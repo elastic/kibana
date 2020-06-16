@@ -83,12 +83,23 @@ export const agentConfigRouteService = {
     return AGENT_CONFIG_API_ROUTES.UPDATE_PATTERN.replace('{agentConfigId}', agentConfigId);
   },
 
+  getCopyPath: (agentConfigId: string) => {
+    return AGENT_CONFIG_API_ROUTES.COPY_PATTERN.replace('{agentConfigId}', agentConfigId);
+  },
+
   getDeletePath: () => {
     return AGENT_CONFIG_API_ROUTES.DELETE_PATTERN;
   },
 
   getInfoFullPath: (agentConfigId: string) => {
     return AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
+  },
+
+  getInfoFullDownloadPath: (agentConfigId: string) => {
+    return AGENT_CONFIG_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN.replace(
+      '{agentConfigId}',
+      agentConfigId
+    );
   },
 };
 

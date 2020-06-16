@@ -37,22 +37,19 @@ import { OptimizerConfig } from './optimizer_config';
 const OPTIMIZER_DIR = Path.dirname(require.resolve('../../package.json'));
 const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
 
-function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj) as any) {
-    if (!keys.includes(key)) {
-      result[key] = value;
-    }
-  }
-  return result as Omit<T, K>;
-}
-
 export function diffCacheKey(expected?: unknown, actual?: unknown) {
-  if (jsonStable(expected) === jsonStable(actual)) {
+  const expectedJson = jsonStable(expected, {
+    space: '  ',
+  });
+  const actualJson = jsonStable(actual, {
+    space: '  ',
+  });
+
+  if (expectedJson === actualJson) {
     return;
   }
 
-  return reformatJestDiff(jestDiff(expected, actual));
+  return reformatJestDiff(jestDiff(expectedJson, actualJson));
 }
 
 export function reformatJestDiff(diff: string | null) {
@@ -178,7 +175,7 @@ export async function getOptimizerCacheKey(config: OptimizerConfig) {
     bootstrap,
     deletedPaths,
     modifiedTimes: {} as Record<string, number>,
-    workerConfig: omit(config.getWorkerConfig('♻'), ['watch', 'profileWebpack']),
+    workerConfig: config.getCacheableWorkerConfig(),
   };
 
   const mtimes = await getMtimes(modifiedPaths);

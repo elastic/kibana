@@ -39,11 +39,12 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const {
+          namespace_type: namespaceType,
           name,
           _tags,
           tags,
           meta,
-          comment,
+          comments,
           description,
           entries,
           item_id: itemId,
@@ -54,8 +55,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
         const exceptionList = await exceptionLists.getExceptionList({
           id: undefined,
           listId,
-          // TODO: Expose the name space type
-          namespaceType: 'single',
+          namespaceType,
         });
         if (exceptionList == null) {
           return siemResponse.error({
@@ -66,8 +66,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
           const exceptionListItem = await exceptionLists.getExceptionListItem({
             id: undefined,
             itemId,
-            // TODO: Expose the name space type
-            namespaceType: 'single',
+            namespaceType,
           });
           if (exceptionListItem != null) {
             return siemResponse.error({
@@ -77,15 +76,14 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
           } else {
             const createdList = await exceptionLists.createExceptionListItem({
               _tags,
-              comment,
+              comments,
               description,
               entries,
               itemId,
               listId,
               meta,
               name,
-              // TODO: Expose the name space type
-              namespaceType: 'single',
+              namespaceType,
               tags,
               type,
             });

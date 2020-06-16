@@ -17,6 +17,8 @@
  * under the License.
  */
 
+export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
+
 export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
 
 export { SharePluginSetup, SharePluginStart } from './plugin';

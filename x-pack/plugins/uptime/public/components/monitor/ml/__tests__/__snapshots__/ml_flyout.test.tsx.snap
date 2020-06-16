@@ -160,6 +160,9 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                 <button
                   class="euiButton euiButton--primary"
                   type="button"
+                  href="/app/management/stack/license_management/home"
+                  rel="noopener noreferrer"
+                  target="_blank"
                 >
                   <span
                     class="euiButton__content"
@@ -186,7 +189,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
      identify periods of increased latency across geographical regions.
               </p>
               <p>
-                Once a job is created, you can manage it and see more details in the 
+                Once a job is created, you can manage it and see more details in the
                 <a
                   class="euiLink euiLink--primary"
                   href="/app/ml"

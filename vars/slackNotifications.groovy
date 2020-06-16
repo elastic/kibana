@@ -62,7 +62,17 @@ def getTestFailures() {
   def messages = []
   messages << "*Test Failures*"
 
-  def list = failures.collect { "• <${it.url}|${it.fullDisplayName.split(/\./, 2)[-1]}>" }.join("\n")
+  def list = failures.collect {
+    def name = it
+      .fullDisplayName
+      .split(/\./, 2)[-1]
+      // Only the following three characters need to be escaped for link text, per Slack's docs
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+
+    return "• <${it.url}|${name}>"
+  }.join("\n")
   return "*Test Failures*\n${list}"
 }
 
@@ -79,18 +89,30 @@ def getDefaultContext() {
   ].join(' · '))
 }
 
+def getStatusIcon() {
+  def status = buildUtils.getBuildStatus()
+  if (status == 'UNSTABLE') {
+    return ':yellow_heart:'
+  }
+
+  return ':broken_heart:'
+}
+
 def sendFailedBuild(Map params = [:]) {
   def config = [
     channel: '#kibana-operations-alerts',
-    title: ":broken_heart: *<${env.BUILD_URL}|${getDefaultDisplayName()}>*",
-    message: ":broken_heart: ${getDefaultDisplayName()}",
+    title: "*<${env.BUILD_URL}|${getDefaultDisplayName()}>*",
+    message: getDefaultDisplayName(),
     color: 'danger',
     icon: ':jenkins:',
     username: 'Kibana Operations',
     context: getDefaultContext(),
   ] + params
 
-  def blocks = [markdownBlock(config.title)]
+  def title = "${getStatusIcon()} ${config.title}"
+  def message = "${getStatusIcon()} ${config.message}"
+
+  def blocks = [markdownBlock(title)]
   getFailedBuildBlocks().each { blocks << it }
   blocks << dividerBlock()
   blocks << config.context
@@ -100,7 +122,7 @@ def sendFailedBuild(Map params = [:]) {
     username: config.username,
     iconEmoji: config.icon,
     color: config.color,
-    message: config.message,
+    message: message,
     blocks: blocks
   )
 }

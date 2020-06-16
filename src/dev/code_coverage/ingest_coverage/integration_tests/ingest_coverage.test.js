@@ -17,17 +17,12 @@
  * under the License.
  */
 
-import { spawn } from 'child_process';
 import { resolve } from 'path';
-import { green, always } from '../utils';
+import execa from 'execa';
+import expect from '@kbn/expect';
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
-const staticSiteUrlRegexes = {
-  staticHostIncluded: /https:\/\/kibana-coverage\.elastic\.dev/,
-  timeStampIncluded: /\d{4}-\d{2}-\d{2}T\d{2}.*\d{2}.*\d{2}Z/,
-  folderStructureIncluded: /(?:.*|.*-combined)\//,
-};
 const env = {
   BUILD_ID: 407,
   CI_RUN_URL: 'https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/407/',
@@ -37,75 +32,100 @@ const env = {
   NODE_ENV: 'integration_test',
   COVERAGE_INGESTION_KIBANA_ROOT: '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
 };
-const includesSiteUrlPredicate = (x) => x.includes('staticSiteUrl');
-const siteUrlLines = specificLinesOnly(includesSiteUrlPredicate);
-const splitByNewLine = (x) => x.split('\n');
-const siteUrlsSplitByNewLine = siteUrlLines(splitByNewLine);
-const siteUrlsSplitByNewLineWithoutBlanks = siteUrlsSplitByNewLine(notBlankLines);
-const verboseArgs = [
-  'scripts/ingest_coverage.js',
-  '--verbose',
-  '--vcsInfoPath',
-  'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
-  '--path',
-];
 
 describe('Ingesting coverage', () => {
-  const bothIndexesPath = 'jest-combined/coverage-summary-manual-mix.json';
+  const verboseArgs = [
+    'scripts/ingest_coverage.js',
+    '--verbose',
+    '--vcsInfoPath',
+    'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
+    '--path',
+  ];
 
-  describe(`to the coverage index`, () => {
-    const mutableCoverageIndexChunks = [];
+  const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
+  const resolved = resolve(MOCKS_DIR, summaryPath);
 
-    beforeAll((done) => {
-      const ingestAndMutateAsync = ingestAndMutate(done);
-      const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(bothIndexesPath);
-      const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
-      verboseIngestAndMutateAsyncWithPath(mutableCoverageIndexChunks);
+  describe(`staticSiteUrl`, () => {
+    let actualUrl = '';
+    const siteUrlRegex = /staticSiteUrl:\s*(.+,)/;
+
+    beforeAll(async () => {
+      const opts = [...verboseArgs, resolved];
+      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+      actualUrl = siteUrlRegex.exec(stdout)[1];
     });
 
-    it(
-      'should result in every posted item having a site url that meets all regex assertions',
-      always(
-        siteUrlsSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks).forEach(
-          expectAllRegexesToPass({
-            ...staticSiteUrlRegexes,
-            endsInDotJsDotHtml: /.js.html$/,
-          })
-        )
-      )
-    );
+    it('should contain the static host', () => {
+      const staticHost = /https:\/\/kibana-coverage\.elastic\.dev/;
+      expect(staticHost.test(actualUrl)).ok();
+    });
+    it('should contain the timestamp', () => {
+      const timeStamp = /\d{4}-\d{2}-\d{2}T\d{2}.*\d{2}.*\d{2}Z/;
+      expect(timeStamp.test(actualUrl)).ok();
+    });
+    it('should contain the folder structure', () => {
+      const folderStructure = /(?:.*|.*-combined)\//;
+      expect(folderStructure.test(actualUrl)).ok();
+    });
+  });
+
+  describe(`vcsInfo`, () => {
+    let vcsInfo;
+    describe(`without a commit msg in the vcs info file`, () => {
+      const args = [
+        'scripts/ingest_coverage.js',
+        '--verbose',
+        '--vcsInfoPath',
+        'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO_missing_commit_msg.txt',
+        '--path',
+      ];
+
+      beforeAll(async () => {
+        const opts = [...args, resolved];
+        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+        vcsInfo = stdout;
+      });
+
+      it(`should be an obj w/o a commit msg`, () => {
+        const commitMsgRE = /"commitMsg"/;
+        expect(commitMsgRE.test(vcsInfo)).to.not.be.ok();
+      });
+    });
+  });
+  describe(`team assignment`, () => {
+    let shouldNotHavePipelineOut = '';
+    let shouldIndeedHavePipelineOut = '';
+
+    const args = [
+      'scripts/ingest_coverage.js',
+      '--verbose',
+      '--vcsInfoPath',
+      'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
+      '--path',
+    ];
+
+    const teamAssignRE = /pipeline:/;
+
+    beforeAll(async () => {
+      const summaryPath = 'jest-combined/coverage-summary-just-total.json';
+      const resolved = resolve(MOCKS_DIR, summaryPath);
+      const opts = [...args, resolved];
+      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+      shouldNotHavePipelineOut = stdout;
+    });
+    beforeAll(async () => {
+      const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
+      const resolved = resolve(MOCKS_DIR, summaryPath);
+      const opts = [...args, resolved];
+      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+      shouldIndeedHavePipelineOut = stdout;
+    });
+
+    it(`should not occur when going to the totals index`, () => {
+      expect(teamAssignRE.test(shouldNotHavePipelineOut)).to.not.be.ok();
+    });
+    it(`should indeed occur when going to the coverage index`, () => {
+      expect(teamAssignRE.test(shouldIndeedHavePipelineOut)).to.be.ok();
+    });
   });
 });
-
-function ingestAndMutate(done) {
-  return (summaryPathSuffix) => (args) => (xs) => {
-    const coverageSummaryPath = resolve(MOCKS_DIR, summaryPathSuffix);
-    const opts = [...args, coverageSummaryPath];
-    const ingest = spawn(process.execPath, opts, { cwd: ROOT_DIR, env });
-
-    ingest.stdout.on('data', (x) => xs.push(x + ''));
-    ingest.on('close', done);
-  };
-}
-
-function specificLinesOnly(predicate) {
-  return (splitByNewLine) => (notBlankLines) => (xs) =>
-    xs.filter(predicate).map((x) => splitByNewLine(x).reduce(notBlankLines));
-}
-
-function notBlankLines(acc, item) {
-  if (item !== '') return item;
-  return acc;
-}
-
-function expectAllRegexesToPass(staticSiteUrlRegexes) {
-  return (urlLine) =>
-    Object.entries(staticSiteUrlRegexes).forEach((regexTuple) => {
-      if (!regexTuple[1].test(urlLine))
-        throw new Error(
-          `\n### ${green('FAILED')}\nAsserting: [\n\t${green(
-            regexTuple[0]
-          )}\n]\nAgainst: [\n\t${urlLine}\n]`
-        );
-    });
-}

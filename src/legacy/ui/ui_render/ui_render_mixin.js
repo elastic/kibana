@@ -26,8 +26,6 @@ import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
-const uniq = (...items) => Array.from(new Set(items));
-
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
  * @typedef {import('../../server/kbn_server').ResponseToolkit} ResponseToolkit
@@ -150,15 +148,7 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
         ];
 
-        const kpPluginIds = uniq(
-          // load these plugins first, they are "shared" and other bundles access their
-          // public/index exports without considering topographic sorting by plugin deps (for now)
-          'kibanaUtils',
-          'kibanaReact',
-          'data',
-          'esUiShared',
-          ...kbnServer.newPlatform.__internals.uiPlugins.public.keys()
-        );
+        const kpPluginIds = Array.from(kbnServer.newPlatform.__internals.uiPlugins.public.keys());
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
@@ -173,6 +163,7 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
 
+          `${regularBundlePath}/core/core.entry.js`,
           ...kpPluginIds.map(
             (pluginId) => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
           ),
@@ -199,9 +190,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,
-            entryBundlePath: isCore
-              ? `${regularBundlePath}/core/core.entry.js`
-              : `${regularBundlePath}/${app.getId()}.bundle.js`,
+            legacyBundlePath: isCore ? undefined : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });
 
@@ -247,9 +236,10 @@ export function uiRenderMixin(kbnServer, server, config) {
       rendering,
       legacy,
       savedObjectsClientProvider: savedObjects,
-      uiSettings: { asScopedToClient },
     } = kbnServer.newPlatform.__internals;
-    const uiSettings = asScopedToClient(savedObjects.getClient(h.request));
+    const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+      savedObjects.getClient(h.request)
+    );
     const vars = await legacy.getVars(app.getId(), h.request, {
       apmConfig: getApmConfig(app),
       ...overrides,

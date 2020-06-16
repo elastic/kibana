@@ -76,8 +76,37 @@ const createInstance = async () => {
   };
 };
 
+const createIndexPatternManagmentContext = () => {
+  const {
+    chrome,
+    application,
+    savedObjects,
+    uiSettings,
+    notifications,
+    overlays,
+    docLinks,
+  } = coreMock.createStart();
+  const { http } = coreMock.createSetup();
+  const data = dataPluginMock.createStartContract();
+
+  return {
+    chrome,
+    application,
+    savedObjects,
+    uiSettings,
+    notifications,
+    overlays,
+    http,
+    docLinks,
+    data,
+    indexPatternManagementStart: createStartContract(),
+    setBreadcrumbs: () => {},
+  };
+};
+
 export const mockManagementPlugin = {
   createSetupContract,
   createStartContract,
   createInstance,
+  createIndexPatternManagmentContext,
 };

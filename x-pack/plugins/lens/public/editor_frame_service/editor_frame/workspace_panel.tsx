@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,6 +36,7 @@ import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -54,7 +55,7 @@ export interface WorkspacePanelProps {
   dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart | CoreSetup;
-  plugins: { uiActions?: UiActionsStart };
+  plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -134,6 +135,31 @@ export function InnerWorkspacePanel({
     framePublicAPI.query,
     framePublicAPI.filters,
   ]);
+
+  const onEvent = useCallback(
+    (event: ExpressionRendererEvent) => {
+      if (!plugins.uiActions) {
+        // ui actions not available, not handling event...
+        return;
+      }
+      if (isLensBrushEvent(event)) {
+        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: event.data,
+        });
+      }
+      if (isLensFilterEvent(event)) {
+        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: event.data,
+        });
+      }
+    },
+    [plugins.uiActions]
+  );
+
+  const autoRefreshFetch$ = useMemo(
+    () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
+    [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$]
+  );
 
   useEffect(() => {
     // reset expression error if component attempts to run it again
@@ -224,22 +250,8 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
-          onEvent={(event: ExpressionRendererEvent) => {
-            if (!plugins.uiActions) {
-              // ui actions not available, not handling event...
-              return;
-            }
-            if (isLensBrushEvent(event)) {
-              plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-                data: event.data,
-              });
-            }
-            if (isLensFilterEvent(event)) {
-              plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-                data: event.data,
-              });
-            }
-          }}
+          reload$={autoRefreshFetch$}
+          onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {
             return (
               <EuiFlexGroup direction="column" alignItems="center">

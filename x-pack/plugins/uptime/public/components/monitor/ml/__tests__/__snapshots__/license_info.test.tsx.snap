@@ -29,6 +29,9 @@ Array [
       <button
         class="euiButton euiButton--primary"
         type="button"
+        href="/app/management/stack/license_management/home"
+        rel="noopener noreferrer"
+        target="_blank"
       >
         <span
           class="euiButton__content"
@@ -64,6 +67,7 @@ exports[`ShowLicenseInfo shallow renders without errors 1`] = `
       color="primary"
       isLoading={false}
       onClick={[Function]}
+      href="/app/management/stack/license_management/home"
       target="_blank"
     >
       Start free 14-day trial

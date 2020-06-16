@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "3KVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -17,7 +17,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -51,7 +55,7 @@
   "type": "doc",
   "value": {
     "id": "3aVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -66,7 +70,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -99,7 +107,7 @@
   "type": "doc",
   "value": {
     "id": "3qVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -114,7 +122,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "Default",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -145,7 +157,7 @@
   "type": "doc",
   "value": {
     "id": "36VN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -160,7 +172,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -194,7 +210,7 @@
   "type": "doc",
   "value": {
     "id": "4KVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -209,7 +225,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -241,7 +261,7 @@
   "type": "doc",
   "value": {
     "id": "4aVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -256,7 +276,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -288,7 +312,7 @@
   "type": "doc",
   "value": {
     "id": "4qVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -303,7 +327,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -336,7 +364,7 @@
   "type": "doc",
   "value": {
     "id": "46VN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -351,7 +379,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -383,7 +415,7 @@
   "type": "doc",
   "value": {
     "id": "5KVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -398,7 +430,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "success"
+          }
         }
       },
       "event": {

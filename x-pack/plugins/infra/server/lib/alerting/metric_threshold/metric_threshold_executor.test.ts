@@ -6,12 +6,12 @@
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertExecutorOptions } from '../../../../../alerts/server';
 import {
   alertsMock,
   AlertServicesMock,
   AlertInstanceMock,
-} from '../../../../../alerting/server/mocks';
+} from '../../../../../alerts/server/mocks';
 import { InfraSources } from '../../sources';
 
 interface AlertTestInstance {
@@ -383,34 +383,6 @@ const executor = createMetricThresholdExecutor(mockLibs, 'test') as (opts: {
 }) => Promise<void>;
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
-services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
-  if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
-  const metric = body.query.bool.filter[1]?.exists.field;
-  if (body.aggs.groupings) {
-    if (body.aggs.groupings.composite.after) {
-      return mocks.compositeEndResponse;
-    }
-    if (metric === 'test.metric.2') {
-      return mocks.alternateCompositeResponse;
-    }
-    return mocks.basicCompositeResponse;
-  }
-  if (metric === 'test.metric.2') {
-    return mocks.alternateMetricResponse;
-  }
-  return mocks.basicMetricResponse;
-});
-services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
-  if (sourceId === 'alternate')
-    return {
-      id: 'alternate',
-      attributes: { metricAlias: 'alternatebeat-*' },
-      type,
-      references: [],
-    };
-  return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
-});
-
 services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
   if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
   const metric = body.query.bool.filter[1]?.exists.field;

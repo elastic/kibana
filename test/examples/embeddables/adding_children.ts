@@ -25,10 +25,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/58692
-  describe.skip('creating and adding children', () => {
+  describe('creating and adding children', () => {
     before(async () => {
-      await testSubjects.click('embeddablePanelExamplae');
+      await testSubjects.click('embeddablePanelExample');
     });
 
     it('Can create a new child', async () => {

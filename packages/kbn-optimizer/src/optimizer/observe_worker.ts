@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { fork, ChildProcess } from 'child_process';
 import { Readable } from 'stream';
 import { inspect } from 'util';
 
+import execa from 'execa';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle } from '../common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRefs } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
 
@@ -42,7 +42,7 @@ export interface WorkerStarted {
 export type WorkerStatus = WorkerStdio | WorkerStarted;
 
 interface ProcResource extends Rx.Unsubscribable {
-  proc: ChildProcess;
+  proc: execa.ExecaChildProcess;
 }
 const isNumeric = (input: any) => String(input).match(/^[0-9]+$/);
 
@@ -70,20 +70,26 @@ function usingWorkerProc<T>(
   config: OptimizerConfig,
   workerConfig: WorkerConfig,
   bundles: Bundle[],
-  fn: (proc: ChildProcess) => Rx.Observable<T>
+  fn: (proc: execa.ExecaChildProcess) => Rx.Observable<T>
 ) {
   return Rx.using(
     (): ProcResource => {
-      const args = [JSON.stringify(workerConfig), JSON.stringify(bundles.map((b) => b.toSpec()))];
+      const args = [
+        JSON.stringify(workerConfig),
+        JSON.stringify(bundles.map((b) => b.toSpec())),
+        BundleRefs.fromBundles(config.bundles).toSpecJson(),
+      ];
 
-      const proc = fork(require.resolve('../worker/run_worker'), args, {
-        stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-        execArgv: [
+      const proc = execa.node(require.resolve('../worker/run_worker'), args, {
+        nodeOptions: [
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),
           ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
         ],
+        buffer: false,
+        stderr: 'pipe',
+        stdout: 'pipe',
       });
 
       return {

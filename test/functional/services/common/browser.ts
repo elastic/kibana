@@ -410,6 +410,20 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Switches driver to specific browser tab by index
+     *
+     * @param {string} tabIndex
+     * @return {Promise<void>}
+     */
+    public async switchTab(tabIndex: number) {
+      const tabs = await driver.getAllWindowHandles();
+      if (tabs.length <= tabIndex) {
+        throw new Error(`Out of existing tabs bounds`);
+      }
+      await driver.switchTo().window(tabs[tabIndex]);
+    }
+
+    /**
      * Sets a value in local storage for the focused window/frame.
      *
      * @param {string} key
@@ -465,11 +479,27 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<R>(
-      fn: string | ((...args: any[]) => Promise<R>),
+    public async executeAsync<T = unknown>(fn: (cb: (value?: T) => void) => void): Promise<T>;
+    public async executeAsync<T = unknown, A1 = unknown>(
+      fn: (a1: A1, cb: (value?: T) => void) => void,
+      a1: A1
+    ): Promise<T>;
+    public async executeAsync<T = unknown, A1 = unknown, A2 = unknown>(
+      fn: (a1: A1, a2: A2, cb: (value?: T) => void) => void,
+      a1: A1,
+      a2: A2
+    ): Promise<T>;
+    public async executeAsync<T = unknown, A1 = unknown, A2 = unknown, A3 = unknown>(
+      fn: (a1: A1, a2: A2, a3: A3, cb: (value?: T) => void) => void,
+      a1: A1,
+      a2: A2,
+      a3: A3
+    ): Promise<T>;
+    public async executeAsync<T = unknown>(
+      fn: (...args: any[]) => void,
       ...args: any[]
-    ): Promise<R> {
-      return await driver.executeAsyncScript(
+    ): Promise<T> {
+      return await driver.executeAsyncScript<T>(
         fn,
         ...cloneDeep<any>(args, (arg) => {
           if (arg instanceof WebElementWrapper) {

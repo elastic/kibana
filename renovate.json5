@@ -25,7 +25,7 @@
     'Team:Operations',
     'renovate',
     'v8.0.0',
-    'v7.7.0',
+    'v7.9.0',
   ],
   major: {
     labels: [
@@ -33,7 +33,7 @@
       'Team:Operations',
       'renovate',
       'v8.0.0',
-      'v7.7.0',
+      'v7.9.0',
       'renovate:major',
     ],
   },
@@ -64,6 +64,14 @@
         packageNames: [
           '@reach/router',
           '@types/reach__router',
+        ],
+      },
+      {
+        groupSlug: '@testing-library/dom',
+        groupName: '@testing-library/dom related packages',
+        packageNames: [
+          '@testing-library/dom',
+          '@types/testing-library__dom',
         ],
       },
       {
@@ -246,7 +254,7 @@
           'Team:Operations',
           'renovate',
           'v8.0.0',
-          'v7.7.0',
+          'v7.9.0',
           ':ml',
         ],
       },
@@ -416,14 +424,6 @@
         packageNames: [
           'history',
           '@types/history',
-        ],
-      },
-      {
-        groupSlug: 'indent-string',
-        groupName: 'indent-string related packages',
-        packageNames: [
-          'indent-string',
-          '@types/indent-string',
         ],
       },
       {
@@ -713,14 +713,6 @@
         packageNames: [
           'normalize-path',
           '@types/normalize-path',
-        ],
-      },
-      {
-        groupSlug: 'numeral',
-        groupName: 'numeral related packages',
-        packageNames: [
-          'numeral',
-          '@types/numeral',
         ],
       },
       {
@@ -1073,14 +1065,6 @@
           '@types/mini-css-extract-plugin',
           'chokidar',
           '@types/chokidar',
-        ],
-      },
-      {
-        groupSlug: 'wrap-ansi',
-        groupName: 'wrap-ansi related packages',
-        packageNames: [
-          'wrap-ansi',
-          '@types/wrap-ansi',
         ],
       },
       {

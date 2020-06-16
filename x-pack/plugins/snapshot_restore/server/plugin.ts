@@ -23,7 +23,8 @@ import {
 import { PLUGIN } from '../common';
 import { License } from './services';
 import { ApiRoutes } from './routes';
-import { isEsError, wrapEsError } from './lib';
+import { wrapEsError } from './lib';
+import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch_sr';
 import { Dependencies } from './types';
 import { SnapshotRestoreConfig } from './config';
@@ -92,7 +93,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       router,
       license: this.license,
       config: {
-        isSecurityEnabled: security !== undefined,
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
         isCloudEnabled: cloud !== undefined && cloud.isCloudEnabled,
         isSlmEnabled: pluginConfig.slm_ui.enabled,
       },

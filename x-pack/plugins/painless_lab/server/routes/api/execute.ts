@@ -7,7 +7,7 @@ import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
-import { isEsError } from '../../lib';
+import { isEsError } from '../../shared_imports';
 
 const bodySchema = schema.string();
 
@@ -23,7 +23,7 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
       const body = req.body;
 
       try {
-        const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+        const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
         const response = await callAsCurrentUser('scriptsPainlessExecute', {
           body,
         });

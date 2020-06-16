@@ -8,14 +8,23 @@ import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { AppMountContext, NotificationsStart } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { AppMountContext, AppMountParameters, NotificationsStart } from 'kibana/public';
+import { History } from 'history';
+import {
+  Query,
+  DataPublicPluginStart,
+  syncQueryStateWithUrl,
+} from '../../../../../src/plugins/data/public';
+import {
+  createKbnUrlStateStorage,
+  IStorageWrapper,
+} from '../../../../../src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   SavedObjectSaveModalOrigin,
   OnSaveProps,
+  checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
@@ -27,6 +36,7 @@ import {
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   SavedQuery,
+  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 
 interface State {
@@ -57,6 +67,8 @@ export function App({
   redirectTo,
   originatingAppFromUrl,
   navigation,
+  onAppLeave,
+  history,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -72,9 +84,12 @@ export function App({
     newlyCreated?: boolean
   ) => void;
   originatingAppFromUrl?: string | undefined;
+  onAppLeave: AppMountParameters['onAppLeave'];
+  history: History;
 }) {
   const language =
-    storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
+    storage.get('kibana.userQueryLanguage') ||
+    core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
 
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
@@ -93,6 +108,12 @@ export function App({
   });
 
   const { lastKnownDoc } = state;
+
+  const isSaveable =
+    lastKnownDoc &&
+    lastKnownDoc.expression &&
+    lastKnownDoc.expression.length > 0 &&
+    core.application.capabilities.visualize.save;
 
   useEffect(() => {
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
@@ -119,11 +140,45 @@ export function App({
       },
     });
 
+    const kbnUrlStateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: core.uiSettings.get('state:storeInSessionStorage'),
+    });
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+      data.query,
+      kbnUrlStateStorage
+    );
+
     return () => {
+      stopSyncingQueryServiceStateWithUrl();
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
     };
-  }, []);
+  }, [data.query.filterManager, data.query.timefilter.timefilter]);
+
+  useEffect(() => {
+    onAppLeave((actions) => {
+      // Confirm when the user has made any changes to an existing doc
+      // or when the user has configured something without saving
+      if (
+        core.application.capabilities.visualize.save &&
+        (state.persistedDoc?.expression
+          ? !_.isEqual(lastKnownDoc?.expression, state.persistedDoc.expression)
+          : lastKnownDoc?.expression)
+      ) {
+        return actions.confirm(
+          i18n.translate('xpack.lens.app.unsavedWorkMessage', {
+            defaultMessage: 'Leave Lens with unsaved work?',
+          }),
+          i18n.translate('xpack.lens.app.unsavedWorkTitle', {
+            defaultMessage: 'Unsaved changes',
+          })
+        );
+      } else {
+        return actions.default();
+      }
+    });
+  }, [lastKnownDoc, onAppLeave, state.persistedDoc, core.application.capabilities.visualize.save]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
@@ -144,7 +199,7 @@ export function App({
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
       },
     ]);
-  }, [state.persistedDoc && state.persistedDoc.title]);
+  }, [core.application, core.chrome, core.http.basePath, state.persistedDoc]);
 
   useEffect(() => {
     if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
@@ -187,17 +242,22 @@ export function App({
           redirectTo();
         });
     }
-  }, [docId]);
+  }, [
+    core.notifications,
+    data.indexPatterns,
+    data.query.filterManager,
+    docId,
+    // TODO: These dependencies are changing too often
+    // docStorage,
+    // redirectTo,
+    // state.persistedDoc,
+  ]);
 
-  const isSaveable =
-    lastKnownDoc &&
-    lastKnownDoc.expression &&
-    lastKnownDoc.expression.length > 0 &&
-    core.application.capabilities.visualize.save;
-
-  const runSave = (
+  const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
+      onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+      newDescription?: string;
     }
   ) => {
     if (!lastKnownDoc) {
@@ -219,9 +279,29 @@ export function App({
 
     const doc = {
       ...lastDocWithoutPinned,
+      description: saveProps.newDescription,
       id: saveProps.newCopyOnSave ? undefined : lastKnownDoc.id,
       title: saveProps.newTitle,
     };
+
+    await checkForDuplicateTitle(
+      {
+        ...doc,
+        copyOnSave: saveProps.newCopyOnSave,
+        lastSavedTitle: lastKnownDoc?.title,
+        getEsType: () => 'lens',
+        getDisplayName: () =>
+          i18n.translate('xpack.lens.app.saveModalType', {
+            defaultMessage: 'Lens visualization',
+          }),
+      },
+      saveProps.isTitleDuplicateConfirmed,
+      saveProps.onTitleDuplicate,
+      {
+        savedObjectsClient: core.savedObjects.client,
+        overlays: core.overlays,
+      }
+    );
 
     const newlyCreated: boolean = saveProps.newCopyOnSave || !lastKnownDoc?.id;
     docStorage
@@ -257,7 +337,7 @@ export function App({
       core.notifications.toasts.addDanger({
         title: e.message,
       }),
-    []
+    [core.notifications.toasts]
   );
 
   const { TopNavMenu } = navigation.ui;
@@ -378,7 +458,7 @@ export function App({
                     query: '',
                     language:
                       storage.get('kibana.userQueryLanguage') ||
-                      core.uiSettings.get('search:queryLanguage'),
+                      core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
                   },
                 }));
               }}
@@ -435,6 +515,7 @@ export function App({
             documentInfo={{
               id: lastKnownDoc.id,
               title: lastKnownDoc.title || '',
+              description: lastKnownDoc.description || '',
             }}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',

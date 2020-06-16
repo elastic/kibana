@@ -19,14 +19,10 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      SearchBar={[MockFunction]}
-      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -39,7 +35,6 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isVisible={false}
       lang="painless"
       onClose={[Function]}
-      uiSettings={Object {}}
     />
     <eui-form-row
       error="Name is required"
@@ -259,14 +254,10 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      SearchBar={[MockFunction]}
-      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -289,7 +280,6 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       name="test"
       onClose={[Function]}
       script="doc.test.value"
-      uiSettings={Object {}}
     />
     <eui-form-row
       helpText={null}
@@ -506,14 +496,10 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      SearchBar={[MockFunction]}
-      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -543,7 +529,6 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       lang="painless"
       name="foobar"
       onClose={[Function]}
-      uiSettings={Object {}}
     />
     <eui-form-row
       error={null}
@@ -790,14 +775,10 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      SearchBar={[MockFunction]}
-      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -828,7 +809,6 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       name="test"
       onClose={[Function]}
       script="doc.test.value"
-      uiSettings={Object {}}
     />
     <eui-form-row
       helpText={
@@ -856,6 +836,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                   testlang
                 </eui-code>,
                 "painlessLink": <eui-link
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html"
                   target="_blank"
                 >
                   <FormattedMessage
@@ -1126,14 +1107,10 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      SearchBar={[MockFunction]}
-      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -1163,7 +1140,6 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       lang="painless"
       name="foobar"
       onClose={[Function]}
-      uiSettings={Object {}}
     />
     <eui-form-row
       error={null}

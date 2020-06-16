@@ -3,7 +3,7 @@
   "indices": ["INDEX_PATTERN_NAME"],
   "query": {
     "bool": {
-      "filter": [{ "term": { "_index": "kibana_sample_data_logs" } }]
+      "filter": [{ "term": { "event.dataset": "sample_web_logs" } }]
     }
   },
   "aggregations": {

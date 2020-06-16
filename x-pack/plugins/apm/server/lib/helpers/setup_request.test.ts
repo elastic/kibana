@@ -41,9 +41,11 @@ function getMockRequest() {
     },
     core: {
       elasticsearch: {
-        dataClient: {
-          callAsCurrentUser: jest.fn(),
-          callAsInternalUser: jest.fn(),
+        legacy: {
+          client: {
+            callAsCurrentUser: jest.fn(),
+            callAsInternalUser: jest.fn(),
+          },
         },
       },
       uiSettings: {
@@ -57,12 +59,17 @@ function getMockRequest() {
         },
       },
     },
+    plugins: {
+      ml: undefined,
+    },
   } as unknown) as APMRequestHandlerContext & {
     core: {
       elasticsearch: {
-        dataClient: {
-          callAsCurrentUser: jest.Mock<any, any>;
-          callAsInternalUser: jest.Mock<any, any>;
+        legacy: {
+          client: {
+            callAsCurrentUser: jest.Mock<any, any>;
+            callAsInternalUser: jest.Mock<any, any>;
+          };
         };
       };
       uiSettings: {
@@ -91,7 +98,7 @@ describe('setupRequest', () => {
     const { client } = await setupRequest(mockContext, mockRequest);
     await client.search({ index: 'apm-*', body: { foo: 'bar' } } as any);
     expect(
-      mockContext.core.elasticsearch.dataClient.callAsCurrentUser
+      mockContext.core.elasticsearch.legacy.client.callAsCurrentUser
     ).toHaveBeenCalledWith('search', {
       index: 'apm-*',
       body: {
@@ -114,7 +121,7 @@ describe('setupRequest', () => {
       body: { foo: 'bar' },
     } as any);
     expect(
-      mockContext.core.elasticsearch.dataClient.callAsInternalUser
+      mockContext.core.elasticsearch.legacy.client.callAsInternalUser
     ).toHaveBeenCalledWith('search', {
       index: 'apm-*',
       body: {
@@ -139,7 +146,7 @@ describe('setupRequest', () => {
           body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
         });
         const params =
-          mockContext.core.elasticsearch.dataClient.callAsCurrentUser.mock
+          mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
             .calls[0][1];
         expect(params.body).toEqual({
           query: {
@@ -158,7 +165,7 @@ describe('setupRequest', () => {
         const { client } = await setupRequest(mockContext, mockRequest);
         await client.search({ index: 'apm-*' });
         const params =
-          mockContext.core.elasticsearch.dataClient.callAsCurrentUser.mock
+          mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
             .calls[0][1];
         expect(params.body).toEqual({
           query: {
@@ -182,7 +189,7 @@ describe('setupRequest', () => {
           }
         );
         const params =
-          mockContext.core.elasticsearch.dataClient.callAsCurrentUser.mock
+          mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
             .calls[0][1];
         expect(params.body).toEqual({
           query: { bool: { filter: [{ term: 'someTerm' }] } },
@@ -200,7 +207,7 @@ describe('setupRequest', () => {
         },
       });
       const params =
-        mockContext.core.elasticsearch.dataClient.callAsCurrentUser.mock
+        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
           .calls[0][1];
       expect(params.body).toEqual({
         query: {
@@ -224,7 +231,7 @@ describe('setupRequest', () => {
       await client.search({});
 
       const params =
-        mockContext.core.elasticsearch.dataClient.callAsCurrentUser.mock
+        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
           .calls[0][1];
       expect(params.ignore_throttled).toBe(true);
     });
@@ -240,7 +247,7 @@ describe('setupRequest', () => {
       await client.search({});
 
       const params =
-        mockContext.core.elasticsearch.dataClient.callAsCurrentUser.mock
+        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
           .calls[0][1];
       expect(params.ignore_throttled).toBe(false);
     });

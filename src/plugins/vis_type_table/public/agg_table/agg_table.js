@@ -17,6 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
+import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import aggTableTemplate from './agg_table.html';
 import { getFormatService } from '../services';
 import { i18n } from '@kbn/i18n';
@@ -47,8 +48,8 @@ export function KbnAggTable(config, RecursionHelper) {
 
       self._saveAs = require('@elastic/filesaver').saveAs;
       self.csv = {
-        separator: config.get('csv:separator'),
-        quoteValues: config.get('csv:quoteValues'),
+        separator: config.get(CSV_SEPARATOR_SETTING),
+        quoteValues: config.get(CSV_QUOTE_VALUES_SETTING),
       };
 
       self.exportAsCsv = function (formatted) {
@@ -57,8 +58,13 @@ export function KbnAggTable(config, RecursionHelper) {
       };
 
       self.toCsv = function (formatted) {
-        const rows = $scope.table.rows;
-        const columns = formatted ? $scope.formattedColumns : $scope.table.columns;
+        const rows = formatted ? $scope.rows : $scope.table.rows;
+        const columns = formatted ? [...$scope.formattedColumns] : [...$scope.table.columns];
+
+        if ($scope.splitRow && formatted) {
+          columns.unshift($scope.splitRow);
+        }
+
         const nonAlphaNumRE = /[^a-zA-Z0-9]/;
         const allDoubleQuoteRE = /"/g;
 
@@ -71,16 +77,17 @@ export function KbnAggTable(config, RecursionHelper) {
           return val;
         }
 
-        // escape each cell in each row
-        const csvRows = rows.map(function (row) {
-          return Object.entries(row).map(([k, v]) => {
-            const column = columns.find((c) => c.id === k);
-            if (formatted && column) {
-              return escape(column.formatter.convert(v));
-            }
-            return escape(v);
-          });
-        });
+        let csvRows = [];
+        for (const row of rows) {
+          const rowArray = [];
+          for (const col of columns) {
+            const value = row[col.id];
+            const formattedValue =
+              formatted && col.formatter ? escape(col.formatter.convert(value)) : escape(value);
+            rowArray.push(formattedValue);
+          }
+          csvRows = [...csvRows, rowArray];
+        }
 
         // add the columns to the rows
         csvRows.unshift(
@@ -105,6 +112,7 @@ export function KbnAggTable(config, RecursionHelper) {
           if (!table) {
             $scope.rows = null;
             $scope.formattedColumns = null;
+            $scope.splitRow = null;
             return;
           }
 
@@ -114,7 +122,7 @@ export function KbnAggTable(config, RecursionHelper) {
 
           if (typeof $scope.dimensions === 'undefined') return;
 
-          const { buckets, metrics, splitColumn } = $scope.dimensions;
+          const { buckets, metrics, splitColumn, splitRow } = $scope.dimensions;
 
           $scope.formattedColumns = table.columns
             .map(function (col, i) {
@@ -122,12 +130,15 @@ export function KbnAggTable(config, RecursionHelper) {
               const isSplitColumn = splitColumn
                 ? splitColumn.find((splitColumn) => splitColumn.accessor === i)
                 : undefined;
+              const isSplitRow = splitRow
+                ? splitRow.find((splitRow) => splitRow.accessor === i)
+                : undefined;
               const dimension =
                 isBucket || isSplitColumn || metrics.find((metric) => metric.accessor === i);
 
-              if (!dimension) return;
-
-              const formatter = getFormatService().deserialize(dimension.format);
+              const formatter = dimension
+                ? getFormatService().deserialize(dimension.format)
+                : undefined;
 
               const formattedColumn = {
                 id: col.id,
@@ -135,6 +146,12 @@ export function KbnAggTable(config, RecursionHelper) {
                 formatter: formatter,
                 filterable: !!isBucket,
               };
+
+              if (isSplitRow) {
+                $scope.splitRow = formattedColumn;
+              }
+
+              if (!dimension) return;
 
               const last = i === table.columns.length - 1;
 
