@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  ListAndOrUndefined,
+  Language,
+  Query,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import {
   ListOperator,
   ListValues,
   List,
 } from '../../../../common/detection_engine/schemas/types/lists_default_array';
-import { Query } from '../../../../../../../src/plugins/data/server';
-import { RuleAlertParams, Language } from '../types';
+import { Query as DataQuery } from '../../../../../../../src/plugins/data/server';
 
 type Operators = 'and' | 'or' | 'not';
 type LuceneOperators = 'AND' | 'OR' | 'NOT';
@@ -187,10 +191,10 @@ export const buildQueryExceptions = ({
   language,
   lists,
 }: {
-  query: string;
+  query: Query;
   language: Language;
-  lists: RuleAlertParams['exceptionsList'];
-}): Query[] => {
+  lists: ListAndOrUndefined;
+}): DataQuery[] => {
   if (lists && lists !== null) {
     const exceptions = buildExceptions({ lists, language, query });
     const formattedQuery = formatQuery({ exceptions, language, query });

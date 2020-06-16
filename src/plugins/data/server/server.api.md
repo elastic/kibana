@@ -150,7 +150,7 @@ import { Url } from 'url';
 // Warning: (ae-missing-release-tag) "castEsToKbnFieldTypeName" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export const castEsToKbnFieldTypeName: (esType: string) => KBN_FIELD_TYPES;
+export const castEsToKbnFieldTypeName: (esType: ES_FIELD_TYPES | string) => KBN_FIELD_TYPES;
 
 // Warning: (ae-forgotten-export) The symbol "PluginConfigDescriptor" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ConfigSchema" needs to be exported by the entry point index.d.ts

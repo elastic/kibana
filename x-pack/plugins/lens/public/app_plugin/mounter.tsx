@@ -93,6 +93,7 @@ export async function mountApp(
         }
         originatingAppFromUrl={originatingAppFromUrl}
         onAppLeave={params.onAppLeave}
+        history={routeProps.history}
       />
     );
   };

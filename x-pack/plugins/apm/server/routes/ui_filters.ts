@@ -75,7 +75,10 @@ function createLocalFiltersRoute<
   queryRt,
 }: {
   path: TPath;
-  getProjection: GetProjection<TProjection, TQueryRT & BaseQueryType>;
+  getProjection: GetProjection<
+    TProjection,
+    t.IntersectionC<[TQueryRT, BaseQueryType]>
+  >;
   queryRt: TQueryRT;
 }) {
   return createRoute(() => ({
@@ -207,9 +210,10 @@ export const errorGroupsLocalFiltersRoute = createLocalFiltersRoute({
 export const serviceNodesLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/serviceNodes',
   getProjection: ({ setup, query }) => {
+    const { serviceName } = query;
     return getServiceNodesProjection({
       setup,
-      serviceName: query.serviceName,
+      serviceName,
     });
   },
   queryRt: t.type({

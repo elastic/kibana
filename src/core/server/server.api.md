@@ -480,11 +480,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>) => string;
+    get: (request: KibanaRequest | LegacyRequest) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -1520,6 +1520,8 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
 // @public
 export interface PluginManifest {
     readonly configPath: ConfigPath;
+    // @deprecated
+    readonly extraPublicDirs?: string[];
     readonly id: PluginName;
     readonly kibanaVersion: string;
     readonly optionalPlugins: readonly PluginName[];
@@ -2019,6 +2021,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
+    preference?: string;
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -2221,7 +2224,7 @@ export class SavedObjectsRepository {
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
-    find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, preference, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
         id: string;
@@ -2428,6 +2431,7 @@ export interface SessionStorageCookieOptions<T> {
     encryptionKey: string;
     isSecure: boolean;
     name: string;
+    sameSite?: 'Strict' | 'Lax' | 'None';
     validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
 }
 
@@ -2547,8 +2551,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:166:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:167:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:232:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:238:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:238:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:240:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

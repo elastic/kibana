@@ -24,7 +24,7 @@ import ReactDOM from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 
 import { ApplicationStart, HttpStart, ToastsSetup } from 'kibana/public';
-import { SavedObjectNotFound } from '../errors';
+import { SavedObjectNotFound } from '..';
 
 interface Mapping {
   [key: string]: string | { app: string; path: string };

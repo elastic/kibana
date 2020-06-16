@@ -13,7 +13,7 @@ import { OVERVIEW_PAGE } from '../urls/navigation';
 
 describe('Overview Page', () => {
   before(() => {
-    cy.stubSIEMapi('overview');
+    cy.stubSecurityApi('overview');
     loginAndWaitForPage(OVERVIEW_PAGE);
   });
 

@@ -1,5 +1,8 @@
 [[windows]]
 === Install {kib} on Windows
+++++
+<titleabbrev>Install on Windows</titleabbrev>
+++++
 
 Kibana can be installed on Windows using the `.zip` package.
 

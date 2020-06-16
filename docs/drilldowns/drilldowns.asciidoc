@@ -15,8 +15,8 @@ that shows a single data center or server.
 [[how-drilldowns-work]]
 === How drilldowns work
 
-Drilldowns are {kib} actions that you configure and store
-in the dashboard saved object. Drilldowns are specific to the dashboard panel
+Drilldowns are user-configurable {kib} actions that are stored with the
+dashboard metadata. Drilldowns are specific to the dashboard panel
 for which you create them&mdash;they are not shared across panels.
 A panel can have multiple drilldowns.
 

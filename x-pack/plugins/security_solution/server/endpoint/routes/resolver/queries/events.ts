@@ -7,7 +7,7 @@ import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
 import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
  * Builds a query for retrieving related events for a node.

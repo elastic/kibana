@@ -197,9 +197,12 @@ module.exports = {
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
               },
               {
-                target: ['(src|x-pack)/plugins/*/public/**/*'],
-                from: ['(src|x-pack)/plugins/*/server/**/*'],
-                errorMessage: `Public code can not import from server, use a common directory.`,
+                target: [
+                  '(src|x-pack)/plugins/*/server/**/*',
+                  '!x-pack/plugins/apm/**/*', // https://github.com/elastic/kibana/issues/67210
+                ],
+                from: ['(src|x-pack)/plugins/*/public/**/*'],
+                errorMessage: `Server code can not import from public, use a common directory.`,
               },
               {
                 target: ['(src|x-pack)/plugins/*/common/**/*'],
@@ -469,6 +472,7 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
+        'src/legacy/ui/ui_render/bootstrap/kbn_bundles_loader_source.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -589,8 +593,11 @@ module.exports = {
      * Security Solution overrides
      */
     {
-      // front end typescript and javascript files only
-      files: ['x-pack/plugins/security_solution/public/**/*.{js,ts,tsx}'],
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/security_solution/public/**/*.{js,ts,tsx}',
+        'x-pack/plugins/security_solution/common/**/*.{js,ts,tsx}',
+      ],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
@@ -766,6 +773,23 @@ module.exports = {
     /**
      * Lists overrides
      */
+    {
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/lists/public/**/*.{js,ts,tsx}',
+        'x-pack/plugins/lists/common/**/*.{js,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
+          },
+        ],
+      },
+    },
     {
       // typescript and javascript for front and back end
       files: ['x-pack/plugins/lists/**/*.{js,ts,tsx}'],

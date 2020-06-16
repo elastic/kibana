@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { ml } from '../../../../../services/ml_api_service';
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
@@ -11,7 +12,6 @@ import {
   isDataFrameAnalyticsFailed,
   DataFrameAnalyticsListRow,
 } from '../../components/analytics_list/common';
-import { extractErrorMessage } from '../../../../../util/error_utils';
 
 export const deleteAnalytics = async (d: DataFrameAnalyticsListRow) => {
   const toastNotifications = getToastNotifications();

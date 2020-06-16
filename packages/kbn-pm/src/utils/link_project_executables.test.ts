@@ -23,7 +23,7 @@ jest.mock('./fs');
 
 import { resolve } from 'path';
 
-import { ToolingLogCollectingWriter } from '@kbn/dev-utils';
+import { ToolingLogCollectingWriter } from '@kbn/dev-utils/tooling_log';
 
 import { absolutePathSnapshotSerializer, stripAnsiSnapshotSerializer } from '../test_helpers';
 import { linkProjectExecutables } from './link_project_executables';

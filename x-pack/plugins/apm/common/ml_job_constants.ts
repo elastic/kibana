@@ -11,6 +11,8 @@ export enum severity {
   warning = 'warning',
 }
 
+export const APM_ML_JOB_GROUP_NAME = 'apm';
+
 export function getMlPrefix(serviceName: string, transactionType?: string) {
   const maybeTransactionType = transactionType ? `${transactionType}-` : '';
   return encodeForMlApi(`${serviceName}-${maybeTransactionType}`);

@@ -25,11 +25,11 @@ export interface TimelineRowAction {
   ariaLabel?: string;
   dataTestSubj?: string;
   displayType: 'icon' | 'contextMenu';
-  iconType: string;
+  iconType?: string;
   id: string;
   isActionDisabled?: boolean;
   onClick: ({ eventId, ecsData }: TimelineRowActionOnClick) => void;
-  content: string;
+  content: string | JSX.Element;
   width?: number;
 }
 

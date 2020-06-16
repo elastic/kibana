@@ -28,6 +28,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const { header, common } = getPageObjects(['header', 'common']);
+  const kibanaServer = getService('kibanaServer');
 
   type CommonlyUsed =
     | 'Today'
@@ -44,9 +45,24 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   class TimePicker {
     defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
     defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
+    defaultStartTimeUTC = '2015-09-18T06:31:44.000Z';
+    defaultEndTimeUTC = '2015-09-23T18:31:44.000Z';
 
     async setDefaultAbsoluteRange() {
       await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
+    }
+
+    /**
+     * the provides a quicker way to set the timepicker to the default range, saves a few seconds
+     */
+    async setDefaultAbsoluteRangeViaUiSettings() {
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults': `{ "from": "${this.defaultStartTimeUTC}", "to": "${this.defaultEndTimeUTC}"}`,
+      });
+    }
+
+    async resetDefaultAbsoluteRangeViaUiSettings() {
+      await kibanaServer.uiSettings.replace({});
     }
 
     private async getTimePickerPanel() {

@@ -28,9 +28,10 @@ jest.mock('./new_template_timeline', () => {
 jest.mock('./helpers', () => {
   return {
     Description: jest.fn().mockReturnValue(<div data-test-subj="Description" />),
-    NotesButton: jest.fn().mockReturnValue(<div data-test-subj="NotesButton" />),
+    ExistingCase: jest.fn().mockReturnValue(<div data-test-subj="ExistingCase" />),
     NewCase: jest.fn().mockReturnValue(<div data-test-subj="NewCase" />),
     NewTimeline: jest.fn().mockReturnValue(<div data-test-subj="create-default-btn" />),
+    NotesButton: jest.fn().mockReturnValue(<div data-test-subj="NotesButton" />),
   };
 });
 
@@ -62,6 +63,7 @@ describe('Properties Right', () => {
     noteIds: [],
     onToggleShowNotes: jest.fn(),
     onCloseTimelineModal: jest.fn(),
+    onOpenCaseModal: jest.fn(),
     onOpenTimelineModal: jest.fn(),
     status: TimelineStatus.active,
     showTimelineModal: false,
@@ -76,7 +78,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: true,
                 },
               },
@@ -127,7 +129,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: true,
                 },
               },
@@ -156,7 +158,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: true,
                 },
               },
@@ -187,7 +189,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: false,
                 },
               },
@@ -234,7 +236,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: false,
                 },
               },
@@ -263,7 +265,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: false,
                 },
               },

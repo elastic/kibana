@@ -10,6 +10,46 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   Client.prototype.dataManagement = components.clientAction.namespaceFactory();
   const dataManagement = Client.prototype.dataManagement.prototype;
 
+  // Data streams
+  dataManagement.getDataStreams = ca({
+    urls: [
+      {
+        fmt: '/_data_stream',
+      },
+    ],
+    method: 'GET',
+  });
+
+  // We don't allow the user to create a data stream in the UI or API. We're just adding this here
+  // to enable the API integration tests.
+  dataManagement.createDataStream = ca({
+    urls: [
+      {
+        fmt: '/_data_stream/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'PUT',
+  });
+
+  dataManagement.deleteDataStream = ca({
+    urls: [
+      {
+        fmt: '/_data_stream/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'DELETE',
+  });
+
   // Component templates
   dataManagement.getComponentTemplates = ca({
     urls: [
@@ -70,5 +110,34 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
       },
     ],
     method: 'GET',
+  });
+
+  dataManagement.saveComposableIndexTemplate = ca({
+    urls: [
+      {
+        fmt: '/_index_template/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    needBody: true,
+    method: 'PUT',
+  });
+
+  dataManagement.deleteComposableIndexTemplate = ca({
+    urls: [
+      {
+        fmt: '/_index_template/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'DELETE',
   });
 };

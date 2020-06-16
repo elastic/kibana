@@ -10,12 +10,20 @@ export function MachineLearningSettingsProvider({ getService }: FtrProviderConte
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertSettingsCalendarLinkExists() {
-      await testSubjects.existOrFail('ml_calendar_mng_button');
+    async assertSettingsManageCalendarsLinkExists() {
+      await testSubjects.existOrFail('mlCalendarsMngButton');
     },
 
-    async assertSettingsFilterlistLinkExists() {
-      await testSubjects.existOrFail('ml_filter_lists_button');
+    async assertSettingsCreateCalendarLinkExists() {
+      await testSubjects.existOrFail('mlCalendarsCreateButton');
+    },
+
+    async assertSettingsManageFilterListsLinkExists() {
+      await testSubjects.existOrFail('mlFilterListsMngButton');
+    },
+
+    async assertSettingsCreateFilterListLinkExists() {
+      await testSubjects.existOrFail('mlFilterListsCreateButton');
     },
   };
 }
