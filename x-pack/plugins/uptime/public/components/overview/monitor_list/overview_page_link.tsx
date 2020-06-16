@@ -5,10 +5,11 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { useUrlParams } from '../../../hooks';
+import { setUiState } from '../../../state/actions';
 
 const OverviewPageLinkButtonIcon = styled(EuiButtonIcon)`
   padding-top: 12px;
@@ -20,12 +21,24 @@ interface OverviewPageLinkProps {
   pagination: string;
 }
 
-export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
+export const OverviewPageLink: React.FC<OverviewPageLinkProps> = (props) => {
+  const dispatch = useDispatch();
+  const updatePagination = useCallback(
+    (nextPagination?: string) => dispatch(setUiState({ currentMonitorListPage: nextPagination })),
+    [dispatch]
+  );
+
+  return <OverviewPageLinkComponent {...props} updatePagination={updatePagination} />;
+};
+
+type Props = OverviewPageLinkProps & { updatePagination: (nextPagination?: string) => void };
+
+export const OverviewPageLinkComponent: React.FC<Props> = ({
   dataTestSubj,
   direction,
   pagination,
+  updatePagination,
 }) => {
-  const [, updateUrlParams] = useUrlParams();
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
 
   const ariaLabel =
@@ -46,7 +59,7 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
     <OverviewPageLinkButtonIcon
       color="text"
       onClick={() => {
-        updateUrlParams({ pagination });
+        updatePagination(pagination);
       }}
       data-test-subj={dataTestSubj}
       iconType={icon}
