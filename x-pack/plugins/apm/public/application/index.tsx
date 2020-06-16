@@ -44,7 +44,7 @@ const App = () => {
 
   return (
     <ThemeProvider
-      theme={(outerTheme) => ({
+      theme={(outerTheme?: OuterTheme) => ({
         ...outerTheme,
         eui: darkMode ? euiDarkVars : euiLightVars,
         darkMode,
