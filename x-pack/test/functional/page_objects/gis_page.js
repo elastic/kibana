@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { APP_ID } from '../../../plugins/case/common/constants';
+import { APP_ID } from '../../../plugins/maps/common/constants';
 
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
