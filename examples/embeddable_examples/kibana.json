@@ -6,5 +6,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["embeddable"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "extraPublicDirs": ["public/todo"]
 }

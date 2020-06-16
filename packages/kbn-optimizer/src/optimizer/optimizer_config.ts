@@ -162,7 +162,7 @@ export class OptimizerConfig {
             new Bundle({
               type: 'entry',
               id: 'core',
-              publicDirNames: ['public', 'public/utils'],
+              publicDirNames: ['public', 'public/utils', 'utils'],
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),

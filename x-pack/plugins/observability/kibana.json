@@ -10,5 +10,6 @@
     "licensing"
   ],
   "ui": true,
-  "server": true
+  "server": true,
+  "extraPublicDirs": ["public/typings/eui_styled_components"]
 }

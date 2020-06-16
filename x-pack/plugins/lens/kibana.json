@@ -13,5 +13,6 @@
     "visualizations"
   ],
   "optionalPlugins": ["embeddable", "usageCollection", "taskManager"],
-  "configPath": ["xpack", "lens"]
+  "configPath": ["xpack", "lens"],
+  "extraPublicDirs": ["common/constants"]
 }
