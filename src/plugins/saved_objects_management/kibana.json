@@ -4,5 +4,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["home", "management", "data"],
-  "optionalPlugins": ["dashboard", "visualizations", "discover"]
+  "optionalPlugins": ["dashboard", "visualizations", "discover"],
+  "extraPublicDirs": ["public/lib"]
 }
