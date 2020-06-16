@@ -1,5 +1,5 @@
 {
-  $schema: https://vega.github.io/schema/vega-lite/v2.json
+  $schema: https://vega.github.io/schema/vega-lite/v4.json
   data: {
     format: {property: "aggregations.time_buckets.buckets"}
     values: {

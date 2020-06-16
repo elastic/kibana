@@ -6,8 +6,11 @@
 
 /* eslint-disable react/display-name */
 
+import React from 'react';
 import ApolloClient from 'apollo-client';
 
+import { EuiText } from '@elastic/eui';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
   TimelineRowAction,
@@ -21,7 +24,7 @@ import {
 import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
-import { FILTER_OPEN } from './alerts_filter_group';
+import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from './alerts_filter_group';
 import { sendAlertToTimelineAction, updateAlertStatusAction } from './actions';
 import * as i18n from './translations';
 import {
@@ -31,7 +34,7 @@ import {
   UpdateTimelineLoading,
 } from './types';
 
-export const alertsOpenFilters: Filter[] = [
+export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
     meta: {
       alias: null,
@@ -40,32 +43,12 @@ export const alertsOpenFilters: Filter[] = [
       type: 'phrase',
       key: 'signal.status',
       params: {
-        query: 'open',
+        query: status,
       },
     },
     query: {
-      match_phrase: {
-        'signal.status': 'open',
-      },
-    },
-  },
-];
-
-export const alertsClosedFilters: Filter[] = [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'signal.status',
-      params: {
-        query: 'closed',
-      },
-    },
-    query: {
-      match_phrase: {
-        'signal.status': 'closed',
+      term: {
+        'signal.status': status,
       },
     },
   },
@@ -203,36 +186,19 @@ export const getAlertActions = ({
   canUserCRUD: boolean;
   createTimeline: CreateTimeline;
   hasIndexWrite: boolean;
-  onAlertStatusUpdateFailure: (status: string, error: Error) => void;
-  onAlertStatusUpdateSuccess: (count: number, status: string) => void;
+  onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
+  onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
-  status: 'open' | 'closed';
+  status: Status;
   updateTimelineIsLoading: UpdateTimelineLoading;
-}): TimelineRowAction[] => [
-  {
-    ariaLabel: 'Send alert to timeline',
-    content: i18n.ACTION_INVESTIGATE_IN_TIMELINE,
-    dataTestSubj: 'send-alert-to-timeline',
-    displayType: 'icon',
-    iconType: 'timeline',
-    id: 'sendAlertToTimeline',
-    onClick: ({ ecsData }: TimelineRowActionOnClick) =>
-      sendAlertToTimelineAction({
-        apolloClient,
-        createTimeline,
-        ecsData,
-        updateTimelineIsLoading,
-      }),
-    width: 26,
-  },
-  {
-    ariaLabel: 'Update alert status',
-    content: status === FILTER_OPEN ? i18n.ACTION_OPEN_ALERT : i18n.ACTION_CLOSE_ALERT,
-    dataTestSubj: 'update-alert-status',
-    displayType: 'icon',
-    iconType: status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved',
-    id: 'updateAlertStatus',
+}): TimelineRowAction[] => {
+  const openAlertActionComponent: TimelineRowAction = {
+    ariaLabel: 'Open alert',
+    content: <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>,
+    dataTestSubj: 'open-alert-status',
+    displayType: 'contextMenu',
+    id: FILTER_OPEN,
     isActionDisabled: !canUserCRUD || !hasIndexWrite,
     onClick: ({ eventId }: TimelineRowActionOnClick) =>
       updateAlertStatusAction({
@@ -242,7 +208,71 @@ export const getAlertActions = ({
         setEventsDeleted,
         setEventsLoading,
         status,
+        selectedStatus: FILTER_OPEN,
       }),
     width: 26,
-  },
-];
+  };
+
+  const closeAlertActionComponent: TimelineRowAction = {
+    ariaLabel: 'Close alert',
+    content: <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>,
+    dataTestSubj: 'close-alert-status',
+    displayType: 'contextMenu',
+    id: FILTER_CLOSED,
+    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    onClick: ({ eventId }: TimelineRowActionOnClick) =>
+      updateAlertStatusAction({
+        alertIds: [eventId],
+        onAlertStatusUpdateFailure,
+        onAlertStatusUpdateSuccess,
+        setEventsDeleted,
+        setEventsLoading,
+        status,
+        selectedStatus: FILTER_CLOSED,
+      }),
+    width: 26,
+  };
+
+  const inProgressAlertActionComponent: TimelineRowAction = {
+    ariaLabel: 'Mark alert in progress',
+    content: <EuiText size="m">{i18n.ACTION_IN_PROGRESS_ALERT}</EuiText>,
+    dataTestSubj: 'in-progress-alert-status',
+    displayType: 'contextMenu',
+    id: FILTER_IN_PROGRESS,
+    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    onClick: ({ eventId }: TimelineRowActionOnClick) =>
+      updateAlertStatusAction({
+        alertIds: [eventId],
+        onAlertStatusUpdateFailure,
+        onAlertStatusUpdateSuccess,
+        setEventsDeleted,
+        setEventsLoading,
+        status,
+        selectedStatus: FILTER_IN_PROGRESS,
+      }),
+    width: 26,
+  };
+
+  return [
+    {
+      ariaLabel: 'Send alert to timeline',
+      content: i18n.ACTION_INVESTIGATE_IN_TIMELINE,
+      dataTestSubj: 'send-alert-to-timeline',
+      displayType: 'icon',
+      iconType: 'timeline',
+      id: 'sendAlertToTimeline',
+      onClick: ({ ecsData }: TimelineRowActionOnClick) =>
+        sendAlertToTimelineAction({
+          apolloClient,
+          createTimeline,
+          ecsData,
+          updateTimelineIsLoading,
+        }),
+      width: 26,
+    },
+    // Context menu items
+    ...(FILTER_OPEN !== status ? [openAlertActionComponent] : []),
+    ...(FILTER_CLOSED !== status ? [closeAlertActionComponent] : []),
+    ...(FILTER_IN_PROGRESS !== status ? [inProgressAlertActionComponent] : []),
+  ];
+};
