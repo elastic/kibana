@@ -188,7 +188,7 @@ export const MinAgeInput = (props) => {
           errors={errors}
           helpText={
             <LearnMoreLink
-              docPath="_timing.html"
+              docPath="ilm-index-lifecycle.html#ilm-phase-transitions"
               text={
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"

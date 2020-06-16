@@ -67,7 +67,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
                 color="primary"
                 fill={false}
                 aria-label={i18n.translate(
-                  'xpack.ml.newJi18n(ob.recognize.jobsCreationFailed.resetButtonAriaLabel',
+                  'xpack.ml.newJob.recognize.jobsCreationFailed.resetButtonAriaLabel',
                   { defaultMessage: 'Reset' }
                 )}
                 onClick={onReset}
