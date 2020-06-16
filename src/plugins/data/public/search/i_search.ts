@@ -20,9 +20,9 @@
 import { Observable } from 'rxjs';
 import { TStrategyTypes } from './strategy_types';
 import {
-  DEFAULT_SEARCH_STRATEGY,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
+  DEFAULT_SEARCH_STRATEGY,
 } from '../../common/search';
 import { SYNC_SEARCH_STRATEGY, ISyncSearchRequest } from './sync_search_strategy';
 import {
@@ -47,13 +47,17 @@ export interface IResponseTypesMap {
   [key: string]: IKibanaSearchResponse;
 }
 
-export type ISearchGeneric = <T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY>(
-  request: IRequestTypesMap[T],
-  options?: ISearchOptions,
-  strategy?: T
-) => Observable<IResponseTypesMap[T]>;
-
 export type ISearch<T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY> = (
   request: IRequestTypesMap[T],
   options?: ISearchOptions
+) => Observable<IResponseTypesMap[T]>;
+
+// Service API types
+export interface IStrategyOptions extends ISearchOptions {
+  strategy?: TStrategyTypes;
+}
+
+export type ISearchGeneric = <T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY>(
+  request: IRequestTypesMap[T],
+  options?: IStrategyOptions
 ) => Observable<IResponseTypesMap[T]>;

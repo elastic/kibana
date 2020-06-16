@@ -99,7 +99,7 @@ export class DemoStrategy extends React.Component<Props, State> {
           request={request}
           strategy={DEMO_SEARCH_STRATEGY}
           search={(signal: AbortSignal) =>
-            this.props.search(request, { signal }, DEMO_SEARCH_STRATEGY)
+            this.props.search(request, { signal, strategy: DEMO_SEARCH_STRATEGY })
           }
         />
       </React.Fragment>

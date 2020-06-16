@@ -22,9 +22,10 @@ import { takeUntil, finalize, mergeMapTo, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IKibanaSearchRequest } from '../../common/search';
-import { ISearchGeneric, ISearchOptions } from './i_search';
+import { ISearch, ISearchOptions } from './i_search';
 import { RequestTimeoutError } from './request_timeout_error';
 import { getLongQueryNotification } from './long_query_notification';
+import { TStrategyTypes } from './strategy_types';
 
 const LONG_QUERY_NOTIFICATION_DELAY = 10000;
 
@@ -86,8 +87,8 @@ export class SearchInterceptor {
    * either when `cancelPending` is called, when the request times out, or when the original
    * `AbortSignal` is aborted. Updates the `pendingCount` when the request is started/finalized.
    */
-  public search = (
-    search: ISearchGeneric,
+  public search = <T extends TStrategyTypes>(
+    search: ISearch<T>,
     request: IKibanaSearchRequest,
     options?: ISearchOptions
   ) => {
@@ -127,7 +128,7 @@ export class SearchInterceptor {
       ];
       const combinedSignal = getCombinedSignal(signals);
 
-      return search(request as any, { ...options, signal: combinedSignal }).pipe(
+      return search(request, { ...options, signal: combinedSignal }).pipe(
         takeUntil(timeoutError$),
         takeUntil(userAbort$),
         finalize(() => {

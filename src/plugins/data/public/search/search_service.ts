@@ -135,11 +135,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const aggTypesStart = this.aggTypesRegistry.start();
 
-    const search: ISearchGeneric = (request, options, strategyName) => {
+    const search: ISearchGeneric = (request, options) => {
       const { search: defaultSearch } = this.getSearchStrategy(
-        strategyName || DEFAULT_SEARCH_STRATEGY
+        options?.strategy || DEFAULT_SEARCH_STRATEGY
       );
-      return this.searchInterceptor.search(defaultSearch as any, request, options);
+      return this.searchInterceptor.search(defaultSearch, request, options);
     };
 
     const legacySearch = {

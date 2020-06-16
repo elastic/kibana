@@ -82,7 +82,7 @@ export class AsyncDemoStrategy extends React.Component<Props, State> {
           request={request}
           strategy={ASYNC_DEMO_SEARCH_STRATEGY}
           search={(signal: AbortSignal) =>
-            this.props.search(request, { signal }, ASYNC_DEMO_SEARCH_STRATEGY)
+            this.props.search(request, { signal, strategy: ASYNC_DEMO_SEARCH_STRATEGY })
           }
         />
       </React.Fragment>
