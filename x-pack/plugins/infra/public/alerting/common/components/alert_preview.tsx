@@ -157,7 +157,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
                       ),
                     }}
                   />{' '}
-                  {groupByDisplayName ? (
+                  {previewResult.groupByDisplayName ? (
                     <>
                       <FormattedMessage
                         id="xpack.infra.metrics.alertFlyout.alertPreviewGroupsAcross"
