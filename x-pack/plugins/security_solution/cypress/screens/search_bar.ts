@@ -9,6 +9,9 @@ import { SearchBarFilter } from '../objects/filter';
 export const GLOBAL_SEARCH_BAR_ADD_FILTER =
   '[data-test-subj="globalDatePicker"] [data-test-subj="addFilter"]';
 
+export const GLOBAL_SEARCH_BAR_SUBMIT_BUTTON =
+  '[data-test-subj="globalDatePicker"] [data-test-subj="querySubmitButton"]';
+
 export const ADD_FILTER_FORM_FIELD_INPUT =
   '[data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]';
 

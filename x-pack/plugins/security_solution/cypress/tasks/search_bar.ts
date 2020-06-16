@@ -8,6 +8,7 @@ import { SearchBarFilter } from '../objects/filter';
 
 import {
   GLOBAL_SEARCH_BAR_ADD_FILTER,
+  GLOBAL_SEARCH_BAR_SUBMIT_BUTTON,
   ADD_FILTER_FORM_SAVE_BUTTON,
   ADD_FILTER_FORM_FIELD_INPUT,
   ADD_FILTER_FORM_OPERATOR_OPTION_IS,
@@ -17,6 +18,7 @@ import {
 } from '../screens/search_bar';
 
 export const openAddFilterPopover = () => {
+  cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click({ force: true });
 };
 
