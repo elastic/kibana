@@ -951,15 +951,6 @@ export interface ImageValidation {
     };
 }
 
-// @internal (undocumented)
-export interface InternalApplicationStart extends Omit<ApplicationStart, 'registerMountContext'> {
-    // (undocumented)
-    getComponent(): JSX.Element | null;
-    history: History<unknown> | undefined;
-    // @deprecated
-    registerMountContext<T extends keyof AppMountContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
-}
-
 // @public
 export function isRelativeUrl(candidatePath: string): boolean;
 
@@ -1597,5 +1588,9 @@ export interface UserProvidedValues<T = any> {
     userValue?: T;
 }
 
+
+// Warnings were encountered during analysis:
+//
+// src/core/public/core_system.ts:216:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
