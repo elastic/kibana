@@ -306,6 +306,7 @@
     "@kbn/expect": "1.0.0",
     "@kbn/optimizer": "1.0.0",
     "@kbn/plugin-generator": "1.0.0",
+    "@kbn/release-notes": "1.0.0",
     "@kbn/test": "1.0.0",
     "@kbn/utility-types": "1.0.0",
     "@microsoft/api-documenter": "7.7.2",
