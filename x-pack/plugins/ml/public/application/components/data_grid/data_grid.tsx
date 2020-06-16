@@ -203,7 +203,7 @@ export const DataGrid: FC<Props> = memo(
                         onClick={toggleChartVisibility}
                       >
                         {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
-                          defaultMessage: 'Histogram Charts',
+                          defaultMessage: 'Histogram charts',
                         })}
                       </EuiButtonEmpty>
                     ),
