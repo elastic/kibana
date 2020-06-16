@@ -8,27 +8,40 @@ import { leftJoin } from '../../../common/utils/left_join';
 import { Job as AnomalyDetectionJob } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../typings/common';
 import { IEnvOptions } from './get_service_map';
-import { APM_ML_JOB_GROUP_NAME } from '../../../common/ml_job_constants';
+import {
+  APM_ML_JOB_GROUP_NAME,
+  encodeForMlApi,
+} from '../../../common/ml_job_constants';
 
 type ApmMlJobCategory = NonNullable<ReturnType<typeof getApmMlJobCategory>>;
-const getApmMlJobCategory = (
+export const getApmMlJobCategory = (
   mlJob: AnomalyDetectionJob,
   serviceNames: string[]
 ) => {
-  const apmJobGroups = mlJob.groups.filter(
-    (groupName) => groupName !== APM_ML_JOB_GROUP_NAME
+  const serviceByGroupNameMap = new Map(
+    serviceNames.map((serviceName) => [
+      encodeForMlApi(serviceName),
+      serviceName,
+    ])
   );
-  if (apmJobGroups.length === mlJob.groups.length) {
+  if (!mlJob.groups.includes(APM_ML_JOB_GROUP_NAME)) {
     // ML job missing "apm" group name
     return;
   }
-  const [serviceName] = intersection(apmJobGroups, serviceNames);
+  const apmJobGroups = mlJob.groups.filter(
+    (groupName) => groupName !== APM_ML_JOB_GROUP_NAME
+  );
+  const apmJobServiceNames = apmJobGroups.map(
+    (groupName) => serviceByGroupNameMap.get(groupName) || groupName
+  );
+  const [serviceName] = intersection(apmJobServiceNames, serviceNames);
   if (!serviceName) {
     // APM ML job service was not found
     return;
   }
+  const serviceGroupName = encodeForMlApi(serviceName);
   const [transactionType] = apmJobGroups.filter(
-    (groupName) => groupName !== serviceName
+    (groupName) => groupName !== serviceGroupName
   );
   if (!transactionType) {
     // APM ML job transaction type was not found.

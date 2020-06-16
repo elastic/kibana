@@ -19,16 +19,7 @@ import { Logs } from '../../logs/';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
 
-export const Node = ({
-  nodeSummary,
-  metrics,
-  logs,
-  nodeId,
-  clusterUuid,
-  scope,
-  kbnUrl,
-  ...props
-}) => {
+export const Node = ({ nodeSummary, metrics, logs, nodeId, clusterUuid, scope, ...props }) => {
   const metricsToShow = [
     metrics.node_jvm_mem,
     metrics.node_mem,
@@ -62,7 +53,7 @@ export const Node = ({
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>
-          <ShardAllocation scope={scope} kbnUrl={kbnUrl} />
+          <ShardAllocation scope={scope} />
         </EuiPanel>
       </EuiPageBody>
     </EuiPage>

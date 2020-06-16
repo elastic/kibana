@@ -155,6 +155,9 @@ export const ConfigSchema = schema.object({
     hostname: schema.maybe(schema.string({ hostname: true })),
     port: schema.maybe(schema.number({ min: 0, max: 65535 })),
   }),
+  sameSiteCookies: schema.maybe(
+    schema.oneOf([schema.literal('Strict'), schema.literal('Lax'), schema.literal('None')])
+  ),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {

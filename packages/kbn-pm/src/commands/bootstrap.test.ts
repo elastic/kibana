@@ -22,7 +22,7 @@ jest.mock('../utils/link_project_executables');
 
 import { resolve } from 'path';
 
-import { ToolingLogCollectingWriter } from '@kbn/dev-utils';
+import { ToolingLogCollectingWriter } from '@kbn/dev-utils/tooling_log';
 
 import { absolutePathSnapshotSerializer, stripAnsiSnapshotSerializer } from '../test_helpers';
 import { linkProjectExecutables } from '../utils/link_project_executables';

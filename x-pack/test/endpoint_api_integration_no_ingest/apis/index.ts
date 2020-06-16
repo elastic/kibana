@@ -7,7 +7,8 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('Endpoint plugin', function () {
+  // endpoint was not released in 7.8 so disabling all the tests
+  describe.skip('Endpoint plugin', function () {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./index_pattern'));
     loadTestFile(require.resolve('./metadata'));

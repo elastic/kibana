@@ -6,7 +6,8 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('endpoint', function () {
+  // endpoint was not released in 7.8 so disabling all the tests
+  describe.skip('endpoint', function () {
     this.tags('ciGroup7');
 
     loadTestFile(require.resolve('./feature_controls'));

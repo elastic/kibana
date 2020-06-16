@@ -44,7 +44,7 @@ add them as you create the dashboard, or you can add
 <<add-sample-data, sample data sets>>,
 which include pre-built dashboards.
 
-To begin, open *Dashboard*, then click *Create new dashboard.*
+To begin, open the menu, go to *Dashboard*, then click *Create dashboard.*
 
 [float]
 [[dashboard-add-elements]]
@@ -186,5 +186,5 @@ tools. To create a short URL, you must have write access to {kib}.
 [[import-dashboards]]
 === Export the dashboard
 
-To export the dashboard, go to *Management > Saved Objects*. For more information,
-see <<managing-saved-objects, Managing saved objects>>.
+To export the dashboard, open the menu, then click *Stack Management > Saved Objects*. For more information,
+refer to <<managing-saved-objects, Managing saved objects>>.
