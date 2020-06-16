@@ -32,7 +32,7 @@ import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters
 import { InventoryAlertDropdown } from '../../components/alerting/inventory/alert_dropdown';
 import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
 
-const ADD_DATA_LABEL = i18n.translate('xpack.metrics.addDataButtonLabel', {
+const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
 });
 

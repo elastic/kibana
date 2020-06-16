@@ -136,6 +136,6 @@ const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle
 
 const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';
 
-const ADD_DATA_LABEL = i18n.translate('xpack.logs.addDataButtonLabel', {
+const ADD_DATA_LABEL = i18n.translate('xpack.infra.logsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
 });
