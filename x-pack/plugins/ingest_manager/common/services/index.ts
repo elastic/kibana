@@ -7,7 +7,7 @@ import * as AgentStatusKueryHelper from './agent_status';
 
 export * from './routes';
 export { packageToConfigDatasourceInputs, packageToConfigDatasource } from './package_to_config';
-export { storedDatasourceToAgentDatasource } from './datasource_to_agent_datasource';
+export { storedDatasourcesToAgentInputs } from './datasources_to_agent_inputs';
 export { configToYaml } from './config_to_yaml';
 export { AgentStatusKueryHelper };
 export { decodeCloudId } from './decode_cloud_id';
