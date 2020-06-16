@@ -7,10 +7,14 @@
 import React from 'react';
 import { MapsAppView } from '.';
 import { getMapsSavedObjectLoader } from '../../../bootstrap/services/gis_map_saved_object_loader';
+import { getToasts } from '../../../kibana_services';
+import { i18n } from '@kbn/i18n';
+import { Redirect } from 'react-router-dom';
 
 export const LoadMapAndRender = class extends React.Component {
   state = {
     savedMap: null,
+    failedToLoad: false,
   };
 
   async componentDidMount() {
@@ -19,14 +23,23 @@ export const LoadMapAndRender = class extends React.Component {
       const savedMap = await getMapsSavedObjectLoader().get(savedMapId);
       this.setState({ savedMap });
     } catch (err) {
-      // error handling
+      this.setState({ failedToLoad: true });
+      getToasts().addDanger({
+        title: i18n.translate('xpack.maps.loadMap.errorAttemptingToLoadSavedMap', {
+          defaultMessage: `Unable to load map: ${savedMapId}`,
+        }),
+        text: `${err}`,
+      });
     }
   }
 
   render() {
-    const { savedMap } = this.state;
-    const currentPath = this.props.match.url;
+    const { savedMap, failedToLoad } = this.state;
+    if (failedToLoad) {
+      return <Redirect to="/" />;
+    }
 
+    const currentPath = this.props.match.url;
     return savedMap ? <MapsAppView savedMap={savedMap} currentPath={currentPath} /> : null;
   }
 };
