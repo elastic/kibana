@@ -251,7 +251,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       savedObjects.getClient(h.request)
     );
     const vars = await legacy.getVars(app.getId(), h.request, {
-      apmConfig: getApmConfig(app),
+      apmConfig: getApmConfig(h.request.path),
       ...overrides,
     });
     const content = await rendering.render(h.request, uiSettings, {
