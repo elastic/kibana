@@ -32,7 +32,7 @@ image::images/vega_lite_default.png[]
 The default visualization uses Vega-Lite version 2. To use Vega version 4, edit
 the `schema`.
 
-Go to `$schema`, enter `https://vega.github.io/schema/vega/v4.json`, then click
+Go to `$schema`, enter `https://vega.github.io/schema/vega/v5.json`, then click
 *Update*.
 
 [float]

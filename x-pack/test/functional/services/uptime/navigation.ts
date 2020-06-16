@@ -56,6 +56,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     },
 
     goToMonitor: async (monitorId: string) => {
+      // only go to monitor page if not already there
       if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
         await testSubjects.click(`monitor-page-link-${monitorId}`);
         await testSubjects.existOrFail('uptimeMonitorPage', {
@@ -79,6 +80,14 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
       await PageObjects.timePicker.setAbsoluteRange(dateStart, dateEnd);
       await this.goToMonitor(monitorId);
+    },
+
+    async isOnDetailsPage() {
+      return await testSubjects.exists('uptimeMonitorPage', { timeout: 0 });
+    },
+
+    async goToHomeViaBreadCrumb() {
+      await testSubjects.click('breadcrumb first');
     },
   };
 }
