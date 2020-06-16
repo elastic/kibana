@@ -24,9 +24,6 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { updateBreadcrumbs } from '../breadcrumbs';
 import { goToSpecifiedPath } from '../../maps_router';
 
-/**
- * @return {null}
- */
 export function MapsTopNavMenu({
   savedMap,
   query,
@@ -90,7 +87,7 @@ export function MapsTopNavMenu({
   const onRefreshChange = function ({ isPaused, refreshInterval }) {
     const newRefreshConfig = {
       isPaused,
-      interval: refreshInterval ? refreshInterval : refreshConfig.interval,
+      interval: isNaN(refreshInterval) ? refreshConfig.interval : refreshInterval,
     };
     setRefreshConfig(newRefreshConfig, () => {
       setRefreshStoreConfig(newRefreshConfig);

@@ -160,9 +160,7 @@ export class MapsPlugin
       async mount(context, params) {
         const [coreStart, startPlugins] = await core.getStartServices();
         bindStartCoreAndPlugins(coreStart, startPlugins);
-        // @ts-expect-error
         const { renderApp } = await lazyLoadMapModules();
-        // @ts-expect-error
         return renderApp(context, params);
       },
     });
