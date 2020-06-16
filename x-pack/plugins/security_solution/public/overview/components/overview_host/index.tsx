@@ -18,26 +18,16 @@ import { useUiSetting$ } from '../../../common/lib/kibana';
 import { getHostsUrl } from '../../../common/components/link_to';
 import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { inputsModel } from '../../../common/store/inputs';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export interface OwnProps {
-  startDate: number;
-  endDate: number;
+  startDate: GlobalTimeArgs['from'];
+  endDate: GlobalTimeArgs['to'];
   filterQuery?: ESQuery | string;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
+  setQuery: GlobalTimeArgs['setQuery'];
 }
 
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);

@@ -13,7 +13,6 @@ import { FlowTarget } from '../../graphql/types';
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { GlobalTime } from '../../common/containers/global_time';
 import { SiemPageName } from '../../app/types';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
@@ -35,65 +34,42 @@ const NetworkContainerComponent: React.FC<Props> = () => {
   );
 
   return (
-    <GlobalTime>
-      {({ to, from, setQuery, deleteQuery, isInitializing }) => (
-        <Switch>
-          <Route
-            strict
-            path={networkRoutePath}
-            render={() => (
-              <Network
-                networkPagePath={networkPagePath}
-                to={to}
-                from={from}
-                setQuery={setQuery}
-                deleteQuery={deleteQuery}
-                isInitializing={isInitializing}
-                capabilitiesFetched={capabilities.capabilitiesFetched}
-                hasMlUserPermissions={userHasMlUserPermissions}
-              />
-            )}
+    <Switch>
+      <Route strict path={networkRoutePath}>
+        <Network
+          networkPagePath={networkPagePath}
+          capabilitiesFetched={capabilities.capabilitiesFetched}
+          hasMlUserPermissions={userHasMlUserPermissions}
+        />
+      </Route>
+      <Route
+        path={`${ipDetailsPageBasePath}/:flowTarget`}
+        render={({
+          match: {
+            params: { detailName, flowTarget },
+          },
+        }) => <IPDetails detailName={detailName} flowTarget={flowTarget} />}
+      />
+      <Route
+        path={ipDetailsPageBasePath}
+        render={({
+          location: { search = '' },
+          match: {
+            params: { detailName },
+          },
+        }) => (
+          <Redirect
+            to={`/${SiemPageName.network}/ip/${detailName}/${FlowTarget.source}${search}`}
           />
-          <Route
-            path={`${ipDetailsPageBasePath}/:flowTarget`}
-            render={({
-              match: {
-                params: { detailName, flowTarget },
-              },
-            }) => (
-              <IPDetails
-                detailName={detailName}
-                flowTarget={flowTarget}
-                to={to}
-                from={from}
-                setQuery={setQuery}
-                deleteQuery={deleteQuery}
-                isInitializing={isInitializing}
-              />
-            )}
-          />
-          <Route
-            path={ipDetailsPageBasePath}
-            render={({
-              location: { search = '' },
-              match: {
-                params: { detailName },
-              },
-            }) => (
-              <Redirect
-                to={`/${SiemPageName.network}/ip/${detailName}/${FlowTarget.source}${search}`}
-              />
-            )}
-          />
-          <Route
-            path={`/${SiemPageName.network}/`}
-            render={({ location: { search = '' } }) => (
-              <Redirect to={`/${SiemPageName.network}/${NetworkRouteType.flows}${search}`} />
-            )}
-          />
-        </Switch>
-      )}
-    </GlobalTime>
+        )}
+      />
+      <Route
+        path={`/${SiemPageName.network}/`}
+        render={({ location: { search = '' } }) => (
+          <Redirect to={`/${SiemPageName.network}/${NetworkRouteType.flows}${search}`} />
+        )}
+      />
+    </Switch>
   );
 };
 

@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { LegendItem } from '../../../common/components/charts/draggable_legend_item';
@@ -30,7 +31,7 @@ import { alertsHistogramOptions } from './config';
 import { formatAlertsData, getAlertsHistogramQuery, showInitialLoadingSpinner } from './helpers';
 import { AlertsHistogram } from './alerts_histogram';
 import * as i18n from './translations';
-import { RegisterQuery, AlertsHistogramOption, AlertsAggregation, AlertsTotal } from './types';
+import { AlertsHistogramOption, AlertsAggregation, AlertsTotal } from './types';
 
 const DEFAULT_PANEL_HEIGHT = 300;
 
@@ -52,12 +53,11 @@ const ViewAlertsFlexItem = styled(EuiFlexItem)`
   margin-left: 24px;
 `;
 
-interface AlertsHistogramPanelProps {
+interface AlertsHistogramPanelProps
+  extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery' | 'deleteQuery'> {
   chartHeight?: number;
   defaultStackByOption?: AlertsHistogramOption;
-  deleteQuery?: ({ id }: { id: string }) => void;
   filters?: Filter[];
-  from: number;
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
   onlyField?: string;
@@ -65,12 +65,10 @@ interface AlertsHistogramPanelProps {
   legendPosition?: Position;
   panelHeight?: number;
   signalIndexName: string | null;
-  setQuery: (params: RegisterQuery) => void;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
   stackByOptions?: AlertsHistogramOption[];
   title?: string;
-  to: number;
   updateDateRange: UpdateDateRange;
 }
 

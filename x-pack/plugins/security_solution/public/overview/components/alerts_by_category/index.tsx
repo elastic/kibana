@@ -20,7 +20,6 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../../common/store';
 import { HostsTableType, HostsType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
@@ -32,6 +31,7 @@ import { MatrixHisrogramConfigs } from '../../../common/components/matrix_histog
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -39,20 +39,11 @@ const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.module';
 
-interface Props {
-  deleteQuery?: ({ id }: { id: string }) => void;
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters?: Filter[];
-  from: number;
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
   query?: Query;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
-  to: number;
 }
 
 const AlertsByCategoryComponent: React.FC<Props> = ({

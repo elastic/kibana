@@ -8,10 +8,10 @@ import { EuiTitleSize } from '@elastic/eui';
 import { ScaleType, Position, TickFormatter } from '@elastic/charts';
 import { ActionCreator } from 'redux';
 import { ESQuery } from '../../../../common/typed_json';
-import { SetQuery } from '../../../hosts/pages/navigation/types';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HistogramType } from '../../../graphql/types';
 import { UpdateDateRange } from '../charts/common';
+import { GlobalTimeArgs } from '../../containers/use_global_time';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -47,15 +47,15 @@ interface MatrixHistogramBasicProps {
     from: number;
     to: number;
   }>;
-  endDate: number;
+  endDate: GlobalTimeArgs['to'];
   headerChildren?: React.ReactNode;
   hideHistogramIfEmpty?: boolean;
   id: string;
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   panelHeight?: number;
-  setQuery: SetQuery;
-  startDate: number;
+  setQuery: GlobalTimeArgs['setQuery'];
+  startDate: GlobalTimeArgs['from'];
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
   title?: string | GetTitle;

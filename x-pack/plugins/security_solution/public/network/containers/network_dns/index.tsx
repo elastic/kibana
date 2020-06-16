@@ -36,7 +36,7 @@ import {
   GetSubTitle,
 } from '../../../common/components/matrix_histogram/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
-import { SetQuery } from '../../../hosts/pages/navigation/types';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { networkModel, networkSelectors } from '../../store';
 
 const ID = 'networkDnsQuery';
@@ -67,7 +67,7 @@ interface DnsHistogramOwnProps extends QueryTemplatePaginatedProps {
   isDnsHistogram?: boolean;
   query: DocumentNode;
   scaleType: ScaleType;
-  setQuery: SetQuery;
+  setQuery: GlobalTimeArgs['setQuery'];
   showLegend?: boolean;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;

@@ -33,15 +33,14 @@ interface HostDetailsComponentDispatchProps extends HostBodyComponentDispatchPro
   setHostDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
-export interface HostDetailsProps extends HostsQueryProps {
+export interface HostDetailsProps {
   detailName: string;
   hostDetailsPagePath: string;
 }
 
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
   HostDetailsComponentDispatchProps &
-  HostComponentProps &
-  HostsQueryProps;
+  HostComponentProps;
 
 type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &
   HostsTableType.uncommonProcesses &

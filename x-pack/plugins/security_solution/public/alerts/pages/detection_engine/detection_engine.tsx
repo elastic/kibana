@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { GlobalTime } from '../../../common/containers/global_time';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import {
   indicesExistOrDataTemporarilyUnavailable,
   WithSource,
@@ -42,6 +42,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   query,
   setAbsoluteRangeDatePicker,
 }) => {
+  const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const {
     loading,
     isSignalIndexExists,
@@ -120,35 +121,27 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
                   </EuiButton>
                 </DetectionEngineHeaderPage>
 
-                <GlobalTime>
-                  {({ to, from, deleteQuery, setQuery }) => (
-                    <>
-                      <>
-                        <AlertsHistogramPanel
-                          deleteQuery={deleteQuery}
-                          filters={filters}
-                          from={from}
-                          query={query}
-                          setQuery={setQuery}
-                          showTotalAlertsCount={true}
-                          signalIndexName={signalIndexName}
-                          stackByOptions={alertsHistogramOptions}
-                          to={to}
-                          updateDateRange={updateDateRangeCallback}
-                        />
-                        <EuiSpacer size="l" />
-                        <AlertsTable
-                          loading={loading}
-                          hasIndexWrite={hasIndexWrite ?? false}
-                          canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
-                          from={from}
-                          signalsIndex={signalIndexName ?? ''}
-                          to={to}
-                        />
-                      </>
-                    </>
-                  )}
-                </GlobalTime>
+                <AlertsHistogramPanel
+                  deleteQuery={deleteQuery}
+                  filters={filters}
+                  from={from}
+                  query={query}
+                  setQuery={setQuery}
+                  showTotalAlertsCount={true}
+                  signalIndexName={signalIndexName}
+                  stackByOptions={alertsHistogramOptions}
+                  to={to}
+                  updateDateRange={updateDateRangeCallback}
+                />
+                <EuiSpacer size="l" />
+                <AlertsTable
+                  loading={loading}
+                  hasIndexWrite={hasIndexWrite ?? false}
+                  canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
+                  from={from}
+                  signalsIndex={signalIndexName ?? ''}
+                  to={to}
+                />
               </WrapperPage>
             </StickyContainer>
           ) : (

@@ -20,7 +20,7 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../../common/store';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 const HorizontalSpacer = styled(EuiFlexItem)`
   width: 24px;
@@ -29,18 +29,10 @@ const HorizontalSpacer = styled(EuiFlexItem)`
 const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 
-interface Props {
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters?: Filter[];
-  from: number;
   indexPattern: IIndexPattern;
   query?: Query;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
-  to: number;
 }
 
 const EventCountsComponent: React.FC<Props> = ({

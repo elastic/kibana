@@ -5,7 +5,6 @@
  */
 
 import { RenderTooltipContentParams } from '../../../../../../legacy/plugins/maps/public';
-import { inputsModel } from '../../../common/store/inputs';
 
 export interface IndexPatternMapping {
   title: string;
@@ -27,13 +26,6 @@ export interface LayerMapping {
 export interface LayerMappingCollection {
   [indexPatternTitle: string]: LayerMapping;
 }
-
-export type SetQuery = (params: {
-  id: string;
-  inspect: inputsModel.InspectQuery | null;
-  loading: boolean;
-  refetch: inputsModel.Refetch;
-}) => void;
 
 export interface MapFeature {
   id: number;

@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { GlobalTime } from '../../containers/global_time';
+import { useGlobalTime } from '../../containers/use_global_time';
 import { BrowserFields, WithSource } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
 import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/public';
@@ -92,6 +92,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   value,
 }) => {
   const kibana = useKibana();
+  const { from, deleteQuery, setQuery, to } = useGlobalTime();
 
   //  Regarding data from useTimelineTypeContext:
   //  * `documentType` (e.g. 'alerts') may only be populated in some views,
@@ -118,55 +119,49 @@ const StatefulTopNComponent: React.FC<Props> = ({
   );
 
   return (
-    <GlobalTime>
-      {({ from, deleteQuery, setQuery, to }) => (
-        <WithSource sourceId="default" indexToAdd={indexToAdd}>
-          {({ indexPattern }) => (
-            <TopN
-              combinedQueries={
-                timelineId === ACTIVE_TIMELINE_REDUX_ID
-                  ? combineQueries({
-                      browserFields,
-                      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-                      dataProviders,
-                      end: activeTimelineTo,
-                      filters: activeTimelineFilters,
-                      indexPattern,
-                      kqlMode,
-                      kqlQuery: {
-                        language: 'kuery',
-                        query: activeTimelineKqlQueryExpression ?? '',
-                      },
-                      start: activeTimelineFrom,
-                    })?.filterQuery
-                  : undefined
-              }
-              data-test-subj="top-n"
-              defaultView={
-                documentType?.toLocaleLowerCase() === 'alerts' ? 'alert' : options[0].value
-              }
-              deleteQuery={timelineId === ACTIVE_TIMELINE_REDUX_ID ? undefined : deleteQuery}
-              field={field}
-              filters={timelineId === ACTIVE_TIMELINE_REDUX_ID ? EMPTY_FILTERS : globalFilters}
-              from={timelineId === ACTIVE_TIMELINE_REDUX_ID ? activeTimelineFrom : from}
-              indexPattern={indexPattern}
-              indexToAdd={indexToAdd}
-              options={options}
-              query={timelineId === ACTIVE_TIMELINE_REDUX_ID ? EMPTY_QUERY : globalQuery}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-              setAbsoluteRangeDatePickerTarget={
-                timelineId === ACTIVE_TIMELINE_REDUX_ID ? 'timeline' : 'global'
-              }
-              setQuery={setQuery}
-              to={timelineId === ACTIVE_TIMELINE_REDUX_ID ? activeTimelineTo : to}
-              toggleTopN={toggleTopN}
-              onFilterAdded={onFilterAdded}
-              value={value}
-            />
-          )}
-        </WithSource>
+    <WithSource sourceId="default" indexToAdd={indexToAdd}>
+      {({ indexPattern }) => (
+        <TopN
+          combinedQueries={
+            timelineId === ACTIVE_TIMELINE_REDUX_ID
+              ? combineQueries({
+                  browserFields,
+                  config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+                  dataProviders,
+                  end: activeTimelineTo,
+                  filters: activeTimelineFilters,
+                  indexPattern,
+                  kqlMode,
+                  kqlQuery: {
+                    language: 'kuery',
+                    query: activeTimelineKqlQueryExpression ?? '',
+                  },
+                  start: activeTimelineFrom,
+                })?.filterQuery
+              : undefined
+          }
+          data-test-subj="top-n"
+          defaultView={documentType?.toLocaleLowerCase() === 'alerts' ? 'alert' : options[0].value}
+          deleteQuery={timelineId === ACTIVE_TIMELINE_REDUX_ID ? undefined : deleteQuery}
+          field={field}
+          filters={timelineId === ACTIVE_TIMELINE_REDUX_ID ? EMPTY_FILTERS : globalFilters}
+          from={timelineId === ACTIVE_TIMELINE_REDUX_ID ? activeTimelineFrom : from}
+          indexPattern={indexPattern}
+          indexToAdd={indexToAdd}
+          options={options}
+          query={timelineId === ACTIVE_TIMELINE_REDUX_ID ? EMPTY_QUERY : globalQuery}
+          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+          setAbsoluteRangeDatePickerTarget={
+            timelineId === ACTIVE_TIMELINE_REDUX_ID ? 'timeline' : 'global'
+          }
+          setQuery={setQuery}
+          to={timelineId === ACTIVE_TIMELINE_REDUX_ID ? activeTimelineTo : to}
+          toggleTopN={toggleTopN}
+          onFilterAdded={onFilterAdded}
+          value={value}
+        />
       )}
-    </GlobalTime>
+    </WithSource>
   );
 };
 

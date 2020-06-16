@@ -22,6 +22,7 @@ import { KpiNetworkComponent } from '..//components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { KpiNetworkQuery } from '../../network/containers/kpi_network';
+import { useGlobalTime } from '../../common/containers/use_global_time';
 import {
   indicesExistOrDataTemporarilyUnavailable,
   WithSource,
@@ -49,13 +50,10 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
     query,
     setAbsoluteRangeDatePicker,
     networkPagePath,
-    to,
-    from,
-    setQuery,
-    isInitializing,
     hasMlUserPermissions,
     capabilitiesFetched,
   }) => {
+    const { to, from, setQuery, isInitializing } = useGlobalTime();
     const kibana = useKibana();
     const { tabName } = useParams();
 

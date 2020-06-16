@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { useCallback, useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { inputsSelectors } from '../../store';
+import { inputsActions } from '../../store/actions';
+
+export const useGlobalTime = () => {
+  const dispatch = useDispatch();
+  const { from, to } = useSelector(inputsSelectors.globalTimeRangeSelector);
+
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  const setQuery = useCallback(
+    ({
+      id,
+      inspect,
+      loading,
+      refetch,
+    }: Omit<Parameters<typeof inputsActions.setQuery>[0], 'inputId'>) =>
+      dispatch(inputsActions.setQuery({ inputId: 'global', id, inspect, loading, refetch })),
+    [dispatch]
+  );
+
+  const deleteQuery = useCallback(
+    ({ id }: Pick<Parameters<typeof inputsActions.deleteOneQuery>[0], 'id'>) =>
+      dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id })),
+    [dispatch]
+  );
+
+  useEffect(() => {
+    if (isInitializing) {
+      setIsInitializing(false);
+    }
+    return () => {
+      dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
+    };
+  }, [dispatch, isInitializing]);
+
+  return {
+    isInitializing,
+    from,
+    to,
+    setQuery,
+    deleteQuery,
+  };
+};
+
+export type GlobalTimeArgs = Omit<ReturnType<typeof useGlobalTime>, 'deleteQuery'> &
+  Partial<Pick<ReturnType<typeof useGlobalTime>, 'deleteQuery'>>;

@@ -21,6 +21,7 @@ import { manageQuery } from '../../common/components/page/manage_query';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { KpiHostsQuery } from '../containers/kpi_hosts';
+import { useGlobalTime } from '../../common/containers/use_global_time';
 import {
   indicesExistOrDataTemporarilyUnavailable,
   WithSource,
@@ -46,17 +47,8 @@ import { HostsTableType } from '../store/model';
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
-  ({
-    deleteQuery,
-    isInitializing,
-    filters,
-    from,
-    query,
-    setAbsoluteRangeDatePicker,
-    setQuery,
-    to,
-    hostsPagePath,
-  }) => {
+  ({ filters, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
+    const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
     const capabilities = useMlCapabilities();
     const kibana = useKibana();
     const { tabName } = useParams();

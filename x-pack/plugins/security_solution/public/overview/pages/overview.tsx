@@ -15,7 +15,7 @@ import { AlertsByCategory } from '../components/alerts_by_category';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { GlobalTime } from '../../common/containers/global_time';
+import { useGlobalTime } from '../../common/containers/use_global_time';
 import {
   WithSource,
   indicesExistOrDataTemporarilyUnavailable,
@@ -40,89 +40,88 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   filters = NO_FILTERS,
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePicker,
-}) => (
-  <>
-    <WithSource sourceId="default">
-      {({ indicesExist, indexPattern }) =>
-        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-          <StickyContainer>
-            <FiltersGlobal>
-              <SiemSearchBar id="global" indexPattern={indexPattern} />
-            </FiltersGlobal>
+}) => {
+  const { from, deleteQuery, setQuery, to } = useGlobalTime();
+  return (
+    <>
+      <WithSource sourceId="default">
+        {({ indicesExist, indexPattern }) =>
+          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <StickyContainer>
+              <FiltersGlobal>
+                <SiemSearchBar id="global" indexPattern={indexPattern} />
+              </FiltersGlobal>
 
-            <WrapperPage>
-              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-                <SidebarFlexItem grow={false}>
-                  <StatefulSidebar />
-                </SidebarFlexItem>
+              <WrapperPage>
+                <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+                  <SidebarFlexItem grow={false}>
+                    <StatefulSidebar />
+                  </SidebarFlexItem>
 
-                <EuiFlexItem grow={true}>
-                  <GlobalTime>
-                    {({ from, deleteQuery, setQuery, to }) => (
-                      <EuiFlexGroup direction="column" gutterSize="none">
-                        <EuiFlexItem grow={false}>
-                          <SignalsByCategory
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                          <EuiSpacer size="l" />
-                        </EuiFlexItem>
+                  <EuiFlexItem grow={true}>
+                    <EuiFlexGroup direction="column" gutterSize="none">
+                      <EuiFlexItem grow={false}>
+                        <SignalsByCategory
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                        <EuiSpacer size="l" />
+                      </EuiFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <AlertsByCategory
-                            deleteQuery={deleteQuery}
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <AlertsByCategory
+                          deleteQuery={deleteQuery}
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </EuiFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <EventsByDataset
-                            deleteQuery={deleteQuery}
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EventsByDataset
+                          deleteQuery={deleteQuery}
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </EuiFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <EventCounts
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    )}
-                  </GlobalTime>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </WrapperPage>
-          </StickyContainer>
-        ) : (
-          <OverviewEmpty />
-        )
-      }
-    </WithSource>
+                      <EuiFlexItem grow={false}>
+                        <EventCounts
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </WrapperPage>
+            </StickyContainer>
+          ) : (
+            <OverviewEmpty />
+          )
+        }
+      </WithSource>
 
-    <SpyRoute />
-  </>
-);
+      <SpyRoute />
+    </>
+  );
+};
 
 const makeMapStateToProps = () => {
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
