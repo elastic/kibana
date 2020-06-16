@@ -46,7 +46,7 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
  * Update alert status by query
  *
  * @param query of alerts to update
- * @param status to update to('open' / 'closed')
+ * @param status to update to('open' / 'closed' / 'in-progress')
  * @param signal AbortSignal for cancelling request
  *
  * @throws An error if response is not OK

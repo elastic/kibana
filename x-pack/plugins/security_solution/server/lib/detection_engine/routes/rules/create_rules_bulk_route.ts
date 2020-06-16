@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { validate } from '../../../../../common/validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
@@ -19,7 +20,7 @@ import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
-import { transformValidateBulkError, validate } from './validate';
+import { transformValidateBulkError } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
