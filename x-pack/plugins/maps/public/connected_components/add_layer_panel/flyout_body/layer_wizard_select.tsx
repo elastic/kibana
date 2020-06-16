@@ -10,10 +10,10 @@ import {
   EuiCard,
   EuiIcon,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
-  EuiButtonEmpty,
+  EuiFacetGroup,
+  EuiFacetButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +28,7 @@ interface State {
   activeCategories: LAYER_WIZARD_CATEGORY[];
   hasLoadedWizards: boolean;
   layerWizards: LayerWizard[];
-  selectedCategory?: LAYER_WIZARD_CATEGORY;
+  selectedCategory: LAYER_WIZARD_CATEGORY | null;
 }
 
 function getCategoryLabel(category: LAYER_WIZARD_CATEGORY): string {
@@ -50,7 +50,7 @@ function getCategoryLabel(category: LAYER_WIZARD_CATEGORY): string {
     });
   }
 
-  return category as string;
+  throw new Exception(`Unexpected category: ${category}`);
 }
 
 export class LayerWizardSelect extends Component<Props, State> {
@@ -60,7 +60,7 @@ export class LayerWizardSelect extends Component<Props, State> {
     activeCategories: [],
     hasLoadedWizards: false,
     layerWizards: [],
-    selectedCategory: undefined,
+    selectedCategory: null,
   };
 
   componentDidMount() {
@@ -92,37 +92,38 @@ export class LayerWizardSelect extends Component<Props, State> {
     }
   }
 
-  _filterByCategory(category?: LAYER_WIZARD_CATEGORY) {
+  _filterByCategory(category: LAYER_WIZARD_CATEGORY | null) {
     this.setState({ selectedCategory: category });
   }
 
-  _renderCategoryButtons() {
+  _renderCategoryFacets() {
     if (this.state.activeCategories.length === 0) {
       return null;
     }
 
-    const categoryButtons = this.state.activeCategories.map((category: LAYER_WIZARD_CATEGORY) => {
+    const facets = this.state.activeCategories.map((category: LAYER_WIZARD_CATEGORY) => {
       return (
-        <EuiFlexItem grow={false} key={category}>
-          <EuiButtonEmpty color="text" onClick={() => this._filterByCategory(category)} size="xs">
-            {getCategoryLabel(category)}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        <EuiFacetButton
+          key={category}
+          isSelected={category === this.state.selectedCategory}
+          onClick={() => this._filterByCategory(category)}
+        >
+          {getCategoryLabel(category)}
+        </EuiFacetButton>
       );
     });
 
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="text" onClick={() => this._filterByCategory(undefined)} size="xs">
-            <FormattedMessage
-              id="xpack.maps.layerWizardSelect.allCategories"
-              defaultMessage="All"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {categoryButtons}
-      </EuiFlexGroup>
+      <EuiFacetGroup layout="horizontal">
+        <EuiFacetButton
+          key="all"
+          isSelected={!this.state.selectedCategory}
+          onClick={() => this._filterByCategory(null)}
+        >
+          <FormattedMessage id="xpack.maps.layerWizardSelect.allCategories" defaultMessage="All" />
+        </EuiFacetButton>
+        {facets}
+      </EuiFacetGroup>
     );
   }
 
@@ -163,7 +164,7 @@ export class LayerWizardSelect extends Component<Props, State> {
 
     return (
       <>
-        {this._renderCategoryButtons()}
+        {this._renderCategoryFacets()}
         <EuiFlexGrid columns={2}>{wizardCards}</EuiFlexGrid>
       </>
     );
