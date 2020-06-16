@@ -19,7 +19,14 @@
 
 import * as Rx from 'rxjs';
 
-import { parseBundles, parseWorkerConfig, WorkerMsg, isWorkerMsg, WorkerMsgs } from '../common';
+import {
+  parseBundles,
+  parseWorkerConfig,
+  WorkerMsg,
+  isWorkerMsg,
+  WorkerMsgs,
+  BundleRefs,
+} from '../common';
 
 import { runCompilers } from './run_compilers';
 
@@ -76,11 +83,12 @@ setInterval(() => {
 Rx.defer(() => {
   const workerConfig = parseWorkerConfig(process.argv[2]);
   const bundles = parseBundles(process.argv[3]);
+  const bundleRefs = BundleRefs.parseSpec(process.argv[4]);
 
   // set BROWSERSLIST_ENV so that style/babel loaders see it before running compilers
   process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;
 
-  return runCompilers(workerConfig, bundles);
+  return runCompilers(workerConfig, bundles, bundleRefs);
 }).subscribe(
   (msg) => {
     send(msg);
