@@ -28,7 +28,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValueComponent)
+          <UNDEFINED
             count={246351}
             isGroupStat={true}
             isLoading={false}
@@ -261,7 +261,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValueComponent)
+          <UNDEFINED
             count={156714735}
             isGroupStat={true}
             isLoading={false}
@@ -526,7 +526,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValueComponent)
+          <UNDEFINED
             count={568}
             isGroupStat={true}
             isLoading={false}
@@ -599,7 +599,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValueComponent)
+          <UNDEFINED
             count={296999}
             isGroupStat={true}
             isLoading={false}

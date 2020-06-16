@@ -43,7 +43,7 @@ exports[`NewNote renders correctly 1`] = `
           height={200}
           paddingSize="s"
         >
-          <Memo(Markdown)
+          <UNDEFINED
             raw="The contents of a new note"
           />
         </ForwardRef(Styled(EuiPanel))>,

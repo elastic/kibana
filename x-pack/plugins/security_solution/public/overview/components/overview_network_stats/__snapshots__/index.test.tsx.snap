@@ -28,7 +28,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValueComponent)
+          <UNDEFINED
             count={12}
             isGroupStat={true}
             isLoading={false}
@@ -101,7 +101,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValueComponent)
+          <UNDEFINED
             count={70860}
             isGroupStat={true}
             isLoading={false}
@@ -302,7 +302,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         <EuiFlexItem
           grow={false}
         >
-          <Memo(StatValueComponent)
+          <UNDEFINED
             count={13677323}
             isGroupStat={true}
             isLoading={false}

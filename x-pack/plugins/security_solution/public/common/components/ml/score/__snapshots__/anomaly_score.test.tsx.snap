@@ -149,7 +149,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  <Memo(PreferenceFormattedDate)
+                  <UNDEFINED
                     value={2019-06-16T06:00:00.000Z}
                   />
                 </EuiFlexItem>
