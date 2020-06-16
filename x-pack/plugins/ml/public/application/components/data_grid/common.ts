@@ -37,7 +37,7 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
-export const INIT_MAX_COLUMNS = 20;
+export const INIT_MAX_COLUMNS = 10;
 
 export const euiDataGridStyle: EuiDataGridStyle = {
   border: 'all',
