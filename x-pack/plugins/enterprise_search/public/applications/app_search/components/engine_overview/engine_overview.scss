@@ -11,17 +11,17 @@
   width: 100%;
 
   .euiPanel {
-    padding: 35px;
+    padding: $euiSizeXL;
   }
 
   .euiPageContent .euiPageContentHeader {
-    margin-bottom: 10px;
+    margin-bottom: $euiSizeM;
   }
 
   .engine-icon {
     display: inline-block;
-    width: 15px;
-    height: 15px;
-    margin-right: 5px;
+    width: $euiSize;
+    height: $euiSize;
+    margin-right: $euiSizeXS;
   }
 }

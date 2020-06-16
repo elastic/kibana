@@ -16,31 +16,31 @@
   .euiPageSideBar {
     flex-basis: 300px;
     flex-shrink: 0;
-    padding: 24px;
+    padding: $euiSizeL;
     margin-right: 0;
 
-    background-color: #f5f7fa; // $euiColorLightestShade
-    border-color: #d3dae6; // $euiColorLightShade
+    background-color: $euiColorLightestShade;
+    border-color: $euiBorderColor;
     border-style: solid;
-    border-width: 0 0 1px 0; // bottom - mobile view
+    border-width: 0 0 $euiBorderWidthThin 0; // bottom - mobile view
 
-    @media (min-width: 766px) {
-      border-width: 0 1px 0 0; // right - desktop view
+    @include euiBreakpoint('m', 'l', 'xl') {
+      border-width: 0 $euiBorderWidthThin 0 0; // right - desktop view
     }
-    @media (min-width: 1000px) {
+    @include euiBreakpoint('m', 'l') {
       flex-basis: 400px;
     }
-    @media (min-width: 1200px) {
+    @include euiBreakpoint('xl') {
       flex-basis: 500px;
     }
   }
 
   .euiPageBody {
     align-self: start;
-    padding: 24px;
+    padding: $euiSizeL;
 
-    @media (min-width: 1000px) {
-      padding: 40px 50px;
+    @include euiBreakpoint('l') {
+      padding: $euiSizeXXL ($euiSizeXXL * 1.25);
     }
   }
 
@@ -48,6 +48,6 @@
     display: block;
     max-width: 100%;
     height: auto;
-    margin: 24px auto;
+    margin: $euiSizeL auto;
   }
 }
