@@ -7,7 +7,7 @@
 import { CursorPagination } from './types';
 import { QueryContext } from './query_context';
 import { QUERY } from '../../../../common/constants';
-import { CursorDirection, MonitorSummary, SortOrder, Ping } from '../../../../common/runtime_types';
+import { CursorDirection, MonitorSummary, SortOrder } from '../../../../common/runtime_types';
 import { MonitorSummaryIterator } from './monitor_summary_iterator';
 import { getHistogramForMonitors as getHistogramsForMonitors } from './get_monitor_histograms';
 
@@ -24,7 +24,7 @@ import { getHistogramForMonitors as getHistogramsForMonitors } from './get_monit
 // data, decorating it appropriately. The function also takes a fetcher, which does all the actual fetching.
 export const fetchPage = async (
   queryContext: QueryContext,
-  monitorSummariesFetcher: MonitorSummariesFetcher = fetchPageMonitorSummaries,
+  monitorSummariesFetcher: MonitorSummariesFetcher = fetchPageMonitorSummaries
 ): Promise<MonitorSummariesPage> => {
   const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
   const page = monitorSummariesFetcher(queryContext, size);
@@ -64,14 +64,17 @@ const fetchPageMonitorSummaries: MonitorSummariesFetcher = async (
     monitorSummaries.reverse();
   }
 
-  const histograms = await getHistogramsForMonitors(queryContext, monitorSummaries.map(s => s.monitor_id))
-  
-  monitorSummaries.forEach(s => {
+  const histograms = await getHistogramsForMonitors(
+    queryContext,
+    monitorSummaries.map((s) => s.monitor_id)
+  );
+
+  monitorSummaries.forEach((s) => {
     s.histogram = histograms[s.monitor_id];
   });
 
   return {
-    monitorSummaries: monitorSummaries,
+    monitorSummaries,
     nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
     prevPagePagination: ssAligned ? paginationBefore : paginationAfter,
   };

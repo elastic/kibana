@@ -61,8 +61,8 @@ export const StateType = t.type({
     not_before: t.union([t.string, t.null]),
   }),
   checks: t.array(CheckType),
-  observer: t.partial({
-    geo: t.partial({
+  observer: t.type({
+    geo: t.type({
       name: t.array(t.string),
     }),
   }),

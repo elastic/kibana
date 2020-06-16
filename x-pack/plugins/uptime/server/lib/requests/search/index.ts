@@ -5,5 +5,5 @@
  */
 
 export { fetchPage, MonitorGroups, MonitorLocCheckGroup, MonitorSummariesPage } from './fetch_page';
-export { MonitorSummaryIterator } from './monitor_summary_iterator'
+export { MonitorSummaryIterator } from './monitor_summary_iterator';
 export { QueryContext } from './query_context';

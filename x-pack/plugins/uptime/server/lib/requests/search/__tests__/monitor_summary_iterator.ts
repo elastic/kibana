@@ -8,8 +8,8 @@ import {
   CHUNK_SIZE,
   ChunkFetcher,
   ChunkResult,
-  MonitorGroupIterator,
-} from '../monitor_group_iterator';
+  MonitorSummaryIterator,
+} from '../monitor_summary_iterator';
 import { simpleQueryContext } from './test_helpers';
 import { MonitorGroups } from '../fetch_page';
 import { QueryContext } from '../query_context';
