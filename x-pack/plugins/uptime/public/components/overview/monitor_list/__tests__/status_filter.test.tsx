@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import * as reactRedux from 'react-redux';
 import {
   mountWithRouter,
   renderWithRouter,
@@ -16,7 +17,16 @@ import { StatusFilter } from '../status_filter';
 import { FilterStatusButton } from '../filter_status_button';
 
 describe('StatusFilterComponent', () => {
+  beforeAll(() => {
+    const useSelectorSpy = jest.spyOn(reactRedux, 'useSelector');
+    useSelectorSpy.mockReturnValue({});
+  });
+
   beforeEach(() => {});
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
 
   const getStatusBtns = (status: string) => {
     const history = createMemoryHistory({

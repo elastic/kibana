@@ -11,9 +11,13 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 describe('MonitorListPageSizeSelect', () => {
   it('updates the state when selection changes', () => {
     const setSize = jest.fn();
-    const setUrlParams = jest.fn();
+    const setPagination = jest.fn();
     const wrapper = mountWithIntl(
-      <MonitorListPageSizeSelectComponent size={10} setSize={setSize} setUrlParams={setUrlParams} />
+      <MonitorListPageSizeSelectComponent
+        size={10}
+        setSize={setSize}
+        setPagination={setPagination}
+      />
     );
     wrapper
       .find('[data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"]')
@@ -31,13 +35,11 @@ describe('MonitorListPageSizeSelect', () => {
         ],
       ]
     `);
-    expect(setUrlParams).toHaveBeenCalledTimes(1);
-    expect(setUrlParams.mock.calls).toMatchInlineSnapshot(`
+    expect(setPagination).toHaveBeenCalledTimes(1);
+    expect(setPagination.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          Object {
-            "pagination": undefined,
-          },
+          undefined,
         ],
       ]
     `);

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import * as reactRedux from 'react-redux';
 import { MonitorBarSeries, MonitorBarSeriesProps } from '../monitor_bar_series';
 import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
 import { HistogramPoint } from '../../../../../common/runtime_types';
@@ -12,6 +13,16 @@ import { HistogramPoint } from '../../../../../common/runtime_types';
 describe('MonitorBarSeries component', () => {
   let props: MonitorBarSeriesProps;
   let histogramSeries: HistogramPoint[];
+  beforeAll(() => {
+    const useSelectorSpy = jest.spyOn(reactRedux, 'useSelector');
+    useSelectorSpy.mockReturnValue({
+      dateRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+    });
+  });
+
   beforeEach(() => {
     props = {
       histogramSeries: [
@@ -156,6 +167,10 @@ describe('MonitorBarSeries component', () => {
         down: 10,
       },
     ];
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
   });
 
   it('shallow renders a series when there are down items', () => {
