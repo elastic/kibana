@@ -4,25 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiPageContent, EuiPageContentHeader, EuiPageContentBody } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import {
+  EuiPageContent,
+  EuiPageContentHeader,
+  EuiPageContentBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { FramePublicAPI, Visualization } from '../../types';
+import { NativeRenderer } from '../../native_renderer';
+import { Action } from './state_management';
 
-interface Props {
-  title: string;
+export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
+  framePublicAPI: FramePublicAPI;
+  visualizationState: unknown;
+  activeVisualization?: Visualization;
+  dispatch: (action: Action) => void;
 }
 
-export function WorkspacePanelWrapper({ children, title }: Props) {
+export function WorkspacePanelWrapper({
+  children,
+  framePublicAPI,
+  visualizationState,
+  activeVisualization,
+  dispatch,
+}: WorkspacePanelWrapperProps) {
+  const setVisualizationState = useCallback(
+    (newState: unknown) => {
+      if (!activeVisualization) {
+        return;
+      }
+      dispatch({
+        type: 'UPDATE_VISUALIZATION_STATE',
+        visualizationId: activeVisualization.id,
+        newState,
+        clearStagedPreview: false,
+      });
+    },
+    [dispatch]
+  );
   return (
-    <EuiPageContent className="lnsWorkspacePanelWrapper">
-      {title && (
-        <EuiPageContentHeader className="lnsWorkspacePanelWrapper__pageContentHeader">
-          <span data-test-subj="lns_ChartTitle">{title}</span>
-        </EuiPageContentHeader>
+    <EuiFlexGroup gutterSize="s" direction="column" alignItems="stretch">
+      {activeVisualization && activeVisualization.renderToolbar && (
+        <EuiFlexItem grow={false}>
+          <NativeRenderer
+            render={activeVisualization.renderToolbar}
+            nativeProps={{
+              frame: framePublicAPI,
+              state: visualizationState,
+              setState: setVisualizationState,
+            }}
+          />
+        </EuiFlexItem>
       )}
-      <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-        {children}
-      </EuiPageContentBody>
-    </EuiPageContent>
+      <EuiFlexItem>
+        <EuiPageContent className="lnsWorkspacePanelWrapper">
+          <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+            {children}
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

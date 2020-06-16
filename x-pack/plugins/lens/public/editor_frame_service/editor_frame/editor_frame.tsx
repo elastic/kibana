@@ -275,7 +275,16 @@ export function EditorFrame(props: EditorFrameProps) {
         }
         workspacePanel={
           allLoaded && (
-            <WorkspacePanelWrapper title={state.title}>
+            <WorkspacePanelWrapper
+              framePublicAPI={framePublicAPI}
+              dispatch={dispatch}
+              visualizationState={state.visualization.state}
+              activeVisualization={
+                state.visualization.activeId
+                  ? props.visualizationMap[state.visualization.activeId]
+                  : undefined
+              }
+            >
               <WorkspacePanel
                 activeDatasourceId={state.activeDatasourceId}
                 activeVisualizationId={state.visualization.activeId}
