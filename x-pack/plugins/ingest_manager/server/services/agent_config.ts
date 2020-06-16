@@ -179,6 +179,48 @@ class AgentConfigService {
     return this._update(soClient, id, agentConfig, options?.user);
   }
 
+  public async copy(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    newAgentConfigProps: Pick<AgentConfig, 'name' | 'description'>,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<AgentConfig> {
+    // Copy base config
+    const baseAgentConfig = await this.get(soClient, id, true);
+    if (!baseAgentConfig) {
+      throw new Error('Agent config not found');
+    }
+    const { namespace, monitoring_enabled } = baseAgentConfig;
+    const newAgentConfig = await this.create(
+      soClient,
+      {
+        namespace,
+        monitoring_enabled,
+        ...newAgentConfigProps,
+      },
+      options
+    );
+
+    // Copy all datasources
+    if (baseAgentConfig.datasources.length) {
+      const newDatasources = (baseAgentConfig.datasources as Datasource[]).map(
+        (datasource: Datasource) => {
+          const { id: datasourceId, ...newDatasource } = datasource;
+          return newDatasource;
+        }
+      );
+      await datasourceService.bulkCreate(soClient, newDatasources, newAgentConfig.id, options);
+    }
+
+    // Get updated config
+    const updatedAgentConfig = await this.get(soClient, newAgentConfig.id, true);
+    if (!updatedAgentConfig) {
+      throw new Error('Copied agent config not found');
+    }
+
+    return updatedAgentConfig;
+  }
+
   public async bumpRevision(
     soClient: SavedObjectsClientContract,
     id: string,
@@ -203,7 +245,6 @@ class AgentConfigService {
       soClient,
       id,
       {
-        ...oldAgentConfig,
         datasources: uniq(
           [...((oldAgentConfig.datasources || []) as string[])].concat(datasourceIds)
         ),
@@ -242,7 +283,8 @@ class AgentConfigService {
   public async getDefaultAgentConfigId(soClient: SavedObjectsClientContract) {
     const configs = await soClient.find({
       type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
-      filter: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
+      searchFields: ['is_default'],
+      search: 'true',
     });
 
     if (configs.saved_objects.length === 0) {
