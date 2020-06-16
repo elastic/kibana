@@ -17,23 +17,24 @@
  * under the License.
  */
 
-import { ES_SEARCH_STRATEGY } from '../../common/search/es_search';
+import { createSearchSetupMock, createSearchStartMock } from './search/mocks';
+import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field_formats/mocks';
 
-/**
- * Contains all known strategy type identifiers that will be used to map to
- * request and response shapes. Plugins that wish to add their own custom search
- * strategies should extend this type via:
- *
- * const MY_STRATEGY = 'MY_STRATEGY';
- *
- * declare module 'src/plugins/search/server' {
- *  export interface IRequestTypesMap {
- *    [MY_STRATEGY]: IMySearchRequest;
- *  }
- *
- *  export interface IResponseTypesMap {
- *   [MY_STRATEGY]: IMySearchResponse
- *  }
- * }
- */
-export type TStrategyTypes = typeof ES_SEARCH_STRATEGY | string;
+function createSetupContract() {
+  return {
+    search: createSearchSetupMock(),
+    fieldFormats: createFieldFormatsSetupMock(),
+  };
+}
+
+function createStartContract() {
+  return {
+    search: createSearchStartMock(),
+    fieldFormats: createFieldFormatsStartMock(),
+  };
+}
+
+export const dataPluginMock = {
+  createSetupContract,
+  createStartContract,
+};
