@@ -62,7 +62,9 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
 import { MetricsServiceSetup } from './metrics';
 import { StatusServiceSetup } from './status';
+import { Auditor, AuditTrailSetup } from './audit_trail';
 
+export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
 export {
@@ -359,6 +361,7 @@ export interface RequestHandlerContext {
     uiSettings: {
       client: IUiSettingsClient;
     };
+    auditor: Auditor;
   };
 }
 
@@ -395,6 +398,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   uuid: UuidServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+  /** {@link AuditTrailSetup} */
+  auditTrail: AuditTrailSetup;
 }
 
 /**

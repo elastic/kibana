@@ -186,6 +186,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       getInstanceUuid: deps.uuid.getInstanceUuid,
     },
     getStartServices: () => plugin.startDependencies,
+    auditTrail: deps.auditTrail,
   };
 }
 

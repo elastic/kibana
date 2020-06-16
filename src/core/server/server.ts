@@ -27,6 +27,7 @@ import {
   coreDeprecationProvider,
 } from './config';
 import { CoreApp } from './core_app';
+import { AuditTrailService } from './audit_trail';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
@@ -75,6 +76,7 @@ export class Server {
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
   private readonly coreApp: CoreApp;
+  private readonly auditTrail: AuditTrailService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -102,6 +104,7 @@ export class Server {
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
     this.httpResources = new HttpResourcesService(core);
+    this.auditTrail = new AuditTrailService(core);
   }
 
   public async setup() {
@@ -123,6 +126,7 @@ export class Server {
       pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
     });
 
+    const auditTrailSetup = this.auditTrail.setup();
     const uuidSetup = await this.uuid.setup();
 
     const httpSetup = await this.http.setup({
@@ -176,6 +180,7 @@ export class Server {
       metrics: metricsSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
+      auditTrail: auditTrailSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -195,6 +200,8 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
+    const auditTrailStart = this.auditTrail.start();
+
     const elasticsearchStart = await this.elasticsearch.start();
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -208,6 +215,7 @@ export class Server {
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
+      auditTrail: auditTrailStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -264,6 +272,7 @@ export class Server {
           uiSettings: {
             client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
           },
+          auditor: coreStart.auditTrail.asScoped(req),
         };
       }
     );

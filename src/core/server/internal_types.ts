@@ -34,6 +34,7 @@ import { InternalMetricsServiceSetup } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
+import { InternalAuditTrailServiceSetup, InternalAuditTrailServiceStart } from './audit_trail';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -48,6 +49,7 @@ export interface InternalCoreSetup {
   uuid: UuidServiceSetup;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
+  auditTrail: InternalAuditTrailServiceSetup;
 }
 
 /**
@@ -58,6 +60,7 @@ export interface InternalCoreStart {
   elasticsearch: ElasticsearchServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
+  auditTrail: InternalAuditTrailServiceStart;
 }
 
 /**
