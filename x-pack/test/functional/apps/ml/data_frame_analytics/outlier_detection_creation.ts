@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
-        modelMemory: '55mb',
+        modelMemory: '5mb',
         createIndexPattern: true,
         expected: {
           row: {
