@@ -15,18 +15,11 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
-
-// TODO: remove FieldMapping, createDefaultMapping later
-// when Case ServiceNow will move their fields to the level of action execution
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FieldMapping } from '../../../../../../security_solution/public/cases/components/configure_cases/field_mapping';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createDefaultMapping } from '../../../../../../security_solution/public/common/lib/connectors/utils';
-
 import { IErrorObject, ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ServiceNowActionConnector, CasesConfigurationMapping } from './types';
 import { connectorConfiguration } from './config';
+import { FieldMapping } from './case_mappings/field_mapping';
 
 export interface ConnectorFlyoutFormProps<T> {
   errors: IErrorObject;
@@ -178,6 +171,16 @@ const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
     </>
   );
 };
+
+export const createDefaultMapping = (fields: Record<string, any>): CasesConfigurationMapping[] =>
+  Object.keys(fields).map(
+    (key) =>
+      ({
+        source: fields[key].defaultSourceField,
+        target: key,
+        actionType: fields[key].defaultActionType,
+      } as CasesConfigurationMapping)
+  );
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFlyout as default };

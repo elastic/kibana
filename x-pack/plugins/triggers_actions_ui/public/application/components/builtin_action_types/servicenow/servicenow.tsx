@@ -5,8 +5,6 @@
  */
 
 import { lazy } from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { isUrlInvalid } from '../../../../../../security_solution/public/common/lib/connectors/validators';
 import {
   ValidationResult,
   ActionTypeModel,
@@ -16,6 +14,7 @@ import { connectorConfiguration } from './config';
 import logo from './logo.svg';
 import { ServiceNowActionConnector, ServiceNowActionParams } from './types';
 import * as i18n from './translations';
+import { isUrlInvalid } from '../../../lib/value_validators';
 
 const validateConnector = (action: ServiceNowActionConnector): ValidationResult => {
   const validationResult = { errors: {} };

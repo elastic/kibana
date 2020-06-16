@@ -88,7 +88,7 @@ describe('api', () => {
             short_description:
               'Incident title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
-          incidentId: null,
+          incidentId: 'incident-1',
         });
 
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
@@ -99,7 +99,7 @@ describe('api', () => {
             short_description:
               'Incident title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
-          incidentId: null,
+          incidentId: 'incident-1',
         });
       });
     });
@@ -169,13 +169,13 @@ describe('api', () => {
         await api.pushToService({ externalService, mapping, params, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledTimes(3);
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
-          incidentId: 'incident-3',
           incident: {
             description:
               'Incident description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
             short_description:
               'Incident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
+          incidentId: 'incident-3',
         });
 
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
@@ -186,7 +186,7 @@ describe('api', () => {
             short_description:
               'Incident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
-          incidentId: 'incident-3',
+          incidentId: 'incident-2',
         });
       });
     });

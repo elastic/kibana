@@ -40,6 +40,7 @@ export function defineActionTypes(
       secrets: schema.object({
         encrypted: schema.string(),
       }),
+      consumer: schema.string(),
     },
     async executor({ config, secrets, params, services, actionId }: ActionTypeExecutorOptions) {
       await services.callCluster('index', {
