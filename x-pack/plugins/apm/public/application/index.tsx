@@ -8,7 +8,7 @@ import { ApmRoute } from '@elastic/apm-rum-react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import styled, { ThemeProvider } from 'styled-components';
+import styled, { ThemeProvider, DefaultTheme } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { CoreStart, AppMountParameters } from '../../../../../src/core/public';
@@ -44,7 +44,7 @@ const App = () => {
 
   return (
     <ThemeProvider
-      theme={(outerTheme?: OuterTheme) => ({
+      theme={(outerTheme?: DefaultTheme) => ({
         ...outerTheme,
         eui: darkMode ? euiDarkVars : euiLightVars,
         darkMode,
