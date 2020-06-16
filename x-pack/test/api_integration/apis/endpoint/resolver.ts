@@ -42,25 +42,6 @@ const expectLifecycleNodeInMap = (node: LifecycleNode, nodeMap: Map<string, Tree
 };
 
 /**
- * Verify that all the ancestor nodes including the origin are valid.
- *
- * @param origin the origin node for the tree
- * @param ancestors an array of ancestors
- * @param tree the generated resolver tree as the source of truth
- * @param verifyLastParent a boolean indicating whether to check the last ancestor. If the ancestors array intentionally
- *  does not contain all the ancestors, the last one will not have the parent
- */
-const verifyAncestryFromOrigin = (
-  origin: LifecycleNode,
-  ancestors: LifecycleNode[],
-  tree: Tree,
-  verifyLastParent: boolean
-) => {
-  compareArrays(tree.origin.lifecycle, origin.lifecycle, true);
-  verifyAncestry(ancestors, tree, verifyLastParent);
-};
-
-/**
  * Verify that all the ancestor nodes are valid and optionally have parents.
  *
  * @param ancestors an array of ancestors
@@ -80,15 +61,34 @@ const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent
   // make sure there aren't any nodes with the same parent entity_id
   expect(Object.keys(groupedAncestorsParent).length).to.eql(ancestors.length);
 
-  const endAncestor = verifyLastParent ? ancestors.length : ancestors.length - 1;
-  for (let i = 0; i < endAncestor; i++) {
-    const node = ancestors[i];
-    const parentID = parentEntityId(node.lifecycle[0]);
-    // the last node generated will have `undefined` as the parent entity_id
-    if (parentID !== undefined) {
-      expect(groupedAncestors[parentID]).to.be.ok();
-    }
+  // make sure each of the ancestors' lifecycle events are in the generated tree
+  for (const node of ancestors) {
     expectLifecycleNodeInMap(node, tree.ancestry);
+  }
+
+  // start at the origin which is always the first element of the array and make sure we have a connection
+  // using parent id between each of the nodes
+  let foundParents = 0;
+  let node = ancestors[0];
+  for (let i = 0; i < ancestors.length; i++) {
+    const parentID = parentEntityId(node.lifecycle[0]);
+    if (parentID !== undefined) {
+      // the grouped nodes should only have a single entry since each entity is unique
+      node = groupedAncestors[parentID][0];
+      if (node) {
+        foundParents++;
+      } else {
+        break;
+      }
+    }
+  }
+
+  if (verifyLastParent) {
+    expect(foundParents).to.eql(ancestors.length);
+  } else {
+    // if we only retrieved a portion of all the ancestors then the most distant grandparent's parent will not necessarily
+    // be in the results
+    expect(foundParents).to.eql(ancestors.length - 1);
   }
 };
 
@@ -428,9 +428,12 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       });
 
       describe('endpoint events', () => {
-        const getRootAndAncestry = (ancestry: ResolverAncestry) => {
-          return { root: ancestry.ancestors[0], ancestry: ancestry.ancestors.slice(1) };
-        };
+        it('should return the origin node at the front of the array', async () => {
+          const { body }: { body: ResolverAncestry } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=9`)
+            .expect(200);
+          expect(body.ancestors[0].entityID).to.eql(tree.origin.id);
+        });
 
         it('should return details for the root node', async () => {
           const { body }: { body: ResolverAncestry } = await supertest
@@ -438,8 +441,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .expect(200);
           // the tree we generated had 5 ancestors + 1 origin node
           expect(body.ancestors.length).to.eql(6);
-          const ancestryInfo = getRootAndAncestry(body);
-          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree, true);
+          expect(body.ancestors[0].entityID).to.eql(tree.origin.id);
+          verifyAncestry(body.ancestors, tree, true);
           expect(body.nextAncestor).to.eql(null);
         });
 
@@ -457,15 +460,17 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .expect(200);
           // it should have 2 ancestors + 1 origin
           expect(body.ancestors.length).to.eql(3);
-          const ancestryInfo = getRootAndAncestry(body);
-          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree, false);
+          verifyAncestry(body.ancestors, tree, true);
+          // TODO fix this test
+          expect(false).to.be.ok();
           expect(body.nextAncestor).to.eql(
             // TODO this won't be valid anymore since the order of the array will be wrong. We'll need to go through
             // each ensure that they represent a direct lineage from the origin up the ancestry
             // to make sure it isn't returning the wrong set of ancestry
 
             // it should be the parent entity id on the last element of the ancestry array
-            parentEntityId(ancestryInfo.ancestry[ancestryInfo.ancestry.length - 1].lifecycle[0])
+            // parentEntityId(ancestryInfo.ancestry[ancestryInfo.ancestry.length - 1].lifecycle[0])
+            {}
           );
         });
 
