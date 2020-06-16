@@ -52,3 +52,7 @@ npm-debug.log*
 # apm plugin
 /x-pack/plugins/apm/tsconfig.json
 apm.tsconfig.json
+
+# release notes script output
+report.csv
+report.asciidoc

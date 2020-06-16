@@ -33,7 +33,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     job: JobDocPayloadDiscoverCsv,
     cancellationToken: any
   ) {
-    const elasticsearch = await reporting.getElasticsearchService();
+    const elasticsearch = reporting.getElasticsearchService();
     const jobLogger = logger.clone([jobId]);
 
     const {
