@@ -7,7 +7,6 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { validateAlerts } from '../../../../common/endpoint/schema/resolver';
-import { eventsIndexPattern } from '../../../../common/endpoint/constants';
 import { Fetcher } from './utils/fetch';
 import { EndpointAppContext } from '../../types';
 
@@ -21,9 +20,11 @@ export function handleAlerts(
       query: { alerts, afterAlert, legacyEndpointID: endpointID },
     } = req;
     try {
+      const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
       const client = context.core.elasticsearch.legacy.client;
+      const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
-      const fetcher = new Fetcher(client, id, eventsIndexPattern, endpointID);
+      const fetcher = new Fetcher(client, id, indexPattern, endpointID);
 
       return res.ok({
         body: await fetcher.alerts(alerts, afterAlert),
