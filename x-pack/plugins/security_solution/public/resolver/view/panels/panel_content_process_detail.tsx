@@ -54,48 +54,99 @@ export const ProcessDetails = memo(function ProcessDetails({
       dateTime = formatDate(eventTime);
     }
 
-    const processInfo = processEvent
-      ? {
-          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.created', {
-            defaultMessage: 'Created',
-          })]: dateTime,
-          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.path', {
-            defaultMessage: 'Path',
-          })]: processPath(processEvent),
-          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.pid', {
-            defaultMessage: 'PID',
-          })]: processPid(processEvent),
-          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.user', {
-            defaultMessage: 'User',
-          })]: (userInfoForProcess(processEvent) as { name: string; domain: string }).name,
-          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.domain', {
-            defaultMessage: 'Domain',
-            [i18n.translate(
-              'xpack.securitySolution.enpoint.resolver.panel.processDescList.parentPid',
-              {
-                defaultMessage: 'Parent PID',
-              }
-            )]: processParentPid(processEvent),
-          })]: (userInfoForProcess(processEvent) as { name: string; domain: string }).domain,
-          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.md5hash', {
-            defaultMessage: 'MD5',
-          })]: md5HashForProcess(processEvent),
-          [i18n.translate(
-            'xpack.securitySolution.enpoint.resolver.panel.processDescList.commandLine',
-            {
-              defaultMessage: 'Command Line',
-            }
-          )]: argsForProcess(processEvent),
+    const createdEntry = {
+      title: i18n.translate(
+        'xpack.securitySolution.enpoint.resolver.panel.processDescList.created',
+        {
+          defaultMessage: 'Created',
         }
-      : {};
+      ),
+      description: dateTime,
+    };
 
-    return Object.entries(processInfo)
-      .filter(([, description]) => {
-        return description;
+    const pathEntry = {
+      title: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.path', {
+        defaultMessage: 'Path',
+      }),
+      description: processPath(processEvent),
+    };
+
+    const pidEntry = {
+      title: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.pid', {
+        defaultMessage: 'PID',
+      }),
+      description: processPid(processEvent),
+    };
+
+    const userEntry = {
+      title: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.user', {
+        defaultMessage: 'User',
+      }),
+      description: (userInfoForProcess(processEvent) as { name: string }).name,
+    };
+
+    const domainEntry = {
+      title: i18n.translate(
+        'xpack.securitySolution.enpoint.resolver.panel.processDescList.domain',
+        {
+          defaultMessage: 'Domain',
+        }
+      ),
+      description: (userInfoForProcess(processEvent) as { domain: string }).domain,
+    };
+
+    const parentPidEntry = {
+      title: i18n.translate(
+        'xpack.securitySolution.enpoint.resolver.panel.processDescList.parentPid',
+        {
+          defaultMessage: 'Parent PID',
+        }
+      ),
+      description: processParentPid(processEvent),
+    };
+
+    const md5Entry = {
+      title: i18n.translate(
+        'xpack.securitySolution.enpoint.resolver.panel.processDescList.md5hash',
+        {
+          defaultMessage: 'MD5',
+        }
+      ),
+      description: md5HashForProcess(processEvent),
+    };
+
+    const commandLineEntry = {
+      title: i18n.translate(
+        'xpack.securitySolution.enpoint.resolver.panel.processDescList.commandLine',
+        {
+          defaultMessage: 'Command Line',
+        }
+      ),
+      description: argsForProcess(processEvent),
+    };
+
+    // This is the data in {title, description} form for the EUIDescriptionList to display
+    const processDescriptionListData = [
+      createdEntry,
+      pathEntry,
+      pidEntry,
+      userEntry,
+      domainEntry,
+      parentPidEntry,
+      md5Entry,
+      commandLineEntry,
+    ]
+      .filter((entry) => {
+        return entry.description;
       })
-      .map(([title, description]) => {
-        return { title, description: String(description) };
+      .map((entry) => {
+        return {
+          ...entry,
+          description: String(entry.description),
+        };
       });
+
+    return processDescriptionListData;
   }, [processEvent]);
 
   const crumbs = useMemo(() => {
