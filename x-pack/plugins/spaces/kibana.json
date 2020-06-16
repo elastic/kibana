@@ -13,5 +13,6 @@
     "savedObjectsManagement"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "extraPublicDirs": ["common"]
 }
