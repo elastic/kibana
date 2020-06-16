@@ -19,19 +19,30 @@
 
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
-import { COVERAGE_INDEX, TOTALS_INDEX } from './constants';
-import { errMsg, redact } from './ingest_helpers';
+import {
+  // COVERAGE_INDEX,
+  // TOTALS_INDEX,
+  RESEARCH_CI_JOB_NAME,
+  // TEAM_ASSIGNMENT_PIPELINE_NAME,
+  // RESEARCH_TOTALS_INDEX,
+  // RESEARCH_COVERAGE_INDEX,
+} from './constants';
+import { errMsg, redact, maybeTeamAssign, whichIndex } from './ingest_helpers';
 import { noop } from './utils';
 import { right, left } from './either';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
+
 const client = new Client({ node });
-const pipeline = process.env.PIPELINE_NAME || 'team_assignment';
 const redacted = redact(node);
 
 export const ingest = (log) => async (body) => {
-  const index = body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX;
-  const maybeWithPipeline = maybeTeamAssign(index, body);
+  const isTotal = !!body.isTotal;
+  const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? true : false;
+  const index = whichIndex(isResearchJob)(isTotal);
+  const isACoverageIndex = isTotal ? false : true;
+
+  const maybeWithPipeline = maybeTeamAssign(isACoverageIndex, body);
   const withIndex = { index, body: maybeWithPipeline };
   const dontSend = noop;
 
@@ -50,10 +61,4 @@ async function send(idx, redacted, requestBody) {
   } catch (e) {
     throw createFailError(errMsg(idx, redacted, requestBody, e));
   }
-}
-
-export function maybeTeamAssign(index, body) {
-  const withTeam = { body, pipeline };
-  const payload = index === TOTALS_INDEX ? body : withTeam;
-  return payload;
 }
