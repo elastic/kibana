@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, MouseEvent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,7 +11,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
-import { ThemeContext } from 'styled-components';
+import React, { MouseEvent } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricFetcher } from './ServiceMetricFetcher';
@@ -59,25 +58,6 @@ export const Contents = ({
   onFocusClick,
   selectedNodeServiceName,
 }: ContentsProps) => {
-  const theme = useContext(ThemeContext);
-
-  // Anomaly Detection
-  const severity = selectedNodeData.severity;
-  const maxScore = selectedNodeData.max_score;
-  const actualValue = selectedNodeData.actual_value;
-  const typicalValue = selectedNodeData.typical_value;
-  const jobId = selectedNodeData.job_id;
-  const hasAnomalyDetection = [
-    severity,
-    maxScore,
-    actualValue,
-    typicalValue,
-    jobId,
-  ].every((value) => value !== undefined);
-  const anomalyDescription = hasAnomalyDetection
-    ? getMetricChangeDescription(actualValue, typicalValue).message
-    : null;
-
   return (
     <FlexColumnGroup
       direction="column"
