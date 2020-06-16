@@ -48,7 +48,7 @@ export const SettingsFormFlyout: FunctionComponent<Props> = memo(
     );
 
     return (
-      <EuiFlyout onClose={onClose}>
+      <EuiFlyout data-test-subj="processorSettingsFormFlyout" onClose={onClose}>
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>{flyoutTitleContent}</h2>

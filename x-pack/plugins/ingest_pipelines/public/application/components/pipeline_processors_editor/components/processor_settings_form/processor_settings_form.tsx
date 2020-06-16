@@ -23,7 +23,7 @@ export interface Props {
 export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
   ({ processor, form }) => {
     return (
-      <Form form={form}>
+      <Form data-test-subj="processorSettingsForm" form={form}>
         <ProcessorTypeField initialType={processor?.type} />
 
         <EuiHorizontalRule />
@@ -50,7 +50,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
               return (
                 <>
                   {formContent}
-                  <EuiButton onClick={form.submit}>
+                  <EuiButton data-test-subj="submitButton" onClick={form.submit}>
                     {i18n.translate(
                       'xpack.ingestPipelines.pipelineEditor.settingsForm.submitButtonLabel',
                       { defaultMessage: 'Submit' }
