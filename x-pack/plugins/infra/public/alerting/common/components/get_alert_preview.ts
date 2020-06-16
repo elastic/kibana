@@ -12,18 +12,20 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   alertPreviewRequestParamsRT,
   alertPreviewSuccessResponsePayloadRT,
-} from '../../../common/alerting/metrics';
+} from '../../../../common/alerting/metrics';
 
-async function getAlertPreview({
+export type PreviewableAlertTypes =
+  | typeof METRIC_THRESHOLD_ALERT_TYPE_ID
+  | typeof METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
+
+export async function getAlertPreview({
   fetch,
   params,
   alertType,
 }: {
   fetch: HttpSetup['fetch'];
   params: rt.TypeOf<typeof alertPreviewRequestParamsRT>;
-  alertType:
-    | typeof METRIC_THRESHOLD_ALERT_TYPE_ID
-    | typeof METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
+  alertType: PreviewableAlertTypes;
 }): Promise<rt.TypeOf<typeof alertPreviewSuccessResponsePayloadRT>> {
   return await fetch(`${INFRA_ALERT_PREVIEW_PATH}`, {
     method: 'POST',
@@ -33,19 +35,3 @@ async function getAlertPreview({
     }),
   });
 }
-
-export const getMetricThresholdAlertPreview = ({
-  fetch,
-  params,
-}: {
-  fetch: HttpSetup['fetch'];
-  params: rt.TypeOf<typeof alertPreviewRequestParamsRT>;
-}) => getAlertPreview({ fetch, params, alertType: METRIC_THRESHOLD_ALERT_TYPE_ID });
-
-export const getInventoryAlertPreview = ({
-  fetch,
-  params,
-}: {
-  fetch: HttpSetup['fetch'];
-  params: rt.TypeOf<typeof alertPreviewRequestParamsRT>;
-}) => getAlertPreview({ fetch, params, alertType: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID });

@@ -35,7 +35,7 @@ export const previewMetricThresholdAlert: (
   params: PreviewMetricThresholdAlertParams,
   iterations?: number,
   precalculatedNumberOfGroups?: number
-) => Promise<Array<number | null | typeof TOO_MANY_BUCKETS_PREVIEW_EXCEPTION>> = async (
+) => Promise<Array<number | null>> = async (
   {
     callCluster,
     params,
@@ -135,7 +135,7 @@ export const previewMetricThresholdAlert: (
 
       // Bail out if it looks like this is going to take too long
       if (slicedLookback <= 0 || iterations > MAX_ITERATIONS || slices > MAX_ITERATIONS) {
-        return [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION];
+        throw new Error(`${TOO_MANY_BUCKETS_PREVIEW_EXCEPTION}:${maxBuckets * MAX_ITERATIONS}`);
       }
 
       const slicedRequests = [...Array(slices)].map((_, i) => {
