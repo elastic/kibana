@@ -19,7 +19,7 @@ const List = styled.ul`
   box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
     ${({ theme }) => tint(0.1, theme.eui.euiColorFullShade)};
   position: absolute;
-  background: #fff;
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   z-index: 10;
   left: 0;
   max-height: ${px(unit * 20)};
