@@ -18,6 +18,15 @@ import {
 import { factory as policyFactory } from './models/policy_config';
 
 export type Event = AlertEvent | EndpointEvent;
+/**
+ * This value indicates the limit for the size of the ancestry array. The endpoint currently saves up to 20 values
+ * in its messages. To simulate a limit on the array size I'm using 2 here so that we can't rely on there being a large
+ * number like 20. The ancestry array contains entity_ids for the ancestors of a particular process.
+ *
+ * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
+ * values towards the end of the array are more distant ancestors (grandparents). Therefore
+ * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
+ */
 export const ANCESTRY_LIMIT: number = 2;
 
 interface EventOptions {
@@ -240,7 +249,6 @@ export interface Tree {
    * Map of entity_id to node
    */
   ancestry: Map<string, TreeNode>;
-  // TODO add the origin to the ancestry array to make test verification easier
   origin: TreeNode;
   /**
    * All events from children, ancestry, origin, and the alert in a single array
@@ -345,8 +353,7 @@ export class EndpointDocGenerator {
     ts = new Date().getTime(),
     entityID = this.randomString(10),
     parentEntityID?: string,
-    ancestryArray: string[] = [],
-    ancestryLimit: number = 2
+    ancestryArray: string[] = []
   ): AlertEvent {
     return {
       ...this.commonInfo,

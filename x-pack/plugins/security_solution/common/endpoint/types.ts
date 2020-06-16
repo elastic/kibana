@@ -313,6 +313,11 @@ export interface AlertEvent {
     thread?: ThreadFields[];
     uptime: number;
     user: string;
+    /*
+     * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
+     * values towards the end of the array are more distant ancestors (grandparents). Therefore
+     * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
+     */
     Ext: {
       ancestry: string[];
     };
@@ -448,6 +453,11 @@ export interface EndpointEvent {
       entity_id: string;
       name?: string;
     };
+    /*
+     * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
+     * values towards the end of the array are more distant ancestors (grandparents). Therefore
+     * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
+     */
     Ext: {
       ancestry: string[];
     };
