@@ -5,6 +5,7 @@
  */
 
 export const APP_ID = 'securitySolution';
+export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
 export const APP_PATH = `/app/security`;

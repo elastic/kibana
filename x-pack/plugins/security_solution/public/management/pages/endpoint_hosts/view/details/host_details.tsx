@@ -12,12 +12,14 @@ import {
   EuiLink,
   EuiListGroup,
   EuiListGroupItem,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { useHostSelector, useHostLogsUrl } from '../hooks';
+import { useHostSelector, useHostLogsUrl, useHostIngestUrl } from '../hooks';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
@@ -32,8 +34,19 @@ const HostIds = styled(EuiListGroupItem)`
   }
 `;
 
+const LinkToExternalApp = styled.div`
+  margin-top: ${(props) => props.theme.eui.ruleMargins.marginMedium};
+  .linkToAppIcon {
+    margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
+  }
+  .linkToAppPopoutIcon {
+    margin-left: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
+  }
+`;
+
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
-  const { appId, appPath, url } = useHostLogsUrl(details.host.id);
+  const { url: logsUrl, appId: logsAppId, appPath: logsAppPath } = useHostLogsUrl(details.host.id);
+  const { url: ingestUrl, appId: ingestAppId, appPath: ingestAppPath } = useHostIngestUrl();
   const queryParams = useHostSelector(uiQueryParams);
   const policyStatus = useHostSelector(
     policyResponseStatus
@@ -79,7 +92,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
 
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
-  const detailsResultsLower = useMemo(() => {
+  const detailsResultsPolicy = useMemo(() => {
     return [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
@@ -102,15 +115,21 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
               href={policyResponseUri}
               onClick={policyStatusClickHandler}
             >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.host.details.policyStatusValue"
-                defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
-                values={{ policyStatus }}
-              />
+              <EuiText size="m">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.host.details.policyStatusValue"
+                  defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
+                  values={{ policyStatus }}
+                />
+              </EuiText>
             </EuiLink>
           </EuiHealth>
         ),
       },
+    ];
+  }, [details, policyResponseUri, policyStatus, policyStatusClickHandler]);
+  const detailsResultsLower = useMemo(() => {
+    return [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.ipAddress', {
           defaultMessage: 'IP Address',
@@ -136,15 +155,8 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         description: details.agent.version,
       },
     ];
-  }, [
-    details.agent.version,
-    details.endpoint.policy.applied.id,
-    details.host.hostname,
-    details.host.ip,
-    policyStatus,
-    policyResponseUri,
-    policyStatusClickHandler,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [details.agent.version, details.host.hostname, details.host.ip]);
 
   return (
     <>
@@ -153,26 +165,49 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         listItems={detailsResultsUpper}
         data-test-subj="hostDetailsUpperList"
       />
-      <EuiHorizontalRule margin="s" />
+      <EuiHorizontalRule margin="m" />
+      <EuiDescriptionList
+        type="column"
+        listItems={detailsResultsPolicy}
+        data-test-subj="hostDetailsPolicyList"
+      />
+      <LinkToExternalApp>
+        <LinkToApp
+          appId={ingestAppId}
+          appPath={ingestAppPath}
+          href={ingestUrl}
+          data-test-subj="hostDetailsLinkToIngest"
+        >
+          <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
+            defaultMessage="Reassign Policy"
+          />
+          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
+        </LinkToApp>
+      </LinkToExternalApp>
+      <EuiHorizontalRule margin="m" />
       <EuiDescriptionList
         type="column"
         listItems={detailsResultsLower}
         data-test-subj="hostDetailsLowerList"
       />
-      <EuiHorizontalRule margin="s" />
-      <p>
+      <EuiHorizontalRule margin="m" />
+      <LinkToExternalApp>
         <LinkToApp
-          appId={appId}
-          appPath={appPath}
-          href={url}
+          appId={logsAppId}
+          appPath={logsAppPath}
+          href={logsUrl}
           data-test-subj="hostDetailsLinkToLogs"
         >
+          <EuiIcon type="logsApp" className="linkToAppIcon" />
           <FormattedMessage
             id="xpack.securitySolution.endpoint.host.details.linkToLogsTitle"
             defaultMessage="Endpoint Logs"
           />
+          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
         </LinkToApp>
-      </p>
+      </LinkToExternalApp>
     </>
   );
 });

@@ -34,9 +34,9 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
             <p>
               {from === 'edit' ? (
                 <LinkToApp
-                  appId="siem"
+                  appId="securitySolution"
                   appPath={policyUrl}
-                  href={`${services.application.getUrlForApp('siem')}${policyUrl}`}
+                  href={`${services.application.getUrlForApp('securitySolution')}${policyUrl}`}
                 >
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.ingestManager.editDatasource.stepConfigure"
