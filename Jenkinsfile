@@ -52,6 +52,7 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true) {
           ]),
         ])
       }
+      githubCommitStatus.onFinish()
     }
   }
 
