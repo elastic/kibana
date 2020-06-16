@@ -107,7 +107,7 @@ export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDe
           id: 'range',
           params: {
             id: format.id,
-            ...format.params,
+            params: format.params,
           },
         };
       },
