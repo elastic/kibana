@@ -361,7 +361,7 @@ export interface RequestHandlerContext {
     uiSettings: {
       client: IUiSettingsClient;
     };
-    auditor: Auditor;
+    auditTrail: Auditor;
   };
 }
 

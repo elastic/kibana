@@ -272,7 +272,7 @@ export class Server {
           uiSettings: {
             client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
           },
-          auditor: coreStart.auditTrail.asScoped(req),
+          auditTrail: coreStart.auditTrail.asScoped(req),
         };
       }
     );
