@@ -8,11 +8,19 @@ import React, { useState, useEffect } from 'react';
 
 import { Pipeline } from '../../../../../common/types';
 import { useFormContext } from '../../../../shared_imports';
+
+import { ReadProcessorsFunction } from '../types';
+
 import { PipelineTestFlyout, PipelineTestFlyoutProps } from './pipeline_test_flyout';
 
-type Props = Omit<PipelineTestFlyoutProps, 'pipeline' | 'isPipelineValid'>;
+interface Props extends Omit<PipelineTestFlyoutProps, 'pipeline' | 'isPipelineValid'> {
+  readProcessors: ReadProcessorsFunction;
+}
 
-export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({ closeFlyout }) => {
+export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({
+  closeFlyout,
+  readProcessors,
+}) => {
   const form = useFormContext();
   const [formData, setFormData] = useState<Pipeline>({} as Pipeline);
   const [isFormDataValid, setIsFormDataValid] = useState<boolean>(false);
@@ -31,7 +39,7 @@ export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({ clo
 
   return (
     <PipelineTestFlyout
-      pipeline={formData}
+      pipeline={{ ...formData, ...readProcessors() }}
       closeFlyout={closeFlyout}
       isPipelineValid={isFormDataValid}
     />
