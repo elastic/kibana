@@ -43,6 +43,7 @@ import { registerAlertRoutes } from './endpoint/alerts/routes';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
+import { handleDatasourceCreate } from './endpoint/ingest_integration';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -217,9 +218,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
+    plugins.ingestManager.register('datasourceCreate', handleDatasourceCreate);
+
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager.agentService,
     });
+
     return {};
   }
 
