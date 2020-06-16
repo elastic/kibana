@@ -34,6 +34,7 @@ const TimeLegend = styled(Legend)`
 const ErrorLink = styled(ErrorDetailLink)`
   display: block;
   margin: ${px(units.half)} 0 ${px(units.half)} 0;
+  overflow-wrap: break-word;
 `;
 
 const Button = styled(Legend)`
@@ -41,6 +42,16 @@ const Button = styled(Legend)`
   display: flex;
   align-items: flex-end;
 `;
+
+// We chose 240 characters because it fits most error messages and it's still easily readable on a screen.
+function truncateMessage(errorMessage?: string) {
+  const maxLength = 240;
+  if (typeof errorMessage === 'string' && errorMessage.length > maxLength) {
+    return errorMessage.substring(0, maxLength) + '…';
+  } else {
+    return errorMessage;
+  }
+}
 
 export const ErrorMarker: React.FC<Props> = ({ mark }) => {
   const { urlParams } = useUrlParams();
@@ -73,6 +84,10 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     rangeTo,
   };
 
+  const errorMessage =
+    error.error.log?.message || error.error.exception?.[0]?.message;
+  const truncatedErrorMessage = truncateMessage(errorMessage);
+
   return (
     <EuiPopover
       id="popover"
@@ -99,8 +114,9 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
             serviceName={error.service.name}
             errorGroupId={error.error.grouping_key}
             query={query}
+            title={errorMessage}
           >
-            {error.error.log?.message || error.error.exception?.[0]?.message}
+            {truncatedErrorMessage}
           </ErrorLink>
         </EuiText>
       </Popover>

@@ -25,9 +25,16 @@ export default function ({ getService }: FtrProviderContext) {
       .saveComposableIndexTemplate({
         name,
         body: {
-          index_patterns: ['*'],
+          // We need to match the names of backing indices with this template
+          index_patterns: [name + '*'],
           template: {
-            settings: {},
+            mappings: {
+              properties: {
+                '@timestamp': {
+                  type: 'date',
+                },
+              },
+            },
           },
           data_stream: {
             timestamp_field: '@timestamp',
