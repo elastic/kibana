@@ -39,7 +39,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       hasError: true,
     };
   } else if (action.type === 'userRequestedRelatedEventData') {
-    state.relatedEventsReady.set(action.payload, false);
     return {
       ...state,
       relatedEventsReady: new Map(state.relatedEventsReady.set(action.payload, false)),
