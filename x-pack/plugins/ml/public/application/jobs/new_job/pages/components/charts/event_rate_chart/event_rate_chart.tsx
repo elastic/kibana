@@ -5,13 +5,22 @@
  */
 
 import React, { FC } from 'react';
-import { BarSeries, Chart, ScaleType, Settings, TooltipType } from '@elastic/charts';
+import {
+  HistogramBarSeries,
+  Chart,
+  ScaleType,
+  Settings,
+  TooltipType,
+  BrushEndListener,
+  PartialTheme,
+} from '@elastic/charts';
 import { Axes } from '../common/axes';
 import { LineChartPoint } from '../../../../common/chart_loader';
 import { Anomaly } from '../../../../common/results_loader';
 import { useChartColors } from '../common/settings';
 import { LoadingWrapper } from '../loading_wrapper';
 import { Anomalies } from '../common/anomalies';
+import { OverlayRange } from './overlay_range';
 
 interface Props {
   eventRateChartData: LineChartPoint[];
@@ -21,6 +30,13 @@ interface Props {
   showAxis?: boolean;
   loading?: boolean;
   fadeChart?: boolean;
+  overlayRanges?: Array<{
+    start: number;
+    end: number;
+    color: string;
+    showMarker?: boolean;
+  }>;
+  onBrushEnd?: BrushEndListener;
 }
 
 export const EventRateChart: FC<Props> = ({
@@ -31,9 +47,15 @@ export const EventRateChart: FC<Props> = ({
   showAxis,
   loading = false,
   fadeChart,
+  overlayRanges,
+  onBrushEnd,
 }) => {
   const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
   const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
+
+  const theme: PartialTheme = {
+    scales: { histogramPadding: 0.2 },
+  };
 
   return (
     <div
@@ -44,9 +66,27 @@ export const EventRateChart: FC<Props> = ({
         <Chart>
           {showAxis === true && <Axes />}
 
-          <Settings tooltip={TooltipType.None} />
+          {onBrushEnd === undefined ? (
+            <Settings tooltip={TooltipType.None} theme={theme} />
+          ) : (
+            <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} theme={theme} />
+          )}
+
+          {overlayRanges &&
+            overlayRanges.map((range, i) => (
+              <OverlayRange
+                key={i}
+                overlayKey={i}
+                eventRateChartData={eventRateChartData}
+                start={range.start}
+                end={range.end}
+                color={range.color}
+                showMarker={range.showMarker}
+              />
+            ))}
+
           <Anomalies anomalyData={anomalyData} />
-          <BarSeries
+          <HistogramBarSeries
             id="event_rate"
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
