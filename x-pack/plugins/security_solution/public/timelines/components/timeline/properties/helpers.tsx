@@ -27,7 +27,7 @@ import {
   TimelineTypeLiteral,
   TimelineStatus,
   TimelineType,
-  TimelineStatusLiteralWithNull,
+  TimelineStatusLiteral,
 } from '../../../../../common/types/timeline';
 
 import { SiemPageName } from '../../../../app/types';
@@ -243,13 +243,13 @@ interface NotesButtonProps {
   getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
   size: 's' | 'l';
+  status: TimelineStatusLiteral;
   showNotes: boolean;
   toggleShowNotes: () => void;
   text?: string;
   toolTip?: string;
   updateNote: UpdateNote;
   timelineType: TimelineTypeLiteral;
-  timelineStatus: TimelineStatusLiteralWithNull;
 }
 
 const getNewNoteId = (): string => uuid.v4();
@@ -258,33 +258,29 @@ interface LargeNotesButtonProps {
   noteIds: string[];
   text?: string;
   toggleShowNotes: () => void;
-  timelineStatus: TimelineStatusLiteralWithNull;
 }
 
-const LargeNotesButton = React.memo<LargeNotesButtonProps>(
-  ({ noteIds, text, toggleShowNotes, timelineStatus }) => (
-    <EuiButton
-      data-test-subj="timeline-notes-button-large"
-      onClick={() => toggleShowNotes()}
-      size="m"
-      isDisabled={timelineStatus === TimelineStatus.immutable}
-    >
-      <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon color="subdued" size="m" type="editorComment" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {text && text.length ? <LabelText>{text}</LabelText> : null}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <NotesCountBadge data-test-subj="timeline-notes-count" color="hollow">
-            {noteIds.length}
-          </NotesCountBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiButton>
-  )
-);
+const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, toggleShowNotes }) => (
+  <EuiButton
+    data-test-subj="timeline-notes-button-large"
+    onClick={() => toggleShowNotes()}
+    size="m"
+  >
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiIcon color="subdued" size="m" type="editorComment" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {text && text.length ? <LabelText>{text}</LabelText> : null}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <NotesCountBadge data-test-subj="timeline-notes-count" color="hollow">
+          {noteIds.length}
+        </NotesCountBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiButton>
+));
 LargeNotesButton.displayName = 'LargeNotesButton';
 
 interface SmallNotesButtonProps {
@@ -320,21 +316,16 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
     noteIds,
     showNotes,
     size,
+    status,
     toggleShowNotes,
     text,
     updateNote,
     timelineType,
-    timelineStatus,
   }) => (
     <ButtonContainer animate={animate} data-test-subj="timeline-notes-button-container">
       <>
         {size === 'l' ? (
-          <LargeNotesButton
-            noteIds={noteIds}
-            text={text}
-            toggleShowNotes={toggleShowNotes}
-            timelineStatus={timelineStatus}
-          />
+          <LargeNotesButton noteIds={noteIds} text={text} toggleShowNotes={toggleShowNotes} />
         ) : (
           <SmallNotesButton
             noteIds={noteIds}
@@ -347,9 +338,10 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
             <EuiModal maxWidth={NOTES_PANEL_WIDTH} onClose={toggleShowNotes}>
               <Notes
                 associateNote={associateNote}
-                getNotesByIds={getNotesByIds}
-                noteIds={noteIds}
                 getNewNoteId={getNewNoteId}
+                getNotesByIds={getNotesByIds}
+                status={status}
+                noteIds={noteIds}
                 updateNote={updateNote}
               />
             </EuiModal>
@@ -369,8 +361,8 @@ export const NotesButton = React.memo<NotesButtonProps>(
     noteIds,
     showNotes,
     size,
+    status,
     timelineType,
-    timelineStatus,
     toggleShowNotes,
     toolTip,
     text,
@@ -384,10 +376,10 @@ export const NotesButton = React.memo<NotesButtonProps>(
         noteIds={noteIds}
         showNotes={showNotes}
         size={size}
+        status={status}
         toggleShowNotes={toggleShowNotes}
         text={text}
         updateNote={updateNote}
-        timelineStatus={timelineStatus}
         timelineType={timelineType}
       />
     ) : (
@@ -399,10 +391,10 @@ export const NotesButton = React.memo<NotesButtonProps>(
           noteIds={noteIds}
           showNotes={showNotes}
           size={size}
+          status={status}
           toggleShowNotes={toggleShowNotes}
           text={text}
           updateNote={updateNote}
-          timelineStatus={timelineStatus}
           timelineType={timelineType}
         />
       </EuiToolTip>

@@ -21,12 +21,14 @@ import { AddNote } from './add_note';
 import { columns } from './columns';
 import { AssociateNote, GetNewNoteId, NotesCount, search, UpdateNote } from './helpers';
 import { NOTES_PANEL_WIDTH, NOTES_PANEL_HEIGHT } from '../timeline/properties/notes_size';
+import { TimelineStatusLiteral } from '../../../../common/types/timeline';
 
 interface Props {
   associateNote: AssociateNote;
   getNotesByIds: (noteIds: string[]) => Note[];
   getNewNoteId: GetNewNoteId;
   noteIds: string[];
+  status: TimelineStatusLiteral;
   updateNote: UpdateNote;
 }
 
@@ -53,7 +55,7 @@ InMemoryTable.displayName = 'InMemoryTable';
 
 /** A view for entering and reviewing notes */
 export const Notes = React.memo<Props>(
-  ({ associateNote, getNotesByIds, getNewNoteId, noteIds, updateNote }) => {
+  ({ associateNote, getNotesByIds, getNewNoteId, noteIds, status, updateNote }) => {
     const [newNote, setNewNote] = useState('');
 
     return (
@@ -67,6 +69,7 @@ export const Notes = React.memo<Props>(
             associateNote={associateNote}
             getNewNoteId={getNewNoteId}
             newNote={newNote}
+            status={status}
             updateNewNote={setNewNote}
             updateNote={updateNote}
           />

@@ -127,12 +127,12 @@ export const PropertiesLeft = React.memo<Props>(
             noteIds={noteIds}
             showNotes={showNotes}
             size="l"
+            status={status}
             text={i18n.NOTES}
             toggleShowNotes={onToggleShowNotes}
             toolTip={i18n.NOTES_TOOL_TIP}
             updateNote={updateNote}
             timelineType={timelineType}
-            timelineStatus={status}
           />
         </EuiFlexItem>
       ) : null}

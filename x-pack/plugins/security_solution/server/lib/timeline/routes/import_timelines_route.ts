@@ -97,7 +97,6 @@ export const importTimelinesRoute = (
           parsedObjects,
           false
         );
-        console.log('uniqueParsedObjects', uniqueParsedObjects);
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importTimelineResponse: ImportTimelineResponse[] = [];
 
@@ -111,8 +110,6 @@ export const importTimelinesRoute = (
                 const importsWorkerPromise = new Promise<ImportTimelineResponse>(
                   async (resolve, reject) => {
                     if (parsedTimeline instanceof Error) {
-                      console.log('parsedTimeline', parsedTimeline);
-
                       // If the JSON object had a validation or parse error then we return
                       // early with the error and an (unknown) for the ruleId
                       resolve(
@@ -141,7 +138,6 @@ export const importTimelinesRoute = (
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
-                    console.log('title0000', title);
                     // console.log('parsedTimeline', JSON.stringify(parsedTimeline));
                     let newTimeline = null;
                     try {
@@ -189,7 +185,6 @@ export const importTimelinesRoute = (
                         const errorMessage = compareTimelinesStatus.checkIsFailureCases(
                           TimelineStatusActions.createViaImport
                         );
-                        console.log('errorMessage one', errorMessage);
                         const message =
                           errorMessage?.body != null
                             ? errorMessage.body
@@ -221,11 +216,6 @@ export const importTimelinesRoute = (
                         } else {
                           const errorMessage = compareTimelinesStatus.checkIsFailureCases(
                             TimelineStatusActions.updateViaImport
-                          );
-                          console.log(
-                            'compareTimelinesStatus.isUpdatableViaImport',
-                            compareTimelinesStatus.isUpdatableViaImport,
-                            errorMessage
                           );
 
                           const message =

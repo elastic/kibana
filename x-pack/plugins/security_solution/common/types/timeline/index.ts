@@ -272,6 +272,13 @@ export const TimelineResponseType = runtimeTypes.type({
   }),
 });
 
+export const TimelineErrorResponseType = runtimeTypes.type({
+  status_code: runtimeTypes.number,
+  message: runtimeTypes.string,
+});
+
+export interface TimelineErrorResponse
+  extends runtimeTypes.TypeOf<typeof TimelineErrorResponseType> {}
 export interface TimelineResponse extends runtimeTypes.TypeOf<typeof TimelineResponseType> {}
 
 /**

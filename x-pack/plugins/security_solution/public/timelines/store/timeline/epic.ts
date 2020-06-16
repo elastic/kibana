@@ -12,7 +12,6 @@ import {
   omit,
   isObject,
   toString as fpToString,
-  isEmpty,
 } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
@@ -27,6 +26,7 @@ import {
   concatMap,
   delay,
   takeUntil,
+  catchError,
 } from 'rxjs/operators';
 
 import {
@@ -84,6 +84,7 @@ import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { persistTimeline } from '../../containers/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -134,6 +135,7 @@ export const createTimelineEpic = <State>(): Epic<
     apolloClient$,
   }
 ) => {
+  const { notifications } = useKibana().services;
   const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
   const allTimelineQuery$ = state$.pipe(
@@ -154,16 +156,17 @@ export const createTimelineEpic = <State>(): Epic<
       filter(([action, timeline]) => {
         const timelineId: string = get('payload.id', action);
         const timelineObj: TimelineModel = timeline[timelineId];
-        console.log(
-          '-------',
-          action.type === startTimelineSaving.type &&
-            timelineObj != null &&
-            timelineObj.status != null
-        );
         if (action.type === addError.type) {
           return true;
         }
-        if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
+        if (
+          isItAtimelineAction(timelineId) &&
+          timelineObj != null &&
+          timelineObj.status != null &&
+          TimelineStatus.immutable === timelineObj.status
+        ) {
+          return false;
+        } else if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
           myEpicTimelineId.setTimelineVersion(null);
           myEpicTimelineId.setTimelineId(null);
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
@@ -175,20 +178,6 @@ export const createTimelineEpic = <State>(): Epic<
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&
           isItAtimelineAction(timelineId)
-        ) {
-          return true;
-        } else if (
-          action.type === startTimelineSaving.type &&
-          timelineObj != null &&
-          timelineObj.status != null &&
-          TimelineStatus.immutable === timelineObj.status
-        ) {
-          return true;
-        } else if (
-          action.type === startTimelineSaving.type &&
-          timelineObj != null &&
-          timelineObj.status != null &&
-          isEmpty(timelineObj.title)
         ) {
           return true;
         }
@@ -238,7 +227,6 @@ export const createTimelineEpic = <State>(): Epic<
             allTimelineQuery$
           );
         } else if (timelineActionsType.includes(action.type)) {
-          console.log('persistTimeline', timeline[action.payload.id]);
           return from(
             persistTimeline({
               timelineId,
@@ -246,6 +234,15 @@ export const createTimelineEpic = <State>(): Epic<
               timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
             })
           ).pipe(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            catchError((err: any) => {
+              if (err.status_code && err.status_code === 405) {
+                return notifications!.toasts.addDanger({
+                  title: 'Timeline error',
+                  text: err.message ?? 'Something went wrong',
+                });
+              }
+            }),
             withLatestFrom(timeline$, allTimelineQuery$),
             mergeMap(([result, recentTimeline, allTimelineQuery]) => {
               const savedTimeline = recentTimeline[action.payload.id];
@@ -255,7 +252,7 @@ export const createTimelineEpic = <State>(): Epic<
               if (allTimelineQuery.refetch != null) {
                 (allTimelineQuery.refetch as inputsModel.Refetch)();
               }
-              console.log('savedTimeline', savedTimeline);
+
               return [
                 response.code === 409
                   ? updateAutoSaveMsg({

@@ -80,6 +80,7 @@ const parseString = (params: string) => {
   }
 };
 
+// eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean
@@ -169,10 +170,10 @@ export const defaultTimelineToTimelineModel = (
         )
       : {},
     id: duplicate ? '' : timeline.savedObjectId,
-    status: duplicate ? TimelineStatus.draft : timeline.status,
+    status: duplicate ? TimelineStatus.active : timeline.status,
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
-    title: duplicate ? '' : timeline.title || '',
+    title: duplicate ? `${timeline.title} - Duplicate` : timeline.title || '',
     templateTimelineId: duplicate && isTemplate ? uuid.v4() : timeline.templateTimelineId,
     templateTimelineVersion: duplicate && isTemplate ? 1 : timeline.templateTimelineVersion,
   };

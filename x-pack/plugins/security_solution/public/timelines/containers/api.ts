@@ -12,6 +12,8 @@ import {
   TimelineResponse,
   TimelineResponseType,
   TimelineStatus,
+  TimelineErrorResponseType,
+  TimelineErrorResponse,
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
@@ -50,6 +52,12 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
+const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
+  pipe(
+    TimelineErrorResponseType.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
 const postTimeline = async ({ timeline }: RequestPostTimeline): Promise<TimelineResponse> => {
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_URL, {
     method: 'POST',
@@ -63,12 +71,16 @@ const patchTimeline = async ({
   timelineId,
   timeline,
   version,
-}: RequestPatchTimeline): Promise<TimelineResponse> => {
-  const response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
-    method: 'PATCH',
-    body: JSON.stringify({ timeline, timelineId, version }),
-  });
-
+}: RequestPatchTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+  let response = null;
+  try {
+    response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
+      method: 'PATCH',
+      body: JSON.stringify({ timeline, timelineId, version }),
+    });
+  } catch (err) {
+    return Promise.reject(decodeTimelineErrorResponse(err.body));
+  }
   return decodeTimelineResponse(response);
 };
 
@@ -78,7 +90,7 @@ export const persistTimeline = async ({
   version,
   templateTimelineId,
   templateTimelineVersion,
-}: RequestPersistTimeline): Promise<TimelineResponse> => {
+}: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   if (timelineId == null && timeline.status === TimelineStatus.draft) {
     const draftTimeline = await cleanDraftTimeline({
       timelineType: timeline.timelineType!,

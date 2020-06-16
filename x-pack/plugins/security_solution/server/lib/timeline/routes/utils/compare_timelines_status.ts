@@ -82,7 +82,6 @@ export class CompareTimelinesStatus {
   }
 
   public get isCreatableViaImport() {
-    console.log('=======1=====');
     return (
       this.isCreatedStatusValid &&
       ((this.isCreatable && !this.isHandlingTemplateTimeline) ||
@@ -92,7 +91,6 @@ export class CompareTimelinesStatus {
 
   private get isCreatedStatusValid() {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
-    console.log('======2======', this.status, obj.isExists);
 
     return obj.isExists
       ? this.status === obj.getData?.status && this.status !== TimelineStatus.draft
@@ -111,12 +109,10 @@ export class CompareTimelinesStatus {
   private get isTimelineTypeValid() {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
     const existintTimelineType = obj.getData?.timelineType ?? TimelineType.default;
-    console.log('isTimelineTypeValid', this.timelineType, existintTimelineType);
     return obj.isExists ? this.timelineType === existintTimelineType : true;
   }
 
   public get isUpdatableViaImport() {
-    console.log('isUpdatableViaImport', this.isTimelineTypeValid);
     return (
       this.isTimelineTypeValid &&
       this.isTitleValid &&
@@ -129,7 +125,6 @@ export class CompareTimelinesStatus {
   }
 
   public get isTitleValid() {
-    console.log('title', this.title, this.status);
     return (
       (this.status !== TimelineStatus.draft && !isEmpty(this.title)) ||
       this.status === TimelineStatus.draft
@@ -224,7 +219,6 @@ export class CompareTimelinesStatus {
     const existingStatus = this.isHandlingTemplateTimeline
       ? this.templateTimelineInput.data?.status
       : this.timelineInput.data?.status;
-    console.log('isUpdatedTimelineStatusValid', status, existingStatus);
     return (
       ((existingStatus == null || existingStatus === TimelineStatus.active) &&
         (status == null || status === TimelineStatus.active)) ||
