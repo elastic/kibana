@@ -20,12 +20,12 @@ import url from 'url';
 import { kibanaTestUser } from './users';
 
 interface UrlParts {
-  protocol: string;
-  hostname: string;
-  port: number;
-  auth: string;
-  username: string;
-  password: string;
+  protocol?: string;
+  hostname?: string;
+  port?: number;
+  auth?: string;
+  username?: string;
+  password?: string;
 }
 
 export const kbnTestConfig = new (class KbnTestConfig {
@@ -38,12 +38,12 @@ export const kbnTestConfig = new (class KbnTestConfig {
     if (process.env.TEST_KIBANA_URL) {
       const testKibanaUrl = url.parse(process.env.TEST_KIBANA_URL);
       return {
-        protocol: testKibanaUrl.protocol!.slice(0, -1),
-        hostname: testKibanaUrl.hostname!,
-        port: parseInt(testKibanaUrl.port!, 10),
-        auth: testKibanaUrl.auth!,
-        username: testKibanaUrl.auth!.split(':')[0],
-        password: testKibanaUrl.auth!.split(':')[1],
+        protocol: testKibanaUrl.protocol?.slice(0, -1),
+        hostname: testKibanaUrl.hostname,
+        port: testKibanaUrl.port ? parseInt(testKibanaUrl.port, 10) : undefined,
+        auth: testKibanaUrl.auth,
+        username: testKibanaUrl.auth?.split(':')[0],
+        password: testKibanaUrl.auth?.split(':')[1],
       };
     }
 
@@ -52,7 +52,7 @@ export const kbnTestConfig = new (class KbnTestConfig {
     return {
       protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
       hostname: process.env.TEST_KIBANA_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_KIBANA_PORT!, 10) || 5620,
+      port: process.env.TEST_KIBANA_PORT ? parseInt(process.env.TEST_KIBANA_PORT, 10) : 5620,
       auth: `${username}:${password}`,
       username,
       password,

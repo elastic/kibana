@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Url from 'url';
-import { By, until } from 'selenium-webdriver';
-import testSubjSelector from '@kbn/test-subj-selector';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -14,8 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
-
-  const WD = getService('__webdriver__');
 
   describe('in iframe', () => {
     it('should open Kibana for logged-in user', async () => {
@@ -33,11 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.navigateTo(url);
 
       const iframe = await testSubjects.find('iframe_embedded');
-      WD.driver.switchTo().frame(iframe._webElement);
+      await browser.switchToFrame(iframe);
 
-      const selector = By.css(testSubjSelector('kibanaChrome'));
-      const minute = 60000;
-      await WD.driver.wait(until.elementLocated(selector), minute);
+      await testSubjects.find('kibanaChrome', 60000);
     });
   });
 }
