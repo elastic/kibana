@@ -21,7 +21,7 @@ import { pageObjects } from '../functional/page_objects';
 import { services } from '../functional/services';
 
 export default async function ({ readConfigFile }) {
-  const commonConfig = await readConfigFile(require.resolve('../../../config.js'));
+  const commonConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   return {
     testFiles: [require.resolve('./dashboard_embedding')],
