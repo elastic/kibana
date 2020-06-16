@@ -17,24 +17,12 @@
  * under the License.
  */
 
-import Path from 'path';
+module.exports = function ({ entries }: { entries: Array<{ importId: string; relPath: string }> }) {
+  const lines = entries.map(({ importId, relPath }) => [
+    `__kbnBundles__.define('${importId}', __webpack_require__, require.resolve('./${relPath}'))`,
+  ]);
 
-import { Bundle } from '../common';
-
-import { KibanaPlatformPlugin } from './kibana_platform_plugins';
-
-export function getPluginBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
-  return plugins
-    .filter((p) => p.isUiPlugin)
-    .map(
-      (p) =>
-        new Bundle({
-          type: 'plugin',
-          id: p.id,
-          publicDirNames: ['public', ...p.extraPublicDirs],
-          sourceRoot: repoRoot,
-          contextDir: p.directory,
-          outputDir: Path.resolve(p.directory, 'target/public'),
-        })
-    );
-}
+  return {
+    code: lines.join('\n'),
+  };
+};
