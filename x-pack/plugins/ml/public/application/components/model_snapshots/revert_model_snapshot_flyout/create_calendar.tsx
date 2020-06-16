@@ -161,6 +161,7 @@ export const CreateCalendar: FC<Props> = ({
           end: c.end!.valueOf(),
         }))}
         onBrushEnd={onBrushEnd}
+        overlayColor={euiTheme.euiColorPrimary}
       />
       <EuiSpacer size="s" />
 
@@ -264,10 +265,11 @@ interface ChartProps {
   loading: boolean;
   onBrushEnd(area: XYBrushArea): void;
   overlayRanges: Array<{ start: number; end: number }>;
+  overlayColor: string;
 }
 
 const Chart: FC<ChartProps> = memo(
-  ({ eventRateData, anomalies, loading, onBrushEnd, overlayRanges }) => (
+  ({ eventRateData, anomalies, loading, onBrushEnd, overlayRanges, overlayColor }) => (
     <EventRateChart
       eventRateChartData={eventRateData}
       anomalyData={anomalies}
@@ -278,7 +280,7 @@ const Chart: FC<ChartProps> = memo(
       overlayRanges={overlayRanges.map((c) => ({
         start: c.start,
         end: c.end,
-        color: '#0000ff',
+        color: overlayColor,
         showMarker: false,
       }))}
       onBrushEnd={onBrushEnd}

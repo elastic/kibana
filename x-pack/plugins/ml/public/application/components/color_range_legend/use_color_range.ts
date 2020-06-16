@@ -5,7 +5,7 @@
  */
 
 import d3 from 'd3';
-
+import { useMemo } from 'react';
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
@@ -188,5 +188,9 @@ export const useColorRange = (
 };
 
 export function useCurrentEuiTheme() {
-  return { euiTheme: useUiSettings().get('theme:darkMode') ? euiThemeDark : euiThemeLight };
+  const uiSettings = useUiSettings();
+  return useMemo(
+    () => ({ euiTheme: uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight }),
+    [uiSettings]
+  );
 }
