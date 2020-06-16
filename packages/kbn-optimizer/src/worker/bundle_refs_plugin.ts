@@ -68,12 +68,12 @@ export class BundleRefsPlugin {
           const context = data.context;
           const dep = data.dependencies[0];
 
-          this.resolveRef(context, dep.request).then(
-            (ref) => {
-              if (!ref) {
+          this.maybeReplaceImport(context, dep.request).then(
+            (module) => {
+              if (!module) {
                 wrappedFactory(data, callback);
               } else {
-                callback(undefined, new BundleRefModule(ref.exportId));
+                callback(undefined, module);
               }
             },
             (error) => callback(error)
@@ -149,7 +149,7 @@ export class BundleRefsPlugin {
    * then an error is thrown. If the request does not resolve to a bundleRef then
    * undefined is returned. Otherwise it returns the referenced bundleRef.
    */
-  private async resolveRef(context: string, request: string) {
+  private async maybeReplaceImport(context: string, request: string) {
     // ignore imports that have loaders defined or are not relative seeming
     if (request.includes('!') || !request.startsWith('.')) {
       return;
@@ -179,7 +179,7 @@ export class BundleRefsPlugin {
     for (const ref of eligibleRefs) {
       const resolvedEntry = await this.cachedResolveRefEntry(ref);
       if (resolved === resolvedEntry) {
-        return ref;
+        return new BundleRefModule(ref.exportId);
       }
     }
 
