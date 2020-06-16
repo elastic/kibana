@@ -73,7 +73,8 @@ class AgentConfigService {
   public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
     const configs = await soClient.find<AgentConfigSOAttributes>({
       type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
-      filter: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
+      searchFields: ['is_default'],
+      search: 'true',
     });
 
     if (configs.total === 0) {
