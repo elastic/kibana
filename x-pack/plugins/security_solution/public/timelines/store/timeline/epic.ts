@@ -235,7 +235,7 @@ export const createTimelineEpic = <State>(): Epic<
             })
           ).pipe(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            catchError((err: any) => {
+            catchError((err: any, caught: Observable<any>) => {
               if (err.status_code && err.status_code === 405) {
                 return notifications!.toasts.addDanger({
                   title: 'Timeline error',
@@ -267,6 +267,8 @@ export const createTimelineEpic = <State>(): Epic<
                         version: response.timeline.version,
                         status: response.timeline.status ?? TimelineStatus.active,
                         timelineType: response.timeline.timelineType ?? TimelineType.default,
+                        templateTimelineId: response.timeline.templateTimelineId ?? null,
+                        templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
                         isSaving: false,
                       },
                     }),
