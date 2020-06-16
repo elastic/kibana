@@ -6,8 +6,7 @@
 
 import { QueryContext } from './query_context';
 import { fetchChunk } from './fetch_chunk';
-import { CursorDirection } from '../../../../common/runtime_types';
-import { MonitorGroups } from './fetch_page';
+import { CursorDirection, MonitorSummary } from '../../../../common/runtime_types';
 import { CursorPagination } from './types';
 
 // Hardcoded chunk size for how many monitors to fetch at a time when querying
@@ -22,7 +21,7 @@ export type ChunkFetcher = (
 
 // Result of fetching more results from the search.
 export interface ChunkResult {
-  monitorGroups: MonitorGroups[];
+  monitorSummaries: MonitorSummary[];
   searchAfter: any;
 }
 
@@ -35,18 +34,18 @@ export interface ChunkResult {
 // matches, or may simple be empty results that tell us a to keep looking for more, this class exists to simplify things.
 // The idea is that you can call next() on it and receive the next matching result, even if internally we need to fetch
 // multiple chunks to find that result.
-export class MonitorGroupIterator {
+export class MonitorSummaryIterator {
   queryContext: QueryContext;
   // Cache representing pre-fetched query results.
   // The first item is the CheckGroup this represents.
-  buffer: MonitorGroups[];
+  buffer: MonitorSummary[];
   bufferPos: number;
   searchAfter: any;
   chunkFetcher: ChunkFetcher;
 
   constructor(
     queryContext: QueryContext,
-    initialBuffer: MonitorGroups[] = [],
+    initialBuffer: MonitorSummary[] = [],
     initialBufferPos: number = -1,
     chunkFetcher: ChunkFetcher = fetchChunk
   ) {
@@ -58,7 +57,7 @@ export class MonitorGroupIterator {
   }
 
   // Fetch the next matching result.
-  async next(): Promise<MonitorGroups | null> {
+  async next(): Promise<MonitorSummary | null> {
     await this.bufferNext(CHUNK_SIZE);
 
     const found = this.buffer[this.bufferPos + 1];
@@ -70,14 +69,14 @@ export class MonitorGroupIterator {
   }
 
   // Look ahead to see if there are additional results.
-  async peek(): Promise<MonitorGroups | null> {
+  async peek(): Promise<MonitorSummary | null> {
     await this.bufferNext(CHUNK_SIZE);
     return this.buffer[this.bufferPos + 1] || null;
   }
 
   // Returns the last item fetched with next(). null if no items fetched with
   // next or if next has not yet been invoked.
-  getCurrent(): MonitorGroups | null {
+  getCurrent(): MonitorSummary | null {
     return this.buffer[this.bufferPos] || null;
   }
 
@@ -120,13 +119,13 @@ export class MonitorGroupIterator {
     const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
     // If we've hit the end of the stream searchAfter will be empty
 
-    results.monitorGroups.forEach((mig: MonitorGroups) => this.buffer.push(mig));
+    results.monitorSummaries.forEach((ms: MonitorSummary) => this.buffer.push(ms));
     if (results.searchAfter) {
       this.searchAfter = results.searchAfter;
     }
 
     return {
-      gotHit: results.monitorGroups.length > 0,
+      gotHit: results.monitorSummaries.length > 0,
       hasMore: !!results.searchAfter,
     };
   }
@@ -142,7 +141,7 @@ export class MonitorGroupIterator {
     if (!current) {
       return null;
     }
-    const cursorKey = { monitor_id: current.id };
+    const cursorKey = { monitor_id: current.monitor_id };
 
     return Object.assign({}, this.queryContext.pagination, { cursorKey });
   }
@@ -154,12 +153,12 @@ export class MonitorGroupIterator {
   }
 
   // Returns a copy of this fetcher that goes backwards from the current position
-  reverse(): MonitorGroupIterator | null {
+  reverse(): MonitorSummaryIterator | null {
     const reverseContext = this.queryContext.clone();
     const current = this.getCurrent();
 
     reverseContext.pagination = {
-      cursorKey: current ? { monitor_id: current.id } : null,
+      cursorKey: current ? { monitor_id: current.monitor_id } : null,
       sortOrder: this.queryContext.pagination.sortOrder,
       cursorDirection:
         this.queryContext.pagination.cursorDirection === CursorDirection.AFTER
@@ -168,12 +167,12 @@ export class MonitorGroupIterator {
     };
 
     return current
-      ? new MonitorGroupIterator(reverseContext, [current], 0, this.chunkFetcher)
+      ? new MonitorSummaryIterator(reverseContext, [current], 0, this.chunkFetcher)
       : null;
   }
 
   // Returns a copy of this with a shallow copied buffer. Note that the queryContext is still shared!
   clone() {
-    return new MonitorGroupIterator(this.queryContext, this.buffer.slice(0), this.bufferPos);
+    return new MonitorSummaryIterator(this.queryContext, this.buffer.slice(0), this.bufferPos);
   }
 }

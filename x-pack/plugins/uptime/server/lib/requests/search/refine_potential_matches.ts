@@ -5,8 +5,7 @@
  */
 
 import { QueryContext } from './query_context';
-import { CursorDirection } from '../../../../common/runtime_types';
-import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
+import { MonitorSummaryState, MonitorSummary } from '../../../../common/runtime_types';
 
 /**
  * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.
@@ -19,40 +18,34 @@ import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 export const refinePotentialMatches = async (
   queryContext: QueryContext,
   potentialMatchMonitorIDs: string[]
-): Promise<MonitorGroups[]> => {
+): Promise<MonitorSummary[]> => {
   if (potentialMatchMonitorIDs.length === 0) {
     return [];
   }
 
   const queryResult = await query(queryContext, potentialMatchMonitorIDs);
-  const recentGroupsMatchingStatus = await fullyMatchingIds(queryResult, queryContext.statusFilter);
-
-  // Return the monitor groups filtering out potential matches that weren't current
-  const matches: MonitorGroups[] = potentialMatchMonitorIDs
-    .map((id: string) => {
-      return { id, groups: recentGroupsMatchingStatus.get(id) || [] };
-    })
-    .filter((mrg) => mrg.groups.length > 0);
-
-  // Sort matches by ID
-  matches.sort((a: MonitorGroups, b: MonitorGroups) => {
-    return a.id === b.id ? 0 : a.id > b.id ? 1 : -1;
-  });
-
-  if (queryContext.pagination.cursorDirection === CursorDirection.BEFORE) {
-    matches.reverse();
-  }
-  return matches;
+  return await fullyMatchingIds(queryResult, queryContext.statusFilter);
 };
 
-export const fullyMatchingIds = (queryResult: any, statusFilter?: string) => {
-  const matching = new Map<string, MonitorLocCheckGroup[]>();
+export const fullyMatchingIds = (queryResult: any, statusFilter?: string): MonitorSummary[] => {
+  const summaries: MonitorSummary[] = [];
+
   MonitorLoop: for (const monBucket of queryResult.aggregations.monitor.buckets) {
     const monitorId: string = monBucket.key;
-    const groups: MonitorLocCheckGroup[] = [];
 
     // Did at least one location match?
     let matched = false;
+    const monitorSummaryState: MonitorSummaryState = {
+      timestamp: "",
+      checks: [],
+      observer: {geo: {name: []}},
+      summary: {
+        up: 0,
+        down: 0,
+      },
+      url: {}
+    };
+
     for (const locBucket of monBucket.location.buckets) {
       const location = locBucket.key;
       const latestSource = locBucket.summaries.latest.hits.hits[0]._source;
@@ -68,7 +61,6 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string) => {
       ) {
         matched = true;
       }
-      const checkGroup = latestSource.monitor.check_group;
       const status = latestSource.summary.down > 0 ? 'down' : 'up';
 
       // This monitor doesn't match, so just skip ahead and don't add it to the output
@@ -77,22 +69,22 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string) => {
         continue MonitorLoop;
       }
 
-      groups.push({
-        monitorId,
-        location,
-        checkGroup,
-        status,
-        summaryTimestamp: new Date(latestSource['@timestamp']),
-      });
+      monitorSummaryState.url = latestSource.url;
+      monitorSummaryState.observer?.geo?.name?.push(location)
+      if (monitorSummaryState.summary) { // unnecessary if, for type checker
+        monitorSummaryState.summary.up += latestSource.summary.up;
+        monitorSummaryState.summary.down += latestSource.summary.down;
+      }
     }
-
-    // If one location matched, include data from all locations in the result set
     if (matched) {
-      matching.set(monitorId, groups);
+      summaries.push({
+        monitor_id: monitorId,
+        state: monitorSummaryState
+      });
     }
   }
 
-  return matching;
+  return summaries;
 };
 
 export const query = async (
@@ -125,14 +117,6 @@ export const query = async (
                     latest: {
                       top_hits: {
                         sort: [{ '@timestamp': 'desc' }],
-                        _source: {
-                          includes: [
-                            'monitor.check_group',
-                            '@timestamp',
-                            'summary.up',
-                            'summary.down',
-                          ],
-                        },
                         size: 1,
                       },
                     },
@@ -145,9 +129,6 @@ export const query = async (
                     top: {
                       top_hits: {
                         sort: [{ '@timestamp': 'desc' }],
-                        _source: {
-                          includes: ['monitor.check_group', '@timestamp'],
-                        },
                         size: 1,
                       },
                     },

@@ -6,7 +6,7 @@
 
 import { refinePotentialMatches } from './refine_potential_matches';
 import { findPotentialMatches } from './find_potential_matches';
-import { ChunkFetcher, ChunkResult } from './monitor_group_iterator';
+import { ChunkFetcher, ChunkResult } from './monitor_summary_iterator';
 import { QueryContext } from './query_context';
 
 /**
@@ -34,7 +34,7 @@ export const fetchChunk: ChunkFetcher = async (
   const matching = await refinePotentialMatches(queryContext, monitorIds);
 
   return {
-    monitorGroups: matching,
+    monitorSummaries: matching,
     searchAfter: foundSearchAfter,
   };
 };

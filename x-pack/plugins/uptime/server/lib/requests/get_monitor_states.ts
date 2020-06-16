@@ -71,7 +71,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   const page = await fetchPage(queryContext);
 
   return {
-    summaries: page.items,
+    summaries: page.monitorSummaries,
     nextPagePagination: jsonifyPagination(page.nextPagePagination),
     prevPagePagination: jsonifyPagination(page.prevPagePagination),
   };

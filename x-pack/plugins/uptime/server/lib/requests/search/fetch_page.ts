@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten } from 'lodash';
 import { CursorPagination } from './types';
 import { QueryContext } from './query_context';
 import { QUERY } from '../../../../common/constants';
-import { CursorDirection, MonitorSummary, SortOrder } from '../../../../common/runtime_types';
-import { enrichMonitorGroups } from './enrich_monitor_groups';
-import { MonitorGroupIterator } from './monitor_group_iterator';
+import { CursorDirection, MonitorSummary, SortOrder, Ping } from '../../../../common/runtime_types';
+import { MonitorSummaryIterator } from './monitor_summary_iterator';
 
 /**
  *
@@ -18,52 +16,40 @@ import { MonitorGroupIterator } from './monitor_group_iterator';
  * just monitor IDs and check groups. This takes an optional `MonitorGroupEnricher` that post-processes the minimal
  * data, decorating it appropriately. The function also takes a fetcher, which does all the actual fetching.
  * @param queryContext defines the criteria for the data on the current page
- * @param monitorGroupFetcher performs paginated monitor fetching
+ * @param monitorSummariesFetcher performs paginated monitor fetching
  * @param monitorEnricher decorates check group results with additional data
  */
 // just monitor IDs and check groups. This takes an optional `MonitorGroupEnricher` that post-processes the minimal
 // data, decorating it appropriately. The function also takes a fetcher, which does all the actual fetching.
 export const fetchPage = async (
   queryContext: QueryContext,
-  monitorGroupFetcher: MonitorGroupsFetcher = fetchPageMonitorGroups,
-  monitorEnricher: MonitorEnricher = enrichMonitorGroups
-): Promise<EnrichedPage> => {
+  monitorSummariesFetcher: MonitorSummariesFetcher = fetchPageMonitorSummaries,
+): Promise<MonitorSummariesPage> => {
   const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
-  const monitorPage = await monitorGroupFetcher(queryContext, size);
-
-  const checkGroups: string[] = flatten(
-    monitorPage.monitorGroups.map((monitorGroups) => monitorGroups.groups.map((g) => g.checkGroup))
-  );
-
-  const enrichedMonitors = await monitorEnricher(queryContext, checkGroups);
-
-  return {
-    items: enrichedMonitors,
-    nextPagePagination: monitorPage.nextPagePagination,
-    prevPagePagination: monitorPage.prevPagePagination,
-  };
+  const page = monitorSummariesFetcher(queryContext, size);
+  return page;
 };
 
 // Fetches the most recent monitor groups for the given page,
 // in the manner demanded by the `queryContext` and return at most `size` results.
-const fetchPageMonitorGroups: MonitorGroupsFetcher = async (
+const fetchPageMonitorSummaries: MonitorSummariesFetcher = async (
   queryContext: QueryContext,
   size: number
-): Promise<MonitorGroupsPage> => {
-  const monitorGroups: MonitorGroups[] = [];
+): Promise<MonitorSummariesPage> => {
+  const monitorSummaries: MonitorSummary[] = [];
 
-  const iterator = new MonitorGroupIterator(queryContext);
+  const iterator = new MonitorSummaryIterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
-  while (monitorGroups.length < size) {
+  while (monitorSummaries.length < size) {
     const monitor = await iterator.next();
     if (!monitor) {
       break; // No more items to fetch
     }
-    monitorGroups.push(monitor);
+    monitorSummaries.push(monitor);
 
     // We want the before pagination to be before the first item we encounter
-    if (monitorGroups.length === 1) {
+    if (monitorSummaries.length === 1) {
       paginationBefore = await iterator.paginationBeforeCurrent();
     }
   }
@@ -74,11 +60,11 @@ const fetchPageMonitorGroups: MonitorGroupsFetcher = async (
   const ssAligned = searchSortAligned(queryContext.pagination);
 
   if (!ssAligned) {
-    monitorGroups.reverse();
+    monitorSummaries.reverse();
   }
 
   return {
-    monitorGroups,
+    monitorSummaries: monitorSummaries,
     nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
     prevPagePagination: ssAligned ? paginationBefore : paginationAfter,
   };
@@ -106,33 +92,21 @@ export interface MonitorLocCheckGroup {
   monitorId: string;
   location: string | null;
   checkGroup: string;
+  summaryPings: {[key: string]: Ping};
   status: 'up' | 'down';
   summaryTimestamp: Date;
 }
 
 // Represents a page that has not yet been enriched.
-export interface MonitorGroupsPage {
-  monitorGroups: MonitorGroups[];
-  nextPagePagination: CursorPagination | null;
-  prevPagePagination: CursorPagination | null;
-}
-
-// Representation of a full page of results with pagination data for constructing next/prev links.
-export interface EnrichedPage {
-  items: MonitorSummary[];
+export interface MonitorSummariesPage {
+  monitorSummaries: MonitorSummary[];
   nextPagePagination: CursorPagination | null;
   prevPagePagination: CursorPagination | null;
 }
 
 // A function that does the work of matching the minimal set of data for this query, returning just matching fields
 // that are efficient to access while performing the query.
-export type MonitorGroupsFetcher = (
+export type MonitorSummariesFetcher = (
   queryContext: QueryContext,
   size: number
-) => Promise<MonitorGroupsPage>;
-
-// A function that takes a set of check groups and returns richer MonitorSummary objects.
-export type MonitorEnricher = (
-  queryContext: QueryContext,
-  checkGroups: string[]
-) => Promise<MonitorSummary[]>;
+) => Promise<MonitorSummariesPage>;
