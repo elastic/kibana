@@ -454,6 +454,7 @@ export const MapsAppView = class extends React.Component {
       time,
       refreshConfig,
       savedMap,
+      savedQuery,
       initialLayerListConfig,
       isVisible,
       indexPatterns,
@@ -465,6 +466,7 @@ export const MapsAppView = class extends React.Component {
       <MapsTopNavMenu
         savedMap={savedMap}
         query={query}
+        savedQuery={savedQuery}
         onQueryChange={this.onQueryChange}
         time={time}
         refreshConfig={refreshConfig}
