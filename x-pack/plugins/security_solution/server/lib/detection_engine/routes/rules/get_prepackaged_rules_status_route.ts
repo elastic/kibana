@@ -44,6 +44,7 @@ export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
           sortField: 'enabled',
           sortOrder: 'desc',
           filter: 'alert.attributes.tags:"__internal_immutable:false"',
+          fields: undefined,
         });
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);

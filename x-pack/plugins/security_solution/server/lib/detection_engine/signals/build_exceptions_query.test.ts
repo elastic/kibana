@@ -1147,37 +1147,8 @@ describe('build_exceptions_query', () => {
   });
 
   describe('buildQueryExceptions', () => {
-    test('it returns original query if no lists exist', () => {
-      const query = buildQueryExceptions({
-        query: 'host.name: *',
-        language: 'kuery',
-        lists: undefined,
-      });
-      const expectedQuery = 'host.name: *';
-
-      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-    });
-
     test('it returns original query if lists is empty array', () => {
       const query = buildQueryExceptions({ query: 'host.name: *', language: 'kuery', lists: [] });
-      const expectedQuery = 'host.name: *';
-
-      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-    });
-
-    test('it returns original query if lists is null', () => {
-      const query = buildQueryExceptions({ query: 'host.name: *', language: 'kuery', lists: null });
-      const expectedQuery = 'host.name: *';
-
-      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-    });
-
-    test('it returns original query if lists is undefined', () => {
-      const query = buildQueryExceptions({
-        query: 'host.name: *',
-        language: 'kuery',
-        lists: undefined,
-      });
       const expectedQuery = 'host.name: *';
 
       expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);

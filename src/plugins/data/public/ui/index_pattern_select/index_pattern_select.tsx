@@ -24,7 +24,7 @@ import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
-import { getTitle } from '../../index_patterns/lib';
+import { getTitle } from '../../../common/index_patterns/lib';
 
 export type IndexPatternSelectProps = Required<
   // Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'append' | 'prepend' | 'sortMatchesBy'>,

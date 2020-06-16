@@ -270,7 +270,7 @@ export async function getServiceMapFromTraceIds({
         return conns;
       }, [] as Connection[]);
     }, [] as Connection[]),
-    (value, index, array) => {
+    (value, _index, array) => {
       return find(array, value);
     }
   );

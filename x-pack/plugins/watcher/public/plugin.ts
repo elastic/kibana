@@ -64,8 +64,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       },
     });
 
-    watcherESApp.disable();
-
     // TODO: Fix the below dependency on `home` plugin inner workings
     // Because the home feature catalogue does not have enable/disable functionality we pass
     // the config in but keep a reference for enabling and disabling showing on home based on
@@ -85,9 +83,16 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     home.featureCatalogue.register(watcherHome);
 
     licensing.license$.pipe(first(), map(licenseToLicenseStatus)).subscribe(({ valid }) => {
+      // NOTE: We enable the plugin by default instead of disabling it by default because this
+      // creates a race condition that can cause the app nav item to not render in the side nav.
+      // The race condition still exists, but it will result in the item rendering when it shouldn't
+      // (e.g. on a license it's not available for), instead of *not* rendering when it *should*,
+      // which is a less frustrating UX.
       if (valid) {
         watcherESApp.enable();
         watcherHome.showOnHomePage = true;
+      } else {
+        watcherESApp.disable();
       }
     });
   }

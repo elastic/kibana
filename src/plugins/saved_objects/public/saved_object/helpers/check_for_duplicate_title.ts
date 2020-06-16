@@ -31,10 +31,13 @@ import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_con
  * @param services
  */
 export async function checkForDuplicateTitle(
-  savedObject: SavedObject,
+  savedObject: Pick<
+    SavedObject,
+    'id' | 'title' | 'getDisplayName' | 'lastSavedTitle' | 'copyOnSave' | 'getEsType'
+  >,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
-  services: SavedObjectKibanaServices
+  services: Pick<SavedObjectKibanaServices, 'savedObjectsClient' | 'overlays'>
 ): Promise<true> {
   const { savedObjectsClient, overlays } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title

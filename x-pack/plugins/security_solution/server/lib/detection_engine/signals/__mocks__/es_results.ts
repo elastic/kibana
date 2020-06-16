@@ -11,7 +11,7 @@ import {
   SavedObjectsFindResponse,
 } from '../../../../../../../../src/core/server';
 import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
-import { RuleTypeParams, OutputRuleAlertRest } from '../../types';
+import { RuleTypeParams } from '../../types';
 import { IRuleStatusAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
@@ -44,7 +44,7 @@ export const sampleRuleAlertParams = (
   meta: undefined,
   threat: undefined,
   version: 1,
-  exceptions_list: [
+  exceptionsList: [
     {
       field: 'source.ip',
       values_operator: 'included',
@@ -363,34 +363,6 @@ export const sampleDocSearchResultsWithSortId = (
 
 export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 export const sampleIdGuid = 'e1e08ddc-5e37-49ff-a258-5393aa44435a';
-
-export const sampleRule = (): Partial<OutputRuleAlertRest> => {
-  return {
-    created_by: 'elastic',
-    description: 'Detecting root and admin users',
-    enabled: true,
-    false_positives: [],
-    from: 'now-6m',
-    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-    immutable: false,
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    interval: '5m',
-    risk_score: 50,
-    rule_id: 'rule-1',
-    language: 'kuery',
-    max_signals: 100,
-    name: 'Detect Root/Admin Users',
-    output_index: '.siem-signals',
-    query: 'user.name: root or user.name: admin',
-    references: ['http://www.example.com', 'https://ww.example.com'],
-    severity: 'high',
-    updated_by: 'elastic',
-    tags: ['some fake tag 1', 'some fake tag 2'],
-    to: 'now',
-    type: 'query',
-    note: '',
-  };
-};
 
 export const exampleRuleStatus: () => SavedObject<IRuleStatusAttributes> = () => ({
   type: ruleStatusSavedObjectType,

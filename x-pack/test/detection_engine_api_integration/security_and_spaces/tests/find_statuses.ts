@@ -42,6 +42,25 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body).to.eql({});
     });
 
+    /*
+       This test is to ensure no future regressions introduced by the following scenario
+       a call to updateApiKey was invalidating the api key used by the
+       rule while the rule was executing, or even before it executed,
+       on the first rule run.
+       this pr https://github.com/elastic/kibana/pull/68184
+       fixed this by finding the true source of a bug that required the manual
+       api key update, and removed the call to that function.
+
+       When the api key is updated before / while the rule is executing, the alert
+       executor no longer has access to a service to update the rule status
+       saved object in Elasticsearch. Because of this, we cannot set the rule into
+       a 'failure' state, so the user ends up seeing 'going to run' as that is the
+       last status set for the rule before it erupts in an error that cannot be
+       recorded inside of the executor.
+
+       This adds an e2e test for the backend to catch that in case
+       this pops up again elsewhere.
+      */
     it('should return a single rule status when a single rule is loaded from a find status with defaults added', async () => {
       // add a single rule
       const { body: resBody } = await supertest
@@ -61,7 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       // expected result for status should be 'going to run' or 'succeeded
-      expect(['succeeded', 'going to run']).to.contain(body[resBody.id].current_status.status);
+      expect(body[resBody.id].current_status.status).to.eql('succeeded');
     });
   });
 };

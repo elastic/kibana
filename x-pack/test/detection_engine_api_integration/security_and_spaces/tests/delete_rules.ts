@@ -92,12 +92,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return an error if the id does not exist when trying to delete it', async () => {
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?id=fake_id`)
+          .delete(`${DETECTION_ENGINE_RULES_URL}?id=c1e1b359-7ac1-4e96-bc81-c683c092436f`)
           .set('kbn-xsrf', 'true')
           .expect(404);
 
         expect(body).to.eql({
-          message: 'id: "fake_id" not found',
+          message: 'id: "c1e1b359-7ac1-4e96-bc81-c683c092436f" not found',
           status_code: 404,
         });
       });

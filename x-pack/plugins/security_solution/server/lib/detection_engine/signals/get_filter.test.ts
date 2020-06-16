@@ -449,20 +449,6 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work when lists has value null', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], null);
-      expect(esQuery).toEqual({
-        bool: {
-          filter: [
-            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
-          ],
-          must: [],
-          must_not: [],
-          should: [],
-        },
-      });
-    });
-
     test('it should work when lists has value undefined', () => {
       const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], undefined);
       expect(esQuery).toEqual({

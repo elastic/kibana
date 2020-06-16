@@ -11,7 +11,7 @@ import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { KibanaRequest } from '../../../../src/core/server';
 import { loggingServiceMock, savedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { AuthenticatedUser } from '../../security/public';
+import { AuthenticatedUser } from '../../../plugins/security/common/model';
 import { securityMock } from '../../security/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
 

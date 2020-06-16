@@ -5,9 +5,9 @@
  */
 
 import { readRules } from './read_rules';
-import { DeleteRuleParams } from './types';
+import { DeleteRuleOptions } from './types';
 
-export const deleteRules = async ({ alertsClient, id, ruleId }: DeleteRuleParams) => {
+export const deleteRules = async ({ alertsClient, id, ruleId }: DeleteRuleOptions) => {
   const rule = await readRules({ alertsClient, id, ruleId });
   if (rule == null) {
     return null;

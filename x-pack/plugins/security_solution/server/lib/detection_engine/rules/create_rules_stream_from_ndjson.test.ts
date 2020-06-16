@@ -6,12 +6,12 @@
 import { Readable } from 'stream';
 import { createRulesStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from 'src/legacy/utils/streams';
-import { ImportRuleAlertRest } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
+import { ImportRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 
-type PromiseFromStreams = ImportRuleAlertRest | Error;
+type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
-export const getOutputSample = (): Partial<ImportRuleAlertRest> => ({
+export const getOutputSample = (): Partial<ImportRulesSchemaDecoded> => ({
   rule_id: 'rule-1',
   output_index: '.siem-signals',
   risk_score: 50,
@@ -25,7 +25,7 @@ export const getOutputSample = (): Partial<ImportRuleAlertRest> => ({
   type: 'query',
 });
 
-export const getSampleAsNdjson = (sample: Partial<ImportRuleAlertRest>): string => {
+export const getSampleAsNdjson = (sample: Partial<ImportRulesSchemaDecoded>): string => {
   return `${JSON.stringify(sample)}\n`;
 };
 
@@ -64,8 +64,6 @@ describe('create_rules_stream_from_ndjson', () => {
           enabled: true,
           false_positives: [],
           immutable: false,
-          query: '',
-          language: 'kuery',
           exceptions_list: [],
           max_signals: 100,
           tags: [],
@@ -90,8 +88,6 @@ describe('create_rules_stream_from_ndjson', () => {
           enabled: true,
           false_positives: [],
           immutable: false,
-          query: '',
-          language: 'kuery',
           exceptions_list: [],
           max_signals: 100,
           tags: [],
@@ -154,8 +150,6 @@ describe('create_rules_stream_from_ndjson', () => {
           enabled: true,
           false_positives: [],
           immutable: false,
-          query: '',
-          language: 'kuery',
           max_signals: 100,
           tags: [],
           exceptions_list: [],
@@ -180,8 +174,6 @@ describe('create_rules_stream_from_ndjson', () => {
           enabled: true,
           false_positives: [],
           immutable: false,
-          query: '',
-          language: 'kuery',
           max_signals: 100,
           exceptions_list: [],
           tags: [],
@@ -227,8 +219,6 @@ describe('create_rules_stream_from_ndjson', () => {
           enabled: true,
           false_positives: [],
           immutable: false,
-          query: '',
-          language: 'kuery',
           max_signals: 100,
           exceptions_list: [],
           tags: [],
@@ -253,8 +243,6 @@ describe('create_rules_stream_from_ndjson', () => {
           enabled: true,
           false_positives: [],
           immutable: false,
-          query: '',
-          language: 'kuery',
           max_signals: 100,
           exceptions_list: [],
           tags: [],
@@ -300,8 +288,6 @@ describe('create_rules_stream_from_ndjson', () => {
         enabled: true,
         false_positives: [],
         immutable: false,
-        query: '',
-        language: 'kuery',
         max_signals: 100,
         exceptions_list: [],
         tags: [],
@@ -327,8 +313,6 @@ describe('create_rules_stream_from_ndjson', () => {
         enabled: true,
         false_positives: [],
         immutable: false,
-        query: '',
-        language: 'kuery',
         max_signals: 100,
         exceptions_list: [],
         tags: [],
@@ -373,8 +357,6 @@ describe('create_rules_stream_from_ndjson', () => {
         enabled: true,
         false_positives: [],
         immutable: false,
-        query: '',
-        language: 'kuery',
         max_signals: 100,
         exceptions_list: [],
         tags: [],
@@ -383,8 +365,9 @@ describe('create_rules_stream_from_ndjson', () => {
         references: [],
         version: 1,
       });
+      // TODO: Change the formatter to output something better than [object Object]
       expect(resultOrError[1].message).toEqual(
-        'child "description" fails because ["description" is required]'
+        '[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]'
       );
       expect(resultOrError[2]).toEqual({
         actions: [],
@@ -402,8 +385,6 @@ describe('create_rules_stream_from_ndjson', () => {
         enabled: true,
         false_positives: [],
         immutable: false,
-        query: '',
-        language: 'kuery',
         max_signals: 100,
         exceptions_list: [],
         tags: [],

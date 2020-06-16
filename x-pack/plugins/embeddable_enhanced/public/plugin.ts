@@ -127,17 +127,19 @@ export class EmbeddableEnhancedPlugin
     });
 
     dynamicActions.start().catch((error) => {
-      /* eslint-disable */	
-      console.log('Failed to start embeddable dynamic actions', embeddable);	
-      console.error(error);	
+      /* eslint-disable */
+
+      console.log('Failed to start embeddable dynamic actions', embeddable);
+      console.error(error);
       /* eslint-enable */
     });
 
     const stop = () => {
       dynamicActions.stop().catch((error) => {
-        /* eslint-disable */	
-        console.log('Failed to stop embeddable dynamic actions', embeddable);	
-        console.error(error);	
+        /* eslint-disable */
+
+        console.log('Failed to stop embeddable dynamic actions', embeddable);
+        console.error(error);
         /* eslint-enable */
       });
     };

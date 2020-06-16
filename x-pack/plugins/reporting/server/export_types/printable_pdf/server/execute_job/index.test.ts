@@ -84,6 +84,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   await executeJob(
     'pdfJobId',
     getJobDocPayload({
+      title: 'PDF Params Timezone Test',
       relativeUrl: '/app/kibana#/something',
       browserTimezone,
       headers: encryptedHeaders,
@@ -91,39 +92,8 @@ test(`passes browserTimezone to generatePdf`, async () => {
     cancellationToken
   );
 
-  expect(generatePdfObservable.mock.calls).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        LevelLogger {
-          "_logger": Object {
-            "get": [MockFunction],
-          },
-          "_tags": Array [
-            "printable_pdf",
-            "execute",
-            "pdfJobId",
-          ],
-          "warning": [Function],
-        },
-        undefined,
-        Array [
-          "http://localhost:5601/sbp/app/kibana#/something",
-        ],
-        "UTC",
-        Object {
-          "conditions": Object {
-            "basePath": "/sbp",
-            "hostname": "localhost",
-            "port": 5601,
-            "protocol": "http",
-          },
-          "headers": Object {},
-        },
-        undefined,
-        false,
-      ],
-    ]
-  `);
+  const tzParam = generatePdfObservable.mock.calls[0][3];
+  expect(tzParam).toBe('UTC');
 });
 
 test(`returns content_type of application/pdf`, async () => {

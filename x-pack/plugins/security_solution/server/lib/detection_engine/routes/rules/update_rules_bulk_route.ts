@@ -4,27 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import {
+  updateRulesBulkSchema,
+  UpdateRulesBulkSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
-import { UpdateRuleAlertParamsRest } from '../../rules/types';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
-import { buildRouteValidation, transformBulkError, buildSiemResponse } from '../utils';
-import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
+import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { PartialFilter } from '../../types';
 
 export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
       validate: {
-        body: buildRouteValidation<UpdateRuleAlertParamsRest[]>(updateRulesBulkSchema),
+        body: buildRouteValidation<typeof updateRulesBulkSchema, UpdateRulesBulkSchemaDecoded>(
+          updateRulesBulkSchema
+        ),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -46,21 +54,21 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const {
-            actions,
+            actions: actionsRest,
             anomaly_threshold: anomalyThreshold,
             description,
             enabled,
             false_positives: falsePositives,
             from,
-            query,
-            language,
+            query: queryOrUndefined,
+            language: languageOrUndefined,
             machine_learning_job_id: machineLearningJobId,
             output_index: outputIndex,
             saved_id: savedId,
             timeline_id: timelineId,
             timeline_title: timelineTitle,
             meta,
-            filters,
+            filters: filtersRest,
             rule_id: ruleId,
             id,
             index,
@@ -77,11 +85,32 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             references,
             note,
             version,
-            exceptions_list,
+            exceptions_list: exceptionsList,
           } = payloadRule;
           const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
+            const validationErrors = updateRuleValidateTypeDependents(payloadRule);
+            if (validationErrors.length) {
+              return createBulkErrorObject({
+                ruleId,
+                statusCode: 400,
+                message: validationErrors.join(),
+              });
+            }
+
+            const query =
+              type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+
+            const language =
+              type !== 'machine_learning' && languageOrUndefined == null
+                ? 'kuery'
+                : languageOrUndefined;
+
+            // TODO: Fix these either with an is conversion or by better typing them within io-ts
+            const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
+            const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
+
             throwHttpError(await mlAuthz.validateRuleType(type));
 
             const rule = await updateRules({
@@ -116,7 +145,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               references,
               note,
               version,
-              exceptions_list,
+              exceptionsList,
               actions,
             });
             if (rule != null) {

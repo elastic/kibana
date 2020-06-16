@@ -11,8 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // flaky test, see https://github.com/elastic/kibana/issues/68356
-  describe.skip('classification creation', function () {
+  describe('classification creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
@@ -66,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('selects the source data and loads the job wizard page', async () => {
-          ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
         });
 
         it('selects the job type', async () => {

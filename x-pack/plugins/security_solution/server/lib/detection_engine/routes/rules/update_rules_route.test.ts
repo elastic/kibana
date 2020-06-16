@@ -10,7 +10,6 @@ import {
   getEmptyFindResult,
   getResult,
   getUpdateRequest,
-  typicalPayload,
   getFindResultWithSingleHit,
   getFindResultStatusEmpty,
   nonRuleFindResult,
@@ -21,6 +20,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { updateRulesRoute } from './update_rules_route';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/update_rules_notifications');
@@ -138,20 +138,23 @@ describe('update_rules', () => {
       const noIdRequest = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...typicalPayload(), rule_id: undefined },
+        body: {
+          ...getCreateRulesSchemaMock(),
+          rule_id: undefined,
+        },
       });
-      const result = await server.validate(noIdRequest);
-
-      expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" must contain at least one of [id, rule_id]'
-      );
+      const response = await server.inject(noIdRequest, context);
+      expect(response.body).toEqual({
+        message: ['either "id" or "rule_id" must be set'],
+        status_code: 400,
+      });
     });
 
     test('allows query rule type', async () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...typicalPayload(), type: 'query' },
+        body: { ...getCreateRulesSchemaMock(), type: 'query' },
       });
       const result = await server.validate(request);
 
@@ -162,12 +165,12 @@ describe('update_rules', () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...typicalPayload(), type: 'unknown type' },
+        body: { ...getCreateRulesSchemaMock(), type: 'unknown type' },
       });
       const result = await server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]'
+        'Invalid value "unknown type" supplied to "type"'
       );
     });
   });

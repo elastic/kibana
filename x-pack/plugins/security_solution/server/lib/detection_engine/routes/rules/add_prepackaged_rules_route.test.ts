@@ -13,18 +13,16 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../__mocks__';
 import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
-import { PrepackagedRules } from '../../types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
-    getPrepackagedRules: (): PrepackagedRules[] => {
+    getPrepackagedRules: (): AddPrepackagedRulesSchemaDecoded[] => {
       return [
         {
           tags: [],
-          immutable: true,
           rule_id: 'rule-1',
-          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -34,6 +32,16 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
+          query: 'user.name: root or user.name: admin',
+          language: 'kuery',
+          references: [],
+          actions: [],
+          enabled: false,
+          false_positives: [],
+          max_signals: 100,
+          threat: [],
+          throttle: null,
+          exceptions_list: [],
           version: 2, // set one higher than the mocks which is set to 1 to trigger updates
         },
       ];

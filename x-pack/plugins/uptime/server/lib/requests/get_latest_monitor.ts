@@ -50,8 +50,8 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
         'monitor',
         'observer',
         '@timestamp',
-        'tls.server.x509.not_after',
-        'tls.server.x509.not_before',
+        'tls.certificate_not_valid_after',
+        'tls.certificate_not_valid_before',
       ],
       sort: {
         '@timestamp': { order: 'desc' },
@@ -68,6 +68,9 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
     ...ping,
     docId,
     timestamp: ping['@timestamp'],
-    tls: { not_after: tls?.server?.x509?.not_after, not_before: tls?.server?.x509?.not_before },
+    tls: {
+      not_after: tls?.certificate_not_valid_after,
+      not_before: tls?.certificate_not_valid_before,
+    },
   };
 };

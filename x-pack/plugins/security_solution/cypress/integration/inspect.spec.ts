@@ -5,14 +5,14 @@
  */
 
 import {
-  INSPECT_HOSTS_BUTTONS_IN_SIEM,
+  INSPECT_HOSTS_BUTTONS_IN_SECURITY,
   INSPECT_MODAL,
-  INSPECT_NETWORK_BUTTONS_IN_SIEM,
+  INSPECT_NETWORK_BUTTONS_IN_SECURITY,
 } from '../screens/inspect';
 
 import { closesModal, openStatsAndTables } from '../tasks/inspect';
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/siem_main';
+import { openTimeline } from '../tasks/security_main';
 import {
   executeTimelineKQL,
   openTimelineInspectButton,
@@ -30,7 +30,7 @@ describe('Inspect', () => {
       closesModal();
     });
 
-    INSPECT_HOSTS_BUTTONS_IN_SIEM.forEach((table) =>
+    INSPECT_HOSTS_BUTTONS_IN_SECURITY.forEach((table) =>
       it(`inspects the ${table.title}`, () => {
         openStatsAndTables(table);
         cy.get(INSPECT_MODAL).should('be.visible');
@@ -46,7 +46,7 @@ describe('Inspect', () => {
       closesModal();
     });
 
-    INSPECT_NETWORK_BUTTONS_IN_SIEM.forEach((table) =>
+    INSPECT_NETWORK_BUTTONS_IN_SECURITY.forEach((table) =>
       it(`inspects the ${table.title}`, () => {
         openStatsAndTables(table);
         cy.get(INSPECT_MODAL).should('be.visible');

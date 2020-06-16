@@ -30,12 +30,15 @@ export const analyticsJobsCreationRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const { index, jobId, savedSearchId }: Record<string, any> = parse(location.search, {
+    sort: false,
+  });
+
   const { context } = useResolver(index, savedSearchId, deps.config, basicResolvers(deps));
 
   return (
     <PageLoader context={context}>
-      <Page />
+      <Page jobId={jobId} />
     </PageLoader>
   );
 };

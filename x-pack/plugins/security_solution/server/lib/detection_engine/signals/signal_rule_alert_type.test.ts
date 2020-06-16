@@ -39,8 +39,6 @@ const getPayload = (ruleAlert: RuleAlertType, services: AlertServicesMock) => ({
     name: ruleAlert.name,
     tags: ruleAlert.tags,
     throttle: ruleAlert.throttle,
-    scrollSize: 10,
-    scrollLock: '0',
   },
   state: {},
   spaceId: '',
@@ -105,7 +103,7 @@ describe('rules_notification_alert_type', () => {
       attributes: ruleAlert,
     });
 
-    payload = getPayload(ruleAlert, alertServices);
+    payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
 
     alert = signalRulesAlertType({
       logger,
@@ -196,7 +194,7 @@ describe('rules_notification_alert_type', () => {
     describe('ML rule', () => {
       it('should throw an error if ML plugin was not available', async () => {
         const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices);
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         alert = signalRulesAlertType({
           logger,
           version,
@@ -213,7 +211,7 @@ describe('rules_notification_alert_type', () => {
       it('should throw an error if machineLearningJobId or anomalyThreshold was not null', async () => {
         const ruleAlert = getMlResult();
         ruleAlert.params.anomalyThreshold = undefined;
-        payload = getPayload(ruleAlert, alertServices);
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         await alert.executor(payload);
         expect(logger.error).toHaveBeenCalled();
         expect(logger.error.mock.calls[0][0]).toContain(
@@ -223,7 +221,7 @@ describe('rules_notification_alert_type', () => {
 
       it('should throw an error if Machine learning job summary was null', async () => {
         const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices);
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         jobsSummaryMock.mockResolvedValue([]);
         await alert.executor(payload);
         expect(logger.warn).toHaveBeenCalled();
@@ -236,7 +234,7 @@ describe('rules_notification_alert_type', () => {
 
       it('should log an error if Machine learning job was not started', async () => {
         const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices);
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         jobsSummaryMock.mockResolvedValue([
           {
             id: 'some_job_id',
@@ -260,7 +258,7 @@ describe('rules_notification_alert_type', () => {
 
       it('should not call ruleStatusService.success if no anomalies were found', async () => {
         const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices);
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         jobsSummaryMock.mockResolvedValue([]);
         (findMlSignals as jest.Mock).mockResolvedValue({
           hits: {
@@ -278,7 +276,7 @@ describe('rules_notification_alert_type', () => {
 
       it('should call ruleStatusService.success if signals were created', async () => {
         const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices);
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         jobsSummaryMock.mockResolvedValue([
           {
             id: 'some_job_id',
@@ -313,7 +311,7 @@ describe('rules_notification_alert_type', () => {
             id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
           },
         ];
-        payload = getPayload(ruleAlert, alertServices);
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         alertServices.savedObjectsClient.get.mockResolvedValue({
           id: 'id',
           type: 'type',

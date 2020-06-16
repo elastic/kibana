@@ -168,7 +168,7 @@ export class InnerCustomPlot extends PureComponent {
             tickFormatX={this.props.tickFormatX}
           />
 
-          {this.state.showAnnotations && !isEmpty(annotations) && (
+          {this.state.showAnnotations && !isEmpty(annotations) && !noHits && (
             <AnnotationsPlot
               plotValues={plotValues}
               width={width}
@@ -202,7 +202,7 @@ export class InnerCustomPlot extends PureComponent {
           hiddenSeriesCount={hiddenSeriesCount}
           clickLegend={this.clickLegend}
           seriesEnabledState={this.state.seriesEnabledState}
-          hasAnnotations={!isEmpty(annotations)}
+          hasAnnotations={!isEmpty(annotations) && !noHits}
           showAnnotations={this.state.showAnnotations}
           onAnnotationsToggle={() => {
             this.setState(({ showAnnotations }) => ({

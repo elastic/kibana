@@ -122,7 +122,7 @@ const AddressLinksComponent: React.FC<{
               />
             </DragEffects>
           ) : (
-            <IPDetailsLink data-test-sub="ip-details" ip={address} />
+            <IPDetailsLink data-test-subj="ip-details" ip={address} />
           )
         }
         truncate={truncate}

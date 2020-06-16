@@ -77,9 +77,15 @@ export const persistTimeline = async ({
 }: RequestPersistTimeline): Promise<TimelineResponse> => {
   if (timelineId == null && timeline.status === TimelineStatus.draft) {
     const draftTimeline = await cleanDraftTimeline({ timelineType: timeline.timelineType! });
+
     return patchTimeline({
       timelineId: draftTimeline.data.persistTimeline.timeline.savedObjectId,
-      timeline,
+      timeline: {
+        ...timeline,
+        templateTimelineId: draftTimeline.data.persistTimeline.timeline.templateTimelineId,
+        templateTimelineVersion:
+          draftTimeline.data.persistTimeline.timeline.templateTimelineVersion,
+      },
       version: draftTimeline.data.persistTimeline.timeline.version ?? '',
     });
   }
