@@ -9,7 +9,6 @@ import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ReportingCore } from '../';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { ReportingConfig } from '../../server';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { ReportingSetupDeps } from '../types';
 import { GetLicense } from './';
@@ -23,7 +22,7 @@ const METATYPE = 'kibana_stats';
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(
-  config: ReportingConfig,
+  reporting: ReportingCore,
   usageCollection: UsageCollectionSetup,
   getLicense: GetLicense,
   exportTypesRegistry: ExportTypesRegistry,
@@ -31,8 +30,10 @@ export function getReportingUsageCollector(
 ) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
-    fetch: (callCluster: CallCluster) =>
-      getReportingUsage(config, getLicense, callCluster, exportTypesRegistry),
+    fetch: (callCluster: CallCluster) => {
+      const config = reporting.getConfig();
+      return getReportingUsage(config, getLicense, callCluster, exportTypesRegistry);
+    },
     isReady,
 
     /*
@@ -63,7 +64,6 @@ export function registerReportingUsageCollector(
     return;
   }
 
-  const config = reporting.getConfig();
   const exportTypesRegistry = reporting.getExportTypesRegistry();
   const getLicense = async () => {
     return await licensing.license$
@@ -78,10 +78,10 @@ export function registerReportingUsageCollector(
       )
       .toPromise();
   };
-  const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
+  const collectionIsReady = reporting.pluginStartsUp.bind(reporting);
 
   const collector = getReportingUsageCollector(
-    config,
+    reporting,
     usageCollection,
     getLicense,
     exportTypesRegistry,
