@@ -114,10 +114,10 @@ describe('data generator', () => {
         relatedEvents: 0,
         relatedAlerts: 0,
       });
+      tree.ancestry.delete(tree.origin.id);
     });
 
     it('creates an alert for the origin node but no other nodes', () => {
-      tree.ancestry.delete(tree.origin.id);
       for (const node of tree.ancestry.values()) {
         expect(node.relatedAlerts.length).toEqual(0);
       }

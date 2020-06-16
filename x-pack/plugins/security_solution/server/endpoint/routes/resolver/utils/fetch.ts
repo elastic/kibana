@@ -216,29 +216,6 @@ export class Fetcher {
     );
   }
 
-  private async doAlerts(limit: number, after?: string) {
-    const query = new AlertsQuery(
-      PaginationBuilder.createBuilder(limit, after),
-      this.indexPattern,
-      this.endpointID
-    );
-
-    const { totals, results } = await query.search(this.client, this.id);
-    if (results.length === 0) {
-      // return an empty set of results
-      return createRelatedAlerts(this.id);
-    }
-    if (!totals[this.id]) {
-      throw new Error(`Could not find the totals for related events entity_id: ${this.id}`);
-    }
-
-    return createRelatedAlerts(
-      this.id,
-      results,
-      PaginationBuilder.buildCursor(totals[this.id], results)
-    );
-  }
-
   private async doChildren(
     cache: ChildrenNodesHelper,
     ids: string[],
