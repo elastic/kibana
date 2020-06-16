@@ -76,7 +76,7 @@ pipeline {
         }
       }
       steps{
-        notifyStatus('Running smoke tests', 'PENDING')
+        notifyTestStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
           sh "${E2E_DIR}/ci/run-e2e.sh"
         }
@@ -95,10 +95,10 @@ pipeline {
           }
         }
         unsuccessful {
-          notifyStatus('Test failures', 'FAILURE')
+          notifyTestStatus('Test failures', 'FAILURE')
         }
         success {
-          notifyStatus('Tests passed', 'SUCCESS')
+          notifyTestStatus('Tests passed', 'SUCCESS')
         }
       }
     }
@@ -113,5 +113,9 @@ pipeline {
 }
 
 def notifyStatus(String description, String status) {
-  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanDisplayURL())
+  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('pipeline'))
+}
+
+def notifyTestStatus(String description, String status) {
+  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('tests'))
 }
