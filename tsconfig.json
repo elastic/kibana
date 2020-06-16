@@ -54,7 +54,8 @@
       "jest",
       "react",
       "flot",
-      "jest-styled-components"
+      "jest-styled-components",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
