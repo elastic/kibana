@@ -6,12 +6,11 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useGetUrlParams } from '../../../hooks';
 import { parseFiltersMap } from './parse_filter_map';
 import { fetchOverviewFilters } from '../../../state/actions';
 import { FilterGroupComponent } from './index';
 import { UptimeRefreshContext } from '../../../contexts';
-import { esKuerySelector, overviewFiltersSelector } from '../../../state/selectors';
+import { esKuerySelector, overviewFiltersSelector, uiSelector } from '../../../state/selectors';
 
 interface Props {
   esFilters?: string;
@@ -21,14 +20,16 @@ export const FilterGroup: React.FC<Props> = ({ esFilters }: Props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const { filters: overviewFilters, loading } = useSelector(overviewFiltersSelector);
+  const {
+    dateRange: { from: dateRangeStart, to: dateRangeEnd },
+    selectedFilters,
+    statusFilter,
+  } = useSelector(uiSelector);
   const esKuery = useSelector(esKuerySelector);
-
-  const { dateRangeStart, dateRangeEnd, statusFilter, filters: urlFilters } = useGetUrlParams();
-
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const filterSelections = parseFiltersMap(urlFilters);
+    const filterSelections = parseFiltersMap(selectedFilters);
     dispatch(
       fetchOverviewFilters({
         dateRangeStart,
@@ -47,8 +48,8 @@ export const FilterGroup: React.FC<Props> = ({ esFilters }: Props) => {
     dateRangeEnd,
     esKuery,
     esFilters,
+    selectedFilters,
     statusFilter,
-    urlFilters,
     dispatch,
   ]);
 

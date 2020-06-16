@@ -48,6 +48,10 @@ const resolveUrlUpdates = (
     urlState.pagination = storeState.currentMonitorListPage;
   }
 
+  if (params.filters !== storeState.selectedFilters) {
+    urlState.filters = storeState.selectedFilters;
+  }
+
   return urlState;
 };
 
@@ -78,6 +82,10 @@ const resolveStateChanges = (params: UptimeUrlParams, storeState: UiState): Part
 
   if (params.pagination !== storeState.currentMonitorListPage) {
     uiState.currentMonitorListPage = params.pagination;
+  }
+
+  if (params.filters !== storeState.selectedFilters) {
+    uiState.selectedFilters = params.filters;
   }
 
   return uiState;

@@ -42,6 +42,7 @@ export interface UiState {
   };
   esKuery: string;
   searchText: string;
+  selectedFilters: string;
   statusFilter: string;
   integrationsPopoverOpen: PopoverState | null;
 }
@@ -58,6 +59,7 @@ const initialState: UiState = {
   },
   esKuery: '',
   searchText: '',
+  selectedFilters: '',
   statusFilter: '',
   integrationsPopoverOpen: null,
 };
