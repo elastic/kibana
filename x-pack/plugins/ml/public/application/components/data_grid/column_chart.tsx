@@ -35,9 +35,9 @@ const getLegendText = (chartData: ChartData, MAX_CHART_COLUMNS: number): string 
     );
   }
 
-  if (isOrdinalChartData(chartData) && chartData.cardinality === 1) {
+  if (isOrdinalChartData(chartData) && chartData.cardinality <= MAX_CHART_COLUMNS) {
     return i18n.translate('xpack.ml.dataGridChart.singleCategoryLegend', {
-      defaultMessage: `{cardinality} category`,
+      defaultMessage: `{cardinality, plural, one {# category} other {# categories}}`,
       values: { cardinality: chartData.cardinality },
     });
   }
@@ -46,17 +46,6 @@ const getLegendText = (chartData: ChartData, MAX_CHART_COLUMNS: number): string 
     return i18n.translate('xpack.ml.dataGridChart.topCategoriesLegend', {
       defaultMessage: `top {MAX_CHART_COLUMNS} of {cardinality} categories`,
       values: { cardinality: chartData.cardinality, MAX_CHART_COLUMNS },
-    });
-  }
-
-  if (
-    isOrdinalChartData(chartData) &&
-    chartData.cardinality <= MAX_CHART_COLUMNS &&
-    chartData.cardinality > 1
-  ) {
-    return i18n.translate('xpack.ml.dataGridChart.categoriesLegend', {
-      defaultMessage: `{cardinality} categories`,
-      values: { cardinality: chartData.cardinality },
     });
   }
 
