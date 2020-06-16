@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const actionElement = await testSubjects.find(EXPLORE_RAW_DATA_ACTION_TEST_SUBJ);
       const tag = await actionElement.getTagName();
 
-      expect(tag).to.be('A');
+      expect(tag.toLowerCase()).to.be('a');
     });
 
     it('navigates to Discover app to index pattern of the panel on action click', async () => {
