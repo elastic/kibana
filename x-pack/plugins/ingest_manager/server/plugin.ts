@@ -73,6 +73,7 @@ export interface IngestManagerAppContext {
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: boolean;
   kibanaVersion: string;
+  externalCallbacks: ExternalCallbacksStorage;
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -97,6 +98,8 @@ export type ExternalCallbacks = [
   'datasourceCreate',
   (newDatasource: NewDatasource) => Promise<NewDatasource>
 ];
+
+export type ExternalCallbacksStorage = Map<ExternalCallbacks[0], Set<ExternalCallbacks[1]>>;
 
 /**
  * Describes public IngestManager plugin contract returned at the `startup` stage.
@@ -128,7 +131,7 @@ export class IngestManagerPlugin
   private isProductionMode: boolean;
   private kibanaVersion: string;
   private httpSetup: HttpServiceSetup | undefined;
-  private externalCallbacks: Map<ExternalCallbacks[0], Set<ExternalCallbacks[1]>>;
+  private externalCallbacks: ExternalCallbacksStorage;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
@@ -225,6 +228,7 @@ export class IngestManagerPlugin
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
+      externalCallbacks: this.externalCallbacks,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
