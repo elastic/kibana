@@ -151,6 +151,16 @@ export const PingType = t.intersection([
       port: t.number,
       scheme: t.string,
     }),
+    journey: t.partial({
+      results: t.array(t.partial({
+        name: t.string,
+        status: t.string,
+        duration: t.number,
+        screenshot: t.string,
+        source: t.string,
+        error: t.any,
+      }))
+    })
   }),
 ]);
 

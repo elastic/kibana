@@ -14,10 +14,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
+import { EuiPopover } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 
 interface Props {
   ping: Ping;
@@ -57,6 +61,67 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
     listItems.push({
       title: i18n.translate('xpack.uptime.pingList.expandedRow.error', { defaultMessage: 'Error' }),
       description: <EuiText>{ping.error.message}</EuiText>,
+    });
+  }
+
+  // Show the journey
+  const journeyItems = ping.journey?.results?.map(r => {
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+    const onButtonClick = () => setIsPopoverOpen(isPopoverOpen => !isPopoverOpen);
+    const closePopover = () => setIsPopoverOpen(false);
+
+    const thumbnail = <img style={{width: "auto", height: "auto", maxWidth: "150px", maxHeight: "150px"}} onClick={onButtonClick} src={"data:image/png;charset=utf-8;base64, " + r.screenshot} />
+    const description = <EuiPopover
+      button={thumbnail}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}>
+
+      <img style={{width: "600px"}} src={"data:image/png;charset=utf-8;base64, " + r.screenshot} />
+      </EuiPopover>
+
+    let color = "primary";
+    let icon = "checkInCircleFilled";
+    let message = "Succeeded";
+    if (r.status === "failed") {
+      color = "danger";
+      icon = "crossInACircleFilled";
+      message = `Failure (${r.error.name})`;
+    } else if (r.status === "skipped") {
+      color = "hollow";
+      icon = "questionInCircle";
+      message = "Skipped";
+    }
+
+    const title = <>
+      <EuiText>{r.name}</EuiText>
+      <EuiBadge color={color} iconType={icon} iconSide="left">
+        {message}
+      </EuiBadge>
+      <EuiCodeBlock>
+        {r.source}
+      </EuiCodeBlock>
+    </>;
+
+
+    return {
+      title,
+      description
+    }
+  }) ?? [];
+  if (ping.journey) {
+    listItems.push({
+      title: i18n.translate('xpack.uptime.pingList.expandedRow.journey', {
+        defaultMessage: 'Journey'
+      }),
+      description: (
+        <EuiPanel>
+          <EuiDescriptionList
+            type="responsiveColumn"
+            listItems={journeyItems}
+          />
+        </EuiPanel>
+      )
     });
   }
 

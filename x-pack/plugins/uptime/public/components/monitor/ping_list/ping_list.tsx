@@ -238,7 +238,7 @@ export const PingListComponent = (props: Props) => {
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
-            disabled={!item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
+            disabled={!item.journey && !item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
             aria-label={
               expandedRows[item.docId]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {
