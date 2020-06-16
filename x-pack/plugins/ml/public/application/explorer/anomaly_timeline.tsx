@@ -68,7 +68,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
     const disableDragSelectOnMouseLeave = useRef(true);
 
-    const canEditDashboards = capabilities.dashboard.createNew;
+    const canEditDashboards = capabilities.dashboard?.createNew ?? false;
 
     const timeBuckets = useMemo(() => {
       return new TimeBuckets({
