@@ -48,6 +48,7 @@ import { EndpointAppContextService } from './endpoint/endpoint_app_context_servi
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
+import { createSiemTelemetry } from './lib/telemetry';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -59,6 +60,8 @@ export interface SetupPlugins {
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
+  ml?: MlSetup;
+  lists?: ListPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -245,6 +248,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.manifestTask = new ManifestTask({
         endpointAppContext: endpointContext,
         taskManager: plugins.taskManager!,
+      });
+    }
+
+    if (plugins.usageCollection) {
+      const { usageCollection } = plugins;
+      core.getStartServices().then(([{ savedObjects }]) => {
+        const savedObjectsClient = savedObjects.createInternalRepository();
+        createSiemTelemetry(usageCollection, savedObjectsClient);
       });
     }
 
