@@ -79,6 +79,32 @@ const gridStyle = {
 const pageSizeArr = [25, 50, 100, 500];
 const defaultPageSize = 50;
 
+/**
+ * TODO remove this component just used for debugging
+ */
+class EuiDataGridWrapper extends React.Component<Props<P>> {
+  /**
+  componentWillReceiveProps(nextProps: Props<P>) {
+    Object.keys(nextProps)
+      .filter((key) => nextProps[key] !== this.props[key])
+      .map((key) => {
+        console.log('changed property:', key, 'from', this.props[key], 'to', nextProps[key]);
+      });
+  }*/
+  shouldComponentUpdate(
+    nextProps: Readonly<Props<P>>,
+    nextState: Readonly<{}>,
+    nextContext: any
+  ): boolean {
+    return Object.keys(nextProps).filter((key) => nextProps[key] !== this.props[key]).length !== 0;
+  }
+
+  render() {
+    // @ts-ignore
+    return <EuiDataGrid {...this.props} />;
+  }
+}
+
 export const DiscoverGrid = React.memo(
   ({
     rows,
@@ -111,7 +137,7 @@ export const DiscoverGrid = React.memo(
      */
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
 
-    const getPaginationObj = useCallback(() => {
+    const paginationObj = useMemo(() => {
       const onChangeItemsPerPage = (pageSize) =>
         setPagination((paginationData) => ({ ...paginationData, pageSize }));
 
@@ -191,6 +217,26 @@ export const DiscoverGrid = React.memo(
     const randomId = useMemo(() => String(htmlIdGenerator()), []);
 
     const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
+    const euiGridColumns = useMemo(
+      () => getEuiGridColumns(columns, indexPattern, showTimeCol, timeString),
+      [columns, indexPattern, showTimeCol, timeString]
+    );
+    const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
+    const popoverContents = useMemo(() => getPopoverContents(), []);
+    const colummsVisibility = useMemo(
+      () => ({
+        visibleColumns: getVisibleColumns(columns, indexPattern, showTimeCol) as string[],
+        setVisibleColumns: (newColumns) => {
+          onSetColumns(newColumns);
+        },
+      }),
+      [columns, indexPattern, showTimeCol, onSetColumns]
+    );
+    const sorting = useMemo(() => ({ columns: sortingColumns, onSort: onTableSort }), [
+      sortingColumns,
+      onTableSort,
+    ]);
+
     const leadingControlControls = useMemo(
       () => [
         {
@@ -229,25 +275,20 @@ export const DiscoverGrid = React.memo(
 
     return (
       <>
-        <EuiDataGrid
+        <EuiDataGridWrapper
           aria-labelledby={ariaLabelledBy}
           aria-describedby={randomId}
-          sorting={{ columns: sortingColumns, onSort: onTableSort }}
+          sorting={sorting}
           rowCount={rowCount}
-          columns={getEuiGridColumns(columns, indexPattern, showTimeCol, timeString)}
+          columns={euiGridColumns}
           renderCellValue={renderCellValue}
           leadingControlColumns={leadingControlControls}
-          columnVisibility={{
-            visibleColumns: getVisibleColumns(columns, indexPattern, showTimeCol) as string[],
-            setVisibleColumns: (newColumns) => {
-              onSetColumns(newColumns);
-            },
-          }}
-          pagination={getPaginationObj()}
+          columnVisibility={colummsVisibility}
+          pagination={paginationObj}
           toolbarVisibility={toolbarVisibility}
           gridStyle={gridStyle}
-          schemaDetectors={getSchemaDetectors()}
-          popoverContents={getPopoverContents()}
+          schemaDetectors={schemaDetectors}
+          popoverContents={popoverContents}
         />
         {showDisclaimer && (
           <>
