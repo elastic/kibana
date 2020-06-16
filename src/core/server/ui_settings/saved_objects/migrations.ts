@@ -17,30 +17,26 @@
  * under the License.
  */
 
-import { relative, join } from 'path';
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'kibana/server';
 
-import del from 'del';
-import vfs from 'vinyl-fs';
-import zip from 'gulp-zip';
-
-import { pipeline, PluginConfig } from '../../lib';
-
-export async function createPackage(
-  plugin: PluginConfig,
-  buildTarget: string,
-  buildVersion: string
-) {
-  const buildId = `${plugin.id}-${buildVersion}`;
-  const buildRoot = join(buildTarget, 'kibana', plugin.id);
-  const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];
-
-  // zip up the package
-  await pipeline(
-    vfs.src(buildFiles, { cwd: buildTarget, base: buildTarget, dot: true }),
-    zip(`${buildId}.zip`),
-    vfs.dest(buildTarget)
-  );
-
-  // clean up the build path
-  await del(join(buildTarget, 'kibana'));
-}
+export const migrations = {
+  '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          key.startsWith('siem:')
+            ? {
+                ...acc,
+                [key.replace('siem', 'securitySolution')]: doc.attributes[key],
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
+    references: doc.references || [],
+  }),
+};
