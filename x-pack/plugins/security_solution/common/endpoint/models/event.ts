@@ -52,3 +52,10 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
   }
   return event.process.parent?.entity_id;
 }
+
+export function ancestryArray(event: ResolverEvent): string[] {
+  if (isLegacyEvent(event)) {
+    return [];
+  }
+  return event.process.Ext.ancestry;
+}

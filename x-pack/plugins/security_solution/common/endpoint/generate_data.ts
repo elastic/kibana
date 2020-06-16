@@ -18,6 +18,7 @@ import {
 import { factory as policyFactory } from './models/policy_config';
 
 export type Event = AlertEvent | EndpointEvent;
+export const ANCESTRY_LIMIT: number = 2;
 
 interface EventOptions {
   timestamp?: number;
@@ -239,6 +240,7 @@ export interface Tree {
    * Map of entity_id to node
    */
   ancestry: Map<string, TreeNode>;
+  // TODO add the origin to the ancestry array to make test verification easier
   origin: TreeNode;
   /**
    * All events from children, ancestry, origin, and the alert in a single array
@@ -343,7 +345,8 @@ export class EndpointDocGenerator {
     ts = new Date().getTime(),
     entityID = this.randomString(10),
     parentEntityID?: string,
-    ancestryArray: string[] = []
+    ancestryArray: string[] = [],
+    ancestryLimit: number = 2
   ): AlertEvent {
     return {
       ...this.commonInfo,
@@ -418,7 +421,9 @@ export class EndpointDocGenerator {
           sha1: 'fake sha1',
           sha256: 'fake sha256',
         },
-        Ext: { ancestry: ancestryArray },
+        // simulate a finite ancestry array size, the endpoint limits the ancestry array to 20 entries we'll use
+        // 2 so that the backend can handle that case
+        Ext: { ancestry: ancestryArray.slice(0, ANCESTRY_LIMIT) },
       },
       dll: [
         {
@@ -472,7 +477,9 @@ export class EndpointDocGenerator {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
         name: options.processName ? options.processName : randomProcessName(),
-        Ext: { ancestry: options.ancestry?.slice() || [] },
+        // simulate a finite ancestry array size, the endpoint limits the ancestry array to 20 entries we'll use
+        // 2 so that the backend can handle that case
+        Ext: { ancestry: options.ancestry?.slice(0, ANCESTRY_LIMIT) || [] },
       },
     };
   }
@@ -525,9 +532,6 @@ export class EndpointDocGenerator {
     if (!origin) {
       throw Error(`could not find origin while building tree: ${alert.process.entity_id}`);
     }
-
-    // remove the origin node from the ancestry array
-    ancestryNodes.delete(alert.process.entity_id);
 
     const children = Array.from(
       this.descendantsTreeGenerator(

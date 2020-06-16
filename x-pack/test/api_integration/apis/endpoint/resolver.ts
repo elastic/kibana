@@ -79,14 +79,17 @@ const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent
   expect(Object.keys(groupedAncestors).length).to.eql(ancestors.length);
   // make sure there aren't any nodes with the same parent entity_id
   expect(Object.keys(groupedAncestorsParent).length).to.eql(ancestors.length);
-  ancestors.forEach((node) => {
+
+  const endAncestor = verifyLastParent ? ancestors.length : ancestors.length - 1;
+  for (let i = 0; i < endAncestor; i++) {
+    const node = ancestors[i];
     const parentID = parentEntityId(node.lifecycle[0]);
     // the last node generated will have `undefined` as the parent entity_id
-    if (parentID !== undefined && verifyLastParent) {
+    if (parentID !== undefined) {
       expect(groupedAncestors[parentID]).to.be.ok();
     }
     expectLifecycleNodeInMap(node, tree.ancestry);
-  });
+  }
 };
 
 /**
@@ -457,6 +460,10 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           const ancestryInfo = getRootAndAncestry(body);
           verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree, false);
           expect(body.nextAncestor).to.eql(
+            // TODO this won't be valid anymore since the order of the array will be wrong. We'll need to go through
+            // each ensure that they represent a direct lineage from the origin up the ancestry
+            // to make sure it isn't returning the wrong set of ancestry
+
             // it should be the parent entity id on the last element of the ancestry array
             parentEntityId(ancestryInfo.ancestry[ancestryInfo.ancestry.length - 1].lifecycle[0])
           );
