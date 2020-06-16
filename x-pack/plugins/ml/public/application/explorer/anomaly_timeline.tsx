@@ -185,9 +185,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         items.push(
           <EuiContextMenuItem
             key="addToDashboard"
-            onClick={() => {
-              setIsAddDashboardActive(true);
-            }}
+            onClick={setIsAddDashboardActive.bind(null, true)}
+            data-test-subj="mlAnomalyTimelinePanelAddToDashboardButton"
           >
             <FormattedMessage
               id="xpack.ml.explorer.addToDashboardLabel"
@@ -288,15 +287,12 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                       })}
                       color="subdued"
                       iconType="boxesHorizontal"
-                      onClick={() => {
-                        setIsMenuOpen(!isMenuOpen);
-                      }}
+                      onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                      data-test-subj="mlAnomalyTimelinePanelMenu"
                     />
                   }
                   isOpen={isMenuOpen}
-                  closePopover={() => {
-                    setIsMenuOpen(false);
-                  }}
+                  closePopover={setIsMenuOpen.bind(null, false)}
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
                 >
@@ -376,7 +372,12 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         </EuiPanel>
         {isAddDashboardsActive && selectedJobs && (
           <AddToDashboardControl
-            onClose={setIsAddDashboardActive.bind(null, false)}
+            onClose={async (callback) => {
+              setIsAddDashboardActive(false);
+              if (callback) {
+                await callback();
+              }
+            }}
             jobIds={selectedJobs.map(({ id }) => id)}
             viewBy={viewBySwimlaneFieldName!}
             limit={swimlaneLimit}
