@@ -5,5 +5,6 @@
   "ui": true,
   "requiredPlugins": ["home", "licensing", "management"],
   "optionalPlugins": ["telemetry"],
-  "configPath": ["xpack", "license_management"]
+  "configPath": ["xpack", "license_management"],
+  "extraPublicDirs": ["common/constants"]
 }

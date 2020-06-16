@@ -6,14 +6,13 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { HostState } from '../types';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
 import { State } from '../../../../common/store';
-
 export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
   return useSelector(function (state: State) {
     return selector(
@@ -36,4 +35,19 @@ export const useHostLogsUrl = (hostId: string): { url: string; appId: string; ap
       appPath,
     };
   }, [hostId, services.application]);
+};
+
+/**
+ * Returns an object that contains Ingest app and URL information
+ */
+export const useHostIngestUrl = (): { url: string; appId: string; appPath: string } => {
+  const { services } = useKibana();
+  return useMemo(() => {
+    const appPath = `#/fleet`;
+    return {
+      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
+      appId: 'ingestManager',
+      appPath,
+    };
+  }, [services.application]);
 };
