@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { deleteMetadataStream } from '../../../api_integration/apis/endpoint/data_stream_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
@@ -13,11 +14,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/63621
-  describe.skip('endpoint list', function () {
+  describe('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     before(async () => {
-      await esArchiver.load('endpoint/metadata/api_feature');
+      await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
       await pageObjects.endpoint.navigateToEndpointList();
     });
 
@@ -117,12 +118,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('no data', () => {
       before(async () => {
         // clear out the data and reload the page
-        await esArchiver.unload('endpoint/metadata/api_feature');
+        await deleteMetadataStream(getService);
+        // await esArchiver.unload('endpoint/metadata/api_feature');
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         // reload the data so the other tests continue to pass
-        await esArchiver.load('endpoint/metadata/api_feature');
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        //  await esArchiver.load('endpoint/metadata/api_feature');
       });
       it('displays no items found when empty', async () => {
         // get the endpoint list table data and verify message
@@ -175,7 +178,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
     after(async () => {
-      await esArchiver.unload('endpoint/metadata/api_feature');
+      await deleteMetadataStream(getService);
+      // await esArchiver.unload('endpoint/metadata/api_feature');
     });
   });
 };
