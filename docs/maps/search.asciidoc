@@ -1,11 +1,6 @@
 [role="xpack"]
 [[maps-search]]
-== Search your data
-
-++++
-<titleabbrev>Search your data</titleabbrev>
-++++
-
+== Search geographic data
 
 Maps embeds the search bar for real-time search.
 Only layers requesting data from {es} are filtered when you submit a search request.
