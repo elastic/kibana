@@ -73,14 +73,14 @@ const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent
   for (let i = 0; i < ancestors.length; i++) {
     const parentID = parentEntityId(node.lifecycle[0]);
     if (parentID !== undefined) {
-      // the grouped nodes should only have a single entry since each entity is unique
-      node = groupedAncestors[parentID][0];
-      if (node) {
-        foundParents++;
-      } else {
+      const nextNode = groupedAncestors[parentID];
+      if (!nextNode) {
         break;
       }
+      // the grouped nodes should only have a single entry since each entity is unique
+      node = nextNode[0];
     }
+    foundParents++;
   }
 
   if (verifyLastParent) {
@@ -90,6 +90,29 @@ const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent
     // be in the results
     expect(foundParents).to.eql(ancestors.length - 1);
   }
+};
+
+/**
+ * Retrieves the most distant ancestor in the given array.
+ *
+ * @param ancestors an array of ancestor nodes
+ */
+const retrieveDistantAncestor = (ancestors: LifecycleNode[]) => {
+  // group the ancestors by their entity_id mapped to a lifecycle node
+  const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
+  let node = ancestors[0];
+  for (let i = 0; i < ancestors.length; i++) {
+    const parentID = parentEntityId(node.lifecycle[0]);
+    if (parentID !== undefined) {
+      const nextNode = groupedAncestors[parentID];
+      if (nextNode) {
+        node = nextNode[0];
+      } else {
+        return node;
+      }
+    }
+  }
+  return node;
 };
 
 /**
@@ -460,18 +483,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .expect(200);
           // it should have 2 ancestors + 1 origin
           expect(body.ancestors.length).to.eql(3);
-          verifyAncestry(body.ancestors, tree, true);
-          // TODO fix this test
-          expect(false).to.be.ok();
-          expect(body.nextAncestor).to.eql(
-            // TODO this won't be valid anymore since the order of the array will be wrong. We'll need to go through
-            // each ensure that they represent a direct lineage from the origin up the ancestry
-            // to make sure it isn't returning the wrong set of ancestry
-
-            // it should be the parent entity id on the last element of the ancestry array
-            // parentEntityId(ancestryInfo.ancestry[ancestryInfo.ancestry.length - 1].lifecycle[0])
-            {}
-          );
+          verifyAncestry(body.ancestors, tree, false);
+          const distantGrandparent = retrieveDistantAncestor(body.ancestors);
+          expect(body.nextAncestor).to.eql(parentEntityId(distantGrandparent.lifecycle[0]));
         });
 
         it('should handle multiple ancestor requests', async () => {

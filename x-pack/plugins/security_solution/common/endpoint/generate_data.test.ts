@@ -168,12 +168,12 @@ describe('data generator', () => {
       for (let i = 0; i < event.process.Ext.ancestry.length; i++) {
         const ancestor = event.process.Ext.ancestry[i];
         const parent = genTree.children.get(ancestor) || genTree.ancestry.get(ancestor);
-        expect(ancestor).toBe(parent.lifecycle[0].process.entity_id);
+        expect(ancestor).toBe(parent?.lifecycle[0].process.entity_id);
 
         // the next ancestor should be the grandparent
         if (i + 1 < event.process.Ext.ancestry.length) {
           const grandparent = event.process.Ext.ancestry[i + 1];
-          expect(grandparent).toBe(parent.lifecycle[0].process.parent?.entity_id);
+          expect(grandparent).toBe(parent?.lifecycle[0].process.parent?.entity_id);
         }
       }
     };

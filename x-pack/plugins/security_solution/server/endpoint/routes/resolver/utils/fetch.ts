@@ -13,7 +13,11 @@ import {
   LifecycleNode,
   ResolverEvent,
 } from '../../../../../common/endpoint/types';
-import { entityId, ancestryArray } from '../../../../../common/endpoint/models/event';
+import {
+  entityId,
+  ancestryArray,
+  parentEntityId,
+} from '../../../../../common/endpoint/models/event';
 import { PaginationBuilder } from './pagination';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
@@ -54,6 +58,8 @@ export class Fetcher {
     const originNode = await this.getNode(this.id);
     if (originNode) {
       ancestryInfo.ancestors.push(originNode);
+      // If the request is only for the origin node then set next to its parent
+      ancestryInfo.nextAncestor = parentEntityId(originNode.lifecycle[0]) || null;
       await this.doAncestors(
         // limit the ancestors we're looking for to the number of levels
         // the array could be up to length 20 but that could change
@@ -149,9 +155,6 @@ export class Fetcher {
     ancestorInfo: ResolverAncestry
   ): Promise<void> {
     if (levels <= 0) {
-      if (ancestors.length !== 0) {
-        ancestorInfo.nextAncestor = ancestors[0];
-      }
       return;
     }
 
@@ -159,6 +162,7 @@ export class Fetcher {
     const results = await query.search(this.client, ancestors);
 
     if (results.length === 0) {
+      ancestorInfo.nextAncestor = null;
       return;
     }
 
@@ -180,7 +184,7 @@ export class Fetcher {
     // the order of this array is going to be weird, it will look like this
     // [furthest grandparent...closer grandparent, next recursive call furthest grandparent...closer grandparent]
     ancestorInfo.ancestors.push(...ancestryNodes.values());
-
+    ancestorInfo.nextAncestor = parentEntityId(results[0]) || null;
     const levelsLeft = levels - ancestryNodes.size;
     // the results come back in ascending order on timestamp so the first entry in the
     // results should be the further ancestor (most distant grandparent)
