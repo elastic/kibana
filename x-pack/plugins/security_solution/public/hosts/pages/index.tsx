@@ -41,6 +41,12 @@ export const HostsContainer = React.memo<Props>(({ url }) => {
       {({ to, from, setQuery, deleteQuery, isInitializing }) => (
         <Switch>
           <Route
+            path="/ml-hosts"
+            render={({ location, match }) => (
+              <MlHostConditionalContainer location={location} url={match.url} />
+            )}
+          />
+          <Route
             path={getHostsTabPath()}
             render={() => (
               <Hosts
@@ -83,12 +89,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => {
               return null;
             }}
           />
-          <Route
-            path="/ml-hosts"
-            render={({ location, match }) => (
-              <MlHostConditionalContainer location={location} url={match.url} />
-            )}
-          />
+
           <Route
             exact
             strict

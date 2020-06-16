@@ -16,6 +16,7 @@ import { Network } from './network';
 import { GlobalTime } from '../../common/containers/global_time';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
+import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
@@ -38,6 +39,12 @@ const NetworkContainerComponent: React.FC<Props> = () => {
     <GlobalTime>
       {({ to, from, setQuery, deleteQuery, isInitializing }) => (
         <Switch>
+          <Route
+            path="/ml-network"
+            render={({ location, match }) => (
+              <MlNetworkConditionalContainer location={location} url={match.url} />
+            )}
+          />
           <Route
             strict
             path={networkRoutePath}

@@ -18,85 +18,58 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
 
   switch (pageName) {
     case SecurityPageName.overview:
-      window.setTimeout(
-        () =>
-          application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
-            replace: true,
-            path,
-          }),
-        0
-      );
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
+        replace: true,
+        path,
+      });
+      break;
     case 'ml-hosts':
-      window.setTimeout(
-        () =>
-          application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
-            replace: true,
-            path: `/ml-hosts${path}`,
-          }),
-        0
-      );
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        replace: true,
+        path: `/ml-hosts${path}`,
+      });
+      break;
     case SecurityPageName.hosts:
-      window.setTimeout(
-        () =>
-          application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
-            replace: true,
-            path,
-          }),
-        0
-      );
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        replace: true,
+        path,
+      });
+      break;
     case 'ml-network':
-      window.setTimeout(
-        () =>
-          application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
-            replace: true,
-            path: `/ml-network${path}`,
-          }),
-        0
-      );
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+        replace: true,
+        path: `/ml-network${path}`,
+      });
+      break;
     case SecurityPageName.network:
-      window.setTimeout(
-        () =>
-          application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
-            replace: true,
-            path,
-          }),
-        0
-      );
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+        replace: true,
+        path,
+      });
+      break;
     case SecurityPageName.timelines:
-      window.setTimeout(
-        () =>
-          application.navigateToApp(`${APP_ID}:${SecurityPageName.timelines}`, {
-            replace: true,
-            path,
-          }),
-        0
-      );
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.timelines}`, {
+        replace: true,
+        path,
+      });
+      break;
     case SecurityPageName.case:
-      window.setTimeout(
-        () =>
-          application.navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-            replace: true,
-            path,
-          }),
-        0
-      );
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        replace: true,
+        path,
+      });
+      break;
     case 'detections':
-      window.setTimeout(
-        () =>
-          application.navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
-            replace: true,
-            path,
-          }),
-        0
-      );
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+        replace: true,
+        path,
+      });
+      break;
     default:
-      window.setTimeout(
-        () =>
-          application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
-            replace: true,
-            path: `?${search}`,
-          }),
-        0
-      );
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
+        replace: true,
+        path: `?${search}`,
+      });
+      break;
   }
 };
