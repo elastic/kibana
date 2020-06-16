@@ -37,12 +37,11 @@ export interface TypeMeta {
 export interface IndexPatternSpec {
   id: string;
   type: string;
-  source: {
-    title: string;
-    timeFieldName: string;
-    sourceFilters: string;
-    fields: string;
-    fieldFormatMap: string;
-  };
   version: string;
+
+  title: string;
+  timeFieldName: string;
+  sourceFilters: string;
+  fields: string;
+  fieldFormatMap: string;
 }

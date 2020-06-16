@@ -208,11 +208,11 @@ export class IndexPattern implements IIndexPattern {
         return;
       }
 
-      response.source[name] = fieldMapping._deserialize(response.source[name]);
+      response[name] = fieldMapping._deserialize(response[name]);
     });
 
     // give index pattern all of the values in _source
-    _.assign(this, response.source);
+    _.assign(this, response);
 
     if (!this.title && this.id) {
       this.title = this.id;
@@ -280,10 +280,10 @@ export class IndexPattern implements IIndexPattern {
 
     const response = {
       id: savedObject.id,
-      type: savedObject.type,
+      // type: savedObject.type,
       version: savedObject._version,
-      source: _.cloneDeep(savedObject.attributes),
       found: savedObject._version ? true : false,
+      ..._.cloneDeep(savedObject.attributes),
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
@@ -297,9 +297,10 @@ export class IndexPattern implements IIndexPattern {
   public toSpec() {
     return {
       id: this.id,
-      type: this.type,
-      source: this.prepBody(),
+      // type: this.type,
+      // source: this.prepBody(),
       version: this.version,
+      ...this.prepBody(),
     } as IndexPatternSpec;
   }
 
