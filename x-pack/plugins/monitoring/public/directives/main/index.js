@@ -13,6 +13,7 @@ import { Legacy } from '../../legacy_shims';
 import { shortenPipelineHash } from '../../../common/formatting';
 import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 import { Subscription } from 'rxjs';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 const setOptions = (controller) => {
   if (
@@ -104,7 +105,6 @@ export class MonitoringMainController {
     const timefilter = Legacy.shims.timefilter;
     this._licenseService = options.licenseService;
     this._breadcrumbsService = options.breadcrumbsService;
-    this._kbnUrlService = options.kbnUrlService;
     this._executorService = options.executorService;
 
     Object.assign(this, options.attributes);
@@ -132,7 +132,7 @@ export class MonitoringMainController {
     if (this.pipelineHash) {
       this.pipelineHashShort = shortenPipelineHash(this.pipelineHash);
       this.onChangePipelineHash = () => {
-        return this._kbnUrlService.changePath(
+        window.location.hash = getSafeForExternalLink(
           `/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`
         );
       };
@@ -198,7 +198,7 @@ export class MonitoringMainController {
   }
 }
 
-export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) {
+export function monitoringMainProvider(breadcrumbs, license, $injector) {
   const $executor = $injector.get('$executor');
 
   return {
@@ -234,7 +234,6 @@ export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) 
           licenseService: license,
           breadcrumbsService: breadcrumbs,
           executorService: $executor,
-          kbnUrlService: kbnUrl,
           attributes: {
             name: attributes.name,
             product: attributes.product,

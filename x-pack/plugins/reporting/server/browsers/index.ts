@@ -4,20 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as chromiumDefinition from './chromium';
+import { first } from 'rxjs/operators';
+import { LevelLogger } from '../lib';
+import { CaptureConfig } from '../types';
+import { chromium } from './chromium';
+import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
+import { installBrowser } from './install';
+import { ReportingConfig } from '..';
 
 export { ensureAllBrowsersDownloaded } from './download';
-export { createBrowserDriverFactory } from './create_browser_driver_factory';
-
 export { HeadlessChromiumDriver } from './chromium/driver';
 export { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
+export { chromium } from './chromium';
 
-export const chromium = {
-  paths: chromiumDefinition.paths,
-  createDriverFactory: chromiumDefinition.createDriverFactory,
-};
+type CreateDriverFactory = (
+  binaryPath: string,
+  captureConfig: CaptureConfig,
+  logger: LevelLogger
+) => HeadlessChromiumDriverFactory;
 
 export interface BrowserDownload {
+  createDriverFactory: CreateDriverFactory;
   paths: {
     archivesPath: string;
     baseUrl: string;
@@ -30,3 +37,13 @@ export interface BrowserDownload {
     }>;
   };
 }
+
+export const initializeBrowserDriverFactory = async (
+  config: ReportingConfig,
+  logger: LevelLogger
+) => {
+  const { binaryPath$ } = installBrowser(chromium, config, logger);
+  const binaryPath = await binaryPath$.pipe(first()).toPromise();
+  const captureConfig = config.get('capture');
+  return chromium.createDriverFactory(binaryPath, captureConfig, logger);
+};

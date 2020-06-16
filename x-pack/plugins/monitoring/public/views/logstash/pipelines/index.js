@@ -79,7 +79,6 @@ uiRoutes.when('/logstash/pipelines', {
       });
 
       const $route = $injector.get('$route');
-      const kbnUrl = $injector.get('kbnUrl');
       const config = $injector.get('config');
       this.data = $route.current.locals.pageData;
       const globalState = $injector.get('globalState');
@@ -110,10 +109,6 @@ uiRoutes.when('/logstash/pipelines', {
             {...this.getPaginationTableProps(pagination)}
             upgradeMessage={upgradeMessage}
             dateFormat={config.get('dateFormat')}
-            angular={{
-              kbnUrl,
-              scope: $scope,
-            }}
           />
         );
       };

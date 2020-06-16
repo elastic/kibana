@@ -120,7 +120,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
           'xpack.apm.metrics.transactionChart.machineLearningTooltip',
           {
             defaultMessage:
-              'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores >= 75.',
+              'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores ≥ 75.',
           }
         )}
       />

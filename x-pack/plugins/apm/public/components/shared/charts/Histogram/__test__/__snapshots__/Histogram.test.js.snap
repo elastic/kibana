@@ -127,7 +127,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="middle"
                   transform="translate(0, 18)"
                 >
-                  0 ms
+                  0.0 ms
                 </text>
               </g>
               <g
@@ -162,7 +162,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="middle"
                   transform="translate(0, 18)"
                 >
-                  500 ms
+                  500.0 ms
                 </text>
               </g>
               <g
@@ -197,7 +197,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="middle"
                   transform="translate(0, 18)"
                 >
-                  1,000 ms
+                  1,000.0 ms
                 </text>
               </g>
               <g
@@ -232,7 +232,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="middle"
                   transform="translate(0, 18)"
                 >
-                  1,500 ms
+                  1,500.0 ms
                 </text>
               </g>
               <g
@@ -267,7 +267,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="middle"
                   transform="translate(0, 18)"
                 >
-                  2,000 ms
+                  2,000.0 ms
                 </text>
               </g>
               <g
@@ -302,7 +302,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="middle"
                   transform="translate(0, 18)"
                 >
-                  2,500 ms
+                  2,500.0 ms
                 </text>
               </g>
               <g
@@ -337,7 +337,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="middle"
                   transform="translate(0, 18)"
                 >
-                  3,000 ms
+                  3,000.0 ms
                 </text>
               </g>
             </g>
@@ -1477,7 +1477,7 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
         <div
           className="c1"
         >
-          811 - 927 ms
+          811.1 - 926.9 ms
         </div>
       </styled.div>
       <styled.div>

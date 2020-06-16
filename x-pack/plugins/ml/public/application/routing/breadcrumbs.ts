@@ -28,6 +28,13 @@ export const ANOMALY_DETECTION_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '#/jobs',
 });
 
+export const DATA_FRAME_ANALYTICS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.dataFrameAnalyticsLabel', {
+    defaultMessage: 'Data Frame Analytics',
+  }),
+  href: '#/data_frame_analytics',
+});
+
 export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
     defaultMessage: 'Data Visualizer',

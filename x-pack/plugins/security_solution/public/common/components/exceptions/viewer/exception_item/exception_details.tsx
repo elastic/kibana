@@ -49,9 +49,8 @@ const ExceptionDetailsComponent = ({
   );
 
   const commentsSection = useMemo((): JSX.Element => {
-    // TODO: return back to exceptionItem.comments once updated
-    const { comment } = exceptionItem;
-    if (comment.length > 0) {
+    const { comments } = exceptionItem;
+    if (comments.length > 0) {
       return (
         <EuiButtonEmpty
           onClick={onCommentsClick}
@@ -59,7 +58,9 @@ const ExceptionDetailsComponent = ({
           size="xs"
           data-test-subj="exceptionsViewerItemCommentsBtn"
         >
-          {!showComments ? i18n.COMMENTS_SHOW(comment.length) : i18n.COMMENTS_HIDE(comment.length)}
+          {!showComments
+            ? i18n.COMMENTS_SHOW(comments.length)
+            : i18n.COMMENTS_HIDE(comments.length)}
         </EuiButtonEmpty>
       );
     } else {
