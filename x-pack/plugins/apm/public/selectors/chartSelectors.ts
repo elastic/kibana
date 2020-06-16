@@ -18,7 +18,7 @@ import {
   RectCoordinate,
   TimeSeries,
 } from '../../typings/timeseries';
-import { asDecimal, tpmUnit, convertTo } from '../utils/formatters';
+import { asDecimal, asDuration, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
@@ -72,10 +72,7 @@ export function getResponseTimeSeries({
 }: TimeSeriesAPIResponse) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
-  const formattedDuration = convertTo({
-    unit: 'milliseconds',
-    microseconds: overallAvgDuration,
-  }).formatted;
+  const formattedDuration = asDuration(overallAvgDuration);
 
   const series: TimeSeries[] = [
     {
