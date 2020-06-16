@@ -4,7 +4,7 @@
 
 ## SavedObjectsFindResult.score property
 
-The ES search's `_score` of this result.
+The Elasticsearch `_score` of this result.
 
 <b>Signature:</b>
 

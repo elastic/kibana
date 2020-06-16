@@ -85,7 +85,7 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  */
 export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
   /**
-   * The ES search's `_score` of this result.
+   * The Elasticsearch `_score` of this result.
    */
   score: number;
 }
