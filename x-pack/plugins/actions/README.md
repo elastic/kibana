@@ -616,11 +616,11 @@ When creating a new action type, your plugin will eventually call `server.plugin
 
 Currently actions are licensed as "basic" if the action only interacts with the stack, eg the server log and es index actions.  Other actions are at least "gold" level.  
 
-# location
+## plugin location
 
 Currently actions that are licensed as "basic" **MUST** be implemented in the actions plugin, other actions can be implemented in any other plugin that pre-reqs the actions plugin.
 
-Actions that take URLs or hostnames should check that those values are whitelisted.  The whitelisting utilities are currently internal to the actions plugin, and so such actions will need to be implemented in the actions plugin.
+Actions that take URLs or hostnames should check that those values are whitelisted.  The whitelisting utilities are currently internal to the actions plugin, and so such actions will need to be implemented in the actions plugin.  Longer-term, we will expose these utilities so they can be used by alerts implemented in other plugins; see [issue #64659](https://github.com/elastic/kibana/issues/64659).
 
 ## documentation
 
@@ -641,9 +641,3 @@ Instead of `schema.maybe()`, use `schema.nullable()`, which is the same as `sche
 ## user interface
 
 In order to make this action usable in the Kibana UI, you will need to provide all the UI editing aspects of the action.  The existing action type user interfaces are defined in [`x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`](../triggers_actions_ui/public/application/components/builtin_action_types).
-
-TBD: integrations with connectors list
-
-## usability by a generic alert
-
-TBD
