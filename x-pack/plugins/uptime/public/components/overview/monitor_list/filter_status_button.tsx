@@ -8,10 +8,7 @@ import { EuiFilterButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { uiSelector } from '../../../state/selectors';
-import {
-  setStatusFilter as setStatusFilterAction,
-  setCurrentPagination,
-} from '../../../state/actions';
+import { setUiState } from '../../../state/actions';
 
 export interface FilterStatusButtonProps {
   content: string | JSX.Element;
@@ -27,8 +24,12 @@ export const FilterStatusButton: React.FC<FilterStatusButtonProps> = (props) => 
   const dispatch = useDispatch();
   const setStatusFilterAndPagination = useCallback(
     (nextValue: string) => {
-      dispatch(setStatusFilterAction(nextValue));
-      dispatch(setCurrentPagination(''));
+      dispatch(
+        setUiState({
+          statusFilter: nextValue,
+          currentMonitorListPage: '',
+        })
+      );
     },
     [dispatch]
   );
