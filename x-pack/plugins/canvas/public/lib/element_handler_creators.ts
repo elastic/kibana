@@ -37,7 +37,7 @@ export interface Props {
   /**
    * selects elements on the page
    */
-  selectToplevelNodes: (elements: PositionedElement) => void;
+  selectToplevelNodes: (elements: PositionedElement[]) => void;
   /**
    * deletes elements from the page
    */

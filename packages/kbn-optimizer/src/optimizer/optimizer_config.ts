@@ -20,7 +20,7 @@
 import Path from 'path';
 import Os from 'os';
 
-import { Bundle, WorkerConfig } from '../common';
+import { Bundle, WorkerConfig, CacheableWorkerConfig } from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
@@ -28,6 +28,16 @@ import { getPluginBundles } from './get_plugin_bundles';
 function pickMaxWorkerCount() {
   const cpuCount = Os.cpus()?.length || 1;
   return Math.max(cpuCount - 1, 2);
+}
+
+function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj) as any) {
+    if (!keys.includes(key)) {
+      result[key] = value;
+    }
+  }
+  return result as Omit<T, K>;
 }
 
 interface Options {
@@ -165,7 +175,7 @@ export class OptimizerConfig {
             new Bundle({
               type: 'entry',
               id: 'core',
-              entry: './public/entry_point',
+              publicDirNames: ['public', 'public/utils'],
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),
@@ -212,5 +222,15 @@ export class OptimizerConfig {
       optimizerCacheKey,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
+  }
+
+  getCacheableWorkerConfig(): CacheableWorkerConfig {
+    return omit(this.getWorkerConfig('♻'), [
+      // these config options don't change the output of the bundles, so
+      // should not invalidate caches when they change
+      'watch',
+      'profileWebpack',
+      'cache',
+    ]);
   }
 }

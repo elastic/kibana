@@ -41,7 +41,7 @@ export class ClusterClientAdapter {
   public async doesIlmPolicyExist(policyName: string): Promise<boolean> {
     const request = {
       method: 'GET',
-      path: `_ilm/policy/${policyName}`,
+      path: `/_ilm/policy/${policyName}`,
     };
     try {
       await this.callEs('transport.request', request);
@@ -55,7 +55,7 @@ export class ClusterClientAdapter {
   public async createIlmPolicy(policyName: string, policy: unknown): Promise<void> {
     const request = {
       method: 'PUT',
-      path: `_ilm/policy/${policyName}`,
+      path: `/_ilm/policy/${policyName}`,
       body: policy,
     };
     try {

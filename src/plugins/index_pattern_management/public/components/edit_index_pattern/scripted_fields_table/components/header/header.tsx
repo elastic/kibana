@@ -22,9 +22,13 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ScopedHistory } from 'kibana/public';
+
+import { reactRouterNavigate } from '../../../../../../../kibana_react/public';
 
 interface HeaderProps extends RouteComponentProps {
   indexPatternId: string;
+  history: ScopedHistory;
 }
 
 export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
@@ -52,9 +56,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
     <EuiFlexItem grow={false}>
       <EuiButton
         data-test-subj="addScriptedFieldLink"
-        onClick={() => {
-          history.push(`${indexPatternId}/create-field/`);
-        }}
+        {...reactRouterNavigate(history, `patterns/${indexPatternId}/create-field/`)}
       >
         <FormattedMessage
           id="indexPatternManagement.editIndexPattern.scripted.addFieldButton"

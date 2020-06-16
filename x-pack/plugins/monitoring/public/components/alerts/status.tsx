@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Legacy } from '../../legacy_shims';
-import { Alert, BASE_ALERT_API_PATH } from '../../../../../plugins/alerting/common';
+import { Alert, BASE_ALERT_API_PATH } from '../../../../alerts/common';
 import { getSetupModeState, addSetupModeCallback, toggleSetupMode } from '../../lib/setup_mode';
 import { NUMBER_OF_MIGRATED_ALERTS, ALERT_TYPE_PREFIX } from '../../../common/constants';
 import { AlertsConfiguration } from './configuration';

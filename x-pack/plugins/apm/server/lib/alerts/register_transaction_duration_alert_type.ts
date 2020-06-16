@@ -18,12 +18,12 @@ import {
   TRANSACTION_DURATION,
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { AlertingPlugin } from '../../../../alerting/server';
+import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
 
 interface RegisterAlertParams {
-  alerting: AlertingPlugin['setup'];
+  alerts: AlertingPlugin['setup'];
   config$: Observable<APMConfig>;
 }
 
@@ -44,10 +44,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
-  alerting,
+  alerts,
   config$,
 }: RegisterAlertParams) {
-  alerting.registerType({
+  alerts.registerType({
     id: AlertType.TransactionDuration,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -157,7 +157,7 @@ export function registerTransactionDurationAlertType({
 
       const { agg } = response.aggregations;
 
-      const value = 'values' in agg ? agg.values[0] : agg.value;
+      const value = 'values' in agg ? agg.values[0] : agg?.value;
 
       if (value && value > alertParams.threshold * 1000) {
         const alertInstance = services.alertInstanceFactory(

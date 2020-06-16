@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -17,10 +17,9 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiIcon,
+  EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
@@ -36,12 +35,10 @@ import {
   useLink,
   useBreadcrumbs,
 } from '../../../hooks';
-import { AgentReassignConfigFlyout } from '../components';
-import { SearchBar } from '../../../components/search_bar';
-import { AgentHealth } from '../components/agent_health';
-import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
+import { SearchBar, ContextMenuActions } from '../../../components';
 import { AgentStatusKueryHelper } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AgentReassignConfigFlyout, AgentHealth, AgentUnenrollProvider } from '../components';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -76,73 +73,53 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
   ({ agent, refresh, onReassignClick }) => {
     const { getHref } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
-    const [isOpen, setIsOpen] = useState(false);
-    const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
-    const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
 
     return (
-      <EuiPopover
-        anchorPosition="downRight"
-        panelPaddingSize="none"
-        button={
-          <EuiButtonIcon
-            iconType="boxesHorizontal"
-            onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.ingestManager.agentList.actionsMenuText', {
-              defaultMessage: 'Open',
-            })}
-          />
-        }
-        isOpen={isOpen}
-        closePopover={handleCloseMenu}
-      >
-        <EuiContextMenuPanel
-          items={[
-            <EuiContextMenuItem
-              icon="inspect"
-              href={getHref('fleet_agent_details', { agentId: agent.id })}
-              key="viewConfig"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.agentList.viewActionText"
-                defaultMessage="View agent"
-              />
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              icon="pencil"
-              onClick={() => {
-                handleCloseMenu();
-                onReassignClick();
-              }}
-              key="reassignConfig"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.agentList.reassignActionText"
-                defaultMessage="Assign new agent config"
-              />
-            </EuiContextMenuItem>,
+      <ContextMenuActions
+        items={[
+          <EuiContextMenuItem
+            icon="inspect"
+            href={getHref('fleet_agent_details', { agentId: agent.id })}
+            key="viewConfig"
+          >
+            <FormattedMessage
+              id="xpack.ingestManager.agentList.viewActionText"
+              defaultMessage="View agent"
+            />
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            icon="pencil"
+            onClick={() => {
+              onReassignClick();
+            }}
+            key="reassignConfig"
+          >
+            <FormattedMessage
+              id="xpack.ingestManager.agentList.reassignActionText"
+              defaultMessage="Assign new agent config"
+            />
+          </EuiContextMenuItem>,
 
-            <AgentUnenrollProvider>
-              {(unenrollAgentsPrompt) => (
-                <EuiContextMenuItem
-                  disabled={!hasWriteCapabilites}
-                  icon="cross"
-                  onClick={() => {
-                    unenrollAgentsPrompt([agent.id], 1, () => {
-                      refresh();
-                    });
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentList.unenrollOneButton"
-                    defaultMessage="Unenroll"
-                  />
-                </EuiContextMenuItem>
-              )}
-            </AgentUnenrollProvider>,
-          ]}
-        />
-      </EuiPopover>
+          <AgentUnenrollProvider>
+            {(unenrollAgentsPrompt) => (
+              <EuiContextMenuItem
+                disabled={!hasWriteCapabilites}
+                icon="cross"
+                onClick={() => {
+                  unenrollAgentsPrompt([agent.id], 1, () => {
+                    refresh();
+                  });
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.ingestManager.agentList.unenrollOneButton"
+                  defaultMessage="Unenroll"
+                />
+              </EuiContextMenuItem>
+            )}
+          </AgentUnenrollProvider>,
+        ]}
+      />
     );
   }
 );
@@ -387,13 +364,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         />
       ) : null}
       {agentToReassign && (
-        <AgentReassignConfigFlyout
-          agent={agentToReassign}
-          onClose={() => {
-            setAgentToReassignId(undefined);
-            agentsRequest.sendRequest();
-          }}
-        />
+        <EuiPortal>
+          <AgentReassignConfigFlyout
+            agent={agentToReassign}
+            onClose={() => {
+              setAgentToReassignId(undefined);
+              agentsRequest.sendRequest();
+            }}
+          />
+        </EuiPortal>
       )}
       <EuiFlexGroup alignItems={'center'}>
         <EuiFlexItem grow={4}>

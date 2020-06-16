@@ -27,7 +27,7 @@ export class AutoFollowPatternAdd extends PureComponent {
   };
 
   componentDidMount() {
-    setBreadcrumbs([listBreadcrumb, addBreadcrumb]);
+    setBreadcrumbs([listBreadcrumb('/auto_follow_patterns'), addBreadcrumb]);
   }
 
   componentWillUnmount() {

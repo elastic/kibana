@@ -27,7 +27,7 @@ import { MlStartDependencies } from '../../plugin';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
 import { Query } from '../../../../../../src/plugins/data/common/query';
-import { esKuery } from '../../../../../../src/plugins/data/public';
+import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
@@ -51,19 +51,19 @@ export function useSwimlaneInputResolver(
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number
-) {
+): [string | undefined, OverallSwimlaneData | undefined, TimeBuckets, Error | null | undefined] {
   const [{ uiSettings }, , { explorerService, anomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [swimlaneType, setSwimlaneType] = useState<string>();
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error | null>();
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
 
   const timeBuckets = useMemo(() => {
     return new TimeBuckets({
-      'histogram:maxBars': uiSettings.get('histogram:maxBars'),
-      'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });

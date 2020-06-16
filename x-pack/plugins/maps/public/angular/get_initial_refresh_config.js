@@ -5,6 +5,7 @@
  */
 
 import { getUiSettings } from '../kibana_services';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 
 export function getInitialRefreshConfig({ mapStateJSON, globalState = {} }) {
   const uiSettings = getUiSettings();
@@ -16,7 +17,7 @@ export function getInitialRefreshConfig({ mapStateJSON, globalState = {} }) {
     }
   }
 
-  const defaultRefreshConfig = uiSettings.get('timepicker:refreshIntervalDefaults');
+  const defaultRefreshConfig = uiSettings.get(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS);
   const refreshInterval = { ...defaultRefreshConfig, ...globalState.refreshInterval };
   return {
     isPaused: refreshInterval.pause,

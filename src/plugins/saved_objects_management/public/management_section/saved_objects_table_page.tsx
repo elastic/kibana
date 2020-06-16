@@ -52,7 +52,7 @@ const SavedObjectsTablePage = ({
         text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
           defaultMessage: 'Saved objects',
         }),
-        href: '#/management/kibana/objects',
+        href: '/',
       },
     ]);
   }, [setBreadcrumbs]);
@@ -73,11 +73,7 @@ const SavedObjectsTablePage = ({
       goInspectObject={(savedObject) => {
         const { editUrl } = savedObject.meta;
         if (editUrl) {
-          // previously, kbnUrl.change(object.meta.editUrl); was used.
-          // using direct access to location.hash seems the only option for now,
-          // as using react-router-dom will prefix the url with the router's basename
-          // which should be ignored there.
-          window.location.hash = editUrl;
+          return coreStart.application.navigateToUrl('/app' + editUrl);
         }
       }}
       canGoInApp={(savedObject) => {

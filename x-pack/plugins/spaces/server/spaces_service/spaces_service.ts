@@ -68,14 +68,18 @@ export class SpacesService {
       return spaceId;
     };
 
+    const internalRepositoryPromise = getStartServices().then(([coreStart]) =>
+      coreStart.savedObjects.createInternalRepository(['space'])
+    );
+
     const getScopedClient = async (request: KibanaRequest) => {
       const [coreStart] = await getStartServices();
+      const internalRepository = await internalRepositoryPromise;
 
       return config$
         .pipe(
+          take(1),
           map((config) => {
-            const internalRepository = coreStart.savedObjects.createInternalRepository(['space']);
-
             const callWithRequestRepository = coreStart.savedObjects.createScopedRepository(
               request,
               ['space']
@@ -92,8 +96,7 @@ export class SpacesService {
               internalRepository,
               request
             );
-          }),
-          take(1)
+          })
         )
         .toPromise();
     };

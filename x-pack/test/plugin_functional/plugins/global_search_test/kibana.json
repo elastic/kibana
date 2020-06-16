@@ -1,0 +1,9 @@
+{
+  "id": "globalSearchTest",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "global_search_test"],
+  "requiredPlugins": ["globalSearch"],
+  "server": true,
+  "ui": true
+}

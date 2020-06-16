@@ -475,10 +475,14 @@ The more interesting logic is in `renderApp`:
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { AppMountParams, CoreStart } from 'src/core/public';
+import { AppMountParameters, CoreStart } from 'src/core/public';
 import { AppRoot } from './components/app_root';
 
-export const renderApp = ({ element, history }: AppMountParams, core: CoreStart, plugins: MyPluginDepsStart) => {
+export const renderApp = (
+  { element, history }: AppMountParameters,
+  core: CoreStart,
+  plugins: MyPluginDepsStart
+) => {
   // Hide the chrome while this app is mounted for a full screen experience
   core.chrome.setIsVisible(false);
 

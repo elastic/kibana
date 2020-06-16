@@ -23,8 +23,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { serializers } from '../../../../shared_imports';
 
 import {
-  serializeV1Template,
-  serializeV2Template,
+  serializeLegacyTemplate,
+  serializeTemplate,
 } from '../../../../../common/lib/template_serialization';
 import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
 import { StepProps } from '../types';
@@ -60,16 +60,20 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
     indexPatterns,
     version,
     order,
-    _kbnMeta: { formatVersion },
+    _kbnMeta: { isLegacy },
   } = template!;
 
-  const serializedTemplate =
-    formatVersion === 1
-      ? serializeV1Template(stripEmptyFields(template!) as TemplateDeserialized)
-      : serializeV2Template(stripEmptyFields(template!) as TemplateDeserialized);
-
-  // Name not included in ES request body
-  delete serializedTemplate.name;
+  const serializedTemplate = isLegacy
+    ? serializeLegacyTemplate(
+        stripEmptyFields(template!, {
+          types: ['string'],
+        }) as TemplateDeserialized
+      )
+    : serializeTemplate(
+        stripEmptyFields(template!, {
+          types: ['string'],
+        }) as TemplateDeserialized
+      );
 
   const serializedMappings = getTemplateParameter(serializedTemplate, 'mappings');
   const serializedSettings = getTemplateParameter(serializedTemplate, 'settings');

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { CSSProperties, PureComponent } from 'react';
 // @ts-ignore Untyped local
 import { WORKPAD_CONTAINER_ID } from '../../../apps/workpad/workpad_app';
 
@@ -52,14 +52,12 @@ export class InteractionBoundary extends PureComponent<void, State, void> {
   }
 
   render() {
-    const style = Object.assign(
-      {
-        top: '50%',
-        left: '50%',
-        position: 'absolute',
-      },
-      this.state
-    );
+    const style: CSSProperties = {
+      top: '50%',
+      left: '50%',
+      position: 'absolute',
+      ...this.state,
+    };
     return <div id="canvasInteractionBoundary" style={style} />;
   }
 }

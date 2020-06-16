@@ -30,7 +30,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
 import { GridData } from '../../../../common';
-import { ViewMode, EmbeddableChildPanel } from '../../../embeddable_plugin';
+import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../embeddable_plugin';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { withKibana } from '../../../../../kibana_react/public';
@@ -115,6 +115,7 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   kibana: DashboardReactContextValue;
+  PanelComponent: EmbeddableStart['EmbeddablePanel'];
   container: DashboardContainer;
 }
 
@@ -271,14 +272,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           <EmbeddableChildPanel
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
-            getActions={this.props.kibana.services.uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={this.props.kibana.services.embeddable.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.kibana.services.embeddable.getEmbeddableFactories}
-            overlays={this.props.kibana.services.overlays}
-            application={this.props.kibana.services.application}
-            notifications={this.props.kibana.services.notifications}
-            inspector={this.props.kibana.services.inspector}
-            SavedObjectFinder={this.props.kibana.services.SavedObjectFinder}
+            PanelComponent={this.props.PanelComponent}
           />
         </div>
       );

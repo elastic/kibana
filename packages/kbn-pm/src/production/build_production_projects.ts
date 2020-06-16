@@ -47,7 +47,7 @@ export async function buildProductionProjects({
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
   const projectNames = [...projects.values()].map((project) => project.name);
-  log.write(`Preparing production build for [${projectNames.join(', ')}]`);
+  log.info(`Preparing production build for [${projectNames.join(', ')}]`);
 
   for (const batch of batchedProjects) {
     for (const project of batch) {

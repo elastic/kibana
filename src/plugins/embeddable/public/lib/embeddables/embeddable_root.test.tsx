@@ -36,6 +36,15 @@ test('EmbeddableRoot renders an embeddable', async () => {
   expect(findTestSubject(component, 'embedError').length).toBe(0);
 });
 
+test('EmbeddableRoot updates input', async () => {
+  const embeddable = new HelloWorldEmbeddable({ id: 'hello' });
+  const component = mount(<EmbeddableRoot embeddable={embeddable} />);
+  const spy = jest.spyOn(embeddable, 'updateInput');
+  const newInput = { id: 'hello', something: 'new' };
+  component.setProps({ embeddable, input: newInput });
+  expect(spy).toHaveBeenCalledWith(newInput);
+});
+
 test('EmbeddableRoot renders a spinner if loading an no embeddable given', async () => {
   const component = mount(<EmbeddableRoot loading={true} />);
   // Due to the way embeddables mount themselves on the dom node, they are not forced to be

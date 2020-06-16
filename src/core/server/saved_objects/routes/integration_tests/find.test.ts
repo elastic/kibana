@@ -23,7 +23,7 @@ import querystring from 'querystring';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerFindRoute } from '../find';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { setupServer } from './test_utils';
+import { setupServer } from '../test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 

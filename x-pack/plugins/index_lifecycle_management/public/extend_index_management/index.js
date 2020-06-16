@@ -67,7 +67,7 @@ export const removeLifecyclePolicyActionExtension = ({ indices, reloadIndices })
   };
 };
 
-export const addLifecyclePolicyActionExtension = ({ indices, reloadIndices }) => {
+export const addLifecyclePolicyActionExtension = ({ indices, reloadIndices, getUrlForApp }) => {
   if (indices.length !== 1) {
     return null;
   }
@@ -86,6 +86,7 @@ export const addLifecyclePolicyActionExtension = ({ indices, reloadIndices }) =>
           closeModal={closeModal}
           index={index}
           reloadIndices={reloadIndices}
+          getUrlForApp={getUrlForApp}
         />
       );
     },
@@ -123,8 +124,8 @@ export const ilmBannerExtension = (indices) => {
   };
 };
 
-export const ilmSummaryExtension = (index) => {
-  return <IndexLifecycleSummary index={index} />;
+export const ilmSummaryExtension = (index, getUrlForApp) => {
+  return <IndexLifecycleSummary index={index} getUrlForApp={getUrlForApp} />;
 };
 
 export const ilmFilterExtension = (indices) => {

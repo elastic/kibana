@@ -21,7 +21,7 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerCreateRoute } from '../create';
 import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
-import { setupServer } from './test_utils';
+import { setupServer } from '../test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 

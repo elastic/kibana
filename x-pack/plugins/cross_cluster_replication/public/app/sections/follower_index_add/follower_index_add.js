@@ -27,7 +27,7 @@ export class FollowerIndexAdd extends PureComponent {
   };
 
   componentDidMount() {
-    setBreadcrumbs([listBreadcrumb, addBreadcrumb]);
+    setBreadcrumbs([listBreadcrumb('/follower_indices'), addBreadcrumb]);
   }
 
   componentWillUnmount() {

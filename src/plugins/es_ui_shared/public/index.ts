@@ -47,6 +47,10 @@ export {
   expandLiteralStrings,
 } from './console_lang';
 
+import * as Monaco from './monaco';
+
+export { Monaco };
+
 export {
   AuthorizationContext,
   AuthorizationProvider,

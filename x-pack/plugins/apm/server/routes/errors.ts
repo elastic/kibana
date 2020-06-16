@@ -12,7 +12,7 @@ import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 
-export const errorsRoute = createRoute((core) => ({
+export const errorsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/errors',
   params: {
     path: t.type({

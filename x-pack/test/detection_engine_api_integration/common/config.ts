@@ -8,7 +8,7 @@ import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
-import { listsEnvFeatureFlagName } from '../../../plugins/siem/server/lib/detection_engine/feature_flags';
+import { listsEnvFeatureFlagName } from '../../../plugins/security_solution/server/lib/detection_engine/feature_flags';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -42,7 +42,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
-      require.resolve('../../api_integration/config.js')
+      require.resolve('../../api_integration/config.ts')
     );
     const servers = {
       ...xPackApiIntegrationTestsConfig.get('servers'),

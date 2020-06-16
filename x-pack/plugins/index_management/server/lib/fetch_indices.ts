@@ -23,6 +23,7 @@ interface Hit {
 interface IndexInfo {
   aliases: { [aliasName: string]: unknown };
   mappings: unknown;
+  data_stream?: string;
   settings: {
     index: {
       hidden: 'true' | 'false';
@@ -87,6 +88,7 @@ async function fetchIndicesCall(
       isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
       aliases: aliases.length ? aliases : 'none',
       hidden: index.settings.index.hidden === 'true',
+      data_stream: index.data_stream,
     };
   });
 }

@@ -35,6 +35,8 @@ import { useLoadSnapshot } from '../../../../services/http';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { TabSummary, TabFailures } from './tabs';
 
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+
 interface Props {
   repositoryName: string;
   snapshotId: string;
@@ -56,7 +58,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   onClose,
   onSnapshotDeleted,
 }) => {
-  const { i18n, uiMetricService } = useServices();
+  const { i18n, uiMetricService, history } = useServices();
   const { error, data: snapshotDetails } = useLoadSnapshot(repositoryName, snapshotId);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
@@ -221,7 +223,10 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={linkToRestoreSnapshot(repositoryName, snapshotId)}
+                  {...reactRouterNavigate(
+                    history,
+                    linkToRestoreSnapshot(repositoryName, snapshotId)
+                  )}
                   fill
                   color="primary"
                   isDisabled={
@@ -257,7 +262,10 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
           </h2>
           <p>
             <small>
-              <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
+              <EuiLink
+                {...reactRouterNavigate(history, linkToRepository(repositoryName))}
+                data-test-subj="repositoryLink"
+              >
                 <FormattedMessage
                   id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
                   defaultMessage="'{repositoryName}' repository"

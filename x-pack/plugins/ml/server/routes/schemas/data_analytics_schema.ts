@@ -47,6 +47,7 @@ export const dataAnalyticsExplainSchema = schema.object({
   /** Source */
   source: schema.object({
     index: schema.string(),
+    query: schema.maybe(schema.any()),
   }),
   analysis: schema.any(),
   analyzed_fields: schema.maybe(schema.any()),
@@ -58,6 +59,14 @@ export const analyticsIdSchema = schema.object({
    * Analytics ID
    */
   analyticsId: schema.string(),
+});
+
+export const deleteDataFrameAnalyticsJobSchema = schema.object({
+  /**
+   * Analytics Destination Index
+   */
+  deleteDestIndex: schema.maybe(schema.boolean()),
+  deleteDestIndexPattern: schema.maybe(schema.boolean()),
 });
 
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({

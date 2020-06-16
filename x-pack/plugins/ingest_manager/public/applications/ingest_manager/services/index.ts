@@ -20,5 +20,6 @@ export {
   appRoutesService,
   packageToConfigDatasourceInputs,
   storedDatasourceToAgentDatasource,
+  configToYaml,
   AgentStatusKueryHelper,
 } from '../../../../common';

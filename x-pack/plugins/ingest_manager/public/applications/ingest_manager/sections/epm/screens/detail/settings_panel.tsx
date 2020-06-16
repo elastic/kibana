@@ -175,7 +175,7 @@ export const SettingsPanel = (
               <p>
                 <FormattedMessage
                   id="xpack.ingestManager.integrations.settings.packageUninstallDescription"
-                  defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this Integration."
+                  defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
                 />
               </p>
             </div>

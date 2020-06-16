@@ -24,7 +24,7 @@ import execa from 'execa';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle } from '../common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRefs } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
 
@@ -74,7 +74,11 @@ function usingWorkerProc<T>(
 ) {
   return Rx.using(
     (): ProcResource => {
-      const args = [JSON.stringify(workerConfig), JSON.stringify(bundles.map((b) => b.toSpec()))];
+      const args = [
+        JSON.stringify(workerConfig),
+        JSON.stringify(bundles.map((b) => b.toSpec())),
+        BundleRefs.fromBundles(config.bundles).toSpecJson(),
+      ];
 
       const proc = execa.node(require.resolve('../worker/run_worker'), args, {
         nodeOptions: [

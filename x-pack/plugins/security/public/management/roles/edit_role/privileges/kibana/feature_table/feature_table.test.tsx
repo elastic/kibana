@@ -762,4 +762,88 @@ describe('FeatureTable', () => {
       },
     });
   });
+
+  it('renders a description for features with only reserved privileges (omitting the primary feature controls)', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {},
+      },
+    ]);
+    const reservedFeature = createFeature({
+      id: 'reserved_feature',
+      name: 'Reserved Feature',
+      privileges: null,
+      reserved: {
+        description: 'this is my reserved feature description',
+        privileges: [
+          {
+            id: 'priv_1',
+            privilege: {
+              api: [],
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+        ],
+      },
+    });
+
+    const { wrapper } = setup({
+      role,
+      features: [reservedFeature],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: false,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(findTestSubject(wrapper, 'reservedFeatureDescription').text()).toMatchInlineSnapshot(
+      `"this is my reserved feature description"`
+    );
+
+    expect(findTestSubject(wrapper, 'primaryFeaturePrivilegeControl')).toHaveLength(0);
+  });
+
+  it('renders renders the primary feature controls when both primary and reserved privileges are specified', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {},
+      },
+    ]);
+    const reservedFeature = createFeature({
+      id: 'reserved_feature',
+      name: 'Reserved Feature with primary feature privileges',
+      reserved: {
+        description: 'this is my reserved feature description',
+        privileges: [
+          {
+            id: 'priv_1',
+            privilege: {
+              api: [],
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+        ],
+      },
+    });
+
+    const { displayedPrivileges, wrapper } = setup({
+      role,
+      features: [reservedFeature],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: true,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(findTestSubject(wrapper, 'reservedFeatureDescription')).toHaveLength(0);
+    expect(displayedPrivileges).toEqual({
+      reserved_feature: {
+        primaryFeaturePrivilege: 'none',
+      },
+    });
+  });
 });

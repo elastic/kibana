@@ -52,12 +52,12 @@ This plugin follows the `common`, `server`, `public` structure from the [Archite
 1. In one terminal, change to the `x-pack` directory and start the test server with
 
    ```
-   node scripts/functional_tests_server.js --config test/api_integration/config.js
+   node scripts/functional_tests_server.js --config test/api_integration/config.ts
    ```
 
 1. in a second terminal, run the tests from the Kibana root directory with
    ```
-   node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.js
+   node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.ts
    ```
 
 #### EPM

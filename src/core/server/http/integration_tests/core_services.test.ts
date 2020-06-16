@@ -383,8 +383,8 @@ describe('http service', () => {
 
       // client contains authHeaders for BWC with legacy platform.
       const [client] = clusterClientMock.mock.calls;
-      const [, , dataClientHeaders] = client;
-      expect(dataClientHeaders).toEqual(authHeaders);
+      const [, , clientHeaders] = client;
+      expect(clientHeaders).toEqual(authHeaders);
     });
 
     it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
@@ -407,8 +407,8 @@ describe('http service', () => {
         .expect(200);
 
       const [client] = clusterClientMock.mock.calls;
-      const [, , dataClientHeaders] = client;
-      expect(dataClientHeaders).toEqual({ authorization: authorizationHeader });
+      const [, , clientHeaders] = client;
+      expect(clientHeaders).toEqual({ authorization: authorizationHeader });
     });
   });
 });

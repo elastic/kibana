@@ -850,7 +850,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const firstType: SavedObjectsType = {
   name: 'first-type',
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'agnostic',
   mappings: {
     properties: {
       someField: {
@@ -888,7 +888,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const secondType: SavedObjectsType = {
   name: 'second-type',
   hidden: true,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       textField: {
@@ -936,7 +936,7 @@ export class MyPlugin implements Plugin {
 
 The NP `registerType` expected input is very close to the legacy format. However, there are some minor changes:
 
-- The `schema.isNamespaceAgnostic` property has been renamed: `SavedObjectsType.namespaceAgnostic`
+- The `schema.isNamespaceAgnostic` property has been renamed: `SavedObjectsType.namespaceType`. It no longer accepts a boolean but instead an enum of 'single', 'multiple', or 'agnostic' (see [SavedObjectsNamespaceType](/docs/development/core/server/kibana-plugin-core-server.savedobjectsnamespacetype.md)).
 
 - The `schema.indexPattern` was accepting either a `string` or a `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only accepts a string, as you can access the configuration during your plugin's setup phase.
 

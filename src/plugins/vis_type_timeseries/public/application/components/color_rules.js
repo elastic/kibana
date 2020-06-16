@@ -54,7 +54,7 @@ class ColorRulesUI extends Component {
   renderRow(row, i, items) {
     const defaults = { value: 0 };
     const model = { ...defaults, ...row };
-    const handleAdd = collectionActions.handleAdd.bind(null, this.props);
+    const handleAdd = () => collectionActions.handleAdd(this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     const { intl } = this.props;
     const operatorOptions = [

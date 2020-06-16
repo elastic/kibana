@@ -1,12 +1,12 @@
 [role="xpack"]
 [[ml-settings-kb]]
-=== Machine learning settings in Kibana
+=== Machine learning settings in {kib}
 ++++
 <titleabbrev>Machine learning settings</titleabbrev>
 ++++
 
 You do not need to configure any settings to use {kib} {ml-features}. They are
-enabled by default. 
+enabled by default.
 
 [[general-ml-settings-kb]]
 ==== General {ml} settings

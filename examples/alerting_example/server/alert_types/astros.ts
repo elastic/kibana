@@ -18,7 +18,7 @@
  */
 
 import axios from 'axios';
-import { AlertType } from '../../../../x-pack/plugins/alerting/server';
+import { AlertType } from '../../../../x-pack/plugins/alerts/server';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {

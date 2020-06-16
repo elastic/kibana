@@ -53,10 +53,11 @@ export class KibanaTelemetryAdapter {
     });
   }
 
+  public static clearLocalTelemetry() {
+    this.collector = {};
+  }
+
   public static countPageView(pageView: PageViewParams) {
-    if (pageView.refreshTelemetryHistory) {
-      this.collector = {};
-    }
     const bucketId = this.getBucketToIncrement();
     const bucket = this.collector[bucketId];
     if (pageView.page === 'Overview') {

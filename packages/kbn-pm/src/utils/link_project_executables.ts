@@ -19,8 +19,6 @@
 
 import { dirname, relative, resolve, sep } from 'path';
 
-import chalk from 'chalk';
-
 import { chmod, createSymlink, isFile, mkdirp } from './fs';
 import { log } from './log';
 import { ProjectGraph, ProjectMap } from './projects';
@@ -37,6 +35,7 @@ export async function linkProjectExecutables(
   projectsByName: ProjectMap,
   projectGraph: ProjectGraph
 ) {
+  log.debug(`Linking package executables`);
   for (const [projectName, projectDeps] of projectGraph) {
     const project = projectsByName.get(projectName)!;
     const binsDir = resolve(project.nodeModulesLocation, '.bin');
@@ -57,7 +56,7 @@ export async function linkProjectExecutables(
         // Get relative project path with normalized path separators.
         const projectRelativePath = relative(project.path, srcPath).split(sep).join('/');
 
-        log.write(chalk`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`);
+        log.debug(`[${project.name}] ${name} -> ${projectRelativePath}`);
 
         await mkdirp(dirname(dest));
         await createSymlink(srcPath, dest, 'exec');

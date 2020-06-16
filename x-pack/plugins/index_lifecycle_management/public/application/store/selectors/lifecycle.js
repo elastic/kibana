@@ -270,7 +270,9 @@ export const getLifecycle = (state) => {
       if (phaseName === PHASE_DELETE) {
         accum[phaseName].actions = {
           ...accum[phaseName].actions,
-          delete: {},
+          delete: {
+            ...accum[phaseName].actions.delete,
+          },
         };
       }
     }

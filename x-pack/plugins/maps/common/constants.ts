@@ -30,6 +30,7 @@ export const TELEMETRY_TYPE = 'maps-telemetry';
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
+export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 
 export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
 
@@ -97,6 +98,9 @@ export enum ES_GEO_FIELD_TYPE {
   GEO_POINT = 'geo_point',
   GEO_SHAPE = 'geo_shape',
 }
+
+// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IFieldType.type is compared to value
+export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
 export enum ES_SPATIAL_RELATIONS {
   INTERSECTS = 'INTERSECTS',

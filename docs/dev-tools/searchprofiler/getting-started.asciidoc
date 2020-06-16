@@ -2,7 +2,7 @@
 [[profiler-getting-started]]
 === Getting Started
 
-The {searchprofiler} is automatically enabled in {kib}.  Go to *Dev Tools > Search Profiler*
+The {searchprofiler} is automatically enabled in {kib}. From the menu, go to *Dev Tools*, then click *Search Profiler*
 to get started.
 
 {searchprofiler} displays the names of the indices searched, the shards in each index,
@@ -11,10 +11,10 @@ with the query you want to profile and click *Profile*.
 
 The following example shows the results of profiling the `match_all` query.
 If we take a closer look at the information for the `.kibana_1` sample index, the
-Cumulative Time field shows us that the query took 0.067ms to execute.
+Cumulative Time field shows us that the query took 1.279ms to execute.
 
 [role="screenshot"]
-image::dev-tools/searchprofiler/images/query.png["{searchprofiler} example"]
+image::dev-tools/searchprofiler/images/overview.png["{searchprofiler} example"]
 
 
 [NOTE]

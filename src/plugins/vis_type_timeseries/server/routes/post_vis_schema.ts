@@ -66,6 +66,7 @@ const backgroundColorRulesItems = schema.object({
   id: stringOptionalNullable,
   background_color: stringOptionalNullable,
   color: stringOptionalNullable,
+  operator: stringOptionalNullable,
 });
 
 const gaugeColorRulesItems = schema.object({
@@ -73,7 +74,7 @@ const gaugeColorRulesItems = schema.object({
   text: stringOptionalNullable,
   id: stringOptionalNullable,
   operator: stringOptionalNullable,
-  value: schema.number(),
+  value: schema.maybe(schema.nullable(schema.number())),
 });
 const metricsItems = schema.object({
   field: stringOptionalNullable,
@@ -246,6 +247,9 @@ export const visPayloadSchema = schema.object({
       series: schema.arrayOf(seriesItems),
       show_grid: numberIntegerRequired,
       show_legend: numberIntegerRequired,
+      tooltip_mode: schema.maybe(
+        schema.oneOf([schema.literal('show_all'), schema.literal('show_focused')])
+      ),
       time_field: stringOptionalNullable,
       time_range_mode: stringOptionalNullable,
       type: stringRequired,

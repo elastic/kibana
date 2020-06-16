@@ -23,7 +23,6 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
-import { BASE_PATH } from '../../../common/constants';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
@@ -216,7 +215,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
   }
   render() {
     const { policies } = this.state;
-    const { indexName, closeModal } = this.props;
+    const { indexName, closeModal, getUrlForApp } = this.props;
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
@@ -246,7 +245,11 @@ export class AddLifecyclePolicyConfirmModal extends Component {
                 color="warning"
               >
                 <p>
-                  <EuiLink href={`#${BASE_PATH}policies/edit`}>
+                  <EuiLink
+                    href={getUrlForApp('management', {
+                      path: `data/index_lifecycle_management/policies/edit`,
+                    })}
+                  >
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
                       defaultMessage="Define lifecycle policy"

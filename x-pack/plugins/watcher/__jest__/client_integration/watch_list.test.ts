@@ -131,7 +131,7 @@ describe('<WatchList />', () => {
 
           expect(findTestSubject(idColumn, `watchIdColumn-${watch1.id}`).length).toBe(1);
           expect(findTestSubject(idColumn, `watchIdColumn-${watch1.id}`).props().href).toEqual(
-            `#/management/insightsAndAlerting/watcher/watches/watch/${watch1.id}/status`
+            `/watches/watch/${watch1.id}/status`
           );
         });
 

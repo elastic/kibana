@@ -14,12 +14,6 @@ export { isAddressValid, isPortValid } from './validate_address';
 
 export { extractQueryParams } from './query_params';
 
-export {
-  setUserHasLeftApp,
-  getUserHasLeftApp,
-  registerRouter,
-  getRouter,
-  getRouterLinkProps,
-} from './routing';
+export { setUserHasLeftApp, getUserHasLeftApp, registerRouter, getRouter } from './routing';
 
 export { trackUiMetric, METRIC_TYPE } from './ui_metric';

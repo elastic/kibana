@@ -5,7 +5,12 @@
  */
 
 import React from 'react';
-import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../../../lib';
+import {
+  mountWithRouter,
+  renderWithRouter,
+  shallowWithRouter,
+  MountWithReduxProvider,
+} from '../../../../lib';
 import { createMemoryHistory } from 'history';
 import { StatusFilter } from '../status_filter';
 import { FilterStatusButton } from '../filter_status_button';
@@ -18,7 +23,12 @@ describe('StatusFilterComponent', () => {
       initialEntries: [`/?g=%22%22&statusFilter=${status}`],
     });
 
-    const wrapper = mountWithRouter(<StatusFilter />, history);
+    const wrapper = mountWithRouter(
+      <MountWithReduxProvider>
+        <StatusFilter />
+      </MountWithReduxProvider>,
+      history
+    );
     const filterBtns = wrapper.find(FilterStatusButton);
 
     const allBtn = filterBtns.at(0);
@@ -34,7 +44,11 @@ describe('StatusFilterComponent', () => {
   });
 
   it('renders without errors for valid props', () => {
-    const wrapper = renderWithRouter(<StatusFilter />);
+    const wrapper = renderWithRouter(
+      <MountWithReduxProvider>
+        <StatusFilter />
+      </MountWithReduxProvider>
+    );
     expect(wrapper).toMatchSnapshot();
   });
 

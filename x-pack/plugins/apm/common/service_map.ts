@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import { ILicense } from '../../licensing/public';
+import { ILicense } from '../../licensing/common/types';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -33,6 +33,16 @@ export interface Connection {
   source: ConnectionNode;
   destination: ConnectionNode;
 }
+
+export interface ServiceAnomaly {
+  anomaly_score: number;
+  anomaly_severity: string;
+  actual_value: number;
+  typical_value: number;
+  ml_job_id: string;
+}
+
+export type ServiceNode = ConnectionNode & Partial<ServiceAnomaly>;
 
 export interface ServiceNodeMetrics {
   avgMemoryUsage: number | null;

@@ -34,9 +34,9 @@ export default function (kibana) {
       // All methods that ES plugin exposes are synchronous so we should get the first
       // value from all observables here to be able to synchronously return and create
       // cluster clients afterwards.
-      const { adminClient, dataClient } = server.newPlatform.setup.core.elasticsearch;
-      const adminCluster = new Cluster(adminClient);
-      const dataCluster = new Cluster(dataClient);
+      const { client } = server.newPlatform.setup.core.elasticsearch.legacy;
+      const adminCluster = new Cluster(client);
+      const dataCluster = new Cluster(client);
 
       const esConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
         .pipe(first())
@@ -72,7 +72,7 @@ export default function (kibana) {
         }
 
         const cluster = new Cluster(
-          server.newPlatform.setup.core.elasticsearch.createClient(name, clientConfig)
+          server.newPlatform.setup.core.elasticsearch.legacy.createClient(name, clientConfig)
         );
 
         clusters.set(name, cluster);

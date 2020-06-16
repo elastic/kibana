@@ -162,6 +162,7 @@ const PollSchema = schema.object({
 });
 
 export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
   kibanaServer: KibanaServerSchema,
   queue: QueueSchema,
   capture: CaptureSchema,
@@ -172,4 +173,4 @@ export const ConfigSchema = schema.object({
   poll: PollSchema,
 });
 
-export type ConfigType = TypeOf<typeof ConfigSchema>;
+export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

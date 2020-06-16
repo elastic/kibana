@@ -36,6 +36,7 @@ function decodeUiFilters(
 export interface Setup {
   client: ESClient;
   internalClient: ESClient;
+  ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
   dynamicIndexPattern?: IIndexPattern;
@@ -93,6 +94,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     internalClient: getESClient(context, request, {
       clientAsInternalUser: true,
     }),
+    ml: getMlSetup(context, request),
     config,
     dynamicIndexPattern,
   };
@@ -103,4 +105,17 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     ...('uiFilters' in query ? { uiFiltersES } : {}),
     ...coreSetupRequest,
   } as InferSetup<TParams>;
+}
+
+function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
+  if (!context.plugins.ml) {
+    return;
+  }
+  const ml = context.plugins.ml;
+  const mlClient = ml.mlClient.asScoped(request).callAsCurrentUser;
+  return {
+    mlSystem: ml.mlSystemProvider(mlClient, request),
+    anomalyDetectors: ml.anomalyDetectorsProvider(mlClient),
+    mlClient,
+  };
 }

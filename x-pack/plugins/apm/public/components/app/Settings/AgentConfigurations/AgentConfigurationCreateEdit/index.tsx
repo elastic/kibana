@@ -79,6 +79,7 @@ export function AgentConfigurationCreateEdit({
       ..._newConfig,
       settings: existingConfig?.settings || {},
     }));
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [existingConfig]);
 
   // update newConfig when existingConfig has loaded

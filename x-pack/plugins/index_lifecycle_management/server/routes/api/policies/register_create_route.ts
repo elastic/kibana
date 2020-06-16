@@ -67,7 +67,7 @@ const warmPhaseSchema = schema.maybe(
     actions: schema.object({
       set_priority: setPrioritySchema,
       unfollow: unfollowSchema,
-      read_only: schema.maybe(schema.object({})), // Readonly has no options
+      readonly: schema.maybe(schema.object({})), // Readonly has no options
       allocate: allocateSchema,
       shrink: schema.maybe(
         schema.object({
@@ -91,6 +91,11 @@ const coldPhaseSchema = schema.maybe(
       unfollow: unfollowSchema,
       allocate: allocateSchema,
       freeze: schema.maybe(schema.object({})), // Freeze has no options
+      searchable_snapshot: schema.maybe(
+        schema.object({
+          snapshot_repository: schema.string(),
+        })
+      ),
     }),
   })
 );
@@ -104,7 +109,11 @@ const deletePhaseSchema = schema.maybe(
           policy: schema.string(),
         })
       ),
-      delete: schema.maybe(schema.object({})), // Delete has no options
+      delete: schema.maybe(
+        schema.object({
+          delete_searchable_snapshot: schema.maybe(schema.boolean()),
+        })
+      ),
     }),
   })
 );

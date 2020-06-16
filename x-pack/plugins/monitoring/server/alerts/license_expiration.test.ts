@@ -16,7 +16,7 @@ import {
 } from './types';
 import { executeActions } from '../lib/alerts/license_expiration.lib';
 import { PreparedAlert, getPreparedAlert } from '../lib/alerts/get_prepared_alert';
-import { alertsMock, AlertServicesMock } from '../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../alerts/server/mocks';
 
 jest.mock('../lib/alerts/license_expiration.lib', () => ({
   executeActions: jest.fn(),

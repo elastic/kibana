@@ -715,7 +715,6 @@ export async function loadDataForCharts(
           (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
           influencersFilterQuery !== undefined
         ) {
-          console.log('Explorer anomaly charts data set:', resp.records);
           resolve(resp.records);
         }
 
@@ -764,7 +763,6 @@ export function loadOverallData(selectedJobs, interval, bounds) {
           interval.asSeconds()
         );
 
-        console.log('Explorer overall swimlane data set:', overallSwimlaneData);
         resolve({
           loading: false,
           overallSwimlaneData,
@@ -795,7 +793,6 @@ export function loadViewBySwimlane(
             getSwimlaneContainerWidth(noInfluencersConfigured)
           ).asSeconds()
         );
-        console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
 
         resolve({
           viewBySwimlaneData,
@@ -879,7 +876,6 @@ export async function loadTopInfluencers(
         )
         .then((resp) => {
           // TODO - sort the influencers keys so that the partition field(s) are first.
-          console.log('Explorer top influencers data set:', resp.influencers);
           resolve(resp.influencers);
         });
     } else {

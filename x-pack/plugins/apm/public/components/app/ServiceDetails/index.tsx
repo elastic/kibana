@@ -28,7 +28,7 @@ export function ServiceDetails({ tab }: Props) {
   const canSaveAlerts = !!plugin.core.application.capabilities.apm[
     'alerting:save'
   ];
-  const isAlertingPluginEnabled = 'alerting' in plugin.plugins;
+  const isAlertingPluginEnabled = 'alerts' in plugin.plugins;
 
   const isAlertingAvailable =
     isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);

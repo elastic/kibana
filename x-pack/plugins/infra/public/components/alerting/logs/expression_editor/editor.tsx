@@ -137,6 +137,7 @@ export const Editor: React.FC<Props> = (props) => {
     } else {
       return [];
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [sourceStatus]);
 
   const updateCount = useCallback(
@@ -176,6 +177,7 @@ export const Editor: React.FC<Props> = (props) => {
       ? [...alertParams.criteria, DEFAULT_CRITERIA]
       : [DEFAULT_CRITERIA];
     setAlertParams('criteria', nextCriteria);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [alertParams, setAlertParams]);
 
   const removeCriterion = useCallback(
@@ -185,6 +187,7 @@ export const Editor: React.FC<Props> = (props) => {
       });
       setAlertParams('criteria', nextCriteria);
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [alertParams, setAlertParams]
   );
 
@@ -233,3 +236,7 @@ export const Editor: React.FC<Props> = (props) => {
     </>
   );
 };
+
+// required for dynamic import
+// eslint-disable-next-line import/no-default-export
+export default Editor;

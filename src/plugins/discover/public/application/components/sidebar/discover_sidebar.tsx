@@ -33,6 +33,7 @@ import {
   IIndexPatternFieldList,
   IndexPatternField,
   IndexPattern,
+  UI_SETTINGS,
 } from '../../../../../data/public';
 import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
@@ -113,10 +114,12 @@ export function DiscoverSidebar({
         setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
       } else {
         setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
-        selectedIndexPattern.popularizeField(field.name, 1);
+        if (services.capabilities.discover.save) {
+          selectedIndexPattern.popularizeField(field.name, 1);
+        }
       }
     },
-    [openFieldMap, selectedIndexPattern]
+    [openFieldMap, selectedIndexPattern, services.capabilities.discover.save]
   );
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -133,7 +136,7 @@ export function DiscoverSidebar({
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
-  const useShortDots = services.uiSettings.get('shortDots:enable');
+  const useShortDots = services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
 
   const {
     selected: selectedFields,

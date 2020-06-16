@@ -58,13 +58,6 @@ filters.limit = {
   value: 100,
 };
 
-filters.type = {
-  __template: {
-    value: 'TYPE',
-  },
-  value: '{type}',
-};
-
 filters.geo_bounding_box = {
   __template: {
     FIELD: {

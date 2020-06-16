@@ -57,6 +57,7 @@ export interface DashboardContainerInput extends ContainerInput {
   useMargins: boolean;
   title: string;
   description?: string;
+  isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
@@ -104,10 +105,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   ) {
     super(
       {
-        panels: {},
-        isFullScreenMode: false,
-        filters: [],
-        useMargins: true,
         ...initialInput,
       },
       { embeddableLoaded: {} },
@@ -186,7 +183,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
-          <DashboardViewport renderEmpty={this.renderEmpty} container={this} />
+          <DashboardViewport
+            renderEmpty={this.renderEmpty}
+            container={this}
+            PanelComponent={this.options.embeddable.EmbeddablePanel}
+          />
         </KibanaContextProvider>
       </I18nProvider>,
       dom

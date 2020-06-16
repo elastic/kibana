@@ -24,7 +24,7 @@ import { UrlGeneratorInternal } from './url_generator_internal';
 import { UrlGeneratorContract } from './url_generator_contract';
 
 export interface UrlGeneratorsStart {
-  getUrlGenerator: (urlGeneratorId: UrlGeneratorId) => UrlGeneratorContract<UrlGeneratorId>;
+  getUrlGenerator: <T extends UrlGeneratorId>(urlGeneratorId: T) => UrlGeneratorContract<T>;
 }
 
 export interface UrlGeneratorsSetup {

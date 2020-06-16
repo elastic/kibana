@@ -30,6 +30,7 @@ export async function agentCheckin(
   const updateData: {
     last_checkin: string;
     default_api_key?: string;
+    default_api_key_id?: string;
     local_metadata?: AgentMetadata;
     current_error_events?: string;
   } = {
@@ -51,11 +52,13 @@ export async function agentCheckin(
       // Assign output API keys
       // We currently only support default ouput
       if (!defaultApiKey) {
-        updateData.default_api_key = await APIKeysService.generateOutputApiKey(
+        const outputAPIKey = await APIKeysService.generateOutputApiKey(
           soClient,
           'default',
           agent.id
         );
+        updateData.default_api_key = outputAPIKey.key;
+        updateData.default_api_key_id = outputAPIKey.id;
       }
       // Mutate the config to set the api token for this agent
       config.outputs.default.api_key = defaultApiKey || updateData.default_api_key;

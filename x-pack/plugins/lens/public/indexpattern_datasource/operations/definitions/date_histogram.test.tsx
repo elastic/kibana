@@ -12,6 +12,7 @@ import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { coreMock } from 'src/core/public/mocks';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
 import {
   dataPluginMock,
   getCalculateAutoTimeExpression,
@@ -23,7 +24,7 @@ const dataStart = dataPluginMock.createStartContract();
 dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression({
   ...coreMock.createStart().uiSettings,
   get: (path: string) => {
-    if (path === 'histogram:maxBars') {
+    if (path === UI_SETTINGS.HISTOGRAM_MAX_BARS) {
       return 10;
     }
   },

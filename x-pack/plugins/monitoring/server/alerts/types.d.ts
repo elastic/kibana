@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Moment } from 'moment';
-import { AlertExecutorOptions } from '../../../alerting/server';
+import { AlertExecutorOptions } from '../../../alerts/server';
 import { AlertClusterStateState, AlertCommonPerClusterMessageTokenType } from './enums';
 
 export interface AlertLicense {

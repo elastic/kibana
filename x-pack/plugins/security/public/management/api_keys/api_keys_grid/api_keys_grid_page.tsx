@@ -7,6 +7,7 @@
 import React, { Component } from 'react';
 import {
   EuiBadge,
+  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -26,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
-import { NotificationsStart } from 'src/core/public';
+import { ApplicationStart, NotificationsStart } from 'src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { APIKeysAPIClient } from '../api_keys_api_client';
@@ -40,6 +41,7 @@ interface Props {
   notifications: NotificationsStart;
   docLinks: DocumentationLinksService;
   apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -137,7 +139,11 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
         <EuiPageContent>
-          <EmptyPrompt isAdmin={isAdmin} docLinks={this.props.docLinks} />
+          <EmptyPrompt
+            isAdmin={isAdmin}
+            docLinks={this.props.docLinks}
+            navigateToApp={this.props.navigateToApp}
+          />
         </EuiPageContent>
       );
     }
@@ -349,7 +355,7 @@ export class APIKeysGridPage extends Component<Props, State> {
   private getColumnConfig = () => {
     const { isAdmin } = this.state;
 
-    let config = [
+    let config: Array<EuiBasicTableColumn<any>> = [
       {
         field: 'name',
         name: i18n.translate('xpack.security.management.apiKeys.table.nameColumnName', {
@@ -385,7 +391,6 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Created',
         }),
         sortable: true,
-        // @ts-ignore
         render: (creationDateMs: number) => moment(creationDateMs).format(DATE_FORMAT),
       },
       {
@@ -394,7 +399,6 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Expires',
         }),
         sortable: true,
-        // @ts-ignore
         render: (expirationDateMs: number) => {
           if (expirationDateMs === undefined) {
             return (

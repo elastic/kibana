@@ -6,7 +6,6 @@
 
 import { xpackMain } from './legacy/plugins/xpack_main';
 import { monitoring } from './legacy/plugins/monitoring';
-import { reporting } from './legacy/plugins/reporting';
 import { security } from './legacy/plugins/security';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { beats } from './legacy/plugins/beats_management';
@@ -18,7 +17,6 @@ module.exports = function (kibana) {
   return [
     xpackMain(kibana),
     monitoring(kibana),
-    reporting(kibana),
     spaces(kibana),
     security(kibana),
     dashboardMode(kibana),
