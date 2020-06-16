@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -136,6 +136,26 @@ export function InnerWorkspacePanel({
     framePublicAPI.filters,
   ]);
 
+  const onEvent = useCallback(
+    (event: ExpressionRendererEvent) => {
+      if (!plugins.uiActions) {
+        // ui actions not available, not handling event...
+        return;
+      }
+      if (isLensBrushEvent(event)) {
+        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: event.data,
+        });
+      }
+      if (isLensFilterEvent(event)) {
+        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: event.data,
+        });
+      }
+    },
+    [plugins.uiActions]
+  );
+
   const autoRefreshFetch$ = useMemo(
     () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
     [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$]
@@ -231,22 +251,7 @@ export function InnerWorkspacePanel({
           padding="m"
           expression={expression!}
           reload$={autoRefreshFetch$}
-          onEvent={(event: ExpressionRendererEvent) => {
-            if (!plugins.uiActions) {
-              // ui actions not available, not handling event...
-              return;
-            }
-            if (isLensBrushEvent(event)) {
-              plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-                data: event.data,
-              });
-            }
-            if (isLensFilterEvent(event)) {
-              plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-                data: event.data,
-              });
-            }
-          }}
+          onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {
             return (
               <EuiFlexGroup direction="column" alignItems="center">

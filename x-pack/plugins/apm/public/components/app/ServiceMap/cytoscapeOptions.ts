@@ -183,11 +183,10 @@ const style: cytoscape.Stylesheet[] = [
         : parseInt(theme.paddingSizes.xs, 10),
     },
   },
-  // @ts-ignore DefinitelyTyped says visibility is "none" but it's
-  // actually "hidden"
   {
     selector: 'edge[isInverseEdge]',
-    // @ts-ignore
+    // @ts-ignore DefinitelyTyped says visibility is "none" but it's
+    // actually "hidden"
     style: { visibility: 'hidden' },
   },
   {

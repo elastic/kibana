@@ -324,7 +324,7 @@ export function getElements(
   return elements.map(appendAst);
 }
 
-const augment = (type: string) => <T extends any>(n: T): T => ({
+const augment = (type: string) => <T extends CanvasElement | CanvasGroup>(n: T): T => ({
   ...n,
   position: { ...n.position, type },
   ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic

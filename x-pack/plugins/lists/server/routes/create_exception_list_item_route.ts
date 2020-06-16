@@ -44,7 +44,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
           _tags,
           tags,
           meta,
-          comment,
+          comments,
           description,
           entries,
           item_id: itemId,
@@ -76,7 +76,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
           } else {
             const createdList = await exceptionLists.createExceptionListItem({
               _tags,
-              comment,
+              comments,
               description,
               entries,
               itemId,

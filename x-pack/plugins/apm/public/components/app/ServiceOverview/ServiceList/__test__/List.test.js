@@ -40,7 +40,7 @@ describe('ServiceOverview -> List', () => {
     expect(renderedColumns[0]).toMatchSnapshot();
     expect(renderedColumns.slice(2)).toEqual([
       'python',
-      '92 ms',
+      '91.5 ms',
       '86.9 tpm',
       '12.6 err.',
     ]);

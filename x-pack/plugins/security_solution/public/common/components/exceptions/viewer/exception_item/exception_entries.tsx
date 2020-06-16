@@ -22,11 +22,11 @@ import { getEmptyValue } from '../../../empty_value';
 import * as i18n from '../../translations';
 import { FormattedEntry } from '../../types';
 
-const EntriesDetails = styled(EuiFlexItem)`
+const MyEntriesDetails = styled(EuiFlexItem)`
   padding: ${({ theme }) => theme.eui.euiSize};
 `;
 
-const StyledEditButton = styled(EuiButton)`
+const MyEditButton = styled(EuiButton)`
   ${({ theme }) => css`
     background-color: ${transparentize(0.9, theme.eui.euiColorPrimary)};
     border: none;
@@ -34,7 +34,7 @@ const StyledEditButton = styled(EuiButton)`
   `}
 `;
 
-const StyledRemoveButton = styled(EuiButton)`
+const MyRemoveButton = styled(EuiButton)`
   ${({ theme }) => css`
     background-color: ${transparentize(0.9, theme.eui.euiColorDanger)};
     border: none;
@@ -42,7 +42,7 @@ const StyledRemoveButton = styled(EuiButton)`
   `}
 `;
 
-const AndOrBadgeContainer = styled(EuiFlexItem)`
+const MyAndOrBadgeContainer = styled(EuiFlexItem)`
   padding-top: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
@@ -118,19 +118,19 @@ const ExceptionEntriesComponent = ({
   );
 
   return (
-    <EntriesDetails grow={5}>
+    <MyEntriesDetails grow={5}>
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="none">
             {entries.length > 1 && (
               <EuiHideFor sizes={['xs', 's']}>
-                <AndOrBadgeContainer grow={false}>
+                <MyAndOrBadgeContainer grow={false}>
                   <AndOrBadge
                     type="and"
                     includeAntennas
                     data-test-subj="exceptionsViewerAndBadge"
                   />
-                </AndOrBadgeContainer>
+                </MyAndOrBadgeContainer>
               </EuiHideFor>
             )}
             <EuiFlexItem grow={1}>
@@ -147,7 +147,7 @@ const ExceptionEntriesComponent = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <StyledEditButton
+              <MyEditButton
                 size="s"
                 color="primary"
                 onClick={onEdit}
@@ -155,10 +155,10 @@ const ExceptionEntriesComponent = ({
                 data-test-subj="exceptionsViewerEditBtn"
               >
                 {i18n.EDIT}
-              </StyledEditButton>
+              </MyEditButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <StyledRemoveButton
+              <MyRemoveButton
                 size="s"
                 color="danger"
                 onClick={onDelete}
@@ -166,12 +166,12 @@ const ExceptionEntriesComponent = ({
                 data-test-subj="exceptionsViewerDeleteBtn"
               >
                 {i18n.REMOVE}
-              </StyledRemoveButton>
+              </MyRemoveButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EntriesDetails>
+    </MyEntriesDetails>
   );
 };
 

@@ -280,7 +280,7 @@ export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
  * testing upload features.
  * @param rule The rule to convert to ndjson
  */
-export const ruleToNdjson = (rule: Partial<RulesSchema>): Buffer => {
+export const ruleToNdjson = (rule: Partial<CreateRulesSchema>): Buffer => {
   const stringified = JSON.stringify(rule);
   return Buffer.from(`${stringified}\n`);
 };

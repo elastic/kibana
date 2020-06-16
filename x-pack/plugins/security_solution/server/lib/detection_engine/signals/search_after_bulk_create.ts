@@ -104,6 +104,7 @@ export const searchAfterAndBulkCreate = async ({
     try {
       logger.debug(`sortIds: ${sortId}`);
       const {
+        // @ts-ignore https://github.com/microsoft/TypeScript/issues/35546
         searchResult,
         searchDuration,
       }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter({
@@ -141,7 +142,7 @@ export const searchAfterAndBulkCreate = async ({
 
       // filter out the search results that match with the values found in the list.
       // the resulting set are valid signals that are not on the allowlist.
-      const filteredEvents =
+      const filteredEvents: SignalSearchResponse =
         listClient != null
           ? await filterEventsAgainstList({
               listClient,

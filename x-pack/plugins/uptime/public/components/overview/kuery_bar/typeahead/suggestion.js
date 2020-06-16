@@ -49,7 +49,8 @@ const Description = styled.div`
   }
 `;
 
-const ListItem = styled.li`
+const ListItem = styled.button`
+  width: inherit;
   font-size: ${fontSizes.small};
   height: ${px(units.double)};
   align-items: center;
@@ -81,6 +82,7 @@ const Icon = styled.div`
 `;
 
 const TextValue = styled.div`
+  text-align: left;
   flex: 0 0 ${px(unit * 12)};
   color: ${theme.euiColorDarkestShade};
   padding: 0 ${px(units.half)};

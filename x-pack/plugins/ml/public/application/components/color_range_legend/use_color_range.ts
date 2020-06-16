@@ -152,19 +152,23 @@ export const useColorRange = (
 ) => {
   const euiTheme = useUiSettings().get('theme:darkMode') ? euiThemeDark : euiThemeLight;
 
-  const colorRanges = {
-    [COLOR_RANGE.BLUE]: [d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)],
-    [COLOR_RANGE.RED]: [d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorDanger)],
+  const colorRanges: Record<COLOR_RANGE, string[]> = {
+    [COLOR_RANGE.BLUE]: [
+      d3.rgb(euiTheme.euiColorEmptyShade).toString(),
+      d3.rgb(euiTheme.euiColorVis1).toString(),
+    ],
+    [COLOR_RANGE.RED]: [
+      d3.rgb(euiTheme.euiColorEmptyShade).toString(),
+      d3.rgb(euiTheme.euiColorDanger).toString(),
+    ],
     [COLOR_RANGE.RED_GREEN]: ['red', 'green'],
     [COLOR_RANGE.GREEN_RED]: ['green', 'red'],
     [COLOR_RANGE.YELLOW_GREEN_BLUE]: coloursYGB,
   };
 
   const linearScale = d3.scale
-    .linear()
+    .linear<string>()
     .domain(colorDomains[colorRange])
-    // typings for .range() incorrectly don't allow passing in a color extent.
-    // @ts-ignore
     .range(colorRanges[colorRange]);
   const influencerColorScale = influencerColorScaleFactory(featureCount);
   const influencerScaleLinearWrapper = (n: number) => linearScale(influencerColorScale(n));
@@ -173,7 +177,7 @@ export const useColorRange = (
     [COLOR_RANGE_SCALE.LINEAR]: linearScale,
     [COLOR_RANGE_SCALE.INFLUENCER]: influencerScaleLinearWrapper,
     [COLOR_RANGE_SCALE.SQRT]: d3.scale
-      .sqrt()
+      .sqrt<string>()
       .domain(colorDomains[colorRange])
       // typings for .range() incorrectly don't allow passing in a color extent.
       // @ts-ignore

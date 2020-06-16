@@ -11,7 +11,7 @@ import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionListItemSchema } from '../../../common/schemas';
-import { ExceptionList, UseExceptionListProps } from '../types';
+import { ExceptionList, UseExceptionListProps, UseExceptionListSuccess } from '../types';
 
 import { ReturnExceptionListAndItems, useExceptionList } from './use_exception_list';
 
@@ -57,6 +57,7 @@ describe('useExceptionList', () => {
 
   test('fetch exception list and items', async () => {
     await act(async () => {
+      const onSuccessMock = jest.fn();
       const { result, waitForNextUpdate } = renderHook<
         UseExceptionListProps,
         ReturnExceptionListAndItems
@@ -65,6 +66,7 @@ describe('useExceptionList', () => {
           http: mockKibanaHttpService,
           lists: [{ id: 'myListId', namespaceType: 'single' }],
           onError: onErrorMock,
+          onSuccess: onSuccessMock,
         })
       );
       await waitForNextUpdate();
@@ -78,6 +80,12 @@ describe('useExceptionList', () => {
         { ...getExceptionListItemSchemaMock() },
       ];
 
+      const expectedResult: UseExceptionListSuccess = {
+        exceptions: expectedListItemsResult,
+        lists: expectedListResult,
+        pagination: { page: 1, perPage: 20, total: 1 },
+      };
+
       expect(result.current).toEqual([
         false,
         expectedListResult,
@@ -89,6 +97,7 @@ describe('useExceptionList', () => {
         },
         result.current[4],
       ]);
+      expect(onSuccessMock).toHaveBeenCalledWith(expectedResult);
     });
   });
 
@@ -100,13 +109,14 @@ describe('useExceptionList', () => {
         UseExceptionListProps,
         ReturnExceptionListAndItems
       >(
-        ({ filterOptions, http, lists, pagination, onError }) =>
-          useExceptionList({ filterOptions, http, lists, onError, pagination }),
+        ({ filterOptions, http, lists, pagination, onError, onSuccess }) =>
+          useExceptionList({ filterOptions, http, lists, onError, onSuccess, pagination }),
         {
           initialProps: {
             http: mockKibanaHttpService,
             lists: [{ id: 'myListId', namespaceType: 'single' }],
             onError: onErrorMock,
+            onSuccess: jest.fn(),
           },
         }
       );

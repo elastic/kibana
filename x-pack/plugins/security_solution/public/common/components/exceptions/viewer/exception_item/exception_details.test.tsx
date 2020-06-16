@@ -24,7 +24,7 @@ describe('ExceptionDetails', () => {
 
   test('it renders no comments button if no comments exist', () => {
     const exceptionItem = getExceptionItemMock();
-    exceptionItem.comment = [];
+    exceptionItem.comments = [];
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -77,15 +77,15 @@ describe('ExceptionDetails', () => {
 
   test('it renders comments plural if more than one', () => {
     const exceptionItem = getExceptionItemMock();
-    exceptionItem.comment = [
+    exceptionItem.comments = [
       {
-        user: 'user_1',
-        timestamp: '2020-04-23T00:19:13.289Z',
+        created_by: 'user_1',
+        created_at: '2020-04-23T00:19:13.289Z',
         comment: 'Comment goes here',
       },
       {
-        user: 'user_2',
-        timestamp: '2020-04-23T00:19:13.289Z',
+        created_by: 'user_2',
+        created_at: '2020-04-23T00:19:13.289Z',
         comment: 'Comment goes here',
       },
     ];

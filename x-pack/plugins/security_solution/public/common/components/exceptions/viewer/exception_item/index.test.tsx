@@ -51,7 +51,7 @@ describe('ExceptionItem', () => {
     const editBtn = wrapper.find('[data-test-subj="exceptionsViewerEditBtn"] button').at(0);
     editBtn.simulate('click');
 
-    expect(mockOnEditException).toHaveBeenCalledTimes(1);
+    expect(mockOnEditException).toHaveBeenCalledWith(getExceptionItemMock());
   });
 
   it('it invokes "onDeleteException" when delete button clicked', () => {
@@ -73,7 +73,10 @@ describe('ExceptionItem', () => {
     const editBtn = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0);
     editBtn.simulate('click');
 
-    expect(mockOnDeleteException).toHaveBeenCalledTimes(1);
+    expect(mockOnDeleteException).toHaveBeenCalledWith({
+      id: 'uuid_here',
+      namespaceType: 'single',
+    });
   });
 
   it('it renders comment accordion closed to begin with', () => {

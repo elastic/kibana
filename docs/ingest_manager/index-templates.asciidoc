@@ -1,7 +1,0 @@
-# Elasticsearch Index Templates
-
-## Generation
-
-* Index templates are generated from `YAML` files contained in the package.
-* There is one index template per dataset.
-* For the generation of an index template, all `yml` files contained in the package subdirectory `dataset/DATASET_NAME/fields/` are used.

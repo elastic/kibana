@@ -46,7 +46,7 @@ describe('ExceptionsViewer', () => {
     ]);
   });
 
-  it('it renders loader if "initLoading" is true', () => {
+  it('it renders loader if "loadingList" is true', () => {
     (useExceptionList as jest.Mock).mockReturnValue([
       true,
       [],

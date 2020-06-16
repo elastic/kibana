@@ -172,11 +172,18 @@ except that the time range is shifted back by 10 minutes:
           // the auto-generated "MUST-NOT" clause
           "%dashboard_context-must_not_clause%"
         ]
+        filter: [
+          // This string will be replaced
+          // with the auto-generated "FILTER" clause
+          "%dashboard_context-filter_clause%"
+        ]
       }
     }
   }
 }
 ----
+
+NOTE: When using `"%context%": true` or defining a value for "%timefield%"` the body cannot contain a query. To customize the query within the VEGA specification (e.g. add an additional filter, or shift the timefilter), define your query and use the placeholders as in the example above. The placeholders will be replaced by the actual context of the dashboard or visualization once parsed.
 
 The `"%timefilter%"` can also be used to specify a single min or max
 value. The date_histogram's `extended_bounds` can be set

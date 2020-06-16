@@ -63,3 +63,5 @@ export interface Datasource extends Omit<NewDatasource, 'inputs'> {
   created_at: string;
   created_by: string;
 }
+
+export type DatasourceSOAttributes = Omit<Datasource, 'id'>;
