@@ -1,13 +1,13 @@
 [role="xpack"]
 [[maps-search]]
-== Search the data in a map
+== Search your data
 
 ++++
-<titleabbrev>Search data in a map</titleabbrev>
+<titleabbrev>Search your data</titleabbrev>
 ++++
 
 
-**Elastic Maps** embeds the search bar for real-time search.
+Maps embeds the search bar for real-time search.
 Only layers requesting data from {es} are filtered when you submit a search request.
 Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 

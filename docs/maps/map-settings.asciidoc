@@ -2,7 +2,7 @@
 [[maps-settings]]
 == Configure map settings
 
-*Elastic Maps* offers settings that let you configure how a map is displayed.
+Maps offers settings that let you configure how a map is displayed.
 To access these settings, click *Map settings* in the application toolbar.
 
 [float]

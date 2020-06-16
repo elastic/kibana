@@ -1,6 +1,6 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Get started with Elastic Maps
+== Get started with Maps
 
 ++++
 <titleabbrev>Get started</titleabbrev>
@@ -8,7 +8,7 @@
 
 
 
-You work with *Elastic Maps* by adding layers. The data for a layer can come from
+You work with Maps by adding layers. The data for a layer can come from
 sources such as {es} documents, vector sources, tile map services, web map
 services, and more. You can symbolize the data in different ways.
 For example, you might show which airports have the longest flight
@@ -31,7 +31,7 @@ image::maps/images/read-only-badge.png[Example of Maps' read only access indicat
 [float]
 === Prerequisites
 Before you start this tutorial, <<add-sample-data, add the web logs sample data set>>. Each
-sample data set includes a map to go along with the data. Once you've added the data, open *Elastic Maps* and
+sample data set includes a map to go along with the data. Once you've added the data, open Maps and
 explore the different layers of the *[Logs] Total Requests and Bytes* map.
 You'll re-create this map in this tutorial.
 
