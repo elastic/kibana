@@ -16,6 +16,8 @@ import { MetricsChart } from '../../components/chart/metrics';
 import { StackedBarChart } from '../../components/chart/stacked_bar';
 import { logsData } from './logs.mock';
 import { uptimeData } from './uptime.mock';
+import { metricsData } from './metrics.mock';
+import { apmData } from './apm.mock';
 
 export const Overview = () => {
   const theme = useContext(ThemeContext);
@@ -45,10 +47,10 @@ export const Overview = () => {
               <StackedBarChart data={logsData} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <MetricsChart />
+              <MetricsChart data={metricsData} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <APMChart />
+              <APMChart data={apmData} />
             </EuiFlexItem>
             <EuiFlexItem>
               <StackedBarChart data={uptimeData} />

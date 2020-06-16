@@ -9,10 +9,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiProgress } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { ChartContainer } from '../container';
-import { data } from './mock.data';
+import { FetchDataResponse } from '../../../typings/data_handler';
 
-export const MetricsChart = () => {
+interface Props {
+  data?: FetchDataResponse;
+}
+
+export const MetricsChart = ({ data }: Props) => {
   const theme = useContext(ThemeContext);
+
+  if (!data) {
+    return null;
+  }
+
   return (
     <ChartContainer title={data.title} appLink={data.appLink}>
       <EuiFlexGroup>

@@ -20,10 +20,18 @@ import numeral from '@elastic/numeral';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { ChartContainer } from '../container';
-import { apmData as data } from './mock.data';
+import { FetchDataResponse } from '../../../typings/data_handler';
 
-export const APMChart = () => {
+interface Props {
+  data?: FetchDataResponse;
+}
+
+export const APMChart = ({ data }: Props) => {
   const theme = useContext(ThemeContext);
+
+  if (!data) {
+    return null;
+  }
 
   const transactionSeries = data.series.find((d) => d.key === 'transactions');
   const errorSeries = data.series.find((d) => d.key === 'errors');
