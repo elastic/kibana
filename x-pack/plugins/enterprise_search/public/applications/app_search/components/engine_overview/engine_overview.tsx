@@ -89,18 +89,18 @@ export const EngineOverview: React.FC = () => {
   if (!engines.length) return <EmptyState />;
 
   return (
-    <EuiPage restrictWidth className="engine-overview">
+    <EuiPage restrictWidth className="engineOverview">
       <SetBreadcrumbs isRoot />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EuiPageBody>
         <EngineOverviewHeader />
 
-        <EuiPageContent>
+        <EuiPageContent panelPaddingSize="s" className="engineOverview__body">
           <EuiPageContentHeader>
             <EuiTitle size="s">
               <h2>
-                <img src={EnginesIcon} alt="" className="engine-icon" />
+                <img src={EnginesIcon} alt="" className="engineIcon" />
                 <FormattedMessage
                   id="xpack.enterpriseSearch.appSearch.enginesOverview.engines"
                   defaultMessage="Engines"
@@ -125,7 +125,7 @@ export const EngineOverview: React.FC = () => {
               <EuiPageContentHeader>
                 <EuiTitle size="s">
                   <h2>
-                    <img src={MetaEnginesIcon} alt="" className="engine-icon" />
+                    <img src={MetaEnginesIcon} alt="" className="engineIcon" />
                     <FormattedMessage
                       id="xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines"
                       defaultMessage="Meta Engines"

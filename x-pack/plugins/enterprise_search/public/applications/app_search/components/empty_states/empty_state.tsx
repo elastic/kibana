@@ -32,13 +32,14 @@ export const EmptyState: React.FC = () => {
   };
 
   return (
-    <EuiPage restrictWidth className="empty-state">
+    <EuiPage restrictWidth>
       <SetBreadcrumbs isRoot />
 
       <EuiPageBody>
         <EngineOverviewHeader />
-        <EuiPageContent>
+        <EuiPageContent className="emptyState">
           <EuiEmptyPrompt
+            className="emptyState__prompt"
             iconType="eyeClosed"
             title={
               <h2>

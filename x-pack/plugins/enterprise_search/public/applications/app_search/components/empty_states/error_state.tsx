@@ -20,14 +20,15 @@ export const ErrorState: React.FC = () => {
   const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
 
   return (
-    <EuiPage restrictWidth className="empty-state">
+    <EuiPage restrictWidth>
       <SetBreadcrumbs isRoot />
       <SendTelemetry action="error" metric="cannot_connect" />
 
       <EuiPageBody>
         <EngineOverviewHeader isButtonDisabled />
-        <EuiPageContent>
+        <EuiPageContent className="emptyState">
           <EuiEmptyPrompt
+            className="emptyState__prompt"
             iconType="alert"
             iconColor="danger"
             title={

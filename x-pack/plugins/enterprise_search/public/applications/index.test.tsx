@@ -35,6 +35,6 @@ describe('renderApp', () => {
 
   it('renders AppSearch', () => {
     renderApp(AppSearch, core, params, config, plugins);
-    expect(params.element.querySelector('.setup-guide')).not.toBeNull();
+    expect(params.element.querySelector('.setupGuide')).not.toBeNull();
   });
 });

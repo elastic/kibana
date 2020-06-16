@@ -7,15 +7,13 @@
 /**
  * Empty/Error UI states
  */
-.empty-state {
-  .euiPageContent {
-    min-height: 450px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+.emptyState {
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
-  .euiEmptyPrompt > .euiIcon {
+  &__prompt > .euiIcon {
     margin-bottom: $euiSizeS;
   }
 }
