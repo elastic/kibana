@@ -158,46 +158,6 @@ export const Home = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-
-          <EuiHorizontalRule margin="xl" />
-
-          {/* Try it out */}
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h3>
-                    {i18n.translate('xpack.observability.home.tryItOut', {
-                      defaultMessage: 'Try it out',
-                    })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          {/* Try it out sections */}
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="center">
-              {tryItOutItemsSection.map((item) => (
-                <EuiFlexItem grow={false} key={item.id} style={{ width: '260px' }}>
-                  <EuiCard
-                    layout="horizontal"
-                    icon={<EuiIcon size="l" type={item.icon} />}
-                    title={
-                      <EuiTitle size="xs" className="title">
-                        <h3>{item.title}</h3>
-                      </EuiTitle>
-                    }
-                    description={item.description}
-                    target={item.target}
-                    href={item.href}
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-            <EuiSpacer />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </Page>
     </Container>
