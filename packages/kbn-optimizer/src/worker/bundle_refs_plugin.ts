@@ -70,9 +70,11 @@ function hookIntoCompiler(
 }
 
 export class BundleRefsPlugin {
-  private resolvedRequestCache = new Map<string, Promise<string | undefined>>();
+  private readonly resolvedRefEntryCache = new Map<BundleRef, Promise<string>>();
+  private readonly resolvedRequestCache = new Map<string, Promise<string | undefined>>();
+  private readonly ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
 
-  constructor(private readonly bundle: Bundle, public readonly bundleRefs: BundleRefs) {}
+  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {}
 
   apply(compiler: webpack.Compiler) {
     hookIntoCompiler(compiler, async (context, request) => {
@@ -83,8 +85,26 @@ export class BundleRefsPlugin {
     });
   }
 
-  private cachedResolveRequest(context: string, request: string) {
-    const absoluteRequest = Path.resolve(context, request);
+  private cachedResolveRefEntry(ref: BundleRef) {
+    const cached = this.resolvedRefEntryCache.get(ref);
+
+    if (cached) {
+      return cached;
+    }
+
+    const absoluteRequest = Path.resolve(ref.contextDir, ref.entry);
+    const promise = this.cachedResolveRequest(absoluteRequest).then((resolved) => {
+      if (!resolved) {
+        throw new Error(`Unable to resolve request [${ref.entry}] relative to [${ref.contextDir}]`);
+      }
+
+      return resolved;
+    });
+    this.resolvedRefEntryCache.set(ref, promise);
+    return promise;
+  }
+
+  private cachedResolveRequest(absoluteRequest: string) {
     const cached = this.resolvedRequestCache.get(absoluteRequest);
 
     if (cached) {
@@ -102,6 +122,7 @@ export class BundleRefsPlugin {
       return absoluteRequest;
     }
 
+    // look for an index file in directories
     if (stats?.isDirectory()) {
       for (const ext of RESOLVE_EXTENSIONS) {
         const indexPath = Path.resolve(absoluteRequest, `index${ext}`);
@@ -109,6 +130,15 @@ export class BundleRefsPlugin {
         if (indexStats?.isFile()) {
           return indexPath;
         }
+      }
+    }
+
+    // look for a file with one of the supported extensions
+    for (const ext of RESOLVE_EXTENSIONS) {
+      const filePath = `${absoluteRequest}${ext}`;
+      const fileStats = await safeStat(filePath);
+      if (fileStats?.isFile()) {
+        return filePath;
       }
     }
 
@@ -132,7 +162,12 @@ export class BundleRefsPlugin {
       return;
     }
 
-    const resolved = await this.cachedResolveRequest(context, request);
+    const absoluteRequest = Path.resolve(context, request);
+    if (absoluteRequest.startsWith(this.ignorePrefix)) {
+      return;
+    }
+
+    const resolved = await this.cachedResolveRequest(absoluteRequest);
     if (!resolved) {
       return;
     }
@@ -143,23 +178,17 @@ export class BundleRefsPlugin {
       return;
     }
 
-    let matchingRef: BundleRef | undefined;
     for (const ref of eligibleRefs) {
-      const resolvedEntry = await this.cachedResolveRequest(ref.contextDir, ref.entry);
+      const resolvedEntry = await this.cachedResolveRefEntry(ref);
       if (resolved === resolvedEntry) {
-        matchingRef = ref;
-        break;
+        return ref;
       }
     }
 
-    if (!matchingRef) {
-      const bundleId = Array.from(new Set(eligibleRefs.map((r) => r.bundleId))).join(', ');
-      const publicDir = eligibleRefs.map((r) => r.entry).join(', ');
-      throw new Error(
-        `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
-      );
-    }
-
-    return matchingRef;
+    const bundleId = Array.from(new Set(eligibleRefs.map((r) => r.bundleId))).join(', ');
+    const publicDir = eligibleRefs.map((r) => r.entry).join(', ');
+    throw new Error(
+      `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
+    );
   }
 }
