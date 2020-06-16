@@ -106,15 +106,6 @@ export default ({ getService }: FtrProviderContext) => {
           return statusBody[body.id].current_status?.status === 'succeeded';
         });
 
-        await waitFor(async () => {
-          const { body: statusBody } = await supertest
-            .post(DETECTION_ENGINE_RULES_STATUS_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ids: [body.id] })
-            .expect(200);
-          return statusBody[body.id].current_status?.status === 'succeeded';
-        });
-
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')
