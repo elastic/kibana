@@ -191,7 +191,7 @@ export type Severity = t.TypeOf<typeof severity>;
 export const severityOrUndefined = t.union([severity, t.undefined]);
 export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
 
-export const status = t.keyof({ open: null, closed: null });
+export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
 export type Status = t.TypeOf<typeof status>;
 
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
@@ -235,6 +235,7 @@ export const pageOrUndefined = t.union([page, t.undefined]);
 export type PageOrUndefined = t.TypeOf<typeof pageOrUndefined>;
 
 export const signal_ids = t.array(t.string);
+export type SignalIds = t.TypeOf<typeof signal_ids>;
 
 // TODO: Can this be more strict or is this is the set of all Elastic Queries?
 export const signal_status_query = t.object;
