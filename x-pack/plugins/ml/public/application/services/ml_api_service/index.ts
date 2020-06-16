@@ -96,6 +96,8 @@ const proxyHttpStart = new Proxy(
   }
 );
 
+export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
+
 export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
 export function mlApiServicesProvider(httpService: HttpService) {
