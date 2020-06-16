@@ -168,6 +168,14 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
     [addedDashboards, selectedSwimlanes]
   );
 
+  const addLabel = i18n.translate('xpack.ml.explorer.dashboardsTable.addToDashboardLabel', {
+    defaultMessage: 'Add to dashboard',
+  });
+
+  const editLabel = i18n.translate('xpack.ml.explorer.dashboardsTable.addAndEditDashboardLabel', {
+    defaultMessage: 'Add and edit dashboard',
+  });
+
   const columns: EuiTableProps['columns'] = useMemo(
     () => [
       {
@@ -193,9 +201,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
         align: 'right',
         actions: [
           {
-            name: i18n.translate('xpack.ml.explorer.dashboardsTable.quickAddLabel', {
-              defaultMessage: 'Quick add',
-            }),
+            name: addLabel,
             render: (item) => {
               return addedDashboards[item.id] === 'pending' ? (
                 <EuiLoadingSpinner size="m" />
@@ -208,22 +214,19 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
                         defaultMessage="Successfully added"
                       />
                     ) : (
-                      <FormattedMessage
-                        id="xpack.ml.explorer.dashboardsTable.quickAddLabel"
-                        defaultMessage="Quick add"
-                      />
+                      addLabel
                     )
                   }
                 >
                   <EuiButtonIcon
-                    color="primary"
+                    color="text"
                     onClick={addSwimlaneToDashboardCallback.bind(null, item)}
                     iconType={
                       addedDashboards[item.id] === 'success'
                         ? 'checkInCircleFilled'
                         : 'plusInCircle'
                     }
-                    aria-label="Quick add"
+                    aria-label={addLabel}
                     disabled={addedDashboards[item.id] === 'success'}
                   />
                 </EuiToolTip>
@@ -231,18 +234,25 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
             },
           },
           {
-            name: i18n.translate('xpack.ml.explorer.dashboardsTable.editInDashboard', {
-              defaultMessage: 'Edit in dashboard',
-            }),
-            onClick: async (item) => {
-              // TODO generate an edit URL with predefined state instead (https://github.com/elastic/kibana/issues/69152)
-              await addSwimlaneToDashboardCallback(item);
-              setAddedDashboards({ ...addedDashboards, [item.id]: 'redirecting' });
-              await navigateToUrl(await dashboardService.getDashboardEditUrl(item.id));
+            name: editLabel,
+            render: (item) => {
+              return (
+                <EuiToolTip content={editLabel}>
+                  <EuiButtonIcon
+                    color="primary"
+                    onClick={async () => {
+                      // TODO generate an edit URL with predefined state instead (https://github.com/elastic/kibana/issues/69152)
+                      await addSwimlaneToDashboardCallback(item);
+                      setAddedDashboards({ ...addedDashboards, [item.id]: 'redirecting' });
+                      await navigateToUrl(await dashboardService.getDashboardEditUrl(item.id));
+                    }}
+                    iconType="pencil"
+                    aria-label={editLabel}
+                    disabled={!!addedDashboards[item.id]}
+                  />
+                </EuiToolTip>
+              );
             },
-            type: 'icon',
-            icon: 'pencil',
-            enabled: (item) => !addedDashboards[item.id],
           },
         ],
       },
