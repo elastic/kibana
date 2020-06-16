@@ -562,7 +562,9 @@ export class CoreSystem {
         fatalErrors: FatalErrorsSetup;
     } | undefined>;
     // (undocumented)
-    start(): Promise<void>;
+    start(): Promise<{
+        application: InternalApplicationStart;
+    } | undefined>;
     // (undocumented)
     stop(): void;
     }
@@ -1586,5 +1588,9 @@ export interface UserProvidedValues<T = any> {
     userValue?: T;
 }
 
+
+// Warnings were encountered during analysis:
+//
+// src/core/public/core_system.ts:216:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
