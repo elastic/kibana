@@ -165,7 +165,9 @@ export class LayerWizardSelect extends Component<Props, State> {
     return (
       <>
         {this._renderCategoryFacets()}
-        <EuiFlexGrid columns={2}>{wizardCards}</EuiFlexGrid>
+        <EuiFlexGrid columns={2} gutterSize="s">
+          {wizardCards}
+        </EuiFlexGrid>
       </>
     );
   }
