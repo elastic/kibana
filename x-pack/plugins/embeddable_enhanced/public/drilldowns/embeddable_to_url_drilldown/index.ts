@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './embeddable_to_url_drilldown';
+export { EmbeddableToUrlDrilldownDefinition } from './embeddable_to_url_drilldown';

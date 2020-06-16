@@ -5,13 +5,15 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
 import {
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
-} from '../../../../../src/plugins/embeddable/public';
+  UiActionsEnhancedDrilldownDefinition as Drilldown,
+  UiActionsEnhancedUrlDrilldownCollectConfig as UrlDrilldownCollectConfig,
+  UiActionsEnhancedUrlDrilldownConfig as UrlDrilldownConfig,
+  UiActionsEnhancedUrlDrilldownGlobalScope as UrlDrilldownGlobalScope,
+  uiActionsEnhancedUrlDrilldownCompile as compile,
+} from '../../../../plugins/ui_actions_enhanced/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
 
 function isValidUrl(url: string) {
@@ -23,8 +25,6 @@ function isValidUrl(url: string) {
   }
 }
 
-export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
-
 export interface Config {
   url: string;
   openInNewTab: boolean;
@@ -32,16 +32,18 @@ export interface Config {
 
 export type CollectConfigProps = CollectConfigPropsBase<Config>;
 
-const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
+const SAMPLE_URL_DRILLDOWN = 'SAMPLE_URL_DRILLDOWN';
 
-export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext> {
-  public readonly id = SAMPLE_DASHBOARD_TO_URL_DRILLDOWN;
+export class SampleUrlDrilldown implements Drilldown<UrlDrilldownConfig, {}> {
+  public readonly id = SAMPLE_URL_DRILLDOWN;
 
   public readonly order = 8;
 
   public readonly getDisplayName = () => 'Go to URL (example)';
 
   public readonly euiIcon = 'link';
+
+  constructor(private params: { getGlobalScope: () => UrlDrilldownGlobalScope }) {}
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => (
     <>
@@ -57,28 +59,11 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
         </p>
       </EuiCallOut>
       <EuiSpacer size="xl" />
-      <EuiFormRow label="Enter target URL" fullWidth>
-        <EuiFieldText
-          fullWidth
-          name="url"
-          placeholder="Enter URL"
-          value={config.url}
-          onChange={(event) => onConfig({ ...config, url: event.target.value })}
-          onBlur={() => {
-            if (!config.url) return;
-            if (/https?:\/\//.test(config.url)) return;
-            onConfig({ ...config, url: 'https://' + config.url });
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow hasChildLabel={false}>
-        <EuiSwitch
-          name="openInNewTab"
-          label="Open in new tab?"
-          checked={config.openInNewTab}
-          onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
-        />
-      </EuiFormRow>
+      <UrlDrilldownCollectConfig
+        config={config}
+        onConfig={onConfig}
+        scope={this.params.getGlobalScope()}
+      />
     </>
   );
 
@@ -98,12 +83,12 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
    * `getHref` is need to support mouse middle-click and Cmd + Click behavior
    * to open a link in new tab.
    */
-  public readonly getHref = async (config: Config, context: ActionContext) => {
-    return config.url;
+  public readonly getHref = async (config: Config) => {
+    return compile(config.url, this.params.getGlobalScope());
   };
 
-  public readonly execute = async (config: Config, context: ActionContext) => {
-    const url = await this.getHref(config, context);
+  public readonly execute = async (config: Config) => {
+    const url = await this.getHref(config);
 
     if (config.openInNewTab) {
       window.open(url, '_blank');

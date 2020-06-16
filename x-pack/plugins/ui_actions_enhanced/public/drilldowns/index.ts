@@ -5,3 +5,4 @@
  */
 
 export * from './drilldown_definition';
+export * from './url_drilldown_lib';

@@ -29,7 +29,7 @@ import {
   AdvancedUiActionsStart,
 } from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
-import { UrlDrilldownDefinition } from './drilldowns/url_drilldown';
+import { EmbeddableToUrlDrilldownDefinition } from './drilldowns';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
@@ -75,10 +75,9 @@ export class EmbeddableEnhancedPlugin
     plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
     plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
     plugins.uiActionsEnhanced.registerDrilldown(
-      new UrlDrilldownDefinition({
+      new EmbeddableToUrlDrilldownDefinition({
         getGlobalScope: () => ({
-          kibanaInstance: 'fake',
-          kibanaUrl: 'https://mock-kibana.dev/',
+          kibanaUrl: window.location.origin + core.http.basePath.get(),
         }),
         getDataActionsHelpers,
       })

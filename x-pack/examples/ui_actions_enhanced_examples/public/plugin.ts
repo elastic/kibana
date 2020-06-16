@@ -11,7 +11,7 @@ import {
   AdvancedUiActionsStart,
 } from '../../../../x-pack/plugins/ui_actions_enhanced/public';
 import { DashboardHelloWorldDrilldown } from './dashboard_hello_world_drilldown';
-import { DashboardToUrlDrilldown } from './dashboard_to_url_drilldown';
+import { SampleUrlDrilldown } from './sample_url_drilldown';
 import { DashboardToDiscoverDrilldown } from './dashboard_to_discover_drilldown';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
@@ -37,7 +37,11 @@ export class UiActionsEnhancedExamplesPlugin
     const start = createStartServicesGetter(core.getStartServices);
 
     uiActions.registerDrilldown(new DashboardHelloWorldDrilldown());
-    uiActions.registerDrilldown(new DashboardToUrlDrilldown());
+    uiActions.registerDrilldown(
+      new SampleUrlDrilldown({
+        getGlobalScope: () => ({ kibanaUrl: window.location.origin + core.http.basePath.get() }),
+      })
+    );
     uiActions.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
   }
 

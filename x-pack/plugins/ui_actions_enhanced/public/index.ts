@@ -30,4 +30,11 @@ export {
   MemoryActionStorage as UiActionsEnhancedMemoryActionStorage,
 } from './dynamic_actions';
 
-export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns';
+export {
+  DrilldownDefinition as UiActionsEnhancedDrilldownDefinition,
+  UrlDrilldownCollectConfig as UiActionsEnhancedUrlDrilldownCollectConfig,
+  UrlDrilldownConfig as UiActionsEnhancedUrlDrilldownConfig,
+  UrlDrilldownGlobalScope as UiActionsEnhancedUrlDrilldownGlobalScope,
+  UrlDrilldownScope as UiActionsEnhancedUrlDrilldownScope,
+  compile as uiActionsEnhancedUrlDrilldownCompile,
+} from './drilldowns';
