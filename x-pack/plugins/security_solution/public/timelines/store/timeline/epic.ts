@@ -34,7 +34,7 @@ import {
   Filter,
   MatchAllFilter,
 } from '../../../../../../.../../../src/plugins/data/public';
-import { TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineErrorResponse } from '../../../../common/types/timeline';
 import {
   TimelineType,
   TimelineInput,
@@ -169,10 +169,14 @@ export const createTimelineEpic = <State>(): Epic<
         } else if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
           myEpicTimelineId.setTimelineVersion(null);
           myEpicTimelineId.setTimelineId(null);
+          myEpicTimelineId.setTemplateTimelineId(null);
+          myEpicTimelineId.setTemplateTimelineVersion(null);
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
+          myEpicTimelineId.setTemplateTimelineId(addNewTimeline.templateTimelineId);
+          myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
           return true;
         } else if (
           timelineActionsType.includes(action.type) &&
@@ -196,6 +200,8 @@ export const createTimelineEpic = <State>(): Epic<
         const action: ActionTimeline = get('action', objAction);
         const timelineId = myEpicTimelineId.getTimelineId();
         const version = myEpicTimelineId.getTimelineVersion();
+        const templateTimelineId = myEpicTimelineId.getTemplateTimelineId();
+        const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
 
         if (timelineNoteActionsType.includes(action.type)) {
           return epicPersistNote(
@@ -231,22 +237,38 @@ export const createTimelineEpic = <State>(): Epic<
             persistTimeline({
               timelineId,
               version,
-              timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+              timeline: {
+                ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+                templateTimelineId,
+                templateTimelineVersion,
+              },
             })
           ).pipe(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            catchError((err: any) => {
-              if (err.status_code && err.status_code === 405) {
-                return notifications!.toasts.addDanger({
+            catchError((error: TimelineErrorResponse) => {
+              if (error.status_code != null && error.status_code === 405) {
+                // TO DO i18n
+                notifications!.toasts.addDanger({
                   title: 'Timeline error',
-                  text: err.message ?? 'Something went wrong',
+                  text: error.message ?? 'Something went wrong',
                 });
               }
+              return [
+                endTimelineSaving({
+                  id: action.payload.id,
+                }),
+              ];
             }),
             withLatestFrom(timeline$, allTimelineQuery$),
             mergeMap(([result, recentTimeline, allTimelineQuery]) => {
               const savedTimeline = recentTimeline[action.payload.id];
               const response: ResponseTimeline = get('data.persistTimeline', result);
+              if (response == null) {
+                return [
+                  endTimelineSaving({
+                    id: action.payload.id,
+                  }),
+                ];
+              }
               const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
               if (allTimelineQuery.refetch != null) {
@@ -292,6 +314,12 @@ export const createTimelineEpic = <State>(): Epic<
                     );
                     myEpicTimelineId.setTimelineVersion(
                       updatedTimeline[get('payload.id', checkAction)].version
+                    );
+                    myEpicTimelineId.setTemplateTimelineId(
+                      updatedTimeline[get('payload.id', checkAction)].templateTimelineId
+                    );
+                    myEpicTimelineId.setTemplateTimelineVersion(
+                      updatedTimeline[get('payload.id', checkAction)].templateTimelineVersion
                     );
                     return true;
                   }

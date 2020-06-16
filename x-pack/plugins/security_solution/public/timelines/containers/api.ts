@@ -35,8 +35,6 @@ import {
 interface RequestPostTimeline {
   timeline: TimelineInput;
   signal?: AbortSignal;
-  templateTimelineId?: string;
-  templateTimelineVersion?: number;
 }
 
 interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
@@ -88,24 +86,23 @@ export const persistTimeline = async ({
   timelineId,
   timeline,
   version,
-  templateTimelineId,
-  templateTimelineVersion,
 }: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
-  if (timelineId == null && timeline.status === TimelineStatus.draft) {
+  if (timelineId == null && timeline.status === TimelineStatus.draft && timeline) {
     const draftTimeline = await cleanDraftTimeline({
       timelineType: timeline.timelineType!,
-      templateTimelineId,
-      templateTimelineVersion,
+      templateTimelineId: timeline.templateTimelineId ?? undefined,
+      templateTimelineVersion: timeline.templateTimelineVersion ?? undefined,
     });
 
     const templateTimelineInfo =
       timeline.timelineType! === TimelineType.template
         ? {
             templateTimelineId:
-              draftTimeline.data.persistTimeline.timeline.templateTimelineId ?? templateTimelineId,
+              draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
+              timeline.templateTimelineId,
             templateTimelineVersion:
               draftTimeline.data.persistTimeline.timeline.templateTimelineVersion ??
-              templateTimelineVersion,
+              timeline.templateTimelineVersion,
           }
         : {};
 
