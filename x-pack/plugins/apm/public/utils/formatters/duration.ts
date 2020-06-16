@@ -18,7 +18,7 @@ interface FormatterOptions {
 
 type DurationTimeUnit = TimeUnit | 'microseconds';
 
-interface DurationUnit {
+interface DurationsUnitsMap {
   [unit: string]: {
     label: string;
     convert: (value: number) => string;
@@ -38,34 +38,42 @@ export type TimeFormatter = (
 
 type TimeFormatterBuilder = (max: number) => TimeFormatter;
 
-const durationUnit: DurationUnit = {
+function asDecimalOrInteger(value: number) {
+  // exact 0 should or above 10 should not have decimal
+  if (value === 0 || value >= 10) {
+    return asInteger(value);
+  }
+  return asDecimal(value);
+}
+
+const durationsUnitsMap: DurationsUnitsMap = {
   hours: {
     label: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
       defaultMessage: 'h',
     }),
     convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asHours()),
+      asDecimalOrInteger(moment.duration(value / 1000).asHours()),
   },
   minutes: {
     label: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
       defaultMessage: 'min',
     }),
     convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asMinutes()),
+      asDecimalOrInteger(moment.duration(value / 1000).asMinutes()),
   },
   seconds: {
     label: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
       defaultMessage: 's',
     }),
     convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asSeconds()),
+      asDecimalOrInteger(moment.duration(value / 1000).asSeconds()),
   },
   milliseconds: {
     label: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
       defaultMessage: 'ms',
     }),
     convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asMilliseconds()),
+      asDecimalOrInteger(moment.duration(value / 1000).asMilliseconds()),
   },
   microseconds: {
     label: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
@@ -87,7 +95,7 @@ function convertTo({
   microseconds: Maybe<number>;
   defaultValue?: string;
 }): ConvertedDuration {
-  const duration = durationUnit[unit];
+  const duration = durationsUnitsMap[unit];
   if (!duration || microseconds == null) {
     return { value: defaultValue, formatted: defaultValue };
   }
