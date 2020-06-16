@@ -24,7 +24,7 @@ import { PLUGIN } from '../common';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch';
 
 export interface DataManagementContext {
