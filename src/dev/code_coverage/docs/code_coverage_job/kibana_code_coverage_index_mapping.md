@@ -1,9 +1,12 @@
-# Create index mapping 
+# Index Mapping
 
-This is usually done in Kibana's dev tools ui.
+Execute the following in Kibana Dev Tools.
+
 
 ```
-    "mappings" : {
+PUT /kibana_code_coverage
+{
+ "mappings" : {
       "properties" : {
         "@timestamp" : {
           "type" : "date"
@@ -189,6 +192,7 @@ This is usually done in Kibana's dev tools ui.
         }
       }
     }
+}
 ```
 
 _The main portion of the above mapping, is the timestamp-date mapping._
