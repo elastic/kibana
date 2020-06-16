@@ -191,7 +191,7 @@ export type Severity = t.TypeOf<typeof severity>;
 export const severityOrUndefined = t.union([severity, t.undefined]);
 export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
 
-export const status = t.keyof({ open: null, closed: null });
+export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
 export type Status = t.TypeOf<typeof status>;
 
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });

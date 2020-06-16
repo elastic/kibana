@@ -13,7 +13,12 @@ import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../../../../ingest_manage
 import { policyListReducer } from './reducer';
 import { policyListMiddlewareFactory } from './middleware';
 
-import { isOnPolicyListPage, selectIsLoading, urlSearchParams } from './selectors';
+import {
+  isOnPolicyListPage,
+  selectIsLoading,
+  urlSearchParams,
+  selectIsDeleting,
+} from './selectors';
 import { DepsStartMock, depsStartMock } from '../../../../../common/mock/endpoint';
 import { setPolicyListApiMockImplementation } from './test_mock_utils';
 import { INGEST_API_DATASOURCES } from './services/ingest';
@@ -85,6 +90,33 @@ describe('policy list store concerns', () => {
     expect(selectIsLoading(store.getState())).toBe(false);
   });
 
+  it('it sets `isDeleting` when `userClickedPolicyListDeleteButton`', async () => {
+    expect(selectIsDeleting(store.getState())).toBe(false);
+    store.dispatch({
+      type: 'userClickedPolicyListDeleteButton',
+      payload: {
+        policyId: '123',
+      },
+    });
+    expect(selectIsDeleting(store.getState())).toBe(true);
+    await waitForAction('serverDeletedPolicy');
+    expect(selectIsDeleting(store.getState())).toBe(false);
+  });
+
+  it('it sets refreshes policy data when `serverDeletedPolicy`', async () => {
+    expect(selectIsLoading(store.getState())).toBe(false);
+    store.dispatch({
+      type: 'serverDeletedPolicy',
+      payload: {
+        policyId: '',
+        success: true,
+      },
+    });
+    expect(selectIsLoading(store.getState())).toBe(true);
+    await waitForAction('serverReturnedPolicyListData');
+    expect(selectIsLoading(store.getState())).toBe(false);
+  });
+
   it('it resets state on `userChangedUrl` and pathname is NOT `/policy`', async () => {
     store.dispatch({
       type: 'userChangedUrl',
@@ -108,9 +140,18 @@ describe('policy list store concerns', () => {
       location: undefined,
       policyItems: [],
       isLoading: false,
+      isDeleting: false,
+      deleteStatus: undefined,
       pageIndex: 0,
       pageSize: 10,
       total: 0,
+      agentStatusSummary: {
+        error: 0,
+        events: 0,
+        offline: 0,
+        online: 0,
+        total: 0,
+      },
     });
   });
   it('uses default pagination params when not included in url', async () => {

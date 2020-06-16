@@ -574,6 +574,12 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
   T extends LegacyApp ? never : 'unmountBeforeMounting'
 >;
 
+/** @internal */
+export interface ParsedAppUrl {
+  app: string;
+  path?: string;
+}
+
 /** @public */
 export interface ApplicationSetup {
   /**

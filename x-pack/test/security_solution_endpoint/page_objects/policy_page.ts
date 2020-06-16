@@ -20,6 +20,32 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
+     * Finds and returns the Policy Details Page Save button
+     */
+    async findFirstActionsButton() {
+      await this.ensureIsOnPolicyPage();
+      return (await testSubjects.findAll('policyActionsButton'))[0];
+    },
+
+    /**
+     * Finds and returns the Policy Details Page Save button
+     */
+    async launchAndFindDeleteModal() {
+      const actionsButton = await this.findFirstActionsButton();
+      await actionsButton.click();
+      const deleteAction = await testSubjects.find('policyDeleteButton');
+      await deleteAction.click();
+      return await testSubjects.find('policyListDeleteModal');
+    },
+
+    /**
+     * ensures that the Policy Page is the currently display view
+     */
+    async ensureIsOnPolicyPage() {
+      await testSubjects.existOrFail('policyTable');
+    },
+
+    /**
      * Navigates to the Endpoint Policy Details page
      *
      * @param policyId
