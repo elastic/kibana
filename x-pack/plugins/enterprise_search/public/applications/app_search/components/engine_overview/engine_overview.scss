@@ -7,21 +7,21 @@
 /**
  * Engine Overview
  */
-.engine-overview {
+.engineOverview {
   width: 100%;
 
-  .euiPanel {
-    padding: $euiSizeXL;
-  }
+  &__body {
+    padding: $euiSize;
 
-  .euiPageContent .euiPageContentHeader {
-    margin-bottom: $euiSizeM;
+    @include euiBreakpoint('m', 'l', 'xl') {
+      padding: $euiSizeXL;
+    }
   }
+}
 
-  .engine-icon {
-    display: inline-block;
-    width: $euiSize;
-    height: $euiSize;
-    margin-right: $euiSizeXS;
-  }
+.engineIcon {
+  display: inline-block;
+  width: $euiSize;
+  height: $euiSize;
+  margin-right: $euiSizeXS;
 }
