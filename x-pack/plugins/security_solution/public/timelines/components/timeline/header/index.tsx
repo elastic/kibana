@@ -38,7 +38,7 @@ interface Props {
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
-  timelineStatus: TimelineStatusLiteralWithNull;
+  status: TimelineStatusLiteralWithNull;
 }
 
 const TimelineHeaderComponent: React.FC<Props> = ({
@@ -53,7 +53,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   onToggleDataProviderExcluded,
   show,
   showCallOutUnauthorizedMsg,
-  timelineStatus,
+  status,
 }) => (
   <>
     {showCallOutUnauthorizedMsg && (
@@ -65,7 +65,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    {timelineStatus === TimelineStatus.immutable && (
+    {status === TimelineStatus.immutable && (
       <EuiCallOut
         data-test-subj="timelineImmutableCallOut"
         title={i18n.CALL_OUT_IMMUTIABLE}
@@ -108,5 +108,6 @@ export const TimelineHeader = React.memo(
     prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
     prevProps.onToggleDataProviderExcluded === nextProps.onToggleDataProviderExcluded &&
     prevProps.show === nextProps.show &&
-    prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg
+    prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
+    prevProps.status === nextProps.status
 );

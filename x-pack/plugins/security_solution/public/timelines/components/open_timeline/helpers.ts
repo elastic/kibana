@@ -10,7 +10,14 @@ import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
-import { TimelineResult, GetOneTimeline, NoteResult } from '../../../graphql/types';
+import {
+  TimelineResult,
+  GetOneTimeline,
+  NoteResult,
+  FilterTimelineResult,
+  ColumnHeaderResult,
+  PinnedEvent,
+} from '../../../graphql/types';
 
 import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
@@ -80,6 +87,81 @@ const parseString = (params: string) => {
   }
 };
 
+const setTimelineColumn = (col: ColumnHeaderResult) => {
+  const timelineCols: ColumnHeaderOptions = {
+    ...col,
+    columnHeaderType: defaultColumnHeaderType,
+    id: col.id != null ? col.id : 'unknown',
+    placeholder: col.placeholder != null ? col.placeholder : undefined,
+    category: col.category != null ? col.category : undefined,
+    description: col.description != null ? col.description : undefined,
+    example: col.example != null ? col.example : undefined,
+    type: col.type != null ? col.type : undefined,
+    aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
+    width: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+  };
+  return timelineCols;
+};
+
+const setTimelineFilters = (filter: FilterTimelineResult) => ({
+  $state: {
+    store: 'appState',
+  },
+  meta: {
+    ...filter.meta,
+    ...(filter.meta && filter.meta.field != null ? { params: parseString(filter.meta.field) } : {}),
+    ...(filter.meta && filter.meta.params != null
+      ? { params: parseString(filter.meta.params) }
+      : {}),
+    ...(filter.meta && filter.meta.value != null ? { value: parseString(filter.meta.value) } : {}),
+  },
+  ...(filter.exists != null ? { exists: parseString(filter.exists) } : {}),
+  ...(filter.match_all != null ? { exists: parseString(filter.match_all) } : {}),
+  ...(filter.missing != null ? { exists: parseString(filter.missing) } : {}),
+  ...(filter.query != null ? { query: parseString(filter.query) } : {}),
+  ...(filter.range != null ? { range: parseString(filter.range) } : {}),
+  ...(filter.script != null ? { exists: parseString(filter.script) } : {}),
+});
+
+const setEventIdToNoteIds = (
+  duplicate: boolean,
+  eventIdToNoteIds: NoteResult[] | null | undefined
+) =>
+  duplicate
+    ? {}
+    : eventIdToNoteIds != null
+    ? eventIdToNoteIds.reduce((acc, note) => {
+        if (note.eventId != null) {
+          const eventNotes = getOr([], note.eventId, acc);
+          return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
+        }
+        return acc;
+      }, {})
+    : {};
+
+const setPinnedEventsSaveObject = (
+  duplicate: boolean,
+  pinnedEventsSaveObject: PinnedEvent[] | null | undefined
+) =>
+  duplicate
+    ? {}
+    : pinnedEventsSaveObject != null
+    ? pinnedEventsSaveObject.reduce(
+        (acc, pinnedEvent) => ({
+          ...acc,
+          ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
+        }),
+        {}
+      )
+    : {};
+
+const setPinnedEventIds = (duplicate: boolean, pinnedEventIds: string[] | null | undefined) =>
+  duplicate
+    ? {}
+    : pinnedEventIds != null
+    ? pinnedEventIds.reduce((acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }), {})
+    : {};
+
 // eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
@@ -88,87 +170,17 @@ export const defaultTimelineToTimelineModel = (
   const isTemplate = timeline.timelineType === TimelineType.template;
   const timelineEntries = {
     ...timeline,
-    columns:
-      timeline.columns != null
-        ? timeline.columns.map((col) => {
-            const timelineCols: ColumnHeaderOptions = {
-              ...col,
-              columnHeaderType: defaultColumnHeaderType,
-              id: col.id != null ? col.id : 'unknown',
-              placeholder: col.placeholder != null ? col.placeholder : undefined,
-              category: col.category != null ? col.category : undefined,
-              description: col.description != null ? col.description : undefined,
-              example: col.example != null ? col.example : undefined,
-              type: col.type != null ? col.type : undefined,
-              aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
-              width:
-                col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
-            };
-            return timelineCols;
-          })
-        : defaultHeaders,
-    eventIdToNoteIds: duplicate
-      ? {}
-      : timeline.eventIdToNoteIds != null
-      ? timeline.eventIdToNoteIds.reduce((acc, note) => {
-          if (note.eventId != null) {
-            const eventNotes = getOr([], note.eventId, acc);
-            return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
-          }
-          return acc;
-        }, {})
-      : {},
-    filters:
-      timeline.filters != null
-        ? timeline.filters.map((filter) => ({
-            $state: {
-              store: 'appState',
-            },
-            meta: {
-              ...filter.meta,
-              ...(filter.meta && filter.meta.field != null
-                ? { params: parseString(filter.meta.field) }
-                : {}),
-              ...(filter.meta && filter.meta.params != null
-                ? { params: parseString(filter.meta.params) }
-                : {}),
-              ...(filter.meta && filter.meta.value != null
-                ? { value: parseString(filter.meta.value) }
-                : {}),
-            },
-            ...(filter.exists != null ? { exists: parseString(filter.exists) } : {}),
-            ...(filter.match_all != null ? { exists: parseString(filter.match_all) } : {}),
-            ...(filter.missing != null ? { exists: parseString(filter.missing) } : {}),
-            ...(filter.query != null ? { query: parseString(filter.query) } : {}),
-            ...(filter.range != null ? { range: parseString(filter.range) } : {}),
-            ...(filter.script != null ? { exists: parseString(filter.script) } : {}),
-          }))
-        : [],
+    columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
+    eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
+    filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate
       ? false
       : timeline.favorite != null
       ? timeline.favorite.length > 0
       : false,
     noteIds: duplicate ? [] : timeline.noteIds != null ? timeline.noteIds : [],
-    pinnedEventIds: duplicate
-      ? {}
-      : timeline.pinnedEventIds != null
-      ? timeline.pinnedEventIds.reduce(
-          (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
-          {}
-        )
-      : {},
-    pinnedEventsSaveObject: duplicate
-      ? {}
-      : timeline.pinnedEventsSaveObject != null
-      ? timeline.pinnedEventsSaveObject.reduce(
-          (acc, pinnedEvent) => ({
-            ...acc,
-            ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
-          }),
-          {}
-        )
-      : {},
+    pinnedEventIds: setPinnedEventIds(duplicate, timeline.pinnedEventIds),
+    pinnedEventsSaveObject: setPinnedEventsSaveObject(duplicate, timeline.pinnedEventsSaveObject),
     id: duplicate ? '' : timeline.savedObjectId,
     status: duplicate ? TimelineStatus.active : timeline.status,
     savedObjectId: duplicate ? null : timeline.savedObjectId,

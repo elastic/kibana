@@ -150,6 +150,7 @@ export class CompareTimelinesStatus {
     if (commonError != null) {
       return commonError;
     }
+
     const msg = failureChecker(
       this.isHandlingTemplateTimeline,
       this.status,

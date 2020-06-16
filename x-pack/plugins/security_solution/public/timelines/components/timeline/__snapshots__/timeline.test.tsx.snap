@@ -749,7 +749,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
         onToggleDataProviderExcluded={[MockFunction]}
         show={true}
         showCallOutUnauthorizedMsg={false}
-        timelineStatus="active"
+        status="active"
       />
     </TimelineHeaderContainer>
   </Styled(EuiFlyoutHeader)>

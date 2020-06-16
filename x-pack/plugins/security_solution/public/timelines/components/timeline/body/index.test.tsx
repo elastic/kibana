@@ -17,7 +17,7 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../../common/lib/helpers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {
@@ -74,7 +74,6 @@ describe('Body', () => {
     selectedEventIds: {},
     sort: mockSort,
     showCheckboxes: false,
-    status: TimelineStatus.active,
     toggleColumn: jest.fn(),
     updateNote: jest.fn(),
   };

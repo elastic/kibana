@@ -232,16 +232,17 @@ export const checkIsUpdateViaImportFailureCases = (
       };
     }
   } else {
-    if (existTimeline != null && timelineType !== existTimeline?.timelineType) {
+    if (existTemplateTimeline != null && timelineType !== existTemplateTimeline?.timelineType) {
       return {
         body: NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
         statusCode: 403,
       };
     }
     const isStatusValid =
-      ((existTimeline?.status == null || existTimeline?.status === TimelineStatus.active) &&
+      ((existTemplateTimeline?.status == null ||
+        existTemplateTimeline?.status === TimelineStatus.active) &&
         (status == null || status === TimelineStatus.active)) ||
-      (existTimeline?.status != null && status === existTimeline?.status);
+      (existTemplateTimeline?.status != null && status === existTemplateTimeline?.status);
 
     if (!isStatusValid) {
       return {

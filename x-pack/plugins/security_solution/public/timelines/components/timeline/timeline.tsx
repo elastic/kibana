@@ -207,7 +207,7 @@ export const TimelineComponent: React.FC<Props> = ({
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            timelineStatus={status}
+            status={status}
           />
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>

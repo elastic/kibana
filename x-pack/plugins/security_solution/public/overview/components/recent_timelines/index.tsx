@@ -69,7 +69,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
 
     const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
     const timelineType = TimelineType.default;
-    const { timelineStatus } = useTimelineStatus({ timelineType });
+    const { templateTimelineType, timelineStatus } = useTimelineStatus({ timelineType });
     useEffect(
       () => {
         fetchAllTimeline({
@@ -85,6 +85,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
           onlyUserFavorite: filterBy === 'favorites',
           status: timelineStatus,
           timelineType,
+          templateTimelineType,
         });
       }, // eslint-disable-next-line react-hooks/exhaustive-deps
       [filterBy, timelineStatus, timelineType]

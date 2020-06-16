@@ -6,7 +6,6 @@
 
 import React, { useMemo, useRef } from 'react';
 
-import { TimelineStatusLiteralWithNull } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
