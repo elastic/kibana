@@ -5,7 +5,9 @@
  */
 
 import { useEffect } from 'react';
-import { useUrlParams } from './use_url_params';
+import { useSelector, useDispatch } from 'react-redux';
+import { uiSelector } from '../state/selectors';
+import { setUiState } from '../state/actions';
 
 /**
  * Handle an added or removed value to filter against for an uptime field.
@@ -25,14 +27,13 @@ export const useFilterUpdate = (
   values?: string[],
   shouldUpdateUrl: boolean = true
 ): SelectedFilters => {
-  const [getUrlParams, updateUrl] = useUrlParams();
-
-  const { filters: currentFilters } = getUrlParams();
+  const dispatch = useDispatch();
+  const { selectedFilters: currentFilters } = useSelector(uiSelector);
 
   // update filters in the URL from filter group
   const onFilterUpdate = (filtersKuery: string) => {
     if (currentFilters !== filtersKuery && shouldUpdateUrl) {
-      updateUrl({ filters: filtersKuery, pagination: '' });
+      dispatch(setUiState({ selectedFilters: filtersKuery, currentMonitorListPage: '' }));
     }
   };
 
