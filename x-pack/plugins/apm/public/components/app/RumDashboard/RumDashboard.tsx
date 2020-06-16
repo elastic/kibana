@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { ClientMetrics } from './ClientMetrics';
-import { ImpressionTrend } from './ImpressionTrend';
+import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
 import { getWhatIsGoingOnLabel } from './translations';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -28,14 +28,15 @@ export function RumDashboard() {
       <EuiTitle>
         <h1>{getWhatIsGoingOnLabel(environmentLabel)}</h1>
       </EuiTitle>
-      <EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <ClientMetrics />
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={3}>
           <PageLoadDistribution />
           <EuiSpacer size="xxl" />
-          <ImpressionTrend />
+          <PageViewsTrend />
           <EuiSpacer size="xxl" />
         </EuiFlexItem>
       </EuiFlexGroup>

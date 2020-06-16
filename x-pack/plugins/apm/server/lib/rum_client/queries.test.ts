@@ -9,7 +9,7 @@ import {
   inspectSearchParams,
 } from '../../../public/utils/testHelpers';
 import { getClientMetrics } from './get_client_metrics';
-import { getImpressionTrends } from './get_impression_trends';
+import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 
 describe('rum client dashboard queries', () => {
@@ -29,9 +29,9 @@ describe('rum client dashboard queries', () => {
     expect(mock.params).toMatchSnapshot();
   });
 
-  it('fetches impression trends', async () => {
+  it('fetches page view trends', async () => {
     mock = await inspectSearchParams((setup) =>
-      getImpressionTrends({
+      getPageViewTrends({
         setup,
       })
     );

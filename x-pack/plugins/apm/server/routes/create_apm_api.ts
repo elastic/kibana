@@ -73,7 +73,7 @@ import {
 import {
   breakdownFiltersRoute,
   rumClientMetricsRoute,
-  rumImpressionTrendRoute,
+  rumPageViewsTrendRoute,
   rumPageLoadDistributionRoute,
 } from './rum_client';
 
@@ -157,7 +157,7 @@ const createApmApi = () => {
 
     // Rum Overview
     .add(rumOverviewLocalFiltersRoute)
-    .add(rumImpressionTrendRoute)
+    .add(rumPageViewsTrendRoute)
     .add(rumPageLoadDistributionRoute)
     .add(breakdownFiltersRoute)
     .add(rumClientMetricsRoute);

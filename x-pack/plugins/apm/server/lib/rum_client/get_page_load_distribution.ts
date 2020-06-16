@@ -41,7 +41,7 @@ export async function getPageLoadDistribution({
         durationPercentiles: {
           percentiles: {
             field: 'transaction.duration.us',
-            percents: [50, 80, 90, 95, 99],
+            percents: [50, 75, 90, 95, 99],
             script: {
               lang: 'painless',
               source: "doc['transaction.duration.us'].value / params.timeUnit",

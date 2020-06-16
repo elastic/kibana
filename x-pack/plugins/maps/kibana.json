@@ -18,5 +18,6 @@
     "usageCollection"
   ],
   "ui": true,
-  "server": true
+  "server": true,
+  "extraPublicDirs": ["common/constants"]
 }

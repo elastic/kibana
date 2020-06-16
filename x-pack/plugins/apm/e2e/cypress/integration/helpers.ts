@@ -6,8 +6,8 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-const RANGE_FROM = '2020-06-11T14:59:32.686Z';
-const RANGE_TO = '2020-06-11T16:59:36.219Z';
+const RANGE_FROM = '2020-06-01T14:59:32.686Z';
+const RANGE_TO = '2020-06-16T16:59:36.219Z';
 
 const BASE_URL = Cypress.config().baseUrl;
 
