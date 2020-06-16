@@ -93,7 +93,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
 
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
-  const [policyDetailsUri, policyDetailsRoutePath] = useMemo(() => {
+  const [policyDetailsRoutePath, policyDetailsRouteUrl] = useMemo(() => {
     return [
       getManagementUrl({
         name: 'policyDetails',
@@ -107,7 +107,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     ];
   }, [details.endpoint.policy.applied.id]);
 
-  const policyDetailsClickHandler = useNavigateByRouterEventHandler(policyDetailsUri);
+  const policyDetailsClickHandler = useNavigateByRouterEventHandler(policyDetailsRoutePath);
 
   const detailsResultsPolicy = useMemo(() => {
     return [
@@ -120,7 +120,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               data-test-subj="policyDetailsValue"
-              href={policyDetailsRoutePath}
+              href={policyDetailsRouteUrl}
               onClick={policyDetailsClickHandler}
             >
               {details.endpoint.policy.applied.name}
@@ -160,7 +160,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     policyResponseUri,
     policyStatus,
     policyStatusClickHandler,
-    policyDetailsRoutePath,
+    policyDetailsRouteUrl,
     policyDetailsClickHandler,
   ]);
   const detailsResultsLower = useMemo(() => {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { HostStatus, HostPolicyResponseActionStatus } from '../../../../../common/endpoint/types';
 
 export const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<
@@ -27,7 +28,13 @@ export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
 export const POLICY_STATUS_TO_TEXT = Object.freeze<
   { [key in keyof typeof HostPolicyResponseActionStatus]: string }
 >({
-  success: 'Success',
-  warning: 'Warning',
-  failure: 'Failure',
+  success: i18n.translate('xpack.securitySolution.policyStatusText.success', {
+    defaultMessage: 'Success',
+  }),
+  warning: i18n.translate('xpack.securitySolution.policyStatusText.warning', {
+    defaultMessage: 'Warning',
+  }),
+  failure: i18n.translate('xpack.securitySolution.policyStatusText.failure', {
+    defaultMessage: 'Failure',
+  }),
 });
