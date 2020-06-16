@@ -17,34 +17,86 @@
  * under the License.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiText,
+  EuiToolTip,
+  EuiButtonIcon,
+} from '@elastic/eui';
+import { IndexPatternField } from '../../../../../data/public';
+import { i18n } from '@kbn/i18n';
+import './string_progress_bar.scss';
 
 interface Props {
   percent: number;
   count: number;
+  field: IndexPatternField;
+  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  value: string;
 }
 
-export function StringFieldProgressBar(props: Props) {
+export function StringFieldProgressBar({ field, value, onAddFilter, percent, count }: Props) {
+  const addLabel = i18n.translate('discover.fieldChooser.detailViews.filterValueButtonAriaLabel', {
+    defaultMessage: 'Filter for {field}: "{value}"',
+    values: { value: value, field: field.name },
+  });
+  const removeLabel = i18n.translate(
+    'discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
+    {
+      defaultMessage: 'Filter out {field}: "{value}"',
+      values: { value: value, field: field.name },
+    }
+  );
+  const tooltipContent = `${value} ${count}`;
   return (
     <EuiToolTip
       anchorClassName="dscProgressBarTooltip__anchor"
-      content={props.count}
+      content={tooltipContent}
       delay="regular"
       position="right"
     >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem>
-          <EuiProgress
-            value={props.percent}
-            max={100}
-            color="secondary"
-            aria-hidden={true}
-            size="s"
-          />
+          <EuiProgress value={percent} max={100} color="secondary" aria-hidden={true} size="s" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">{props.percent}%</EuiText>
-        </EuiFlexItem>
+        {field.filterable && (
+          <EuiFlexItem grow={false}>
+            <div>
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="magnifyWithPlus"
+                onClick={() => onAddFilter(field, value, '+')}
+                aria-label={addLabel}
+                data-test-subj={`plus-${field.name}-${value}`}
+                style={{
+                  minHeight: 'auto',
+                  minWidth: 'auto',
+                  paddingRight: 2,
+                  paddingLeft: 2,
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                }}
+              />
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="magnifyWithMinus"
+                onClick={() => onAddFilter(field, value, '-')}
+                aria-label={removeLabel}
+                data-test-subj={`minus-${field.name}-${value}`}
+                style={{
+                  minHeight: 'auto',
+                  minWidth: 'auto',
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                  paddingRight: 2,
+                  paddingLeft: 2,
+                }}
+              />
+            </div>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiToolTip>
   );

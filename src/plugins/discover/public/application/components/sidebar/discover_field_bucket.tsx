@@ -47,7 +47,12 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" responsive={false}>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        style={{ width: 156 }}
+        gutterSize="xs"
+        responsive={false}
+      >
         <EuiFlexItem grow={1} className="eui-textTruncate">
           <EuiText size="xs" className="eui-textTruncate">
             {bucket.display === '' ? emptyTxt : bucket.display}
@@ -58,44 +63,14 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
             {bucket.percent}%
           </EuiText>
         </EuiFlexItem>
-        {field.filterable && (
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiButtonIcon
-                iconSize="s"
-                iconType="magnifyWithPlus"
-                onClick={() => onAddFilter(field, bucket.value, '+')}
-                aria-label={addLabel}
-                data-test-subj={`plus-${field.name}-${bucket.value}`}
-                style={{
-                  minHeight: 'auto',
-                  minWidth: 'auto',
-                  paddingRight: 2,
-                  paddingLeft: 2,
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                }}
-              />
-              <EuiButtonIcon
-                iconSize="s"
-                iconType="magnifyWithMinus"
-                onClick={() => onAddFilter(field, bucket.value, '-')}
-                aria-label={removeLabel}
-                data-test-subj={`minus-${field.name}-${bucket.value}`}
-                style={{
-                  minHeight: 'auto',
-                  minWidth: 'auto',
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                  paddingRight: 2,
-                  paddingLeft: 2,
-                }}
-              />
-            </div>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
-      <StringFieldProgressBar percent={bucket.percent} count={bucket.count} />
+      <StringFieldProgressBar
+        field={field}
+        value={bucket.value}
+        percent={bucket.percent}
+        onAddFilter={onAddFilter}
+        count={bucket.count}
+      />
     </>
   );
 }
