@@ -22,30 +22,30 @@ import {
   isAlertPageTabChange,
 } from './selectors';
 
-let lastSelectedAlert: string | null = null;
-/**
- * @returns <boolean> true once per change of `selectedAlert` in query params.
- *
- * As opposed to `hasSelectedAlert` which always returns true if the alert is present
- * query params, which can cause unnecessary requests and re-renders in some cases.
- */
-const selectedAlertHasChanged = (params: ReturnType<typeof uiQueryParams>): boolean => {
-  const { selected_alert: selectedAlert } = params;
-  const shouldNotChange = selectedAlert === lastSelectedAlert;
-  if (shouldNotChange) {
-    return false;
-  }
-  if (typeof selectedAlert !== 'string') {
-    return false;
-  }
-  lastSelectedAlert = selectedAlert;
-  return true;
-};
-
 export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> = (
   coreStart,
   depsStart
 ) => {
+  let lastSelectedAlert: string | null = null;
+  /**
+   * @returns <boolean> true once per change of `selectedAlert` in query params.
+   *
+   * As opposed to `hasSelectedAlert` which always returns true if the alert is present
+   * query params, which can cause unnecessary requests and re-renders in some cases.
+   */
+  const selectedAlertHasChanged = (params: ReturnType<typeof uiQueryParams>): boolean => {
+    const { selected_alert: selectedAlert } = params;
+    const shouldNotChange = selectedAlert === lastSelectedAlert;
+    if (shouldNotChange) {
+      return false;
+    }
+    if (typeof selectedAlert !== 'string') {
+      return false;
+    }
+    lastSelectedAlert = selectedAlert;
+    return true;
+  };
+
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
     const fields = await indexPatterns.getFieldsForWildcard({
