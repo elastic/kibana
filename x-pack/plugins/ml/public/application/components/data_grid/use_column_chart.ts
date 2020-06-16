@@ -200,16 +200,14 @@ export const fetchChartsData = async (
           data: respChartsData.aggregations[`${id}_terms`].buckets,
           id: c.id,
         };
-      } else if (fieldType === KBN_FIELD_TYPES.OBJECT || fieldType === undefined) {
-        return {
-          type: 'ordinal',
-          cardinality: 0,
-          data: [],
-          id: c.id,
-        };
       }
 
-      throw new Error('Invalid fieldType');
+      return {
+        type: 'ordinal',
+        cardinality: 0,
+        data: [],
+        id: c.id,
+      };
     }
   );
 
@@ -269,10 +267,6 @@ export const useColumnChart = (chartData: ChartData, columnType: EuiDataGridColu
   const fieldType = getFieldType(columnType.schema);
 
   const hoveredRow = useObservable(hoveredRow$);
-
-  if (fieldType === undefined) {
-    throw new Error('Invalid fieldType');
-  }
 
   const xScaleType = getXScaleType(fieldType);
 
