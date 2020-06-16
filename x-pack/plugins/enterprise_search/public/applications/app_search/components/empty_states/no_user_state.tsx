@@ -19,14 +19,15 @@ export const NoUserState: React.FC = () => {
   const username = getUserName();
 
   return (
-    <EuiPage restrictWidth className="empty-state">
+    <EuiPage restrictWidth>
       <SetBreadcrumbs isRoot />
       <SendTelemetry action="error" metric="no_as_account" />
 
       <EuiPageBody>
         <EngineOverviewHeader />
-        <EuiPageContent>
+        <EuiPageContent className="emptyState">
           <EuiEmptyPrompt
+            className="emptyState__prompt"
             iconType="lock"
             title={
               <h2>

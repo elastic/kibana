@@ -7,13 +7,11 @@
 /**
  * Setup Guide
  */
-.setup-guide {
-  &.euiPage {
-    padding: 0;
-    min-height: 100vh;
-  }
+.setupGuide {
+  padding: 0;
+  min-height: 100vh;
 
-  .euiPageSideBar {
+  &__sidebar {
     flex-basis: 300px;
     flex-shrink: 0;
     padding: $euiSizeL;
@@ -35,7 +33,7 @@
     }
   }
 
-  .euiPageBody {
+  &__body {
     align-self: start;
     padding: $euiSizeL;
 
