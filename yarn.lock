@@ -2076,29 +2076,29 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/apm-rum-core@^5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.2.0.tgz#2ed30dc226c9b5779532ab2e6065a155587bcea4"
-  integrity sha512-3ti2dhrqfxjHFXgArQI/sVAG2AgZH0kB1nx+2WjLpuAh8gGS4R772M5VXcWcGQb8UW9jrANwwbW2hT2GKv+uOA==
+"@elastic/apm-rum-core@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.3.0.tgz#3ae5e84eba5b5287b92458a49755f6e39e7bba5b"
+  integrity sha512-b/qAnPqi3km808BhSYo+ROpTINm3eVBQ6hNcxOELwKitS3O/HikkwRn5aPkVIhQXOVrbPSufMl1A991nrE3daA==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.1.1.tgz#3a2ba91efc9260da55ef6c31cce642a476eba828"
-  integrity sha512-ZMixw+82VbZIDBnz0dj5Fo4PZ7pnXlLjAA7XTi3AtSIEjpsZa7YIuCFzJdrgb/nOq7MOFkODkFPTiIYAM/yCqg==
+"@elastic/apm-rum-react@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.1.2.tgz#274cc414074d05e33e8f0afcad25ef9a30d99452"
+  integrity sha512-2/wEaPF4EQaVzU8Qj5aYucDc+VFr7438AieON31fx8wsbvnxh9iG+iV7xky2YtT/mf53BbFgZm35L5y/pxCKwA==
   dependencies:
-    "@elastic/apm-rum" "^5.1.1"
+    "@elastic/apm-rum" "^5.2.0"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.1.1":
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.1.1.tgz#02d29fa606e66f9a3a88f629d468b02457b1b183"
-  integrity sha512-A0O/0ZffcHm1taLuXyFoUmV2+aARr+9+xbmsEDIExLV0yKaNlaLl3UaZrodSOZ1ijlCEsRRS+y2i0md93YKQTA==
+"@elastic/apm-rum@^5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.2.0.tgz#b0cfd6e5771b1e765fda2715a38c87746f49f1aa"
+  integrity sha512-l8/Ji1GMuahMCN5DsALIf+fioKi1QeY4pU0izfVI37se2/fxsMNEDpw52WxJknHdfBE0Imh3FPg4T56J5MO+IQ==
   dependencies:
-    "@elastic/apm-rum-core" "^5.2.0"
+    "@elastic/apm-rum-core" "^5.3.0"
 
 "@elastic/charts@19.2.0":
   version "19.2.0"

@@ -29,7 +29,13 @@ export {
   Form,
   getUseField,
   ValidationFuncArg,
+  FormData,
+  UseField,
+  FormHook,
   useFormContext,
+  FormDataProvider,
+  OnFormUpdateArg,
+  FieldConfig,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
@@ -41,6 +47,9 @@ export {
   getFormRow,
   Field,
   JsonEditorField,
+  FormRow,
+  ToggleField,
+  ComboBoxField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {
