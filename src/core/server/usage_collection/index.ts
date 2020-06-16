@@ -17,25 +17,5 @@
  * under the License.
  */
 
-import {
-  PluginInitializerContext,
-  UsageCollectionSetup,
-  AllowedSchemaTypes,
-  MakeSchemaFrom,
-  SchemaField,
-  CollectorOptions,
-  Collector,
-} from '../../../core/server';
-import { UsageCollectionPlugin } from './plugin';
-
-export {
-  UsageCollectionSetup,
-  AllowedSchemaTypes,
-  MakeSchemaFrom,
-  SchemaField,
-  CollectorOptions,
-  Collector,
-};
-// export { config } from './config';
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);
+export { UsageCollectionServiceConfigType, config } from './config';
+export { UsageCollectionService, UsageCollectionSetup } from './usage_collection_service';

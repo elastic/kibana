@@ -18,7 +18,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { ServiceConfigDescriptor } from '../internal_types';
 
 export const configSchema = schema.object({
   uiMetric: schema.object({
@@ -28,15 +28,21 @@ export const configSchema = schema.object({
   maximumWaitTimeForAllCollectorsInS: schema.number({ defaultValue: 60 }),
 });
 
-export type ConfigType = TypeOf<typeof configSchema>;
+/**
+ * @internal
+ */
+export type UsageCollectionServiceConfigType = TypeOf<typeof configSchema>;
 
-export const config: PluginConfigDescriptor<ConfigType> = {
+export const config: ServiceConfigDescriptor<UsageCollectionServiceConfigType> = {
+  path: 'usageCollection',
   schema: configSchema,
+  // TODO: How to
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('ui_metric.enabled', 'usageCollection.uiMetric.enabled'),
     renameFromRoot('ui_metric.debug', 'usageCollection.uiMetric.debug'),
   ],
-  exposeToBrowser: {
-    uiMetric: true,
-  },
+  // TODO: How to use this config in a plugin? (will it work out of the box?)
+  // exposeToBrowser: {
+  //   uiMetric: true,
+  // },
 };

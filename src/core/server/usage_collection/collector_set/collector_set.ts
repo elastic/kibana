@@ -18,25 +18,47 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, LegacyAPICaller } from 'kibana/server';
-import { Collector, CollectorOptions } from './collector';
-import { UsageCollector } from './usage_collector';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { Logger, LegacyAPICaller } from '../../';
+
+import { Collector, UsageCollector, CollectorOptions } from '../collectors';
 
 interface CollectorSetConfig {
   logger: Logger;
-  maximumWaitTimeForAllCollectorsInS?: number;
+  maximumWaitTimeForAllCollectorsInS$: Observable<number>;
   collectors?: Array<Collector<any, any>>;
 }
 
 export class CollectorSet {
   private _waitingForAllCollectorsTimestamp?: number;
   private readonly logger: Logger;
-  private readonly maximumWaitTimeForAllCollectorsInS: number;
-  private collectors: Array<Collector<any, any>> = [];
-  constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
+  private readonly maximumWaitTimeForAllCollectorsInS$: Observable<number>;
+  private maximumWaitTimeForAllCollectorsInS: number = 60;
+  private readonly collectors: Array<Collector<any, any>>;
+  private subscription?: Subscription;
+  private started: boolean = false;
+  constructor({
+    logger,
+    maximumWaitTimeForAllCollectorsInS$,
+    collectors = [],
+  }: CollectorSetConfig) {
     this.logger = logger;
     this.collectors = collectors;
-    this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 60;
+    this.maximumWaitTimeForAllCollectorsInS$ = maximumWaitTimeForAllCollectorsInS$;
+  }
+
+  public start() {
+    this.subscription = this.maximumWaitTimeForAllCollectorsInS$
+      .pipe(map((v) => (this.maximumWaitTimeForAllCollectorsInS = v)))
+      .subscribe();
+    this.started = true;
+  }
+
+  public stop() {
+    this.started = false;
+    return this.subscription && this.subscription.unsubscribe();
   }
 
   public makeStatsCollector = <T, U>(options: CollectorOptions<T, U>) => {
@@ -80,7 +102,7 @@ export class CollectorSet {
     }
 
     const collectorTypesNotReady: string[] = [];
-    let allReady = true;
+    let allReady = this.started; // If the plugin is not started yet, we assume as not ready by default
     for (const collector of collectorSet.collectors) {
       if (!(await collector.isReady())) {
         allReady = false;
@@ -191,16 +213,20 @@ export class CollectorSet {
     return this.collectors.map(mapFn);
   };
 
-  // TODO: remove
+  // TODO: remove (used by bulk_uploader.js in monitoring)
   public some = (someFn: any) => {
     return this.collectors.some(someFn);
   };
 
   private makeCollectorSetFromArray = (collectors: Collector[]) => {
-    return new CollectorSet({
+    const collectorSet = new CollectorSet({
       logger: this.logger,
-      maximumWaitTimeForAllCollectorsInS: this.maximumWaitTimeForAllCollectorsInS,
+      maximumWaitTimeForAllCollectorsInS$: this.maximumWaitTimeForAllCollectorsInS$,
       collectors,
     });
+    if (this.started) {
+      collectorSet.start();
+    }
+    return collectorSet;
   };
 }

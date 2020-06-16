@@ -50,6 +50,7 @@ import { config as pathConfig } from './path';
 import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
+import { config as usageCollectionConfig, UsageCollectionService } from './usage_collection';
 import { mapToObject } from '../utils';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
@@ -73,6 +74,7 @@ export class Server {
   private readonly uuid: UuidService;
   private readonly metrics: MetricsService;
   private readonly httpResources: HttpResourcesService;
+  private readonly usageCollection: UsageCollectionService;
   private readonly status: StatusService;
   private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
@@ -106,6 +108,7 @@ export class Server {
     this.coreApp = new CoreApp(core);
     this.httpResources = new HttpResourcesService(core);
     this.logging = new LoggingService(core);
+    this.usageCollection = new UsageCollectionService(core);
   }
 
   public async setup() {
@@ -172,6 +175,8 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    const usageCollectionSetup = await this.usageCollection.setup();
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -184,6 +189,7 @@ export class Server {
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
       logging: loggingSetup,
+      usageCollection: usageCollectionSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -295,6 +301,7 @@ export class Server {
       [savedObjectsConfig.path, savedObjectsConfig.schema],
       [savedObjectsMigrationConfig.path, savedObjectsMigrationConfig.schema],
       [uiSettingsConfig.path, uiSettingsConfig.schema],
+      [usageCollectionConfig.path, usageCollectionConfig.schema],
       [opsConfig.path, opsConfig.schema],
     ];
 
@@ -306,6 +313,10 @@ export class Server {
     this.configService.addDeprecationProvider(
       uiSettingsConfig.path,
       uiSettingsConfig.deprecations!
+    );
+    this.configService.addDeprecationProvider(
+      usageCollectionConfig.path,
+      usageCollectionConfig.deprecations!
     );
 
     for (const [path, schema] of schemas) {

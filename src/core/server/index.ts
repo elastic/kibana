@@ -68,6 +68,7 @@ import {
   loggerContextConfigSchema,
   loggerSchema,
 } from './logging';
+import { UsageCollectionSetup } from './usage_collection';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -283,6 +284,8 @@ export {
   resolveSavedObjectsImportErrors,
 } from './saved_objects';
 
+export { UsageCollectionSetup } from './usage_collection';
+
 export {
   IUiSettingsClient,
   UiSettingsParams,
@@ -406,6 +409,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */
   status: StatusServiceSetup;
+  /** {@link UsageCollectionSetup} */
+  usageCollection: UsageCollectionSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
   /** {@link UuidServiceSetup} */

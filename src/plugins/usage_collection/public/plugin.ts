@@ -19,15 +19,9 @@
 
 import { Reporter, METRIC_TYPE } from '@kbn/analytics';
 import { Subject, merge } from 'rxjs';
+import { PluginInitializerContext, Plugin, CoreSetup, CoreStart, HttpSetup } from 'kibana/public';
 import { Storage } from '../../kibana_utils/public';
 import { createReporter } from './services';
-import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-} from '../../../core/public';
 import { reportApplicationUsage } from './services/application_usage';
 
 interface PublicConfigType {
@@ -66,9 +60,9 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
   private readonly legacyAppId$ = new Subject<string>();
   private trackUserAgent: boolean = true;
   private reporter?: Reporter;
-  private config: PublicConfigType;
+  private config: PublicConfigType = { uiMetric: { debug: true, enabled: true } };
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<PublicConfigType>();
+    // this.config = initializerContext.config.get<PublicConfigType>();
   }
 
   public setup({ http }: CoreSetup): UsageCollectionSetup {

@@ -36,6 +36,7 @@ import { capabilitiesServiceMock } from './capabilities/capabilities_service.moc
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { uuidServiceMock } from './uuid/uuid_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
+import { usageCollectionServiceMock } from './usage_collection/usage_collection_service.mock';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
@@ -49,6 +50,7 @@ export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.m
 export { migrationMocks } from './saved_objects/migrations/mocks';
 export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export { usageCollectionServiceMock } from './usage_collection/usage_collection_service.mock';
 export { metricsServiceMock } from './metrics/metrics_service.mock';
 export { renderingMock } from './rendering/rendering_service.mock';
 
@@ -129,6 +131,7 @@ function createCoreSetupMock({
     http: httpMock,
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
+    usageCollection: usageCollectionServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
     logging: loggingServiceMock.createSetupContract(),
@@ -161,6 +164,7 @@ function createInternalCoreSetupMock() {
     http: httpServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
+    usageCollection: usageCollectionServiceMock.createSetupContract(),
     uuid: uuidServiceMock.createSetupContract(),
     httpResources: httpResourcesMock.createSetupContract(),
     rendering: renderingMock.createSetupContract(),

@@ -18,10 +18,10 @@
  */
 
 import { noop } from 'lodash';
-import { Collector } from './collector';
-import { CollectorSet } from './collector_set';
-import { UsageCollector } from './usage_collector';
+import { BehaviorSubject } from 'rxjs';
 import { loggingSystemMock } from '../../../../core/server/mocks';
+import { Collector, UsageCollector } from '../collectors';
+import { CollectorSet } from './collector_set';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -29,6 +29,9 @@ const loggerSpies = {
   debug: jest.spyOn(logger, 'debug'),
   warn: jest.spyOn(logger, 'warn'),
 };
+
+const createCollectorSet = () =>
+  new CollectorSet({ logger, maximumWaitTimeForAllCollectorsInS$: new BehaviorSubject(1) });
 
 describe('CollectorSet', () => {
   describe('registers a collector set and runs lifecycle events', () => {
@@ -44,7 +47,7 @@ describe('CollectorSet', () => {
     const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
 
     it('should throw an error if non-Collector type of object is registered', () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = createCollectorSet();
       const registerPojo = () => {
         collectors.registerCollector({
           type: 'type_collector_test',
@@ -59,7 +62,7 @@ describe('CollectorSet', () => {
     });
 
     it('should log debug status of fetching from the collector', async () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = createCollectorSet();
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
@@ -82,7 +85,7 @@ describe('CollectorSet', () => {
     });
 
     it('should gracefully handle a collector fetch method throwing an error', async () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = createCollectorSet();
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
@@ -102,7 +105,7 @@ describe('CollectorSet', () => {
     });
 
     it('should not break if isReady is not a function', async () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = createCollectorSet();
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
@@ -121,7 +124,7 @@ describe('CollectorSet', () => {
     });
 
     it('should not break if isReady is not provided', async () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = createCollectorSet();
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
@@ -139,7 +142,7 @@ describe('CollectorSet', () => {
     });
 
     it('should infer the types from the implementations of fetch and formatForBulkUpload', async () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = createCollectorSet();
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
@@ -166,7 +169,7 @@ describe('CollectorSet', () => {
     let collectorSet: CollectorSet;
 
     beforeEach(() => {
-      collectorSet = new CollectorSet({ logger });
+      collectorSet = createCollectorSet();
     });
 
     it('should snake_case and convert field names to api standards', () => {
@@ -231,7 +234,7 @@ describe('CollectorSet', () => {
     const collectorOptions = { type: 'MY_TEST_COLLECTOR', fetch: () => {}, isReady: () => true };
 
     it('returns true only for UsageCollector instances', () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = createCollectorSet();
       const usageCollector = new UsageCollector(logger, collectorOptions);
       const collector = new Collector(logger, collectorOptions);
       const randomClass = new (class Random {})();

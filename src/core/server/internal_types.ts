@@ -35,6 +35,7 @@ import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
 import { InternalLoggingServiceSetup } from './logging';
+import { UsageCollectionSetup } from './usage_collection';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -49,6 +50,7 @@ export interface InternalCoreSetup {
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
   logging: InternalLoggingServiceSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 /**

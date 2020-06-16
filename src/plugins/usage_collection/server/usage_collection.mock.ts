@@ -17,31 +17,8 @@
  * under the License.
  */
 
-import { CollectorOptions } from './collector/collector';
-import { UsageCollectionSetup } from './index';
-
-export { CollectorOptions };
+import { usageCollectionServiceMock } from '../../../core/server/mocks';
 
 export const createUsageCollectionSetupMock = () => {
-  const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
-    areAllCollectorsReady: jest.fn(),
-    bulkFetch: jest.fn(),
-    bulkFetchUsage: jest.fn(),
-    getCollectorByType: jest.fn(),
-    getFilteredCollectorSet: jest.fn(),
-    // @ts-ignore jest.fn doesn't play nice with type guards
-    isUsageCollector: jest.fn(),
-    makeCollectorSetFromArray: jest.fn(),
-    makeStatsCollector: jest.fn(),
-    map: jest.fn(),
-    maximumWaitTimeForAllCollectorsInS: 0,
-    some: jest.fn(),
-    toApiFieldNames: jest.fn(),
-    toObject: jest.fn(),
-    makeUsageCollector: jest.fn(),
-    registerCollector: jest.fn(),
-  };
-
-  usageCollectionSetupMock.areAllCollectorsReady.mockResolvedValue(true);
-  return usageCollectionSetupMock;
+  return usageCollectionServiceMock.createSetupContract();
 };

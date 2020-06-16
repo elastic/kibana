@@ -17,5 +17,20 @@
  * under the License.
  */
 
-export const KIBANA_STATS_TYPE = 'kibana_stats';
-export const DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S = 60;
+import { Collector } from './collector';
+
+export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> extends Collector<
+  T,
+  U
+> {
+  protected defaultFormatterForBulkUpload(result: T) {
+    return {
+      type: 'kibana_stats',
+      payload: ({
+        usage: {
+          [this.type]: result,
+        },
+      } as unknown) as U,
+    };
+  }
+}
