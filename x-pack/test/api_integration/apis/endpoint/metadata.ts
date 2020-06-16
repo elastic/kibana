@@ -199,6 +199,24 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(0);
       });
 
+      it('metadata api should return the latest event for all the events where policy status is not success', async () => {
+        const { body } = await supertest
+          .post('/api/endpoint/metadata')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `not endpoint.policy.applied.status:success`,
+          })
+          .expect(200);
+        const statuses: Set<string> = new Set(
+          body.hosts.map(
+            (hostInfo: Record<string, any>) => hostInfo.metadata.endpoint.policy.applied.status
+          )
+        );
+
+        expect(statuses.size).to.eql(1);
+        expect(Array.from(statuses)).to.eql(['failure']);
+      });
+
       it('metadata api should return the endpoint based on the elastic agent id, and status should be error', async () => {
         const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
         const targetElasticAgentId = '023fa40c-411d-4188-a941-4147bfadd095';

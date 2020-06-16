@@ -38,5 +38,6 @@ export default function ({
     loadTestFile(require.resolve('./todo_embeddable'));
     loadTestFile(require.resolve('./list_container'));
     loadTestFile(require.resolve('./adding_children'));
+    loadTestFile(require.resolve('./dashboard'));
   });
 }
