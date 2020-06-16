@@ -119,13 +119,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         // clear out the data and reload the page
         await deleteMetadataStream(getService);
-        // await esArchiver.unload('endpoint/metadata/api_feature');
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         // reload the data so the other tests continue to pass
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        //  await esArchiver.load('endpoint/metadata/api_feature');
       });
       it('displays no items found when empty', async () => {
         // get the endpoint list table data and verify message
@@ -179,7 +177,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     after(async () => {
       await deleteMetadataStream(getService);
-      // await esArchiver.unload('endpoint/metadata/api_feature');
     });
   });
 };
