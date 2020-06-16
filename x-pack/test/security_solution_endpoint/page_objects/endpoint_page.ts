@@ -17,9 +17,11 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
      * Navigate to the Endpoints list page
      */
     async navigateToEndpointList(searchParams?: string) {
-      await pageObjects.common.navigateToApp('securitySolution', {
-        hash: `/management/endpoints${searchParams ? `?${searchParams}` : ''}`,
-      });
+      await pageObjects.common.navigateToUrl(
+        'securitySolution:management',
+        `/endpoints${searchParams ? `?${searchParams}` : ''}`,
+        { shouldUseHashForSubUrl: false }
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
