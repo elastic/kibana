@@ -79,9 +79,8 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     },
     {
       title: 'create_time',
-      description: formatHumanReadableDateTimeSeconds(
-        moment(item.config.create_time).unix() * 1000
-      ),
+      description:
+        formatHumanReadableDateTimeSeconds(moment(item.config.create_time).unix() * 1000) ?? '',
     },
     {
       title: 'source_index',
