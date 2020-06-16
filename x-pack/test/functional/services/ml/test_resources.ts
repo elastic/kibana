@@ -79,7 +79,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return this.getSavedObjectIdByTitle(title, SavedObjectType.SEARCH);
     },
 
-    async getVisualizatzionId(title: string): Promise<string | undefined> {
+    async getVisualizationId(title: string): Promise<string | undefined> {
       return this.getSavedObjectIdByTitle(title, SavedObjectType.VISUALIZATION);
     },
 
@@ -250,7 +250,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     async deleteVisualizationByTitle(title: string) {
       log.debug(`Deleting visualization with title '${title}'...`);
 
-      const visualizationId = await this.getVisualizatzionId(title);
+      const visualizationId = await this.getVisualizationId(title);
       if (visualizationId === undefined) {
         log.debug(`Visualization with title '${title}' does not exists. Nothing to delete.`);
         return;
