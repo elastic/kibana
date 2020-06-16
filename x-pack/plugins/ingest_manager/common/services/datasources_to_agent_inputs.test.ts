@@ -106,7 +106,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
         id: 'some-uuid',
         name: 'mock-datasource',
         type: 'test-logs',
-        dataset: { namespace: 'default' },
+        dataset: { namespace: 'default', type: 'test-logs' },
         use_output: 'default',
         streams: [
           {
@@ -142,7 +142,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
         id: 'some-uuid',
         name: 'mock-datasource',
         type: 'test-logs',
-        dataset: { namespace: 'default' },
+        dataset: { namespace: 'default', type: 'test-logs' },
         use_output: 'default',
         streams: [
           {

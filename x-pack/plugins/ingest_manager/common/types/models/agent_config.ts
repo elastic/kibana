@@ -39,7 +39,10 @@ export interface FullAgentConfigInput {
   id: string;
   name: string;
   type: string;
-  dataset: { namespace: string };
+  dataset: {
+    namespace: string;
+    type: string;
+  };
   use_output: string;
   package?: Pick<DatasourcePackage, 'name' | 'version'>;
   streams: FullAgentConfigInputStream[];
