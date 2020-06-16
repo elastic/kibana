@@ -54,6 +54,8 @@ import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
+import { MapsStartApi } from './api';
+import { createSecurityLayerDescriptors } from './api/create_security_layer_descriptors';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -166,7 +168,10 @@ export class MapsPlugin
     });
   }
 
-  public start(core: CoreStart, plugins: any) {
+  public start(core: CoreStart, plugins: any): MapsStartApi {
     bindStartCoreAndPlugins(core, plugins);
+    return {
+      createSecurityLayerDescriptors,
+    };
   }
 }

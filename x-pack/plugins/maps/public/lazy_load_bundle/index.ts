@@ -38,6 +38,10 @@ interface LazyLoadedMapModules {
   ) => LayerDescriptor[];
   mergeInputWithSavedMap: any;
   renderApp: (context: unknown, params: unknown) => ReactElement<any>;
+  createSecurityLayerDescriptors: (
+    indexPatternId: string,
+    indexPatternTitle: string
+  ) => LayerDescriptor[];
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -60,6 +64,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       mergeInputWithSavedMap,
       // @ts-ignore
       renderApp,
+      createSecurityLayerDescriptors,
     } = await import('./lazy');
 
     resolve({
@@ -74,6 +79,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       getInitialLayers,
       mergeInputWithSavedMap,
       renderApp,
+      createSecurityLayerDescriptors,
     });
   });
   return loadModulesPromise;
