@@ -248,7 +248,7 @@ export const MapsAppView = class extends React.Component {
   };
 
   syncAppAndGlobalState = () => {
-    const { query, time, refreshConfig } = this.state;
+    const { query, time, refreshConfig, initialialized } = this.state;
     const { filterManager } = getData().query;
 
     // appState
@@ -262,11 +262,14 @@ export const MapsAppView = class extends React.Component {
       pause: refreshConfig.isPaused,
       value: refreshConfig.interval,
     };
-    updateGlobalState({
-      time: time,
-      refreshInterval,
-      filters: filterManager.getGlobalFilters(),
-    });
+    updateGlobalState(
+      {
+        time: time,
+        refreshInterval,
+        filters: filterManager.getGlobalFilters(),
+      },
+      initialialized
+    );
     this.setState({ refreshInterval });
   };
 
@@ -294,7 +297,10 @@ export const MapsAppView = class extends React.Component {
         query || this.state.query,
         time || this.state.time
       );
-      updateGlobalState({ ...newState, filters: filterManager.getGlobalFilters() });
+      updateGlobalState(
+        { ...newState, filters: filterManager.getGlobalFilters() },
+        this.state.initialized
+      );
     });
   };
 
@@ -324,14 +330,17 @@ export const MapsAppView = class extends React.Component {
       }),
     };
     this.setState(newState);
-    updateGlobalState({
-      query: newState.query,
-      time: newState.time,
-      refreshInterval: {
-        value: newState.refreshConfig.interval,
-        pause: newState.refreshConfig.isPaused,
+    updateGlobalState(
+      {
+        query: newState.query,
+        time: newState.time,
+        refreshInterval: {
+          value: newState.refreshConfig.interval,
+          pause: newState.refreshConfig.isPaused,
+        },
       },
-    });
+      this.state.initialized
+    );
     setRefreshConfig(newState.refreshConfig);
   }
 

@@ -18,18 +18,15 @@ export function getGlobalState() {
   return kbnUrlStateStorage.get('_g');
 }
 
-export function updateGlobalState(newState: unknown) {
+export function updateGlobalState(newState: unknown, skipFlush = true) {
   const globalState = getGlobalState();
-  kbnUrlStateStorage.set(
-    '_g',
-    {
-      // @ts-ignore
-      ...globalState,
-      // @ts-ignore
-      ...newState,
-    },
-    {
-      replace: true,
-    }
-  );
+  kbnUrlStateStorage.set('_g', {
+    // @ts-ignore
+    ...globalState,
+    // @ts-ignore
+    ...newState,
+  });
+  if (!skipFlush) {
+    kbnUrlStateStorage.flush({ replace: true });
+  }
 }
