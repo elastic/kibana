@@ -98,10 +98,16 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 entries: bundle.publicDirNames.map((name) => {
                   const absolute = Path.resolve(bundle.contextDir, name);
                   const newContext = Path.dirname(ENTRY_CREATOR);
-                  return {
-                    importId: `${bundle.type}/${bundle.id}/${name}`,
-                    relPath: Path.relative(newContext, absolute),
-                  };
+                  const importId = `${bundle.type}/${bundle.id}/${name}`;
+
+                  // relative path from context of the ENTRY_CREATOR, with linux path separators
+                  let requirePath = Path.relative(newContext, absolute).split('\\').join('/');
+                  if (!requirePath.startsWith('.')) {
+                    // ensure requirePath is identified by node as relative
+                    requirePath = `./${requirePath}`;
+                  }
+
+                  return { importId, requirePath };
                 }),
               },
             },
