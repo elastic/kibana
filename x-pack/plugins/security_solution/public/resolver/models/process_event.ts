@@ -103,12 +103,12 @@ export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | 
 /**
  * Returns the process event's parent pid
  */
-export function processParentPid(passedEvent: ResolverEvent): string | undefined {
+export function processParentPid(passedEvent: ResolverEvent): number | undefined {
   if (event.isLegacyEvent(passedEvent)) {
-    return String(passedEvent.endgame.unique_ppid);
+    return passedEvent.endgame.unique_ppid;
   } else {
     const ppid = passedEvent.process.parent?.pid;
-    return ppid ? String(ppid) : undefined;
+    return ppid ? ppid : undefined;
   }
 }
 
