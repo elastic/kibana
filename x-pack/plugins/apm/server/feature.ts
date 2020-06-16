@@ -24,7 +24,7 @@ export const APM_FEATURE = {
       api: ['apm', 'apm_write', 'actions-read', 'actions-all'],
       catalogue: ['apm'],
       savedObject: {
-        all: ['alert', 'action', 'action_task_params'],
+        all: ['action', 'action_task_params'],
         read: [],
       },
       alerting: {
@@ -46,7 +46,7 @@ export const APM_FEATURE = {
       api: ['apm', 'actions-read', 'actions-all'],
       catalogue: ['apm'],
       savedObject: {
-        all: ['alert', 'action', 'action_task_params'],
+        all: ['action', 'action_task_params'],
         read: [],
       },
       alerting: {

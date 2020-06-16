@@ -43,7 +43,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           app: ['alerts', 'kibana'],
           savedObject: {
             all: [],
-            read: ['alert'],
+            read: [],
           },
           alerting: {
             read: ['test.restricted-noop', 'test.unrestricted-noop', 'test.noop'],

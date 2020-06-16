@@ -112,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
             'uptime',
             'siem',
             'ingestManager',
-            'alerts',
+            'alerting',
           ].sort()
         );
       });
