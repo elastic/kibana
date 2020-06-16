@@ -28,12 +28,13 @@ import { ESSearchSource } from '../../../sources/es_search_source';
 // @ts-ignore
 import { ESPewPewSource } from '../../../sources/es_pew_pew_source';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
+import { APM_INDEX_PATTERN_TITLE } from '../observability';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 const euiVisColorPalette = euiPaletteColorBlind();
 
 function isApmIndex(indexPatternTitle: string) {
-  return minimatch(indexPatternTitle, 'apm-*');
+  return minimatch(indexPatternTitle, APM_INDEX_PATTERN_TITLE);
 }
 
 function getSourceField(indexPatternTitle: string) {

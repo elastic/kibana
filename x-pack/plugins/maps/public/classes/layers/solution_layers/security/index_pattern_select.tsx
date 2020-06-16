@@ -67,9 +67,9 @@ export class IndexPatternSelect extends Component<Props, State> {
     }
 
     this.props.onChange({
-      // @ts-ignore - avoid wrong "Property does not exist on type 'never'." compile error
+      // @ts-expect-error - avoid wrong "Property does not exist on type 'never'." compile error
       id: targetOption.value,
-      // @ts-ignore - avoid wrong "Property does not exist on type 'never'." compile error
+      // @ts-expect-error - avoid wrong "Property does not exist on type 'never'." compile error
       title: targetOption.text,
     });
   };

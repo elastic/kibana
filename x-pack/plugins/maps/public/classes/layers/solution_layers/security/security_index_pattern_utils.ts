@@ -16,25 +16,11 @@ export type IndexPatternMeta = {
   title: string;
 };
 
-let indexPatterns: IndexPatternMeta[];
-let indexPatternsPromise: Promise<IndexPatternMeta[]>;
-
 export async function getSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
-  if (indexPatterns) {
-    return indexPatterns;
-  }
-
-  if (!indexPatternsPromise) {
-    indexPatternsPromise = loadSecurityIndexPatterns();
-  }
-
-  return indexPatternsPromise;
-}
-
-async function loadSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
+  const uiSettings = getUiSettings();
   let securityIndexPatternTitles: string[];
   try {
-    securityIndexPatternTitles = getUiSettings().get('securitySolution:defaultIndex') as string[];
+    securityIndexPatternTitles = uiSettings.get('securitySolution:defaultIndex');
   } catch (error) {
     // UiSettings throws with unreconized configuration setting
     // siem:defaultIndex configuration setting is not registered if security app is not running
@@ -44,7 +30,7 @@ async function loadSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
   const indexPatternCache = await getIndexPatternService().getCache();
   return indexPatternCache!
     .filter((savedObject: SimpleSavedObject<IndexPatternSavedObjectAttrs>) => {
-      return securityIndexPatternTitles.some((indexPatternTitle) => {
+      return (securityIndexPatternTitles as string[]).some((indexPatternTitle) => {
         // glob matching index pattern title
         return minimatch(indexPatternTitle, savedObject?.attributes?.title);
       });

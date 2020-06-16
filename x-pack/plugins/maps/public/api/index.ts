@@ -5,4 +5,3 @@
  */
 
 export { MapsStartApi } from './start_api';
-export { createSecurityLayerDescriptors } from './create_security_layer_descriptors';
