@@ -16,26 +16,26 @@ describe('top-level navigation common to all pages in the Security app', () => {
   });
   it('navigates to the Overview page', () => {
     navigateFromHeaderTo(OVERVIEW);
-    cy.url().should('include', '/security#/overview');
+    cy.url().should('include', '/security/overview');
   });
 
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(HOSTS);
-    cy.url().should('include', '/security#/hosts');
+    cy.url().should('include', '/security/hosts');
   });
 
   it('navigates to the Network page', () => {
     navigateFromHeaderTo(NETWORK);
-    cy.url().should('include', '/security#/network');
+    cy.url().should('include', '/security/network');
   });
 
   it('navigates to the Detections page', () => {
     navigateFromHeaderTo(DETECTIONS);
-    cy.url().should('include', '/security#/detections');
+    cy.url().should('include', '/security/detections');
   });
 
   it('navigates to the Timelines page', () => {
     navigateFromHeaderTo(TIMELINES);
-    cy.url().should('include', '/security#/timelines');
+    cy.url().should('include', '/security/timelines');
   });
 });

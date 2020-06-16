@@ -40,3 +40,14 @@ export interface NavTab {
   isDetailPage?: boolean;
   pageId?: SecurityPageName;
 }
+
+export type SiemNavTabKey =
+  | SecurityPageName.overview
+  | SecurityPageName.hosts
+  | SecurityPageName.network
+  | SecurityPageName.alerts
+  | SecurityPageName.timelines
+  | SecurityPageName.case
+  | SecurityPageName.management;
+
+export type SiemNavTab = Record<SiemNavTabKey, NavTab>;

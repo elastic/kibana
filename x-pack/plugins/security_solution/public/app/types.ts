@@ -14,7 +14,6 @@ import {
   CombinedState,
 } from 'redux';
 
-import { NavTab } from '../common/components/navigation/types';
 import { State, SubPluginsInitReducer } from '../common/store';
 import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
@@ -28,18 +27,6 @@ export enum SecurityPageName {
   case = 'case',
   management = 'management',
 }
-
-export type SiemNavTabKey =
-  | SecurityPageName.overview
-  | SecurityPageName.hosts
-  | SecurityPageName.network
-  | SecurityPageName.alerts
-  | SecurityPageName.timelines
-  | SecurityPageName.case
-  | SecurityPageName.management;
-
-export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
-
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
   initialState: Record<K, T | undefined>;
   reducer: Record<K, Reducer<T, AnyAction>>;
