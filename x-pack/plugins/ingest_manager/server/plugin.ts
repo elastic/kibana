@@ -14,6 +14,7 @@ import {
   SavedObjectsServiceStart,
   HttpServiceSetup,
 } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -69,6 +70,7 @@ export interface IngestManagerSetupDeps {
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export type IngestManagerStartDeps = object;
