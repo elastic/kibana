@@ -63,7 +63,11 @@ export class MapsListView extends React.Component {
     this.debouncedFetch.cancel();
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.initMapList();
+  }
+
+  async initMapList() {
     this.fetchItems();
     addHelpMenuToAppChrome();
     getCoreChrome().docTitle.change('Maps');
