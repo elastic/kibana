@@ -156,7 +156,7 @@ export function descriptiveName(event: ResolverEvent): string {
 
   if (namableFileEvent) {
     if (namableFileEvent.file.path) {
-      return `${namableFileEvent.file.path}`;
+      return String(namableFileEvent.file.path);
     }
   }
 
@@ -164,12 +164,12 @@ export function descriptiveName(event: ResolverEvent): string {
   if (namableRegistryEvent) {
     const pathOrKey = namableRegistryEvent.registry.path || namableRegistryEvent.registry.key;
     if (pathOrKey) {
-      return `${pathOrKey}`;
+      return String(pathOrKey);
     }
   }
   if (namableDNSEvent) {
     if (namableDNSEvent.dns.question.name) {
-      return `${namableDNSEvent.dns.question.name}`;
+      return String(namableDNSEvent.dns.question.name);
     }
   }
 
