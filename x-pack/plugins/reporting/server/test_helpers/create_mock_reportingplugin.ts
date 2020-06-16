@@ -20,6 +20,7 @@ import {
 } from '../browsers';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStartDeps } from '../types';
+import { ReportingStore, LevelLogger } from '../lib';
 
 (initializeBrowserDriverFactory as jest.Mock<
   Promise<HeadlessChromiumDriverFactory>
@@ -38,12 +39,14 @@ const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
 };
 
 const createMockPluginStart = (startMock?: any): ReportingInternalStart => {
+  const store = new ReportingStore({} as ReportingCore, {} as LevelLogger);
   return {
     browserDriverFactory: startMock.browserDriverFactory,
     enqueueJob: startMock.enqueueJob,
     esqueue: startMock.esqueue,
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
+    store,
   };
 };
 
