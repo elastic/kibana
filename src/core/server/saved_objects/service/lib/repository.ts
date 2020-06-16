@@ -588,6 +588,7 @@ export class SavedObjectsRepository {
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
+   * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find<T = unknown>({
@@ -603,6 +604,7 @@ export class SavedObjectsRepository {
     namespaces,
     type,
     filter,
+    preference,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     if (!type) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -650,6 +652,7 @@ export class SavedObjectsRepository {
       _source: includedFields(type, fields),
       ignore: [404],
       rest_total_hits_as_int: true,
+      preference,
       body: {
         seq_no_primary_term: true,
         ...getSearchDsl(this._mappings, this._registry, {

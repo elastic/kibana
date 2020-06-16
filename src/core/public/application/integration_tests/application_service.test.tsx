@@ -125,6 +125,25 @@ describe('ApplicationService', () => {
 
         expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
       });
+
+      it('replaces the current history entry when the `replace` option is true', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async ({}: AppMountParameters) => {
+            return () => undefined;
+          },
+        });
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('app1', { path: '/foo' });
+        await navigateToApp('app1', { path: '/bar', replace: true });
+
+        expect(history.entries.map((entry) => entry.pathname)).toEqual(['/', '/app/app1/bar']);
+      });
     });
   });
 

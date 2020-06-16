@@ -47,7 +47,6 @@ uiRoutes.when('/beats/beats', {
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
       this.injector = $injector;
-      this.kbnUrl = $injector.get('kbnUrl');
 
       //Bypassing super.updateData, since this controller loads its own data
       this._isDataInitialized = true;
@@ -75,10 +74,6 @@ uiRoutes.when('/beats/beats', {
                 sorting={this.sorting || sorting}
                 pagination={this.pagination || pagination}
                 onTableChange={this.onTableChange || onTableChange}
-                angular={{
-                  kbnUrl: this.kbnUrl,
-                  scope: this.scope,
-                }}
               />
               {bottomBarComponent}
             </Fragment>

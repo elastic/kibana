@@ -54,10 +54,6 @@ describe('Listing', () => {
   it('should render with expected props', () => {
     const props = {
       data: expectedData,
-      angular: {
-        scope: null,
-        kbnUrl: null,
-      },
       sorting: {
         sort: 'asc',
       },
@@ -74,10 +70,6 @@ describe('Listing', () => {
         const { os, process, logstash, jvm, events, ...rest } = item; // eslint-disable-line no-unused-vars
         return rest;
       }),
-      angular: {
-        scope: null,
-        kbnUrl: null,
-      },
       sorting: {
         sort: 'asc',
       },

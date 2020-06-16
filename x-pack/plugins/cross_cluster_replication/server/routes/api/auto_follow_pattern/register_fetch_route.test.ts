@@ -7,7 +7,7 @@
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { IRouter, kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { isEsError } from '../../../lib/is_es_error';
+import { isEsError } from '../../../shared_imports';
 import { formatEsError } from '../../../lib/format_es_error';
 import { License } from '../../../services';
 import { mockRouteContext } from '../test_lib';

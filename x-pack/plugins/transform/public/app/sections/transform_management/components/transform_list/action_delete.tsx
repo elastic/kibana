@@ -12,11 +12,14 @@ import {
   EuiOverlayMask,
   EuiToolTip,
   EUI_MODAL_CONFIRM_BUTTON,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiSpacer,
 } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { TRANSFORM_STATE } from '../../../../../../common';
-
-import { useDeleteTransforms } from '../../../../hooks';
+import { useDeleteTransforms, useDeleteIndexAndTargetIndex } from '../../../../hooks';
 import {
   createCapabilityFailureMessage,
   AuthorizationContext,
@@ -35,13 +38,25 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
 
   const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
   const deleteTransforms = useDeleteTransforms();
+  const {
+    userCanDeleteIndex,
+    deleteDestIndex,
+    indexPatternExists,
+    deleteIndexPattern,
+    toggleDeleteIndex,
+    toggleDeleteIndexPattern,
+  } = useDeleteIndexAndTargetIndex(items);
 
   const [isModalVisible, setModalVisible] = useState(false);
 
   const closeModal = () => setModalVisible(false);
   const deleteAndCloseModal = () => {
     setModalVisible(false);
-    deleteTransforms(items);
+
+    const shouldDeleteDestIndex = userCanDeleteIndex && deleteDestIndex;
+    const shouldDeleteDestIndexPattern =
+      userCanDeleteIndex && indexPatternExists && deleteIndexPattern;
+    deleteTransforms(items, shouldDeleteDestIndex, shouldDeleteDestIndexPattern);
   };
   const openModal = () => setModalVisible(true);
 
@@ -71,17 +86,96 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
     defaultMessage: 'Delete {transformId}',
     values: { transformId: items[0] && items[0].config.id },
   });
-  const bulkDeleteModalMessage = i18n.translate(
-    'xpack.transform.transformList.bulkDeleteModalBody',
-    {
-      defaultMessage:
-        "Are you sure you want to delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}? The transform's destination index and optional Kibana index pattern will not be deleted.",
-      values: { count: items.length },
-    }
+  const bulkDeleteModalContent = (
+    <>
+      <p>
+        <FormattedMessage
+          id="xpack.transform.transformList.bulkDeleteModalBody"
+          defaultMessage="Are you sure you want to delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?"
+          values={{ count: items.length }}
+        />
+      </p>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem>
+          {
+            <EuiSwitch
+              data-test-subj="transformBulkDeleteIndexSwitch"
+              label={i18n.translate(
+                'xpack.transform.actionDeleteTransform.bulkDeleteDestinationIndexTitle',
+                {
+                  defaultMessage: 'Delete destination indices',
+                }
+              )}
+              checked={deleteDestIndex}
+              onChange={toggleDeleteIndex}
+            />
+          }
+        </EuiFlexItem>
+        <EuiSpacer size="s" />
+        <EuiFlexItem>
+          {
+            <EuiSwitch
+              data-test-subj="transformBulkDeleteIndexPatternSwitch"
+              label={i18n.translate(
+                'xpack.transform.actionDeleteTransform.bulkDeleteDestIndexPatternTitle',
+                {
+                  defaultMessage: 'Delete destination index patterns',
+                }
+              )}
+              checked={deleteIndexPattern}
+              onChange={toggleDeleteIndexPattern}
+            />
+          }
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
-  const deleteModalMessage = i18n.translate('xpack.transform.transformList.deleteModalBody', {
-    defaultMessage: `Are you sure you want to delete this transform? The transform's destination index and optional Kibana index pattern will not be deleted.`,
-  });
+
+  const deleteModalContent = (
+    <>
+      <p>
+        <FormattedMessage
+          id="xpack.transform.transformList.deleteModalBody"
+          defaultMessage="Are you sure you want to delete this transform?"
+        />
+      </p>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem>
+          {userCanDeleteIndex && (
+            <EuiSwitch
+              data-test-subj="transformDeleteIndexSwitch"
+              label={i18n.translate(
+                'xpack.transform.actionDeleteTransform.deleteDestinationIndexTitle',
+                {
+                  defaultMessage: 'Delete destination index {destinationIndex}',
+                  values: { destinationIndex: items[0] && items[0].config.dest.index },
+                }
+              )}
+              checked={deleteDestIndex}
+              onChange={toggleDeleteIndex}
+            />
+          )}
+        </EuiFlexItem>
+        {userCanDeleteIndex && indexPatternExists && (
+          <EuiFlexItem>
+            <EuiSpacer size="s" />
+            <EuiSwitch
+              data-test-subj="transformDeleteIndexPatternSwitch"
+              label={i18n.translate(
+                'xpack.transform.actionDeleteTransform.deleteDestIndexPatternTitle',
+                {
+                  defaultMessage: 'Delete index pattern {destinationIndex}',
+                  values: { destinationIndex: items[0] && items[0].config.dest.index },
+                }
+              )}
+              checked={deleteIndexPattern}
+              onChange={toggleDeleteIndexPattern}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </>
+  );
 
   let deleteButton = (
     <EuiButtonEmpty
@@ -99,7 +193,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
   if (disabled || !canDeleteTransform) {
     let content;
     if (disabled) {
-      content = isBulkAction === true ? bulkDeleteButtonDisabledText : deleteButtonDisabledText;
+      content = isBulkAction ? bulkDeleteButtonDisabledText : deleteButtonDisabledText;
     } else {
       content = createCapabilityFailureMessage('canDeleteTransform');
     }
@@ -117,7 +211,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
       {isModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
+            title={isBulkAction ? bulkDeleteModalTitle : deleteModalTitle}
             onCancel={closeModal}
             onConfirm={deleteAndCloseModal}
             cancelButtonText={i18n.translate(
@@ -135,7 +229,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
             buttonColor="danger"
           >
-            <p>{isBulkAction === true ? bulkDeleteModalMessage : deleteModalMessage}</p>
+            {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}

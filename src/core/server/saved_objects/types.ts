@@ -83,6 +83,8 @@ export interface SavedObjectsFindOptions extends Omit<SavedObjectsBaseOptions, '
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string;
   namespaces?: string[];
+  /** An optional ES preference value to be used for the query **/
+  preference?: string;
 }
 
 /**

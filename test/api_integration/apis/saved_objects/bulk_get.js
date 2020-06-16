@@ -96,6 +96,7 @@ export default function ({ getService }) {
                     defaultIndex: '91200a00-9efd-11e7-acb3-3dab96693fab',
                   },
                   namespaces: ['default'],
+                  migrationVersion: resp.body.saved_objects[2].migrationVersion,
                   references: [],
                 },
               ],

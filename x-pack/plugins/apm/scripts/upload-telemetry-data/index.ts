@@ -59,9 +59,9 @@ const cliEsCredentials = pick(
   },
   identity
 ) as {
-  'elasticsearch.username': string;
-  'elasticsearch.password': string;
-  'elasticsearch.hosts': string;
+  'elasticsearch.username'?: string;
+  'elasticsearch.password'?: string;
+  'elasticsearch.hosts'?: string;
 };
 
 const config = {

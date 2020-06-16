@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
 import { get } from 'lodash';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { LevelLogger } from '../lib';
+import { createConfig$ } from './create_config';
 import { ReportingConfigType } from './schema';
 
 // make config.get() aware of the value type it returns
@@ -55,11 +57,12 @@ export interface ReportingConfig extends Config<ReportingConfigType> {
   kbnConfig: Config<KbnServerConfigType>;
 }
 
-export const buildConfig = (
+export const buildConfig = async (
   initContext: PluginInitializerContext<ReportingConfigType>,
   core: CoreSetup,
-  reportingConfig: ReportingConfigType
-): ReportingConfig => {
+  logger: LevelLogger
+): Promise<ReportingConfig> => {
+  const config$ = initContext.config.create<ReportingConfigType>();
   const { http } = core;
   const serverInfo = http.getServerInfo();
 
@@ -77,6 +80,8 @@ export const buildConfig = (
     },
   };
 
+  const reportingConfig$ = createConfig$(core, config$, logger);
+  const reportingConfig = await reportingConfig$.pipe(first()).toPromise();
   return {
     get: (...keys: string[]) => get(reportingConfig, keys.join('.'), null), // spreading arguments as an array allows the return type to be known by the compiler
     kbnConfig: {

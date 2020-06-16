@@ -37,21 +37,19 @@ export interface ExceptionList extends ExceptionListSchema {
   totalItems: number;
 }
 
+export interface UseExceptionListSuccess {
+  lists: ExceptionList[];
+  exceptions: ExceptionListItemSchema[];
+  pagination: Pagination;
+}
+
 export interface UseExceptionListProps {
   http: HttpStart;
   lists: ExceptionIdentifiers[];
   onError: (arg: Error) => void;
   filterOptions?: FilterExceptionsOptions;
   pagination?: Pagination;
-  dispatchListsInReducer?: ({
-    lists,
-    exceptions,
-    pagination,
-  }: {
-    lists: ExceptionList[];
-    exceptions: ExceptionListItemSchema[];
-    pagination: Pagination;
-  }) => void;
+  onSuccess?: (arg: UseExceptionListSuccess) => void;
 }
 
 export interface ExceptionIdentifiers {

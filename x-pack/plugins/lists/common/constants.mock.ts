@@ -31,6 +31,7 @@ export const VALUE_2 = '255.255.255';
 export const NAMESPACE_TYPE = 'single';
 
 // Exception List specific
+export const ID = 'uuid_here';
 export const ENDPOINT_TYPE = 'endpoint';
 export const ENTRIES = [
   { field: 'some.field', match: 'some value', match_any: undefined, operator: 'included' },
@@ -38,4 +39,4 @@ export const ENTRIES = [
 export const ITEM_TYPE = 'simple';
 export const _TAGS = [];
 export const TAGS = [];
-export const COMMENT = [];
+export const COMMENTS = [];

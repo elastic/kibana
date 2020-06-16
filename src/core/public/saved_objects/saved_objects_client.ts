@@ -293,6 +293,7 @@ export class SavedObjectsClient {
       type: 'type',
       filter: 'filter',
       namespaces: 'namespaces',
+      preference: 'preference',
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);

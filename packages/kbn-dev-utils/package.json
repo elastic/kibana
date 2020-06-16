@@ -20,10 +20,10 @@
     "moment": "^2.24.0",
     "rxjs": "^6.5.3",
     "tree-kill": "^1.2.2",
-    "tslib": "^1.9.3"
+    "tslib": "^2.0.0"
   },
   "devDependencies": {
-    "typescript": "3.7.2",
+    "typescript": "3.9.5",
     "@kbn/expect": "1.0.0",
     "chance": "1.0.18"
   }

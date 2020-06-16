@@ -74,8 +74,9 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
+
     // if it's a searchBar syntax error leave the table visible so they can try again
-    if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
+    if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
       return (
         <EuiPanel grow={false}>
           <EuiFlexGroup gutterSize="s">

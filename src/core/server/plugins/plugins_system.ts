@@ -66,15 +66,16 @@ export class PluginsSystem {
       return contracts;
     }
 
-    const sortedPlugins = this.getTopologicallySortedPluginNames();
-    this.log.info(`Setting up [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
+    const sortedPlugins = new Map(
+      [...this.getTopologicallySortedPluginNames()]
+        .map((pluginName) => [pluginName, this.plugins.get(pluginName)!] as [string, PluginWrapper])
+        .filter(([pluginName, plugin]) => plugin.includesServerPlugin)
+    );
+    this.log.info(
+      `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
+    );
 
-    for (const pluginName of sortedPlugins) {
-      const plugin = this.plugins.get(pluginName)!;
-      if (!plugin.includesServerPlugin) {
-        continue;
-      }
-
+    for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
       const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
