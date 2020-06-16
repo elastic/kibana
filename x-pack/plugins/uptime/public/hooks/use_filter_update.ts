@@ -22,17 +22,13 @@ interface SelectedFilters {
   selectedFilters: Map<string, string[]>;
 }
 
-export const useFilterUpdate = (
-  fieldName?: string,
-  values?: string[],
-  shouldUpdateUrl: boolean = true
-): SelectedFilters => {
+export const useFilterUpdate = (fieldName?: string, values?: string[]): SelectedFilters => {
   const dispatch = useDispatch();
   const { selectedFilters: currentFilters } = useSelector(uiSelector);
 
   // update filters in the URL from filter group
   const onFilterUpdate = (filtersKuery: string) => {
-    if (currentFilters !== filtersKuery && shouldUpdateUrl) {
+    if (currentFilters !== filtersKuery) {
       dispatch(setUiState({ selectedFilters: filtersKuery, currentMonitorListPage: '' }));
     }
   };

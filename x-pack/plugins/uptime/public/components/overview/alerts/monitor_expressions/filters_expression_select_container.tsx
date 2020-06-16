@@ -15,7 +15,6 @@ export interface FilterExpressionsSelectProps {
   newFilters: string[];
   onRemoveFilter: (val: string) => void;
   setAlertParams: (key: string, value: any) => void;
-  shouldUpdateUrl: boolean;
 }
 
 export const FiltersExpressionSelectContainer: React.FC<FilterExpressionsSelectProps> = (props) => {
@@ -24,7 +23,7 @@ export const FiltersExpressionSelectContainer: React.FC<FilterExpressionsSelectP
     values: string[];
   }>({ fieldName: '', values: [] });
 
-  useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values, props.shouldUpdateUrl);
+  useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
 
   const overviewFilters = useSelector(overviewFiltersSelector);
 

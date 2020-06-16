@@ -29,7 +29,6 @@ export interface AlertMonitorStatusProps {
   snapshotLoading: boolean;
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
-  shouldUpdateUrl: boolean;
   timerange: {
     from: string;
     to: string;
@@ -42,7 +41,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
     hasFilters,
     isOldAlert,
     setAlertParams,
-    shouldUpdateUrl,
     snapshotCount,
     snapshotLoading,
   } = props;
@@ -93,7 +91,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
           }
         }}
         setAlertParams={setAlertParams}
-        shouldUpdateUrl={shouldUpdateUrl}
       />
 
       <EuiSpacer size="xs" />
