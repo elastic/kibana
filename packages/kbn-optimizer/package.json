@@ -45,6 +45,7 @@
     "terser-webpack-plugin": "^2.1.2",
     "tinymath": "1.2.1",
     "url-loader": "^2.2.0",
+    "val-loader": "^1.1.1",
     "watchpack": "^1.6.0",
     "webpack": "^4.41.5",
     "webpack-merge": "^4.2.2"

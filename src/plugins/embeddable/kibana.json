@@ -6,5 +6,8 @@
   "requiredPlugins": [
     "inspector",
     "uiActions"
+  ],
+  "extraPublicDirs": [
+    "public/lib/test_samples"
   ]
 }
