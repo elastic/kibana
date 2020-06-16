@@ -25,7 +25,7 @@ import {
   PaginateControlsDirectiveProvider,
   PaginateDirectiveProvider,
 } from '../../../kibana_legacy/public';
-import { PER_PAGE_SETTING } from '../../../saved_objects/common';
+import { PER_PAGE_SETTING } from '../../../saved_objects/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../visualizations/public';
 
 export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings) {
