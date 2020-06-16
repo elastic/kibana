@@ -1,0 +1,10 @@
+{
+  "id": "audiTrail",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "audit_trail"],
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["licensing", "security", "spaces"],
+  "optionalPlugins": []
+}
