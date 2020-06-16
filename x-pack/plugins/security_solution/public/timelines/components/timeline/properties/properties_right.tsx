@@ -116,7 +116,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   usersViewing,
 }) => {
   const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.securitySolution.crud;
+  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
   return (
     <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
       <EuiFlexItem grow={false}>
