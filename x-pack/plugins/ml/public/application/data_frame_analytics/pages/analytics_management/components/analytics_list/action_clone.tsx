@@ -21,7 +21,7 @@ import {
 import { State } from '../../hooks/use_create_analytics_form/state';
 import { DataFrameAnalyticsListRow } from './common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
-import { extractErrorMessage } from '../../../../../util/error_utils';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 interface PropDefinition {
   /**

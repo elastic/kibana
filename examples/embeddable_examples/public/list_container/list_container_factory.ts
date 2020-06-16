@@ -22,6 +22,8 @@ import {
   EmbeddableFactoryDefinition,
   ContainerInput,
   EmbeddableStart,
+  EmbeddableFactory,
+  ContainerOutput,
 } from '../../../../src/plugins/embeddable/public';
 import { LIST_CONTAINER, ListContainer } from './list_container';
 
@@ -29,7 +31,9 @@ interface StartServices {
   embeddableServices: EmbeddableStart;
 }
 
-export class ListContainerFactory implements EmbeddableFactoryDefinition {
+export type ListContainerFactory = EmbeddableFactory<ContainerInput, ContainerOutput>;
+export class ListContainerFactoryDefinition
+  implements EmbeddableFactoryDefinition<ContainerInput, ContainerOutput> {
   public readonly type = LIST_CONTAINER;
   public readonly isContainerType = true;
 

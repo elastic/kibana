@@ -34,6 +34,13 @@ export const CLEAR_SELECTION = i18n.translate(
   }
 );
 
+export const TAKE_ACTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.utilityBar.takeActionTitle',
+  {
+    defaultMessage: 'Take action',
+  }
+);
+
 export const BATCH_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActionsTitle',
   {
@@ -73,5 +80,12 @@ export const BATCH_ACTION_CLOSE_SELECTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActions.closeSelectedTitle',
   {
     defaultMessage: 'Close selected',
+  }
+);
+
+export const BATCH_ACTION_IN_PROGRESS_SELECTED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActions.inProgressSelectedTitle',
+  {
+    defaultMessage: 'Mark in progress',
   }
 );

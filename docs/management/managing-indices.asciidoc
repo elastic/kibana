@@ -13,7 +13,7 @@ the amount of bookkeeping when working with indices. Instead of manually
 setting up your indices, you can create them automatically from a template,
 ensuring that your settings, mappings, and aliases are consistently defined.
 
-To manage your indices, go to *Management > {es} > Index Management*.
+To manage your indices, open the menu, then go to *Stack Management > {es} > Index Management*.
 
 [role="screenshot"]
 image::images/management_index_labels.png[Index Management UI]

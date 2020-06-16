@@ -56,7 +56,7 @@ async function ensureDownloaded(browsers: BrowserDownload[], logger: LevelLogger
       const path = resolvePath(archivesPath, archiveFilename);
 
       if (existsSync(path) && (await md5(path)) === archiveChecksum) {
-        logger.info(`Browser archive exists in ${path}`);
+        logger.debug(`Browser archive exists in ${path}`);
         return;
       }
 
