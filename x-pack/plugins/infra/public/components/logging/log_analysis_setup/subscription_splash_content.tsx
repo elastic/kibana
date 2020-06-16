@@ -49,7 +49,11 @@ export const SubscriptionSplashContent: React.FC = () => {
     );
 
     cta = (
-      <EuiButton fullWidth={false} fill onClick={() => {}}>
+      <EuiButton
+        fullWidth={false}
+        fill
+        href={services.http.basePath.prepend('/app/management/stack/license_management')}
+      >
         <FormattedMessage
           id="xpack.infra.logs.logAnalysis.splash.startTrialCta"
           defaultMessage="Start free trial"
@@ -72,7 +76,7 @@ export const SubscriptionSplashContent: React.FC = () => {
     );
 
     cta = (
-      <EuiButton fullWidth={false} fill onClick={() => {}}>
+      <EuiButton fullWidth={false} fill href="https://www.elastic.co/subscriptions">
         <FormattedMessage
           id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionCta"
           defaultMessage="Update subscription"
