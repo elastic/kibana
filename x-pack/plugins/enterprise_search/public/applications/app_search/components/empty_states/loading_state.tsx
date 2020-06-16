@@ -14,12 +14,12 @@ import './empty_states.scss';
 
 export const LoadingState: React.FC = () => {
   return (
-    <EuiPage restrictWidth className="engine-overview empty-state">
+    <EuiPage restrictWidth>
       <SetBreadcrumbs isRoot />
 
       <EuiPageBody>
         <EngineOverviewHeader />
-        <EuiPageContent>
+        <EuiPageContent className="emptyState">
           <EuiLoadingContent lines={5} />
           <EuiSpacer size="xxl" />
           <EuiLoadingContent lines={4} />
