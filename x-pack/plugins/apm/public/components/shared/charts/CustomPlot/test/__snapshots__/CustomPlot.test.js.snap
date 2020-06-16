@@ -9,7 +9,7 @@ Array [
     "text": <ForwardRef(styled.span)>
       Avg.
       <ForwardRef(styled.span)>
-        468 ms
+        467.6 ms
       </ForwardRef(styled.span)>
     </ForwardRef(styled.span)>,
   },
@@ -2744,7 +2744,7 @@ Array [
                 <span
                   className="c4"
                 >
-                  468 ms
+                  467.6 ms
                 </span>
               </styled.span>
             </span>
@@ -5923,7 +5923,7 @@ Array [
                 <span
                   className="c4"
                 >
-                  468 ms
+                  467.6 ms
                 </span>
               </styled.span>
             </span>
