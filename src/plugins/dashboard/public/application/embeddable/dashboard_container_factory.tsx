@@ -19,9 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { EmbeddableFactory, EmbeddableStart } from '../../../../embeddable/public';
 import {
   ContainerOutput,
   EmbeddableFactoryDefinition,
@@ -43,7 +43,12 @@ interface StartServices {
   uiActions: UiActionsStart;
 }
 
-export class DashboardContainerFactory
+export type DashboardContainerFactory = EmbeddableFactory<
+  DashboardContainerInput,
+  ContainerOutput,
+  DashboardContainer
+>;
+export class DashboardContainerFactoryDefinition
   implements
     EmbeddableFactoryDefinition<DashboardContainerInput, ContainerOutput, DashboardContainer> {
   public readonly isContainerType = true;

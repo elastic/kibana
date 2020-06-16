@@ -1206,7 +1206,6 @@
     "embeddableApi.customizeTitle.optionsMenuForm.panelTitleInputAriaLabel": "对此输入的更改将立即应用。按 enter 键可退出。",
     "embeddableApi.customizeTitle.optionsMenuForm.resetCustomDashboardButtonLabel": "重置标题",
     "embeddableApi.errors.embeddableFactoryNotFound": "{type} 无法加载。请升级到具有适当许可的默认 Elasticsearch 和 Kibana 分发。",
-    "embeddableApi.errors.factoryDoesNotExist": "{type} 的 Embeddable 工厂不存在。确保所有必需插件已安装并启用。",
     "embeddableApi.errors.paneldoesNotExist": "未找到面板",
     "embeddableApi.panel.dashboardPanelAriaLabel": "仪表板面板",
     "embeddableApi.panel.editPanel.displayName": "编辑 {value}",
