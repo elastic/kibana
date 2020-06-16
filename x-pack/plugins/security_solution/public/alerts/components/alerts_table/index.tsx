@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
@@ -27,16 +28,10 @@ import { updateAlertStatusAction } from './actions';
 import {
   getAlertActions,
   requiredFieldsForActions,
-  alertsClosedFilters,
   alertsDefaultModel,
-  alertsOpenFilters,
+  buildAlertStatusFilter,
 } from './default_config';
-import {
-  FILTER_CLOSED,
-  FILTER_OPEN,
-  AlertFilterOption,
-  AlertsTableFilterGroup,
-} from './alerts_filter_group';
+import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AlertsUtilityBar } from './alerts_utility_bar';
 import * as i18n from './translations';
 import {
@@ -92,32 +87,36 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const apolloClient = useApolloClient();
 
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
-  const [filterGroup, setFilterGroup] = useState<AlertFilterOption>(FILTER_OPEN);
+  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
     signalsIndex !== '' ? [signalsIndex] : []
   );
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
 
-  const getGlobalQuery = useCallback(() => {
-    if (browserFields != null && indexPatterns != null) {
-      return combineQueries({
-        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-        dataProviders: [],
-        indexPattern: indexPatterns,
-        browserFields,
-        filters: isEmpty(defaultFilters)
-          ? globalFilters
-          : [...(defaultFilters ?? []), ...globalFilters],
-        kqlQuery: globalQuery,
-        kqlMode: globalQuery.language,
-        start: from,
-        end: to,
-        isEventViewer: true,
-      });
-    }
-    return null;
-  }, [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]);
+  const getGlobalQuery = useCallback(
+    (customFilters: Filter[]) => {
+      if (browserFields != null && indexPatterns != null) {
+        return combineQueries({
+          config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+          dataProviders: [],
+          indexPattern: indexPatterns,
+          browserFields,
+          filters: isEmpty(defaultFilters)
+            ? [...globalFilters, ...customFilters]
+            : [...(defaultFilters ?? []), ...globalFilters, ...customFilters],
+          kqlQuery: globalQuery,
+          kqlMode: globalQuery.language,
+          start: from,
+          end: to,
+          isEventViewer: true,
+        });
+      }
+      return null;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]
+  );
 
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
@@ -143,6 +142,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
       setEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isLoading });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setEventsLoading, ALERTS_TABLE_TIMELINE_ID]
   );
 
@@ -150,25 +150,41 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
       setEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isDeleted });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setEventsDeleted, ALERTS_TABLE_TIMELINE_ID]
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
-    (count: number, status: string) => {
-      const title =
-        status === 'closed'
-          ? i18n.CLOSED_ALERT_SUCCESS_TOAST(count)
-          : i18n.OPENED_ALERT_SUCCESS_TOAST(count);
-
+    (count: number, status: Status) => {
+      let title: string;
+      switch (status) {
+        case 'closed':
+          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
+          break;
+        case 'open':
+          title = i18n.OPENED_ALERT_SUCCESS_TOAST(count);
+          break;
+        case 'in-progress':
+          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(count);
+      }
       displaySuccessToast(title, dispatchToaster);
     },
     [dispatchToaster]
   );
 
   const onAlertStatusUpdateFailure = useCallback(
-    (status: string, error: Error) => {
-      const title =
-        status === 'closed' ? i18n.CLOSED_ALERT_FAILED_TOAST : i18n.OPENED_ALERT_FAILED_TOAST;
+    (status: Status, error: Error) => {
+      let title: string;
+      switch (status) {
+        case 'closed':
+          title = i18n.CLOSED_ALERT_FAILED_TOAST;
+          break;
+        case 'open':
+          title = i18n.OPENED_ALERT_FAILED_TOAST;
+          break;
+        case 'in-progress':
+          title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+      }
       displayErrorToast(title, [error.message], dispatchToaster);
     },
     [dispatchToaster]
@@ -185,7 +201,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
-    (newFilterGroup: AlertFilterOption) => {
+    (newFilterGroup: Status) => {
       clearEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID });
       clearEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID });
       clearSelected!({ id: ALERTS_TABLE_TIMELINE_ID });
@@ -210,11 +226,18 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [setSelectAll, setShowClearSelectionAction]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
-    async (refetchQuery: inputsModel.Refetch, { alertIds, status }: UpdateAlertsStatusProps) => {
+    async (
+      refetchQuery: inputsModel.Refetch,
+      { status, selectedStatus }: UpdateAlertsStatusProps
+    ) => {
+      const currentStatusFilter = buildAlertStatusFilter(status);
       await updateAlertStatusAction({
-        query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
+        query: showClearSelectionAction
+          ? getGlobalQuery(currentStatusFilter)?.filterQuery
+          : undefined,
         alertIds: Object.keys(selectedEventIds),
         status,
+        selectedStatus,
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
         onAlertStatusUpdateSuccess,
@@ -242,7 +265,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
           hasIndexWrite={hasIndexWrite}
-          isFilteredToOpen={filterGroup === FILTER_OPEN}
+          currentFilter={filterGroup}
           selectAll={selectAllCallback}
           selectedEventIds={selectedEventIds}
           showClearSelection={showClearSelectionAction}
@@ -274,7 +297,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         createTimeline: createTimelineCallback,
         setEventsLoading: setEventsLoadingCallback,
         setEventsDeleted: setEventsDeletedCallback,
-        status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
+        status: filterGroup,
         updateTimelineIsLoading,
         onAlertStatusUpdateSuccess,
         onAlertStatusUpdateFailure,
@@ -295,12 +318,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
   const defaultFiltersMemo = useMemo(() => {
     if (isEmpty(defaultFilters)) {
-      return filterGroup === FILTER_OPEN ? alertsOpenFilters : alertsClosedFilters;
+      return buildAlertStatusFilter(filterGroup);
     } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
-      return [
-        ...defaultFilters,
-        ...(filterGroup === FILTER_OPEN ? alertsOpenFilters : alertsClosedFilters),
-      ];
+      return [...defaultFilters, ...buildAlertStatusFilter(filterGroup)];
     }
   }, [defaultFilters, filterGroup]);
   const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
@@ -314,6 +334,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       title: i18n.ALERTS_TABLE_TITLE,
       selectAll: canUserCRUD ? selectAll : false,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     setTimelineRowActions({
@@ -321,6 +342,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       queryFields: requiredFieldsForActions,
       timelineRowActions: additionalActions,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [additionalActions]);
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,

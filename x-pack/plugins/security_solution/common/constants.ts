@@ -5,6 +5,7 @@
  */
 
 export const APP_ID = 'securitySolution';
+export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
 export const APP_PATH = `/app/security`;
@@ -31,6 +32,7 @@ export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
+export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -142,3 +144,9 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+/**
+ * CreateTemplateTimelineBtn
+ * Remove the comment here to enable template timeline
+ */
+export const disableTemplate = true;

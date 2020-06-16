@@ -69,6 +69,7 @@ export const metricsVisDefinition = {
       axis_scale: 'normal',
       show_legend: 1,
       show_grid: 1,
+      tooltip_mode: 'show_all',
     },
     component: VisEditor,
   },

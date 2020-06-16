@@ -34,9 +34,11 @@
 /src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
 
 # App Architecture
+/examples/developer_examples/ @elastic/kibana-app-arch
 /examples/url_generators_examples/ @elastic/kibana-app-arch
 /examples/url_generators_explorer/ @elastic/kibana-app-arch
 /packages/kbn-interpreter/ @elastic/kibana-app-arch
+/packages/elastic-datemath/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch
@@ -166,15 +168,15 @@
 /src/core/public/i18n/  @elastic/kibana-localization
 /packages/kbn-i18n/  @elastic/kibana-localization
 
-# Pulse
-/packages/kbn-analytics/ @elastic/pulse
-/src/plugins/kibana_usage_collection/ @elastic/pulse
-/src/plugins/newsfeed/ @elastic/pulse
-/src/plugins/telemetry/ @elastic/pulse
-/src/plugins/telemetry_collection_manager/ @elastic/pulse
-/src/plugins/telemetry_management_section/ @elastic/pulse
-/src/plugins/usage_collection/ @elastic/pulse
-/x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
+# Kibana Telemetry
+/packages/kbn-analytics/ @elastic/kibana-telemetry
+/src/plugins/kibana_usage_collection/ @elastic/kibana-telemetry
+/src/plugins/newsfeed/ @elastic/kibana-telemetry
+/src/plugins/telemetry/ @elastic/kibana-telemetry
+/src/plugins/telemetry_collection_manager/ @elastic/kibana-telemetry
+/src/plugins/telemetry_management_section/ @elastic/kibana-telemetry
+/src/plugins/usage_collection/ @elastic/kibana-telemetry
+/x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-telemetry
 
 # Kibana Alerting Services
 /x-pack/plugins/alerts/ @elastic/kibana-alerting-services
@@ -220,8 +222,7 @@
 /x-pack/plugins/endpoint/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/endpoint-app-team @elastic/siem
-/x-pack/test/functional_endpoint/ @elastic/endpoint-app-team @elastic/siem
-/x-pack/test/functional_endpoint_ingest_failure/ @elastic/endpoint-app-team @elastic/siem
+/x-pack/test/security_solution_endpoint/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team @elastic/siem

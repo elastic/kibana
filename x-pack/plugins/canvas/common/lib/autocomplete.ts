@@ -14,7 +14,7 @@ import {
   ExpressionFunction,
   ExpressionFunctionParameter,
   getByAlias,
-} from '../../../../../src/plugins/expressions';
+} from '../../../../../src/plugins/expressions/common';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
 
@@ -419,7 +419,7 @@ function getArgNameSuggestions(
   });
 
   const argDefs: ArgSuggestionValue[] = unusedArgDefs
-    .map(([name, arg]) => ({ name, ...arg }))
+    .map(([_name, arg]) => arg)
     .sort(unnamedArgComparator);
 
   return argDefs.map((argDef) => {

@@ -116,3 +116,8 @@ export function ErrorRateAlertTrigger(props: Props) {
     />
   );
 }
+
+// Default export is required for React.lazy loading
+//
+// eslint-disable-next-line import/no-default-export
+export default ErrorRateAlertTrigger;

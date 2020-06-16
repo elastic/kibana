@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Endpoint plugin', function () {
     this.tags('ciGroup7');
-    loadTestFile(require.resolve('./alerts/index_pattern'));
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./alerts'));
   });
