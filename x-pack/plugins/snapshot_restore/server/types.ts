@@ -8,7 +8,8 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { CloudSetup } from '../../cloud/server';
 import { License } from './services';
-import { isEsError, wrapEsError } from './lib';
+import { wrapEsError } from './lib';
+import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;

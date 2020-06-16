@@ -3,6 +3,7 @@ window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 window.__kbnDarkMode__ = {{darkMode}};
 window.__kbnThemeVersion__ = "{{themeVersion}}";
 window.__kbnPublicPath__ = {{publicPathMap}};
+window.__kbnBundles__ = {{kbnBundlesLoaderSource}}
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
@@ -78,12 +79,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       {{/each}}
     ], function () {
       {{#unless legacyBundlePath}}
-        if (!__kbnBundles__ || !__kbnBundles__['entry/core'] || typeof __kbnBundles__['entry/core'].__kbnBootstrap__ !== 'function') {
-          console.error('entry/core bundle did not load correctly');
-          failure();
-        } else {
-          __kbnBundles__['entry/core'].__kbnBootstrap__()
-        }
+        __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
       {{/unless}}
 
       load([
