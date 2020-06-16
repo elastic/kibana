@@ -5,10 +5,27 @@
  */
 
 import React from 'react';
+import * as reactRedux from 'react-redux';
 import { PageHeader } from '../page_header';
 import { renderWithRouter, MountWithReduxProvider } from '../../lib';
 
 describe('PageHeader', () => {
+  beforeAll(() => {
+    const useSelectorSpy = jest.spyOn(reactRedux, 'useSelector');
+    useSelectorSpy.mockReturnValue({
+      autorefreshInterval: 10000,
+      autorefreshIsPaused: false,
+      dateRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+    });
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
   it('shallow renders with the date picker', () => {
     const component = renderWithRouter(
       <MountWithReduxProvider>

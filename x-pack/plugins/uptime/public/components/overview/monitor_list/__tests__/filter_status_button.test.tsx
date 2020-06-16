@@ -5,11 +5,19 @@
  */
 
 import React from 'react';
+import * as reactRedux from 'react-redux';
 import { FilterStatusButton, FilterStatusButtonProps } from '../filter_status_button';
 import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
 
 describe('FilterStatusButton', () => {
   let props: FilterStatusButtonProps;
+  beforeAll(() => {
+    const useSelectorSpy = jest.spyOn(reactRedux, 'useSelector');
+    useSelectorSpy.mockReturnValue({
+      statusFilter: 'up',
+    });
+  });
+
   beforeEach(() => {
     props = {
       content: 'Up',
@@ -18,6 +26,10 @@ describe('FilterStatusButton', () => {
       withNext: true,
       isActive: true,
     };
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
   });
 
   it('shallow renders without errors for valid props', () => {

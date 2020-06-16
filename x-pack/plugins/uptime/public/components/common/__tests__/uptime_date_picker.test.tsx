@@ -5,10 +5,27 @@
  */
 
 import React from 'react';
+import * as reactRedux from 'react-redux';
 import { UptimeDatePicker } from '../uptime_date_picker';
 import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../lib';
 
 describe('UptimeDatePicker component', () => {
+  beforeAll(() => {
+    const useSelectorSpy = jest.spyOn(reactRedux, 'useSelector');
+    useSelectorSpy.mockReturnValue({
+      autorefreshInterval: 60000,
+      autorefreshIsPaused: false,
+      dateRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+    });
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
   it('validates props with shallow render', () => {
     const component = shallowWithRouter(<UptimeDatePicker />);
     expect(component).toMatchSnapshot();
