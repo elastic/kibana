@@ -64,7 +64,18 @@ interface Props {
   onAddColumn: (column: string) => void;
   onSetColumns: (columns: string[]) => void;
 }
-
+const toolbarVisibility = {
+  showColumnSelector: {
+    allowHide: false,
+    allowReorder: true,
+  },
+  showStyleSelector: false,
+};
+const gridStyle = {
+  border: 'horizontal',
+  fontSize: 's',
+  cellPadding: 's',
+};
 const pageSizeArr = [25, 50, 100, 500];
 const defaultPageSize = 50;
 
@@ -99,14 +110,21 @@ export const DiscoverGrid = React.memo(
      * Pagination
      */
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
-    const onChangeItemsPerPage = useCallback(
-      (pageSize) => setPagination((paginationData) => ({ ...paginationData, pageSize })),
-      [setPagination]
-    );
-    const onChangePage = useCallback(
-      (pageIndex) => setPagination((paginationData) => ({ ...paginationData, pageIndex })),
-      [setPagination]
-    );
+
+    const getPaginationObj = useCallback(() => {
+      const onChangeItemsPerPage = (pageSize) =>
+        setPagination((paginationData) => ({ ...paginationData, pageSize }));
+
+      const onChangePage = (pageIndex) =>
+        setPagination((paginationData) => ({ ...paginationData, pageIndex }));
+
+      return {
+        ...pagination,
+        onChangeItemsPerPage,
+        onChangePage,
+        pageSizeOptions: pageSizeArr,
+      };
+    }, [pagination]);
 
     /**
      * Sorting
@@ -225,24 +243,9 @@ export const DiscoverGrid = React.memo(
               onSetColumns(newColumns);
             },
           }}
-          pagination={{
-            ...pagination,
-            onChangeItemsPerPage,
-            onChangePage,
-            pageSizeOptions: pageSizeArr,
-          }}
-          toolbarVisibility={{
-            showColumnSelector: {
-              allowHide: false,
-              allowReorder: true,
-            },
-            showStyleSelector: false,
-          }}
-          gridStyle={{
-            border: 'horizontal',
-            fontSize: 's',
-            cellPadding: 's',
-          }}
+          pagination={getPaginationObj()}
+          toolbarVisibility={toolbarVisibility}
+          gridStyle={gridStyle}
           schemaDetectors={getSchemaDetectors()}
           popoverContents={getPopoverContents()}
         />
