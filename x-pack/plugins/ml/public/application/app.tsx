@@ -76,6 +76,8 @@ export const renderApp = (
     urlGenerators: deps.share.urlGenerators,
   });
 
+  deps.kibanaLegacy.loadFontAwesome();
+
   const mlLicense = setLicenseCache(deps.licensing);
 
   appMountParams.onAppLeave((actions) => actions.default());

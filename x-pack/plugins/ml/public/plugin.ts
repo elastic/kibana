@@ -55,13 +55,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        pluginsStart.kibanaLegacy.loadFontAwesome();
         const { renderApp } = await import('./application/app');
         return renderApp(
           coreStart,
           {
             data: pluginsStart.data,
             share: pluginsStart.share,
+            kibanaLegacy: pluginsStart.kibanaLegacy,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,

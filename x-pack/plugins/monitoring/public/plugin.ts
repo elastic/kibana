@@ -70,6 +70,7 @@ export class MonitoringPlugin
         const { AngularApp } = await import('./angular');
         const deps: MonitoringPluginDependencies = {
           navigation: pluginsStart.navigation,
+          kibanaLegacy: pluginsStart.kibanaLegacy,
           element: params.element,
           core: coreStart,
           data: pluginsStart.data,
