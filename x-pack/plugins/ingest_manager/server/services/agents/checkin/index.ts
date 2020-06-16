@@ -12,11 +12,11 @@ import {
   AgentSOAttributes,
   AgentEventSOAttributes,
   AgentMetadata,
-} from '../../types';
+} from '../../../types';
 
-import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { agentCheckinState } from './checkin_state';
-import { getAgentActionsForCheckin } from './actions';
+import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { agentCheckinState } from './state';
+import { getAgentActionsForCheckin } from '../actions';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,

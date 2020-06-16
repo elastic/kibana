@@ -199,16 +199,24 @@ export const postAgentCheckinHandler: RequestHandler<
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Agent ${request.params.agentId} not found` },
+  } catch (err) {
+    const logger = appContextService.getLogger();
+    if (err.isBoom) {
+      if (err.output.statusCode >= 500) {
+        logger.error(err);
+      }
+
+      return response.customError({
+        statusCode: err.output.statusCode,
+        body: { message: err.output.payload.message },
       });
     }
 
+    logger.error(err);
+
     return response.customError({
       statusCode: 500,
-      body: { message: e.message },
+      body: { message: err.message },
     });
   }
 };

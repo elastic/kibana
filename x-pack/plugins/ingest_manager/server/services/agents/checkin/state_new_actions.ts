@@ -15,21 +15,22 @@ import {
   timeout,
   take,
 } from 'rxjs/operators';
+import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
 import {
-  SavedObjectsClientContract,
-  KibanaRequest,
-  SavedObjectsBulkUpdateObject,
-} from 'src/core/server';
-import { Agent, AgentAction, AgentSOAttributes, AgentConfig, FullAgentConfig } from '../../types';
-import { agentConfigService } from '../agent_config';
-import * as APIKeysService from '../api_keys';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { createAgentAction, getNewActionsSince } from './actions';
-import { appContextService } from '../app_context';
+  Agent,
+  AgentAction,
+  AgentSOAttributes,
+  AgentConfig,
+  FullAgentConfig,
+} from '../../../types';
+import { agentConfigService } from '../../agent_config';
+import * as APIKeysService from '../../api_keys';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { createAgentAction, getNewActionsSince } from '../actions';
+import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError } from './rxjs_utils';
 
 const UPDATE_ACTIONS_INTERVAL_MS = 10000;
-const UPDATE_LAST_CHECKIN_INTERVAL_MS = 15000;
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -126,60 +127,7 @@ async function createAgentActionFromConfigIfOutdated(
   return [configChangeAction];
 }
 
-function agentConnectedStateFactory() {
-  const connectedAgentsIds = new Set<string>();
-  let agentToUpdate = new Set<string>();
-
-  function addAgent(agentId: string) {
-    connectedAgentsIds.add(agentId);
-    agentToUpdate.add(agentId);
-  }
-
-  function removeAgent(agentId: string) {
-    connectedAgentsIds.delete(agentId);
-  }
-
-  async function wrapPromise<T>(agentId: string, p: Promise<T>): Promise<T> {
-    try {
-      addAgent(agentId);
-      const res = await p;
-      removeAgent(agentId);
-      return res;
-    } catch (err) {
-      removeAgent(agentId);
-      throw err;
-    }
-  }
-
-  async function updateLastCheckinAt() {
-    if (agentToUpdate.size === 0) {
-      return;
-    }
-    const internalSOClient = getInternalUserSOClient();
-    const now = new Date().toISOString();
-    const updates: Array<SavedObjectsBulkUpdateObject<AgentSOAttributes>> = [
-      ...connectedAgentsIds.values(),
-    ].map((agentId) => ({
-      type: AGENT_SAVED_OBJECT_TYPE,
-      id: agentId,
-      attributes: {
-        last_checkin: now,
-      },
-    }));
-
-    agentToUpdate = new Set<string>([...connectedAgentsIds.values()]);
-    await internalSOClient.bulkUpdate<AgentSOAttributes>(updates, { refresh: false });
-  }
-
-  return {
-    wrapPromise,
-    updateLastCheckinAt,
-  };
-}
-
-function agentCheckinStateFactory() {
-  const agentConnectedState = agentConnectedStateFactory();
-
+export function agentCheckinStateNewActionsFactory() {
   // Shared Observables
   const agentConfigs$ = new Map<string, Observable<FullAgentConfig | null>>();
   const newActions$ = createNewActionsSharedObservable();
@@ -231,26 +179,7 @@ function agentCheckinStateFactory() {
     }
   }
 
-  function start() {
-    setInterval(async () => {
-      try {
-        await agentConnectedState.updateLastCheckinAt();
-      } catch (err) {
-        appContextService.getLogger().error(err);
-      }
-    }, UPDATE_LAST_CHECKIN_INTERVAL_MS);
-  }
-
   return {
-    subscribeToNewActions: (
-      soClient: SavedObjectsClientContract,
-      agent: Agent,
-      options?: { signal: AbortSignal }
-    ) => agentConnectedState.wrapPromise(agent.id, subscribeToNewActions(soClient, agent, options)),
-    start,
+    subscribeToNewActions,
   };
 }
-
-export const agentCheckinState = agentCheckinStateFactory();
-
-agentCheckinState.start();
