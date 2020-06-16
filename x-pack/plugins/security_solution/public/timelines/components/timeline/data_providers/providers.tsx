@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormHelpText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled, { css } from 'styled-components';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
-import { AddDataProviderPopover } from './add_data_provider_popover';
+import { AddDataProviderPopover, AddDataProviderPopoverButton } from './add_data_provider_popover';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
@@ -67,7 +67,8 @@ const getItemStyle = (
 });
 
 const DroppableContainer = styled.div`
-  height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
+  min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
+  height: auto !important;
 
   .${IS_DRAGGING_CLASS_NAME} &:hover {
     background-color: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
@@ -108,6 +109,14 @@ const TimelineEuiFormHelpText = styled(EuiFormHelpText)`
 
 TimelineEuiFormHelpText.displayName = 'TimelineEuiFormHelpText';
 
+const ParensContainer = styled(EuiFlexItem)`
+  align-self: flex-start;
+`;
+
+const AddDataProviderContainer = styled.div`
+  padding: 10px 15px;
+`;
+
 /**
  * Renders an interactive card representation of the data providers. It also
  * affords uniform UI controls for the following actions:
@@ -134,29 +143,19 @@ export const Providers = React.memo<Props>(
     );
     return (
       <div>
+        <AddDataProviderContainer>
+          <AddDataProviderPopover timelineId={timelineId} Button={AddDataProviderPopoverButton} />
+        </AddDataProviderContainer>
         {dataProviderGroups.map((group, groupIndex) => (
           <EuiFlexGroup alignItems="center" gutterSize="none" key={`droppable-${groupIndex}`}>
             <OrFlexItem grow={false}>
               <AndOrBadgeContainer>
-                {groupIndex === 0 ? (
-                  <AddDataProviderPopover
-                    timelineId={timelineId}
-                    Button={({ onClick }) => (
-                      <EuiButtonIcon
-                        iconSize="xl"
-                        iconType="createSingleMetricJob"
-                        onClick={onClick}
-                      />
-                    )}
-                  />
-                ) : (
-                  <AndOrBadge type="or" />
-                )}
+                {groupIndex !== 0 && <AndOrBadge type="or" />}
               </AndOrBadgeContainer>
             </OrFlexItem>
-            <EuiFlexItem grow={false}>
+            <ParensContainer grow={false}>
               <Parens>{'('}</Parens>
-            </EuiFlexItem>
+            </ParensContainer>
             <EuiFlexItem grow={false}>
               <Droppable
                 droppableId={getTimelineProviderDroppableId({ groupIndex, timelineId })}
@@ -291,9 +290,9 @@ export const Providers = React.memo<Props>(
                 )}
               </Droppable>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <ParensContainer grow={false}>
               <Parens>{')'}</Parens>
-            </EuiFlexItem>
+            </ParensContainer>
           </EuiFlexGroup>
         ))}
       </div>

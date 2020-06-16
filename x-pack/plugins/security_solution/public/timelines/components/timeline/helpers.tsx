@@ -58,7 +58,8 @@ const buildQueryMatch = (
   browserFields: BrowserFields
 ) =>
   `${dataProvider.excluded ? 'NOT ' : ''}${
-    dataProvider.queryMatch.operator !== EXISTS_OPERATOR
+    dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
+    dataProvider.type !== DataProviderType.template
       ? checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
@@ -74,13 +75,7 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
     .reduce((queries: string[], dataProvider: DataProvider) => {
       const flatDataProviders = [dataProvider, ...dataProvider.and];
       const activeDataProviders = flatDataProviders.filter(
-        (flatDataProvider) =>
-          flatDataProvider.enabled &&
-          // don't include template data providers using IS_OPERATOR to global query
-          !(
-            flatDataProvider.type === DataProviderType.template &&
-            flatDataProvider.queryMatch.operator === IS_OPERATOR
-          )
+        (flatDataProvider) => flatDataProvider.enabled
       );
 
       if (!activeDataProviders.length) return queries;

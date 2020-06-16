@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
-import { AddDataProviderPopover } from './add_data_provider_popover';
+import { AddDataProviderPopover, AddDataProviderPopoverButton } from './add_data_provider_popover';
 
 import * as i18n from './translations';
 
@@ -43,7 +43,7 @@ const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
   width: ${(props) => (props.showSmallMsg ? '60px' : 'auto')};
   align-items: center;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: wrap;
   justify-content: center;
   user-select: none;
@@ -87,30 +87,29 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false, timelineId }) =>
   >
     {!showSmallMsg && (
       <>
-        <NoWrap>
-          <Text color="subdued" size="s">
-            {i18n.DROP_ANYTHING}
-          </Text>
-          <HighlightedBackground>
-            <BadgeHighlighted className={HIGHLIGHTED_DROP_TARGET_CLASS_NAME}>
-              {i18n.HIGHLIGHTED}
-            </BadgeHighlighted>
-          </HighlightedBackground>
-        </NoWrap>
+        <div>
+          <NoWrap>
+            <Text color="subdued" size="s">
+              {i18n.DROP_ANYTHING}
+            </Text>
+            <HighlightedBackground>
+              <BadgeHighlighted className={HIGHLIGHTED_DROP_TARGET_CLASS_NAME}>
+                {i18n.HIGHLIGHTED}
+              </BadgeHighlighted>
+            </HighlightedBackground>
+            <Text color="subdued" size="s">
+              {i18n.HERE_TO_BUILD_AN}
+            </Text>
+            <AndOrBadge type="or" />
+            <Text color="subdued" size="s">
+              {i18n.QUERY}
+            </Text>
+          </NoWrap>
+        </div>
 
-        <NoWrap>
-          <Text color="subdued" size="s">
-            {i18n.HERE_TO_BUILD_AN}
-          </Text>
-          <AndOrBadge type="or" />
-          <Text color="subdued" size="s">
-            {i18n.QUERY}
-          </Text>
-          <Text color="subdued" size="s">
-            {i18n.OR_CLICK}
-          </Text>
+        <div>
           <AddDataProviderPopover timelineId={timelineId} Button={AddDataProviderPopoverButton} />
-        </NoWrap>
+        </div>
       </>
     )}
     {showSmallMsg && <AndOrBadge type="or" />}
@@ -118,14 +117,3 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false, timelineId }) =>
 ));
 
 Empty.displayName = 'Empty';
-
-const AddDataProviderPopoverButton = ({ onClick }: { onClick: () => void }) => (
-  <EuiButtonEmpty
-    size="xs"
-    onClick={onClick}
-    data-test-subj="addFilter"
-    className="globalFilterBar__addButton"
-  >
-    <Text size="s">{i18n.ADD_FILTER}</Text>
-  </EuiButtonEmpty>
-);

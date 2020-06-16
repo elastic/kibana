@@ -43,11 +43,27 @@ const ProviderBadgeStyled = (styled(EuiBadge)`
     margin-right: 0;
     margin-left: 4px;
   }
+  ${({ type }) =>
+    type === DataProviderType.template &&
+    `
+    &.globalFilterItem {
+      background: #f8e9e9
+    }
+  `}
 ` as unknown) as typeof EuiBadge;
 
-const TemplateFieldIcon = styled(EuiIcon)`
-  float: left;
+const TemplateTimelineBadge = styled.div`
+  display: block;
+  background: #dd0a73;
+  color: #fff;
+  padding: 4px 0 4px 6px;
+  font-size: 0.6em;
+  text-transform: uppercase;
 `;
+
+// const TemplateFieldIcon = styled(EuiIcon)`
+//   float: left;
+// `;
 
 ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 
@@ -109,23 +125,23 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
     const prefix = useMemo(() => (isExcluded ? <span>{i18n.NOT} </span> : null), [isExcluded]);
 
     const content = useMemo(() => {
-      if (type === DataProviderType.template) {
-        return (
-          <>
-            <TemplateFieldIcon type="string" size="m" />
-            <strong>{'{ '}</strong>
-            {prefix}
-            {operator !== EXISTS_OPERATOR ? (
-              <span className="field-value">{`${field}`}</span>
-            ) : (
-              <span className="field-value">
-                {field} {i18n.EXISTS_LABEL}
-              </span>
-            )}
-            <strong>{' }'}</strong>
-          </>
-        );
-      }
+      // if (type === DataProviderType.template) {
+      //   return (
+      //     <>
+      //       <TemplateFieldIcon type="string" size="m" />
+      //       <strong>{'{ '}</strong>
+      //       {prefix}
+      //       {operator !== EXISTS_OPERATOR ? (
+      //         <span className="field-value">{`${field}`}</span>
+      //       ) : (
+      //         <span className="field-value">
+      //           {field} {i18n.EXISTS_LABEL}
+      //         </span>
+      //       )}
+      //       <strong>{' }'}</strong>
+      //     </>
+      //   );
+      // }
 
       return (
         <>
@@ -143,22 +159,28 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
 
     return (
       <ProviderContainer>
-        <ProviderBadgeStyled
-          id={`${providerId}-${field}-${val}`}
-          className={classes}
-          color="hollow"
-          title=""
-          iconOnClick={deleteFilter}
-          iconOnClickAriaLabel={i18n.REMOVE_DATA_PROVIDER}
-          iconType="cross"
-          iconSide="right"
-          onClick={togglePopover}
-          onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
-          closeButtonProps={closeButtonProps}
-          data-test-subj="providerBadge"
-        >
-          {content}
-        </ProviderBadgeStyled>
+        <div>
+          <ProviderBadgeStyled
+            id={`${providerId}-${field}-${val}`}
+            className={classes}
+            color="hollow"
+            title=""
+            iconOnClick={deleteFilter}
+            iconOnClickAriaLabel={i18n.REMOVE_DATA_PROVIDER}
+            iconType="cross"
+            iconSide="right"
+            onClick={togglePopover}
+            onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
+            closeButtonProps={closeButtonProps}
+            data-test-subj="providerBadge"
+            type={type}
+          >
+            {content}
+          </ProviderBadgeStyled>
+          {type === DataProviderType.template && (
+            <TemplateTimelineBadge>{'Template timeline'}</TemplateTimelineBadge>
+          )}
+        </div>
       </ProviderContainer>
     );
   }

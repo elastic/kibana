@@ -83,6 +83,13 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   padding: 0 10px 5px 12px;
 `;
 
+const TemplateTimelineBadge = styled.div`
+  background: #dd0a73;
+  color: #fff;
+  padding: 10px 15px;
+  font-size: 0.8em;
+`;
+
 export interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
@@ -190,6 +197,9 @@ export const TimelineComponent: React.FC<Props> = ({
 
   return (
     <TimelineContainer data-test-subj="timeline">
+      {timelineType === TimelineType.template && (
+        <TemplateTimelineBadge>{'Template Timeline'}</TemplateTimelineBadge>
+      )}
       <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
         <FlyoutHeaderWithCloseButton
           onClose={onClose}

@@ -38,10 +38,6 @@ export const DROP_ANYTHING = i18n.translate('xpack.securitySolution.dataProvider
   defaultMessage: 'Drop anything',
 });
 
-export const OR_CLICK = i18n.translate('xpack.securitySolution.dataProviders.orClick', {
-  defaultMessage: 'or click',
-});
-
 export const ADD_FILTER = i18n.translate('xpack.securitySolution.dataProviders.addFilter', {
   defaultMessage: 'Add filter',
 });

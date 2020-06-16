@@ -6,8 +6,10 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiButton,
   EuiContextMenu,
   EuiFlexItem,
+  EuiText,
   EuiPopover,
   EuiIcon,
   EuiContextMenuPanelItemDescriptor,
@@ -71,22 +73,20 @@ const AddDataProviderPopoverComponent: React.FC<{
     [dataProviders, timelineId, dispatch, handleClosePopover]
   );
 
-  if (!indexPattern || !browserFields) return <></>;
-
   const panels = [
     {
       id: 0,
       items: [
         {
           name: 'Add Field',
-          icon: <EuiIcon type="search" size="m" />,
+          icon: <EuiIcon type="plusInCircle" size="m" />,
           panel: 1,
         },
         timelineType === TimelineType.template
           ? {
               disabled: timelineType !== TimelineType.template,
               name: 'Add Template Field',
-              icon: <EuiIcon type="search" size="m" />,
+              icon: <EuiIcon type="visText" size="m" />,
               panel: 2,
             }
           : null,
@@ -98,7 +98,7 @@ const AddDataProviderPopoverComponent: React.FC<{
       width: 400,
       content: (
         <StatefulEditDataProvider
-          browserFields={browserFields}
+          browserFields={browserFields!}
           field=""
           isExcluded={false}
           onDataProviderEdited={handleDataProviderEdited}
@@ -115,7 +115,7 @@ const AddDataProviderPopoverComponent: React.FC<{
       width: 400,
       content: (
         <StatefulEditDataProvider
-          browserFields={browserFields}
+          browserFields={browserFields!}
           field=""
           isExcluded={false}
           onDataProviderEdited={handleDataProviderEdited}
@@ -148,3 +148,19 @@ const AddDataProviderPopoverComponent: React.FC<{
 };
 
 export const AddDataProviderPopover = React.memo(AddDataProviderPopoverComponent);
+
+export const AddDataProviderPopoverButton = React.memo(({ onClick }: { onClick: () => void }) => (
+  <EuiButton
+    size="s"
+    onClick={onClick}
+    data-test-subj="addFilter"
+    className="globalFilterBar__addButton"
+    iconType="arrowDown"
+    fill
+    iconSide="right"
+  >
+    <EuiText size="s">{'Add filter'}</EuiText>
+  </EuiButton>
+));
+
+AddDataProviderPopoverButton.displayName = 'AddDataProviderPopoverButton';
