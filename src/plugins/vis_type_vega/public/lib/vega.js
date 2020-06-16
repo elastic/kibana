@@ -17,24 +17,7 @@
  * under the License.
  */
 
-import Path from 'path';
+import * as vegaLite from 'vega-lite/build-es5/vega-lite';
+import * as vega from 'vega/build-es5/vega';
 
-import { Bundle } from '../common';
-
-import { KibanaPlatformPlugin } from './kibana_platform_plugins';
-
-export function getPluginBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
-  return plugins
-    .filter((p) => p.isUiPlugin)
-    .map(
-      (p) =>
-        new Bundle({
-          type: 'plugin',
-          id: p.id,
-          publicDirNames: ['public', ...p.extraPublicDirs],
-          sourceRoot: repoRoot,
-          contextDir: p.directory,
-          outputDir: Path.resolve(p.directory, 'target/public'),
-        })
-    );
-}
+export { vega, vegaLite };
