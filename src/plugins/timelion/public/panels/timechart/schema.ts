@@ -24,11 +24,7 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
-import {
-  calculateInterval,
-  DEFAULT_TIME_FORMAT,
-  // @ts-ignore
-} from '../../../../vis_type_timelion/common/lib';
+import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../../vis_type_timelion/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { tickFormatters } from '../../../../vis_type_timelion/public/helpers/tick_formatters';
 import { TimelionVisualizationDependencies } from '../../application';

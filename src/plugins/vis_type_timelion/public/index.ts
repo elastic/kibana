@@ -26,4 +26,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { getTimezone } from './helpers/get_timezone';
 
+export { DEFAULT_TIME_FORMAT, calculateInterval } from '../common/lib';
+
 export { VisTypeTimelionPluginStart } from './plugin';
