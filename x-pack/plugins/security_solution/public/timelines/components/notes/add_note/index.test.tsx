@@ -64,7 +64,7 @@ describe('AddNote', () => {
   test('it does NOT render the Cancel button when onCancelAddNote is NOT provided', () => {
     const testProps = {
       ...props,
-      newNote: note,
+      onCancelAddNote: undefined,
     };
     const wrapper = mount(<AddNote {...testProps} />);
 
