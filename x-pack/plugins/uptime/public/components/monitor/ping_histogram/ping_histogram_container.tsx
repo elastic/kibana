@@ -8,7 +8,7 @@ import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { PingHistogramComponent } from '../../common/charts';
 import { getPingHistogram } from '../../../state/actions';
-import { esKuerySelector, selectPingHistogram, uiSelector } from '../../../state/selectors';
+import { esKuerySelector, selectPingHistogram, dateRangeSelector } from '../../../state/selectors';
 import { useMonitorId } from '../../../hooks';
 import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../common/higher_order';
 import { UptimeRefreshContext } from '../../../contexts';
@@ -29,18 +29,18 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
 
   const { from, to, updateDateRange } = useAbsoluteDateRange();
 
-  const { dateRange } = useSelector(uiSelector);
+  const { from: dateStart, to: dateEnd } = useSelector(dateRangeSelector);
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(
       getPingHistogram({
         monitorId,
-        dateStart: dateRange.from,
-        dateEnd: dateRange.to,
+        dateStart,
+        dateEnd,
         filters: esKuery,
       })
     );
-  }, [dateRange, monitorId, lastRefresh, esKuery, dispatch]);
+  }, [dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch]);
 
   return (
     <PingHistogramComponent
