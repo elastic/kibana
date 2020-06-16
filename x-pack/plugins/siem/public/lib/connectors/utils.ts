@@ -7,7 +7,6 @@
 import {
   ActionTypeModel,
   ValidationResult,
-  ActionParamsProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../triggers_actions_ui/public/types';
 
@@ -31,7 +30,7 @@ export const createActionType = ({
   validateConnector,
   validateParams = connectorParamsValidator,
   actionConnectorFields,
-  actionParamsFields = ConnectorParamsFields,
+  actionParamsFields = null,
 }: Optional<ActionTypeModel, 'validateParams' | 'actionParamsFields'>) => (): ActionTypeModel => {
   return {
     id,
@@ -57,15 +56,6 @@ export const createActionType = ({
     actionConnectorFields,
     actionParamsFields,
   };
-};
-
-const ConnectorParamsFields: React.FunctionComponent<ActionParamsProps<ActionConnectorParams>> = ({
-  actionParams,
-  editAction,
-  index,
-  errors,
-}) => {
-  return null;
 };
 
 const connectorParamsValidator = (actionParams: ActionConnectorParams): ValidationResult => {
