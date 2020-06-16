@@ -153,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
         after(async () => {
           await ml.api.deleteIndices(cloneDestIndex);
           await ml.api.deleteIndices(testData.job.dest!.index as string);
-          await ml.testResources.deleteIndexPattern(testData.job.dest!.index as string);
+          await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
         });
 
         it('should open the flyout with a proper header', async () => {
