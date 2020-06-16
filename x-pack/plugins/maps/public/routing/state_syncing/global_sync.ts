@@ -18,7 +18,7 @@ export function getGlobalState() {
   return kbnUrlStateStorage.get('_g');
 }
 
-export function updateGlobalState(newState: unknown, skipFlush = true) {
+export function updateGlobalState(newState: unknown, flushUrlState = false) {
   const globalState = getGlobalState();
   kbnUrlStateStorage.set('_g', {
     // @ts-ignore
@@ -26,7 +26,7 @@ export function updateGlobalState(newState: unknown, skipFlush = true) {
     // @ts-ignore
     ...newState,
   });
-  if (!skipFlush) {
+  if (flushUrlState) {
     kbnUrlStateStorage.flush({ replace: true });
   }
 }

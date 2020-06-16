@@ -248,7 +248,7 @@ export const MapsAppView = class extends React.Component {
   };
 
   syncAppAndGlobalState = () => {
-    const { query, time, refreshConfig, initialialized } = this.state;
+    const { query, time, refreshConfig, initialized } = this.state;
     const { filterManager } = getData().query;
 
     // appState
@@ -268,7 +268,7 @@ export const MapsAppView = class extends React.Component {
         refreshInterval,
         filters: filterManager.getGlobalFilters(),
       },
-      initialialized
+      !initialized
     );
     this.setState({ refreshInterval });
   };
@@ -299,7 +299,7 @@ export const MapsAppView = class extends React.Component {
       );
       updateGlobalState(
         { ...newState, filters: filterManager.getGlobalFilters() },
-        this.state.initialized
+        !this.state.initialized
       );
     });
   };
@@ -339,7 +339,7 @@ export const MapsAppView = class extends React.Component {
           pause: newState.refreshConfig.isPaused,
         },
       },
-      this.state.initialized
+      !this.state.initialized
     );
     setRefreshConfig(newState.refreshConfig);
   }
