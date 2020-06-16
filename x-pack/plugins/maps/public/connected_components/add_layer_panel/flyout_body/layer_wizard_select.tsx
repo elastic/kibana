@@ -50,7 +50,7 @@ function getCategoryLabel(category: LAYER_WIZARD_CATEGORY): string {
     });
   }
 
-  throw new Exception(`Unexpected category: ${category}`);
+  throw new Error(`Unexpected category: ${category}`);
 }
 
 export class LayerWizardSelect extends Component<Props, State> {
@@ -139,7 +139,7 @@ export class LayerWizardSelect extends Component<Props, State> {
     const wizardCards = this.state.layerWizards
       .filter((layerWizard: LayerWizard) => {
         return this.state.selectedCategory
-          ? layerWizard.categories.includes(this.state.selectedCategory)
+          ? layerWizard.categories.includes(this.state.selectedCategory!)
           : true;
       })
       .map((layerWizard: LayerWizard) => {
