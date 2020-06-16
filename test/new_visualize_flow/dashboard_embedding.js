@@ -44,6 +44,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('Dashboard Embedding', function describeIndexTests() {
     before(async () => {
+      this.tags('ciGroup2');
       await esArchiver.load('kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -63,6 +64,21 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.metricValuesExist(['0']);
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
+    });
+
+    it('adding a markdown', async function () {
+      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+      expect(originalPanelCount).to.eql(1);
+      await testSubjects.exists('dashboardAddNewPanelButton');
+      await testSubjects.click('dashboardAddNewPanelButton');
+      await dashboardVisualizations.createAndEmbedMarkdown({
+        name: 'Embedding Markdown Test',
+        markdown: 'Nice to meet you, markdown is my name',
+      });
+      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboardExpect.markdownWithValuesExists(['Nice to meet you, markdown is my name']);
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+      expect(panelCount).to.eql(2);
     });
   });
 }

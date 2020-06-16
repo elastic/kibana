@@ -264,6 +264,16 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                         savedVis: { ...savedVis },
                         hideVisModal: true,
                       };
+                      if (stateContainer.getState() && stateContainer.getState().vis) {
+                        const { vis } = stateContainer.getState();
+                        const { type, aggs, params } = vis;
+                        const visState = {
+                          type,
+                          aggs,
+                          params,
+                        };
+                        input.savedVis.visState = visState;
+                      }
                       currentDashboard.addNewEmbeddable('visualization', input).then(() => {
                         const dashInput = currentDashboard.getInput();
                         dashboard.navigateToDashboard(dashInput);
@@ -506,15 +516,13 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
           state.vis
         )
       ) {
-        if (state.vis) {
-          const { aggs, ...visState } = state.vis;
-          vis.setState({
-            ...visState,
-            data: {
-              aggs,
-            },
-          });
-        }
+        const { aggs, ...visState } = state.vis;
+        vis.setState({
+          ...visState,
+          data: {
+            aggs,
+          },
+        });
         embeddableHandler.reload();
         $scope.eventEmitter.emit('updateEditor');
       }
