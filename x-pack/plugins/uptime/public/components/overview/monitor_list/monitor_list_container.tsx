@@ -7,9 +7,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
-import { monitorListSelector } from '../../../state/selectors';
+import { monitorListSelector, uiSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
-import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
 
 export interface MonitorListProps {
@@ -34,8 +33,11 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
 
   const dispatch = useDispatch();
 
-  const [getUrlValues] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
+  const {
+    dateRange: { from: dateRangeStart, to: dateRangeEnd },
+    currentMonitorListPage: pagination,
+    statusFilter,
+  } = useSelector(uiSelector);
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
