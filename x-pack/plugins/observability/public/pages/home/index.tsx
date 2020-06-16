@@ -10,7 +10,6 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiImage,
   EuiSpacer,
@@ -21,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { appsSection, tryItOutItemsSection } from './section';
+import { appsSection } from './section';
 
 const Container = styled.div`
   min-height: calc(100vh - 48px);
