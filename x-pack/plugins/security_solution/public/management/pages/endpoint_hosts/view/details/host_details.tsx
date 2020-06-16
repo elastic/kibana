@@ -86,7 +86,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
           defaultMessage: 'Policy',
         }),
-        description: details.endpoint.policy.applied.id,
+        description: details.Endpoint.policy.applied.id,
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policyStatus', {
@@ -139,7 +139,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     ];
   }, [
     details.agent.version,
-    details.endpoint.policy.applied.id,
+    details.Endpoint.policy.applied.id,
     details.host.hostname,
     details.host.ip,
     policyStatus,

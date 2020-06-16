@@ -47,7 +47,7 @@ describe('data generator', () => {
     const metadata = generator.generateHostMetadata(timestamp);
     expect(metadata['@timestamp']).toEqual(timestamp);
     expect(metadata.event.created).toEqual(timestamp);
-    expect(metadata.endpoint).not.toBeNull();
+    expect(metadata.Endpoint).not.toBeNull();
     expect(metadata.agent).not.toBeNull();
     expect(metadata.host).not.toBeNull();
   });
@@ -68,7 +68,7 @@ describe('data generator', () => {
     const alert = generator.generateAlert(timestamp);
     expect(alert['@timestamp']).toEqual(timestamp);
     expect(alert.event.action).not.toBeNull();
-    expect(alert.endpoint).not.toBeNull();
+    expect(alert.Endpoint).not.toBeNull();
     expect(alert.agent).not.toBeNull();
     expect(alert.host).not.toBeNull();
     expect(alert.process.entity_id).not.toBeNull();
