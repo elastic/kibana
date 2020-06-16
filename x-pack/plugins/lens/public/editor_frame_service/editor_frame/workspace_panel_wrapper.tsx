@@ -5,13 +5,7 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiPageContent, EuiPageContentBody, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FramePublicAPI, Visualization } from '../../types';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
