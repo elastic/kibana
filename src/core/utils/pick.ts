@@ -18,11 +18,12 @@
  */
 
 export function pick<T extends object, K extends keyof T>(obj: T, keys: readonly K[]): Pick<T, K> {
-  return keys.reduce((acc, key) => {
+  const picked = {} as Pick<T, K>;
+  for (const key of keys) {
     if (obj.hasOwnProperty(key)) {
-      acc[key] = obj[key];
+      picked[key] = obj[key];
     }
+  }
 
-    return acc;
-  }, {} as Pick<T, K>);
+  return picked;
 }
