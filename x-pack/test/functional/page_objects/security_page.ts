@@ -466,7 +466,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       log.debug('click save button');
       await testSubjects.click('roleFormSaveButton');
 
-      // Signifies that the role managemet page redirected back to the role grid page,
+      // Signifies that the role management page redirected back to the role grid page,
       // and successfully refreshed the grid
       await testSubjects.existOrFail('roleRow');
     }
