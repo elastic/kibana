@@ -100,11 +100,40 @@ describe('data generator', () => {
     expect(processEvent.process.name).not.toBeNull();
   });
 
+  describe('creates an origin alert when no related alerts are requested', () => {
+    let tree: Tree;
+    beforeEach(() => {
+      tree = generator.generateTree({
+        alwaysGenMaxChildrenPerNode: true,
+        ancestors: 3,
+        children: 3,
+        generations: 3,
+        percentTerminated: 100,
+        percentWithRelated: 100,
+        relatedEvents: 0,
+        relatedAlerts: 0,
+      });
+    });
+
+    it('creates an alert for the origin node but no other nodes', () => {
+      for (const node of tree.ancestry.values()) {
+        expect(node.relatedAlerts.length).toEqual(0);
+      }
+
+      for (const node of tree.children.values()) {
+        expect(node.relatedAlerts.length).toEqual(0);
+      }
+
+      expect(tree.origin.relatedAlerts.length).toEqual(1);
+    });
+  });
+
   describe('creates a resolver tree structure', () => {
     let tree: Tree;
     const ancestors = 3;
     const childrenPerNode = 3;
     const generations = 3;
+    const relatedAlerts = 4;
     beforeEach(() => {
       tree = generator.generateTree({
         alwaysGenMaxChildrenPerNode: true,
@@ -118,14 +147,16 @@ describe('data generator', () => {
           { category: RelatedEventCategory.File, count: 2 },
           { category: RelatedEventCategory.Network, count: 1 },
         ],
+        relatedAlerts,
       });
     });
 
     const eventInNode = (event: Event, node: TreeNode) => {
       const inLifecycle = node.lifecycle.includes(event);
       const inRelated = node.relatedEvents.includes(event);
+      const inRelatedAlerts = node.relatedAlerts.includes(event);
 
-      return (inRelated || inLifecycle) && event.process.entity_id === node.id;
+      return (inRelated || inRelatedAlerts || inLifecycle) && event.process.entity_id === node.id;
     };
 
     it('has the right related events for each node', () => {
@@ -158,6 +189,18 @@ describe('data generator', () => {
       checkRelatedEvents(tree.origin);
     });
 
+    it('has the right number of related alerts for each node', () => {
+      for (const node of tree.ancestry.values()) {
+        expect(node.relatedAlerts.length).toEqual(relatedAlerts);
+      }
+
+      for (const node of tree.children.values()) {
+        expect(node.relatedAlerts.length).toEqual(relatedAlerts);
+      }
+
+      expect(tree.origin.relatedAlerts.length).toEqual(relatedAlerts);
+    });
+
     it('has the right number of ancestors', () => {
       expect(tree.ancestry.size).toEqual(ancestors);
     });
@@ -187,33 +230,28 @@ describe('data generator', () => {
       expect(tree.allEvents.length).toBeGreaterThan(0);
 
       tree.allEvents.forEach((event) => {
-        if (event.event.kind === 'alert') {
-          expect(event).toEqual(tree.alertEvent);
-        } else {
-          const ancestor = tree.ancestry.get(event.process.entity_id);
-          if (ancestor) {
-            expect(eventInNode(event, ancestor)).toBeTruthy();
-            return;
-          }
-
-          const children = tree.children.get(event.process.entity_id);
-          if (children) {
-            expect(eventInNode(event, children)).toBeTruthy();
-            return;
-          }
-
-          expect(eventInNode(event, tree.origin)).toBeTruthy();
+        const ancestor = tree.ancestry.get(event.process.entity_id);
+        if (ancestor) {
+          expect(eventInNode(event, ancestor)).toBeTruthy();
+          return;
         }
+
+        const children = tree.children.get(event.process.entity_id);
+        if (children) {
+          expect(eventInNode(event, children)).toBeTruthy();
+          return;
+        }
+
+        expect(eventInNode(event, tree.origin)).toBeTruthy();
       });
     });
 
     const nodeEventCount = (node: TreeNode) => {
-      return node.lifecycle.length + node.relatedEvents.length;
+      return node.lifecycle.length + node.relatedEvents.length + node.relatedAlerts.length;
     };
 
     it('has the correct number of total events', () => {
-      // starts at 1 because the alert is in the allEvents array
-      let total = 1;
+      let total = 0;
       for (const node of tree.ancestry.values()) {
         total += nodeEventCount(node);
       }
@@ -232,7 +270,7 @@ describe('data generator', () => {
     let events: Event[];
 
     beforeEach(() => {
-      events = generator.createAlertEventAncestry(3, 0, 0, 0);
+      events = generator.createAlertEventAncestry(3, 0, 0, 0, 0);
     });
 
     it('with n-1 process events', () => {

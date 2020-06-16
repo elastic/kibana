@@ -78,7 +78,7 @@ describe('Histogram', () => {
       const tooltips = wrapper.find('Tooltip');
 
       expect(tooltips.length).toBe(1);
-      expect(tooltips.prop('header')).toBe('811 - 927 ms');
+      expect(tooltips.prop('header')).toBe('811.1 - 926.9 ms');
       expect(tooltips.prop('tooltipPoints')).toEqual([
         { value: '49.0 occurrences' },
       ]);

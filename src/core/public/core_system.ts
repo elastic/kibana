@@ -300,6 +300,10 @@ export class CoreSystem {
         plugins: mapToObject(plugins.contracts),
         targetDomElement: rendering.legacyTargetDomElement,
       });
+
+      return {
+        application,
+      };
     } catch (error) {
       if (this.fatalErrorsSetup) {
         this.fatalErrorsSetup.add(error);

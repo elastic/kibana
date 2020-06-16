@@ -40,7 +40,7 @@ export function Overview(props) {
 
         {kibanaAlerts}
 
-        <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
+        <AlertsPanel alerts={props.cluster.alerts} />
 
         {!isFromStandaloneCluster ? (
           <Fragment>
@@ -48,32 +48,19 @@ export function Overview(props) {
               {...props.cluster.elasticsearch}
               version={props.cluster.version}
               ml={props.cluster.ml}
-              changeUrl={props.changeUrl}
               license={props.cluster.license}
               setupMode={props.setupMode}
               showLicenseExpiration={props.showLicenseExpiration}
             />
-            <KibanaPanel
-              {...props.cluster.kibana}
-              setupMode={props.setupMode}
-              changeUrl={props.changeUrl}
-            />
+            <KibanaPanel {...props.cluster.kibana} setupMode={props.setupMode} />
           </Fragment>
         ) : null}
 
-        <LogstashPanel
-          {...props.cluster.logstash}
-          setupMode={props.setupMode}
-          changeUrl={props.changeUrl}
-        />
+        <LogstashPanel {...props.cluster.logstash} setupMode={props.setupMode} />
 
-        <BeatsPanel
-          {...props.cluster.beats}
-          setupMode={props.setupMode}
-          changeUrl={props.changeUrl}
-        />
+        <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} />
 
-        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} changeUrl={props.changeUrl} />
+        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} />
       </EuiPageBody>
     </EuiPage>
   );
