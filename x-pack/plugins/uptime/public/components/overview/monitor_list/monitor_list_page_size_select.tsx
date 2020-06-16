@@ -5,9 +5,10 @@
  */
 
 import { EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useUrlParams, UpdateUrlParams } from '../../../hooks';
+import { useDispatch } from 'react-redux';
+import { setUiState } from '../../../state/actions';
 
 interface PopoverButtonProps {
   setIsOpen: (isOpen: boolean) => any;
@@ -74,19 +75,29 @@ export const MonitorListPageSizeSelect: React.FC<MonitorListPageSizeSelectProps>
   size,
   setSize,
 }) => {
-  const [, setUrlParams] = useUrlParams();
-
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, size.toString());
   }, [size]);
 
+  const dispatch = useDispatch();
+  const setPagination = useCallback(
+    (pagination?: string) => {
+      dispatch(setUiState({ currentMonitorListPage: pagination }));
+    },
+    [dispatch]
+  );
+
   return (
-    <MonitorListPageSizeSelectComponent size={size} setSize={setSize} setUrlParams={setUrlParams} />
+    <MonitorListPageSizeSelectComponent
+      size={size}
+      setSize={setSize}
+      setPagination={setPagination}
+    />
   );
 };
 
 interface ComponentProps extends MonitorListPageSizeSelectProps {
-  setUrlParams: UpdateUrlParams;
+  setPagination: (pagination?: string) => void;
 }
 
 /**
@@ -96,7 +107,7 @@ interface ComponentProps extends MonitorListPageSizeSelectProps {
 export const MonitorListPageSizeSelectComponent: React.FC<ComponentProps> = ({
   size,
   setSize,
-  setUrlParams,
+  setPagination,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -115,7 +126,7 @@ export const MonitorListPageSizeSelectComponent: React.FC<ComponentProps> = ({
             onClick={() => {
               setSize(numRows);
               // reset pagination because the page size has changed
-              setUrlParams({ pagination: undefined });
+              setPagination(undefined);
               setIsOpen(false);
             }}
           >
