@@ -171,7 +171,7 @@ image:images/whats-new/7-8-swim-lane.png[Embed swim lanes in dashboards]
 The upload limit for the File Data Visualizer increased from 100 MB to 1 GB,
 so you can now upload larger CSV, JSON, and log files.
 To configure this value, go to
-{kibana-ref}/advanced-options.html[Advanced Settings].
+{kibana-ref}/advanced-options.html#kibana-ml-settings[Advanced Settings].
 
 [role="screenshot"]
 image::images/add-data-fv.png[File Data Visualizer]
