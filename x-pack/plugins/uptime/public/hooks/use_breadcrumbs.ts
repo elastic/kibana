@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { UptimeUrlParams } from '../lib/helper';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { useUrlParams } from '.';
+import { useGetUrlParams } from './use_url_params';
 
 export const makeBaseBreadcrumb = (params?: UptimeUrlParams): ChromeBreadcrumb => {
   let href = '#/';
@@ -31,7 +31,7 @@ export const makeBaseBreadcrumb = (params?: UptimeUrlParams): ChromeBreadcrumb =
 };
 
 export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
-  const params = useUrlParams()[0]();
+  const params = useGetUrlParams();
   const setBreadcrumbs = useKibana().services.chrome?.setBreadcrumbs;
   useEffect(() => {
     if (setBreadcrumbs) {
