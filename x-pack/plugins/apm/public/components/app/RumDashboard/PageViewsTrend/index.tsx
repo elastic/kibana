@@ -72,8 +72,7 @@ export const PageViewsTrend = () => {
 
   return (
     <div>
-      <EuiSpacer size="l" />
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <h3>{PageViewsLabel}</h3>
       </EuiTitle>
       <ChartWrapper loading={status !== 'success'} height="200px">
