@@ -8,41 +8,39 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 
-export type Tab = TabType.Summary | TabType.Mappings | TabType.Aliases | TabType.Settings;
-
-export enum TabType {
-  Summary = 'summary',
-  Mappings = 'mappings',
-  Aliases = 'aliases',
-  Settings = 'settings',
-}
+export type TabType = 'summary' | 'mappings' | 'aliases' | 'settings';
 
 interface Props {
-  setActiveTab: (id: Tab) => void;
-  activeTab: Tab;
+  setActiveTab: (id: TabType) => void;
+  activeTab: TabType;
 }
 
-const TABS = [
+interface Tab {
+  id: TabType;
+  name: string;
+}
+
+const TABS: Tab[] = [
   {
-    id: TabType.Summary,
+    id: 'summary',
     name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.summaryTabTitle', {
       defaultMessage: 'Summary',
     }),
   },
   {
-    id: TabType.Settings,
+    id: 'settings',
     name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.settingsTabTitle', {
       defaultMessage: 'Settings',
     }),
   },
   {
-    id: TabType.Mappings,
+    id: 'mappings',
     name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.mappingsTabTitle', {
       defaultMessage: 'Mappings',
     }),
   },
   {
-    id: TabType.Aliases,
+    id: 'aliases',
     name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.aliasesTabTitle', {
       defaultMessage: 'Aliases',
     }),

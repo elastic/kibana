@@ -30,10 +30,15 @@ const createActions = (testBed: TestBed<ComponentTemplateDetailsTestSubjects>) =
     find('aliasesTab').simulate('click');
   };
 
+  const clickManageButton = () => {
+    find('manageComponentTemplateButton').simulate('click');
+  };
+
   return {
     clickSettingsTab,
     clickAliasesTab,
     clickMappingsTab,
+    clickManageButton,
   };
 };
 
@@ -76,4 +81,6 @@ export type ComponentTemplateDetailsTestSubjects =
   | 'noMappingsCallout'
   | 'settingsTabContent'
   | 'noSettingsCallout'
-  | 'manageComponentTemplateButton';
+  | 'manageComponentTemplateButton'
+  | 'manageComponentTemplateContextMenu'
+  | 'manageComponentTemplateContextMenu.action';

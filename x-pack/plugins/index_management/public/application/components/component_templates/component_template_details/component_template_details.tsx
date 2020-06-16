@@ -22,7 +22,7 @@ import {
 import { SectionLoading, TabSettings, TabAliases, TabMappings } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { TabSummary } from './tab_summary';
-import { ComponentTemplateTabs, TabType, Tab } from './tabs';
+import { ComponentTemplateTabs, TabType } from './tabs';
 import { ManageButton, ManageAction } from './manage_button';
 
 interface Props {
@@ -43,7 +43,7 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
     componentTemplateName
   );
 
-  const [activeTab, setActiveTab] = useState<Tab>(TabType.Summary);
+  const [activeTab, setActiveTab] = useState<TabType>('summary');
 
   let content: React.ReactNode | undefined;
 
@@ -77,13 +77,11 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
       template: { settings, mappings, aliases },
     } = componentTemplateDetails;
 
-    const tabToComponentMap: {
-      [key: string]: React.ReactNode;
-    } = {
-      [TabType.Summary]: <TabSummary componentTemplateDetails={componentTemplateDetails} />,
-      [TabType.Settings]: <TabSettings settings={settings} />,
-      [TabType.Mappings]: <TabMappings mappings={mappings} />,
-      [TabType.Aliases]: <TabAliases aliases={aliases} />,
+    const tabToComponentMap: Record<TabType, React.ReactNode> = {
+      summary: <TabSummary componentTemplateDetails={componentTemplateDetails} />,
+      settings: <TabSettings settings={settings} />,
+      mappings: <TabMappings mappings={mappings} />,
+      aliases: <TabAliases aliases={aliases} />,
     };
 
     const tabContent = tabToComponentMap[activeTab];

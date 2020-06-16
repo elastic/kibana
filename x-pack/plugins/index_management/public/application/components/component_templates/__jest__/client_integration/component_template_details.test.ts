@@ -182,11 +182,21 @@ describe('<ComponentTemplateDetails />', () => {
     });
 
     test('should render a footer with context menu', () => {
-      const { exists } = testBed;
+      const { exists, actions, component, find } = testBed;
 
       // Verify footer exists
       expect(exists('componentTemplateDetails.footer')).toBe(true);
       expect(exists('manageComponentTemplateButton')).toBe(true);
+
+      // Click manage button and verify actions
+      act(() => {
+        actions.clickManageButton();
+      });
+
+      component.update();
+
+      expect(exists('manageComponentTemplateContextMenu')).toBe(true);
+      expect(find('manageComponentTemplateContextMenu.action').length).toEqual(1);
     });
   });
 

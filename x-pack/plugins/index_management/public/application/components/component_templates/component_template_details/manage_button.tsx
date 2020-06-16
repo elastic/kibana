@@ -36,10 +36,18 @@ export const ManageButton: React.FunctionComponent<Props> = ({
 
   const items: EuiContextMenuPanelItemDescriptor[] = actions.map(
     ({ name, icon, getIsDisabled, closePopoverOnClick, handleActionClick }) => {
+      const isDisabled = getIsDisabled ? getIsDisabled(componentTemplateDetails) : false;
+
       return {
         name,
         icon,
-        disabled: getIsDisabled ? getIsDisabled(componentTemplateDetails) : false,
+        disabled: isDisabled,
+        toolTipContent: isDisabled ? (
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateDetails.manageButtonDisabledTooltipLabel"
+            defaultMessage="Template is in use and cannot be deleted"
+          />
+        ) : null,
         onClick: () => {
           handleActionClick();
 
@@ -47,6 +55,7 @@ export const ManageButton: React.FunctionComponent<Props> = ({
             setIsPopOverOpen(false);
           }
         },
+        'data-test-subj': 'action',
       };
     }
   );
@@ -77,6 +86,7 @@ export const ManageButton: React.FunctionComponent<Props> = ({
     >
       <EuiContextMenu
         initialPanelId={0}
+        data-test-subj="manageComponentTemplateContextMenu"
         panels={[
           {
             id: 0,
