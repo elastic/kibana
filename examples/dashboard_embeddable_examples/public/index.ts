@@ -17,26 +17,6 @@
  * under the License.
  */
 
-export default function ({ getService }) {
-  const testSubjects = getService('testSubjects');
-  const pieChart = getService('pieChart');
-  const dashboardExpect = getService('dashboardExpect');
+import { DashboardEmbeddableExamples } from './plugin';
 
-  describe('dashboard container', () => {
-    before(async () => {
-      await testSubjects.click('embedExplorerTab-dashboardContainer');
-    });
-
-    it('pie charts', async () => {
-      await pieChart.expectPieSliceCount(5);
-    });
-
-    it('markdown', async () => {
-      await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
-    });
-
-    it('saved search', async () => {
-      await dashboardExpect.savedSearchRowCount(50);
-    });
-  });
-}
+export const plugin = () => new DashboardEmbeddableExamples();

@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { ViewMode, CONTACT_CARD_EMBEDDABLE, HELLO_WORLD_EMBEDDABLE } from '../embeddable_api';
-import { DashboardContainerInput } from '../../../../../../src/plugins/dashboard/public';
+import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
-export const dashboardInput: DashboardContainerInput = {
+export const testDashboardInput = {
   panels: {
     '1': {
       gridData: {
@@ -30,23 +29,9 @@ export const dashboardInput: DashboardContainerInput = {
         y: 15,
         i: '1',
       },
-      type: HELLO_WORLD_EMBEDDABLE,
+      type: 'HELLO_WORLD_EMBEDDABLE',
       explicitInput: {
         id: '1',
-      },
-    },
-    '2': {
-      gridData: {
-        w: 24,
-        h: 15,
-        x: 24,
-        y: 15,
-        i: '2',
-      },
-      type: CONTACT_CARD_EMBEDDABLE,
-      explicitInput: {
-        id: '2',
-        firstName: 'Sue',
       },
     },
     '822cd0f0-ce7c-419d-aeaa-1171cf452745': {
@@ -110,8 +95,55 @@ export const dashboardInput: DashboardContainerInput = {
     value: 0,
     pause: true,
   },
-  viewMode: ViewMode.EDIT,
+  viewMode: 'edit',
   lastReloadRequestTime: 1556569306103,
   title: 'New Dashboard',
   description: '',
 };
+
+// eslint-disable-next-line import/no-default-export
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const testSubjects = getService('testSubjects');
+  const pieChart = getService('pieChart');
+  const browser = getService('browser');
+  const dashboardExpect = getService('dashboardExpect');
+  const PageObjects = getPageObjects(['common']);
+
+  describe('dashboard container', () => {
+    before(async () => {
+      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/kibana');
+      await PageObjects.common.navigateToApp('dashboardEmbeddableExamples');
+      await testSubjects.click('dashboardEmbeddableByValue');
+      await updateInput(JSON.stringify(testDashboardInput, null, 4));
+    });
+
+    it('pie charts', async () => {
+      await pieChart.expectPieSliceCount(5);
+    });
+
+    it('markdown', async () => {
+      await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
+    });
+
+    it('saved search', async () => {
+      await dashboardExpect.savedSearchRowCount(50);
+    });
+  });
+
+  async function updateInput(input: string) {
+    const editorWrapper = await (
+      await testSubjects.find('dashboardEmbeddableByValueInputEditor')
+    ).findByClassName('ace_editor');
+    const editorId = await editorWrapper.getAttribute('id');
+    await browser.execute(
+      (_editorId: string, _input: string) => {
+        return (window as any).ace.edit(_editorId).setValue(_input);
+      },
+      editorId,
+      input
+    );
+    await testSubjects.click('dashboardEmbeddableByValueInputSubmit');
+  }
+}
