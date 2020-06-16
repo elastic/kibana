@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import classNames from 'classnames';
 
 import { BarSeries, Chart, Settings } from '@elastic/charts';
 import { EuiDataGridColumn } from '@elastic/eui';
@@ -114,9 +115,9 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
         </Chart>
       </div>
       <div
-        className={`mlDataGridChart__legend${
-          isNumericChartData(chartData) ? ' mlDataGridChart__legend--numeric' : ''
-        }`}
+        className={classNames('mlDataGridChart__legend', {
+          'mlDataGridChart__legend--numeric': isNumericChartData(chartData),
+        })}
       >
         {getLegendText(chartData, MAX_CHART_COLUMNS)}
       </div>
