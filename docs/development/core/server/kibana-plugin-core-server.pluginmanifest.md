@@ -21,6 +21,7 @@ Should never be used in code outside of Core but is exported for documentation p
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [configPath](./kibana-plugin-core-server.pluginmanifest.configpath.md) | <code>ConfigPath</code> | Root [configuration path](./kibana-plugin-core-server.configpath.md) used by the plugin, defaults to "id" in snake\_case format. |
+|  [extraPublicDirs](./kibana-plugin-core-server.pluginmanifest.extrapublicdirs.md) | <code>string[]</code> | Specifies directory names that can be imported by other ui-plugins built using the same instance of the @<!-- -->kbn/optimizer. A temporary measure we plan to replace with better mechanisms for sharing static code between plugins |
 |  [id](./kibana-plugin-core-server.pluginmanifest.id.md) | <code>PluginName</code> | Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract. Other plugins leverage it to access plugin API, navigate to the plugin, etc. |
 |  [kibanaVersion](./kibana-plugin-core-server.pluginmanifest.kibanaversion.md) | <code>string</code> | The version of Kibana the plugin is compatible with, defaults to "version". |
 |  [optionalPlugins](./kibana-plugin-core-server.pluginmanifest.optionalplugins.md) | <code>readonly PluginName[]</code> | An optional list of the other plugins that if installed and enabled \*\*may be\*\* leveraged by this plugin for some additional functionality but otherwise are not required for this plugin to work properly. |
