@@ -35,17 +35,18 @@ import { ManagementPageView } from '../../../components/management_page_view';
 import { getManagementUrl } from '../../..';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 
-const HostLink = memo<{
+const HostListNavLink = memo<{
   name: string;
   href: string;
   route: string;
-}>(({ name, href, route }) => {
+  dataTestSubj: string;
+}>(({ name, href, route, dataTestSubj }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
-      data-test-subj="hostnameCellLink"
+      data-test-subj={dataTestSubj}
       className="eui-textTruncate"
       href={href}
       onClick={clickHandler}
@@ -54,49 +55,7 @@ const HostLink = memo<{
     </EuiLink>
   );
 });
-HostLink.displayName = 'HostLink';
-
-const PolicyDetailsLink = memo<{
-  name: string;
-  href: string;
-  route: string;
-}>(({ name, href, route }) => {
-  const clickHandler = useNavigateByRouterEventHandler(route);
-
-  return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      data-test-subj="policyNameCellLink"
-      className="eui-textTruncate"
-      href={href}
-      onClick={clickHandler}
-    >
-      {name}
-    </EuiLink>
-  );
-});
-PolicyDetailsLink.displayName = 'PolicyDetailsLink';
-
-const PolicyResponseLink = memo<{
-  name: string;
-  href: string;
-  route: string;
-}>(({ name, href, route }) => {
-  const clickHandler = useNavigateByRouterEventHandler(route);
-
-  return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      data-test-subj="policyStatusCellLink"
-      className="eui-textTruncate"
-      href={href}
-      onClick={clickHandler}
-    >
-      {name}
-    </EuiLink>
-  );
-});
-PolicyResponseLink.displayName = 'PolicyResponseLink';
+HostListNavLink.displayName = 'HostListNavLink';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const HostList = () => {
@@ -162,7 +121,14 @@ export const HostList = () => {
             name: 'endpointDetails',
             selected_host: id,
           });
-          return <HostLink name={hostname} href={toRouteUrl} route={toRoutePath} />;
+          return (
+            <HostListNavLink
+              name={hostname}
+              href={toRouteUrl}
+              route={toRoutePath}
+              dataTestSubj="hostnameCellLink"
+            />
+          );
         },
       },
       {
@@ -204,7 +170,14 @@ export const HostList = () => {
             name: 'policyDetails',
             policyId: policy.id,
           });
-          return <PolicyDetailsLink name={policy.name} href={toRouteUrl} route={toRoutePath} />;
+          return (
+            <HostListNavLink
+              name={policy.name}
+              href={toRouteUrl}
+              route={toRoutePath}
+              dataTestSubj="policyNameCellLink"
+            />
+          );
         },
       },
       {
@@ -227,11 +200,13 @@ export const HostList = () => {
             <EuiHealth
               color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
               className="eui-textTruncate"
+              data-test-subj="rowPolicyStatus"
             >
-              <PolicyResponseLink
+              <HostListNavLink
                 name={POLICY_STATUS_TO_TEXT[policy.status]}
                 href={toRouteUrl}
                 route={toRoutePath}
+                dataTestSubj="policyStatusCellLink"
               />
             </EuiHealth>
           );

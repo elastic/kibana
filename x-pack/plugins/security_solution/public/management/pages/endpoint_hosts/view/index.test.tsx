@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppAction } from '../../../../common/store/actions';
+import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 
 describe('when on the hosts page', () => {
   const docGenerator = new EndpointDocGenerator();
@@ -47,14 +48,22 @@ describe('when on the hosts page', () => {
       });
     });
     describe('when list data loads', () => {
+      const generatedPolicyStatuses: Array<
+        HostInfo['metadata']['endpoint']['policy']['applied']['status']
+      > = [];
+      let firstPolicyID: string;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const hostListData = mockHostResultList({ total: 3 });
+          firstPolicyID = hostListData.hosts[0].metadata.endpoint.policy.applied.id;
           [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE].forEach((status, index) => {
             hostListData.hosts[index] = {
               metadata: hostListData.hosts[index].metadata,
               host_status: status,
             };
+          });
+          hostListData.hosts.forEach((item, index) => {
+            generatedPolicyStatuses[index] = item.metadata.endpoint.policy.applied.status;
           });
           const action: AppAction = {
             type: 'serverReturnedHostList',
@@ -90,6 +99,29 @@ describe('when on the hosts page', () => {
         expect(
           hostStatuses[2].querySelector('[data-euiicon-type][color="subdued"]')
         ).not.toBeNull();
+      });
+
+      it('should display correct policy status', async () => {
+        const renderResult = render();
+        const policyStatuses = await renderResult.findAllByTestId('rowPolicyStatus');
+
+        policyStatuses.forEach((status, index) => {
+          expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
+          expect(
+            status.querySelector(
+              `[data-euiicon-type][color=${
+                POLICY_STATUS_TO_HEALTH_COLOR[generatedPolicyStatuses[index]]
+              }]`
+            )
+          ).not.toBeNull();
+        });
+      });
+
+      it('should display policy name as a link', async () => {
+        const renderResult = render();
+        const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
+        expect(firstPolicyName).not.toBeNull();
+        expect(firstPolicyName.getAttribute('href')).toContain(`policy/${firstPolicyID}`);
       });
 
       describe('when the user clicks the first hostname in the table', () => {
@@ -196,6 +228,26 @@ describe('when on the hosts page', () => {
       return renderResult.findByTestId('hostDetailsFlyout').then((flyout) => {
         expect(flyout).not.toBeNull();
       });
+    });
+    it('should display policy name value as a link', async () => {
+      const renderResult = render();
+      const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
+      expect(policyDetailsLink).not.toBeNull();
+      expect(policyDetailsLink.getAttribute('href')).toEqual(
+        `#/management/policy/${hostDetails.metadata.endpoint.policy.applied.id}`
+      );
+    });
+    it('should update the URL when policy name link is clicked', async () => {
+      const renderResult = render();
+      const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
+      const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(policyDetailsLink);
+      });
+      const changedUrlAction = await userChangedUrlChecker;
+      expect(changedUrlAction.payload.pathname).toEqual(
+        `/management/policy/${hostDetails.metadata.endpoint.policy.applied.id}`
+      );
     });
     it('should display policy status value as a link', async () => {
       const renderResult = render();
