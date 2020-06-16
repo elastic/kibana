@@ -20,4 +20,3 @@
 import './accessibility';
 import './modules';
 import './settings';
-import './styles';
