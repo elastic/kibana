@@ -252,29 +252,27 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                   </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                  <EuiFormRow label="&#8203;">
-                    <div className="panel-sub-title">
-                      {viewByLoadedForTimeFormatted && (
-                        <FormattedMessage
-                          id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
-                          defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
-                          values={{ viewByLoadedForTimeFormatted }}
-                        />
-                      )}
-                      {viewByLoadedForTimeFormatted === undefined && (
-                        <FormattedMessage
-                          id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
-                          defaultMessage="(Sorted by max anomaly score)"
-                        />
-                      )}
-                      {filterActive === true && viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL && (
-                        <FormattedMessage
-                          id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
-                          defaultMessage="(Job score across all influencers)"
-                        />
-                      )}
-                    </div>
-                  </EuiFormRow>
+                  <div className="panel-sub-title">
+                    {viewByLoadedForTimeFormatted && (
+                      <FormattedMessage
+                        id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
+                        defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
+                        values={{ viewByLoadedForTimeFormatted }}
+                      />
+                    )}
+                    {viewByLoadedForTimeFormatted === undefined && (
+                      <FormattedMessage
+                        id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
+                        defaultMessage="(Sorted by max anomaly score)"
+                      />
+                    )}
+                    {filterActive === true && viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL && (
+                      <FormattedMessage
+                        id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
+                        defaultMessage="(Job score across all influencers)"
+                      />
+                    )}
+                  </div>
                 </EuiFlexItem>
               </>
             )}
