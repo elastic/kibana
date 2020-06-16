@@ -45,7 +45,7 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType } from '../common';
+import { IngestManagerConfigType, NewDatasource } from '../common';
 import {
   appContextService,
   licenseService,
@@ -91,11 +91,24 @@ const allSavedObjectTypes = [
 ];
 
 /**
+ * Callbacks supported by the Ingest plugin
+ */
+export type ExternalCallbacks = [
+  'datasourceCreate',
+  (newDatasource: NewDatasource) => Promise<NewDatasource>
+];
+
+/**
  * Describes public IngestManager plugin contract returned at the `startup` stage.
  */
 export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   agentService: AgentService;
+  /**
+   * Register callbacks for inclusion in ingest API processing
+   * @param args
+   */
+  register: (...args: ExternalCallbacks) => void;
 }
 
 export class IngestManagerPlugin
@@ -115,12 +128,14 @@ export class IngestManagerPlugin
   private isProductionMode: boolean;
   private kibanaVersion: string;
   private httpSetup: HttpServiceSetup | undefined;
+  private externalCallbacks: Map<ExternalCallbacks[0], Set<ExternalCallbacks[1]>>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.logger = this.initializerContext.logger.get();
+    this.externalCallbacks = new Map();
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
@@ -220,11 +235,22 @@ export class IngestManagerPlugin
       agentService: {
         getAgentStatusById,
       },
+      register: (...args: ExternalCallbacks) => {
+        return this.registerCallback(...args);
+      },
     };
   }
 
   public async stop() {
     appContextService.stop();
     licenseService.stop();
+    this.externalCallbacks.clear();
+  }
+
+  private registerCallback(type: ExternalCallbacks[0], callback: ExternalCallbacks[1]) {
+    if (!this.externalCallbacks.has(type)) {
+      this.externalCallbacks.set(type, new Set());
+    }
+    this.externalCallbacks.get(type)!.add(callback);
   }
 }
