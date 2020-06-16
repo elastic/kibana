@@ -29,7 +29,7 @@ class KibanaURL {
   public readonly appPath: string;
 
   constructor(path: string) {
-    const match = path.match(/^.*\/app\/([^\/\/#]+)(.+)$/);
+    const match = path.match(/^.*\/app\/([^\/#]+)(.+)$/);
 
     if (!match) {
       throw new Error('Unexpected Discover URL path.');
