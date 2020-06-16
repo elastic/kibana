@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { pageObjects } from '../../../page_objects';
-import { services } from '../../../services';
+import { pageObjects } from '../functional/page_objects';
+import { services } from '../functional/services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../../../config.js'));
