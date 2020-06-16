@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorStatusBar component renders 1`] = `
+Array [
+  <div>
+    <div
+      class="euiText euiText--medium"
+    >
+      <h2>
+        Up in 2 Locations
+      </h2>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--l"
+  />,
+  .c0.c0.c0 {
+  width: 35%;
+}
+
+.c1.c1.c1 {
+  width: 65%;
+  overflow-wrap: anywhere;
+}
+
+<dl
+    class="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+    style="max-width:450px"
+  >
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Overall availability
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+      data-test-subj="uptimeOverallAvailability"
+    >
+      0.00 %
+    </dd>
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Url
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+    >
+      <a
+        aria-label="Monitor URL link"
+        class="euiLink euiLink--primary"
+        href=""
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+         
+        <div
+          data-euiicon-type="popout"
+        />
+      </a>
+    </dd>
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Monitor ID
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+      data-test-subj="monitor-page-title"
+    />
+  </dl>,
+]
+`;
