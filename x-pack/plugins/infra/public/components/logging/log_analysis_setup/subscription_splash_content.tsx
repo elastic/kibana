@@ -23,11 +23,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled } from '../../../../../observability/public';
+import { useTrialStatus, TrialStatusLoadState } from '../../../hooks/use_trial_state';
 
 export const SubscriptionSplashContent: React.FC = () => {
   const { services } = useKibana();
+  const { loadState, isTrialAvailable } = useTrialStatus();
 
-  const canStartTrial = true; // FIXME
+  const canStartTrial = isTrialAvailable && loadState === TrialStatusLoadState.Ok; // FIXME
 
   let title;
   let description;
