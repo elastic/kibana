@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Processor {
-  [key: string]: {
-    [key: string]: unknown;
-  };
+export interface ESProcessorConfig {
+  on_failure?: Processor[];
+  ignore_failure?: boolean;
+  if?: string;
+  tag?: string;
+  [key: string]: any;
+}
+
+export interface Processor {
+  [typeName: string]: ESProcessorConfig;
 }
 
 export interface Pipeline {
