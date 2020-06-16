@@ -62,7 +62,13 @@ export async function getServiceAnomalies(
     return [];
   }
 
-  const { jobs: apmMlJobs } = await ml.anomalyDetectors.jobs('apm');
+  let apmMlJobs: AnomalyDetectionJob[];
+  try {
+    const { jobs } = await ml.anomalyDetectors.jobs(APM_ML_JOB_GROUP_NAME);
+    apmMlJobs = jobs;
+  } catch (error) {
+    return [];
+  }
   const apmMlJobCategories = apmMlJobs
     .map((job) => getApmMlJobCategory(job, serviceNames))
     .filter(
