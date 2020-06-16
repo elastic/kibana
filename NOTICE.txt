@@ -22,6 +22,11 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
 For details,  see https://github.com/flot/flot/pull/1328
 
 ---
+This module was heavily inspired by the externals plugin that ships with webpack@97d58d31
+MIT License http://www.opensource.org/licenses/mit-license.php
+Author Tobias Koppers @sokra
+
+---
 This product has relied on ASTExplorer that is licensed under MIT.
 
 ---

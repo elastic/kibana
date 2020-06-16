@@ -89,7 +89,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           {...reactRouterNavigate(history, '/create')}
         >
           {i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
-            defaultMessage: 'Create a pipeline here',
+            defaultMessage: 'Create a pipeline',
           })}
         </EuiButton>,
       ],

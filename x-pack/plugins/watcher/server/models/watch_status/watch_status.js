@@ -43,6 +43,7 @@ export class WatchStatus {
         id,
         actionStatusJson,
         errors: this.watchErrors.actions && this.watchErrors.actions[id],
+        lastCheckedRawFormat: get(this.watchStatusJson, 'last_checked'),
       };
       return ActionStatus.fromUpstreamJson(json);
     });

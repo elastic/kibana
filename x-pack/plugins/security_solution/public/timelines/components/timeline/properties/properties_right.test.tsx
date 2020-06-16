@@ -79,7 +79,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: true,
                 },
               },
@@ -130,7 +130,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: true,
                 },
               },
@@ -159,7 +159,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: true,
                 },
               },
@@ -190,7 +190,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: false,
                 },
               },
@@ -237,7 +237,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: false,
                 },
               },
@@ -266,7 +266,7 @@ describe('Properties Right', () => {
           services: {
             application: {
               capabilities: {
-                securitySolution: {
+                siem: {
                   crud: false,
                 },
               },
