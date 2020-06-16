@@ -12,10 +12,14 @@ const EXPLORE_RAW_DATA_ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const drilldowns = getService('dashboardDrilldownsManage');
-  const { dashboard, common } = getPageObjects(['dashboard', 'common']);
+  const { dashboard, discover, common, timePicker } = getPageObjects([
+    'dashboard',
+    'discover',
+    'common',
+    'timePicker',
+  ]);
   const panelActions = getService('dashboardPanelActions');
   const panelActionsTimeRange = getService('dashboardPanelTimeRange');
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
@@ -37,26 +41,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('is a link <a> element', async () => {
-      const dataAttributeSelector = `[data-test-subj=${EXPLORE_RAW_DATA_ACTION_TEST_SUBJ}]`;
-      const aTag = 'a';
-      const exists = await find.existsByCssSelector(`${aTag}${dataAttributeSelector}`);
+      const actionElement = await testSubjects.find(EXPLORE_RAW_DATA_ACTION_TEST_SUBJ);
+      const tag = await actionElement.getTagName();
 
-      expect(aTag).to.be('a');
-      expect(exists).to.be(true);
+      expect(tag).to.be('A');
     });
 
-    it('navigates to Discover app on click', async () => {
+    it('navigates to Discover app to index pattern of the panel on action click', async () => {
       await testSubjects.clickWhenNotDisabled(EXPLORE_RAW_DATA_ACTION_TEST_SUBJ);
-      const el = await testSubjects.find('breadcrumbs');
-      await el.findByCssSelector('[title=Discover]');
-    });
+      await discover.waitForDiscoverAppOnScreen();
 
-    it('navigates to index pattern of the panel', async () => {
       const el = await testSubjects.find('indexPattern-switch-link');
       const text = await el.getVisibleText();
 
       expect(text).to.be('logstash-*');
-      expect(text).not.to.be('logstash*');
     });
 
     it('carries over panel time range', async () => {
@@ -74,9 +72,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await panelActions.openContextMenu();
       await testSubjects.clickWhenNotDisabled(EXPLORE_RAW_DATA_ACTION_TEST_SUBJ);
+      await discover.waitForDiscoverAppOnScreen();
 
-      const button = await testSubjects.find('superDatePickerShowDatesButton');
-      const text = await button.getVisibleText();
+      const text = await timePicker.getShowDatesButtonText();
       const lowercaseText = text.toLowerCase();
 
       expect(lowercaseText.includes('last 90 days')).to.be(true);

@@ -227,6 +227,12 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       };
     }
 
+    public async getShowDatesButtonText() {
+      const button = await testSubjects.find('superDatePickerShowDatesButton');
+      const text = await button.getVisibleText();
+      return text;
+    }
+
     public async getTimeDurationForSharing() {
       return await testSubjects.getAttribute(
         'dataSharedTimefilterDuration',
