@@ -149,6 +149,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       await this.ensureNewVisualizationDialogIsShowing();
       await PageObjects.visualize.clickMetric();
       await find.clickByCssSelector('li.euiListGroupItem:nth-of-type(2)');
+      await testSubjects.exists('visualizeSaveButton');
       await testSubjects.click('visualizeSaveButton');
     }
 
