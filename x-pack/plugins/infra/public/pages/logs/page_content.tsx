@@ -92,9 +92,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href={kibana.services?.application?.getUrlForApp(
-                '/app/home#/tutorial_directory/logging'
-              )}
+              href={kibana.services?.application?.getUrlForApp('/home#/tutorial_directory/logging')}
               size="s"
               color="primary"
               iconType="plusInCircle"

@@ -111,7 +111,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         href={kibana.services?.application?.getUrlForApp(
-                          '/app/home#/tutorial_directory/metrics'
+                          '/home#/tutorial_directory/metrics'
                         )}
                         size="s"
                         color="primary"

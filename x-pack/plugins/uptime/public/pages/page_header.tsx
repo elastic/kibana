@@ -68,7 +68,7 @@ export const PageHeader = React.memo(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            href={kibana.services?.application?.getUrlForApp('/app/home#/tutorial/uptimeMonitors')}
+            href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
             color="primary"
             iconType="plusInCircle"
           >
