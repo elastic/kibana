@@ -96,6 +96,7 @@ export const useDataGrid = (
 
   return {
     chartsVisible,
+    chartsButtonVisible: true,
     columnsWithCharts: columns.map((c) => {
       const chartData = columnCharts.find((cd) => cd.id === c.id);
 

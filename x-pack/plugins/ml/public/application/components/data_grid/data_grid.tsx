@@ -58,6 +58,7 @@ export const DataGrid: FC<Props> = memo(
   (props) => {
     const {
       chartsVisible,
+      chartsButtonVisible,
       columnsWithCharts,
       dataTestSubj,
       errorMessage,
@@ -189,21 +190,25 @@ export const DataGrid: FC<Props> = memo(
             sorting={{ columns: sortingColumns, onSort }}
             toolbarVisibility={{
               ...euiDataGridToolbarSettings,
-              additionalControls: (
-                <EuiButtonEmpty
-                  className={`euiDataGrid__controlBtn${
-                    chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
-                  }`}
-                  size="xs"
-                  iconType="visBarVertical"
-                  color="text"
-                  onClick={toggleChartVisibility}
-                >
-                  {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
-                    defaultMessage: 'Histogram Charts',
-                  })}
-                </EuiButtonEmpty>
-              ),
+              ...(chartsButtonVisible
+                ? {
+                    additionalControls: (
+                      <EuiButtonEmpty
+                        className={`euiDataGrid__controlBtn${
+                          chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
+                        }`}
+                        size="xs"
+                        iconType="visBarVertical"
+                        color="text"
+                        onClick={toggleChartVisibility}
+                      >
+                        {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
+                          defaultMessage: 'Histogram Charts',
+                        })}
+                      </EuiButtonEmpty>
+                    ),
+                  }
+                : {}),
             }}
             pagination={{
               ...pagination,

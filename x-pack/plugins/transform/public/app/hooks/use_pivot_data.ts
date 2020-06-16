@@ -253,6 +253,7 @@ export const usePivotData = (
 
   return {
     ...dataGrid,
+    chartsButtonVisible: false,
     renderCellValue,
   };
 };
