@@ -203,7 +203,7 @@ export class IngestManagerPlugin
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
   ) {
-    appContextService.start({
+    await appContextService.start({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
       config$: this.config$,
