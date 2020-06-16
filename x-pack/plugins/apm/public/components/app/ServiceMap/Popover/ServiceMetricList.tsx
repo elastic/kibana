@@ -45,7 +45,7 @@ interface ServiceMetricListProps extends ServiceNodeMetrics {
 export function ServiceMetricList({
   avgTransactionDuration,
   avgRequestsPerMinute,
-  avgErrorsPerMinute,
+  avgErrorRate,
   avgCpuUsage,
   avgMemoryUsage,
   isLoading,
@@ -74,13 +74,10 @@ export function ServiceMetricList({
         : null,
     },
     {
-      title: i18n.translate(
-        'xpack.apm.serviceMap.avgErrorsPerMinutePopoverMetric',
-        {
-          defaultMessage: 'Errors per minute (avg.)',
-        }
-      ),
-      description: avgErrorsPerMinute?.toFixed(2),
+      title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverMetric', {
+        defaultMessage: 'Error rate (avg.)',
+      }),
+      description: isNumber(avgErrorRate) ? asPercent(avgErrorRate, 1) : null,
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverMetric', {

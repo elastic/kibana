@@ -49,7 +49,7 @@ export interface ServiceNodeMetrics {
   avgCpuUsage: number | null;
   avgTransactionDuration: number | null;
   avgRequestsPerMinute: number | null;
-  avgErrorsPerMinute: number | null;
+  avgErrorRate: number | null;
 }
 
 export function isValidPlatinumLicense(license: ILicense) {

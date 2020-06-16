@@ -70,7 +70,7 @@ export const ErrorRateChart = () => {
           {
             color: theme.euiColorVis7,
             data: [],
-            legendValue: tickFormatY(mean(errorRates.map((rate) => rate.y))),
+            legendValue: tickFormatY(errorRateData?.average),
             legendClickDisabled: true,
             title: i18n.translate('xpack.apm.errorRateChart.avgLabel', {
               defaultMessage: 'Avg.',
