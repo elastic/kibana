@@ -79,6 +79,14 @@ async function callExecutor(
   criteria: Criterion[] = []
 ) {
   services.callCluster.mockImplementationOnce(async (..._) => ({
+    _shards: {
+      total: 1,
+      successful: 1,
+      skipped: 0,
+      failed: 0,
+    },
+    timed_out: false,
+    took: 123456789,
     hits: {
       total: {
         value,
@@ -140,12 +148,30 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must: [{ term: { foo: { value: 'bar' } } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+              {
+                term: {
+                  foo: {
+                    value: 'bar',
+                  },
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
 
@@ -156,12 +182,32 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must_not: [{ term: { foo: { value: 'bar' } } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+            ],
+            must_not: [
+              {
+                term: {
+                  foo: {
+                    value: 'bar',
+                  },
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
 
@@ -172,12 +218,28 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must: [{ match: { foo: 'bar' } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+              {
+                match: {
+                  foo: 'bar',
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
 
@@ -188,12 +250,30 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must_not: [{ match: { foo: 'bar' } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+            ],
+            must_not: [
+              {
+                match: {
+                  foo: 'bar',
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
 
@@ -204,12 +284,28 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must: [{ match_phrase: { foo: 'bar' } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+              {
+                match_phrase: {
+                  foo: 'bar',
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
 
@@ -220,12 +316,30 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must_not: [{ match_phrase: { foo: 'bar' } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+            ],
+            must_not: [
+              {
+                match_phrase: {
+                  foo: 'bar',
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
 
@@ -236,12 +350,30 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must: [{ range: { foo: { gt: 1 } } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+              {
+                range: {
+                  foo: {
+                    gt: 1,
+                  },
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
 
@@ -252,12 +384,30 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must: [{ range: { foo: { gte: 1 } } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+              {
+                range: {
+                  foo: {
+                    gte: 1,
+                  },
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
 
@@ -268,12 +418,30 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must: [{ range: { foo: { lt: 1 } } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+              {
+                range: {
+                  foo: {
+                    lt: 1,
+                  },
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
 
@@ -284,12 +452,30 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must: [{ range: { foo: { lte: 1 } } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+              {
+                range: {
+                  foo: {
+                    lte: 1,
+                  },
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
   });
@@ -308,12 +494,37 @@ describe('Ungrouped alerts', () => {
       );
 
       const query = services.callCluster.mock.calls[0][1]!;
+
       expect(query.body).toMatchObject({
+        track_total_hits: true,
         query: {
           bool: {
-            must: [{ term: { foo: { value: 'bar' } } }, { range: { 'http.status': { lt: 400 } } }],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+              {
+                term: {
+                  foo: {
+                    value: 'bar',
+                  },
+                },
+              },
+              {
+                range: {
+                  'http.status': {
+                    lt: 400,
+                  },
+                },
+              },
+            ],
           },
         },
+        size: 0,
       });
     });
   });
