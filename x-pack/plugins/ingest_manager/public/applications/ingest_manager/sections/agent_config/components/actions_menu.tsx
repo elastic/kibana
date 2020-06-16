@@ -11,69 +11,92 @@ import { useCapabilities } from '../../../hooks';
 import { ContextMenuActions } from '../../../components';
 import { AgentEnrollmentFlyout } from '../../fleet/components';
 import { ConfigYamlFlyout } from './config_yaml_flyout';
+import { AgentConfigCopyProvider } from './config_copy_provider';
 
-export const AgentConfigActionMenu = memo<{ config: AgentConfig; fullButton?: boolean }>(
-  ({ config, fullButton = false }) => {
-    const hasWriteCapabilities = useCapabilities().write;
-    const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
-    const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
-    return (
-      <>
-        {isYamlFlyoutOpen ? (
-          <EuiPortal>
-            <ConfigYamlFlyout configId={config.id} onClose={() => setIsYamlFlyoutOpen(false)} />
-          </EuiPortal>
-        ) : null}
-        {isEnrollmentFlyoutOpen && (
-          <EuiPortal>
-            <AgentEnrollmentFlyout
-              agentConfigs={[config]}
-              onClose={() => setIsEnrollmentFlyoutOpen(false)}
+export const AgentConfigActionMenu = memo<{
+  config: AgentConfig;
+  onCopySuccess?: (newAgentConfig: AgentConfig) => void;
+  fullButton?: boolean;
+}>(({ config, onCopySuccess, fullButton = false }) => {
+  const hasWriteCapabilities = useCapabilities().write;
+  const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
+  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
+
+  return (
+    <AgentConfigCopyProvider>
+      {(copyAgentConfigPrompt) => {
+        return (
+          <>
+            {isYamlFlyoutOpen ? (
+              <EuiPortal>
+                <ConfigYamlFlyout configId={config.id} onClose={() => setIsYamlFlyoutOpen(false)} />
+              </EuiPortal>
+            ) : null}
+            {isEnrollmentFlyoutOpen && (
+              <EuiPortal>
+                <AgentEnrollmentFlyout
+                  agentConfigs={[config]}
+                  onClose={() => setIsEnrollmentFlyoutOpen(false)}
+                />
+              </EuiPortal>
+            )}
+            <ContextMenuActions
+              button={
+                fullButton
+                  ? {
+                      props: {
+                        iconType: 'arrowDown',
+                        iconSide: 'right',
+                      },
+                      children: (
+                        <FormattedMessage
+                          id="xpack.ingestManager.agentConfigActionMenu.buttonText"
+                          defaultMessage="Actions"
+                        />
+                      ),
+                    }
+                  : undefined
+              }
+              items={[
+                <EuiContextMenuItem
+                  disabled={!hasWriteCapabilities}
+                  icon="plusInCircle"
+                  onClick={() => setIsEnrollmentFlyoutOpen(true)}
+                  key="enrollAgents"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigActionMenu.enrollAgentActionText"
+                    defaultMessage="Enroll agent"
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="inspect"
+                  onClick={() => setIsYamlFlyoutOpen(!isYamlFlyoutOpen)}
+                  key="viewConfig"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigActionMenu.viewConfigText"
+                    defaultMessage="View config"
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  disabled={!hasWriteCapabilities}
+                  icon="copy"
+                  onClick={() => {
+                    copyAgentConfigPrompt(config, onCopySuccess);
+                  }}
+                  key="copyConfig"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigActionMenu.copyConfigActionText"
+                    defaultMessage="Copy config"
+                  />
+                </EuiContextMenuItem>,
+              ]}
             />
-          </EuiPortal>
-        )}
-        <ContextMenuActions
-          button={
-            fullButton
-              ? {
-                  props: {
-                    iconType: 'arrowDown',
-                    iconSide: 'right',
-                  },
-                  children: (
-                    <FormattedMessage
-                      id="xpack.ingestManager.agentConfigActionMenu.buttonText"
-                      defaultMessage="Actions"
-                    />
-                  ),
-                }
-              : undefined
-          }
-          items={[
-            <EuiContextMenuItem
-              disabled={!hasWriteCapabilities}
-              icon="plusInCircle"
-              onClick={() => setIsEnrollmentFlyoutOpen(true)}
-              key="enrollAgents"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigActionMenu.enrollAgentActionText"
-                defaultMessage="Enroll agent"
-              />
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              icon="inspect"
-              onClick={() => setIsYamlFlyoutOpen(!isYamlFlyoutOpen)}
-              key="viewConfig"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigActionMenu.viewConfigText"
-                defaultMessage="View config"
-              />
-            </EuiContextMenuItem>,
-          ]}
-        />
-      </>
-    );
-  }
-);
+          </>
+        );
+      }}
+    </AgentConfigCopyProvider>
+  );
+});
