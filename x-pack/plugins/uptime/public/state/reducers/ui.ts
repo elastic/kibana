@@ -14,12 +14,9 @@ import {
   UiPayload,
   setAlertFlyoutType,
   setAlertFlyoutVisible,
-  setAutorefreshIsPaused,
   setSearchTextAction,
   setDateRange,
   setUiState,
-  setStatusFilter,
-  setCurrentPagination,
 } from '../actions';
 
 const {
@@ -101,24 +98,9 @@ export const uiReducer = handleActions<UiState, UiPayload>(
       dateRange: action.payload,
     }),
 
-    [String(setAutorefreshIsPaused)]: (state, action: Action<boolean>) => ({
-      ...state,
-      autorefreshIsPaused: action.payload,
-    }),
-
     [String(setUiState)]: (state, action: Action<Partial<UiState>>) => ({
       ...state,
       ...action.payload,
-    }),
-
-    [String(setStatusFilter)]: (state, action: Action<string>) => ({
-      ...state,
-      statusFilter: action.payload,
-    }),
-
-    [String(setCurrentPagination)]: (state, action: Action<string>) => ({
-      ...state,
-      currentMonitorListPage: action.payload,
     }),
   },
   initialState
