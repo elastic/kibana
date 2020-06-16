@@ -34,7 +34,7 @@ const NoCasesComponent = () => {
         href={formatUrl(getCreateCaseUrl())}
       >{` ${i18n.START_A_NEW_CASE}`}</LinkAnchor>
     ),
-    [goToCreateCase]
+    [formatUrl, goToCreateCase]
   );
 
   return (
