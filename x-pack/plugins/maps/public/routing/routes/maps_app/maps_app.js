@@ -369,7 +369,7 @@ export const MapsAppView = class extends React.Component {
     const { refreshConfig } = this.state;
     const newRefreshConfig = {
       isPaused,
-      interval: refreshInterval ? refreshInterval : refreshConfig.interval,
+      interval: isNaN(refreshInterval) ? refreshConfig.interval : refreshInterval,
     };
     this.setState({ refreshConfig: newRefreshConfig }, this.syncAppAndGlobalState);
     this.props.setRefreshConfig(newRefreshConfig);
