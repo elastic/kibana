@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 import {
   EuiPage,
@@ -15,15 +15,13 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiScreenReaderOnly,
-  EuiCallOut,
 } from '@elastic/eui';
 import { NodeDetailStatus } from '../node_detail_status';
 import { Logs } from '../../logs/';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AlertSeverity } from '../../../../common/enums';
-import { replaceTokens } from '../../../alerts/replace_tokens';
+import { AlertsCallout } from '../../../alerts/callout';
 
 export const Node = ({
   nodeSummary,
@@ -35,14 +33,10 @@ export const Node = ({
   scope,
   ...props
 }) => {
-  let warningCallout = null;
-  let dangerCallout = null;
   if (alerts) {
-    const warnings = [];
-    const dangers = [];
     for (const alertTypeId of Object.keys(alerts)) {
       const alertInstance = alerts[alertTypeId];
-      for (const { meta, state } of alertInstance.states) {
+      for (const { meta } of alertInstance.states) {
         const metricList = get(meta, 'metrics', []);
         for (const metric of metricList) {
           if (metrics[metric]) {
@@ -50,42 +44,7 @@ export const Node = ({
             metrics[metric].alerts[alertTypeId] = alertInstance;
           }
         }
-        if (state.ui.severity === AlertSeverity.Warning) {
-          warnings.push(state);
-        } else if (state.ui.severity === AlertSeverity.Danger) {
-          dangers.push(state);
-        }
       }
-    }
-
-    if (warnings.length) {
-      warningCallout = (
-        <Fragment>
-          <EuiCallOut title="Warnings" color="warning" iconType="alert">
-            <ul>
-              {warnings.map((state, index) => {
-                return <li key={index}>{replaceTokens(state.ui.message)}</li>;
-              })}
-            </ul>
-          </EuiCallOut>
-          <EuiSpacer />
-        </Fragment>
-      );
-    }
-
-    if (dangers.length) {
-      dangerCallout = (
-        <Fragment>
-          <EuiCallOut title="Dangers" color="danger" iconType="alert">
-            <ul>
-              {dangers.map((state, index) => {
-                return <li key={index}>{replaceTokens(state.ui.message)}</li>;
-              })}
-            </ul>
-          </EuiCallOut>
-          <EuiSpacer />
-        </Fragment>
-      );
     }
   }
 
@@ -114,8 +73,7 @@ export const Node = ({
           <NodeDetailStatus stats={nodeSummary} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
-        {dangerCallout}
-        {warningCallout}
+        <AlertsCallout alerts={alerts} />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (

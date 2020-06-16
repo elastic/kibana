@@ -9,6 +9,9 @@ import {
   NodesChangedAlert,
   ClusterHealthAlert,
   LicenseExpirationAlert,
+  LogstashVersionMismatchAlert,
+  KibanaVersionMismatchAlert,
+  ElasticsearchVersionMismatchAlert,
   BaseAlert,
 } from './';
 import {
@@ -16,6 +19,9 @@ import {
   ALERT_LICENSE_EXPIRATION,
   ALERT_CPU_USAGE,
   ALERT_NODES_CHANGED,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerts/server';
 
@@ -24,6 +30,9 @@ const BY_TYPE = {
   [ALERT_LICENSE_EXPIRATION]: LicenseExpirationAlert,
   [ALERT_CPU_USAGE]: CpuUsageAlert,
   [ALERT_NODES_CHANGED]: NodesChangedAlert,
+  [ALERT_LOGSTASH_VERSION_MISMATCH]: LogstashVersionMismatchAlert,
+  [ALERT_KIBANA_VERSION_MISMATCH]: KibanaVersionMismatchAlert,
+  [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: ElasticsearchVersionMismatchAlert,
 };
 
 export class AlertsFactory {

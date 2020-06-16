@@ -80,13 +80,7 @@ export class LicenseExpirationAlert extends BaseAlert {
     }
     const [licenses, legacyAlerts] = await Promise.all([
       await fetchLicenses(callCluster, clusters, esIndexPattern),
-      await fetchLegacyAlerts(
-        callCluster,
-        clusters,
-        alertIndexPattern,
-        WATCH_NAME,
-        this.config.ui.max_bucket_size
-      ),
+      await fetchLegacyAlerts(callCluster, clusters, alertIndexPattern, WATCH_NAME),
     ]);
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
       const license = licenses.find(

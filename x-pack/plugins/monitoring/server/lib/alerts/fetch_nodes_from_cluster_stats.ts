@@ -33,6 +33,7 @@ export async function fetchNodesFromClusterStats(
       const params = {
         index,
         filterPath: [
+          'hits.hits._source.cluster_state.nodes_hash',
           'hits.hits._source.cluster_state.nodes',
           'hits.hits._source.cluster_uuid',
           'hits.hits._index',

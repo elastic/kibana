@@ -49,6 +49,10 @@ export interface AlertNodesChangedState extends AlertState {
   node: AlertClusterStatsNode;
 }
 
+export interface AlertVersionMismatchState extends AlertState {
+  versions: AlertVersions;
+}
+
 export interface AlertUiState {
   isFiring: boolean;
   severity: AlertSeverity;
@@ -146,4 +150,10 @@ export interface LegacyAlert {
     severity: number;
     cluster_uuid: string;
   };
+}
+
+export interface AlertVersions {
+  clusterUuid: string;
+  ccs: string | null;
+  versions: string[];
 }

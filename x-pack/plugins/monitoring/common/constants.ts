@@ -238,6 +238,9 @@ export const ALERT_LICENSE_EXPIRATION = `${ALERT_PREFIX}alert_license_expiration
 export const ALERT_CLUSTER_HEALTH = `${ALERT_PREFIX}alert_cluster_health`;
 export const ALERT_CPU_USAGE = `${ALERT_PREFIX}alert_cpu_usage`;
 export const ALERT_NODES_CHANGED = `${ALERT_PREFIX}alert_nodes_changed`;
+export const ALERT_ELASTICSEARCH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_elasticsearch_version_mismatch`;
+export const ALERT_KIBANA_VERSION_MISMATCH = `${ALERT_PREFIX}alert_kibana_version_mismatch`;
+export const ALERT_LOGSTASH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_logstash_version_mismatch`;
 
 /**
  * A listing of all alert types
@@ -247,6 +250,9 @@ export const ALERTS = [
   ALERT_CLUSTER_HEALTH,
   ALERT_CPU_USAGE,
   ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
 ];
 
 /**

@@ -32,7 +32,7 @@ export const AlertsList: React.FC<Props> = (props: Props) => {
     [AlertSeverity.Success]: [] as CommonAlertStatus[],
   };
 
-  for (const alert of Object.values(alerts)) {
+  for (const alert of Object.values(alerts).filter(Boolean)) {
     for (const alertState of alert.states) {
       const state = alertState.state as AlertState;
       byType[state.ui.severity].push(alert);

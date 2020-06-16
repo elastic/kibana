@@ -11,7 +11,12 @@ import { getPageData } from './get_page_data';
 import template from './index.html';
 import { Listing } from '../../../components/logstash/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { CODE_PATH_LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
+import {
+  CODE_PATH_LOGSTASH,
+  LOGSTASH_SYSTEM_ID,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+} from '../../../../common/constants';
+import { AlertRenderer } from '../../../alerts/renderer';
 
 uiRoutes.when('/logstash/nodes', {
   template,
@@ -45,14 +50,21 @@ uiRoutes.when('/logstash/nodes', {
               render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
                 <Fragment>
                   {flyoutComponent}
-                  <Listing
-                    data={data.nodes}
-                    setupMode={setupMode}
-                    stats={data.clusterStatus}
-                    sorting={this.sorting}
-                    pagination={this.pagination}
-                    onTableChange={this.onTableChange}
+                  <AlertRenderer
+                    alertTypeIds={[ALERT_LOGSTASH_VERSION_MISMATCH]}
+                    render={({ alerts }) => (
+                      <Listing
+                        data={data.nodes}
+                        setupMode={setupMode}
+                        stats={data.clusterStatus}
+                        alerts={alerts}
+                        sorting={this.sorting}
+                        pagination={this.pagination}
+                        onTableChange={this.onTableChange}
+                      />
+                    )}
                   />
+
                   {bottomBarComponent}
                 </Fragment>
               )}

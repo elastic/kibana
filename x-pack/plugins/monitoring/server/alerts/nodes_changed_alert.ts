@@ -85,13 +85,7 @@ export class NodesChangedAlert extends BaseAlert {
     }
     const [nodesFromClusterStats, legacyAlerts] = await Promise.all([
       await fetchNodesFromClusterStats(callCluster, clusters, esIndexPattern),
-      await fetchLegacyAlerts(
-        callCluster,
-        clusters,
-        alertIndexPattern,
-        WATCH_NAME,
-        this.config.ui.max_bucket_size
-      ),
+      await fetchLegacyAlerts(callCluster, clusters, alertIndexPattern, WATCH_NAME),
     ]);
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
       const nodes = nodesFromClusterStats.find(

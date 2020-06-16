@@ -28,11 +28,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
-import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
+import { KIBANA_SYSTEM_ID, ALERT_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsList } from '../../../alerts/list';
+
+const INSTANCES_PANEL_ALERTS = [ALERT_KIBANA_VERSION_MISMATCH];
 
 export function KibanaPanel(props) {
   const setupMode = props.setupMode;
+  const alerts = props.alerts;
   const showDetectedKibanas =
     setupMode.enabled && get(setupMode.data, 'kibana.detected.doesExist', false);
   if (!props.count && !showDetectedKibanas) {
@@ -53,6 +57,16 @@ export function KibanaPanel(props) {
         badgeClickLink={goToInstances()}
       />
     ) : null;
+
+  let instancesAlertStatus = null;
+  if (INSTANCES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)) {
+    const alertsList = INSTANCES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    instancesAlertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsList alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
 
   return (
     <ClusterItemContainer
@@ -148,7 +162,12 @@ export function KibanaPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeTooltip}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  {setupModeTooltip}
+                  {instancesAlertStatus}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">

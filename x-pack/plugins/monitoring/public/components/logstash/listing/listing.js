@@ -24,10 +24,12 @@ import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsList } from '../../../alerts/list';
 
 export class Listing extends PureComponent {
   getColumns() {
     const setupMode = this.props.setupMode;
+    const alerts = this.props.alerts;
 
     return [
       {
@@ -62,7 +64,9 @@ export class Listing extends PureComponent {
           return (
             <div>
               <div>
-                <EuiLink href={getSafeForExternalLink(`/logstash/node/${node.logstash.uuid}`)}>
+                <EuiLink
+                  href={`#${getSafeForExternalLink(`/logstash/node/${node.logstash.uuid}`)}`}
+                >
                   {name}
                 </EuiLink>
               </div>
@@ -70,6 +74,25 @@ export class Listing extends PureComponent {
               {setupModeStatus}
             </div>
           );
+        },
+      },
+      {
+        name: i18n.translate('xpack.monitoring.elasticsearch.nodes.alertsColumnTitle', {
+          defaultMessage: 'Alerts',
+        }),
+        field: 'isOnline',
+        width: '175px',
+        sortable: true,
+        render: () => {
+          if (alerts) {
+            return (
+              <div>
+                <AlertsList alerts={alerts} />
+              </div>
+            );
+          }
+
+          return null;
         },
       },
       {

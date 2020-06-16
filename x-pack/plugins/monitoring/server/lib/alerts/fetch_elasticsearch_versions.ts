@@ -4,21 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { LegacyAlert, AlertCluster } from '../../alerts/types';
+import { AlertCluster, AlertVersions } from '../../alerts/types';
 
-export async function fetchLegacyAlerts(
+export async function fetchElasticsearchVersions(
   callCluster: any,
   clusters: AlertCluster[],
   index: string,
-  watchName: string
-): Promise<LegacyAlert[]> {
+  size: number
+): Promise<AlertVersions[]> {
   const params = {
     index,
     filterPath: [
-      'hits.hits._source.prefix',
-      'hits.hits._source.message',
-      'hits.hits._source.metadata.severity',
-      'hits.hits._source.metadata.cluster_uuid',
+      'hits.hits._source.cluster_stats.nodes.versions',
+      'hits.hits._index',
+      'hits.hits._source.cluster_uuid',
     ],
     body: {
       size: 1,
@@ -34,16 +33,14 @@ export async function fetchLegacyAlerts(
           filter: [
             {
               terms: {
-                'metadata.cluster_uuid': clusters.map((cluster) => cluster.clusterUuid),
+                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
             {
               term: {
-                'metadata.watch': watchName,
+                type: 'cluster_stats',
               },
             },
-          ],
-          should: [
             {
               range: {
                 timestamp: {
@@ -51,28 +48,23 @@ export async function fetchLegacyAlerts(
                 },
               },
             },
-            {
-              bool: {
-                must_not: {
-                  exists: {
-                    field: 'resolved_timestamp',
-                  },
-                },
-              },
-            },
           ],
         },
+      },
+      collapse: {
+        field: 'cluster_uuid',
       },
     },
   };
 
   const response = await callCluster('search', params);
-  return get(response, 'hits.hits', []).map((hit: any) => {
-    const legacyAlert: LegacyAlert = {
-      prefix: get(hit, '_source.prefix'),
-      message: get(hit, '_source.message'),
-      metadata: get(hit, '_source.metadata'),
+  return get(response, 'hits.hits', []).map((hit) => {
+    const indexName = get(hit, '_index', '');
+    const versions = get(hit, '_source.cluster_stats.nodes.versions', []) as string[];
+    return {
+      versions,
+      clusterUuid: get(hit, '_source.cluster_uuid', ''),
+      ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
     };
-    return legacyAlert;
   });
 }

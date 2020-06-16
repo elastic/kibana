@@ -39,10 +39,10 @@ import {
   ALERT_LICENSE_EXPIRATION,
   ALERT_CLUSTER_HEALTH,
   ALERT_CPU_USAGE,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
 } from '../../../../common/constants';
 import { AlertsList } from '../../../alerts/list';
-import { AlertSeverity } from '../../../../common/enums';
-import { CommonAlertSeverityColorMap } from '../../../../common/types';
 
 const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
@@ -149,6 +149,12 @@ function renderLog(log) {
   );
 }
 
+const NODES_PANEL_ALERTS = [
+  ALERT_CPU_USAGE,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+];
+
 export function ElasticsearchPanel(props) {
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
@@ -211,26 +217,16 @@ export function ElasticsearchPanel(props) {
     red: 'danger',
   };
 
-  const nodesAlertStyle = {};
   let nodesAlertStatus = null;
-  if (alerts[ALERT_CPU_USAGE] && alerts[ALERT_CPU_USAGE].states.length) {
+  if (NODES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)) {
+    const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsList alerts={[alerts[ALERT_CPU_USAGE]]} />
+        <AlertsList alerts={alertsList} />
       </EuiFlexItem>
     );
-    let severity;
-    for (const alertState of alerts[ALERT_CPU_USAGE].states) {
-      if (alertState.state.ui.severity === AlertSeverity.Danger) {
-        severity = AlertSeverity.Danger;
-        break;
-      }
-      severity = alertState.state.ui.severity;
-    }
-    nodesAlertStyle.border = `solid 2px ${CommonAlertSeverityColorMap[severity]}`;
   }
 
-  const overviewAlertStyle = {};
   let overviewAlertStatus = null;
   if (alerts[ALERT_CLUSTER_HEALTH] || alerts[ALERT_LICENSE_EXPIRATION]) {
     const alertsList = [alerts[ALERT_CLUSTER_HEALTH], alerts[ALERT_LICENSE_EXPIRATION]];
@@ -239,24 +235,13 @@ export function ElasticsearchPanel(props) {
         <AlertsList alerts={alertsList} />
       </EuiFlexItem>
     );
-    let severity;
-    for (const { states } of alertsList) {
-      for (const alertState of states) {
-        if (alertState.state.ui.severity === AlertSeverity.Danger) {
-          severity = AlertSeverity.Danger;
-          break;
-        }
-        severity = alertState.state.ui.severity;
-      }
-    }
-    overviewAlertStyle.border = `solid 2px ${CommonAlertSeverityColorMap[severity]}`;
   }
 
   return (
     <ClusterItemContainer {...props} url="elasticsearch" title="Elasticsearch">
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
-          <EuiPanel paddingSize="m" style={overviewAlertStyle}>
+          <EuiPanel paddingSize="m">
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
@@ -357,7 +342,7 @@ export function ElasticsearchPanel(props) {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiPanel paddingSize="m" style={nodesAlertStyle}>
+          <EuiPanel paddingSize="m">
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
