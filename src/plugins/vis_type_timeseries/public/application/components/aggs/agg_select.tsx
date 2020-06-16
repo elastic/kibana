@@ -250,9 +250,7 @@ export function AggSelect(props: AggSelectUiProps) {
     return value === option.value && isMetricEnabled(option.value, uiRestrictions);
   });
 
-  let enablePipelines = siblings.some(
-    (s: { id: string; type: string }) => !!metricAggs.find((m) => m.value === s.type)
-  );
+  let enablePipelines = siblings.some((s) => !!metricAggs.find((m) => m.value === s.type));
 
   if (siblings.length <= 1) enablePipelines = false;
 
