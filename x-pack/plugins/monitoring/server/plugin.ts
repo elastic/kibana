@@ -124,7 +124,7 @@ export class Plugin {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config
         .create<TypeOf<typeof configSchema>>()
-        .pipe(map(rawConfig => createConfig(rawConfig))),
+        .pipe(map((rawConfig) => createConfig(rawConfig))),
       this.initializerContext.config.legacy.globalConfig$,
     ])
       .pipe(first())
