@@ -168,15 +168,15 @@
 /src/core/public/i18n/  @elastic/kibana-localization
 /packages/kbn-i18n/  @elastic/kibana-localization
 
-# Pulse
-/packages/kbn-analytics/ @elastic/pulse
-/src/plugins/kibana_usage_collection/ @elastic/pulse
-/src/plugins/newsfeed/ @elastic/pulse
-/src/plugins/telemetry/ @elastic/pulse
-/src/plugins/telemetry_collection_manager/ @elastic/pulse
-/src/plugins/telemetry_management_section/ @elastic/pulse
-/src/plugins/usage_collection/ @elastic/pulse
-/x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
+# Kibana Telemetry
+/packages/kbn-analytics/ @elastic/kibana-telemetry
+/src/plugins/kibana_usage_collection/ @elastic/kibana-telemetry
+/src/plugins/newsfeed/ @elastic/kibana-telemetry
+/src/plugins/telemetry/ @elastic/kibana-telemetry
+/src/plugins/telemetry_collection_manager/ @elastic/kibana-telemetry
+/src/plugins/telemetry_management_section/ @elastic/kibana-telemetry
+/src/plugins/usage_collection/ @elastic/kibana-telemetry
+/x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-telemetry
 
 # Kibana Alerting Services
 /x-pack/plugins/alerts/ @elastic/kibana-alerting-services

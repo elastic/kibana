@@ -11,18 +11,15 @@ jest.mock('../lib/create_queue');
 jest.mock('../lib/enqueue_job');
 jest.mock('../lib/validate');
 
-import { of } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { coreMock } from 'src/core/server/mocks';
+import * as Rx from 'rxjs';
 import { ReportingConfig, ReportingCore } from '../';
 import {
   chromium,
   HeadlessChromiumDriverFactory,
   initializeBrowserDriverFactory,
 } from '../browsers';
-import { ReportingInternalSetup } from '../core';
-import { ReportingPlugin } from '../plugin';
-import { ReportingSetupDeps, ReportingStartDeps } from '../types';
+import { ReportingInternalSetup, ReportingInternalStart } from '../core';
+import { ReportingStartDeps } from '../types';
 
 (initializeBrowserDriverFactory as jest.Mock<
   Promise<HeadlessChromiumDriverFactory>
@@ -30,32 +27,30 @@ import { ReportingSetupDeps, ReportingStartDeps } from '../types';
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
-const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
+const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   return {
+    elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
+    basePath: setupMock.basePath,
+    router: setupMock.router,
     security: setupMock.security,
-    licensing: {
-      license$: of({ isAvailable: true, isActive: true, type: 'basic' }),
-    } as any,
-    usageCollection: {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as any,
+    licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
+  };
+};
+
+const createMockPluginStart = (startMock?: any): ReportingInternalStart => {
+  return {
+    browserDriverFactory: startMock.browserDriverFactory,
+    enqueueJob: startMock.enqueueJob,
+    esqueue: startMock.esqueue,
+    savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
+    uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
   };
 };
 
 export const createMockConfigSchema = (overrides?: any) => ({
   index: '.reporting',
-  kibanaServer: {
-    hostname: 'localhost',
-    port: '80',
-  },
-  capture: {
-    browser: {
-      chromium: {
-        disableSandbox: true,
-      },
-    },
-  },
+  kibanaServer: { hostname: 'localhost', port: '80' },
+  capture: { browser: { chromium: { disableSandbox: true } } },
   ...overrides,
 });
 
@@ -63,36 +58,20 @@ export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
   data: startMock.data,
 });
 
-const createMockReportingPlugin = async (config: ReportingConfig): Promise<ReportingPlugin> => {
-  const mockConfigSchema = createMockConfigSchema(config);
-  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(mockConfigSchema));
-  const setupMock = coreMock.createSetup();
-  const coreStartMock = coreMock.createStart();
-  const startMock = {
-    ...coreStartMock,
-    data: { fieldFormats: {} },
-  };
-
-  plugin.setup(setupMock, createMockSetupDeps(setupMock));
-  await plugin.setup$.pipe(first()).toPromise();
-  plugin.start(startMock, createMockStartDeps(startMock));
-  await plugin.start$.pipe(first()).toPromise();
-
-  return plugin;
-};
-
 export const createMockReportingCore = async (
   config: ReportingConfig,
-  setupDepsMock?: ReportingInternalSetup
-): Promise<ReportingCore> => {
+  setupDepsMock: ReportingInternalSetup | undefined = createMockPluginSetup({}),
+  startDepsMock: ReportingInternalStart | undefined = createMockPluginStart({})
+) => {
   config = config || {};
-  const plugin = await createMockReportingPlugin(config);
-  const core = plugin.getReportingCore();
+  const core = new ReportingCore();
 
-  if (setupDepsMock) {
-    // @ts-ignore overwriting private properties
-    core.pluginSetupDeps = setupDepsMock;
-  }
+  core.pluginSetup(setupDepsMock);
+  core.setConfig(config);
+  await core.pluginSetsUp();
+
+  core.pluginStart(startDepsMock);
+  await core.pluginStartsUp();
 
   return core;
 };
