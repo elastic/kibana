@@ -45,6 +45,11 @@ import { AppApolloClient } from '../../../common/lib/lib';
 import { addError } from '../../../common/store/app/actions';
 import { NotesById } from '../../../common/store/app/model';
 import { inputsModel } from '../../../common/store/inputs';
+import { useKibana } from '../../../common/lib/kibana';
+
+import { persistTimeline } from '../../containers/api';
+import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
+import * as i18n from '../../pages/translations';
 
 import {
   applyKqlFilterQuery,
@@ -82,9 +87,6 @@ import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
-import { persistTimeline } from '../../containers/api';
-import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
-import { useKibana } from '../../../common/lib/kibana';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -246,10 +248,9 @@ export const createTimelineEpic = <State>(): Epic<
           ).pipe(
             catchError((error: TimelineErrorResponse) => {
               if (error.status_code != null && error.status_code === 405) {
-                // TO DO i18n
                 notifications!.toasts.addDanger({
-                  title: 'Timeline error',
-                  text: error.message ?? 'Something went wrong',
+                  title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+                  text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
                 });
               }
               return [
