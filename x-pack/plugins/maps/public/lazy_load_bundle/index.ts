@@ -51,7 +51,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
 
   loadModulesPromise = new Promise(async (resolve) => {
     const {
-      // @ts-ignore
+      // @ts-expect-error
       getMapsSavedObjectLoader,
       getQueryableUniqueIndexPatternIds,
       MapEmbeddable,
@@ -62,7 +62,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       addLayerWithoutDataSync,
       getInitialLayers,
       mergeInputWithSavedMap,
-      // @ts-ignore
+      // @ts-expect-error
       renderApp,
       createSecurityLayerDescriptors,
     } = await import('./lazy');

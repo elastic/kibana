@@ -7,38 +7,38 @@
 import { Subject } from 'rxjs';
 
 export class AppStateManager {
-  query = '';
-  savedQuery = '';
-  filters = [];
+  _query = '';
+  _savedQuery = '';
+  _filters = [];
 
-  updated$ = new Subject();
+  _updated$ = new Subject();
 
   setQueryAndFilters({ query, savedQuery, filters }) {
-    if (this.query !== query) {
-      this.query = query;
+    if (this._query !== query) {
+      this._query = query;
     }
-    if (this.savedQuery !== savedQuery) {
-      this.savedQuery = savedQuery;
+    if (this._savedQuery !== savedQuery) {
+      this._savedQuery = savedQuery;
     }
-    if (this.filters !== filters) {
-      this.filters = filters;
+    if (this._filters !== filters) {
+      this._filters = filters;
     }
-    this.updated$.next();
+    this._updated$.next();
   }
 
   getQuery() {
-    return this.query;
+    return this._query;
   }
 
   getFilters() {
-    return this.filters;
+    return this._filters;
   }
 
   getAppState() {
     return {
-      query: this.query,
-      savedQuery: this.savedQuery,
-      filters: this.filters,
+      query: this._query,
+      savedQuery: this._savedQuery,
+      filters: this._filters,
     };
   }
 }

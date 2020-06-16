@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { getMapsSavedObjectLoader } from '../../../bootstrap/services/gis_map_saved_object_loader';
+import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { getToasts } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { MapsListView } from './list';
@@ -17,13 +17,22 @@ export const LoadListAndRender = class extends React.Component {
     savedMapsList: null,
   };
 
-  //
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadMapsList();
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async loadMapsList() {
     try {
-      // TODO: Consolidate this check with the first call in list
       const { hits = [] } = await getMapsSavedObjectLoader().find();
       const hasSavedMaps = !!hits.length;
-      this.setState({ hasSavedMaps, savedMapsList: hits });
+      if (this._isMounted) {
+        this.setState({ hasSavedMaps, savedMapsList: hits });
+      }
     } catch (err) {
       getToasts().addDanger({
         title: i18n.translate('xpack.maps.mapListing.errorAttemptingToLoadSavedMaps', {
@@ -31,7 +40,9 @@ export const LoadListAndRender = class extends React.Component {
         }),
         text: `${err}`,
       });
-      this.setState({ hasSavedMaps: false, savedMapsList: [] });
+      if (this._isMounted) {
+        this.setState({ hasSavedMaps: false, savedMapsList: [] });
+      }
     }
   }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getUiSettings } from '../kibana_services';
+import { getUiSettings } from '../../kibana_services';
 
 export function getInitialTimeFilters({ mapStateJSON, globalState }) {
   if (mapStateJSON) {

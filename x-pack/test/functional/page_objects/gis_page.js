@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { APP_ID } from '../../../plugins/case/common/constants';
 
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
@@ -197,7 +198,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('maps', '/');
+          await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });

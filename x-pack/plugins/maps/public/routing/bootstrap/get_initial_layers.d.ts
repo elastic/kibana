@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayerDescriptor } from '../../common/descriptor_types';
+import { LayerDescriptor } from '../../../common/descriptor_types';
 
 export function getInitialLayers(
   layerListJSON?: string,

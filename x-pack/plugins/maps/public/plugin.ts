@@ -153,16 +153,16 @@ export class MapsPlugin
       id: APP_ID,
       title: getAppTitle(),
       order: 4000,
-      icon: 'plugins/maps/icon.svg',
+      icon: `plugins/${APP_ID}/icon.svg`,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      // @ts-ignore
+      // @ts-expect-error
       async mount(context, params) {
         const [coreStart, startPlugins] = await core.getStartServices();
         bindStartCoreAndPlugins(coreStart, startPlugins);
-        // @ts-ignore
+        // @ts-expect-error
         const { renderApp } = await lazyLoadMapModules();
-        // @ts-ignore
+        // @ts-expect-error
         return renderApp(context, params);
       },
     });

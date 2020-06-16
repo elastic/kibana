@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { createSavedObjectClass } from '../../../../../../src/plugins/saved_objects/public';
+import { createSavedObjectClass } from '../../../../../../../src/plugins/saved_objects/public';
 import {
   getTimeFilters,
   getMapZoom,
@@ -16,14 +16,14 @@ import {
   getQuery,
   getFilters,
   getMapSettings,
-} from '../../selectors/map_selectors';
-import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../selectors/ui_selectors';
+} from '../../../selectors/map_selectors';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
 
-import { formatEnvelopeAsPolygon } from '../../elasticsearch_geo_utils';
+import { formatEnvelopeAsPolygon } from '../../../elasticsearch_geo_utils';
 
-import { copyPersistentState } from '../../reducers/util';
-import { extractReferences, injectReferences } from '../../../common/migrations/references';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { copyPersistentState } from '../../../reducers/util';
+import { extractReferences, injectReferences } from '../../../../common/migrations/references';
+import { MAP_BASE_URL, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 
 export function createSavedGisMapClass(services) {
   const SavedObjectClass = createSavedObjectClass(services);
@@ -82,7 +82,7 @@ export function createSavedGisMapClass(services) {
     }
 
     getFullPath = () => {
-      return `/app/maps/map/${this.id}`;
+      return `${MAP_BASE_URL}/${this.id}`;
     };
 
     getLayerList = () => {

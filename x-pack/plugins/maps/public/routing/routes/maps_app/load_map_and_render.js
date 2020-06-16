@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MapsAppView } from '.';
-import { getMapsSavedObjectLoader } from '../../../bootstrap/services/gis_map_saved_object_loader';
+import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { getToasts } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
@@ -17,13 +17,26 @@ export const LoadMapAndRender = class extends React.Component {
     failedToLoad: false,
   };
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadSavedMap();
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async loadSavedMap() {
     const { savedMapId } = this.props.match.params;
     try {
       const savedMap = await getMapsSavedObjectLoader().get(savedMapId);
-      this.setState({ savedMap });
+      if (this._isMounted) {
+        this.setState({ savedMap });
+      }
     } catch (err) {
-      this.setState({ failedToLoad: true });
+      if (this._isMounted) {
+        this.setState({ failedToLoad: true });
+      }
       getToasts().addWarning({
         title: i18n.translate('xpack.maps.loadMap.errorAttemptingToLoadSavedMap', {
           defaultMessage: `Unable to load map`,

@@ -22,7 +22,7 @@ export function useAppStateSyncing(appStateManager) {
     }),
     set: (state) =>
       state && appStateManager.setQueryAndFilters({ query: state.query, filters: state.filters }),
-    state$: appStateManager.updated$.pipe(
+    state$: appStateManager._updated$.pipe(
       map(() => ({
         query: appStateManager.getQuery(),
         filters: appStateManager.getFilters(),

@@ -18,12 +18,12 @@ import {
   getCoreChrome,
 } from '../../../kibana_services';
 import { copyPersistentState } from '../../../reducers/util';
-import { getInitialLayers } from '../../../bootstrap/get_initial_layers';
+import { getInitialLayers } from '../../bootstrap/get_initial_layers';
 import rison from 'rison-node';
-import { getInitialTimeFilters } from '../../../bootstrap/get_initial_time_filters';
-import { getInitialRefreshConfig } from '../../../bootstrap/get_initial_refresh_config';
-import { getInitialQuery } from '../../../bootstrap/get_initial_query';
-import { getMapsSavedObjectLoader } from '../../../bootstrap/services/gis_map_saved_object_loader';
+import { getInitialTimeFilters } from '../../bootstrap/get_initial_time_filters';
+import { getInitialRefreshConfig } from '../../bootstrap/get_initial_refresh_config';
+import { getInitialQuery } from '../../bootstrap/get_initial_query';
+import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { MapsTopNavMenu } from '../../page_elements/top_nav_menu';
 import {
   getGlobalState,
@@ -38,11 +38,11 @@ import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 export const MapsAppView = class extends React.Component {
-  visibleSubscription = null;
-  storeSyncUnsubscribe = null;
-  globalSyncUnsubscribe = null;
-  appSyncUnsubscribe = null;
-  appStateManager = new AppStateManager();
+  _visibleSubscription = null;
+  _storeSyncUnsubscribe = null;
+  _globalSyncUnsubscribe = null;
+  _appSyncUnsubscribe = null;
+  _appStateManager = new AppStateManager();
 
   constructor(props) {
     super(props);
@@ -75,19 +75,19 @@ export const MapsAppView = class extends React.Component {
 
     // Init sync utils
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    this.globalSyncUnsubscribe = useGlobalStateSyncing();
+    this._globalSyncUnsubscribe = useGlobalStateSyncing();
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    this.appSyncUnsubscribe = useAppStateSyncing(this.appStateManager);
+    this._appSyncUnsubscribe = useAppStateSyncing(this._appStateManager);
 
     // Check app state in case of refresh
-    const initAppState = this.appStateManager.getAppState();
+    const initAppState = this._appStateManager.getAppState();
     this.onQueryChange(initAppState);
     if (initAppState.savedQuery) {
       this.updateStateFromSavedQuery(initAppState.savedQuery);
     }
 
     // Monitor visibility
-    this.visibleSubscription = getCoreChrome()
+    this._visibleSubscription = getCoreChrome()
       .getIsVisible$()
       .subscribe((isVisible) => this.setState({ isVisible }));
     this.initMap(savedMap);
@@ -132,7 +132,7 @@ export const MapsAppView = class extends React.Component {
     if (!_.isEmpty(newState)) {
       this.setState(newState, () => {
         const { query, filters, refreshInterval, time } = this.state;
-        this.appStateManager.setQueryAndFilters({
+        this._appStateManager.setQueryAndFilters({
           query: this.state.query,
           filters: filterManager.getAppFilters(),
         });
@@ -142,17 +142,17 @@ export const MapsAppView = class extends React.Component {
   }
 
   componentWillUnmount() {
-    if (this.storeSyncUnsubscribe) {
-      this.storeSyncUnsubscribe();
+    if (this._storeSyncUnsubscribe) {
+      this._storeSyncUnsubscribe();
     }
-    if (this.globalSyncUnsubscribe) {
-      this.globalSyncUnsubscribe();
+    if (this._globalSyncUnsubscribe) {
+      this._globalSyncUnsubscribe();
     }
-    if (this.appSyncUnsubscribe) {
-      this.appSyncUnsubscribe();
+    if (this._appSyncUnsubscribe) {
+      this._appSyncUnsubscribe();
     }
-    if (this.visibleSubscription) {
-      this.visibleSubscription.unsubscribe();
+    if (this._visibleSubscription) {
+      this._visibleSubscription.unsubscribe();
     }
 
     // Clean up app state filters
@@ -244,7 +244,7 @@ export const MapsAppView = class extends React.Component {
   };
 
   getAppStateFilters = () => {
-    return this.appStateManager.getFilters() || [];
+    return this._appStateManager.getFilters() || [];
   };
 
   syncAppAndGlobalState = () => {
@@ -252,7 +252,7 @@ export const MapsAppView = class extends React.Component {
     const { filterManager } = getData().query;
 
     // appState
-    this.appStateManager.setQueryAndFilters({
+    this._appStateManager.setQueryAndFilters({
       query: query,
       filters: filterManager.getAppFilters(),
     });
@@ -317,7 +317,7 @@ export const MapsAppView = class extends React.Component {
     const newState = {
       query: getInitialQuery({
         mapStateJSON,
-        appState: this.appStateManager.getAppState(),
+        appState: this._appStateManager.getAppState(),
         userQueryLanguage: getUiSettings().get('search:queryLanguage'),
       }),
       time: getInitialTimeFilters({
@@ -435,7 +435,7 @@ export const MapsAppView = class extends React.Component {
     clearUi();
 
     await this.handleStoreChanges();
-    this.storeSyncUnsubscribe = getStoreSyncSubscription(this.handleStoreChanges);
+    this._storeSyncUnsubscribe = getStoreSyncSubscription(this.handleStoreChanges);
 
     const savedObjectFilters = this.syncStoreAndGetFilters(savedMap);
     await this.onQueryChange({
@@ -481,12 +481,12 @@ export const MapsAppView = class extends React.Component {
         updateFiltersAndDispatch={this.updateFiltersAndDispatch}
         onQuerySaved={(query) => {
           this.setState({ savedQuery: query });
-          this.appStateManager.setQueryAndFilters({ savedQuery: query });
+          this._appStateManager.setQueryAndFilters({ savedQuery: query });
           this.updateStateFromSavedQuery(query);
         }}
         onSavedQueryUpdated={(query) => {
           this.setState({ savedQuery: { ...query } });
-          this.appStateManager.setQueryAndFilters({ savedQuery: query });
+          this._appStateManager.setQueryAndFilters({ savedQuery: query });
           this.updateStateFromSavedQuery(query);
         }}
         isSaveDisabled={isSaveDisabled}
