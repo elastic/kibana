@@ -5,6 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { HttpStart } from 'kibana/public';
 import { HttpService } from '../http_service';
 
 import { annotations } from './annotations';
@@ -82,19 +83,16 @@ export function basePath() {
   return '/api/ml';
 }
 
-const proxyHttpStart = new Proxy(
-  {},
-  {
-    get(obj, prop) {
-      try {
-        return getHttp()[prop];
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-      }
-    },
-  }
-);
+const proxyHttpStart = new Proxy<HttpStart>(({} as unknown) as HttpStart, {
+  get(obj, prop: keyof HttpStart) {
+    try {
+      return getHttp()[prop];
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
+  },
+});
 
 export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
 
