@@ -8,12 +8,33 @@ import { leftJoin } from '../../../common/utils/left_join';
 import { Job as AnomalyDetectionJob } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../typings/common';
 import { IEnvOptions } from './get_service_map';
+import { Setup } from '../helpers/setup_request';
 import {
   APM_ML_JOB_GROUP_NAME,
   encodeForMlApi,
 } from '../../../common/ml_job_constants';
 
+async function getApmAnomalyDetectionJobs(
+  setup: Setup
+): Promise<AnomalyDetectionJob[]> {
+  const { ml } = setup;
+
+  if (!ml) {
+    return [];
+  }
+  try {
+    const { jobs } = await ml.anomalyDetectors.jobs(APM_ML_JOB_GROUP_NAME);
+    return jobs;
+  } catch (error) {
+    if (error.statusCode === 404) {
+      return [];
+    }
+    throw error;
+  }
+}
+
 type ApmMlJobCategory = NonNullable<ReturnType<typeof getApmMlJobCategory>>;
+
 export const getApmMlJobCategory = (
   mlJob: AnomalyDetectionJob,
   serviceNames: string[]
@@ -62,13 +83,7 @@ export async function getServiceAnomalies(
     return [];
   }
 
-  let apmMlJobs: AnomalyDetectionJob[] = [];
-  try {
-    const { jobs } = await ml.anomalyDetectors.jobs(APM_ML_JOB_GROUP_NAME);
-    apmMlJobs = jobs;
-  } catch (error) {
-    // did not find any apm jobs
-  }
+  const apmMlJobs = await getApmAnomalyDetectionJobs(options.setup);
   if (apmMlJobs.length === 0) {
     return [];
   }
