@@ -26,7 +26,7 @@ const executeJobFactoryStub = sinon.stub();
 const getMockLogger = sinon.stub();
 
 const getMockExportTypesRegistry = (
-  exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
+  exportTypes: any[] = [{ runTaskFnFactory: executeJobFactoryStub }]
 ) =>
   ({
     getAll: () => exportTypes,
@@ -75,11 +75,11 @@ Object {
 
   test('Creates a single Esqueue worker for Reporting, even if there are multiple export types', async () => {
     const exportTypesRegistry = getMockExportTypesRegistry([
-      { executeJobFactory: executeJobFactoryStub },
-      { executeJobFactory: executeJobFactoryStub },
-      { executeJobFactory: executeJobFactoryStub },
-      { executeJobFactory: executeJobFactoryStub },
-      { executeJobFactory: executeJobFactoryStub },
+      { runTaskFnFactory: executeJobFactoryStub },
+      { runTaskFnFactory: executeJobFactoryStub },
+      { runTaskFnFactory: executeJobFactoryStub },
+      { runTaskFnFactory: executeJobFactoryStub },
+      { runTaskFnFactory: executeJobFactoryStub },
     ]);
     mockReporting.getExportTypesRegistry = () => exportTypesRegistry;
     const createWorker = createWorkerFactory(mockReporting, getMockLogger());
