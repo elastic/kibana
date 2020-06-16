@@ -44,6 +44,7 @@ interface LogsFetchDataResponse extends FetchDataResponse {
 
 interface MetricsFetchDataResponse extends FetchDataResponse {
   stats: {
+    hots: Numeral & Color;
     cpu: Percentage & Color;
     memory: Percentage & Color;
     disk: Percentage & Color;
