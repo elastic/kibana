@@ -24,10 +24,12 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerEmbeddables } from './embeddables';
 import { UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
+import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
@@ -53,6 +55,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        pluginsStart.kibanaLegacy.loadFontAwesome();
         const { renderApp } = await import('./application/app');
         return renderApp(
           coreStart,

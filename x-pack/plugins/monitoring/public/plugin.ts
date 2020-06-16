@@ -78,6 +78,7 @@ export class MonitoringPlugin
           externalConfig: this.getExternalConfig(),
         };
 
+        pluginsStart.kibanaLegacy.loadFontAwesome();
         this.setInitialTimefilter(deps);
         this.overrideAlertingEmailDefaults(deps);
 
