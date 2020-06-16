@@ -657,8 +657,8 @@ Distributable packages can be found in `target/` after the build completes.
 Kibana documentation is written in [asciidoc](http://asciidoc.org/) format in
 the `docs/` directory.
 
-To build the docs, you must clone the [elastic/docs](https://github.com/elastic/docs)
-repo as a sibling of your kibana repo. Follow the instructions in that project's
+To build the docs, clone the [elastic/docs](https://github.com/elastic/docs)
+repo as a sibling of your Kibana repo. Follow the instructions in that project's
 README for getting the docs tooling set up.
 
 **To build the Kibana docs and open them in your browser:**
@@ -676,14 +676,26 @@ node scripts/docs.js --open
 
 Part of this process only applies to maintainers, since it requires access to GitHub labels.
 
-Kibana publishes [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html) for major and minor releases.  To generate the Release Notes, the writers run a script against this repo to collect the merged PRs against the release.
-To include your PRs in the Release Notes:
+Kibana publishes [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html) for major and minor releases. The Release Notes summarize what the PRs accomplish in language that is meaningful to users. To generate the Release Notes, the team runs a script against this repo to collect the merged PRs against the release.
 
-1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
-2. Label the PR with the targeted version (ex: `v7.3.0`).
-3. Label the PR with the appropriate GitHub labels:
+#### Create the Release Notes text
+The text that appears in the Release Notes is pulled directly from your PR title, or a single paragraph of text that you specify in the PR description. 
+
+To use a single paragraph of text, enter `Release note:` or a `## Release note` header in the PR description, followed by your text. For example, refer to this [PR](https://github.com/elastic/kibana/pull/65796) that uses the `## Release note` header.
+
+When you create the Release Notes text, use the following best practices:
+* Use present tense. 
+* Use sentence case.
+* When you create a feature PR, start with `Adds`.
+* When you create an enhancement PR, start with `Improves`. 
+* When you create a bug fix PR, start with `Fixes`.
+* When you create a deprecation PR, start with `Deprecates`.
+
+#### Add your labels
+1. Label the PR with the targeted version (ex: `v7.3.0`).
+2. Label the PR with the appropriate GitHub labels:
     * For a new feature or functionality, use `release_note:enhancement`.
-    * For an external-facing fix, use `release_note:fix`. Exception: docs, build, and test fixes do not go in the Release Notes. Neither fixes for issues that were only on `master` and never have been released.
+    * For an external-facing fix, use `release_note:fix`. We do not include docs, build, and test fixes in the Release Notes, or unreleased issues that are only on `master`.
     * For a deprecated feature, use `release_note:deprecation`.
     * For a breaking change, use `release_note:breaking`.
     * To **NOT** include your changes in the Release Notes, use `release_note:skip`.
@@ -695,7 +707,7 @@ We also produce a blog post that details more important breaking API changes in 
 
 ## Name the feature with the break (ex: Visualize Loader)
 
-Summary of the change. Anything Under `#Dev Docs` will be used in the blog.
+Summary of the change. Anything Under `#Dev Docs` is used in the blog.
 ```
 
 ## Signing the contributor license agreement
