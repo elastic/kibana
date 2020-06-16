@@ -6,8 +6,7 @@
 
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
-// @ts-ignore not typed
-import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
+import { AbortController } from 'abort-controller';
 import {
   GetAgentsResponse,
   GetOneAgentResponse,
