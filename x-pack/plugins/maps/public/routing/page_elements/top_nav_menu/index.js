@@ -36,7 +36,9 @@ function mapDispatchToProps(dispatch) {
     setRefreshStoreConfig: (refreshConfig) => dispatch(setRefreshConfig(refreshConfig)),
     enableFullScreen: () => dispatch(enableFullScreen()),
     openMapSettings: () => dispatch(openMapSettings()),
-    syncSavedMap: ({ syncWithStore }) => syncWithStore(getStore().getState()),
+    syncSavedMap: (savedGisMap) => {
+      savedGisMap.syncWithStore(getStore().getState());
+    },
   };
 }
 

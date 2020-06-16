@@ -91,8 +91,12 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     input: MapEmbeddableInput,
     parent?: IContainer
   ) => {
-    const { getInitialLayers } = await lazyLoadMapModules();
-    const { getHttp, MapEmbeddable, mergeInputWithSavedMap } = await lazyLoadMapModules();
+    const {
+      getInitialLayers,
+      getHttp,
+      MapEmbeddable,
+      mergeInputWithSavedMap,
+    } = await lazyLoadMapModules();
     const savedMap = await this._fetchSavedMap(savedObjectId);
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
