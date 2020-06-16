@@ -33,6 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             secrets: {
               webhookUrl: 'https://test',
             },
+            consumer: 'alerts',
           }),
           alerting.actions.createAction({
             name: `slack-${testRunUuid}-${1}`,
@@ -41,6 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             secrets: {
               webhookUrl: 'https://test',
             },
+            consumer: 'alerts',
           }),
         ]);
 
@@ -321,6 +323,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             secrets: {
               webhookUrl: 'https://test',
             },
+            consumer: 'alerts',
           }),
           alerting.actions.createAction({
             name: `slack-${testRunUuid}-${1}`,
@@ -329,6 +332,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             secrets: {
               webhookUrl: 'https://test',
             },
+            consumer: 'alerts',
           }),
         ]);
 
@@ -539,6 +543,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             secrets: {
               webhookUrl: 'https://test',
             },
+            consumer: 'alerts',
           }),
           alerting.actions.createAction({
             name: `slack-${testRunUuid}-${1}`,
@@ -547,6 +552,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             secrets: {
               webhookUrl: 'https://test',
             },
+            consumer: 'alerts',
           }),
         ]);
 

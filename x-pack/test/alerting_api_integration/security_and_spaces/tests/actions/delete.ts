@@ -36,6 +36,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               secrets: {
                 encrypted: 'This value should be encrypted',
               },
+              consumer: 'alerts',
             })
             .expect(200);
 
@@ -79,6 +80,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               secrets: {
                 encrypted: 'This value should be encrypted',
               },
+              consumer: 'alerts',
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');

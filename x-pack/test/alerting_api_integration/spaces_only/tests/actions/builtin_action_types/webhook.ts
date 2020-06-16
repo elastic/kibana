@@ -39,6 +39,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         actionTypeId: '.webhook',
         secrets: {},
         config: composedConfig,
+        consumer: 'alerts',
       })
       .expect(200);
 

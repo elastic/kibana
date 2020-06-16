@@ -50,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
           secrets: {
             encrypted: 'This value should be encrypted',
           },
+          consumer: 'alerts',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
@@ -95,6 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           name: 'failing action',
           actionTypeId: 'test.failing',
+          consumer: 'alerts',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
@@ -133,6 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           secrets: {
             encrypted: 'This value should be encrypted',
           },
+          consumer: 'alerts',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
@@ -163,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           name: 'My action',
           actionTypeId: 'test.authorization',
+          consumer: 'alerts',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');

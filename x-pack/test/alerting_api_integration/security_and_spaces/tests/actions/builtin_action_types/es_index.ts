@@ -35,6 +35,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
             index: ES_TEST_INDEX_NAME,
           },
           secrets: {},
+          consumer: 'alerts',
         })
         .expect(200);
 
@@ -48,6 +49,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           refresh: false,
           executionTimeField: null,
         },
+        consumer: 'alerts',
       });
       createdActionID = createdAction.id;
       expect(typeof createdActionID).to.be('string');
@@ -62,6 +64,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action',
         actionTypeId: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
+        consumer: 'alerts',
       });
 
       // create action with all config props
@@ -76,6 +79,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
             refresh: true,
             executionTimeField: 'test',
           },
+          consumer: 'alerts',
         })
         .expect(200);
 
@@ -89,6 +93,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           refresh: true,
           executionTimeField: 'test',
         },
+        consumer: 'alerts',
       });
       createdActionIDWithIndex = createdActionWithIndex.id;
       expect(typeof createdActionIDWithIndex).to.be('string');
@@ -107,6 +112,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           refresh: true,
           executionTimeField: 'test',
         },
+        consumer: 'alerts',
       });
     });
 
@@ -118,6 +124,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           name: 'An index action',
           actionTypeId: '.index',
           config: { index: 666 },
+          consumer: 'alerts',
         })
         .expect(400)
         .then((resp: any) => {
@@ -142,6 +149,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
             refresh: true,
           },
           secrets: {},
+          consumer: 'alerts',
         })
         .expect(200);
       const { body: result } = await supertest
@@ -172,6 +180,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
             refresh: true,
           },
           secrets: {},
+          consumer: 'alerts',
         })
         .expect(200);
       const { body: result } = await supertest
@@ -217,6 +226,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
             executionTimeField: 'test',
           },
           secrets: {},
+          consumer: 'alerts',
         })
         .expect(200);
       const { body: result } = await supertest
@@ -245,6 +255,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
             refresh: true,
           },
           secrets: {},
+          consumer: 'alerts',
         })
         .expect(200);
       const { body: result2 } = await supertest

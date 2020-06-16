@@ -65,6 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           secrets: {
             webhookUrl: 'https://test',
           },
+          consumer: 'alerts',
         });
 
         const alert = await alerting.alerts.createAlwaysFiringWithAction(

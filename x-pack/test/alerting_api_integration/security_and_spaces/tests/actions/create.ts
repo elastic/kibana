@@ -36,6 +36,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               secrets: {
                 encrypted: 'This value should be encrypted',
               },
+              consumer: 'alerts',
             });
 
           switch (scenario.id) {
@@ -61,6 +62,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
+                consumer: 'alerts',
               });
               expect(typeof response.body.id).to.be('string');
               // Ensure AAD isn't broken
@@ -85,6 +87,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               name: 'My action',
               actionTypeId: 'test.unregistered-action-type',
               config: {},
+              consumer: 'alerts',
             });
 
           switch (scenario.id) {
@@ -155,6 +158,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               config: {
                 unencrypted: 'my unencrypted text',
               },
+              consumer: 'alerts',
             });
 
           switch (scenario.id) {
@@ -191,6 +195,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             .send({
               name: 'my name',
               actionTypeId: 'test.not-enabled',
+              consumer: 'alerts',
             });
 
           switch (scenario.id) {

@@ -45,6 +45,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           secrets: {
             routingKey: 'pager-duty-routing-key',
           },
+          consumer: 'alerts',
         })
         .expect(200);
 
@@ -56,6 +57,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         config: {
           apiUrl: pagerdutySimulatorURL,
         },
+        consumer: 'alerts',
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -72,6 +74,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         config: {
           apiUrl: pagerdutySimulatorURL,
         },
+        consumer: 'alerts',
       });
     });
 
@@ -86,6 +89,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
             apiUrl: pagerdutySimulatorURL,
           },
           secrets: {},
+          consumer: 'alerts',
         })
         .expect(400)
         .then((resp: any) => {
@@ -106,6 +110,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           name: 'A pagerduty action',
           actionTypeId: '.pagerduty',
           secrets: {},
+          consumer: 'alerts',
         })
         .expect(400)
         .then((resp: any) => {
@@ -131,6 +136,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           secrets: {
             routingKey: 'pager-duty-routing-key',
           },
+          consumer: 'alerts',
         })
         .expect(200);
 

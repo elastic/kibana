@@ -35,6 +35,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               secrets: {
                 encrypted: 'This value should be encrypted',
               },
+              consumer: 'alerts',
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
@@ -65,6 +66,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
+                consumer: 'alerts',
               });
               break;
             default:
@@ -85,6 +87,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               secrets: {
                 encrypted: 'This value should be encrypted',
               },
+              consumer: 'alerts',
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
