@@ -5,7 +5,8 @@
  */
 
 import * as i18n from './translations';
-import { SecurityPageName, SiemNavTab } from '../types';
+import { SecurityPageName } from '../types';
+import { SiemNavTab } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
   APP_ALERTS_PATH,
