@@ -6,8 +6,8 @@
 
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release, check out the
-and https://www.elastic.co/blog/kibana-7-8-0-released[release blog], {kibana-ref}/release-notes.html[release notes],
-and {kibana-ref}/breaking-changes.html[breaking changes].
+{kibana-ref-all}/7.8/release-notes-7.8.0.html[release notes]
+and {kibana-ref-all}/7.8/breaking-changes-7.8.html[breaking changes].
 
 Other versions: {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
 {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
@@ -27,8 +27,8 @@ coming[7.8.0]
 === Side navigation organized by use cases
 
 {kib} has a cleaner, more organized side navigation
-for getting you where you need to go. For example, when you
-are ready to work with your logs, metrics, APM, or Uptime data,
+for getting you where you need to go. For example, when you're
+ready to work with your logs, metrics, APM, or Uptime data,
 you'll find the apps you need under *Observability*.
 The side navigation also includes
 *Recently viewed* to easily
@@ -109,7 +109,7 @@ image:images/whats-new/7-8-canvas.png[Top-level menu in Canvas]
 [[maps-7-8]]
 === Dedicated solution layer for Maps
 
-Maps has a new Observability layer that supports real user monitoring (RUM) data.
+{kibana-ref}/maps.html[Maps] has a new Observability layer that supports real user monitoring (RUM) data.
 You're presented with the Observability option if you have APM indices
 in the {ecs-ref}/ecs-reference.html[Elastic Common Schema].
 You can then select either
@@ -178,12 +178,14 @@ image::images/add-data-fv.png[File Data Visualizer]
 
 [float]
 [[logon-7-8]]
-Kibana now offers two customization options for the log-in experience.
-Before starting {kib}, you can show users a screen specific to your requirements,
-for example, if you need them to agree to
+=== Customization of login experience
+
+Kibana now offers two ways to customize the login experience.
+Before starting {kib}, you can show a screen specific to your requirements,
+for example, if users must agree to
 certain terms and conditions.
-In addition, you can configure the login screen experience to
-control the text for password hints, customize the icons for SSO options,
+You can also modify the login screen:
+edit the text for password hints, customize the icons for SSO options,
 and add messages and prompts.
 
 [role="screenshot"]
