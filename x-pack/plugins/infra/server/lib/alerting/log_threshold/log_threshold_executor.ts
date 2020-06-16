@@ -231,7 +231,8 @@ const getGroupedESQuery = (
         filtered_results: {
           filter: {
             bool: {
-              must: mustFilters,
+              // Scope the inner filtering back to the unpadded range
+              must: [rangeFilter, ...mustFilters],
             },
           },
         },
