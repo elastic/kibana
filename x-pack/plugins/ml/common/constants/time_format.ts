@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CalendarManager, Calendar, FormCalendar } from './calendar_manager';
-export { CalendarEvent } from './event_manager';
+export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
