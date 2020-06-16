@@ -17,9 +17,14 @@
  * under the License.
  */
 
-import { ISearchGeneric, ISearchCancelGeneric } from './i_search';
+export function createFieldFormatsSetupMock() {
+  return {
+    register: jest.fn(),
+  };
+}
 
-export interface IRouteHandlerSearchContext {
-  search: ISearchGeneric;
-  cancel: ISearchCancelGeneric;
+export function createFieldFormatsStartMock() {
+  return {
+    fieldFormatServiceFactory: jest.fn(),
+  };
 }
