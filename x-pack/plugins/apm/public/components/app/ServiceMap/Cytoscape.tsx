@@ -11,11 +11,10 @@ import React, {
   useEffect,
   useRef,
   useState,
-  useContext,
 } from 'react';
 import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
-import { ThemeContext } from 'styled-components';
+import { useTheme } from '../../../hooks/useTheme';
 import {
   getAnimationOptions,
   getCytoscapeOptions,
@@ -114,7 +113,7 @@ export const Cytoscape = ({
   serviceName,
   style,
 }: CytoscapeProps) => {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const [ref, cy] = useCytoscape({
     ...getCytoscapeOptions(theme),
     elements,

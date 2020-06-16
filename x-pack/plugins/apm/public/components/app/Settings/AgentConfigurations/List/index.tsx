@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -14,8 +14,8 @@ import {
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { ThemeContext } from 'styled-components';
 import { isEmpty } from 'lodash';
+import { useTheme } from '../../../../../hooks/useTheme';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
@@ -39,7 +39,7 @@ interface Props {
 }
 
 export const AgentConfigurationList = ({ status, data, refetch }: Props) => {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
     null
   );

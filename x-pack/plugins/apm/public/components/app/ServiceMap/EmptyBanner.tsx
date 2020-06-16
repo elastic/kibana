@@ -7,9 +7,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled, { ThemeContext } from 'styled-components';
+import styled from 'styled-components';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { CytoscapeContext } from './Cytoscape';
+import { useTheme } from '../../../hooks/useTheme';
 
 const EmptyBannerContainer = styled.div`
   margin: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
@@ -23,7 +24,7 @@ const EmptyBannerContainer = styled.div`
 `;
 
 export const EmptyBanner = () => {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [nodeCount, setNodeCount] = useState(0);
 

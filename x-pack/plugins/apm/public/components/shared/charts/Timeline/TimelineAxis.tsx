@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactNode, useContext } from 'react';
+import React, { ReactNode } from 'react';
 import { inRange } from 'lodash';
 import { Sticky } from 'react-sticky';
 import { XAxis, XYPlot } from 'react-vis';
-import { ThemeContext } from 'styled-components';
+import { useTheme } from '../../../../hooks/useTheme';
 import { px } from '../../../../style/variables';
 import { getDurationFormatter } from '../../../../utils/formatters';
 import { Mark } from './';
@@ -47,7 +47,7 @@ export const TimelineAxis = ({
   marks = [],
   topTraceDuration,
 }: TimelineAxisProps) => {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);

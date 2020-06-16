@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+import React from 'react';
+import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +14,7 @@ import {
   EuiIconTip,
   EuiHealth,
 } from '@elastic/eui';
+import { useTheme } from '../../../../hooks/useTheme';
 import { fontSize, px } from '../../../../style/variables';
 import { asInteger } from '../../../../utils/formatters';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
@@ -51,7 +52,7 @@ interface AnomalyDetectionProps {
 }
 
 export function AnomalyDetection({ serviceNodeData }: AnomalyDetectionProps) {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const anomalySeverity = serviceNodeData.anomaly_severity;
   const anomalyScore = serviceNodeData.anomaly_score;
   const actualValue = serviceNodeData.actual_value;

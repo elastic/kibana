@@ -26,7 +26,7 @@ const EuiThemeProvider = <
 }) => (
   <ThemeProvider
     {...otherProps}
-    theme={(outerTheme?: OuterTheme) => ({
+    theme={(outerTheme) => ({
       ...outerTheme,
       eui: darkMode ? euiDarkVars : euiLightVars,
       darkMode,

@@ -15,7 +15,7 @@ import React, {
 } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import cytoscape from 'cytoscape';
-import { ThemeContext } from 'styled-components';
+import { useTheme } from '../../../../hooks/useTheme';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
 import { getAnimationOptions } from '../cytoscapeOptions';
@@ -26,7 +26,7 @@ interface PopoverProps {
 }
 
 export const Popover = ({ focusedServiceName }: PopoverProps) => {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined

@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useContext } from 'react';
+import React from 'react';
 import { VerticalGridLines } from 'react-vis';
-import { ThemeContext } from 'styled-components';
 import {
   EuiIcon,
   EuiToolTip,
@@ -14,6 +13,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useTheme } from '../../../../hooks/useTheme';
 import { Maybe } from '../../../../../typings/common';
 import { Annotation } from '../../../../../common/annotations';
 import { PlotValues, SharedPlot } from './plotUtils';
@@ -27,7 +27,7 @@ interface Props {
 }
 
 export const AnnotationsPlot = ({ plotValues, annotations }: Props) => {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const tickValues = annotations.map((annotation) => annotation['@timestamp']);
 
   const style = {

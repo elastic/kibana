@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import d3 from 'd3';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import { scaleLinear } from 'd3-scale';
-import styled, { ThemeContext } from 'styled-components';
+import styled from 'styled-components';
 import SingleRect from './SingleRect';
+import { useTheme } from '../../../../hooks/useTheme';
 import {
   XYPlot,
   XAxis,
@@ -75,7 +76,7 @@ export const HistogramInner = ({
   width: XY_WIDTH,
   xType,
 }) => {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const [hoveredBucket, setHoveredBucket] = useState({});
 
   const onHover = (bucket) => setHoveredBucket(bucket);

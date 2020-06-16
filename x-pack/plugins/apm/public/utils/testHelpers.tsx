@@ -7,7 +7,7 @@
 /* global jest */
 
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import { ReactWrapper, mount, MountRendererProps } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
@@ -185,8 +185,8 @@ export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
 
 export function renderWithTheme(
   component: React.ReactNode,
-  params: any,
-  { darkMode = false }: { darkMode: boolean } = {}
+  params?: any,
+  { darkMode = false } = {}
 ) {
   return render(
     <EuiThemeProvider darkMode={darkMode}>{component}</EuiThemeProvider>,
@@ -196,9 +196,9 @@ export function renderWithTheme(
 
 export function mountWithTheme(
   tree: React.ReactElement<any>,
-  { darkMode = false }: { darkMode: boolean } = {}
+  { darkMode = false } = {}
 ) {
-  const WrappingThemeProvider = (props) => (
+  const WrappingThemeProvider = (props: any) => (
     <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>
   );
 

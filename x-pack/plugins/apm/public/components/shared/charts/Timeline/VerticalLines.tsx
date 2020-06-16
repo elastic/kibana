@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { VerticalGridLines, XYPlot } from 'react-vis';
-import { ThemeContext } from 'styled-components';
+import { useTheme } from '../../../../hooks/useTheme';
 import { Mark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks';
 import { PlotValues } from './plotUtils';
 
@@ -27,7 +27,7 @@ export const VerticalLines = ({
     .filter((mark) => mark.verticalLine)
     .map(({ offset }) => offset);
 
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
 
   return (
     <div

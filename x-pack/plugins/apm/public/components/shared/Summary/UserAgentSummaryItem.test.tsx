@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { UserAgentSummaryItem } from './UserAgentSummaryItem';
-import { renderWithTheme, mountWithTheme } from '../../../utils/testHelpers';
+import { mountWithTheme } from '../../../utils/testHelpers';
 
 describe('UserAgentSummaryItem', () => {
   describe('render', () => {

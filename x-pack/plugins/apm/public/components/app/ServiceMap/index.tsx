@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ThemeContext } from 'styled-components';
+import { useTheme } from '../../../hooks/useTheme';
 import {
   invalidLicenseMessage,
   isValidPlatinumLicense,
@@ -30,7 +30,7 @@ interface ServiceMapProps {
 }
 
 export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const license = useLicense();
   const { urlParams } = useUrlParams();
 

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
-import styled, { ThemeContext } from 'styled-components';
+import styled from 'styled-components';
+import { useTheme } from '../../../../../hooks/useTheme';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -53,7 +54,7 @@ function truncateMessage(errorMessage?: string) {
 }
 
 export const ErrorMarker: React.FC<Props> = ({ mark }) => {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 

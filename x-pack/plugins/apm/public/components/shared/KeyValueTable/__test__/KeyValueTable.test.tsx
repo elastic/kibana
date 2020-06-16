@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { KeyValueTable } from '..';
+import { render } from '@testing-library/react';
 import { renderWithTheme } from '../../../../utils/testHelpers';
 
 function getKeys(output: ReturnType<typeof render>) {

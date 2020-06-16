@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import styled, { ThemeContext } from 'styled-components';
+import styled from 'styled-components';
 import { Legend } from '../Legend';
+import { useTheme } from '../../../../hooks/useTheme';
 import {
   unit,
   units,
@@ -79,7 +80,7 @@ export default function Legends({
   showAnnotations,
   onAnnotationsToggle,
 }) {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
 
   if (noHits && !hasAnnotations) {
     return null;
