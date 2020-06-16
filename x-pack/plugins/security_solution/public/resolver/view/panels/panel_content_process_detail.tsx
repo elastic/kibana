@@ -14,6 +14,7 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from 'react-intl';
 import * as event from '../../../../common/endpoint/models/event';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import {
@@ -111,10 +112,15 @@ export const ProcessDetails = memo(function ProcessDetails({
         },
       },
       {
-        text:
-          i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.details', {
-            defaultMessage: 'Details for: ',
-          }) + processName,
+        text: (
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.numberOfEvents"
+              values={{ processName }}
+              defaultMessage="Details for: {processName}"
+            />
+          </>
+        ),
         onClick: () => {},
       },
     ];
