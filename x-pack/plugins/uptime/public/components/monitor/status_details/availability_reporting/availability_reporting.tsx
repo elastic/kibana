@@ -17,7 +17,8 @@ interface Props {
 }
 
 export const formatAvailabilityValue = (val: number) => {
-  return Math.floor(val * 100) / 100;
+  const result = Math.round(val * 100) / 100;
+  return result.toFixed(2);
 };
 
 export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {

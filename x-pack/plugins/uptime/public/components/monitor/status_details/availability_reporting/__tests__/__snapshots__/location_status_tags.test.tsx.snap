@@ -172,7 +172,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class=""
                 >
-                  100 %
+                  100.00 %
                 </span>
               </div>
             </td>
@@ -249,7 +249,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class=""
                 >
-                  100 %
+                  100.00 %
                 </span>
               </div>
             </td>
@@ -420,7 +420,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class=""
                 >
-                  100 %
+                  100.00 %
                 </span>
               </div>
             </td>
@@ -497,7 +497,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class=""
                 >
-                  100 %
+                  100.00 %
                 </span>
               </div>
             </td>
@@ -668,7 +668,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class=""
                 >
-                  100 %
+                  100.00 %
                 </span>
               </div>
             </td>
@@ -745,7 +745,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class=""
                 >
-                  100 %
+                  100.00 %
                 </span>
               </div>
             </td>
@@ -822,7 +822,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class=""
                 >
-                  100 %
+                  100.00 %
                 </span>
               </div>
             </td>
@@ -899,7 +899,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class=""
                 >
-                  100 %
+                  100.00 %
                 </span>
               </div>
             </td>
@@ -976,7 +976,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class=""
                 >
-                  100 %
+                  100.00 %
                 </span>
               </div>
             </td>
