@@ -8,6 +8,7 @@ import { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
+import { metadataIndexPattern } from '../../../../common/endpoint/constants';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import {
   HostInfo,
@@ -67,13 +68,10 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const index = await endpointAppContext.service
-          .getIndexPatternRetriever()
-          .getMetadataIndexPattern(context);
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
-          index
+          metadataIndexPattern
         );
         const response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'search',
@@ -125,10 +123,7 @@ export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string
 ): Promise<HostInfo | undefined> {
-  const index = await metadataRequestContext.endpointAppContext.service
-    .getIndexPatternRetriever()
-    .getMetadataIndexPattern(metadataRequestContext.requestHandlerContext);
-  const query = getESQueryHostMetadataByID(id, index);
+  const query = getESQueryHostMetadataByID(id, metadataIndexPattern);
   const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
     'search',
     query
