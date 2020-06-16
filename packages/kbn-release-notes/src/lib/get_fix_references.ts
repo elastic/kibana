@@ -17,30 +17,13 @@
  * under the License.
  */
 
-import { relative, join } from 'path';
+const FIXES_RE = /(?:closes|close|closed|fix|fixes|fixed|resolve|resolves|resolved)[ :]*(#\d*)/gi;
 
-import del from 'del';
-import vfs from 'vinyl-fs';
-import zip from 'gulp-zip';
-
-import { pipeline, PluginConfig } from '../../lib';
-
-export async function createPackage(
-  plugin: PluginConfig,
-  buildTarget: string,
-  buildVersion: string
-) {
-  const buildId = `${plugin.id}-${buildVersion}`;
-  const buildRoot = join(buildTarget, 'kibana', plugin.id);
-  const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];
-
-  // zip up the package
-  await pipeline(
-    vfs.src(buildFiles, { cwd: buildTarget, base: buildTarget, dot: true }),
-    zip(`${buildId}.zip`),
-    vfs.dest(buildTarget)
-  );
-
-  // clean up the build path
-  await del(join(buildTarget, 'kibana'));
+export function getFixReferences(prText: string) {
+  const fixes: string[] = [];
+  let match;
+  while ((match = FIXES_RE.exec(prText))) {
+    fixes.push(match[1]);
+  }
+  return fixes;
 }

@@ -17,30 +17,19 @@
  * under the License.
  */
 
-import { relative, join } from 'path';
+import cheerio from 'cheerio';
 
-import del from 'del';
-import vfs from 'vinyl-fs';
-import zip from 'gulp-zip';
+export function getNoteFromDescription(descriptionHtml: string) {
+  const $ = cheerio.load(descriptionHtml);
+  for (const el of $('p,h1,h2,h3,h4,h5').toArray()) {
+    const text = $(el).text();
+    const match = text.match(/^(\s*release note(?:s)?\s*:?\s*)/i);
 
-import { pipeline, PluginConfig } from '../../lib';
+    if (!match) {
+      continue;
+    }
 
-export async function createPackage(
-  plugin: PluginConfig,
-  buildTarget: string,
-  buildVersion: string
-) {
-  const buildId = `${plugin.id}-${buildVersion}`;
-  const buildRoot = join(buildTarget, 'kibana', plugin.id);
-  const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];
-
-  // zip up the package
-  await pipeline(
-    vfs.src(buildFiles, { cwd: buildTarget, base: buildTarget, dot: true }),
-    zip(`${buildId}.zip`),
-    vfs.dest(buildTarget)
-  );
-
-  // clean up the build path
-  await del(join(buildTarget, 'kibana'));
+    const note = text.replace(match[1], '').trim();
+    return note || $(el).next().text().trim();
+  }
 }

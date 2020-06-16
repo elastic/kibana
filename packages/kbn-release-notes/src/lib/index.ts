@@ -17,30 +17,10 @@
  * under the License.
  */
 
-import { relative, join } from 'path';
-
-import del from 'del';
-import vfs from 'vinyl-fs';
-import zip from 'gulp-zip';
-
-import { pipeline, PluginConfig } from '../../lib';
-
-export async function createPackage(
-  plugin: PluginConfig,
-  buildTarget: string,
-  buildVersion: string
-) {
-  const buildId = `${plugin.id}-${buildVersion}`;
-  const buildRoot = join(buildTarget, 'kibana', plugin.id);
-  const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];
-
-  // zip up the package
-  await pipeline(
-    vfs.src(buildFiles, { cwd: buildTarget, base: buildTarget, dot: true }),
-    zip(`${buildId}.zip`),
-    vfs.dest(buildTarget)
-  );
-
-  // clean up the build path
-  await del(join(buildTarget, 'kibana'));
-}
+export * from './pull_request';
+export * from './version';
+export * from './is_pr_relevant';
+export * from './streams';
+export * from './type_helpers';
+export * from './irrelevant_pr_summary';
+export * from './classify_pr';
