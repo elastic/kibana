@@ -85,9 +85,9 @@ export function createSavedGisMapClass(services) {
       return `${MAP_BASE_URL}/${this.id}`;
     };
 
-    getLayerList = () => {
+    getLayerList() {
       return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
-    };
+    }
 
     syncWithStore = (state) => {
       const layerList = getLayerListRaw(state);
