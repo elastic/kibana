@@ -1,5 +1,14 @@
 {
   "id": "esUiShared",
   "version": "kibana",
-  "ui": true
+  "ui": true,
+  "extraPublicDirs": [
+    "public/request/np_ready_request",
+    "static/ace_x_json/hooks",
+    "static/forms/components",
+    "static/forms/helpers",
+    "static/forms/helpers/field_validators/types",
+    "static/forms/hook_form_lib",
+    "static/validators/string"
+  ]
 }

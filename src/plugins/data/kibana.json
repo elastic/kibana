@@ -7,5 +7,11 @@
     "expressions",
     "uiActions"
   ],
-  "optionalPlugins": ["usageCollection"]
+  "optionalPlugins": ["usageCollection"],
+  "extraPublicDirs": [
+    "common",
+    "common/types",
+    "common/utils/abort_utils",
+    "public/actions/value_click_action"
+  ]
 }

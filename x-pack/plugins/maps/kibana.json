@@ -14,5 +14,6 @@
     "visualizations",
     "embeddable"
   ],
-  "ui": true
+  "ui": true,
+  "extraPublicDirs": ["common/constants"]
 }

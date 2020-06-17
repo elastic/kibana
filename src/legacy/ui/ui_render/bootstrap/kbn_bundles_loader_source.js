@@ -17,24 +17,35 @@
  * under the License.
  */
 
-import Path from 'path';
+module.exports = {
+  kbnBundlesLoaderSource: `(${kbnBundlesLoader.toString()})();`,
+};
 
-import { Bundle } from '../common';
+function kbnBundlesLoader() {
+  var modules = {};
 
-import { KibanaPlatformPlugin } from './kibana_platform_plugins';
+  function has(prop) {
+    return Object.prototype.hasOwnProperty.call(modules, prop);
+  }
 
-export function getPluginBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
-  return plugins
-    .filter((p) => p.isUiPlugin)
-    .map(
-      (p) =>
-        new Bundle({
-          type: 'plugin',
-          id: p.id,
-          publicDirNames: ['public', ...p.extraPublicDirs],
-          sourceRoot: repoRoot,
-          contextDir: p.directory,
-          outputDir: Path.resolve(p.directory, 'target/public'),
-        })
-    );
+  function define(key, bundleRequire, bundleModuleKey) {
+    if (has(key)) {
+      throw new Error('__kbnBundles__ already has a module defined for "' + key + '"');
+    }
+
+    modules[key] = {
+      bundleRequire,
+      bundleModuleKey,
+    };
+  }
+
+  function get(key) {
+    if (!has(key)) {
+      throw new Error('__kbnBundles__ does not have a module defined for "' + key + '"');
+    }
+
+    return modules[key].bundleRequire(modules[key].bundleModuleKey);
+  }
+
+  return { has: has, define: define, get: get };
 }
