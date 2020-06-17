@@ -4,82 +4,139 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, memo } from 'react';
-import { EuiButton, EuiHorizontalRule } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { FunctionComponent, memo, useEffect } from 'react';
+import {
+  EuiButton,
+  EuiHorizontalRule,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { Form, useForm, FormDataProvider } from '../../../../../shared_imports';
 import { usePipelineProcessorsContext } from '../../context';
 import { ProcessorInternal } from '../../types';
 
-import { LearnMoreFormLabel } from './learn_more_form_label';
-import { getProcessorFormOrDocPath } from './map_processor_type_to_form';
+import { LearnMoreFormButton } from './learn_more_form_button';
+import { ProcessorSettingsFromOnSubmitArg } from './processor_settings_form.container';
+import { getProcessorFormDescriptor } from './map_processor_type_to_form';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
 import { Custom } from './processors/custom';
 
+export type OnSubmitHandler = (processor: ProcessorSettingsFromOnSubmitArg) => void;
+
 export interface Props {
+  isOnFailure: boolean;
   processor?: ProcessorInternal;
   form: ReturnType<typeof useForm>['form'];
+  onClose: () => void;
+  onOpen: () => void;
 }
 
 export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
-  ({ processor, form }) => {
+  ({ processor, form, isOnFailure, onClose, onOpen }) => {
     const {
       links: { esDocsBasePath },
     } = usePipelineProcessorsContext();
+
+    const flyoutTitleContent = isOnFailure ? (
+      <FormattedMessage
+        id="xpack.ingestPipelines.settingsFormOnFailureFlyout.title"
+        defaultMessage="Configure on-failure processor"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.ingestPipelines.settingsFormFlyout.title"
+        defaultMessage="Configure processor"
+      />
+    );
+
+    useEffect(
+      () => {
+        onOpen();
+      },
+      [] /* eslint-disable-line react-hooks/exhaustive-deps */
+    );
+
     return (
       <Form form={form}>
-        <ProcessorTypeField initialType={processor?.type} />
+        <EuiFlyout onClose={onClose}>
+          <EuiFlyoutHeader>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem>
+                <div>
+                  <EuiTitle size="m">
+                    <h2>{flyoutTitleContent}</h2>
+                  </EuiTitle>
+                </div>
+              </EuiFlexItem>
 
-        <EuiHorizontalRule />
+              <EuiFlexItem grow={false}>
+                <FormDataProvider pathsToWatch="type">
+                  {({ type }) => {
+                    const formDescriptor = getProcessorFormDescriptor(type as any);
 
-        <FormDataProvider pathsToWatch="type">
-          {(arg: any) => {
-            const { type } = arg;
-            let formContent: React.ReactNode | undefined;
-
-            if (type?.length) {
-              const ProcessorFormOrDocPath = getProcessorFormOrDocPath(type as any);
-
-              if (typeof ProcessorFormOrDocPath === 'function') {
-                formContent = (
-                  <>
-                    <ProcessorFormOrDocPath />
-                    <CommonProcessorFields />
-                  </>
-                );
-              } else {
-                formContent = (
-                  <Custom
-                    defaultOptions={processor?.options}
-                    helpText={
-                      typeof ProcessorFormOrDocPath === 'string' ? (
-                        <LearnMoreFormLabel
-                          processorType={type}
-                          docLink={esDocsBasePath + ProcessorFormOrDocPath}
+                    if (formDescriptor) {
+                      return (
+                        <LearnMoreFormButton
+                          processorLabel={formDescriptor.label}
+                          docLink={esDocsBasePath + formDescriptor.docLinkPath}
                         />
-                      ) : undefined
+                      );
                     }
-                  />
-                );
-              }
+                    return null;
+                  }}
+                </FormDataProvider>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <ProcessorTypeField initialType={processor?.type} />
 
-              return (
-                <>
-                  {formContent}
-                  <EuiButton onClick={form.submit}>
-                    {i18n.translate(
-                      'xpack.ingestPipelines.pipelineEditor.settingsForm.submitButtonLabel',
-                      { defaultMessage: 'Submit' }
-                    )}
-                  </EuiButton>
-                </>
-              );
-            }
+            <EuiHorizontalRule />
 
-            // If the user has not yet defined a type, we do not show any settings fields
-            return null;
-          }}
-        </FormDataProvider>
+            <FormDataProvider pathsToWatch="type">
+              {(arg: any) => {
+                const { type } = arg;
+                let formContent: React.ReactNode | undefined;
+
+                if (type?.length) {
+                  const formDescriptor = getProcessorFormDescriptor(type as any);
+
+                  if (formDescriptor?.FieldsComponent) {
+                    formContent = (
+                      <>
+                        <formDescriptor.FieldsComponent />
+                        <CommonProcessorFields />
+                      </>
+                    );
+                  } else {
+                    formContent = <Custom defaultOptions={processor?.options} />;
+                  }
+
+                  return (
+                    <>
+                      {formContent}
+                      <EuiButton onClick={form.submit}>
+                        {i18n.translate(
+                          'xpack.ingestPipelines.pipelineEditor.settingsForm.submitButtonLabel',
+                          { defaultMessage: 'Submit' }
+                        )}
+                      </EuiButton>
+                    </>
+                  );
+                }
+
+                // If the user has not yet defined a type, we do not show any settings fields
+                return null;
+              }}
+            </FormDataProvider>
+          </EuiFlyoutBody>
+        </EuiFlyout>
       </Form>
     );
   },
