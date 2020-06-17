@@ -215,6 +215,8 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
     onSelectionChange: setSelectedItems,
   };
 
+  const noSwimlaneSelected = Object.values(selectedSwimlanes).every((isSelected) => !isSelected);
+
   return (
     <EuiOverlayMask data-test-subj="mlAddToDashboardModal">
       <EuiModal onClose={onClose.bind(null, undefined)}>
@@ -222,7 +224,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="xpack.ml.explorer.dashboardsTitle"
-              defaultMessage="Attach swimlanes to dashboards"
+              defaultMessage="Add swimlanes to dashboards"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -243,8 +245,6 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
                   ...selectedSwimlanes,
                   [optionId]: !selectedSwimlanes[optionId as SwimlaneType],
                 };
-                // at least one swimlane has to be selected
-                if (Object.values(newSelection).every((isSelected) => !isSelected)) return;
                 setSelectedSwimlanes(newSelection);
               }}
               data-test-subj="mlAddToDashboardSwimlaneTypeSelector"
@@ -253,17 +253,27 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
 
           <EuiSpacer size="m" />
 
-          <EuiInMemoryTable
-            itemId="id"
-            isSelectable={true}
-            selection={selection}
-            items={dashboardItems}
-            loading={isLoading}
-            columns={columns}
-            search={search}
-            pagination={true}
-            sorting={true}
-          />
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.ml.explorer.addToDashboard.selectDashboardsLabel"
+                defaultMessage="Select dashboards:"
+              />
+            }
+          >
+            <EuiInMemoryTable
+              itemId="id"
+              isSelectable={true}
+              selection={selection}
+              items={dashboardItems}
+              loading={isLoading}
+              columns={columns}
+              search={search}
+              pagination={true}
+              sorting={true}
+            />
+          </EuiFormRow>
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onClose.bind(null, undefined)}>
@@ -273,7 +283,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
             />
           </EuiButtonEmpty>
           <EuiButton
-            disabled={selectedItems.length !== 1}
+            disabled={noSwimlaneSelected || selectedItems.length !== 1}
             onClick={async () => {
               onClose(async () => {
                 const selectedDashboardId = selectedItems[0].id;
@@ -292,7 +302,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
           <EuiButton
             fill
             onClick={onClose.bind(null, addSwimlaneToDashboardCallback)}
-            disabled={selectedItems.length === 0}
+            disabled={noSwimlaneSelected || selectedItems.length === 0}
           >
             <FormattedMessage
               id="xpack.ml.explorer.dashboardsTable.addToDashboardLabel"
