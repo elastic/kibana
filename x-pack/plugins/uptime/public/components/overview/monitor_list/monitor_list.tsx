@@ -83,9 +83,13 @@ export const MonitorListComponent: React.FC<Props> = ({
       mobileOptions: {
         fullWidth: true,
       },
-      render: (status: string, { state: { timestamp, checks } }: MonitorSummary) => {
+      render: (status: string, { state: { timestamp, summaryPings } }: MonitorSummary) => {
         return (
-          <MonitorListStatusColumn status={status} timestamp={timestamp} checks={checks ?? []} />
+          <MonitorListStatusColumn
+            status={status}
+            timestamp={timestamp}
+            summaryPings={summaryPings ?? []}
+          />
         );
       },
     },

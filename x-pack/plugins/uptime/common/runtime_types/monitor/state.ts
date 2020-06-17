@@ -5,6 +5,7 @@
  */
 
 import * as t from 'io-ts';
+import { PingType } from '../ping/ping';
 
 export const CheckMonitorType = t.intersection([
   t.partial({
@@ -15,37 +16,6 @@ export const CheckMonitorType = t.intersection([
     status: t.string,
   }),
 ]);
-
-export const CheckType = t.intersection([
-  t.partial({
-    agent: t.partial({
-      id: t.string,
-    }),
-    container: t.type({
-      id: t.string,
-    }),
-    kubernetes: t.type({
-      pod: t.type({
-        uid: t.string,
-      }),
-    }),
-    observer: t.type({
-      geo: t.partial({
-        name: t.string,
-        location: t.partial({
-          lat: t.number,
-          lon: t.number,
-        }),
-      }),
-    }),
-  }),
-  t.type({
-    monitor: CheckMonitorType,
-    timestamp: t.number,
-  }),
-]);
-
-export type Check = t.TypeOf<typeof CheckType>;
 
 export const StateType = t.type({
   timestamp: t.string,
@@ -60,7 +30,7 @@ export const StateType = t.type({
     not_after: t.union([t.string, t.null]),
     not_before: t.union([t.string, t.null]),
   }),
-  checks: t.array(CheckType),
+  summaryPings: t.array(PingType),
   observer: t.type({
     geo: t.type({
       name: t.array(t.string),

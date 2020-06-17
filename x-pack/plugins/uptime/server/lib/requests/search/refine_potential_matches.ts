@@ -37,7 +37,7 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
     let matched = false;
     const monitorSummaryState: MonitorSummaryState = {
       timestamp: '',
-      checks: [],
+      summaryPings: [],
       observer: { geo: { name: [] } },
       summary: {
         status: 'up',
@@ -74,6 +74,7 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
         continue MonitorLoop;
       }
 
+      monitorSummaryState.summaryPings.push(latestSource);
       monitorSummaryState.url = latestSource.url;
       monitorSummaryState.observer.geo.name.push(location);
       if (latestSource['@timestamp'] > monitorSummaryState.timestamp) {

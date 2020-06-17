@@ -8,6 +8,7 @@ import { QueryContext } from './query_context';
 import { fetchChunk } from './fetch_chunk';
 import { CursorDirection, MonitorSummary } from '../../../../common/runtime_types';
 import { CursorPagination } from './types';
+import { MonitorSummariesPage } from '.';
 
 // Hardcoded chunk size for how many monitors to fetch at a time when querying
 export const CHUNK_SIZE = 1000;
@@ -66,6 +67,38 @@ export class MonitorSummaryIterator {
       return found;
     }
     return null;
+  }
+
+  async nextPage(size: number): Promise<MonitorSummariesPage> {
+    const monitorSummaries: MonitorSummary[] = [];
+    let paginationBefore: CursorPagination | null = null;
+    while (monitorSummaries.length < size) {
+      const monitor = await this.next();
+      if (!monitor) {
+        break; // No more items to fetch
+      }
+      monitorSummaries.push(monitor);
+
+      // We want the before pagination to be before the first item we encounter
+      if (monitorSummaries.length === 1) {
+        paginationBefore = await this.paginationBeforeCurrent();
+      }
+    }
+
+    // We have to create these objects before checking if we can navigate backward
+    const paginationAfter = await this.paginationAfterCurrent();
+
+    const ssAligned = this.queryContext.searchSortAligned();
+
+    if (!ssAligned) {
+      monitorSummaries.reverse();
+    }
+
+    return {
+      monitorSummaries,
+      nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
+      prevPagePagination: ssAligned ? paginationBefore : paginationAfter,
+    };
   }
 
   // Look ahead to see if there are additional results.
