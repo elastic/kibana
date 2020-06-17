@@ -19,6 +19,8 @@ import {
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
+  CopyAgentConfigRequest,
+  CopyAgentConfigResponse,
   DeleteAgentConfigRequest,
   DeleteAgentConfigResponse,
 } from '../../types';
@@ -72,6 +74,17 @@ export const sendUpdateAgentConfig = (
   return sendRequest<UpdateAgentConfigResponse>({
     path: agentConfigRouteService.getUpdatePath(agentConfigId),
     method: 'put',
+    body: JSON.stringify(body),
+  });
+};
+
+export const sendCopyAgentConfig = (
+  agentConfigId: string,
+  body: CopyAgentConfigRequest['body']
+) => {
+  return sendRequest<CopyAgentConfigResponse>({
+    path: agentConfigRouteService.getCopyPath(agentConfigId),
+    method: 'post',
     body: JSON.stringify(body),
   });
 };

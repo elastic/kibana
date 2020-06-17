@@ -65,7 +65,7 @@ const durationUnit: DurationUnit = {
       defaultMessage: 'ms',
     }),
     convert: (value: number) =>
-      asInteger(moment.duration(value / 1000).asMilliseconds()),
+      asDecimal(moment.duration(value / 1000).asMilliseconds()),
   },
   microseconds: {
     label: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
@@ -77,13 +77,8 @@ const durationUnit: DurationUnit = {
 
 /**
  * Converts a microseconds value into the unit defined.
- *
- * @param param0
- * { unit: "milliseconds" | "hours" | "minutes" | "seconds" | "microseconds", microseconds, defaultValue }
- *
- * @returns object { value, unit, formatted }
  */
-export function convertTo({
+function convertTo({
   unit,
   microseconds,
   defaultValue = NOT_AVAILABLE_LABEL,
@@ -118,7 +113,7 @@ function getDurationUnitKey(max: number): DurationTimeUnit {
   if (max > toMicroseconds(10, 'seconds')) {
     return 'seconds';
   }
-  if (max > toMicroseconds(10, 'milliseconds')) {
+  if (max > toMicroseconds(1, 'milliseconds')) {
     return 'milliseconds';
   }
   return 'microseconds';
@@ -135,10 +130,6 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
 
 /**
  * Converts value and returns it formatted - 00 unit
- *
- * @param value
- * @param param1 { defaultValue }
- * @returns formated value - 00 unit
  */
 export function asDuration(
   value: Maybe<number>,
@@ -150,4 +141,16 @@ export function asDuration(
 
   const formatter = getDurationFormatter(value);
   return formatter(value, { defaultValue }).formatted;
+}
+
+/**
+ * Convert a microsecond value to decimal milliseconds. Normally we use
+ * `asDuration`, but this is used in places like tables where we always want
+ * the same units.
+ */
+export function asMillisecondDuration(time: number) {
+  return convertTo({
+    unit: 'milliseconds',
+    microseconds: time,
+  }).formatted;
 }

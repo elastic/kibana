@@ -67,6 +67,14 @@
         ],
       },
       {
+        groupSlug: '@testing-library/dom',
+        groupName: '@testing-library/dom related packages',
+        packageNames: [
+          '@testing-library/dom',
+          '@types/testing-library__dom',
+        ],
+      },
+      {
         groupSlug: 'angular',
         groupName: 'angular related packages',
         packagePatterns: [

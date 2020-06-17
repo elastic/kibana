@@ -13,6 +13,7 @@ import { ml } from './ml_api_service';
 import { mlMessageBarService } from '../components/messagebar';
 import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
+import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
 
 const msgs = mlMessageBarService;
@@ -929,10 +930,8 @@ function createResultsUrlForJobs(jobsList, resultsPage) {
     }
   }
 
-  const timeFormat = 'YYYY-MM-DD HH:mm:ss';
-
-  const fromString = moment(from).format(timeFormat); // Defaults to 'now' if 'from' is undefined
-  const toString = moment(to).format(timeFormat); // Defaults to 'now' if 'to' is undefined
+  const fromString = moment(from).format(TIME_FORMAT); // Defaults to 'now' if 'from' is undefined
+  const toString = moment(to).format(TIME_FORMAT); // Defaults to 'now' if 'to' is undefined
 
   const jobIds = jobsList.map((j) => j.id);
   return createResultsUrl(jobIds, fromString, toString, resultsPage);

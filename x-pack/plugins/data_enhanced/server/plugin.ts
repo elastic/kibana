@@ -42,15 +42,9 @@ export class EnhancedDataServerPlugin
   }
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
-    deps.data.search.registerSearchStrategyContext(
-      this.initializerContext.opaqueId,
-      'backgroundSearchService',
-      () => this.backgroundSessionService
-    );
-    deps.data.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
+    deps.data.search.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
-      enhancedEsSearchStrategyProvider
+      enhancedEsSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
     );
 
     // Background session registrations
