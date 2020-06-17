@@ -261,19 +261,8 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   .then((currentDashboard) => {
                     if (currentDashboard) {
                       const input = {
-                        savedVis: { ...savedVis },
-                        hideVisModal: true,
+                        savedVis: { ...vis.serialize() },
                       };
-                      if (stateContainer.getState() && stateContainer.getState().vis) {
-                        const { vis } = stateContainer.getState();
-                        const { type, aggs, params } = vis;
-                        const visState = {
-                          type,
-                          aggs,
-                          params,
-                        };
-                        input.savedVis.visState = visState;
-                      }
                       currentDashboard.addNewEmbeddable('visualization', input).then(() => {
                         const dashInput = currentDashboard.getInput();
                         dashboard.navigateToDashboard(dashInput);

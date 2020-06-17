@@ -31,7 +31,7 @@ import {
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { Vis } from '../vis';
+import { SerializedVis, Vis } from '../vis';
 import {
   getCapabilities,
   getTypes,
@@ -44,7 +44,6 @@ import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_obje
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { ISavedVis } from '../types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -134,12 +133,12 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  public async create(input: VisualizeInput & { hideVisModal: boolean }, parent?: IContainer) {
+  public async create(input: VisualizeInput & { savedVis?: SerializedVis }, parent?: IContainer) {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     const originatingAppParam = await this.getCurrentAppId();
-    if (input.hideVisModal) {
-      const visState = convertToSerializedVis(input.savedVis as ISavedVis);
+    if (input.savedVis) {
+      const visState = input.savedVis;
       const vis = new Vis(visState.type, visState);
       await vis.setState(visState);
       return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
