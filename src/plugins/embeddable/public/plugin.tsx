@@ -71,7 +71,7 @@ export interface EmbeddableStart {
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   EmbeddablePanel: EmbeddablePanelHOC;
-  getEmbeddablePanel: (stateTransfer: EmbeddableStateTransfer) => EmbeddablePanelHOC;
+  getEmbeddablePanel: (stateTransfer?: EmbeddableStateTransfer) => EmbeddablePanelHOC;
   getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
 }
 

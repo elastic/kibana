@@ -104,7 +104,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     private readonly options: DashboardContainerOptions,
-    stateTransfer: EmbeddableStateTransfer,
+    stateTransfer?: EmbeddableStateTransfer,
     parent?: Container
   ) {
     super(
