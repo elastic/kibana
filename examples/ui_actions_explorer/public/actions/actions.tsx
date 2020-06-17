@@ -35,7 +35,7 @@ export const ACTION_PHONE_USER = 'ACTION_PHONE_USER';
 export const ACTION_SHOWCASE_PLUGGABILITY = 'ACTION_SHOWCASE_PLUGGABILITY';
 
 export const showcasePluggability = createAction<typeof ACTION_SHOWCASE_PLUGGABILITY>({
-  type: ACTION_SHOWCASE_PLUGGABILITY,
+  factoryId: ACTION_SHOWCASE_PLUGGABILITY,
   getDisplayName: () => 'This is pluggable! Any plugin can inject their actions here.',
   execute: async () => alert("Isn't that cool?!"),
 });
@@ -51,7 +51,7 @@ export const makePhoneCallAction = createAction<typeof ACTION_CALL_PHONE_NUMBER>
 });
 
 export const lookUpWeatherAction = createAction<typeof ACTION_TRAVEL_GUIDE>({
-  type: ACTION_TRAVEL_GUIDE,
+  factoryId: ACTION_TRAVEL_GUIDE,
   getIconType: () => 'popout',
   getDisplayName: () => 'View travel guide',
   execute: async (context) => {
@@ -64,7 +64,7 @@ export interface CountryContext {
 }
 
 export const viewInMapsAction = createAction<typeof ACTION_VIEW_IN_MAPS>({
-  type: ACTION_VIEW_IN_MAPS,
+  factoryId: ACTION_VIEW_IN_MAPS,
   getIconType: () => 'popout',
   getDisplayName: () => 'View in maps',
   execute: async (context) => {
@@ -105,7 +105,7 @@ function EditUserModal({
 
 export const createEditUserAction = (getOpenModal: () => Promise<OverlayStart['openModal']>) =>
   createAction<typeof ACTION_EDIT_USER>({
-    type: ACTION_EDIT_USER,
+    factoryId: ACTION_EDIT_USER,
     getIconType: () => 'pencil',
     getDisplayName: () => 'Edit user',
     execute: async ({ user, update }) => {
@@ -122,7 +122,7 @@ export interface UserContext {
 
 export const createPhoneUserAction = (getUiActionsApi: () => Promise<UiActionsStart>) =>
   createAction<typeof ACTION_PHONE_USER>({
-    type: ACTION_PHONE_USER,
+    factoryId: ACTION_PHONE_USER,
     getDisplayName: () => 'Call phone number',
     isCompatible: async ({ user }) => user.phone !== undefined,
     execute: async ({ user }) => {

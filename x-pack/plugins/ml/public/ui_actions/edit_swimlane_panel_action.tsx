@@ -26,7 +26,7 @@ export interface EditSwimlanePanelContext {
 export function createEditSwimlanePanelAction(getStartServices: CoreSetup['getStartServices']) {
   return createAction<typeof EDIT_SWIMLANE_PANEL_ACTION>({
     id: 'edit-anomaly-swimlane',
-    type: EDIT_SWIMLANE_PANEL_ACTION,
+    factoryId: EDIT_SWIMLANE_PANEL_ACTION,
     getIconType(context: ActionContextMapping[typeof EDIT_SWIMLANE_PANEL_ACTION]): string {
       return 'pencil';
     },

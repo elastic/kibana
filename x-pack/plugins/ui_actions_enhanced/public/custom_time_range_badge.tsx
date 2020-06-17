@@ -30,7 +30,7 @@ export interface TimeBadgeActionContext {
 }
 
 export class CustomTimeRangeBadge implements ActionByType<typeof CUSTOM_TIME_RANGE_BADGE> {
-  public readonly type = CUSTOM_TIME_RANGE_BADGE;
+  public readonly factoryId = CUSTOM_TIME_RANGE_BADGE;
   public readonly id = CUSTOM_TIME_RANGE_BADGE;
   public order = 7;
   private openModal: OpenModal;

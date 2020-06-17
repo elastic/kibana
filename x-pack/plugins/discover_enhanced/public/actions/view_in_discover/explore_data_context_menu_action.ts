@@ -75,7 +75,7 @@ export interface Params {
 export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
   public readonly id = ACTION_EXPLORE_DATA;
 
-  public readonly type = ACTION_EXPLORE_DATA;
+  public readonly factoryId = ACTION_EXPLORE_DATA;
 
   public readonly order = 200;
 

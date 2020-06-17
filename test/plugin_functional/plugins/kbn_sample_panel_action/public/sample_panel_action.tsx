@@ -34,7 +34,7 @@ export interface SamplePanelActionContext {
 
 export function createSamplePanelAction(getStartServices: CoreSetup['getStartServices']) {
   return createAction<typeof SAMPLE_PANEL_ACTION>({
-    type: SAMPLE_PANEL_ACTION,
+    factoryId: SAMPLE_PANEL_ACTION,
     getDisplayName: () => 'Sample Panel Action',
     execute: async ({ embeddable }: SamplePanelActionContext) => {
       if (!embeddable) {

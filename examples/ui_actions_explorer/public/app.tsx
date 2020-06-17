@@ -78,7 +78,7 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
                 onClick={() => {
                   const dynamicAction = createAction<typeof ACTION_HELLO_WORLD>({
                     id: `${ACTION_HELLO_WORLD}-${name}`,
-                    type: ACTION_HELLO_WORLD,
+                    factoryId: ACTION_HELLO_WORLD,
                     getDisplayName: () => `Say hello to ${name}`,
                     execute: async () => {
                       const overlay = openModal(

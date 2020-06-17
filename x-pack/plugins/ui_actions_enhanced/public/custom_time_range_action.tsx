@@ -39,7 +39,7 @@ export interface TimeRangeActionContext {
 }
 
 export class CustomTimeRangeAction implements ActionByType<typeof CUSTOM_TIME_RANGE> {
-  public readonly type = CUSTOM_TIME_RANGE;
+  public readonly factoryId = CUSTOM_TIME_RANGE;
   private openModal: OpenModal;
   private dateFormat?: string;
   private commonlyUsedRanges: CommonlyUsedRange[];

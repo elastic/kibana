@@ -30,7 +30,7 @@ interface StartServices {
 
 export const createHelloWorldAction = (getStartServices: () => Promise<StartServices>) =>
   createAction({
-    type: ACTION_HELLO_WORLD,
+    factoryId: ACTION_HELLO_WORLD,
     getDisplayName: () => 'Hello World!',
     execute: async () => {
       const { openModal } = await getStartServices();

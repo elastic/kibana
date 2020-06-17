@@ -24,7 +24,7 @@ export const SAMPLE_PANEL_LINK = 'samplePanelLink' as ActionType;
 
 export const createSamplePanelLink = (): Action =>
   createAction<typeof SAMPLE_PANEL_LINK>({
-    type: SAMPLE_PANEL_LINK,
+    factoryId: SAMPLE_PANEL_LINK,
     getDisplayName: () => 'Sample panel Link',
     execute: async () => {
       window.location.href = 'https://example.com/kibana/test';
