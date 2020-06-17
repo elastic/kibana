@@ -14,13 +14,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   const findResultsWithAPI = async (t: string): Promise<GlobalSearchResult[]> => {
-    return browser.executeAsync(async (term: string, cb: Function) => {
+    return browser.executeAsync(async (term, cb) => {
       const { start } = window.__coreProvider;
       const globalSearchTestApi: GlobalSearchTestApi = start.plugins.globalSearchTest;
-      globalSearchTestApi.findAll(term).then((results) => {
-        cb(results);
-      });
-    }, t) as any; // executeAsync signature is broken. return type should be inferred from the cb param.
+      globalSearchTestApi.findAll(term).then(cb);
+    }, t);
   };
 
   describe('GlobalSearch API', function () {

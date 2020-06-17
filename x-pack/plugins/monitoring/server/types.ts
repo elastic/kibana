@@ -15,7 +15,3 @@ export interface MonitoringLicenseService {
   getSecurityFeature: () => LicenseFeature;
   stop: () => void;
 }
-
-export interface MonitoringElasticsearchConfig {
-  hosts: string[];
-}

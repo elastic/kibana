@@ -189,7 +189,9 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         }),
         actions: [
           {
-            render: (config: AgentConfig) => <AgentConfigActionMenu configId={config.id} />,
+            render: (config: AgentConfig) => (
+              <AgentConfigActionMenu config={config} onCopySuccess={() => sendRequest()} />
+            ),
           },
         ],
       },
@@ -201,7 +203,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     }
 
     return cols;
-  }, [getHref, isFleetEnabled]);
+  }, [getHref, isFleetEnabled, sendRequest]);
 
   const createAgentConfigButton = useMemo(
     () => (

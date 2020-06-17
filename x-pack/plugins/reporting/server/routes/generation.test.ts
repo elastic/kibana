@@ -18,6 +18,7 @@ import { of } from 'rxjs';
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('POST /api/reporting/generate', () => {
+  const reportingSymbol = Symbol('reporting');
   let server: setupServerReturn['server'];
   let httpSetup: setupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
@@ -47,7 +48,8 @@ describe('POST /api/reporting/generate', () => {
   } as unknown) as jest.Mocked<LevelLogger>;
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer());
+    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
     const mockDeps = ({
       elasticsearch: {
         legacy: {
