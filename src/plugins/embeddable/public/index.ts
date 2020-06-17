@@ -84,4 +84,5 @@ export {
   EmbeddableStart,
   EmbeddableSetupDependencies,
   EmbeddableStartDependencies,
+  EmbeddablePanelHOC,
 } from './plugin';

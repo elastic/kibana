@@ -44,12 +44,47 @@ describe('embeddable state transfer', () => {
     });
   });
 
+  it('can send an outgoing originating app state in append mode', async () => {
+    const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
+    stateTransfer = new EmbeddableStateTransfer(
+      application.navigateToApp,
+      (historyMock as unknown) as ScopedHistory
+    );
+    await stateTransfer.navigateToWithOriginatingApp(destinationApp, {
+      state: { originatingApp },
+      appendToExistingState: true,
+    });
+    expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
+      path: undefined,
+      state: {
+        kibanaIsNowForSports: 'extremeSportsKibana',
+        originatingApp: 'superUltraTestDashboard',
+      },
+    });
+  });
+
   it('can send an outgoing embeddable package state', async () => {
     await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
       state: { type: 'coolestType', id: '150' },
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
       state: { type: 'coolestType', id: '150' },
+    });
+  });
+
+  it('can send an outgoing embeddable package state in append mode', async () => {
+    const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
+    stateTransfer = new EmbeddableStateTransfer(
+      application.navigateToApp,
+      (historyMock as unknown) as ScopedHistory
+    );
+    await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
+      state: { type: 'coolestType', id: '150' },
+      appendToExistingState: true,
+    });
+    expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
+      path: undefined,
+      state: { kibanaIsNowForSports: 'extremeSportsKibana', type: 'coolestType', id: '150' },
     });
   });
 
@@ -93,7 +128,7 @@ describe('embeddable state transfer', () => {
     expect(fetchedState).toBeUndefined();
   });
 
-  it('removes keys after fetching if removeAfterFetching is true', async () => {
+  it('removes all keys in the keysToRemoveAfterFetch array', async () => {
     const historyMock = mockHistoryState({
       type: 'skisEmbeddable',
       id: '123',
@@ -110,7 +145,7 @@ describe('embeddable state transfer', () => {
     );
   });
 
-  it('leaves state as is if removeAfterFetching is false', async () => {
+  it('leaves state as is when no keysToRemove are supplied', async () => {
     const historyMock = mockHistoryState({
       type: 'skisEmbeddable',
       id: '123',

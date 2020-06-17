@@ -70,9 +70,12 @@ export interface EmbeddableStart {
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
-  EmbeddablePanel: React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
+  EmbeddablePanel: EmbeddablePanelHOC;
+  getEmbeddablePanel: (stateTransfer: EmbeddableStateTransfer) => EmbeddablePanelHOC;
   getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
 }
+
+export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactoryDefinitions: Map<
@@ -118,6 +121,28 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
     this.isRegistryReady = true;
 
+    const getEmbeddablePanelHoc = (stateTransfer?: EmbeddableStateTransfer) => ({
+      embeddable,
+      hideHeader,
+    }: {
+      embeddable: IEmbeddable;
+      hideHeader?: boolean;
+    }) => (
+      <EmbeddablePanel
+        hideHeader={hideHeader}
+        embeddable={embeddable}
+        stateTransfer={stateTransfer ? stateTransfer : this.outgoingOnlyStateTransfer}
+        getActions={uiActions.getTriggerCompatibleActions}
+        getEmbeddableFactory={this.getEmbeddableFactory}
+        getAllEmbeddableFactories={this.getEmbeddableFactories}
+        overlays={core.overlays}
+        notifications={core.notifications}
+        application={core.application}
+        inspector={inspector}
+        SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
+      />
+    );
+
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
@@ -126,27 +151,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           ? new EmbeddableStateTransfer(core.application.navigateToApp, history)
           : this.outgoingOnlyStateTransfer;
       },
-      EmbeddablePanel: ({
-        embeddable,
-        hideHeader,
-      }: {
-        embeddable: IEmbeddable;
-        hideHeader?: boolean;
-      }) => (
-        <EmbeddablePanel
-          hideHeader={hideHeader}
-          embeddable={embeddable}
-          getActions={uiActions.getTriggerCompatibleActions}
-          getEmbeddableFactory={this.getEmbeddableFactory}
-          stateTransfer={this.outgoingOnlyStateTransfer}
-          getAllEmbeddableFactories={this.getEmbeddableFactories}
-          overlays={core.overlays}
-          notifications={core.notifications}
-          application={core.application}
-          inspector={inspector}
-          SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
-        />
-      ),
+      EmbeddablePanel: getEmbeddablePanelHoc(),
+      getEmbeddablePanel: getEmbeddablePanelHoc,
     };
   }
 

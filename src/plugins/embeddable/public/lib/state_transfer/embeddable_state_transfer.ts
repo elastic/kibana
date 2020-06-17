@@ -43,7 +43,7 @@ export class EmbeddableStateTransfer {
    * history's location state.
    *
    * @param history - the scoped history to fetch from
-   * @param removeAfterFetch - determines whether or not the state transfer service removes all keys relating to this object
+   * @param options.keysToRemoveAfterFetch - an array of keys to be removed from the state after they are retrieved
    */
   public getIncomingOriginatingApp(options?: {
     keysToRemoveAfterFetch?: string[];
@@ -58,7 +58,7 @@ export class EmbeddableStateTransfer {
    * history's location state.
    *
    * @param history - the scoped history to fetch from
-   * @param removeAfterFetch - determines whether or not the state transfer service removes all keys relating to this object
+   * @param options.keysToRemoveAfterFetch - an array of keys to be removed from the state after they are retrieved
    */
   public getIncomingEmbeddablePackage(options?: {
     keysToRemoveAfterFetch?: string[];
@@ -74,7 +74,11 @@ export class EmbeddableStateTransfer {
    */
   public async navigateToWithOriginatingApp(
     appId: string,
-    options?: { path?: string; state: EmbeddableOriginatingAppState }
+    options?: {
+      path?: string;
+      state: EmbeddableOriginatingAppState;
+      appendToExistingState?: boolean;
+    }
   ): Promise<void> {
     await this.navigateToWithState<EmbeddableOriginatingAppState>(appId, options);
   }
@@ -85,7 +89,7 @@ export class EmbeddableStateTransfer {
    */
   public async navigateToWithEmbeddablePackage(
     appId: string,
-    options?: { path?: string; state: EmbeddablePackageState }
+    options?: { path?: string; state: EmbeddablePackageState; appendToExistingState?: boolean }
   ): Promise<void> {
     await this.navigateToWithState<EmbeddablePackageState>(appId, options);
   }
@@ -114,8 +118,15 @@ export class EmbeddableStateTransfer {
 
   private async navigateToWithState<OutgoingStateType = unknown>(
     appId: string,
-    options?: { path?: string; state?: OutgoingStateType }
+    options?: { path?: string; state?: OutgoingStateType; appendToExistingState?: boolean }
   ): Promise<void> {
-    await this.navigateToApp(appId, options);
+    const stateObject =
+      options?.appendToExistingState && this.scopedHistory
+        ? {
+            ...(this.scopedHistory?.location.state as { [key: string]: unknown }),
+            ...options.state,
+          }
+        : options?.state;
+    await this.navigateToApp(appId, { path: options?.path, state: stateObject });
   }
 }
