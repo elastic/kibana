@@ -48,7 +48,7 @@ export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort, isLoa
     <>
       {sort.columnId === header.id && isLoading ? (
         <EventsHeadingExtra className="siemEventsHeading__extra--loading">
-          <EventsLoading />
+          <EventsLoading data-test-subj="timeline-loading-spinner" />
         </EventsHeadingExtra>
       ) : (
         <EventsHeadingExtra className="siemEventsHeading__extra--close">
