@@ -40,7 +40,7 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
 
 export const OverviewPageComponent = React.memo(
   ({ indexPattern, setEsKueryFilters, loading }: Props) => {
-    const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
+    const params = useGetUrlParams();
     const { search, filters: urlFilters } = params;
 
     const {

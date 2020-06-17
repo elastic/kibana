@@ -5,9 +5,6 @@
  */
 
 export const CLIENT_DEFAULTS = {
-  ABSOLUTE_DATE_RANGE_START: 0,
-  // 15 minutes
-  ABSOLUTE_DATE_RANGE_END: 1000 * 60 * 15,
   /**
    * The application auto refreshes every 60s by default.
    */
@@ -32,11 +29,18 @@ export const CLIENT_DEFAULTS = {
    */
   DATE_RANGE_END: 'now',
   FILTERS: '',
-  MONITOR_LIST_PAGE_INDEX: 0,
-  MONITOR_LIST_PAGE_SIZE: 20,
-  MONITOR_LIST_SORT_DIRECTION: 'asc',
-  MONITOR_LIST_SORT_FIELD: 'monitor_id',
+  PAGINATION: '',
   SEARCH: '',
-  SELECTED_PING_LIST_STATUS: '',
   STATUS_FILTER: '',
+};
+
+export const URL_PARAM_DEFAULT_MAPPING: { [key: string]: string | number | boolean } = {
+  autorefreshInterval: CLIENT_DEFAULTS.AUTOREFRESH_INTERVAL,
+  autorefreshIsPaused: CLIENT_DEFAULTS.AUTOREFRESH_IS_PAUSED,
+  dateRangeStart: CLIENT_DEFAULTS.DATE_RANGE_START,
+  dateRangeEnd: CLIENT_DEFAULTS.DATE_RANGE_END,
+  filters: CLIENT_DEFAULTS.FILTERS,
+  pagination: CLIENT_DEFAULTS.PAGINATION,
+  search: CLIENT_DEFAULTS.SEARCH,
+  statusFilter: CLIENT_DEFAULTS.STATUS_FILTER,
 };

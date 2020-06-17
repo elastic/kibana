@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { PingHistogramComponent, PingHistogramComponentProps } from '../ping_histogram';
-import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
+import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 
 describe('PingHistogram component', () => {
   const props: PingHistogramComponentProps = {

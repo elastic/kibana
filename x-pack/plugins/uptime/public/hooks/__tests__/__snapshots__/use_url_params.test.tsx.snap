@@ -209,7 +209,7 @@ exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
         }
       >
         <div>
-          {"absoluteDateRangeStart":20,"absoluteDateRangeEnd":20,"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-12","dateRangeEnd":"now","filters":"","search":"","selectedPingStatus":"","statusFilter":"","pagination":"foo"}
+          {"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-12","dateRangeEnd":"now","filters":"","search":"","statusFilter":"","pagination":"foo"}
         </div>
         <button
           id="setUrlParams"
@@ -433,7 +433,7 @@ exports[`useUrlParams gets the expected values using the context 1`] = `
         hook={[Function]}
       >
         <div>
-          {"absoluteDateRangeStart":20,"absoluteDateRangeEnd":20,"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-15m","dateRangeEnd":"now","filters":"","search":"","selectedPingStatus":"","statusFilter":""}
+          {"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-15m","dateRangeEnd":"now","filters":"","search":"","statusFilter":""}
         </div>
         <button
           id="setUrlParams"

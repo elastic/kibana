@@ -7,12 +7,9 @@
 import { parseIsPaused } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
-import { parseAbsoluteDate } from './parse_absolute_date';
 
 export interface UptimeUrlParams {
   // both
-  absoluteDateRangeStart: number;
-  absoluteDateRangeEnd: number;
   autorefreshInterval: number;
   autorefreshIsPaused: boolean;
   dateRangeStart: string;
@@ -23,20 +20,14 @@ export interface UptimeUrlParams {
   filters: string;
   search: string;
   statusFilter: string;
-
-  // monitor only
-  selectedPingStatus: string;
 }
 
 const {
-  ABSOLUTE_DATE_RANGE_START,
-  ABSOLUTE_DATE_RANGE_END,
   AUTOREFRESH_INTERVAL,
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
   SEARCH,
-  SELECTED_PING_LIST_STATUS,
   FILTERS,
   STATUS_FILTER,
 } = CLIENT_DEFAULTS;
@@ -77,29 +68,17 @@ export const getSupportedUrlParams = (params: {
     dateRangeEnd,
     filters,
     search,
-    selectedPingStatus,
     statusFilter,
     pagination,
   } = filteredParams;
 
   return {
-    absoluteDateRangeStart: parseAbsoluteDate(
-      dateRangeStart || DATE_RANGE_START,
-      ABSOLUTE_DATE_RANGE_START
-    ),
-    absoluteDateRangeEnd: parseAbsoluteDate(
-      dateRangeEnd || DATE_RANGE_END,
-      ABSOLUTE_DATE_RANGE_END,
-      { roundUp: true }
-    ),
     autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
     filters: filters || FILTERS,
     search: search || SEARCH,
-    selectedPingStatus:
-      selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
     statusFilter: statusFilter || STATUS_FILTER,
     pagination,
   };

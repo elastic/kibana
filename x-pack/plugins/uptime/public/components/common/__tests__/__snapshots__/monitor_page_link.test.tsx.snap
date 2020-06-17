@@ -4,7 +4,7 @@ exports[`MonitorPageLink component renders a help link when link parameters pres
 <EuiLink>
   <Link
     data-test-subj="monitor-page-link-bad-ssl"
-    to="/monitor/YmFkLXNzbA==/selectedPingStatus=down"
+    to="/monitor/YmFkLXNzbA==/dateRangeStart=now-13m"
   />
 </EuiLink>
 `;

@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 import { selectedFiltersSelector } from '../state/selectors';
 import { setSelectedFilters } from '../state/actions/selected_filters';
+import { URL_PARAM_DEFAULT_MAPPING } from '../../common/constants/client_defaults';
 
 export type GetUrlParams = () => UptimeUrlParams;
 export type UpdateUrlParams = (updatedParams: {
@@ -76,7 +77,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
         // drop any parameters that have no value
         Object.keys(mergedParams).reduce((params, key) => {
           const value = mergedParams[key];
-          if (value === undefined || value === '') {
+          if (value === undefined || value === '' || URL_PARAM_DEFAULT_MAPPING[key] === value) {
             return params;
           }
           return {
