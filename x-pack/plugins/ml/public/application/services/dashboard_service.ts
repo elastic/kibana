@@ -24,6 +24,8 @@ export function dashboardServiceProvider(
   dashboardUrlGenerator: DashboardUrlGenerator
 ) {
   const generateId = htmlIdGenerator();
+  const DEFAULT_PANEL_WIDTH = 24;
+  const DEFAULT_PANEL_HEIGHT = 15;
 
   return {
     /**
@@ -38,6 +40,22 @@ export function dashboardServiceProvider(
       });
     },
     /**
+     * Resolves the last positioned panel from the collection.
+     */
+    getLastPanel(panels: SavedDashboardPanel[]): SavedDashboardPanel | null {
+      return panels.length > 0
+        ? panels.reduce((prev, current) =>
+            prev.gridData.y >= current.gridData.y
+              ? prev.gridData.y === current.gridData.y
+                ? prev.gridData.x > current.gridData.x
+                  ? prev
+                  : current
+                : prev
+              : current
+          )
+        : null;
+    },
+    /**
      * Attaches embeddable panels to the dashboard
      */
     async attachPanels(
@@ -47,15 +65,16 @@ export function dashboardServiceProvider(
     ) {
       const panels = JSON.parse(dashboardAttributes.panelsJSON) as SavedDashboardPanel[];
       const version = kibanaVersion;
+      const rowWidth = DEFAULT_PANEL_WIDTH * 2;
 
       for (const panelData of panelsData) {
         const panelIndex = generateId();
-        const maxPanel =
-          panels.length > 0
-            ? panels.reduce((prev, current) =>
-                prev.gridData.y > current.gridData.y ? prev : current
-              )
-            : null;
+        const lastPanel = this.getLastPanel(panels);
+
+        const xOffset = lastPanel ? lastPanel.gridData.w + lastPanel.gridData.x : 0;
+        const availableRowSpace = rowWidth - xOffset;
+        const xPosition = availableRowSpace - DEFAULT_PANEL_WIDTH >= 0 ? xOffset : 0;
+
         panels.push({
           panelIndex,
           embeddableConfig: panelData.embeddableConfig as { [key: string]: any },
@@ -63,11 +82,15 @@ export function dashboardServiceProvider(
           type: panelData.type,
           version,
           gridData: {
-            h: 15,
+            h: DEFAULT_PANEL_HEIGHT,
             i: panelIndex,
-            w: 24,
-            x: 0,
-            y: maxPanel ? maxPanel.gridData.y + maxPanel.gridData.h : 0,
+            w: DEFAULT_PANEL_WIDTH,
+            x: xPosition,
+            y: lastPanel
+              ? xPosition > 0
+                ? lastPanel.gridData.y
+                : lastPanel.gridData.y + lastPanel.gridData.h
+              : 0,
           },
         });
       }

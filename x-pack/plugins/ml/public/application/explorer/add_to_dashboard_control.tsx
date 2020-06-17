@@ -163,7 +163,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
           title: (
             <FormattedMessage
               id="xpack.ml.explorer.dashboardsTable.savedSuccessfullyTitle"
-              defaultMessage='Dashboard "{dashboardTitle}" updated successfully!'
+              defaultMessage='Dashboard "{dashboardTitle}" updated successfully'
               values={{ dashboardTitle: selectedDashboard.title }}
             />
           ),
