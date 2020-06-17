@@ -82,7 +82,6 @@ export const alertPreviewSuccessResponsePayloadRT = rt.type({
     fired: rt.number,
     noData: rt.number,
     error: rt.number,
-    tooManyBuckets: rt.number,
   }),
 });
 export type AlertPreviewSuccessResponsePayload = rt.TypeOf<
