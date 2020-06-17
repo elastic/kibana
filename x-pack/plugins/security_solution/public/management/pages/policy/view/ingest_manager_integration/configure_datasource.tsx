@@ -32,14 +32,15 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
 
     return (
       <EuiEmptyPrompt
+        data-test-subj={`endpointDatasourceConfig_${from === 'edit' ? 'edit' : 'create'}`}
         body={
           <EuiText>
             <p>
               {from === 'edit' ? (
                 <LinkToApp
-                  appId="siem"
+                  appId="securitySolution"
                   appPath={policyUrl}
-                  href={`${services.application.getUrlForApp('siem')}${policyUrl}`}
+                  href={`${services.application.getUrlForApp('securitySolution')}${policyUrl}`}
                 >
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.ingestManager.editDatasource.stepConfigure"
