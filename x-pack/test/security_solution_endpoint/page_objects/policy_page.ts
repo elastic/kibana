@@ -16,7 +16,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async navigateToPolicyList() {
       await pageObjects.common.navigateToUrlWithBrowserHistory(
-        'securitySolution:management',
+        'securitySolutionManagement',
         '/policy'
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -55,7 +55,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async navigateToPolicyDetails(policyId: string) {
       await pageObjects.common.navigateToUrlWithBrowserHistory(
-        'securitySolution:management',
+        'securitySolutionManagement',
         `/policy/${policyId}`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();

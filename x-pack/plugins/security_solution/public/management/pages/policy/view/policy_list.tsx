@@ -151,11 +151,9 @@ export const PolicyList = React.memo(() => {
       // of the cancel and submit buttons and redirect the user back to endpoint policy
       path: `#/integrations${packageInfo ? `/endpoint-${packageInfo.version}/add-datasource` : ''}`,
       state: {
-        onCancelNavigateTo: ['securitySolution', { path: getPoliciesPath() }],
-        onCancelUrl: services.application?.getUrlForApp('securitySolution', {
-          path: getPoliciesPath(),
-        }),
-        onSaveNavigateTo: ['securitySolution', { path: getPoliciesPath() }],
+        onCancelNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onCancelUrl: formatUrl(getPoliciesPath()),
+        onSaveNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
       },
     }
   );
