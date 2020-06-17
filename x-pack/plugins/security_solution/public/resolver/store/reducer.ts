@@ -37,7 +37,10 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
       selectedDescendantId: action.payload.nodeId,
       processEntityIdOfSelectedDescendant: action.payload.selectedProcessId,
     };
-  } else if (action.type === 'userBroughtProcessIntoView') {
+  } else if (
+    action.type === 'userBroughtProcessIntoView' ||
+    action.type === 'appDetectedNewIdFromQueryParams'
+  ) {
     /**
      * This action has a process payload (instead of a processId), so we use
      * `uniquePidForProcess` and `resolverNodeIdGenerator` to resolve the determinant
@@ -64,7 +67,10 @@ const concernReducers = combineReducers({
 
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, action) => {
   const nextState = concernReducers(state, action);
-  if (action.type === 'userBroughtProcessIntoView') {
+  if (
+    action.type === 'userBroughtProcessIntoView' ||
+    action.type === 'appDetectedNewIdFromQueryParams'
+  ) {
     return animateProcessIntoView(nextState, action.payload.time, action.payload.process);
   } else {
     return nextState;

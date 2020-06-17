@@ -25,6 +25,24 @@ interface UserBroughtProcessIntoView {
 }
 
 /**
+ * When an examination of query params in the UI indicates that state needs to
+ * be updated to reflect the new selection
+ */
+interface AppDetectedNewIdFromQueryParams {
+  readonly type: 'appDetectedNewIdFromQueryParams';
+  readonly payload: {
+    /**
+     * Used to identify the process the process that should be synced with state.
+     */
+    readonly process: ResolverEvent;
+    /**
+     * The time (since epoch in milliseconds) when the action was dispatched.
+     */
+    readonly time: number;
+  };
+}
+
+/**
  * Used when the alert list selects an alert and the flyout shows resolver.
  */
 interface UserChangedSelectedEvent {
@@ -122,4 +140,5 @@ export type ResolverAction =
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData
   | UserSelectedRelatedEventCategory
-  | UserSelectedRelatedAlerts;
+  | UserSelectedRelatedAlerts
+  | AppDetectedNewIdFromQueryParams;

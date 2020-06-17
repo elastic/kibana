@@ -94,7 +94,7 @@ const PanelContent = memo(function PanelContent() {
     ) {
       setLastUpdatedProcess(paramsSelectedEvent);
       dispatch({
-        type: 'userBroughtProcessIntoView',
+        type: 'appDetectedNewIdFromQueryParams',
         payload: {
           time: timestamp(),
           process: paramsSelectedEvent,
