@@ -148,6 +148,7 @@ describe('getOperationTypesForField', () => {
       existingFields: {},
       currentIndexPatternId: '1',
       showEmptyFields: false,
+      isFirstExistenceFetch: false,
       indexPatterns: expectedIndexPatterns,
       layers: {
         first: {
