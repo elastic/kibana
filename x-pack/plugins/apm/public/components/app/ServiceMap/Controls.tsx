@@ -107,6 +107,9 @@ export function Controls() {
   const centerLabel = i18n.translate('xpack.apm.serviceMap.center', {
     defaultMessage: 'Center',
   });
+  const downloadLabel = i18n.translate('xpack.apm.serviceMap.download', {
+    defaultMessage: 'Download',
+  });
   const viewFullMapLabel = i18n.translate('xpack.apm.serviceMap.viewFullMap', {
     defaultMessage: 'View full service map',
   });
@@ -173,9 +176,12 @@ export function Controls() {
       )}
       {showDownloadButton && (
         <Panel hasShadow={true} paddingSize="none">
-          <EuiToolTip anchorClassName="eui-displayInline" content={'Download'}>
+          <EuiToolTip
+            anchorClassName="eui-displayInline"
+            content={downloadLabel}
+          >
             <Button
-              aria-label={'Download'}
+              aria-label={downloadLabel}
               color="text"
               download="service-map.json"
               href={downloadUrl}
