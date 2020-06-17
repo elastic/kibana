@@ -10,6 +10,7 @@ import { withKnobs } from '@storybook/addon-knobs/react';
 import { withInfo } from '@storybook/addon-info';
 import { create } from '@storybook/theming';
 
+import { withRedux } from './redux_context';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
 // If we're running Storyshots, be sure to register the require context hook.
@@ -29,11 +30,13 @@ if (process.env.NODE_ENV === 'test') {
           margin: '40px 60px',
         },
       },
+      source: false,
     })
   );
 
   // Add optional knobs to customize each story.
   addDecorator(withKnobs);
+  addDecorator(withRedux());
 }
 
 // Add New Platform Context for any stories that need it
@@ -59,6 +62,9 @@ function loadStories() {
   // Find all files ending in *.examples.ts
   const req = require.context('./..', true, /.(stories|examples).tsx$/);
   req.keys().forEach(filename => req(filename));
+
+  // Import Canvas CSS
+  require('../public/style/index.scss')
 }
 
 // Set up the Storybook environment with custom settings.

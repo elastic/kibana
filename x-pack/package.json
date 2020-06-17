@@ -119,6 +119,7 @@
     "@types/pretty-ms": "^5.0.0",
     "@welldone-software/why-did-you-render": "^4.0.0",
     "abab": "^1.0.4",
+    "addon-redux": "^1.1.0",
     "axios": "^0.19.0",
     "babel-jest": "^24.9.0",
     "babel-plugin-require-context-hook": "npm:babel-plugin-require-context-hook-babel7@1.0.0",
