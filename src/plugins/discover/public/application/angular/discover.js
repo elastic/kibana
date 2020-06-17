@@ -782,6 +782,10 @@ function discoverController(
     if (!init.complete) return;
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
+    if (!validateTimeRange()) {
+      $scope.resultState = 'none';
+      return;
+    }
 
     // Abort any in-progress requests before fetching again
     if (abortController) abortController.abort();
@@ -913,15 +917,39 @@ function discoverController(
     });
   }
 
+  function validateTimeRange() {
+    const { from, to } = timefilter.getTime();
+    if (!from || !to || !dateMath.parse(from) || !dateMath.parse(to)) {
+      toastNotifications.addDanger({
+        title: i18n.translate('discover.notifications.invalidTimeRangeTitle', {
+          defaultMessage: `Invalid time range`,
+        }),
+        text: i18n.translate('discover.notifications.invalidTimeRangeText', {
+          defaultMessage: `The provided time range is invalid. (from: '{from}', to: '{to}')`,
+          values: {
+            from,
+            to,
+          },
+        }),
+      });
+      return false;
+    }
+    return true;
+  }
+
   $scope.updateTime = function () {
-    //this is the timerange for the histogram, should be refactored
+    const { from, to } = timefilter.getTime();
+    // this is the timerange for the histogram, should be refactored
     $scope.timeRange = {
-      from: dateMath.parse(timefilter.getTime().from),
-      to: dateMath.parse(timefilter.getTime().to, { roundUp: true }),
+      from: dateMath.parse(from),
+      to: dateMath.parse(to, { roundUp: true }),
     };
   };
 
   $scope.toMoment = function (datetime) {
+    if (!datetime) {
+      return;
+    }
     return moment(datetime).format(config.get('dateFormat'));
   };
 
