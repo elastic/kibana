@@ -97,27 +97,29 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           const soResponse = await soClient.create(
             ArtifactConstants.SAVED_OBJECT_TYPE,
             exceptionSO,
-            { id: `${artifactName}-${sha256Hash}` }
+            { id: `${artifactName}`, overwrite: true }
           );
 
-          // Clean up old artifacts
-          const otherArtifacts = await soClient.find({
-            type: ArtifactConstants.SAVED_OBJECT_TYPE,
-            search: artifactName,
-            searchFields: ['name'],
-            sortField: 'created',
-            sortOrder: 'desc',
-          });
+          context.logger.debug(`Current artifact ${artifactName} with hash ${sha256Hash}`);
 
-          // Remove all but the latest artifact
-          const toDelete = otherArtifacts.saved_objects.slice(
-            1,
-            otherArtifacts.saved_objects.length
-          );
-          for (const delObj of toDelete) {
-            context.logger.debug(`REMOVING ${delObj.id}`);
-            await soClient.delete(ArtifactConstants.SAVED_OBJECT_TYPE, delObj.id);
-          }
+          // // Clean up old artifacts
+          // const otherArtifacts = await soClient.find({
+          //   type: ArtifactConstants.SAVED_OBJECT_TYPE,
+          //   search: artifactName,
+          //   searchFields: ['name'],
+          //   sortField: 'created',
+          //   sortOrder: 'desc',
+          // });
+
+          // // Remove all but the latest artifact
+          // const toDelete = otherArtifacts.saved_objects.slice(
+          //   1,
+          //   otherArtifacts.saved_objects.length
+          // );
+          // for (const delObj of toDelete) {
+          //   context.logger.debug(`REMOVING ${delObj.id}`);
+          //   await soClient.delete(ArtifactConstants.SAVED_OBJECT_TYPE, delObj.id);
+          // }
         } catch (error) {
           if (error.statusCode === 409) {
             context.logger.debug(`No update to Endpoint Exceptions (${artifactName}), skipping.`);

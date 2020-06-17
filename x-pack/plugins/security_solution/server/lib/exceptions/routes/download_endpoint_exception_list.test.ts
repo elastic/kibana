@@ -69,6 +69,7 @@ describe('test alerts route', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       path: `/api/endpoint/allowlist/download/${mockArtifactName}/123456`,
       method: 'get',
+      params: { sha256: '123456' },
     });
 
     const mockCompressedArtifact = await CompressExceptionList(expectedEndpointExceptions);
@@ -119,5 +120,53 @@ describe('test alerts route', () => {
     expect(mockResponse.ok.mock.calls[0][0]?.headers).toEqual(expectedHeaders);
     const compressedArtifact = mockResponse.ok.mock.calls[0][0]?.body;
     expect(compressedArtifact).toEqual(mockCompressedArtifact);
+  });
+
+  it('should handle a sha256 mismatch', async () => {
+    const mockRequest = httpServerMock.createKibanaRequest({
+      path: `/api/endpoint/allowlist/download/${mockArtifactName}/123456`,
+      method: 'get',
+      params: { sha256: '789' },
+    });
+
+    const mockCompressedArtifact = await CompressExceptionList(expectedEndpointExceptions);
+
+    const mockArtifact = {
+      id: '2468',
+      type: 'test',
+      references: [],
+      attributes: {
+        name: mockArtifactName,
+        schemaVersion: '1.0.0',
+        sha256: '123456',
+        encoding: 'xz',
+        created: Date.now(),
+        body: mockCompressedArtifact,
+        size: 100,
+      },
+    };
+
+    const soFindResp: SavedObject<unknown> = {
+      ...mockArtifact,
+    };
+
+    mockSavedObjectClient.get.mockImplementationOnce(() => Promise.resolve(soFindResp));
+
+    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+      path.startsWith('/api/endpoint/allowlist/download')
+    )!;
+
+    await routeHandler(
+      ({
+        core: {
+          savedObjects: {
+            client: mockSavedObjectClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext,
+      mockRequest,
+      mockResponse
+    );
+    expect(mockResponse.notFound).toBeCalled();
   });
 });

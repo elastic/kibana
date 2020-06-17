@@ -37,13 +37,16 @@ async function handleEndpointExceptionDownload(context, req, res) {
   // TODO: api key validation
   const soClient = context.core.savedObjects.client;
 
-  soClient
-    .get({
-      type: ArtifactConstants.SAVED_OBJECT_TYPE,
-      id: `${req.params.artifactName}-${req.params.sha256}`,
-    })
+  return soClient
+    .get(ArtifactConstants.SAVED_OBJECT_TYPE, `${req.params.artifactName}`)
     .then((artifact) => {
       const outBuffer = Buffer.from(artifact.attributes.body, 'binary');
+
+      if (artifact.attributes.sha256 !== req.params.sha256) {
+        return res.notFound(
+          `No artifact matching sha256: ${req.params.sha256} for type ${req.params.artifactName}`
+        );
+      }
 
       // TODO: validate response before returning
       return res.ok({
