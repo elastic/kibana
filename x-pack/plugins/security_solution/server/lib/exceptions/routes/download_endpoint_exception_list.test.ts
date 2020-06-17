@@ -20,7 +20,8 @@ import {
   httpServiceMock,
   httpServerMock,
 } from 'src/core/server/mocks';
-import { ArtifactConstants, CompressExceptionList } from '../../../exceptions';
+import { CompressExceptionList } from '../fetch_endpoint_exceptions';
+import { ArtifactConstants } from '../task';
 import { downloadEndpointExceptionListRoute } from './download_endpoint_exception_list';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
@@ -91,7 +92,7 @@ describe('test alerts route', () => {
       ...mockArtifact,
     };
 
-    mockSavedObjectClient.find.mockImplementationOnce(() => Promise.resolve(soFindResp));
+    mockSavedObjectClient.get.mockImplementationOnce(() => Promise.resolve(soFindResp));
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/allowlist/download')

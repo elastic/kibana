@@ -41,7 +41,7 @@ describe('buildEventTypeSignal', () => {
 
     const first = getFoundExceptionListItemSchemaMock();
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-    const resp = await GetFullEndpointExceptionList(mockExceptionClient, 'linux');
+    const resp = await GetFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
     expect(resp).toEqual(expectedEndpointExceptions);
   });
 
@@ -61,7 +61,7 @@ describe('buildEventTypeSignal', () => {
       .mockReturnValueOnce(first)
       .mockReturnValueOnce(second)
       .mockReturnValueOnce(third);
-    const resp = await GetFullEndpointExceptionList(mockExceptionClient, 'linux');
+    const resp = await GetFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
     expect(resp.exceptions_list.length).toEqual(3);
   });
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from '../../../../../../../../src/core/server';
+import { IRouter } from 'src/core/server';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { ArtifactConstants } from '../task';
 import { DownloadArtifactReqParamsSchema, downloadArtifactReqParamsSchema } from '../schemas';
