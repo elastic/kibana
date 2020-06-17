@@ -395,5 +395,15 @@ Array [
       />
     </div>
   </div>,
+  <div
+    className="canvasPaletteSwatch"
+  >
+    <div
+      className="canvasPaletteSwatch__background canvasCheckered"
+    />
+    <div
+      className="canvasPaletteSwatch__foreground"
+    />
+  </div>,
 ]
 `;

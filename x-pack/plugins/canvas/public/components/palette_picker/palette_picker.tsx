@@ -13,21 +13,27 @@ import { Popover } from '../popover';
 import { PaletteSwatch } from '../palette_swatch';
 import { palettes, Palette } from '../../../common/lib/palettes';
 
-interface Props {
+interface RequiredProps {
+  onChange?: (palette: Palette) => void;
+  palette: Palette;
+  anchorPosition?: PopoverAnchorPosition;
+  ariaLabel: string;
+  clearable?: false;
+}
+
+interface ClearableProps {
   onChange?: (palette: Palette | null) => void;
   palette: Palette | null;
   anchorPosition?: PopoverAnchorPosition;
   ariaLabel: string;
-  clearable?: boolean;
+  clearable: true;
 }
 
-export const PalettePicker: FC<Props> = ({
-  onChange = () => {},
-  palette,
-  anchorPosition = 'downCenter',
-  ariaLabel,
-  clearable = false,
-}) => {
+type Props = RequiredProps | ClearableProps;
+
+export const PalettePicker: FC<Props> = (props) => {
+  const { palette, anchorPosition = 'downCenter', ariaLabel } = props;
+
   const button = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
     <button aria-label={ariaLabel} style={{ width: '100%', height: 16 }} onClick={handleClick}>
       <PaletteSwatch palette={palette} />
@@ -36,7 +42,8 @@ export const PalettePicker: FC<Props> = ({
 
   let clear: ReactElement | null = null;
 
-  if (clearable) {
+  if (props.clearable) {
+    const { onChange = () => {} } = props;
     clear = (
       <button
         key="clear"
@@ -55,6 +62,8 @@ export const PalettePicker: FC<Props> = ({
       </button>
     );
   }
+
+  const { onChange = () => {} } = props;
 
   return (
     <Popover
@@ -96,4 +105,5 @@ PalettePicker.propTypes = {
   onChange: PropTypes.func,
   anchorPosition: PropTypes.string,
   ariaLabel: PropTypes.string,
+  clearable: PropTypes.bool,
 };

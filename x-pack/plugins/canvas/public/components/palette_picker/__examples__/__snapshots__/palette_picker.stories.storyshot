@@ -1,5 +1,53 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Storyshots components/Color/PalettePicker clearable 1`] = `
+<div
+  className="canvasContainerWrapper"
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="euiPopover euiPopover--anchorDownCenter canvasPalettePicker__swatchesPopover"
+    container={null}
+    id="palette-picker-popover"
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
+  >
+    <div
+      className="euiPopover__anchor canvasPalettePicker__swatchesPopoverAnchor"
+    >
+      <button
+        aria-label="palette picker"
+        onClick={[Function]}
+        style={
+          Object {
+            "height": 16,
+            "width": "100%",
+          }
+        }
+      >
+        <div
+          className="canvasPaletteSwatch"
+        >
+          <div
+            className="canvasPaletteSwatch__background canvasCheckered"
+          />
+          <div
+            className="canvasPaletteSwatch__foreground"
+          />
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`Storyshots components/Color/PalettePicker default 1`] = `
 <div
   className="canvasContainerWrapper"
