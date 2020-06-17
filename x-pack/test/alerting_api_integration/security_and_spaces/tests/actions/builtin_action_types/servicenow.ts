@@ -46,33 +46,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       password: 'elastic',
       username: 'changeme',
     },
-    /* params: {
-      subAction: 'pushToService',
-      subActionParams: {
-        savedObjectId: '123',
-        title: 'a title',
-        description: 'a description',
-        createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: 'elastic' },
-        updatedAt: null,
-        updatedBy: null,
-        externalId: null,
-        comment: 'test-alert comment',
-        severity: '1',
-        urgency: '2',
-        impact: '1',
-        comments: [
-          {
-            commentId: '456',
-            comment: 'first comment',
-            createdAt: '2020-03-13T08:34:53.450Z',
-            createdBy: { fullName: 'Elastic User', username: 'elastic' },
-            updatedAt: null,
-            updatedBy: null,
-          },
-        ],
-      },
-    },*/
     params: {
       subAction: 'pushToService',
       subActionParams: {
@@ -407,30 +380,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             });
         });
 
-        it('should handle failing with a simulated success without createdAt', async () => {
-          await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockServiceNow.params,
-                subActionParams: {
-                  savedObjectId: 'success',
-                  title: 'success',
-                },
-              },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.createdAt]: expected value of type [string] but got [undefined]',
-              });
-            });
-        });
-
         it('should handle failing with a simulated success without commentId', async () => {
           await supertest
             .post(`/api/actions/action/${simulatedActionId}/_execute`)
@@ -483,34 +432,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without comment.createdAt', async () => {
-          await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockServiceNow.params,
-                subActionParams: {
-                  ...mockServiceNow.params.subActionParams,
-                  savedObjectId: 'success',
-                  title: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
-                  comments: [{ commentId: 'success', comment: 'success' }],
-                },
-              },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.createdAt]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
               });
             });
         });
