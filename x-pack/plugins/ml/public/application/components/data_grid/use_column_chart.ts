@@ -65,16 +65,26 @@ const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYPES | un
   return fieldType;
 };
 
-export const fetchChartsData = async (
+interface NumericColumnStats {
+  interval: number;
+  min: number;
+  max: number;
+}
+type NumericColumnStatsMap = Record<string, NumericColumnStats>;
+const getAggIntervals = async (
   indexPatternTitle: string,
   api: any,
   query: any,
   columnTypes: EuiDataGridColumn[]
-): Promise<ChartData[]> => {
+): Promise<NumericColumnStatsMap> => {
   const numericColumns = columnTypes.filter((cT) => {
     const fieldType = getFieldType(cT.schema);
     return fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE;
   });
+
+  if (numericColumns.length === 0) {
+    return {};
+  }
 
   const minMaxAggs = numericColumns.reduce((aggs, c) => {
     const id = stringHash(c.id);
@@ -101,7 +111,7 @@ export const fetchChartsData = async (
     throw new Error(e);
   }
 
-  const aggIntervals = Object.keys(respStats.aggregations).reduce((p, aggName) => {
+  return Object.keys(respStats.aggregations).reduce((p, aggName) => {
     const stats = [respStats.aggregations[aggName].min, respStats.aggregations[aggName].max];
     if (!stats.includes(null)) {
       const delta = respStats.aggregations[aggName].max - respStats.aggregations[aggName].min;
@@ -116,11 +126,42 @@ export const fetchChartsData = async (
         aggInterval = delta / MAX_CHART_COLUMNS;
       }
 
-      p[aggName] = aggInterval;
+      p[aggName] = { interval: aggInterval, min: stats[0], max: stats[1] };
     }
 
     return p;
-  }, {} as Record<string, number>);
+  }, {} as NumericColumnStatsMap);
+};
+
+interface AggHistogram {
+  histogram: {
+    field: string;
+    interval: number;
+  };
+}
+
+interface AggCardinality {
+  cardinality: {
+    field: string;
+  };
+}
+
+interface AggTerms {
+  terms: {
+    field: string;
+    size: number;
+  };
+}
+
+type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
+
+export const fetchChartsData = async (
+  indexPatternTitle: string,
+  api: any,
+  query: any,
+  columnTypes: EuiDataGridColumn[]
+): Promise<ChartData[]> => {
+  const aggIntervals = await getAggIntervals(indexPatternTitle, api, query, columnTypes);
 
   const chartDataAggs = columnTypes.reduce((aggs, c) => {
     const fieldType = getFieldType(c.schema);
@@ -130,7 +171,7 @@ export const fetchChartsData = async (
         aggs[`${id}_histogram`] = {
           histogram: {
             field: c.id,
-            interval: aggIntervals[id] !== 0 ? aggIntervals[id] : 1,
+            interval: aggIntervals[id].interval !== 0 ? aggIntervals[id].interval : 1,
           },
         };
       }
@@ -150,7 +191,11 @@ export const fetchChartsData = async (
       };
     }
     return aggs;
-  }, {} as Record<string, object>);
+  }, {} as Record<string, ChartRequestAgg>);
+
+  if (Object.keys(chartDataAggs).length === 0) {
+    return [];
+  }
 
   let respChartsData: any;
   try {
@@ -185,8 +230,8 @@ export const fetchChartsData = async (
 
         return {
           data: respChartsData.aggregations[`${id}_histogram`].buckets,
-          interval: aggIntervals[id],
-          stats: [respStats.aggregations[id].min, respStats.aggregations[id].max],
+          interval: aggIntervals[id].interval,
+          stats: [aggIntervals[id].min, aggIntervals[id].max],
           type: 'numeric',
           id: c.id,
         };
