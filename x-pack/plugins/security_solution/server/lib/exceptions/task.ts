@@ -14,6 +14,7 @@ import {
 import { ListPluginSetup } from '../../../../lists/server';
 import { ConfigType } from '../../config';
 import { GetFullEndpointExceptionList, CompressExceptionList } from './fetch_endpoint_exceptions';
+import { ArtifactSoSchema } from './schemas';
 
 const PackagerTaskConstants = {
   TIMEOUT: '1m',
@@ -94,32 +95,13 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           };
 
           // Create the new artifact
-          const soResponse = await soClient.create(
+          const soResponse = await soClient.create<ArtifactSoSchema>(
             ArtifactConstants.SAVED_OBJECT_TYPE,
             exceptionSO,
             { id: `${artifactName}`, overwrite: true }
           );
 
           context.logger.debug(`Current artifact ${artifactName} with hash ${sha256Hash}`);
-
-          // // Clean up old artifacts
-          // const otherArtifacts = await soClient.find({
-          //   type: ArtifactConstants.SAVED_OBJECT_TYPE,
-          //   search: artifactName,
-          //   searchFields: ['name'],
-          //   sortField: 'created',
-          //   sortOrder: 'desc',
-          // });
-
-          // // Remove all but the latest artifact
-          // const toDelete = otherArtifacts.saved_objects.slice(
-          //   1,
-          //   otherArtifacts.saved_objects.length
-          // );
-          // for (const delObj of toDelete) {
-          //   context.logger.debug(`REMOVING ${delObj.id}`);
-          //   await soClient.delete(ArtifactConstants.SAVED_OBJECT_TYPE, delObj.id);
-          // }
         } catch (error) {
           if (error.statusCode === 409) {
             context.logger.debug(`No update to Endpoint Exceptions (${artifactName}), skipping.`);

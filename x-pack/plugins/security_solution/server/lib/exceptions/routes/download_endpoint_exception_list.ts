@@ -5,9 +5,15 @@
  */
 
 import { IRouter } from 'src/core/server';
+import { validate } from '../../../../common/validate';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { ArtifactConstants } from '../task';
-import { DownloadArtifactReqParamsSchema, downloadArtifactReqParamsSchema } from '../schemas';
+import {
+  ArtifactDownloadSchema,
+  DownloadArtifactRequestParamsSchema,
+  downloadArtifactRequestParamsSchema,
+  downloadArtifactResponseSchema,
+} from '../schemas';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 
@@ -20,9 +26,9 @@ export function downloadEndpointExceptionListRoute(router: IRouter) {
       path: `${allowlistBaseRoute}/download/{artifactName}/{sha256}`,
       validate: {
         params: buildRouteValidation<
-          typeof downloadArtifactReqParamsSchema,
-          DownloadArtifactReqParamsSchema
-        >(downloadArtifactReqParamsSchema),
+          typeof downloadArtifactRequestParamsSchema,
+          DownloadArtifactRequestParamsSchema
+        >(downloadArtifactRequestParamsSchema),
       },
       options: { tags: [] },
     },
@@ -38,7 +44,7 @@ async function handleEndpointExceptionDownload(context, req, res) {
   const soClient = context.core.savedObjects.client;
 
   return soClient
-    .get(ArtifactConstants.SAVED_OBJECT_TYPE, `${req.params.artifactName}`)
+    .get<ArtifactDownloadSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, `${req.params.artifactName}`)
     .then((artifact) => {
       const outBuffer = Buffer.from(artifact.attributes.body, 'binary');
 
@@ -48,14 +54,20 @@ async function handleEndpointExceptionDownload(context, req, res) {
         );
       }
 
-      // TODO: validate response before returning
-      return res.ok({
+      const downloadResponse = {
         body: outBuffer,
         headers: {
           'content-encoding': 'xz',
           'content-disposition': `attachment; filename=${artifact.attributes.name}.xz`,
         },
-      });
+      };
+
+      const [validated, errors] = validate(downloadResponse, downloadArtifactResponseSchema);
+      if (errors != null) {
+        return res.internalError({ body: errors });
+      } else {
+        return res.ok(validated);
+      }
     })
     .catch((err) => {
       return res.internalError({ body: err });

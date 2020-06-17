@@ -5,15 +5,15 @@
  */
 
 import * as t from 'io-ts';
+import { artifactName, sha256 } from '../common';
 
-export const artifactName = t.string;
-export const sha256 = t.string;
-
-export const downloadArtifactReqParamsSchema = t.exact(
+export const downloadArtifactRequestParamsSchema = t.exact(
   t.type({
     artifactName,
     sha256,
   })
 );
 
-export type DownloadArtifactReqParamsSchema = t.TypeOf<typeof downloadArtifactReqParamsSchema>;
+export type DownloadArtifactRequestParamsSchema = t.TypeOf<
+  typeof downloadArtifactRequestParamsSchema
+>;
