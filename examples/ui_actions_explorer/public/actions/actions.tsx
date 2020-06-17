@@ -45,7 +45,7 @@ export interface PhoneContext {
 }
 
 export const makePhoneCallAction = createAction<typeof ACTION_CALL_PHONE_NUMBER>({
-  type: ACTION_CALL_PHONE_NUMBER,
+  factoryId: ACTION_CALL_PHONE_NUMBER,
   getDisplayName: () => 'Call phone number',
   execute: async (context) => alert(`Pretend calling ${context.phone}...`),
 });
