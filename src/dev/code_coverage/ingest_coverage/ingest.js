@@ -42,43 +42,51 @@ export const ingest = (log) => async (body) => {
 
   const justLog = dontSendButLog(log);
   const doSendToIndex = doSend(index);
-  const doSendRedacted = doSendToIndex(redactedEsHostUrl)(log);
+  const doSendRedacted = doSendToIndex(redactedEsHostUrl)(log)(client);
 
-  eitherSendOrNotAndParseForPrint(payloadWithIndex).fold(justLog, doSendRedacted);
+  eitherSendOrNot(payloadWithIndex).fold(justLog, doSendRedacted);
 };
 
-async function send(idx, redactedEsHostUrl, requestBody) {
-  try {
-    await client.index(requestBody);
-  } catch (e) {
-    const { body } = requestBody;
-    const parsed = parse(body);
-    throw createFailError(errMsg(idx, redactedEsHostUrl, parsed, e));
-  }
-}
-
 function doSend(index) {
-  return (redactedEsHostUrl) => (log) => async (payload) => {
-    const { body } = payload;
-    log.verbose(
-      `\n### Sent: \n\t### ES Host: ${redactedEsHostUrl}\n\t### Index: ${green(
-        index
-      )}\n\t### payload.body: ${body}`
-    );
-    await send(index, redactedEsHostUrl, payload);
+  return (redactedEsHostUrl) => (log) => (client) => async (payload) => {
+    const logF = logSend(true)(redactedEsHostUrl)(index)(log);
+    await send(logF, index, redactedEsHostUrl, client, payload);
   };
 }
 
 function dontSendButLog(log) {
-  return (payload) => log.verbose(payload);
+  return (payload) => {
+    console.log(`\n### log: \n\t${log}`);
+    console.log(`\n### payload: \n\t${payload}`);
+    // logSend(false)(?)(log)(payload);
+  };
 }
 
-function eitherSendOrNotAndParseForPrint(payload) {
-  const { body } = payload;
-  const parsed = parse(body);
-  return process.env.NODE_ENV === 'integration_test' ? left(parsed) : right(payload);
+async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
+  try {
+    await client.index(requestBody);
+    logF(requestBody);
+  } catch (e) {
+    // const { body } = requestBody;
+    // const parsed = parse(body);
+    throw createFailError(errMsg(idx, redactedEsHostUrl, requestBody, e));
+  }
 }
 
-function parse(body) {
-  return JSON.parse(body);
+function logSend(actuallySent) {
+  return (redactedEsHostUrl) => (idx) => (log) => (payload) =>
+    log.verbose(
+      `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
+\t### ES Host: ${redactedEsHostUrl}
+\t### Index: ${green(idx)}
+\t### payload: ${pretty(payload)}`
+    );
 }
+
+function eitherSendOrNot(payload) {
+  return process.env.NODE_ENV === 'integration_test' ? left(payload) : right(payload);
+}
+
+// function parse(body) {
+//   return JSON.parse(body);
+// }
