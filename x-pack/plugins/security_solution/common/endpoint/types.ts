@@ -438,11 +438,11 @@ export interface EndpointEvent {
     kind: string;
   };
   host: Host;
-  network: {
+  network?: {
     direction: unknown;
     forwarded_ip: unknown;
   };
-  dns: {
+  dns?: {
     question: { name: unknown };
   };
   process: {
@@ -464,12 +464,12 @@ export interface EndpointEvent {
       pid: number;
     };
   };
-  user: {
+  user?: {
     domain?: string;
     name: string;
   };
   file: { path: unknown };
-  registry: { path: unknown; key: unknown };
+  registry?: { path: unknown; key: unknown };
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
