@@ -160,7 +160,7 @@ export const HostList = () => {
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
-        render: (policy: HostInfo['metadata']['endpoint']['policy']['applied']) => {
+        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
           const toRoutePath = getManagementUrl({
             name: 'policyDetails',
             policyId: policy.id,
@@ -186,7 +186,7 @@ export const HostList = () => {
           defaultMessage: 'Policy Status',
         }),
         // eslint-disable-next-line react/display-name
-        render: (policy: HostInfo['metadata']['endpoint']['policy']['applied'], item: HostInfo) => {
+        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           const toRoutePath = getManagementUrl({
             name: 'endpointPolicyResponse',
             selected_host: item.metadata.host.id,

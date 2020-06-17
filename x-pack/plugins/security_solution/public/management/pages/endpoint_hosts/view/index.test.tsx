@@ -50,13 +50,13 @@ describe('when on the hosts page', () => {
     });
     describe('when list data loads', () => {
       const generatedPolicyStatuses: Array<
-        HostInfo['metadata']['endpoint']['policy']['applied']['status']
+        HostInfo['metadata']['Endpoint']['policy']['applied']['status']
       > = [];
       let firstPolicyID: string;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const hostListData = mockHostResultList({ total: 3 });
-          firstPolicyID = hostListData.hosts[0].metadata.endpoint.policy.applied.id;
+          firstPolicyID = hostListData.hosts[0].metadata.Endpoint.policy.applied.id;
           [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE].forEach((status, index) => {
             hostListData.hosts[index] = {
               metadata: hostListData.hosts[index].metadata,
@@ -64,7 +64,7 @@ describe('when on the hosts page', () => {
             };
           });
           hostListData.hosts.forEach((item, index) => {
-            generatedPolicyStatuses[index] = item.metadata.endpoint.policy.applied.status;
+            generatedPolicyStatuses[index] = item.metadata.Endpoint.policy.applied.status;
           });
           const action: AppAction = {
             type: 'serverReturnedHostList',
@@ -160,9 +160,9 @@ describe('when on the hosts page', () => {
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
     ) => {
       const policyResponse = docGenerator.generatePolicyResponse();
-      policyResponse.endpoint.policy.applied.status = overallStatus;
-      policyResponse.endpoint.policy.applied.response.configurations.malware.status = overallStatus;
-      let downloadModelAction = policyResponse.endpoint.policy.applied.actions.find(
+      policyResponse.Endpoint.policy.applied.status = overallStatus;
+      policyResponse.Endpoint.policy.applied.response.configurations.malware.status = overallStatus;
+      let downloadModelAction = policyResponse.Endpoint.policy.applied.actions.find(
         (action) => action.name === 'download_model'
       );
 
@@ -172,7 +172,7 @@ describe('when on the hosts page', () => {
           message: 'Failed to apply a portion of the configuration (kernel)',
           status: overallStatus,
         };
-        policyResponse.endpoint.policy.applied.actions.push(downloadModelAction);
+        policyResponse.Endpoint.policy.applied.actions.push(downloadModelAction);
       }
       if (
         overallStatus === HostPolicyResponseActionStatus.failure ||
@@ -236,7 +236,7 @@ describe('when on the hosts page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `#/management/policy/${hostDetails.metadata.endpoint.policy.applied.id}`
+        `#/management/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -252,7 +252,7 @@ describe('when on the hosts page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `/management/policy/${hostDetails.metadata.endpoint.policy.applied.id}`
+        `/management/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
