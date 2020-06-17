@@ -94,7 +94,7 @@ export function processPid(passedEvent: ResolverEvent): string {
  */
 export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | undefined {
   if (event.isLegacyEvent(passedEvent)) {
-    return String(passedEvent.endgame.ppid);
+    return String(passedEvent.endgame.unique_pid);
   } else {
     return passedEvent.process.parent?.entity_id;
   }
@@ -105,7 +105,7 @@ export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | 
  */
 export function processParentPid(passedEvent: ResolverEvent): number | undefined {
   if (event.isLegacyEvent(passedEvent)) {
-    return passedEvent.endgame.unique_ppid;
+    return passedEvent.endgame.ppid;
   } else {
     const ppid = passedEvent.process.parent?.pid;
     return ppid ? ppid : undefined;
