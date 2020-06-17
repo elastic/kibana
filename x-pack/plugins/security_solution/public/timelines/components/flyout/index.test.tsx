@@ -14,6 +14,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
@@ -31,6 +32,7 @@ const usersViewing = ['elastic'];
 
 describe('Flyout', () => {
   const state: State = mockGlobalState;
+  const { storage } = createSecuritySolutionStorageMock();
 
   describe('rendering', () => {
     test('it renders correctly against snapshot', () => {
@@ -59,7 +61,8 @@ describe('Flyout', () => {
       const storeShowIsTrue = createStore(
         stateShowIsTrue,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable
+        apolloClientObservable,
+        storage
       );
 
       const wrapper = mount(
@@ -82,7 +85,8 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable
+        apolloClientObservable,
+        storage
       );
 
       const wrapper = mount(
@@ -103,7 +107,8 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable
+        apolloClientObservable,
+        storage
       );
 
       const wrapper = mount(
@@ -136,7 +141,8 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable
+        apolloClientObservable,
+        storage
       );
 
       const wrapper = mount(
