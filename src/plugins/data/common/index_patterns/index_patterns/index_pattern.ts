@@ -29,9 +29,8 @@ import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import type { IIndexPatternsApiClient } from '.';
 import { TypeMeta } from '.';
-import { OnNotification, OnError, UiSettingsCommon } from '../types';
+import { OnNotification, OnError, UiSettingsCommon, IIndexPatternsApiClient } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';

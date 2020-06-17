@@ -17,10 +17,13 @@
  * under the License.
  */
 
-import { setup } from 'test_utils/http_test_setup';
+import { GetFieldsOptions, IIndexPatternsApiClient } from '../../common/index_patterns/types';
 
-export const { http } = setup((injectedMetadata) => {
-  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
-});
-
-jest.doMock('ui/new_platform', () => ({ npSetup: { core: { http } } }));
+export class IndexPatternsApiServer implements IIndexPatternsApiClient {
+  async getFieldsForTimePattern(options: GetFieldsOptions = {}) {
+    throw new Error('IndexPatternsApiServer - getFieldsForTimePattern not defined');
+  }
+  async getFieldsForWildcard(options: GetFieldsOptions = {}) {
+    throw new Error('IndexPatternsApiServer - getFieldsForWildcard');
+  }
+}

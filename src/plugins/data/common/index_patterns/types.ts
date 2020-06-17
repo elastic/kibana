@@ -87,3 +87,16 @@ export interface SavedObjectsClientCommon {
   ) => Promise<SavedObjectCommon>;
   delete: (type: string, id: string) => Promise<{}>;
 }
+
+export interface GetFieldsOptions {
+  pattern?: string;
+  type?: string;
+  params?: any;
+  lookBack?: boolean;
+  metaFields?: string;
+}
+
+export interface IIndexPatternsApiClient {
+  getFieldsForTimePattern: (options: GetFieldsOptions) => Promise<any>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
+}

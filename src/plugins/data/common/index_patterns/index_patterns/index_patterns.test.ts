@@ -20,12 +20,9 @@
 // eslint-disable-next-line max-classes-per-file
 import { IndexPatternsService } from './index_patterns';
 import { SavedObjectsClientContract, SavedObjectsFindResponsePublic } from 'kibana/public';
-// import { httpServiceMock } from '../../../../../core/public/mocks';
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { UiSettingsCommon } from '../types';
-import { IndexPatternsApiClient as IndexPatternsApiClientType } from '.';
+import { UiSettingsCommon, IIndexPatternsApiClient } from '../types';
 
-// const http = httpServiceMock.createStartContract();
 const fieldFormats = fieldFormatsMock;
 
 jest.mock('./index_pattern', () => {
@@ -66,7 +63,7 @@ describe('IndexPatterns', () => {
     indexPatterns = new IndexPatternsService({
       uiSettings: {} as UiSettingsCommon,
       savedObjectsClient,
-      apiClient: {} as IndexPatternsApiClientType,
+      apiClient: {} as IIndexPatternsApiClient,
       fieldFormats,
       onNotification: () => {},
       onError: () => {},

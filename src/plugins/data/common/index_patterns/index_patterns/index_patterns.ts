@@ -21,7 +21,6 @@ import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
-import { IndexPatternsApiClient, GetFieldsOptions } from '.';
 import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
@@ -32,7 +31,13 @@ import {
   Field,
   FieldSpec,
 } from '../fields';
-import { OnNotification, OnError, UiSettingsCommon } from '../types';
+import {
+  OnNotification,
+  OnError,
+  UiSettingsCommon,
+  IIndexPatternsApiClient,
+  GetFieldsOptions,
+} from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS } from '../../../common';
 
@@ -47,7 +52,7 @@ export interface IndexPatternSavedObjectAttrs {
 interface IndexPatternsServiceDeps {
   uiSettings: UiSettingsCommon;
   savedObjectsClient: SavedObjectsClientContract;
-  apiClient: IndexPatternsApiClient;
+  apiClient: IIndexPatternsApiClient;
   fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
   onError: OnError;
@@ -58,7 +63,7 @@ export class IndexPatternsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
-  private apiClient: IndexPatternsApiClient;
+  private apiClient: IIndexPatternsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
@@ -148,19 +153,11 @@ export class IndexPatternsService {
   };
 
   getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
-    if (this.apiClient) {
-      return this.apiClient.getFieldsForTimePattern(options);
-    } else {
-      throw new Error('Index Patterns Service - no apiClient defiined');
-    }
+    return this.apiClient.getFieldsForTimePattern(options);
   };
 
   getFieldsForWildcard = (options: GetFieldsOptions = {}) => {
-    if (this.apiClient) {
-      return this.apiClient.getFieldsForWildcard(options);
-    } else {
-      throw new Error('Index Patterns Service - no apiClient defiined');
-    }
+    return this.apiClient.getFieldsForWildcard(options);
   };
 
   clearCache = (id?: string) => {
