@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
 import styled from 'styled-components';
-import { head } from 'lodash';
+import { first } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -67,7 +67,7 @@ function getCurrentTab(
   currentTabKey: string | undefined
 ) {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
-  return selectedTab ? selectedTab : head(tabs) || {};
+  return selectedTab ? selectedTab : first(tabs) || {};
 }
 
 export function DetailView({ errorGroup, urlParams, location }: Props) {

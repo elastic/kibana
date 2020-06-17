@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { head, last } from 'lodash';
+import { first, last } from 'lodash';
 import {
   InfraWaffleMapGroup,
   InfraWaffleMapGroupOfGroups,
@@ -30,7 +30,7 @@ function findOrCreateGroupWithNodes(
    * then look for the group in it's sub groups.
    */
   if (path.length === 2) {
-    const parentId = head(path).value;
+    const parentId = first(path).value;
     const existingParentGroup = groups.find((g) => g.id === parentId);
     if (isWaffleMapGroupWithGroups(existingParentGroup)) {
       const existingSubGroup = existingParentGroup.groups.find((g) => g.id === id);

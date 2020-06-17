@@ -30,9 +30,9 @@ describe('Url autocomplete', () => {
   function patternsTest(name, endpoints, tokenPath, expectedContext, globalUrlComponentFactories) {
     test(name, function () {
       const patternMatcher = new UrlPatternMatcher(globalUrlComponentFactories);
-      _.forEach(endpoints, function (e, id) {
+      _.each(endpoints, function (e, id) {
         e.id = id;
-        _.forEach(e.patterns, function (p) {
+        _.each(e.patterns, function (p) {
           patternMatcher.addEndpoint(p, e);
         });
       });

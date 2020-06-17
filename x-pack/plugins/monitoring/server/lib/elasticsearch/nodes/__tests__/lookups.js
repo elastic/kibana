@@ -20,10 +20,10 @@ describe('Node Types Lookups', () => {
   });
 
   it('Has usable values', () => {
-    _.forEach(nodeTypeClass, (value) => {
+    _.each(nodeTypeClass, (value) => {
       expect(value).to.be.a('string');
     });
-    _.forEach(nodeTypeLabel, (value) => {
+    _.each(nodeTypeLabel, (value) => {
       expect(value).to.be.a('string');
     });
   });

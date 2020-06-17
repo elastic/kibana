@@ -47,7 +47,7 @@ export function seriesAgg(resp, panel, series) {
         id: `${series.id}`,
         label: series.label || calculateLabel(_.last(series.metrics), series.metrics),
         color: series.color,
-        data: _.head(data),
+        data: _.first(data),
         ...decoration,
       });
     }

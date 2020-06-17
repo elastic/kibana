@@ -49,7 +49,7 @@ export default function (directory) {
 
   const functions = _.fromPairs(files.concat(directories));
 
-  _.forEach(functions, function (func) {
+  _.each(functions, function (func) {
     _.assign(functions, processFunctionDefinition(func));
   });
 

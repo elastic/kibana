@@ -16,17 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  keys,
-  isFunction,
-  difference,
-  filter,
-  union,
-  pick,
-  forEach,
-  assign,
-  isEqual,
-} from 'lodash';
+import { keys, isFunction, difference, filter, union, pick, each, assign, isEqual } from 'lodash';
 
 export interface IDiffObject {
   removed: string[];
@@ -72,7 +62,7 @@ export function applyDiff(target: Record<string, any>, source: Record<string, an
   diff.keys = union(diff.changed, diff.removed, diff.added);
 
   // Remove all the keys
-  forEach(diff.removed, (key) => {
+  each(diff.removed, (key) => {
     delete target[key];
   });
 

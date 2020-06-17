@@ -372,7 +372,7 @@ class JobService {
 
     delete tempJob.analysis_config.use_per_partition_normalization;
 
-    _.forEach(tempJob.analysis_config.detectors, (d) => {
+    _.each(tempJob.analysis_config.detectors, (d) => {
       delete d.detector_index;
     });
 
@@ -537,7 +537,7 @@ class JobService {
 
               // get fields from detectors
               if (job.analysis_config.detectors) {
-                _.forEach(job.analysis_config.detectors, (dtr) => {
+                _.each(job.analysis_config.detectors, (dtr) => {
                   if (dtr.by_field_name) {
                     fields[dtr.by_field_name] = {};
                   }
@@ -555,7 +555,7 @@ class JobService {
 
               // get fields from influencers
               if (job.analysis_config.influencers) {
-                _.forEach(job.analysis_config.influencers, (inf) => {
+                _.each(job.analysis_config.influencers, (inf) => {
                   fields[inf] = {};
                 });
               }
@@ -767,7 +767,7 @@ class JobService {
         });
       }
     });
-    _.forEach(tempGroups, (js, id) => {
+    _.each(tempGroups, (js, id) => {
       groups.push({ id, jobs: js });
     });
     return groups;
@@ -826,7 +826,7 @@ function processBasicJobInfo(localJobService, jobsList) {
   // use cloned copy of jobs list so not to alter the original
   const jobsListCopy = _.cloneDeep(jobsList);
 
-  _.forEach(jobsListCopy, (jobObj) => {
+  _.each(jobsListCopy, (jobObj) => {
     const analysisConfig = jobObj.analysis_config;
     const bucketSpan = parseInterval(analysisConfig.bucket_span);
 
@@ -847,7 +847,7 @@ function processBasicJobInfo(localJobService, jobsList) {
 
     if (_.has(jobObj, 'custom_settings.custom_urls')) {
       job.customUrls = [];
-      _.forEach(jobObj.custom_settings.custom_urls, (url) => {
+      _.each(jobObj.custom_settings.custom_urls, (url) => {
         if (_.has(url, 'url_name') && _.has(url, 'url_value') && isWebUrl(url.url_value)) {
           // Only make web URLs (i.e. http or https) available in dashboard drilldowns.
           job.customUrls.push(url);
@@ -884,7 +884,7 @@ function createJobStats(jobsList, jobStats) {
   const mlNodes = {};
   let failedJobs = 0;
 
-  _.forEach(jobsList, (job) => {
+  _.each(jobsList, (job) => {
     if (job.state === 'opened') {
       jobStats.open.value++;
     } else if (job.state === 'closed') {

@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
-import { head, last } from 'lodash';
+import { first, last } from 'lodash';
 import { euiStyled } from '../../../../../../../observability/public';
 import { InfraWaffleMapBounds, InventoryColorPalette, PALETTES } from '../../../../../lib/lib';
 import { WaffleLegendOptions } from '../../hooks/use_waffle_options';
@@ -266,7 +266,7 @@ export const LegendControls = ({
             fullWidth
             label={
               <SwatchLabel
-                color={head(paletteColors)}
+                color={first(paletteColors)}
                 label={i18n.translate('xpack.infra.legendControls.minLabel', {
                   defaultMessage: 'Minimum',
                 })}

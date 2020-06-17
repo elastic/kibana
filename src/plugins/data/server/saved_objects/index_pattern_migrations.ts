@@ -37,7 +37,7 @@ const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> =
   const migratedFields = fields.map((field) => {
     if (field.subType === 'multi') {
       return {
-        ...omit(field, ['parent']),
+        ...omit(field, 'parent'),
         subType: { multi: { parent: field.parent } },
       };
     }

@@ -24,7 +24,7 @@ export const getLocalFilterQuery = ({
   localUIFilterName: LocalUIFilterName;
 }) => {
   const field = localUIFilters[localUIFilterName];
-  const filter = getUiFiltersES(indexPattern, omit(uiFilters, [field.name]));
+  const filter = getUiFiltersES(indexPattern, omit(uiFilters, field.name));
 
   const bucketCountAggregation = projection.body.aggs
     ? {

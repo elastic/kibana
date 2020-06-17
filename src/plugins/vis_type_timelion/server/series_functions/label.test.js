@@ -31,7 +31,7 @@ describe('label.js', () => {
 
   it('changes the label on the series', () => {
     return invoke(fn, [seriesList, 'free beer']).then((r) => {
-      _.forEach(r.output.list, (series) => expect(series.label).to.equal('free beer'));
+      _.each(r.output.list, (series) => expect(series.label).to.equal('free beer'));
     });
   });
 

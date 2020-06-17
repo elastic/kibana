@@ -66,7 +66,7 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
       patterns: [endpoint],
       methods: ['GET'],
     });
-    _.forEach(copiedDescription.patterns, (p) => {
+    _.each(copiedDescription.patterns, (p) => {
       this.urlPatternMatcher.addEndpoint(p, copiedDescription);
     });
 

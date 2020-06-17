@@ -6,7 +6,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
-  head,
+  first,
   flatten,
   groupBy,
   isEmpty,
@@ -195,7 +195,7 @@ export function getOrderedWaterfallItems(
 }
 
 function getRootTransaction(childrenByParentId: IWaterfallGroup) {
-  const item = head(childrenByParentId.root);
+  const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
     return item.doc;
   }

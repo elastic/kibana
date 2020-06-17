@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { forEach, isFunction } from 'lodash';
+import { each, isFunction } from 'lodash';
 
 /**
  * Like _.groupBy, but allows specifying multiple groups for a
@@ -43,7 +43,7 @@ export function organizeBy(collection: object[], callback: ((obj: object) => str
     buckets[key].push(obj);
   }
 
-  forEach(collection, (obj: Record<string, any>) => {
+  each(collection, (obj: Record<string, any>) => {
     const keys = isFunction(callback) ? callback(obj) : obj[callback];
 
     if (!Array.isArray(keys)) {

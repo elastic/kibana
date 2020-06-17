@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { head } from 'lodash';
+import { first } from 'lodash';
 import { MetricsExplorerResponse } from '../../../../common/http_api/metrics_explorer';
 import { MetricThresholdAlertParams, ExpressionChartSeries } from '../types';
 
@@ -14,7 +14,7 @@ export const transformMetricsExplorerData = (
 ) => {
   const { criteria } = params;
   if (criteria && data) {
-    const firstSeries = head(data.series);
+    const firstSeries = first(data.series);
     const series = firstSeries.rows.reduce((acc, row) => {
       const { timestamp } = row;
       criteria.forEach((item, index) => {

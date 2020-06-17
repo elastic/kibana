@@ -32,7 +32,7 @@ describe('color.js', () => {
   it('sets the color, on all series', () => {
     return invoke(fn, [seriesList, '#eee']).then((r) => {
       const colors = _.map(r.output.list, 'color');
-      _.forEach(colors, (color) => expect(color).to.equal('#eee'));
+      _.each(colors, (color) => expect(color).to.equal('#eee'));
     });
   });
 
@@ -44,7 +44,7 @@ describe('color.js', () => {
     };
     return invoke(fn, [fourLongList, '#000:#333']).then((r) => {
       const colors = _.map(r.output.list, 'color');
-      _.forEach(colors, (color, i) => expect(color).to.equal(expected[i]));
+      _.each(colors, (color, i) => expect(color).to.equal(expected[i]));
     });
   });
 

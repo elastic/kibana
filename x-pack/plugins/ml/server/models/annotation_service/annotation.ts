@@ -178,7 +178,7 @@ export function annotationProvider(callAsCurrentUser: APICaller) {
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
-      _.forEach(jobIds, (jobId, i: number) => {
+      _.each(jobIds, (jobId, i: number) => {
         jobIdFilterStr += `${i! > 0 ? ' OR ' : ''}job_id:${jobId}`;
       });
       boolCriteria.push({

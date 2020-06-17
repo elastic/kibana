@@ -45,7 +45,7 @@ export function initializeUpdateCustomElementRoute(deps: RouteInitializerDeps) {
         CUSTOM_ELEMENT_TYPE,
         {
           ...customElementObject.attributes,
-          ...omit(payload, ['id']), // never write the id property
+          ...omit(payload, 'id'), // never write the id property
           '@timestamp': now,
           '@created': customElementObject.attributes['@created'], // ensure created is not modified
         },

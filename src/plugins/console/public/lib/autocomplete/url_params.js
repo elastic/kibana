@@ -50,7 +50,7 @@ export class UrlParams {
     }
     description = _.clone(description || {});
     _.defaults(description, defaults);
-    _.forEach(description, (pDescription, param) => {
+    _.each(description, (pDescription, param) => {
       const component = new ParamComponent(param, this.rootComponent, pDescription);
       if (Array.isArray(pDescription)) {
         new ListComponent(param, pDescription, component);

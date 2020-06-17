@@ -73,7 +73,7 @@ export class MappedColors {
     const oldColors = _.values(this._oldMap);
 
     const keysToMap: Array<string | number> = [];
-    _.forEach(keys, (key) => {
+    _.each(keys, (key) => {
       // If this key is mapped in the config, it's unnecessary to have it mapped here
       if (configMapping[key]) delete this._mapping[key];
 

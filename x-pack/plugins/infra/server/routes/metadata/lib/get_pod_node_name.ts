@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { head, get } from 'lodash';
+import { first, get } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
@@ -40,7 +40,7 @@ export const getPodNodeName = async (
     { _source: { kubernetes: { node: { name: string } } } },
     {}
   >(requestContext, 'search', params);
-  const firstHit = head(response.hits.hits);
+  const firstHit = first(response.hits.hits);
   if (firstHit) {
     return get(firstHit, '_source.kubernetes.node.name');
   }

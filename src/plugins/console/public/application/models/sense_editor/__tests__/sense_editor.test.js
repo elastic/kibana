@@ -81,7 +81,7 @@ describe('Editor', () => {
       expected = [expected];
     }
 
-    _.forEach(requests, function (r) {
+    _.each(requests, function (r) {
       delete r.range;
     });
     expect(requests).toEqual(expected);
@@ -343,7 +343,7 @@ describe('Editor', () => {
     utilsTest('multi request select - ' + name, editorInput, async function (done) {
       const requests = await input.getRequestsInRange(range, false);
       // convert to format returned by request.
-      _.forEach(expected, function (req) {
+      _.each(expected, function (req) {
         req.data = req.data == null ? [] : [JSON.stringify(req.data, null, 2)];
       });
 

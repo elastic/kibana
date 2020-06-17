@@ -187,7 +187,7 @@ export class Handler {
     return function (event, chart) {
       const proxyHandler = this.getProxyHandler(event);
 
-      _.forEach(chart ? [chart] : this.charts, function (chart) {
+      _.each(chart ? [chart] : this.charts, function (chart) {
         chart.events[method](event, proxyHandler);
       });
     };

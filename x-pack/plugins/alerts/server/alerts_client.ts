@@ -606,7 +606,7 @@ export class AlertsClient {
         throw new Error(`Reference ${action.actionRef} not found`);
       }
       return {
-        ...omit(action, ['actionRef']),
+        ...omit(action, 'actionRef'),
         id: reference.id,
       };
     }) as Alert['actions'];

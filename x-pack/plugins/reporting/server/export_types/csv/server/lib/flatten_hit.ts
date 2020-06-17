@@ -40,7 +40,7 @@ export function createFlattenHit(
   };
 
   const flattenMetaFields = (flat: Hit, hit: Hit) => {
-    _.forEach(metaFields, (meta) => {
+    _.each(metaFields, (meta) => {
       if (meta === '_source') return;
       flat[meta] = hit[meta];
     });

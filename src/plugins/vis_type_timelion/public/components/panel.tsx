@@ -20,7 +20,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import $ from 'jquery';
 import moment from 'moment-timezone';
-import { debounce, compact, get, forEach, cloneDeep, last, map } from 'lodash';
+import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 
 import { useKibana } from '../../../kibana_react/public';
 import '../flot';
@@ -321,7 +321,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     if (legendCaption) {
       legendCaption.html(emptyCaption);
     }
-    forEach(legendValueNumbers!, (num: Node) => {
+    each(legendValueNumbers!, (num: Node) => {
       $(num).empty();
     });
   }, [legendCaption, legendValueNumbers]);

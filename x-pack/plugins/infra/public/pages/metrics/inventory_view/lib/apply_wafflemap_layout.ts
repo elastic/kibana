@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { head, sortBy } from 'lodash';
+import { first, sortBy } from 'lodash';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 import { InfraWaffleMapGroup } from '../../../../lib/lib';
 import { sizeOfSquares } from './size_of_squares';
@@ -60,7 +60,7 @@ export function applyWaffleMapLayout(
   if (groups.length === 0) {
     return [];
   }
-  const levels = isWaffleMapGroupWithGroups(head(groups)) ? 2 : 1;
+  const levels = isWaffleMapGroupWithGroups(first(groups)) ? 2 : 1;
   const totalItems = getTotalItems(groups);
   const squareSize = Math.round(sizeOfSquares(width, height, totalItems, levels));
   const largestCount = getLargestCount(groups);

@@ -50,7 +50,7 @@ export default new Datasource('static', {
     const target = tlConfig.getTargetSeries();
     if (typeof args.byName.value === 'string') {
       const points = args.byName.value.split(':');
-      const begin = _.head(target)[0];
+      const begin = _.first(target)[0];
       const end = _.last(target)[0];
       const step = (end - begin) / (points.length - 1);
       data = _.map(points, function (point, i) {

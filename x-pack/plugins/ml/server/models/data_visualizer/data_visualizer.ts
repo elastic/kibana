@@ -142,7 +142,7 @@ export class DataVisualizer {
     // To avoid checking for the existence of too many aggregatable fields in one request,
     // split the check into multiple batches (max 200 fields per request).
     const batches: string[][] = [[]];
-    _.forEach(aggregatableFields, (field) => {
+    _.each(aggregatableFields, (field) => {
       let lastArray: string[] = _.last(batches);
       if (lastArray.length === AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE) {
         lastArray = [];
@@ -217,7 +217,7 @@ export class DataVisualizer {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
     const batchedFields: { [key: string]: Field[][] } = {};
-    _.forEach(fields, (field) => {
+    _.each(fields, (field) => {
       if (field.fieldName === undefined) {
         // undefined fieldName is used for a document count request.
         // getDocumentCountStats requires timeField - don't add to batched requests if not defined
@@ -238,7 +238,7 @@ export class DataVisualizer {
       }
     });
 
-    _.forEach(batchedFields, (lists) => {
+    _.each(batchedFields, (lists) => {
       batches.push(...lists);
     });
 
@@ -492,7 +492,7 @@ export class DataVisualizer {
       ['aggregations', 'eventRate', 'buckets'],
       []
     );
-    _.forEach(dataByTimeBucket, (dataForTime) => {
+    _.each(dataByTimeBucket, (dataForTime) => {
       const time = dataForTime.key;
       buckets[time] = dataForTime.doc_count;
     });

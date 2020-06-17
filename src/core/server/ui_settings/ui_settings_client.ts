@@ -74,7 +74,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   getRegistered() {
     const copiedDefaults: Record<string, PublicUiSettingsParams> = {};
     for (const [key, value] of Object.entries(this.defaults)) {
-      copiedDefaults[key] = omit(value, ['schema']);
+      copiedDefaults[key] = omit(value, 'schema');
     }
     return copiedDefaults;
   }

@@ -104,7 +104,7 @@ export async function generateSampleDocuments(
           -dayNo
         );
 
-        const generated = mapValuesDeep(omit(sample, ['versions']), (value) =>
+        const generated = mapValuesDeep(omit(sample, 'versions'), (value) =>
           randomize(value, instanceVariation, dailyGrowth)
         );
 

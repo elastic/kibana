@@ -54,7 +54,7 @@ export class FilterManager {
     // existing globalFilters should be mutated by appFilters
     // ignore original appFilters which are already inside globalFilters
     const cleanedAppFilters: Filter[] = [];
-    _.forEach(appFilters, function (filter, i) {
+    _.each(appFilters, function (filter, i) {
       const match = _.find(globalFilters, function (globalFilter) {
         return compareFilters(globalFilter, filter);
       });

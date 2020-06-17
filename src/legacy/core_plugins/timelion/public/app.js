@@ -447,7 +447,7 @@ app.controller('timelion', function (
       .then(function (resp) {
         $scope.stats = resp.stats;
         $scope.sheet = resp.sheet;
-        _.forEach(resp.sheet, function (cell) {
+        _.each(resp.sheet, function (cell) {
           if (cell.exception) {
             $scope.state.selected = cell.plot;
           }

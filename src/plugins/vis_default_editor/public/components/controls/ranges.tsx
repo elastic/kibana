@@ -81,7 +81,7 @@ function RangesParamEditor({
   const updateRanges = useCallback(
     (rangeValues: RangeValuesModel[]) => {
       // do not set internal id parameter into saved object
-      setValue(rangeValues.map((range) => omit(range, ['id'])));
+      setValue(rangeValues.map((range) => omit(range, 'id')));
       setRanges(rangeValues);
 
       if (setTouched) {
@@ -121,7 +121,7 @@ function RangesParamEditor({
     // responsible for discarding changes
     if (
       value.length !== ranges.length ||
-      value.some((range, index) => !isEqual(range, omit(ranges[index], ['id'])))
+      value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
     ) {
       setRanges(value.map((range) => ({ ...range, id: generateId() })));
     }

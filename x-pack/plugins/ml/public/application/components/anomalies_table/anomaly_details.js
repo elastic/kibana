@@ -63,7 +63,7 @@ function getDetailsItems(anomaly, examples, filter) {
     }
   } else {
     causes = sourceCauses.map((cause) => {
-      const simplified = _.pick(cause, ['typical', 'actual', 'probability']);
+      const simplified = _.pick(cause, 'typical', 'actual', 'probability');
       // Get the 'entity field name/value' to display in the cause -
       // For by and over, use by_field_name/value (over_field_name/value are in the top level fields)
       // For just an 'over' field - the over_field_name/value appear in both top level and cause.

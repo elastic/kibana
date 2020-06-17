@@ -36,9 +36,9 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
       if (deep) {
         const field = fields(key);
         const isNestedField = field && field.type === 'nested';
-        const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.head(val));
+        const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.first(val));
         if (isArrayOfObjects && !isNestedField) {
-          _.forEach(val, (v) => flatten(v, key));
+          _.each(val, (v) => flatten(v, key));
           return;
         }
       } else if (flat[key] !== void 0) {
@@ -70,7 +70,7 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
 function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<string, any>) {
   return function (flattened: Record<string, any>) {
     // assign the meta fields
-    _.forEach(metaFields, function (meta) {
+    _.each(metaFields, function (meta) {
       if (meta === '_source') return;
       flattened[meta] = hit[meta];
     });

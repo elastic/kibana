@@ -73,7 +73,7 @@ export class Layout {
    * @returns {*} Creates the visualization layout
    */
   createLayout(arr) {
-    return _.forEach(arr, (obj) => {
+    return _.each(arr, (obj) => {
       this.layout(obj);
     });
   }

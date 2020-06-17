@@ -210,7 +210,7 @@ export function pointseries(): ExpressionFunctionDefinition<
 
       // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
       const resultingRows = uniqBy(
-        Object.values(results).map((row) => omit(row, [PRIMARY_KEY])),
+        Object.values(results).map((row) => omit(row, PRIMARY_KEY)),
         JSON.stringify
       );
 

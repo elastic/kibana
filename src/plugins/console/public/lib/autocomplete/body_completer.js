@@ -104,7 +104,7 @@ class ScopeResolver extends SharedComponent {
   getTerms(context, editor) {
     const options = [];
     const components = this.resolveLinkToComponents(context, editor);
-    _.forEach(components, function (component) {
+    _.each(components, function (component) {
       options.push.apply(options, component.getTerms(context, editor));
     });
     return options;
@@ -115,7 +115,7 @@ class ScopeResolver extends SharedComponent {
       next: [],
     };
     const components = this.resolveLinkToComponents(context, editor);
-    _.forEach(components, function (component) {
+    _.each(components, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
         result.next.push.apply(result.next, componentResult.next);
@@ -228,7 +228,7 @@ function compileObject(objDescription, compilingContext) {
   const objectC = new ConstantComponent('{');
   const constants = [];
   const patterns = [];
-  _.forEach(objDescription, function (desc, key) {
+  _.each(objDescription, function (desc, key) {
     if (key.indexOf('__') === 0) {
       // meta key
       return;
@@ -257,8 +257,8 @@ function compileObject(objDescription, compilingContext) {
 
 function compileList(listRule, compilingContext) {
   const listC = new ConstantComponent('[');
-  _.forEach(listRule, function (desc) {
-    _.forEach(compileDescription(desc, compilingContext), function (component) {
+  _.each(listRule, function (desc) {
+    _.each(compileDescription(desc, compilingContext), function (component) {
       listC.addComponent(component);
     });
   });

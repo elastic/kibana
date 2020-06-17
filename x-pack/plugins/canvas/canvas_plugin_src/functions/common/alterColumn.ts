@@ -95,7 +95,7 @@ export function alterColumn(): ExpressionFunctionDefinition<
       }
 
       const rows = input.rows.map((row) => ({
-        ...omit(row, [column.name]),
+        ...omit(row, column.name),
         [name]: handler(row[column.name]),
       }));
 

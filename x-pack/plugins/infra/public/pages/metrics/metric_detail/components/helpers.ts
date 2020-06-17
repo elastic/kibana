@@ -6,7 +6,7 @@
 
 import { ReactText } from 'react';
 import Color from 'color';
-import { get, head, last, min, max } from 'lodash';
+import { get, first, last, min, max } from 'lodash';
 import { createFormatter } from '../../../../../common/formatters';
 import { InfraDataSeries } from '../../../../graphql/types';
 import {
@@ -40,7 +40,7 @@ export const getMaxMinTimestamp = (metric: NodeDetailsMetricData): [number, numb
     return [0, 0];
   }
   const values = metric.series.reduce((acc, item) => {
-    const firstRow = head(item.data);
+    const firstRow = first(item.data);
     const lastRow = last(item.data);
     return acc.concat([(firstRow && firstRow.timestamp) || 0, (lastRow && lastRow.timestamp) || 0]);
   }, [] as number[]);

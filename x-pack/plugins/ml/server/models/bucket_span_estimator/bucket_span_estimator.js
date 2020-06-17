@@ -154,7 +154,7 @@ export function estimateBucketSpanFactory(
               }
             };
 
-            _.forEach(this.checkers, (check) => {
+            _.each(this.checkers, (check) => {
               check.check
                 .run()
                 .then((interval) => {

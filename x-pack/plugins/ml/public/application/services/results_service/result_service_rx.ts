@@ -227,7 +227,7 @@ export function getModelPlotOutput(
   ];
 
   // Add in term queries for each of the specified criteria.
-  _.forEach(criteriaFields, (criteria) => {
+  _.each(criteriaFields, (criteria) => {
     mustCriteria.push({
       term: {
         [criteria.fieldName]: criteria.fieldValue,
@@ -307,7 +307,7 @@ export function getModelPlotOutput(
     .pipe(
       map((resp) => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.forEach(aggregationsByTime, (dataForTime: any) => {
+        _.each(aggregationsByTime, (dataForTime: any) => {
           const time = dataForTime.key;
           const modelUpper: number | undefined = _.get(dataForTime, ['modelUpper', 'value']);
           const modelLower: number | undefined = _.get(dataForTime, ['modelLower', 'value']);
@@ -369,7 +369,7 @@ export function getRecordsForCriteria(
 
   if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
     let jobIdFilterStr = '';
-    _.forEach(jobIds, (jobId, i) => {
+    _.each(jobIds, (jobId, i) => {
       if (i > 0) {
         jobIdFilterStr += ' OR ';
       }
@@ -385,7 +385,7 @@ export function getRecordsForCriteria(
   }
 
   // Add in term queries for each of the specified criteria.
-  _.forEach(criteriaFields, (criteria) => {
+  _.each(criteriaFields, (criteria) => {
     boolCriteria.push({
       term: {
         [criteria.fieldName]: criteria.fieldValue,
@@ -422,7 +422,7 @@ export function getRecordsForCriteria(
     .pipe(
       map((resp) => {
         if (resp.hits.total !== 0) {
-          _.forEach(resp.hits.hits, (hit: any) => {
+          _.each(resp.hits.hits, (hit: any) => {
             obj.records.push(hit._source);
           });
         }
@@ -471,7 +471,7 @@ export function getScheduledEventsByBucket(
 
   if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
     let jobIdFilterStr = '';
-    _.forEach(jobIds, (jobId, i) => {
+    _.each(jobIds, (jobId, i) => {
       jobIdFilterStr += `${i > 0 ? ' OR ' : ''}job_id:${jobId}`;
     });
     boolCriteria.push({
@@ -535,11 +535,11 @@ export function getScheduledEventsByBucket(
     .pipe(
       map((resp) => {
         const dataByJobId = _.get(resp, ['aggregations', 'jobs', 'buckets'], []);
-        _.forEach(dataByJobId, (dataForJob: any) => {
+        _.each(dataByJobId, (dataForJob: any) => {
           const jobId: string = dataForJob.key;
           const resultsForTime: Record<string, any> = {};
           const dataByTime = _.get(dataForJob, ['times', 'buckets'], []);
-          _.forEach(dataByTime, (dataForTime: any) => {
+          _.each(dataByTime, (dataForTime: any) => {
             const time: string = dataForTime.key;
             const events: object[] = _.get(dataForTime, ['events', 'buckets']);
             resultsForTime[time] = _.map(events, 'key');

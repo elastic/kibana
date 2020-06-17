@@ -61,7 +61,7 @@ export class UrlPatternMatcher {
       }
       const endpointComponents = endpoint.url_components || {};
       const partList = pattern.split('/');
-      _.forEach(partList, (part, partIndex) => {
+      _.each(partList, (part, partIndex) => {
         if (part.search(/^{.+}$/) >= 0) {
           part = part.substr(1, part.length - 2);
           if (activeComponent.getComponent(part)) {

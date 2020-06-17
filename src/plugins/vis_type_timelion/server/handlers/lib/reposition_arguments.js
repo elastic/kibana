@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 export default function repositionArguments(functionDef, unorderedArgs) {
   const args = [];
 
-  _.forEach(unorderedArgs, function (unorderedArg, i) {
+  _.each(unorderedArgs, function (unorderedArg, i) {
     let argDef;
     let targetIndex;
     let value;

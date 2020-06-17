@@ -107,7 +107,7 @@ export default ({ getService }) => {
         await callCluster('indices.existsTemplate', { name: 'migration_test_a_template' })
       );
 
-      assert.deepEqual(_.omit(result, ['elapsedMs']), {
+      assert.deepEqual(_.omit(result, 'elapsedMs'), {
         destIndex: '.migration-a_2',
         sourceIndex: '.migration-a_1',
         status: 'migrated',
@@ -337,7 +337,7 @@ async function createDocs({ callCluster, index, docs }) {
   await callCluster('bulk', {
     body: docs.reduce((acc, doc) => {
       acc.push({ index: { _id: doc.id, _index: index } });
-      acc.push(_.omit(doc, ['id']));
+      acc.push(_.omit(doc, 'id'));
       return acc;
     }, []),
   });

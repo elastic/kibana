@@ -73,9 +73,9 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
 
   tracer('starting token evaluation [' + token + ']');
 
-  _.forEach(walkingStates, function (ws) {
+  _.each(walkingStates, function (ws) {
     const contextForState = passThroughContext(context, ws.contextExtensionList);
-    _.forEach(ws.components, function (component) {
+    _.each(ws.components, function (component) {
       tracer('evaluating [' + token + '] with [' + component.name + ']', component);
       const result = component.match(token, contextForState, editor);
       if (result && !_.isEmpty(result)) {
@@ -130,10 +130,10 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
   );
   if (includeAutoComplete) {
     let autoCompleteSet = [];
-    _.forEach(walkStates, function (ws) {
+    _.each(walkStates, function (ws) {
       const contextForState = passThroughContext(context, ws.contextExtensionList);
-      _.forEach(ws.components, function (component) {
-        _.forEach(component.getTerms(contextForState, editor), function (term) {
+      _.each(ws.components, function (component) {
+        _.each(component.getTerms(contextForState, editor), function (term) {
           if (!_.isObject(term)) {
             term = { name: term };
           }
@@ -166,7 +166,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
       wsToUse = walkStates[0];
     }
 
-    _.forEach(wsToUse.contextExtensionList, function (extension) {
+    _.each(wsToUse.contextExtensionList, function (extension) {
       _.assign(context, extension);
     });
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { head, last } from 'lodash';
+import { first, last } from 'lodash';
 import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
@@ -52,7 +52,7 @@ export function getAnomalyScoreDataPoints(
   bucketSizeInMillis: number
 ): RectCoordinate[] {
   const ANOMALY_THRESHOLD = 75;
-  const firstDate = head(timeSeriesDates);
+  const firstDate = first(timeSeriesDates);
   const lastDate = last(timeSeriesDates);
 
   return buckets
@@ -88,7 +88,7 @@ export function replaceFirstAndLastBucket(
   buckets: IBucket[],
   timeSeriesDates: number[]
 ) {
-  const firstDate = head(timeSeriesDates);
+  const firstDate = first(timeSeriesDates);
   const lastDate = last(timeSeriesDates);
 
   const preBucketWithValue = buckets
@@ -99,7 +99,7 @@ export function replaceFirstAndLastBucket(
   const bucketsInRange = buckets.filter(isInDateRange(firstDate, lastDate));
 
   // replace first bucket if it is null
-  const firstBucket = head(bucketsInRange);
+  const firstBucket = first(bucketsInRange);
   if (preBucketWithValue && firstBucket && firstBucket.lower === null) {
     firstBucket.lower = preBucketWithValue.lower;
     firstBucket.upper = preBucketWithValue.upper;

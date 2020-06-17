@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { head, memoize } from 'lodash';
+import { first, memoize } from 'lodash';
 
 export const ECS_ALLOWED_LIST = [
   'host',
@@ -49,7 +49,7 @@ export const AWS_S3_ALLOWED_LIST = ['aws.s3'];
 export const AWS_METRICS_ALLOWED_LIST = ['aws.dimensions'];
 
 export const getAllowedListForPrefix = memoize((prefix: string) => {
-  const firstPart = head(prefix.split(/\./));
+  const firstPart = first(prefix.split(/\./));
   const defaultAllowedList = prefix ? [...ECS_ALLOWED_LIST, prefix] : ECS_ALLOWED_LIST;
   switch (firstPart) {
     case 'docker':

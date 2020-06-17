@@ -5,7 +5,7 @@
  */
 
 import { pageHelpers, mockHttpRequest } from './helpers';
-import { head } from 'lodash';
+import { first } from 'lodash';
 import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
@@ -138,7 +138,7 @@ describe('Create Rollup Job, step 6: Review', () => {
     describe('without starting job after creation', () => {
       it('should call the "create" Api server endpoint', async () => {
         mockHttpRequest(startMock.http, {
-          createdJob: head(JOBS.jobs),
+          createdJob: first(JOBS.jobs),
         });
 
         await goToStep(6);
@@ -159,7 +159,7 @@ describe('Create Rollup Job, step 6: Review', () => {
     describe('with starting job after creation', () => {
       it('should call the "create" and "start" Api server endpoints', async () => {
         mockHttpRequest(startMock.http, {
-          createdJob: head(JOBS.jobs),
+          createdJob: first(JOBS.jobs),
         });
 
         await goToStep(6);

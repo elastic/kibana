@@ -51,5 +51,5 @@ getUrl.noAuth = function getUrlNoAuth(config, app) {
 };
 
 getUrl.baseUrl = function getBaseUrl(config) {
-  return url.format(_.pick(config, ['protocol', 'hostname', 'port']));
+  return url.format(_.pick(config, 'protocol', 'hostname', 'port'));
 };

@@ -157,12 +157,10 @@ export default function ({ getService }: FtrProviderContext) {
   ) {
     try {
       foundEvents.forEach((foundEvent: IValidatedEvent, index: number) => {
-        expect(omit(foundEvent!.event ?? {}, ['start', 'end', 'duration'])).to.eql(
+        expect(omit(foundEvent!.event ?? {}, 'start', 'end', 'duration')).to.eql(
           expectedEvents[index]!.event
         );
-        expect(omit(foundEvent!.kibana ?? {}, ['server_uuid'])).to.eql(
-          expectedEvents[index]!.kibana
-        );
+        expect(omit(foundEvent!.kibana ?? {}, 'server_uuid')).to.eql(expectedEvents[index]!.kibana);
         expect(foundEvent!.message).to.eql(expectedEvents[index]!.message);
       });
     } catch (ex) {

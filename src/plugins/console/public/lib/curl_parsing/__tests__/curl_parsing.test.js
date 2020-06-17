@@ -23,7 +23,7 @@ import curlTests from './curl_parsing.txt';
 
 describe('CURL', () => {
   const notCURLS = ['sldhfsljfhs', 's;kdjfsldkfj curl -XDELETE ""', '{ "hello": 1 }'];
-  _.forEach(notCURLS, function (notCURL, i) {
+  _.each(notCURLS, function (notCURL, i) {
     test('cURL Detection - broken strings ' + i, function () {
       expect(detectCURL(notCURL)).toEqual(false);
     });

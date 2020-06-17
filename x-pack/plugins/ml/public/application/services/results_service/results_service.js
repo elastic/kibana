@@ -42,7 +42,7 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
-      _.forEach(jobIds, (jobId, i) => {
+      _.each(jobIds, (jobId, i) => {
         if (i > 0) {
           jobIdFilterStr += ' OR ';
         }
@@ -118,13 +118,13 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
     })
       .then((resp) => {
         const dataByJobId = _.get(resp, ['aggregations', 'jobId', 'buckets'], []);
-        _.forEach(dataByJobId, (dataForJob) => {
+        _.each(dataByJobId, (dataForJob) => {
           const jobId = dataForJob.key;
 
           const resultsForTime = {};
 
           const dataByTime = _.get(dataForJob, ['byTime', 'buckets'], []);
-          _.forEach(dataByTime, (dataForTime) => {
+          _.each(dataByTime, (dataForTime) => {
             const value = _.get(dataForTime, ['anomalyScore', 'value']);
             if (value !== undefined) {
               const time = dataForTime.key;
@@ -182,7 +182,7 @@ export function getTopInfluencers(
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
-      _.forEach(jobIds, (jobId, i) => {
+      _.each(jobIds, (jobId, i) => {
         if (i > 0) {
           jobIdFilterStr += ' OR ';
         }
@@ -288,12 +288,12 @@ export function getTopInfluencers(
           ['aggregations', 'influencerFieldNames', 'buckets'],
           []
         );
-        _.forEach(fieldNameBuckets, (nameBucket) => {
+        _.each(fieldNameBuckets, (nameBucket) => {
           const fieldName = nameBucket.key;
           const fieldValues = [];
 
           const fieldValueBuckets = _.get(nameBucket, ['influencerFieldValues', 'buckets'], []);
-          _.forEach(fieldValueBuckets, (valueBucket) => {
+          _.each(fieldValueBuckets, (valueBucket) => {
             const fieldValueResult = {
               influencerFieldValue: valueBucket.key,
               maxAnomalyScore: valueBucket.maxAnomalyScore.value,
@@ -344,7 +344,7 @@ export function getTopInfluencerValues(
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
-      _.forEach(jobIds, (jobId, i) => {
+      _.each(jobIds, (jobId, i) => {
         if (i > 0) {
           jobIdFilterStr += ' OR ';
         }
@@ -409,7 +409,7 @@ export function getTopInfluencerValues(
     })
       .then((resp) => {
         const buckets = _.get(resp, ['aggregations', 'influencerFieldValues', 'buckets'], []);
-        _.forEach(buckets, (bucket) => {
+        _.each(buckets, (bucket) => {
           const result = {
             influencerFieldValue: bucket.key,
             maxAnomalyScore: bucket.maxAnomalyScore.value,
@@ -442,7 +442,7 @@ export function getOverallBucketScores(jobIds, topN, earliestMs, latestMs, inter
     })
       .then((resp) => {
         const dataByTime = _.get(resp, ['overall_buckets'], []);
-        _.forEach(dataByTime, (dataForTime) => {
+        _.each(dataByTime, (dataForTime) => {
           const value = _.get(dataForTime, ['overall_score']);
           if (value !== undefined) {
             obj.results[dataForTime.timestamp] = value;
@@ -498,7 +498,7 @@ export function getInfluencerValueMaxScoreByTime(
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
-      _.forEach(jobIds, (jobId, i) => {
+      _.each(jobIds, (jobId, i) => {
         if (i > 0) {
           jobIdFilterStr += ' OR ';
         }
@@ -518,7 +518,7 @@ export function getInfluencerValueMaxScoreByTime(
 
     if (influencerFieldValues && influencerFieldValues.length > 0) {
       let influencerFilterStr = '';
-      _.forEach(influencerFieldValues, (value, i) => {
+      _.each(influencerFieldValues, (value, i) => {
         if (i > 0) {
           influencerFilterStr += ' OR ';
         }
@@ -600,12 +600,12 @@ export function getInfluencerValueMaxScoreByTime(
           ['aggregations', 'influencerFieldValues', 'buckets'],
           []
         );
-        _.forEach(fieldValueBuckets, (valueBucket) => {
+        _.each(fieldValueBuckets, (valueBucket) => {
           const fieldValue = valueBucket.key;
           const fieldValues = {};
 
           const timeBuckets = _.get(valueBucket, ['byTime', 'buckets'], []);
-          _.forEach(timeBuckets, (timeBucket) => {
+          _.each(timeBuckets, (timeBucket) => {
             const time = timeBucket.key;
             const score = timeBucket.maxAnomalyScore.value;
             fieldValues[time] = score;
@@ -669,7 +669,7 @@ export function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, ma
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
-      _.forEach(jobIds, (jobId, i) => {
+      _.each(jobIds, (jobId, i) => {
         if (i > 0) {
           jobIdFilterStr += ' OR ';
         }
@@ -712,7 +712,7 @@ export function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, ma
     })
       .then((resp) => {
         if (resp.hits.total !== 0) {
-          _.forEach(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, (hit) => {
             obj.records.push(hit._source);
           });
         }
@@ -765,7 +765,7 @@ export function getRecordsForInfluencer(
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
-      _.forEach(jobIds, (jobId, i) => {
+      _.each(jobIds, (jobId, i) => {
         if (i > 0) {
           jobIdFilterStr += ' OR ';
         }
@@ -843,7 +843,7 @@ export function getRecordsForInfluencer(
     })
       .then((resp) => {
         if (resp.hits.total !== 0) {
-          _.forEach(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, (hit) => {
             obj.records.push(hit._source);
           });
         }
@@ -968,7 +968,7 @@ export function getRecordsForDetector(
     })
       .then((resp) => {
         if (resp.hits.total !== 0) {
-          _.forEach(resp.hits.hits, (hit) => {
+          _.each(resp.hits.hits, (hit) => {
             obj.records.push(hit._source);
           });
         }
@@ -1047,7 +1047,7 @@ export function getEventRateData(index, query, timeFieldName, earliestMs, latest
     })
       .then((resp) => {
         const dataByTimeBucket = _.get(resp, ['aggregations', 'eventRate', 'buckets'], []);
-        _.forEach(dataByTimeBucket, (dataForTime) => {
+        _.each(dataByTimeBucket, (dataForTime) => {
           const time = dataForTime.key;
           obj.results[time] = dataForTime.doc_count;
         });
@@ -1260,7 +1260,7 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
       { term: { job_id: jobId } },
     ];
 
-    _.forEach(criteriaFields, (criteria) => {
+    _.each(criteriaFields, (criteria) => {
       mustCriteria.push({
         term: {
           [criteria.fieldName]: criteria.fieldValue,
@@ -1309,7 +1309,7 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
     })
       .then((resp) => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.forEach(aggregationsByTime, (dataForTime) => {
+        _.each(aggregationsByTime, (dataForTime) => {
           const time = dataForTime.key;
           obj.results[time] = {
             score: _.get(dataForTime, ['recordScore', 'value']),

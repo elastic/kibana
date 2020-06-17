@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { forEach } from 'lodash';
+import { each } from 'lodash';
 import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
 import { fields, getField } from '../../index_patterns/mocks';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
@@ -103,7 +103,7 @@ describe('Range filter builder', () => {
   it('to use the right operator for each of gte, gt, lt and lte', () => {
     const field = getField('script number');
 
-    forEach({ gte: '>=', gt: '>', lte: '<=', lt: '<' }, (operator: string, key: any) => {
+    each({ gte: '>=', gt: '>', lte: '<=', lt: '<' }, (operator: string, key: any) => {
       const params = {
         [key]: 5,
       };

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { head } from 'lodash';
+import { first } from 'lodash';
 import moment from 'moment';
 import { DATES } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
-        const firstSeries = head(body.series);
+        const firstSeries = first(body.series);
         expect(firstSeries).to.have.property('id', 'Everything');
         expect(firstSeries.columns).to.eql([
           { name: 'timestamp', type: 'date' },
@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
-        const firstSeries = head(body.series);
+        const firstSeries = first(body.series);
         expect(firstSeries).to.have.property('id', 'Everything');
         expect(firstSeries.columns).to.eql([
           { name: 'timestamp', type: 'date' },
@@ -120,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
-        const firstSeries = head(body.series);
+        const firstSeries = first(body.series);
         expect(firstSeries).to.have.property('id', 'Everything');
         expect(firstSeries.columns).to.eql([]);
         expect(firstSeries.rows).to.have.length(0);
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(3);
-        const firstSeries = head(body.series);
+        const firstSeries = first(body.series);
         expect(firstSeries).to.have.property('id', 'system.diskio');
         expect(firstSeries.columns).to.eql([
           { name: 'timestamp', type: 'date' },
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(3);
-        const firstSeries = head(body.series);
+        const firstSeries = first(body.series);
         expect(firstSeries).to.have.property('id', 'demo-stack-mysql-01 / eth0');
         expect(firstSeries.columns).to.eql([
           { name: 'timestamp', type: 'date' },

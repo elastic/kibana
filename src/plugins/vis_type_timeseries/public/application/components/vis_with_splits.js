@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { getDisplayName } from './lib/get_display_name';
-import { last, findIndex, head } from 'lodash';
+import { last, findIndex, first } from 'lodash';
 import { calculateLabel } from '../../../../../plugins/vis_type_timeseries/common/calculate_label';
 
 export function visWithSplits(WrappedComponent) {
@@ -53,7 +53,7 @@ export function visWithSplits(WrappedComponent) {
       return acc;
     }, {});
 
-    const nonSplitSeries = head(
+    const nonSplitSeries = first(
       visData[model.id].series.filter((series) => {
         const seriesModel = model.series.find((s) => s.id === series.id);
         if (!seriesModel) return false;

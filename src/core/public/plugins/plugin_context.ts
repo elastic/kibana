@@ -146,7 +146,7 @@ export function createPluginStartContext<
     },
     docLinks: deps.docLinks,
     http: deps.http,
-    chrome: omit(deps.chrome, ['getComponent']),
+    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

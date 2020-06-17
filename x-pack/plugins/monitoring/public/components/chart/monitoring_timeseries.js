@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { head, get } from 'lodash';
+import { first, get } from 'lodash';
 import numeral from '@elastic/numeral';
 import { getColor } from './get_color';
 import { TimeseriesVisualization } from './timeseries_visualization';
@@ -34,7 +34,7 @@ export function MonitoringTimeseries({ series, onBrush }) {
       label: s.metric.label,
     };
   });
-  const firstSeries = head(series);
+  const firstSeries = first(series);
   const timeRange = get(firstSeries, 'timeRange');
   const formatTicks = formatTicksFor(firstSeries);
 

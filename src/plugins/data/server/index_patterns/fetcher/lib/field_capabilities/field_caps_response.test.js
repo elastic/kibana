@@ -50,7 +50,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
           const fields = readFieldCapsResponse(responseClone);
 
           fields.forEach((field) => {
-            const fieldWithoutOptionalKeys = omit(field, ['conflictDescriptions', 'subType']);
+            const fieldWithoutOptionalKeys = omit(field, 'conflictDescriptions', 'subType');
 
             expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
               'name',

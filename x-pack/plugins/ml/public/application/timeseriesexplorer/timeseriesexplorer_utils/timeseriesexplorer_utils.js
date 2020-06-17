@@ -41,7 +41,7 @@ export function createTimeSeriesJobData(jobs) {
 export function processMetricPlotResults(metricPlotData, modelPlotEnabled) {
   const metricPlotChartData = [];
   if (modelPlotEnabled === true) {
-    _.forEach(metricPlotData, (dataForTime, time) => {
+    _.each(metricPlotData, (dataForTime, time) => {
       metricPlotChartData.push({
         date: new Date(+time),
         lower: dataForTime.modelLower,
@@ -50,7 +50,7 @@ export function processMetricPlotResults(metricPlotData, modelPlotEnabled) {
       });
     });
   } else {
-    _.forEach(metricPlotData, (dataForTime, time) => {
+    _.each(metricPlotData, (dataForTime, time) => {
       metricPlotChartData.push({
         date: new Date(+time),
         value: dataForTime.actual,
@@ -66,7 +66,7 @@ export function processMetricPlotResults(metricPlotData, modelPlotEnabled) {
 // value, lower and upper keys.
 export function processForecastResults(forecastData) {
   const forecastPlotChartData = [];
-  _.forEach(forecastData, (dataForTime, time) => {
+  _.each(forecastData, (dataForTime, time) => {
     forecastPlotChartData.push({
       date: new Date(+time),
       isForecast: true,
@@ -83,7 +83,7 @@ export function processForecastResults(forecastData) {
 // i.e. array of Objects with keys date (JavaScript date) and score.
 export function processRecordScoreResults(scoreData) {
   const bucketScoreData = [];
-  _.forEach(scoreData, (dataForTime, time) => {
+  _.each(scoreData, (dataForTime, time) => {
     bucketScoreData.push({
       date: new Date(+time),
       score: dataForTime.score,
@@ -169,7 +169,7 @@ export function processDataForFocusAnomalies(
             chartPoint.numberOfCauses = causes.length;
             if (causes.length === 1) {
               // If only a single cause, copy actual and typical values to the top level.
-              const cause = _.head(record.causes);
+              const cause = _.first(record.causes);
               chartPoint.actual = cause.actual;
               chartPoint.typical = cause.typical;
               // substitute the value with the record's actual so it won't plot as null/0
@@ -194,7 +194,7 @@ export function processDataForFocusAnomalies(
 // which correspond to times of scheduled events for the job.
 export function processScheduledEventsForChart(chartData, scheduledEvents) {
   if (scheduledEvents !== undefined) {
-    _.forEach(scheduledEvents, (events, time) => {
+    _.each(scheduledEvents, (events, time) => {
       const chartPoint = findNearestChartPointToTime(chartData, time);
       if (chartPoint !== undefined) {
         // Note if the scheduled event coincides with an absence of the underlying metric data,
@@ -324,7 +324,7 @@ export function calculateDefaultFocusRange(
 
   const combinedData =
     isForecastData === false ? contextChartData : contextChartData.concat(contextForecastData);
-  const earliestDataDate = _.head(combinedData).date;
+  const earliestDataDate = _.first(combinedData).date;
   const latestDataDate = _.last(combinedData).date;
 
   let rangeEarliestMs;
@@ -333,7 +333,7 @@ export function calculateDefaultFocusRange(
   if (isForecastData === true) {
     // Return a range centred on the start of the forecast range, depending
     // on the time range of the forecast and data.
-    const earliestForecastDataDate = _.head(contextForecastData).date;
+    const earliestForecastDataDate = _.first(contextForecastData).date;
     const latestForecastDataDate = _.last(contextForecastData).date;
 
     rangeLatestMs = Math.min(

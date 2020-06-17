@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { head, last } from 'lodash';
+import { first, last } from 'lodash';
 
 import { InventoryMetric } from '../../../../plugins/infra/common/inventory_models/types';
 import { InfraNodeType, InfraTimerangeInput } from '../../../../plugins/infra/public/graphql/types';
@@ -61,10 +61,10 @@ export default function ({ getService }: FtrProviderContext) {
           return;
         }
         expect(resp.metrics.length).to.equal(1);
-        const metric = head(resp.metrics);
+        const metric = first(resp.metrics);
         expect(metric).to.have.property('id', 'hostCpuUsage');
         expect(metric).to.have.property('series');
-        const series = head(metric.series);
+        const series = first(metric.series);
         expect(series).to.have.property('id', 'user');
         expect(series).to.have.property('data');
         const datapoint = last(series.data);

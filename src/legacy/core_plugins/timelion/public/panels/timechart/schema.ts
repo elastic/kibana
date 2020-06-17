@@ -277,7 +277,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           if (legendCaption) {
             legendCaption.html(emptyCaption);
           }
-          _.forEach(legendValueNumbers, function (num) {
+          _.each(legendValueNumbers, function (num) {
             $(num).empty();
           });
         }
@@ -380,7 +380,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           legendScope = $scope.$new();
           // Used to toggle the series, and for displaying values on hover
           legendValueNumbers = canvasElem.find('.ngLegendValueNumber');
-          _.forEach(canvasElem.find('.ngLegendValue'), function (elem) {
+          _.each(canvasElem.find('.ngLegendValue'), function (elem) {
             $compile(elem)(legendScope);
           });
 

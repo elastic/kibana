@@ -16,7 +16,7 @@ import {
   TooltipValue,
   BrushEndListener,
 } from '@elastic/charts';
-import { head, last } from 'lodash';
+import { first, last } from 'lodash';
 import moment from 'moment';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
@@ -77,7 +77,7 @@ export const MetricsExplorerChart = ({
   const dateFormatter = useMemo(
     () =>
       series.rows.length > 0
-        ? niceTimeFormatter([head(series.rows).timestamp, last(series.rows).timestamp])
+        ? niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp])
         : (value: number) => `${value}`,
     [series.rows]
   );
@@ -88,7 +88,7 @@ export const MetricsExplorerChart = ({
     ),
   };
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const yAxisFormater = useCallback(createFormatterForMetric(head(metrics)), [options]);
+  const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
   const dataDomain = calculateDomain(series, metrics, chartOptions.stack);
   const domain =
     chartOptions.yAxisMode === MetricsExplorerYAxisMode.fromZero

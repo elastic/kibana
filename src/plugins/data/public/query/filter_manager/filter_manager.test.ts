@@ -429,7 +429,7 @@ describe('filter_manager', () => {
       // global filters should be listed first
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
-      _.forEach(res, function (filter) {
+      _.each(res, function (filter) {
         expect(filter.$state && filter.$state.store).toBe(FilterStateStore.GLOBAL_STATE);
       });
     });
@@ -542,7 +542,7 @@ describe('filter_manager', () => {
       filterManager.addFilters(appFilter);
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
-      _.forEach(res, function (filter, i) {
+      _.each(res, function (filter, i) {
         expect(filter.$state && filter.$state.store).toBe('globalState');
         // make sure global filter actually mutated
         expect(filter.meta.negate).toBe(i === idx);

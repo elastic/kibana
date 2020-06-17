@@ -36,7 +36,7 @@ describe('JSON to XJSON conversion tools', () => {
   });
 });
 
-_.forEach(collapsingTests.split(/^=+$/m), function (fixture) {
+_.each(collapsingTests.split(/^=+$/m), function (fixture) {
   if (fixture.trim() === '') {
     return;
   }
@@ -50,7 +50,7 @@ _.forEach(collapsingTests.split(/^=+$/m), function (fixture) {
   });
 });
 
-_.forEach(expandingTests.split(/^=+$/m), function (fixture) {
+_.each(expandingTests.split(/^=+$/m), function (fixture) {
   if (fixture.trim() === '') {
     return;
   }

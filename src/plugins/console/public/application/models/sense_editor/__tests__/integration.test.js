@@ -122,7 +122,7 @@ describe('Integration', () => {
             const filteredActualTerms = _.map(terms, function (actualTerm, i) {
               const expectedTerm = expectedTerms[i];
               const filteredTerm = {};
-              _.forEach(expectedTerm, function (v, p) {
+              _.each(expectedTerm, function (v, p) {
                 filteredTerm[p] = actualTerm[p];
               });
               return filteredTerm;

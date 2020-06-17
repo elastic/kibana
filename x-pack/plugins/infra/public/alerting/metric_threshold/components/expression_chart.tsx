@@ -15,7 +15,7 @@ import {
   AnnotationDomainTypes,
   LineAnnotation,
 } from '@elastic/charts';
-import { head, last } from 'lodash';
+import { first, last } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
@@ -84,9 +84,9 @@ export const ExpressionChart: React.FC<Props> = ({
   };
   const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
-    const firstSeries = data ? head(data.series) : null;
+    const firstSeries = data ? first(data.series) : null;
     return firstSeries && firstSeries.rows.length > 0
-      ? niceTimeFormatter([head(firstSeries.rows).timestamp, last(firstSeries.rows).timestamp])
+      ? niceTimeFormatter([first(firstSeries.rows).timestamp, last(firstSeries.rows).timestamp])
       : (value: number) => `${value}`;
   }, [data]);
 
@@ -110,7 +110,7 @@ export const ExpressionChart: React.FC<Props> = ({
 
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domian
-  const firstSeries = head(data.series);
+  const firstSeries = first(data.series);
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
     return (
       <EmptyContainer>
@@ -135,15 +135,15 @@ export const ExpressionChart: React.FC<Props> = ({
     }),
   };
 
-  const firstTimestamp = head(firstSeries.rows).timestamp;
+  const firstTimestamp = first(firstSeries.rows).timestamp;
   const lastTimestamp = last(firstSeries.rows).timestamp;
   const dataDomain = calculateDomain(series, [metric], false);
   const domain = {
     max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
-    min: Math.min(dataDomain.min, head(thresholds) || dataDomain.min),
+    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min),
   };
 
-  if (domain.min === head(expression.threshold)) {
+  if (domain.min === first(expression.threshold)) {
     domain.min = domain.min * 0.9;
   }
 
@@ -191,7 +191,7 @@ export const ExpressionChart: React.FC<Props> = ({
                     coordinates: {
                       x0: firstTimestamp,
                       x1: lastTimestamp,
-                      y0: head(expression.threshold),
+                      y0: first(expression.threshold),
                       y1: last(expression.threshold),
                     },
                   },
@@ -213,7 +213,7 @@ export const ExpressionChart: React.FC<Props> = ({
                       x0: firstTimestamp,
                       x1: lastTimestamp,
                       y0: domain.min,
-                      y1: head(expression.threshold),
+                      y1: first(expression.threshold),
                     },
                   },
                 ]}
@@ -237,7 +237,7 @@ export const ExpressionChart: React.FC<Props> = ({
               />
             </>
           ) : null}
-          {isBelow && head(expression.threshold) != null ? (
+          {isBelow && first(expression.threshold) != null ? (
             <RectAnnotation
               id="upper-threshold"
               style={{
@@ -250,13 +250,13 @@ export const ExpressionChart: React.FC<Props> = ({
                     x0: firstTimestamp,
                     x1: lastTimestamp,
                     y0: domain.min,
-                    y1: head(expression.threshold),
+                    y1: first(expression.threshold),
                   },
                 },
               ]}
             />
           ) : null}
-          {isAbove && head(expression.threshold) != null ? (
+          {isAbove && first(expression.threshold) != null ? (
             <RectAnnotation
               id="upper-threshold"
               style={{
@@ -268,7 +268,7 @@ export const ExpressionChart: React.FC<Props> = ({
                   coordinates: {
                     x0: firstTimestamp,
                     x1: lastTimestamp,
-                    y0: head(expression.threshold),
+                    y0: first(expression.threshold),
                     y1: domain.max,
                   },
                 },

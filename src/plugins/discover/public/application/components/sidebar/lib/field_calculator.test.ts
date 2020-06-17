@@ -142,7 +142,7 @@ describe('fieldCalculator', function () {
     let hits: any;
 
     beforeEach(function () {
-      hits = _.forEach(_.cloneDeep(realHits), indexPattern.flattenHit);
+      hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit);
     });
 
     it('Should return an array of values for _source fields', function () {

@@ -887,14 +887,14 @@ class TimeseriesChartIntl extends Component {
       );
 
     const zoomOptions = [{ durationMs: autoZoomDuration, label: 'auto' }];
-    _.forEach(ZOOM_INTERVAL_OPTIONS, (option) => {
+    _.each(ZOOM_INTERVAL_OPTIONS, (option) => {
       if (option.duration.asSeconds() > minSecs && option.duration.asSeconds() < boundsSecs) {
         zoomOptions.push({ durationMs: option.duration.asMilliseconds(), label: option.label });
       }
     });
     xPos += zoomLabel.node().getBBox().width + 4;
 
-    _.forEach(zoomOptions, (option) => {
+    _.each(zoomOptions, (option) => {
       const text = zoomGroup
         .append('a')
         .attr('data-ms', option.durationMs)
@@ -960,7 +960,7 @@ class TimeseriesChartIntl extends Component {
     const combinedData =
       contextForecastData === undefined ? data : data.concat(contextForecastData);
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
-    _.forEach(combinedData, (item) => {
+    _.each(combinedData, (item) => {
       valuesRange.min = Math.min(item.value, valuesRange.min);
       valuesRange.max = Math.max(item.value, valuesRange.max);
     });
@@ -973,7 +973,7 @@ class TimeseriesChartIntl extends Component {
       (contextForecastData !== undefined && contextForecastData.length > 0)
     ) {
       const boundsRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
-      _.forEach(combinedData, (item) => {
+      _.each(combinedData, (item) => {
         boundsRange.min = Math.min(item.lower, boundsRange.min);
         boundsRange.max = Math.max(item.upper, boundsRange.max);
       });
@@ -1294,7 +1294,7 @@ class TimeseriesChartIntl extends Component {
     if (swimlaneData !== undefined && swimlaneData.length > 0) {
       // Adjust the earliest back to the time of the first swimlane point
       // if this is before the time filter minimum.
-      earliest = Math.min(_.head(swimlaneData).date.getTime(), bounds.min.valueOf());
+      earliest = Math.min(_.first(swimlaneData).date.getTime(), bounds.min.valueOf());
     }
 
     const contextAggMs = contextAggregationInterval.asMilliseconds();
