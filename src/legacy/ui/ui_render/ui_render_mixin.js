@@ -26,8 +26,6 @@ import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
-const uniq = (...items) => Array.from(new Set(items));
-
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
  * @typedef {import('../../server/kbn_server').ResponseToolkit} ResponseToolkit
@@ -150,15 +148,7 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
         ];
 
-        const kpPluginIds = uniq(
-          // load these plugins first, they are "shared" and other bundles access their
-          // public/index exports without considering topographic sorting by plugin deps (for now)
-          'kibanaUtils',
-          'kibanaReact',
-          'data',
-          'esUiShared',
-          ...kbnServer.newPlatform.__internals.uiPlugins.public.keys()
-        );
+        const kpPluginIds = Array.from(kbnServer.newPlatform.__internals.uiPlugins.public.keys());
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
