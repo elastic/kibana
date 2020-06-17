@@ -44,7 +44,9 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
           {docsLink && (
             <>
               <EuiSpacer size={'xs'} />
-              <EuiLink href={docsLink}>{txtViewDocsLinkLabel}</EuiLink>
+              <EuiLink href={docsLink} target="_blank" rel="noopener">
+                {txtViewDocsLinkLabel}
+              </EuiLink>
             </>
           )}
         </EuiFlexItem>
