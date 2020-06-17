@@ -15,7 +15,7 @@ export type MapSavedObjectAttributes = {
   uiStateJSON?: string;
   bounds?: {
     type?: string;
-    coordinates?: [];
+    coordinates?: number[][][];
   };
 };
 
