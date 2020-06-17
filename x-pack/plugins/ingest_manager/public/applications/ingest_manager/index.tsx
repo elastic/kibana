@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useObservable } from 'react-use';
 import { HashRouter as Router, Redirect, Switch, Route, RouteProps } from 'react-router-dom';
@@ -28,6 +28,7 @@ import { useCore, sendSetup, sendGetPermissionsCheck } from './hooks';
 import { FleetStatusProvider } from './hooks/use_fleet_status';
 import './index.scss';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { IntraAppStateProvider } from './hooks/use_intra_app_state';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -56,163 +57,170 @@ const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   </EuiErrorBoundary>
 );
 
-const IngestManagerRoutes = ({ ...rest }) => {
-  const { epm, fleet } = useConfig();
-  const { notifications } = useCore();
+const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basepath: string }>(
+  ({ history, ...rest }) => {
+    const { epm, fleet } = useConfig();
+    const { notifications } = useCore();
 
-  const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
-  const [permissionsError, setPermissionsError] = useState<string>();
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [initializationError, setInitializationError] = useState<Error | null>(null);
+    const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
+    const [permissionsError, setPermissionsError] = useState<string>();
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [initializationError, setInitializationError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      setIsPermissionsLoading(false);
-      setPermissionsError(undefined);
-      setIsInitialized(false);
-      setInitializationError(null);
-      try {
-        setIsPermissionsLoading(true);
-        const permissionsResponse = await sendGetPermissionsCheck();
+    useEffect(() => {
+      (async () => {
         setIsPermissionsLoading(false);
-        if (permissionsResponse.data?.success) {
-          try {
-            const setupResponse = await sendSetup();
-            if (setupResponse.error) {
-              setInitializationError(setupResponse.error);
+        setPermissionsError(undefined);
+        setIsInitialized(false);
+        setInitializationError(null);
+        try {
+          setIsPermissionsLoading(true);
+          const permissionsResponse = await sendGetPermissionsCheck();
+          setIsPermissionsLoading(false);
+          if (permissionsResponse.data?.success) {
+            try {
+              const setupResponse = await sendSetup();
+              if (setupResponse.error) {
+                setInitializationError(setupResponse.error);
+              }
+            } catch (err) {
+              setInitializationError(err);
             }
-          } catch (err) {
-            setInitializationError(err);
+            setIsInitialized(true);
+          } else {
+            setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
           }
-          setIsInitialized(true);
-        } else {
-          setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
+        } catch (err) {
+          setPermissionsError('REQUEST_ERROR');
         }
-      } catch (err) {
-        setPermissionsError('REQUEST_ERROR');
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      })();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  if (isPermissionsLoading || permissionsError) {
-    return (
-      <ErrorLayout>
-        {isPermissionsLoading ? (
-          <Loading />
-        ) : permissionsError === 'REQUEST_ERROR' ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.ingestManager.permissionsRequestErrorMessageTitle"
-                defaultMessage="Unable to check permissions"
-              />
-            }
-            error={i18n.translate('xpack.ingestManager.permissionsRequestErrorMessageDescription', {
-              defaultMessage: 'There was a problem checking Ingest Manager permissions',
-            })}
-          />
-        ) : (
-          <Panel>
-            <EuiEmptyPrompt
-              iconType="securityApp"
+    if (isPermissionsLoading || permissionsError) {
+      return (
+        <ErrorLayout>
+          {isPermissionsLoading ? (
+            <Loading />
+          ) : permissionsError === 'REQUEST_ERROR' ? (
+            <Error
               title={
-                <h2>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.ingestManager.permissionDeniedErrorTitle"
-                      defaultMessage="Permission denied"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.ingestManager.securityRequiredErrorTitle"
-                      defaultMessage="Security is not enabled"
-                    />
-                  )}
-                </h2>
+                <FormattedMessage
+                  id="xpack.ingestManager.permissionsRequestErrorMessageTitle"
+                  defaultMessage="Unable to check permissions"
+                />
               }
-              body={
-                <p>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.ingestManager.permissionDeniedErrorMessage"
-                      defaultMessage="You are not authorized to access Ingest Manager. Ingest Manager requires {roleName} privileges."
-                      values={{ roleName: <EuiCode>superuser</EuiCode> }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.ingestManager.securityRequiredErrorMessage"
-                      defaultMessage="You must enable security in Kibana and Elasticsearch to use Ingest Manager."
-                    />
-                  )}
-                </p>
-              }
+              error={i18n.translate(
+                'xpack.ingestManager.permissionsRequestErrorMessageDescription',
+                {
+                  defaultMessage: 'There was a problem checking Ingest Manager permissions',
+                }
+              )}
             />
-          </Panel>
-        )}
-      </ErrorLayout>
-    );
-  }
-
-  if (!isInitialized || initializationError) {
-    return (
-      <ErrorLayout>
-        {initializationError ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.ingestManager.initializationErrorMessageTitle"
-                defaultMessage="Unable to initialize Ingest Manager"
+          ) : (
+            <Panel>
+              <EuiEmptyPrompt
+                iconType="securityApp"
+                title={
+                  <h2>
+                    {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
+                      <FormattedMessage
+                        id="xpack.ingestManager.permissionDeniedErrorTitle"
+                        defaultMessage="Permission denied"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.ingestManager.securityRequiredErrorTitle"
+                        defaultMessage="Security is not enabled"
+                      />
+                    )}
+                  </h2>
+                }
+                body={
+                  <p>
+                    {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
+                      <FormattedMessage
+                        id="xpack.ingestManager.permissionDeniedErrorMessage"
+                        defaultMessage="You are not authorized to access Ingest Manager. Ingest Manager requires {roleName} privileges."
+                        values={{ roleName: <EuiCode>superuser</EuiCode> }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.ingestManager.securityRequiredErrorMessage"
+                        defaultMessage="You must enable security in Kibana and Elasticsearch to use Ingest Manager."
+                      />
+                    )}
+                  </p>
+                }
               />
-            }
-            error={initializationError}
-          />
-        ) : (
-          <Loading />
-        )}
-      </ErrorLayout>
+            </Panel>
+          )}
+        </ErrorLayout>
+      );
+    }
+
+    if (!isInitialized || initializationError) {
+      return (
+        <ErrorLayout>
+          {initializationError ? (
+            <Error
+              title={
+                <FormattedMessage
+                  id="xpack.ingestManager.initializationErrorMessageTitle"
+                  defaultMessage="Unable to initialize Ingest Manager"
+                />
+              }
+              error={initializationError}
+            />
+          ) : (
+            <Loading />
+          )}
+        </ErrorLayout>
+      );
+    }
+
+    return (
+      <EuiErrorBoundary>
+        <FleetStatusProvider>
+          <IntraAppStateProvider kibanaScopedHistory={history}>
+            <Router {...rest}>
+              <PackageInstallProvider notifications={notifications}>
+                <Switch>
+                  <ProtectedRoute path={PAGE_ROUTING_PATHS.integrations} isAllowed={epm.enabled}>
+                    <DefaultLayout section="epm">
+                      <EPMApp />
+                    </DefaultLayout>
+                  </ProtectedRoute>
+                  <Route path={PAGE_ROUTING_PATHS.configurations}>
+                    <DefaultLayout section="agent_config">
+                      <AgentConfigApp />
+                    </DefaultLayout>
+                  </Route>
+                  <Route path={PAGE_ROUTING_PATHS.data_streams}>
+                    <DefaultLayout section="data_stream">
+                      <DataStreamApp />
+                    </DefaultLayout>
+                  </Route>
+                  <ProtectedRoute path={PAGE_ROUTING_PATHS.fleet} isAllowed={fleet.enabled}>
+                    <DefaultLayout section="fleet">
+                      <FleetApp />
+                    </DefaultLayout>
+                  </ProtectedRoute>
+                  <Route exact path={PAGE_ROUTING_PATHS.overview}>
+                    <DefaultLayout section="overview">
+                      <IngestManagerOverview />
+                    </DefaultLayout>
+                  </Route>
+                  <Redirect to="/" />
+                </Switch>
+              </PackageInstallProvider>
+            </Router>
+          </IntraAppStateProvider>
+        </FleetStatusProvider>
+      </EuiErrorBoundary>
     );
   }
-
-  return (
-    <EuiErrorBoundary>
-      <FleetStatusProvider>
-        <Router {...rest}>
-          <PackageInstallProvider notifications={notifications}>
-            <Switch>
-              <ProtectedRoute path={PAGE_ROUTING_PATHS.integrations} isAllowed={epm.enabled}>
-                <DefaultLayout section="epm">
-                  <EPMApp />
-                </DefaultLayout>
-              </ProtectedRoute>
-              <Route path={PAGE_ROUTING_PATHS.configurations}>
-                <DefaultLayout section="agent_config">
-                  <AgentConfigApp />
-                </DefaultLayout>
-              </Route>
-              <Route path={PAGE_ROUTING_PATHS.data_streams}>
-                <DefaultLayout section="data_stream">
-                  <DataStreamApp />
-                </DefaultLayout>
-              </Route>
-              <ProtectedRoute path={PAGE_ROUTING_PATHS.fleet} isAllowed={fleet.enabled}>
-                <DefaultLayout section="fleet">
-                  <FleetApp />
-                </DefaultLayout>
-              </ProtectedRoute>
-              <Route exact path={PAGE_ROUTING_PATHS.overview}>
-                <DefaultLayout section="overview">
-                  <IngestManagerOverview />
-                </DefaultLayout>
-              </Route>
-              <Redirect to="/" />
-            </Switch>
-          </PackageInstallProvider>
-        </Router>
-      </FleetStatusProvider>
-    </EuiErrorBoundary>
-  );
-};
+);
 
 const IngestManagerApp = ({
   basepath,
@@ -220,12 +228,14 @@ const IngestManagerApp = ({
   setupDeps,
   startDeps,
   config,
+  history,
 }: {
   basepath: string;
   coreStart: CoreStart;
   setupDeps: IngestManagerSetupDeps;
   startDeps: IngestManagerStartDeps;
   config: IngestManagerConfigType;
+  history: AppMountParameters['history'];
 }) => {
   const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
   return (
@@ -234,7 +244,7 @@ const IngestManagerApp = ({
         <DepsContext.Provider value={{ setup: setupDeps, start: startDeps }}>
           <ConfigContext.Provider value={config}>
             <EuiThemeProvider darkMode={isDarkMode}>
-              <IngestManagerRoutes basepath={basepath} />
+              <IngestManagerRoutes history={history} basepath={basepath} />
             </EuiThemeProvider>
           </ConfigContext.Provider>
         </DepsContext.Provider>
@@ -245,7 +255,7 @@ const IngestManagerApp = ({
 
 export function renderApp(
   coreStart: CoreStart,
-  { element, appBasePath }: AppMountParameters,
+  { element, appBasePath, history }: AppMountParameters,
   setupDeps: IngestManagerSetupDeps,
   startDeps: IngestManagerStartDeps,
   config: IngestManagerConfigType
@@ -258,6 +268,7 @@ export function renderApp(
       setupDeps={setupDeps}
       startDeps={startDeps}
       config={config}
+      history={history}
     />,
     element
   );

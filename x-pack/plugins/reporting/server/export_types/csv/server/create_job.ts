@@ -4,24 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { ReportingCore } from '../../../';
 import { cryptoFactory } from '../../../lib';
-import { CreateJobFactory, ESQueueCreateJobFn } from '../../../types';
+import { ESQueueCreateJobFn, ScheduleTaskFnFactory } from '../../../types';
 import { JobParamsDiscoverCsv } from '../types';
 
-export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
+export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
   JobParamsDiscoverCsv
->> = function createJobFactoryFn(reporting: ReportingCore) {
+>> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const setupDeps = reporting.getPluginSetupDeps();
 
-  return async function createJob(
-    jobParams: JobParamsDiscoverCsv,
-    context: RequestHandlerContext,
-    request: KibanaRequest
-  ) {
+  return async function scheduleTask(jobParams, context, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
 
     const savedObjectsClient = context.core.savedObjects.client;

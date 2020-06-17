@@ -45,8 +45,7 @@ describe('Pipeline Editor', () => {
       onUpdate,
       isTestButtonDisabled: false,
       onTestPipelineClick: jest.fn(),
-      learnMoreAboutProcessorsUrl: 'test',
-      learnMoreAboutOnFailureProcessorsUrl: 'test',
+      esDocsBasePath: 'test',
     });
   });
 
