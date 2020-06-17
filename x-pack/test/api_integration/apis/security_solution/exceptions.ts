@@ -10,11 +10,26 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
 
   describe('artifact download', () => {
     before(() => esArchiver.load('security_solution/exceptions/api_feature/exception_list'));
     after(() => esArchiver.unload('security_solution/exceptions/api_feature/exception_list'));
 
-    it('Do a download test', () => {});
+    it('should fail to find artifact with invalid hash', async () => {
+      const { body } = await supertest
+        .get('/api/endpoint/allowlist/download/endpoint-allowlist-windows-1.0.0/abcd')
+        .send()
+        .expect(404);
+    });
+
+    it('should download an artifact with correct hash', async () => {
+      const { body } = await supertest
+        .get(
+          '/api/endpoint/allowlist/download/endpoint-allowlist-windows-1.0.0/1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975'
+        )
+        .send()
+        .expect(200);
+    });
   });
 }
