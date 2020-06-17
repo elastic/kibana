@@ -16,6 +16,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
@@ -28,11 +29,11 @@ describe('Users Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
   });
 
   describe('Rendering', () => {

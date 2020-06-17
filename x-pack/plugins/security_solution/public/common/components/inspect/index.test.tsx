@@ -14,6 +14,7 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
 } from '../../mock';
 import { createStore, State } from '../../store';
 import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
@@ -34,13 +35,13 @@ describe('Inspect Button', () => {
     state: state.inputs,
   };
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
 
   describe('Render', () => {
     beforeEach(() => {
       const myState = cloneDeep(state);
       myState.inputs = upsertQuery(newQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
+      store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
     });
     test('Eui Empty Button', () => {
       const wrapper = mount(
@@ -144,7 +145,7 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
+      store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(

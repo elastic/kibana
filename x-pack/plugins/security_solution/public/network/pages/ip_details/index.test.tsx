@@ -20,6 +20,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
@@ -101,9 +102,9 @@ const getMockProps = (ip: string) => ({
 
 describe('Ip Details', () => {
   const mount = useMountAppended();
-
+  const mockFetch = jest.fn();
   beforeAll(() => {
-    (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
+    (global as GlobalWithFetch).fetch = mockFetch.mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
         json: () => {
@@ -114,14 +115,14 @@ describe('Ip Details', () => {
   });
 
   afterAll(() => {
-    delete (global as GlobalWithFetch).fetch;
+    jest.resetAllMocks();
   });
 
   const state: State = mockGlobalState;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
     localSource = cloneDeep(mocksSource);
   });
 

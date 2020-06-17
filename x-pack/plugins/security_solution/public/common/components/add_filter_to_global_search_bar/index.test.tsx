@@ -12,6 +12,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
 } from '../../mock';
 import { createStore, State } from '../../store';
 import { AddFilterToGlobalSearchBar } from '.';
@@ -33,10 +34,10 @@ jest.mock('../../lib/kibana', () => ({
 
 describe('AddFilterToGlobalSearchBar Component', () => {
   const state: State = mockGlobalState;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
     mockAddFilters.mockClear();
   });
 

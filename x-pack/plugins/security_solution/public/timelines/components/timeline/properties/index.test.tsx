@@ -12,6 +12,7 @@ import {
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
   TestProviders,
+  kibanaObservable,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
@@ -100,11 +101,11 @@ describe('Properties', () => {
   const state: State = mockGlobalState;
 
   let mockedWidth = 1000;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
     (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: mockedWidth });
   });
 
