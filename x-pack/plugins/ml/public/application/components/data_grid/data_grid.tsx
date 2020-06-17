@@ -180,7 +180,7 @@ export const DataGrid: FC<Props> = memo(
           <EuiDataGrid
             aria-label={isWithHeader(props) ? props.title : ''}
             columns={columnsWithCharts.map((c) => {
-              c.initialWidth = 150;
+              c.initialWidth = 165;
               return c;
             })}
             columnVisibility={{ visibleColumns, setVisibleColumns }}

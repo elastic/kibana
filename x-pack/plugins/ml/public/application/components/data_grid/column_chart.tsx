@@ -34,6 +34,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
           <Chart>
             <Settings
               theme={{
+                background: { color: 'transparent' },
                 chartMargins: {
                   left: 4,
                   right: 4,
@@ -64,7 +65,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
       )}
       <div
         className={classNames('mlDataGridChart__legend', {
-          'mlDataGridChart__legend--numeric': isNumericChartData(chartData),
+          'mlDataGridChart__legend--numeric': columnType.schema === 'number',
         })}
       >
         {legendText}

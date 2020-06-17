@@ -321,9 +321,16 @@ type LegendText = string | JSX.Element;
 const getLegendText = (chartData: ChartData): LegendText => {
   if (chartData.type === 'unsupported') {
     return i18n.translate('xpack.ml.dataGridChart.histogramNotAvailable', {
-      defaultMessage: `Histogram chart not supported for this type of column.`,
+      defaultMessage: 'Chart not supported.',
     });
   }
+
+  if (chartData.data.length === 0) {
+    return i18n.translate('xpack.ml.dataGridChart.notEnoughData', {
+      defaultMessage: `0 documents contain field.`,
+    });
+  }
+
   if (chartData.type === 'boolean') {
     return (
       <table className="mlDataGridChart__legendBoolean">
