@@ -15,7 +15,6 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * Navigates to the Endpoint Policy List
      */
     async navigateToPolicyList() {
-      pageObjects.common.navigateToUrlWithBrowserHistory();
       await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/policy' });
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
