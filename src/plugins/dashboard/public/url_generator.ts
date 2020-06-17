@@ -28,6 +28,7 @@ import {
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
+import { ViewMode } from '../../embeddable/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -73,6 +74,11 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * true is default
    */
   preserveSavedFilters?: boolean;
+
+  /**
+   * View mode of the dashboard.
+   */
+  viewMode?: ViewMode;
 }>;
 
 export const createDashboardUrlGenerator = (
@@ -123,6 +129,7 @@ export const createDashboardUrlGenerator = (
       cleanEmptyKeys({
         query: state.query,
         filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
+        viewMode: state.viewMode,
       }),
       { useHash },
       `${appBasePath}#/${hash}`
