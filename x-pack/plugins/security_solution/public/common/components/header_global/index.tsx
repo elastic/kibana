@@ -7,7 +7,6 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { pickBy } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
 import { gutterTimeline } from '../../lib/helpers';
@@ -42,7 +41,6 @@ interface HeaderGlobalProps {
   hideDetectionEngine?: boolean;
 }
 export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = false }) => {
-  const currentLocation = useLocation();
   const search = useGetUrlSearch(navTabs.overview);
   const { navigateToApp } = useKibana().services.application;
   const goToOverview = useCallback(
@@ -90,7 +88,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
               <FlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
                   {indicesExistOrDataTemporarilyUnavailable(indicesExist) &&
-                    currentLocation.pathname.includes(`/${SecurityPageName.alerts}/`) && (
+                    window.location.pathname.includes(`/${SecurityPageName.alerts}`) && (
                       <FlexItem grow={false}>
                         <MlPopover />
                       </FlexItem>
