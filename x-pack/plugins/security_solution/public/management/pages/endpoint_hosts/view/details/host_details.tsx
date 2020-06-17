@@ -25,7 +25,7 @@ import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
-import { getEndpointDetailsPath } from '../../../../common/routing';
+import { getEndpointDetailsPath, getPolicyDetailPath } from '../../../../common/routing';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -92,13 +92,33 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
 
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
+  const [policyDetailsRoutePath, policyDetailsRouteUrl] = useMemo(() => {
+    return [
+      getPolicyDetailPath(details.endpoint.policy.applied.id),
+      getPolicyDetailPath(details.endpoint.policy.applied.id),
+    ];
+  }, [details.endpoint.policy.applied.id]);
+
+  const policyDetailsClickHandler = useNavigateByRouterEventHandler(policyDetailsRoutePath);
+
   const detailsResultsPolicy = useMemo(() => {
     return [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
           defaultMessage: 'Policy',
         }),
-        description: details.endpoint.policy.applied.id,
+        description: (
+          <>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiLink
+              data-test-subj="policyDetailsValue"
+              href={policyDetailsRouteUrl}
+              onClick={policyDetailsClickHandler}
+            >
+              {details.endpoint.policy.applied.name}
+            </EuiLink>
+          </>
+        ),
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policyStatus', {
@@ -127,7 +147,14 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         ),
       },
     ];
-  }, [details, policyResponseUri, policyStatus, policyStatusClickHandler]);
+  }, [
+    details,
+    policyResponseUri,
+    policyStatus,
+    policyStatusClickHandler,
+    policyDetailsRouteUrl,
+    policyDetailsClickHandler,
+  ]);
   const detailsResultsLower = useMemo(() => {
     return [
       {

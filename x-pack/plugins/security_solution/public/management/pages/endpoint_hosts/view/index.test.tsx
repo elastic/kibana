@@ -9,6 +9,7 @@ import * as reactTestingLibrary from '@testing-library/react';
 
 import { HostList } from './index';
 import { mockHostDetailsApiResult, mockHostResultList } from '../store/mock_host_result_list';
+import { mockPolicyResultList } from '../../policy/store/policy_list/mock_policy_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   HostInfo,
@@ -17,6 +18,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppAction } from '../../../../common/store/actions';
+import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 
 describe('when on the hosts page', () => {
   const docGenerator = new EndpointDocGenerator();
@@ -47,14 +49,22 @@ describe('when on the hosts page', () => {
       });
     });
     describe('when list data loads', () => {
+      const generatedPolicyStatuses: Array<
+        HostInfo['metadata']['endpoint']['policy']['applied']['status']
+      > = [];
+      let firstPolicyID: string;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const hostListData = mockHostResultList({ total: 3 });
+          firstPolicyID = hostListData.hosts[0].metadata.endpoint.policy.applied.id;
           [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE].forEach((status, index) => {
             hostListData.hosts[index] = {
               metadata: hostListData.hosts[index].metadata,
               host_status: status,
             };
+          });
+          hostListData.hosts.forEach((item, index) => {
+            generatedPolicyStatuses[index] = item.metadata.endpoint.policy.applied.status;
           });
           const action: AppAction = {
             type: 'serverReturnedHostList',
@@ -90,6 +100,29 @@ describe('when on the hosts page', () => {
         expect(
           hostStatuses[2].querySelector('[data-euiicon-type][color="subdued"]')
         ).not.toBeNull();
+      });
+
+      it('should display correct policy status', async () => {
+        const renderResult = render();
+        const policyStatuses = await renderResult.findAllByTestId('rowPolicyStatus');
+
+        policyStatuses.forEach((status, index) => {
+          expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
+          expect(
+            status.querySelector(
+              `[data-euiicon-type][color=${
+                POLICY_STATUS_TO_HEALTH_COLOR[generatedPolicyStatuses[index]]
+              }]`
+            )
+          ).not.toBeNull();
+        });
+      });
+
+      it('should display policy name as a link', async () => {
+        const renderResult = render();
+        const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
+        expect(firstPolicyName).not.toBeNull();
+        expect(firstPolicyName.getAttribute('href')).toContain(`policy/${firstPolicyID}`);
       });
 
       describe('when the user clicks the first hostname in the table', () => {
@@ -197,6 +230,32 @@ describe('when on the hosts page', () => {
         expect(flyout).not.toBeNull();
       });
     });
+
+    it('should display policy name value as a link', async () => {
+      const renderResult = render();
+      const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
+      expect(policyDetailsLink).not.toBeNull();
+      expect(policyDetailsLink.getAttribute('href')).toEqual(
+        `#/management/policy/${hostDetails.metadata.endpoint.policy.applied.id}`
+      );
+    });
+
+    it('should update the URL when policy name link is clicked', async () => {
+      const policyItem = mockPolicyResultList({ total: 1 }).items[0];
+      coreStart.http.get.mockReturnValue(Promise.resolve({ item: policyItem }));
+
+      const renderResult = render();
+      const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
+      const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(policyDetailsLink);
+      });
+      const changedUrlAction = await userChangedUrlChecker;
+      expect(changedUrlAction.payload.pathname).toEqual(
+        `/management/policy/${hostDetails.metadata.endpoint.policy.applied.id}`
+      );
+    });
+
     it('should display policy status value as a link', async () => {
       const renderResult = render();
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
@@ -205,6 +264,7 @@ describe('when on the hosts page', () => {
         '/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
+
     it('should update the URL when policy status link is clicked', async () => {
       const renderResult = render();
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
@@ -217,6 +277,7 @@ describe('when on the hosts page', () => {
         '?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
+
     it('should display Success overall policy status', async () => {
       const renderResult = render();
       reactTestingLibrary.act(() => {
@@ -230,6 +291,7 @@ describe('when on the hosts page', () => {
         policyStatusHealth.querySelector('[data-euiicon-type][color="success"]')
       ).not.toBeNull();
     });
+
     it('should display Warning overall policy status', async () => {
       const renderResult = render();
       reactTestingLibrary.act(() => {
@@ -243,6 +305,7 @@ describe('when on the hosts page', () => {
         policyStatusHealth.querySelector('[data-euiicon-type][color="warning"]')
       ).not.toBeNull();
     });
+
     it('should display Failed overall policy status', async () => {
       const renderResult = render();
       reactTestingLibrary.act(() => {
@@ -256,6 +319,7 @@ describe('when on the hosts page', () => {
         policyStatusHealth.querySelector('[data-euiicon-type][color="danger"]')
       ).not.toBeNull();
     });
+
     it('should display Unknown overall policy status', async () => {
       const renderResult = render();
       reactTestingLibrary.act(() => {
@@ -269,6 +333,7 @@ describe('when on the hosts page', () => {
         policyStatusHealth.querySelector('[data-euiicon-type][color="subdued"]')
       ).not.toBeNull();
     });
+
     it('should include the link to logs', async () => {
       const renderResult = render();
       const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
@@ -278,6 +343,7 @@ describe('when on the hosts page', () => {
         "/app/logs/stream?logFilter=(expression:'host.id:1',kind:kuery)"
       );
     });
+
     describe('when link to logs is clicked', () => {
       beforeEach(async () => {
         const renderResult = render();
@@ -291,6 +357,7 @@ describe('when on the hosts page', () => {
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });
+
     describe('when showing host Policy Response panel', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
@@ -305,10 +372,12 @@ describe('when on the hosts page', () => {
           dispatchServerReturnedHostPolicyResponse();
         });
       });
+
       it('should hide the host details panel', async () => {
         const hostDetailsFlyout = await renderResult.queryByTestId('hostDetailsFlyoutBody');
         expect(hostDetailsFlyout).toBeNull();
       });
+
       it('should display policy response sub-panel', async () => {
         expect(
           await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutHeader')
@@ -317,17 +386,20 @@ describe('when on the hosts page', () => {
           await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutBody')
         ).not.toBeNull();
       });
+
       it('should include the sub-panel title', async () => {
         expect(
           (await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutTitle')).textContent
         ).toBe('Policy Response');
       });
+
       it('should show a configuration section for each protection', async () => {
         const configAccordions = await renderResult.findAllByTestId(
           'hostDetailsPolicyResponseConfigAccordion'
         );
         expect(configAccordions).not.toBeNull();
       });
+
       it('should show an actions section for each configuration', async () => {
         const actionAccordions = await renderResult.findAllByTestId(
           'hostDetailsPolicyResponseActionsAccordion'
@@ -340,6 +412,7 @@ describe('when on the hosts page', () => {
         expect(statusHealth).not.toBeNull();
         expect(message).not.toBeNull();
       });
+
       it('should not show any numbered badges if all actions are successful', () => {
         const policyResponse = docGenerator.generatePolicyResponse(
           new Date().getTime(),
@@ -359,6 +432,7 @@ describe('when on the hosts page', () => {
             expect(e).not.toBeNull();
           });
       });
+
       it('should show a numbered badge if at least one action failed', () => {
         reactTestingLibrary.act(() => {
           dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
@@ -368,6 +442,7 @@ describe('when on the hosts page', () => {
         );
         expect(attentionBadge).not.toBeNull();
       });
+
       it('should show a numbered badge if at least one action has a warning', () => {
         reactTestingLibrary.act(() => {
           dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
@@ -377,6 +452,7 @@ describe('when on the hosts page', () => {
         );
         expect(attentionBadge).not.toBeNull();
       });
+
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
@@ -384,6 +460,7 @@ describe('when on the hosts page', () => {
           '/endpoints?page_index=0&page_size=10&selected_host=1'
         );
       });
+
       it('should update URL when back to details link is clicked', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
