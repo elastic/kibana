@@ -329,8 +329,8 @@ const getLegendText = (chartData: ChartData): LegendText => {
       <table className="mlDataGridChart__legendBoolean">
         <tbody>
           <tr>
-            <td>{chartData.data[0].key_as_string}</td>
-            <td>{chartData.data[1].key_as_string}</td>
+            {chartData.data[0] !== undefined && <td>{chartData.data[0].key_as_string}</td>}
+            {chartData.data[1] !== undefined && <td>{chartData.data[1].key_as_string}</td>}
           </tr>
         </tbody>
       </table>
