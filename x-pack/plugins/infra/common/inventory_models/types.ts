@@ -351,4 +351,5 @@ export interface InventoryModel {
   };
   metrics: InventoryMetrics;
   requiredMetrics: InventoryMetric[];
+  tooltipMetrics: SnapshotMetricType[];
 }

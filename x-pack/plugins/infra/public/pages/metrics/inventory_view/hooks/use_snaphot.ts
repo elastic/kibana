@@ -24,13 +24,14 @@ import {
 
 export function useSnapshot(
   filterQuery: string | null | undefined,
-  metric: { type: SnapshotMetricType },
+  metrics: Array<{ type: SnapshotMetricType }>,
   groupBy: SnapshotGroupBy,
   nodeType: InventoryItemType,
   sourceId: string,
   currentTime: number,
   accountId: string,
-  region: string
+  region: string,
+  sendRequestImmediatly = true
 ) {
   const decodeResponse = (response: any) => {
     return pipe(
@@ -50,7 +51,7 @@ export function useSnapshot(
     '/api/metrics/snapshot',
     'POST',
     JSON.stringify({
-      metric,
+      metrics,
       groupBy,
       nodeType,
       timerange,
@@ -65,9 +66,11 @@ export function useSnapshot(
 
   useEffect(() => {
     (async () => {
-      await makeRequest();
+      if (sendRequestImmediatly) {
+        await makeRequest();
+      }
     })();
-  }, [makeRequest]);
+  }, [makeRequest, sendRequestImmediatly]);
 
   return {
     error: (error && error.message) || null,

@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConditionalToolTip should just work 1`] = `
+<div
+  data-test-subj="conditionalTooltipContent"
+  style={
+    Object {
+      "minWidth": 200,
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "borderBottom": "1px solid #98a2b3",
+        "marginBottom": "4px",
+        "paddingBottom": "4px",
+      }
+    }
+  >
+    host-01
+  </div>
+  <EuiFlexGroup
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      grow={1}
+    >
+      CPU usage
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      10%
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      grow={1}
+    >
+      Memory usage
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      80%
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      grow={1}
+    >
+      Outbound traffic
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      8Mbit/s
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      grow={1}
+    >
+      Inbound traffic
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      8Mbit/s
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
