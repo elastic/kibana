@@ -30,14 +30,12 @@ import {
 } from '../../state_syncing/global_sync';
 import { AppStateManager } from '../../state_syncing/app_state_manager';
 import { useAppStateSyncing } from '../../state_syncing/app_sync';
-import { subscribeToSyncStore } from '../../store_operations';
 import { MapsRoot } from '../../page_elements/maps_root';
 import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 export const MapsAppView = class extends React.Component {
   _visibleSubscription = null;
-  _storeSyncUnsubscribe = null;
   _globalSyncUnsubscribe = null;
   _appSyncUnsubscribe = null;
   _appStateManager = new AppStateManager();
@@ -102,6 +100,7 @@ export const MapsAppView = class extends React.Component {
       this.setState({ globalStateSnapshot: globalState });
       this._updateFromGlobalState(globalState);
     }
+    this._handleStoreChanges();
   }
 
   _updateFromGlobalState(globalState) {
@@ -134,9 +133,6 @@ export const MapsAppView = class extends React.Component {
   }
 
   componentWillUnmount() {
-    if (this._storeSyncUnsubscribe) {
-      this._storeSyncUnsubscribe();
-    }
     if (this._globalSyncUnsubscribe) {
       this._globalSyncUnsubscribe();
     }
@@ -203,18 +199,13 @@ export const MapsAppView = class extends React.Component {
     });
   }
 
-  _handleStoreChanges = async () => {
+  _handleStoreChanges = () => {
     const { prevIndexPatternIds } = this.state;
     const { nextIndexPatternIds } = this.props;
-    const storeUpdates = {};
 
     if (nextIndexPatternIds !== prevIndexPatternIds) {
-      storeUpdates.prevIndexPatternIds = nextIndexPatternIds;
-      await this._updateIndexPatterns(nextIndexPatternIds);
-    }
-
-    if (!_.isEmpty(storeUpdates)) {
-      this.setState(storeUpdates);
+      this.setState({ prevIndexPatternIds: nextIndexPatternIds });
+      this._updateIndexPatterns(nextIndexPatternIds);
     }
   };
 
@@ -412,9 +403,6 @@ export const MapsAppView = class extends React.Component {
     const globalState = getGlobalState();
     this._initMapAndLayerSettings();
     clearUi();
-
-    await this._handleStoreChanges();
-    this._storeSyncUnsubscribe = subscribeToSyncStore(this._handleStoreChanges);
 
     const savedObjectFilters = this._syncStoreAndGetFilters(savedMap);
     await this._onQueryChange({
