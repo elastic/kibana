@@ -21,7 +21,7 @@ def functionalTestProcess(String name, Closure closure) {
     def kibanaPort = "61${processNumber}1"
     def esPort = "61${processNumber}2"
     def esTransportPort = "61${processNumber}3"
-    def fleetPackageRegistryPort = "61${processNumber}4"
+    def ingestPort = "61${processNumber}4"
 
     withEnv([
       "CI_PARALLEL_PROCESS_NUMBER=${processNumber}",
@@ -30,7 +30,7 @@ def functionalTestProcess(String name, Closure closure) {
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-      "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
+      "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestPort}",
       "IS_PIPELINE_JOB=1",
       "JOB=${name}",
       "KBN_NP_PLUGINS_BUILT=true",
