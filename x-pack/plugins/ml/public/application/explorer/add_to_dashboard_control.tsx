@@ -272,6 +272,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
               search={search}
               pagination={true}
               sorting={true}
+              data-test-subj="mlDashboardSelection"
             />
           </EuiFormRow>
         </EuiModalBody>
@@ -293,6 +294,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
                 );
               });
             }}
+            data-test-subj="mlAddAndEditDashboardButton"
           >
             <FormattedMessage
               id="xpack.ml.explorer.dashboardsTable.addAndEditDashboardLabel"
@@ -303,6 +305,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
             fill
             onClick={onClose.bind(null, addSwimlaneToDashboardCallback)}
             disabled={noSwimlaneSelected || selectedItems.length === 0}
+            data-test-subj="mlAddToDashboardsButton"
           >
             <FormattedMessage
               id="xpack.ml.explorer.dashboardsTable.addToDashboardLabel"

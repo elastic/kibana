@@ -5,7 +5,7 @@
  */
 
 import { ProvidedType } from '@kbn/test/types/ftr';
-import { savedSearches } from './test_resources_data';
+import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -70,6 +70,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return this.getSavedObjectIdByTitle(title, SavedObjectType.SEARCH);
     },
 
+    async getDashboardId(title: string): Promise<string | undefined> {
+      return this.getSavedObjectIdByTitle(title, SavedObjectType.DASHBOARD);
+    },
+
     async createIndexPattern(title: string, timeFieldName?: string): Promise<string> {
       log.debug(
         `Creating index pattern with title '${title}'${
@@ -127,6 +131,20 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return createResponse.id;
     },
 
+    async createDashboard(title: string, body: object): Promise<string> {
+      log.debug(`Creating dashboard with title '${title}'`);
+
+      const createResponse = await supertest
+        .post(`/api/saved_objects/${SavedObjectType.DASHBOARD}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(body)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      log.debug(` > Created with id '${createResponse.id}'`);
+      return createResponse.id;
+    },
+
     async createSavedSearchIfNeeded(savedSearch: any): Promise<string> {
       const title = savedSearch.requestBody.attributes.title;
       const savedSearchId = await this.getSavedSearchId(title);
@@ -169,6 +187,21 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
     async createSavedSearchFarequoteFilterIfNeeded() {
       await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter);
+    },
+
+    async createMLTestDashboardIfNeeded() {
+      await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
+    },
+
+    async createDashboardIfNeeded(dashboard: any) {
+      const title = dashboard.requestBody.attributes.title;
+      const dashboardId = await this.getDashboardId(title);
+      if (dashboardId !== undefined) {
+        log.debug(`Dashboard with title '${title}' already exists. Nothing to create.`);
+        return dashboardId;
+      } else {
+        return await this.createDashboard(title, dashboard.requestBody);
+      }
     },
 
     async createSavedSearchFarequoteLuceneIfNeeded() {

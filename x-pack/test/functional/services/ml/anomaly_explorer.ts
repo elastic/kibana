@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return {
     async assertAnomalyExplorerEmptyListMessageExists() {
@@ -65,6 +66,21 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
 
     async assertSwimlaneViewByExists() {
       await testSubjects.existOrFail('mlAnomalyExplorerSwimlaneViewBy');
+    },
+
+    async openAddToDashboardControl() {
+      await testSubjects.click('mlAnomalyTimelinePanelMenu');
+      await testSubjects.click('mlAnomalyTimelinePanelAddToDashboardButton');
+      await testSubjects.existOrFail('mlAddToDashboardModal');
+    },
+
+    async addAndEditSwimlaneInDashboard(dashboardId: string) {
+      await testSubjects.isDisplayed('mlDashboardSelection');
+      await testSubjects.isDisplayed(`checkboxSelectRow-${dashboardId}`);
+      await testSubjects.click(`checkboxSelectRow-${dashboardId}`);
+      await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
+      const swimlane = await find.byClassName('ml-swimlanes');
+      expect(await swimlane.isDisplayed()).to.be(true);
     },
   };
 }
