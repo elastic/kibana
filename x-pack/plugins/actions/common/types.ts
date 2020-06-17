@@ -16,7 +16,7 @@ export interface ActionType {
 }
 
 export interface ActionResult {
-  consumer: string;
+  consumer?: string;
   id: string;
   actionTypeId: string;
   name: string;
