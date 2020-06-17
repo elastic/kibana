@@ -17,18 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { TimelionVisPlugin as Plugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
-
-export { getTimezone } from './helpers/get_timezone';
-export { tickFormatters } from './helpers/tick_formatters';
-export { xaxisFormatterProvider } from './helpers/xaxis_formatter';
-export { generateTicksProvider } from './helpers/tick_generator';
-
-export { DEFAULT_TIME_FORMAT, calculateInterval } from '../common/lib';
-
-export { VisTypeTimelionPluginStart } from './plugin';
+import './webpackShims/jquery.flot';
+import './webpackShims/jquery.flot.time';
+import './webpackShims/jquery.flot.symbol';
+import './webpackShims/jquery.flot.crosshair';
+import './webpackShims/jquery.flot.selection';
+import './webpackShims/jquery.flot.stack';
+import './webpackShims/jquery.flot.axislabels';

@@ -17,21 +17,20 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import '../../../../vis_type_timelion/public/flot';
+import '../../flot';
 import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
-import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../../vis_type_timelion/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { tickFormatters } from '../../../../vis_type_timelion/public/helpers/tick_formatters';
+import {
+  calculateInterval,
+  DEFAULT_TIME_FORMAT,
+  tickFormatters,
+  xaxisFormatterProvider,
+  generateTicksProvider,
+} from '../../../../vis_type_timelion/public';
 import { TimelionVisualizationDependencies } from '../../application';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { xaxisFormatterProvider } from '../../../../vis_type_timelion/public/helpers/xaxis_formatter';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { generateTicksProvider } from '../../../../vis_type_timelion/public/helpers/tick_generator';
 
 const DEBOUNCE_DELAY = 50;
 
