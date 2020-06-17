@@ -70,7 +70,12 @@ export function A11yProvider({ getService }: FtrProviderContext) {
         exclude: ([] as string[])
           .concat(excludeTestSubj || [])
           .map((ts) => [testSubjectToCss(ts)])
-          .concat([['.ace_scrollbar']]),
+          .concat([
+            ['.ace_scrollbar'],
+            [
+              '.leaflet-vega-container[role="graphics-document"][aria-roledescription="visualization"]',
+            ],
+          ]),
       };
     }
 
@@ -93,6 +98,9 @@ export function A11yProvider({ getService }: FtrProviderContext) {
         rules: {
           'color-contrast': {
             enabled: false,
+          },
+          bypass: {
+            enabled: false, // disabled because it's too flaky
           },
         },
       };

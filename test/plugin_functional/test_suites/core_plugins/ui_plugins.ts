@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('to start services via coreSetup.getStartServices', async () => {
         expect(
-          await browser.executeAsync(async (cb) => {
+          await browser.executeAsync<boolean>(async (cb) => {
             const [coreStart] = await window.__coreProvider.setup.core.getStartServices();
             cb(Boolean(coreStart.overlays));
           })

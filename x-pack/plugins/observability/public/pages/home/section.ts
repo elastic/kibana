@@ -60,25 +60,3 @@ export const appsSection: ISection[] = [
     }),
   },
 ];
-
-export const tryItOutItemsSection: ISection[] = [
-  {
-    id: 'demo',
-    title: i18n.translate('xpack.observability.section.tryItOut.demo.title', {
-      defaultMessage: 'Demo Playground',
-    }),
-    icon: 'play',
-    description: '',
-    href: 'https://demo.elastic.co/',
-    target: '_blank',
-  },
-  {
-    id: 'sampleData',
-    title: i18n.translate('xpack.observability.section.tryItOut.sampleData.title', {
-      defaultMessage: 'Add sample data',
-    }),
-    icon: 'documents',
-    description: '',
-    href: '/app/home#/tutorial_directory/sampleData',
-  },
-];

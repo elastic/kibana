@@ -38,6 +38,13 @@ export const CLOSED_ALERTS = i18n.translate(
   }
 );
 
+export const IN_PROGRESS_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.inProgressAlertsTitle',
+  {
+    defaultMessage: 'In progress alerts',
+  }
+);
+
 export const LOADING_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.loadingAlertsTitle',
   {
@@ -101,6 +108,13 @@ export const ACTION_CLOSE_ALERT = i18n.translate(
   }
 );
 
+export const ACTION_IN_PROGRESS_ALERT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.inProgressAlertTitle',
+  {
+    defaultMessage: 'Mark in progress',
+  }
+);
+
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {
@@ -122,6 +136,16 @@ export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
       'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
+export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.alerts.inProgressAlertSuccessToastMessage',
+    {
+      values: { totalAlerts },
+      defaultMessage:
+        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
+    }
+  );
+
 export const CLOSED_ALERT_FAILED_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.closedAlertFailedToastMessage',
   {
@@ -133,5 +157,12 @@ export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openedAlertFailedToastMessage',
   {
     defaultMessage: 'Failed to open alert(s)',
+  }
+);
+
+export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.inProgressAlertFailedToastMessage',
+  {
+    defaultMessage: 'Failed to mark alert(s) as in progress',
   }
 );
