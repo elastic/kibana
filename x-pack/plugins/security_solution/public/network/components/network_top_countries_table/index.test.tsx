@@ -17,6 +17,7 @@ import {
   mockIndexPattern,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
@@ -30,10 +31,11 @@ describe('NetworkTopCountries Table Component', () => {
   const state: State = mockGlobalState;
   const mount = useMountAppended();
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
   });
 
   describe('rendering', () => {

@@ -11,8 +11,8 @@ import d3 from 'd3';
 import { HistogramInner } from '../index';
 import response from './response.json';
 import {
-  asDecimal,
   getDurationFormatter,
+  asInteger,
 } from '../../../../../utils/formatters';
 import { toJson } from '../../../../../utils/testHelpers';
 import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
@@ -33,8 +33,8 @@ describe('Histogram', () => {
         transactionId="myTransactionId"
         onClick={onClick}
         formatX={(time) => timeFormatter(time).formatted}
-        formatYShort={(t) => `${asDecimal(t)} occ.`}
-        formatYLong={(t) => `${asDecimal(t)} occurrences`}
+        formatYShort={(t) => `${asInteger(t)} occ.`}
+        formatYLong={(t) => `${asInteger(t)} occurrences`}
         tooltipHeader={(bucket) => {
           const xFormatted = timeFormatter(bucket.x);
           const x0Formatted = timeFormatter(bucket.x0);
@@ -78,9 +78,9 @@ describe('Histogram', () => {
       const tooltips = wrapper.find('Tooltip');
 
       expect(tooltips.length).toBe(1);
-      expect(tooltips.prop('header')).toBe('811.1 - 926.9 ms');
+      expect(tooltips.prop('header')).toBe('811 - 927 ms');
       expect(tooltips.prop('tooltipPoints')).toEqual([
-        { value: '49.0 occurrences' },
+        { value: '49 occurrences' },
       ]);
       expect(tooltips.prop('x')).toEqual(869010);
       expect(tooltips.prop('y')).toEqual(27.5);
