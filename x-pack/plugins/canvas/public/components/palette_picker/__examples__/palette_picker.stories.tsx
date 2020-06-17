@@ -11,8 +11,19 @@ import { PalettePicker } from '../palette_picker';
 
 import { paulTor14 } from '../../../../common/lib/palettes';
 
-storiesOf('components/Color/PalettePicker', module).add('default', () => (
-  <div className="canvasContainerWrapper" style={{ width: '200px' }}>
-    <PalettePicker palette={paulTor14} ariaLabel="palette picker" onChange={action('onChange')} />
-  </div>
-));
+storiesOf('components/Color/PalettePicker', module)
+  .add('default', () => (
+    <div className="canvasContainerWrapper" style={{ width: '200px' }}>
+      <PalettePicker palette={paulTor14} ariaLabel="palette picker" onChange={action('onChange')} />
+    </div>
+  ))
+  .add('clearable', () => (
+    <div className="canvasContainerWrapper" style={{ width: '200px' }}>
+      <PalettePicker
+        palette={null}
+        ariaLabel="palette picker"
+        onChange={action('onChange')}
+        clearable={true}
+      />
+    </div>
+  ));

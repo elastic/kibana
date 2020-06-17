@@ -15,5 +15,6 @@ storiesOf('components/Color/PaletteSwatch', module).add('default', () => (
     <PaletteSwatch palette={paulTor14} />
     <PaletteSwatch palette={paulTor21} />
     <PaletteSwatch palette={canvas} />
+    <PaletteSwatch />
   </>
 ));

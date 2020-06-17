@@ -23,7 +23,7 @@ export const LibStrings = {
 
     getColorBlind: () =>
       i18n.translate('xpack.canvas.lib.palettes.colorBlindLabel', {
-        defaultMessage: 'Earth Tones',
+        defaultMessage: 'Color Blind',
       }),
 
     getElasticTeal: () =>

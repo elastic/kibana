@@ -9,33 +9,36 @@ import PropTypes from 'prop-types';
 import { Palette } from '../../../common/lib/palettes';
 
 interface Props {
-  palette: Palette;
+  palette?: Palette | null;
 }
 
 export const PaletteSwatch: FC<Props> = ({ palette }) => {
   let colorBoxes;
-  const { gradient, colors } = palette;
 
-  if (!gradient) {
-    colorBoxes = colors.map((color) => (
-      <div
-        key={color}
-        className="canvasPaletteSwatch__box"
-        style={{
-          backgroundColor: color,
-        }}
-      />
-    ));
-  } else {
-    colorBoxes = [
-      <div
-        key="gradient"
-        className="canvasPaletteSwatch__box"
-        style={{
-          background: `linear-gradient(90deg, ${colors.join(', ')})`,
-        }}
-      />,
-    ];
+  if (palette) {
+    const { gradient, colors } = palette;
+
+    if (!gradient) {
+      colorBoxes = colors.map((color) => (
+        <div
+          key={color}
+          className="canvasPaletteSwatch__box"
+          style={{
+            backgroundColor: color,
+          }}
+        />
+      ));
+    } else {
+      colorBoxes = [
+        <div
+          key="gradient"
+          className="canvasPaletteSwatch__box"
+          style={{
+            background: `linear-gradient(90deg, ${colors.join(', ')})`,
+          }}
+        />,
+      ];
+    }
   }
 
   return (
