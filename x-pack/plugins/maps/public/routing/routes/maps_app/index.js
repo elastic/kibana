@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { MapsAppView } from './maps_app';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
-import { getQueryableUniqueIndexPatternIds, hasDirtyState } from '../../../selectors/map_selectors';
+import { getQueryableUniqueIndexPatternIds } from '../../../selectors/map_selectors';
 import {
   replaceLayerList,
   setGotoWithCenter,
@@ -26,9 +26,8 @@ import { getMapsCapabilities } from '../../../kibana_services';
 
 function mapStateToProps(state = {}) {
   return {
-    nextIsFullScreen: getIsFullScreen(state),
+    isFullScreen: getIsFullScreen(state),
     nextIndexPatternIds: getQueryableUniqueIndexPatternIds(state),
-    nextIsSaveDisabled: hasDirtyState(state),
     flyoutDisplay: getFlyoutDisplay(state),
   };
 }

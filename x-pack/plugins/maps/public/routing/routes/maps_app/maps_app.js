@@ -8,10 +8,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
-import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../../../reducers/ui';
+import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import {
   getIndexPatternService,
-  getMapsCapabilities,
   getToasts,
   getData,
   getUiSettings,
@@ -49,17 +48,11 @@ export const MapsAppView = class extends React.Component {
       indexPatterns: [],
       prevIndexPatternIds: [],
       filters: [],
-      showSaveQuery: getMapsCapabilities().saveQuery,
-      layerList: [],
       initialized: false,
       isVisible: true,
-      isSaveDisabled: false,
-      isOpenSettingsDisabled: false,
-      isFullScreen: false,
       savedQuery: null,
       currentPath: '',
       initialLayerListConfig: null,
-      savedMap: null,
       globalStateSnapshot: {},
     };
   }
@@ -88,17 +81,18 @@ export const MapsAppView = class extends React.Component {
     this._visibleSubscription = getCoreChrome()
       .getIsVisible$()
       .subscribe((isVisible) => this.setState({ isVisible }));
-    this._initMap(savedMap);
+    this._initMap();
   }
 
   _initBreadcrumbUpdater = () => {
-    const { initialLayerListConfig, savedMap, currentPath } = this.state;
-    updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
+    const { initialLayerListConfig, currentPath } = this.state;
+    updateBreadcrumbs(this.props.savedMap, initialLayerListConfig, currentPath);
   };
 
   componentDidUpdate(prevProps, prevState) {
     const { currentPath: prevCurrentPath } = prevState;
-    const { currentPath, initialLayerListConfig, savedMap, globalStateSnapshot } = this.state;
+    const { currentPath, initialLayerListConfig, globalStateSnapshot } = this.state;
+    const { savedMap } = this.props;
     if (savedMap && initialLayerListConfig && currentPath !== prevCurrentPath) {
       updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
     }
@@ -210,32 +204,15 @@ export const MapsAppView = class extends React.Component {
   }
 
   _handleStoreChanges = async () => {
-    const {
-      prevIndexPatternIds,
-      isSaveDisabled,
-      isOpenSettingsDisabled,
-      isFullScreen,
-    } = this.state;
-    const { nextIsFullScreen, nextIndexPatternIds, nextIsSaveDisabled, flyoutDisplay } = this.props;
+    const { prevIndexPatternIds } = this.state;
+    const { nextIndexPatternIds } = this.props;
     const storeUpdates = {};
-
-    if (nextIsFullScreen !== isFullScreen) {
-      storeUpdates.isFullScreen = nextIsFullScreen;
-    }
 
     if (nextIndexPatternIds !== prevIndexPatternIds) {
       storeUpdates.prevIndexPatternIds = nextIndexPatternIds;
       await this._updateIndexPatterns(nextIndexPatternIds);
     }
 
-    if (nextIsSaveDisabled !== isSaveDisabled) {
-      storeUpdates.isSaveDisabled = nextIsSaveDisabled;
-    }
-
-    const nextIsOpenSettingsDisabled = flyoutDisplay !== FLYOUT_STATE.NONE;
-    if (nextIsOpenSettingsDisabled !== isOpenSettingsDisabled) {
-      storeUpdates.isOpenSettingsDisabled = nextIsOpenSettingsDisabled;
-    }
     if (!_.isEmpty(storeUpdates)) {
       this.setState(storeUpdates);
     }
@@ -302,8 +279,8 @@ export const MapsAppView = class extends React.Component {
     });
   };
 
-  _initQueryTimeRefresh(savedMap) {
-    const { setRefreshConfig } = this.props;
+  _initQueryTimeRefresh() {
+    const { setRefreshConfig, savedMap } = this.props;
     // TODO: Handle null when converting to TS
     const globalState = getGlobalState();
     const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
@@ -336,9 +313,10 @@ export const MapsAppView = class extends React.Component {
     setRefreshConfig(newState.refreshConfig);
   }
 
-  _initMapAndLayerSettings(savedMap) {
+  _initMapAndLayerSettings() {
+    const { savedMap } = this.props;
     // Get saved map & layer settings
-    this._initQueryTimeRefresh(savedMap);
+    this._initQueryTimeRefresh();
 
     const layerList = getInitialLayers(
       savedMap.layerListJSON,
@@ -396,8 +374,14 @@ export const MapsAppView = class extends React.Component {
     }
   }
 
-  _syncStoreAndGetFilters(savedMap) {
-    const { setGotoWithCenter, setMapSettings, setIsLayerTOCOpen, setOpenTOCDetails } = this.props;
+  _syncStoreAndGetFilters() {
+    const {
+      savedMap,
+      setGotoWithCenter,
+      setMapSettings,
+      setIsLayerTOCOpen,
+      setOpenTOCDetails,
+    } = this.props;
     let savedObjectFilters = [];
     if (savedMap.mapStateJSON) {
       const mapState = JSON.parse(savedMap.mapStateJSON);
@@ -422,11 +406,11 @@ export const MapsAppView = class extends React.Component {
     return savedObjectFilters;
   }
 
-  async _initMap(savedMap) {
-    const { clearUi } = this.props;
+  async _initMap() {
+    const { clearUi, savedMap } = this.props;
     // TODO: Handle null when converting to TS
     const globalState = getGlobalState();
-    this._initMapAndLayerSettings(savedMap);
+    this._initMapAndLayerSettings();
     clearUi();
 
     await this._handleStoreChanges();
@@ -448,14 +432,13 @@ export const MapsAppView = class extends React.Component {
       query,
       time,
       refreshConfig,
-      savedMap,
       savedQuery,
       initialLayerListConfig,
       isVisible,
       indexPatterns,
-      isSaveDisabled,
       currentPath,
     } = this.state;
+    const { savedMap } = this.props;
 
     return isVisible ? (
       <MapsTopNavMenu
@@ -486,7 +469,6 @@ export const MapsAppView = class extends React.Component {
           this._appStateManager.setQueryAndFilters({ savedQuery: query });
           this._updateStateFromSavedQuery(query);
         }}
-        isSaveDisabled={isSaveDisabled}
         syncAppAndGlobalState={this._syncAppAndGlobalState}
         currentPath={currentPath}
       />
@@ -494,10 +476,10 @@ export const MapsAppView = class extends React.Component {
   }
 
   render() {
-    const { isFullScreen, filters, initialized } = this.state;
+    const { filters, initialized } = this.state;
 
     return initialized ? (
-      <div id="maps-plugin" className={isFullScreen ? 'mapFullScreen' : ''}>
+      <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <MapsRoot filters={filters} updateFiltersAndDispatch={this._updateFiltersAndDispatch} />

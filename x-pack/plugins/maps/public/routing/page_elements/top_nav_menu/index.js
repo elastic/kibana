@@ -17,11 +17,13 @@ import {
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import { getFlyoutDisplay } from '../../../selectors/ui_selectors';
+import { hasDirtyState } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
     isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     inspectorAdapters: getInspectorAdapters(state),
+    isSaveDisabled: hasDirtyState(state),
   };
 }
 
