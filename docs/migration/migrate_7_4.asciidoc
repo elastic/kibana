@@ -7,7 +7,7 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.4.
 
-//See also <<release-highlights-7.4.0, release highlights>> and <<release-notes-7.4.0, release notes>>.
+//See also {kibana-ref-all}/7.4/release-highlights-7.4.0.html[release highlights] and <<release-notes-7.4.0, release notes>>.
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide

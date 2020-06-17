@@ -17,6 +17,7 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 :commit:         {repo}commit/
 :blob:           {repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
+:kibana-ref-all: https://www.elastic.co/guide/en/kibana
 
 include::{docs-root}/shared/attributes.asciidoc[]
 
@@ -25,8 +26,6 @@ include::user/index.asciidoc[]
 include::accessibility.asciidoc[]
 
 include::limitations.asciidoc[]
-
-include::release-notes/highlights.asciidoc[]
 
 include::migration.asciidoc[]
 

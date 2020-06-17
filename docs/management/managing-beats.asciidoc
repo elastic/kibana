@@ -4,7 +4,7 @@
 
 include::{asciidoc-dir}/../../shared/discontinued.asciidoc[tag=cm-discontinued]
 
-Use the Central Management UI under *Management > {beats}* to define and
+To use the Central Management UI, open the menu, go to *Stack Management > {beats} > Central Management*, then define and
 manage configurations in a central location in {kib} and quickly deploy
 configuration changes to all {beats} running across your enterprise. For more
 about central management, see the related {beats} documentation:
@@ -17,11 +17,11 @@ about central management, see the related {beats} documentation:
 This feature requires an Elastic license that includes {beats} central
 management.
 
-Don't have a license? You can start a 30-day trial. In {kib}, go to
-*Management > License Management*. At the end of the trial
+Don't have a license? You can start a 30-day trial. Open the menu, go to
+*Stack Management > Elasticsearch > License Management*. At the end of the trial
 period, you can purchase a subscription to keep using central management. For
 more information, see https://www.elastic.co/subscriptions and
-{stack-ov}/license-management.html[License Management].
+<<managing-licenses>>.
 ====
 
 {kib} makes it easy for you to use central management by walking you through the

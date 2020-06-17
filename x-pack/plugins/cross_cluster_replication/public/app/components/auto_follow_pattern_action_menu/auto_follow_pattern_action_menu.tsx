@@ -169,7 +169,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
 export const AutoFollowPatternActionMenu = (props: Omit<Props, 'deleteAutoFollowPatterns'>) => (
   <AutoFollowPatternDeleteProvider>
     {(deleteAutoFollowPattern: (ids: string[]) => void) => (
-      <AutoFollowPatternActionMenuUI deleteAutoFollowPattern={deleteAutoFollowPattern} {...props} />
+      <AutoFollowPatternActionMenuUI {...props} deleteAutoFollowPattern={deleteAutoFollowPattern} />
     )}
   </AutoFollowPatternDeleteProvider>
 );

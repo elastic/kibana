@@ -31,7 +31,7 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
   EmbeddableContext,
 } from '../triggers';
-import { IEmbeddable } from '../embeddables/i_embeddable';
+import { IEmbeddable, EmbeddableOutput, EmbeddableError } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
@@ -42,6 +42,7 @@ import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_a
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
+import { EmbeddableErrorLabel } from './embeddable_error_label';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -72,12 +73,14 @@ interface State {
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
+  loading?: boolean;
+  error?: EmbeddableError;
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
   private embeddableRoot: React.RefObject<HTMLDivElement>;
   private parentSubscription?: Subscription;
-  private subscription?: Subscription;
+  private subscription: Subscription = new Subscription();
   private mounted: boolean = false;
   private generateId = htmlIdGenerator();
 
@@ -140,16 +143,20 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const { embeddable } = this.props;
     const { parent } = embeddable;
 
-    this.subscription = embeddable.getInput$().subscribe(async () => {
-      if (this.mounted) {
-        this.setState({
-          viewMode: embeddable.getInput().viewMode ? embeddable.getInput().viewMode : ViewMode.EDIT,
-        });
+    this.subscription.add(
+      embeddable.getInput$().subscribe(async () => {
+        if (this.mounted) {
+          this.setState({
+            viewMode: embeddable.getInput().viewMode
+              ? embeddable.getInput().viewMode
+              : ViewMode.EDIT,
+          });
 
-        this.refreshBadges();
-        this.refreshNotifications();
-      }
-    });
+          this.refreshBadges();
+          this.refreshNotifications();
+        }
+      })
+    );
 
     if (parent) {
       this.parentSubscription = parent.getInput$().subscribe(async () => {
@@ -167,9 +174,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
   public componentWillUnmount() {
     this.mounted = false;
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription.unsubscribe();
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
@@ -190,7 +195,13 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const viewOnlyMode = this.state.viewMode === ViewMode.VIEW;
     const classes = classNames('embPanel', {
       'embPanel--editing': !viewOnlyMode,
+      'embPanel--loading': this.state.loading,
     });
+
+    const contentAttrs: { [key: string]: boolean } = {};
+    if (this.state.loading) contentAttrs['data-loading'] = true;
+    if (this.state.error) contentAttrs['data-error'] = true;
+
     const title = this.props.embeddable.getTitle();
     const headerId = this.generateId();
     return (
@@ -214,13 +225,22 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             headerId={headerId}
           />
         )}
-        <div className="embPanel__content" ref={this.embeddableRoot} />
+        <EmbeddableErrorLabel error={this.state.error} />
+        <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
       </EuiPanel>
     );
   }
 
   public componentDidMount() {
     if (this.embeddableRoot.current) {
+      this.subscription.add(
+        this.props.embeddable.getOutput$().subscribe((output: EmbeddableOutput) => {
+          this.setState({
+            error: output.error,
+            loading: output.loading,
+          });
+        })
+      );
       this.props.embeddable.render(this.embeddableRoot.current);
     }
   }

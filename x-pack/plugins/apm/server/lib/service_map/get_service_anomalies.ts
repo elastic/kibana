@@ -8,27 +8,61 @@ import { leftJoin } from '../../../common/utils/left_join';
 import { Job as AnomalyDetectionJob } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../typings/common';
 import { IEnvOptions } from './get_service_map';
-import { APM_ML_JOB_GROUP_NAME } from '../../../common/ml_job_constants';
+import { Setup } from '../helpers/setup_request';
+import {
+  APM_ML_JOB_GROUP_NAME,
+  encodeForMlApi,
+} from '../../../common/ml_job_constants';
+
+async function getApmAnomalyDetectionJobs(
+  setup: Setup
+): Promise<AnomalyDetectionJob[]> {
+  const { ml } = setup;
+
+  if (!ml) {
+    return [];
+  }
+  try {
+    const { jobs } = await ml.anomalyDetectors.jobs(APM_ML_JOB_GROUP_NAME);
+    return jobs;
+  } catch (error) {
+    if (error.statusCode === 404) {
+      return [];
+    }
+    throw error;
+  }
+}
 
 type ApmMlJobCategory = NonNullable<ReturnType<typeof getApmMlJobCategory>>;
-const getApmMlJobCategory = (
+
+export const getApmMlJobCategory = (
   mlJob: AnomalyDetectionJob,
   serviceNames: string[]
 ) => {
-  const apmJobGroups = mlJob.groups.filter(
-    (groupName) => groupName !== APM_ML_JOB_GROUP_NAME
+  const serviceByGroupNameMap = new Map(
+    serviceNames.map((serviceName) => [
+      encodeForMlApi(serviceName),
+      serviceName,
+    ])
   );
-  if (apmJobGroups.length === mlJob.groups.length) {
+  if (!mlJob.groups.includes(APM_ML_JOB_GROUP_NAME)) {
     // ML job missing "apm" group name
     return;
   }
-  const [serviceName] = intersection(apmJobGroups, serviceNames);
+  const apmJobGroups = mlJob.groups.filter(
+    (groupName) => groupName !== APM_ML_JOB_GROUP_NAME
+  );
+  const apmJobServiceNames = apmJobGroups.map(
+    (groupName) => serviceByGroupNameMap.get(groupName) || groupName
+  );
+  const [serviceName] = intersection(apmJobServiceNames, serviceNames);
   if (!serviceName) {
     // APM ML job service was not found
     return;
   }
+  const serviceGroupName = encodeForMlApi(serviceName);
   const [transactionType] = apmJobGroups.filter(
-    (groupName) => groupName !== serviceName
+    (groupName) => groupName !== serviceGroupName
   );
   if (!transactionType) {
     // APM ML job transaction type was not found.
@@ -49,7 +83,10 @@ export async function getServiceAnomalies(
     return [];
   }
 
-  const { jobs: apmMlJobs } = await ml.anomalyDetectors.jobs('apm');
+  const apmMlJobs = await getApmAnomalyDetectionJobs(options.setup);
+  if (apmMlJobs.length === 0) {
+    return [];
+  }
   const apmMlJobCategories = apmMlJobs
     .map((job) => getApmMlJobCategory(job, serviceNames))
     .filter(

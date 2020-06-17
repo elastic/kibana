@@ -12,6 +12,7 @@ files:
     - 'x-pack/plugins/maps/**/*.s+(a|c)ss'
     - 'x-pack/plugins/spaces/**/*.s+(a|c)ss'
     - 'x-pack/plugins/security/**/*.s+(a|c)ss'
+    - 'x-pack/plugins/monitoring/**/*.s+(a|c)ss'
   ignore:
     - 'x-pack/plugins/canvas/shareable_runtime/**/*.s+(a|c)ss'
 rules:

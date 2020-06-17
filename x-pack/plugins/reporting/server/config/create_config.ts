@@ -23,8 +23,9 @@ import { ReportingConfigType } from './schema';
 export function createConfig$(
   core: CoreSetup,
   config$: Observable<ReportingConfigType>,
-  logger: LevelLogger
+  parentLogger: LevelLogger
 ) {
+  const logger = parentLogger.clone(['config']);
   return config$.pipe(
     map((config) => {
       // encryption key

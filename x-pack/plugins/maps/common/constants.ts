@@ -99,6 +99,9 @@ export enum ES_GEO_FIELD_TYPE {
   GEO_SHAPE = 'geo_shape',
 }
 
+// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IFieldType.type is compared to value
+export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
+
 export enum ES_SPATIAL_RELATIONS {
   INTERSECTS = 'INTERSECTS',
   DISJOINT = 'DISJOINT',

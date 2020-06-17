@@ -12,12 +12,12 @@ import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
 import { TileLayer } from '../../layers/tile_layer/tile_layer';
-// @ts-ignore
 import { getKibanaTileMap } from '../../../meta';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {
   checkVisibility: async () => {
     const tilemap = getKibanaTileMap();
+    // @ts-ignore
     return !!tilemap.url;
   },
   description: i18n.translate('xpack.maps.source.kbnTMSDescription', {

@@ -31,7 +31,7 @@ describe('ErrorMarker', () => {
     act(() => {
       fireEvent.click(component.getByTestId('popover'));
     });
-    expectTextsInDocument(component, ['10,000 μs']);
+    expectTextsInDocument(component, ['10.0 ms']);
     return component;
   }
   function getKueryDecoded(url: string) {

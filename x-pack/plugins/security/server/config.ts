@@ -150,6 +150,9 @@ export const ConfigSchema = schema.object({
     lifespan: schema.nullable(schema.duration()),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
+  sameSiteCookies: schema.maybe(
+    schema.oneOf([schema.literal('Strict'), schema.literal('Lax'), schema.literal('None')])
+  ),
   public: schema.object({
     protocol: schema.maybe(schema.oneOf([schema.literal('http'), schema.literal('https')])),
     hostname: schema.maybe(schema.string({ hostname: true })),

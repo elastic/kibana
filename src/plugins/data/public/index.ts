@@ -443,6 +443,8 @@ export {
   getKbnTypeNames,
 } from '../common';
 
+export * from '../common/field_mapping';
+
 /*
  * Plugin setup
  */
