@@ -200,7 +200,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     return (
       <>
-        <EuiPanel paddingSize="s">
+        <EuiPanel paddingSize="m">
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle className="panel-title">
@@ -277,7 +277,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             )}
 
             {menuItems.length > 0 && (
-              <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+              <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
                 <EuiPopover
                   button={
                     <EuiButtonIcon
