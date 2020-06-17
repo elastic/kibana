@@ -128,8 +128,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           return (
             <PipelineProcessorsEditor
               onFlyoutOpen={onEditorFlyoutOpen}
-              learnMoreAboutProcessorsUrl={services.documentation.getProcessorsUrl()}
-              learnMoreAboutOnFailureProcessorsUrl={services.documentation.getHandlingFailureUrl()}
+              esDocsBasePath={services.documentation.getEsDocsBasePath()}
               isTestButtonDisabled={isTestButtonDisabled}
               onTestPipelineClick={onTestPipelineClick}
               onUpdate={onProcessorsUpdate}
