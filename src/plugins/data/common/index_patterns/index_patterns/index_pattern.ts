@@ -283,7 +283,7 @@ export class IndexPattern implements IIndexPattern {
       // type: savedObject.type,
       version: savedObject._version,
       found: savedObject._version ? true : false,
-      ..._.cloneDeep(savedObject.attributes),
+      ...(_.cloneDeep(savedObject.attributes) as Record<string, any>),
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
