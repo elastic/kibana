@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   // SKIPPED as it is failing in ES PROMOTION: https://github.com/elastic/kibana/issues/68595
+  // FLAKY: https://github.com/elastic/kibana/issues/52854
   describe.skip('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('dashboard/current/kibana');
