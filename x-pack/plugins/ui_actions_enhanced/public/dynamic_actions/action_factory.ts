@@ -64,9 +64,13 @@ export class ActionFactory<
   public create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
   ): ActionEnhancedDefinition<ActionContext> {
+    const action = this.def.create(serializedAction);
     return {
-      minimalLicense: this.minimalLicense, // actions created with action factory inherit it's license requirements
-      ...this.def.create(serializedAction),
+      ...action,
+      enhancements: {
+        minimalLicense: this.minimalLicense, // actions created with action factory inherit it's license requirements
+        ...action.enhancements,
+      },
     };
   }
 }

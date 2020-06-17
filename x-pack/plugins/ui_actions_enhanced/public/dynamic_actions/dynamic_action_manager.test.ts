@@ -7,12 +7,12 @@
 import { DynamicActionManager } from './dynamic_action_manager';
 import { ActionStorage, MemoryActionStorage } from './dynamic_action_storage';
 import { UiActionsService } from '../../../../../src/plugins/ui_actions/public';
+import { ActionRegistry } from '../../../../../src/plugins/ui_actions/public/types';
 import { of } from '../../../../../src/plugins/kibana_utils';
 import { UiActionsServiceEnhancements } from '../services';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { SerializedAction, SerializedEvent } from './types';
 import { licensingMock } from '../../../licensing/public/mocks';
-import { ActionDefinitionRegistry } from '../../../../../src/plugins/ui_actions/public/types';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
@@ -23,6 +23,7 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
+    enhancements: {},
   }),
 };
 
@@ -35,6 +36,7 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
+    enhancements: {},
   }),
 };
 
@@ -71,9 +73,9 @@ const event3: SerializedEvent = {
 const setup = (events: readonly SerializedEvent[] = []) => {
   const isCompatible = async () => true;
   const storage: ActionStorage = new MemoryActionStorage(events);
-  const actionDefinitions: ActionDefinitionRegistry = new Map();
+  const actions: ActionRegistry = new Map();
   const uiActions = new UiActionsService({
-    actionDefinitions,
+    actions,
   });
   const uiActionsEnhancements = new UiActionsServiceEnhancements({
     getLicenseInfo: () => licensingMock.createLicense(),
@@ -90,7 +92,7 @@ const setup = (events: readonly SerializedEvent[] = []) => {
 
   return {
     isCompatible,
-    actions: actionDefinitions,
+    actions,
     storage,
     uiActions: { ...uiActions, ...uiActionsEnhancements },
     manager,
@@ -98,6 +100,9 @@ const setup = (events: readonly SerializedEvent[] = []) => {
 };
 
 describe('DynamicActionManager', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   test('can instantiate', () => {
     const { manager } = setup([event1]);
     expect(manager).toBeInstanceOf(DynamicActionManager);
@@ -106,11 +111,11 @@ describe('DynamicActionManager', () => {
   describe('.start()', () => {
     test('instantiates stored events', async () => {
       const { manager, actions, uiActions } = setup([event1]);
-      const create1 = jest.fn();
-      const create2 = jest.fn();
+      const create1 = jest.spyOn(actionFactoryDefinition1, 'create');
+      const create2 = jest.spyOn(actionFactoryDefinition2, 'create');
 
-      uiActions.registerActionFactory({ ...actionFactoryDefinition1, create: create1 });
-      uiActions.registerActionFactory({ ...actionFactoryDefinition2, create: create2 });
+      uiActions.registerActionFactory(actionFactoryDefinition1);
+      uiActions.registerActionFactory(actionFactoryDefinition2);
 
       expect(create1).toHaveBeenCalledTimes(0);
       expect(create2).toHaveBeenCalledTimes(0);
@@ -125,11 +130,11 @@ describe('DynamicActionManager', () => {
 
     test('does nothing when no events stored', async () => {
       const { manager, actions, uiActions } = setup();
-      const create1 = jest.fn();
-      const create2 = jest.fn();
+      const create1 = jest.spyOn(actionFactoryDefinition1, 'create');
+      const create2 = jest.spyOn(actionFactoryDefinition2, 'create');
 
-      uiActions.registerActionFactory({ ...actionFactoryDefinition1, create: create1 });
-      uiActions.registerActionFactory({ ...actionFactoryDefinition2, create: create2 });
+      uiActions.registerActionFactory(actionFactoryDefinition1);
+      uiActions.registerActionFactory(actionFactoryDefinition2);
 
       expect(create1).toHaveBeenCalledTimes(0);
       expect(create2).toHaveBeenCalledTimes(0);
@@ -210,11 +215,9 @@ describe('DynamicActionManager', () => {
   describe('.stop()', () => {
     test('removes events from UI actions registry', async () => {
       const { manager, actions, uiActions } = setup([event1, event2]);
-      const create1 = jest.fn();
-      const create2 = jest.fn();
 
-      uiActions.registerActionFactory({ ...actionFactoryDefinition1, create: create1 });
-      uiActions.registerActionFactory({ ...actionFactoryDefinition2, create: create2 });
+      uiActions.registerActionFactory(actionFactoryDefinition1);
+      uiActions.registerActionFactory(actionFactoryDefinition2);
 
       expect(actions.size).toBe(0);
 

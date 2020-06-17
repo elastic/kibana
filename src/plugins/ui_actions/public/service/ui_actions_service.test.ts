@@ -20,7 +20,7 @@
 import { UiActionsService } from './ui_actions_service';
 import { Action, ActionInternal, createAction } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
-import { TriggerRegistry, TriggerId, ActionType, ActionDefinitionRegistry } from '../types';
+import { TriggerRegistry, TriggerId, ActionType, ActionRegistry } from '../types';
 import { Trigger } from '../triggers';
 
 // Casting to ActionType or TriggerId is a hack - in a real situation use
@@ -103,9 +103,9 @@ describe('UiActionsService', () => {
       });
     });
 
-    test('returns an action instance getter', () => {
+    test('return action instance', () => {
       const service = new UiActionsService();
-      const getAction = service.registerAction({
+      const action = service.registerAction({
         id: 'test',
         execute: async () => {},
         getDisplayName: () => 'test',
@@ -113,8 +113,6 @@ describe('UiActionsService', () => {
         isCompatible: async () => true,
         type: 'test' as ActionType,
       });
-
-      const action = getAction();
 
       expect(action).toBeInstanceOf(ActionInternal);
       expect(action.id).toBe('test');
@@ -174,8 +172,8 @@ describe('UiActionsService', () => {
 
   describe('.getTriggerCompatibleActions()', () => {
     test('can register and get actions', async () => {
-      const actions: ActionDefinitionRegistry = new Map();
-      const service = new UiActionsService({ actionDefinitions: actions });
+      const actions: ActionRegistry = new Map();
+      const service = new UiActionsService({ actions });
       const helloWorldAction = createHelloWorldAction({} as any);
       const length = actions.size;
 
@@ -384,8 +382,8 @@ describe('UiActionsService', () => {
     });
 
     test('can register action', () => {
-      const actions: ActionDefinitionRegistry = new Map();
-      const service = new UiActionsService({ actionDefinitions: actions });
+      const actions: ActionRegistry = new Map();
+      const service = new UiActionsService({ actions });
 
       service.registerAction({
         id: ACTION_HELLO_WORLD,
@@ -494,25 +492,55 @@ describe('UiActionsService', () => {
     });
   });
 
-  describe('custom action creator', () => {
-    test('can provide custom action creator', () => {
-      const service = new UiActionsService();
-      class CustomActionInternal extends ActionInternal {
-        readonly custom = true;
-      }
-      service.setCustomActionCreator((def) => new CustomActionInternal(def));
-      const actionDef: Action = {
-        id: 'action1',
-        order: 1,
-        type: 'type1' as ActionType,
-        execute: async () => {},
-        getDisplayName: () => 'test',
-        getIconType: () => '',
-        isCompatible: async () => true,
-      };
-      service.registerAction(actionDef);
-      const action = service.getAction(actionDef.id);
-      expect('custom' in action).toBe(true);
+  describe('action hooks', () => {
+    describe('onIsCompatible', () => {
+      test('can make action incompatible', async () => {
+        const service = new UiActionsService();
+        service.registerActionHook({
+          onIsCompatible: () => false,
+        });
+        service.registerActionHook({
+          onIsCompatible: () => true,
+        });
+        const actionDef: Action = {
+          id: 'action1',
+          order: 1,
+          type: 'type1' as ActionType,
+          execute: async () => {},
+          getDisplayName: () => 'test',
+          getIconType: () => '',
+          isCompatible: async () => true,
+        };
+        service.registerAction(actionDef);
+        const action = service.getAction(actionDef.id);
+
+        const isCompatible = await action.isCompatible({});
+        expect(isCompatible).toBe(false);
+      });
+
+      test("can't force compatibility of incompatible action", async () => {
+        const service = new UiActionsService();
+        service.registerActionHook({
+          onIsCompatible: () => true,
+        });
+        service.registerActionHook({
+          onIsCompatible: () => true,
+        });
+        const actionDef: Action = {
+          id: 'action1',
+          order: 1,
+          type: 'type1' as ActionType,
+          execute: async () => {},
+          getDisplayName: () => 'test',
+          getIconType: () => '',
+          isCompatible: async () => false,
+        };
+        service.registerAction(actionDef);
+        const action = service.getAction(actionDef.id);
+
+        const isCompatible = await action.isCompatible({});
+        expect(isCompatible).toBe(false);
+      });
     });
   });
 });

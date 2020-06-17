@@ -102,6 +102,7 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
   create: () => ({
     id: 'test',
     execute: async () => alert('Navigate to dashboard!'),
+    enhancements: {},
   }),
 };
 

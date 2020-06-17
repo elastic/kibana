@@ -13,7 +13,7 @@ import {
 } from '../../../../src/core/public';
 import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
 import { UI_SETTINGS } from '../../../../src/plugins/data/public';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { Action, UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
@@ -34,7 +34,7 @@ import {
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
 import { ILicense, LicensingPluginStart } from '../../licensing/public';
-import { ActionEnhancedDefinition, ActionEnhancedInternal } from './actions';
+import { isEnhancedAction } from './actions';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -81,8 +81,14 @@ export class AdvancedUiActionsPublicPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
-    uiActions.setCustomActionCreator((def: ActionEnhancedDefinition) => {
-      return new ActionEnhancedInternal(def, () => this.getLicenseInfo());
+    uiActions.registerActionHook({
+      onIsCompatible: (action: Action) => {
+        if (isEnhancedAction(action)) {
+          if (!action.enhancements.minimalLicense) return true;
+          return this.getLicenseInfo().hasAtLeast(action.enhancements.minimalLicense);
+        }
+        return true;
+      },
     });
 
     return {

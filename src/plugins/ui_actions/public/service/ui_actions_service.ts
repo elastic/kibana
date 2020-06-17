@@ -23,9 +23,9 @@ import {
   TriggerToActionsRegistry,
   TriggerId,
   TriggerContextMapping,
-  ActionDefinitionRegistry,
+  ActionHooksRegistry,
 } from '../types';
-import { ActionInternal, Action, ActionDefinition, ActionContext } from '../actions';
+import { ActionInternal, Action, ActionDefinition, ActionContext, ActionHook } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
@@ -33,30 +33,31 @@ import { TriggerContract } from '../triggers/trigger_contract';
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
   readonly actions?: ActionRegistry;
-  readonly actionDefinitions?: ActionDefinitionRegistry;
 
   /**
    * A 1-to-N mapping from `Trigger` to zero or more `Action`.
    */
   readonly triggerToActions?: TriggerToActionsRegistry;
+
+  readonly actionHooks?: ActionHooksRegistry;
 }
 
 export class UiActionsService {
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
-  protected readonly actionDefinitions: ActionDefinitionRegistry;
+  protected readonly actionHooksRegistry: ActionHooksRegistry;
 
   constructor({
     triggers = new Map(),
     actions = new Map(),
     triggerToActions = new Map(),
-    actionDefinitions = new Map(),
+    actionHooks = new Set(),
   }: UiActionsServiceParams = {}) {
     this.triggers = triggers;
     this.actions = actions;
     this.triggerToActions = triggerToActions;
-    this.actionDefinitions = actionDefinitions;
+    this.actionHooksRegistry = actionHooks;
   }
 
   public readonly registerTrigger = (trigger: Trigger) => {
@@ -82,25 +83,26 @@ export class UiActionsService {
 
   public readonly registerAction = <A extends ActionDefinition>(
     definition: A
-  ): (() => Action<ActionContext<A>>) => {
-    if (this.actionDefinitions.has(definition.id)) {
+  ): Action<ActionContext<A>> => {
+    if (this.actions.has(definition.id)) {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
 
-    this.actionDefinitions.set(definition.id, definition);
+    const action = new ActionInternal(definition, () =>
+      Array.from(this.actionHooksRegistry.values())
+    );
 
-    return () => {
-      return this.getAction(definition.id);
-    };
+    this.actions.set(action.id, action);
+
+    return action;
   };
 
   public readonly unregisterAction = (actionId: string): void => {
-    if (!this.actions.has(actionId) && !this.actionDefinitions.has(actionId)) {
+    if (!this.actions.has(actionId)) {
       throw new Error(`Action [action.id = ${actionId}] is not registered.`);
     }
 
     this.actions.delete(actionId);
-    this.actionDefinitions.delete(actionId);
   };
 
   public readonly attachAction = <T extends TriggerId>(triggerId: T, actionId: string): void => {
@@ -148,14 +150,17 @@ export class UiActionsService {
     // by this type of trigger, typescript will complain. yay!
     action: Action<TriggerContextMapping[T]>
   ): void => {
-    if (!this.actionDefinitions.has(action.id)) this.registerAction(action);
+    if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
+  };
+
+  public readonly registerActionHook = (hook: ActionHook) => {
+    this.actionHooksRegistry.add(hook);
   };
 
   public readonly getAction = <T extends ActionDefinition>(
     id: string
   ): Action<ActionContext<T>> => {
-    this.ensureActionExists(id);
     if (!this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
@@ -171,7 +176,9 @@ export class UiActionsService {
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    const actions = actionIds!.map((actionId) => this.getAction(actionId));
+    const actions = actionIds!
+      .map((actionId) => this.actions.get(actionId) as ActionInternal)
+      .filter(Boolean);
 
     return actions as Array<Action<TriggerContext<T>>>;
   };
@@ -209,7 +216,6 @@ export class UiActionsService {
     this.actions.clear();
     this.triggers.clear();
     this.triggerToActions.clear();
-    this.actionDefinitions.clear();
   };
 
   /**
@@ -221,49 +227,11 @@ export class UiActionsService {
     const triggers: TriggerRegistry = new Map();
     const actions: ActionRegistry = new Map();
     const triggerToActions: TriggerToActionsRegistry = new Map();
-    const actionDefinitions: ActionDefinitionRegistry = new Map();
 
     for (const [key, value] of this.triggers.entries()) triggers.set(key, value);
     for (const [key, value] of this.actions.entries()) actions.set(key, value);
     for (const [key, value] of this.triggerToActions.entries())
       triggerToActions.set(key, [...value]);
-    for (const [key, value] of this.actionDefinitions.entries()) actionDefinitions.set(key, value);
-    return new UiActionsService({ triggers, actions, triggerToActions, actionDefinitions });
+    return new UiActionsService({ triggers, actions, triggerToActions });
   };
-
-  /**
-   * Create action from action definition
-   * @param def
-   */
-  private createAction = (def: ActionDefinition) =>
-    this.customActionCreator ? this.customActionCreator(def) : new ActionInternal(def);
-
-  /**
-   * Allows to override default action creator
-   */
-  private customActionCreator?: (def: ActionDefinition) => ActionInternal;
-
-  /**
-   * Allows to overrides default action creator
-   * @param actionCreator
-   */
-  public setCustomActionCreator = (actionCreator: (def: ActionDefinition) => ActionInternal) => {
-    if (this.customActionCreator) {
-      throw new Error('Custom action creator is already set, and can only be set once');
-    }
-    this.customActionCreator = actionCreator;
-  };
-
-  // These two functions are only to support legacy plugins registering factories after the start lifecycle.
-  public ensureActionsExist() {
-    this.actionDefinitions.forEach((def) => this.ensureActionExists(def.id));
-  }
-
-  private ensureActionExists(actionId: string) {
-    if (!this.actions.has(actionId)) {
-      const def = this.actionDefinitions.get(actionId);
-      if (!def) return;
-      this.actions.set(actionId, this.createAction(def));
-    }
-  }
 }

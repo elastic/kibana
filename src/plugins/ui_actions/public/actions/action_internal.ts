@@ -19,24 +19,21 @@
 
 // @ts-ignore
 import React from 'react';
-import { Action, ActionContext as Context, ActionDefinition } from './action';
+import { Action, ActionContext as Context, ActionDefinition, ActionHook } from './action';
 import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionType } from '../types';
 
 /**
- * @remarks
- * This is exported from a plugin only to be used in `x-pack/actions_enhanced`
- * This is not part of public api and could be changed without notice
- *
  * @internal
  */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
-  constructor(public readonly definition: A) {}
+  constructor(public readonly definition: A, private readonly getActionHooks: () => ActionHook[]) {}
 
   public readonly id: string = this.definition.id;
   public readonly type: ActionType = this.definition.type || '';
+  public readonly enhancements: unknown = this.definition.enhancements;
   public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
@@ -61,6 +58,11 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   }
 
   public async isCompatible(context: Context<A>): Promise<boolean> {
+    const isCompatibleFromHooks = this.getActionHooks()
+      .map((hook) => hook.onIsCompatible)
+      .filter(Boolean)
+      .reduce((isCompatible, nextHook) => isCompatible && nextHook!(this, context), true);
+    if (!isCompatibleFromHooks) return false;
     if (!this.definition.isCompatible) return true;
     return await this.definition.isCompatible(context);
   }

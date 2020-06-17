@@ -13,27 +13,32 @@ import { LicenseType } from '../../../licensing/public';
 
 export interface ActionEnhanced<Context extends {} = {}, T = ActionType>
   extends Action<Context, T> {
-  /**
-   * Minimal license
-   * if missing, then no license limitations
-   */
-  readonly minimalLicense?: LicenseType;
-
-  /**
-   * Does this action meet current licence?
-   */
-  isCompatibleLicence(): boolean;
+  readonly enhancements: {
+    /**
+     * Minimal license
+     * if missing, then no license limitations
+     */
+    minimalLicense?: LicenseType;
+  };
 }
 
 export interface ActionEnhancedDefinition<Context extends object = object>
   extends ActionDefinition<Context> {
-  /**
-   * Minimal license
-   * if missing, then no license limitations
-   */
-  readonly minimalLicense?: LicenseType;
+  readonly enhancements: {
+    /**
+     * Minimal license
+     * if missing, then no license limitations
+     */
+    minimalLicense?: LicenseType;
+  };
 }
 
 export type ActionEnhancedContext<A> = A extends ActionEnhancedDefinition<infer Context>
   ? Context
   : never;
+
+export function isEnhancedAction<Context extends {} = {}, T = ActionType>(
+  action: Action<Context, T>
+): action is ActionEnhanced<Context, T> {
+  return !!action.enhancements;
+}

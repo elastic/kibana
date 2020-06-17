@@ -17,6 +17,7 @@ const def: ActionFactoryDefinition = {
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
+    enhancements: {},
   }),
 };
 
