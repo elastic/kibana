@@ -109,29 +109,6 @@ export function useMultiContent<T extends object>({
     };
   }, [stateData, validation]);
 
-  /**
-   * Validate the multi-content active content(s) in the DOM
-   */
-  const validate = useCallback(async () => {
-    let isDataValid = true;
-    const updatedValidation: { [key: string]: boolean } = {};
-
-    for (const [id, _content] of Object.entries(contents.current)) {
-      const isValid = await (_content as Content).validate();
-      (_content as Content).validate = async () => isValid;
-      updatedValidation[id] = isValid;
-
-      // Only update if if its true, don't override a previous "false" or "undefined"
-      if (isDataValid === true) {
-        isDataValid = isValid;
-      }
-    }
-
-    setValidation((prev) => ({ ...prev, ...updatedValidation }));
-
-    return isDataValid;
-  }, []);
-
   const updateContentValidity = useCallback(
     (updatedData: { [key in keyof T]?: boolean | undefined }): boolean | undefined => {
       let allContentValidity: boolean | undefined;
@@ -168,6 +145,21 @@ export function useMultiContent<T extends object>({
     },
     []
   );
+
+  /**
+   * Validate the multi-content active content(s) in the DOM
+   */
+  const validate = useCallback(async () => {
+    const updatedValidation = {} as { [key in keyof T]?: boolean | undefined };
+
+    for (const [id, _content] of Object.entries(contents.current)) {
+      const isValid = await (_content as Content).validate();
+      (_content as Content).validate = async () => isValid;
+      updatedValidation[id as keyof T] = isValid;
+    }
+
+    return Boolean(updateContentValidity(updatedValidation));
+  }, [updateContentValidity]);
 
   /**
    * Update a content. It replaces the content in our "contents" map and update

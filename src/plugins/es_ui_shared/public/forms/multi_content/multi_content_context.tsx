@@ -32,24 +32,7 @@ export function MultiContentProvider<T extends object = { [key: string]: any }>(
   onChange,
   children,
 }: Props<T>) {
-  const {
-    updateContentAt,
-    saveSnapshotAndRemoveContent,
-    validation,
-    getData,
-    validate,
-  } = useMultiContent<T>({
-    defaultValue,
-    onChange,
-  });
-
-  const multiContent: MultiContent<T> = {
-    getData,
-    validate,
-    validation,
-    updateContentAt,
-    saveSnapshotAndRemoveContent,
-  };
+  const multiContent = useMultiContent<T>({ defaultValue, onChange });
 
   return (
     <multiContentContext.Provider value={multiContent}>{children}</multiContentContext.Provider>
