@@ -32,7 +32,7 @@ export type TimeFormatter = (
 type TimeFormatterBuilder = (max: number) => TimeFormatter;
 
 function asDecimalOrInteger(value: number) {
-  // exact 0 should or above 10 should not have decimal
+  // exact 0 or above 10 should not have decimal
   if (value === 0 || value >= 10) {
     return asInteger(value);
   }
