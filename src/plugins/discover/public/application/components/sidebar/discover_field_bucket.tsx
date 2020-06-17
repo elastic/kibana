@@ -48,7 +48,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" responsive={false} gutterSize="xs">
+      <EuiFlexGroup justifyContent="spaceBetween" responsive={false} gutterSize="s">
         <EuiFlexItem className="dscFieldDetails__barContainer" grow={1}>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={1} className="eui-textTruncate">

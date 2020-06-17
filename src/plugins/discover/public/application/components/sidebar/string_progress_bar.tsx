@@ -17,8 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiProgress, EuiText, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiProgress, EuiToolTip } from '@elastic/eui';
 
 interface Props {
   percent: number;
@@ -26,7 +25,7 @@ interface Props {
   value: string;
 }
 
-export function StringFieldProgressBar({ field, value, onAddFilter, percent, count }: Props) {
+export function StringFieldProgressBar({ value, percent, count }: Props) {
   const tooltipContent = `${value} ${count}`;
   return (
     <EuiToolTip
