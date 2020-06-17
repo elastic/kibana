@@ -34,7 +34,8 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       let policyItem: PolicyData;
 
       try {
-        policyItem = (await sendGetDatasource(http, id)).item;
+        const response = await sendGetDatasource(http, id);
+        policyItem = response.item;
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',
@@ -45,7 +46,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       // Until we get the Default configuration into the Endpoint package so that the datasource has
       // the expected data structure, we will add it here manually.
-      if (policyItem && !policyItem.inputs.length) {
+      if (!policyItem.inputs.length) {
         policyItem.inputs = [
           {
             type: 'endpoint',
@@ -69,7 +70,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       // Agent summary is secondary data, so its ok for it to come after the details
       // page is populated with the main content
-      if (policyItem && policyItem.config_id) {
+      if (policyItem.config_id) {
         const { results } = await sendGetFleetAgentStatusForConfig(http, policyItem.config_id);
         dispatch({
           type: 'serverReturnedPolicyDetailsAgentSummaryData',
