@@ -22,6 +22,8 @@ export { nextTick } from '../../../../../../../test_utils';
 
 import { act } from 'react-dom/test-utils';
 
+jest.mock('../../../../common/components/navigation/use_get_url_search');
+
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
 
@@ -47,15 +49,6 @@ const mockDispatch = jest.fn();
 jest.mock('../../../../common/components/utils', () => {
   return {
     useThrottledResizeObserver: jest.fn(),
-  };
-});
-
-jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
-
-  return {
-    ...originalModule,
-    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1' }),
   };
 });
 
@@ -337,7 +330,7 @@ describe('Properties', () => {
     expect(wrapper.find('[data-test-subj="avatar"]').exists()).toEqual(false);
   });
 
-  test.skip('insert timeline - new case', () => {
+  test('insert timeline - new case', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Properties {...{ ...defaultProps, title: 'coolness' }} />
@@ -356,7 +349,7 @@ describe('Properties', () => {
     );
   });
 
-  test.skip('insert timeline - existing case', async () => {
+  test('insert timeline - existing case', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Properties {...{ ...defaultProps, title: 'coolness' }} />
