@@ -12,14 +12,14 @@ exports[`NoFieldCallout renders properly when affected by field filter 1`] = `
 <EuiCallOut
   color="warning"
   size="s"
-  title="No fields match the current filters."
+  title="No fields match the selected filters."
 >
   <strong>
     Try:
   </strong>
   <ul>
     <li>
-      Changing the field filters
+      Using different field filters
     </li>
   </ul>
 </EuiCallOut>
@@ -29,7 +29,7 @@ exports[`NoFieldCallout renders properly when affected by field filters, global 
 <EuiCallOut
   color="warning"
   size="s"
-  title="No fields match the current filters."
+  title="No fields match the selected filters."
 >
   <strong>
     Try:
@@ -39,7 +39,7 @@ exports[`NoFieldCallout renders properly when affected by field filters, global 
       Extending the time range
     </li>
     <li>
-      Changing the field filters
+      Using different field filters
     </li>
     <li>
       Changing the global filters
