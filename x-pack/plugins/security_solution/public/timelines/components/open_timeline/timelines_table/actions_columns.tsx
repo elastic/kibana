@@ -68,7 +68,8 @@ export const getActionsColumns = ({
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (onOpenDeleteTimelineModal != null) onOpenDeleteTimelineModal(selectedTimeline);
     },
-    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    enabled: ({ savedObjectId, status }: OpenTimelineResult) =>
+      savedObjectId != null && status !== TimelineStatus.immutable,
     description: i18n.DELETE_SELECTED,
     'data-test-subj': 'delete-timeline',
   };

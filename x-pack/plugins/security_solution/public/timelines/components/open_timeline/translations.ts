@@ -223,14 +223,14 @@ export const TAB_TEMPLATES = i18n.translate(
 export const FILTER_ELASTIC_TIMELINES = i18n.translate(
   'xpack.securitySolution.timelines.components.templateFilter.elasticTitle',
   {
-    defaultMessage: 'Elastic template',
+    defaultMessage: 'Elastic templates',
   }
 );
 
 export const FILTER_CUSTOM_TIMELINES = i18n.translate(
   'xpack.securitySolution.timelines.components.templateFilter.customizedTitle',
   {
-    defaultMessage: 'Custom template',
+    defaultMessage: 'Custom templates',
   }
 );
 
@@ -244,7 +244,7 @@ export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
 export const SELECT_TIMELINE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.selectTimelineDescription',
   {
-    defaultMessage: 'Select a SIEM timeline (as exported from the Timeline view) to import',
+    defaultMessage: 'Select a Security timeline (as exported from the Timeline view) to import',
   }
 );
 

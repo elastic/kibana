@@ -67,7 +67,7 @@ export const useEditTimelineBatchActions = ({
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => {
       const isItemsSelected = !isEmpty(selectedItems);
-      const isDisabled =
+      const hasImmutableItems =
         !isItemsSelected || selectedItems?.some((item) => item.status === TimelineStatus.immutable);
       return (
         <>
@@ -87,7 +87,7 @@ export const useEditTimelineBatchActions = ({
           <EuiContextMenuPanel
             items={[
               <EuiContextMenuItem
-                disabled={isDisabled}
+                disabled={hasImmutableItems}
                 icon="exportAction"
                 key="ExportItemKey"
                 onClick={handleEnableExportTimelineDownloader}
@@ -95,7 +95,7 @@ export const useEditTimelineBatchActions = ({
                 {i18n.EXPORT_SELECTED}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
-                disabled={!isItemsSelected}
+                disabled={!isItemsSelected || hasImmutableItems}
                 icon="trash"
                 key="DeleteItemKey"
                 onClick={handleOnOpenDeleteTimelineModal}
