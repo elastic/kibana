@@ -127,13 +127,17 @@ export function isRecordNamable<T extends string>(
 /**
  * Based on the ECS category of the event, attempt to provide a more descriptive name
  * (e.g. the `event.registry.key` for `registry` or the `dns.question.name` for `dns`, etc.).
+ * This function returns the data in the form of `{subject, descriptor}` where `subject` will
+ * tend to be the more distinctive term (e.g. 137.213.212.7 for a network event) and the
+ * `descriptor` can be used to present more useful/meaningful view (e.g. `inbound 137.213.212.7`
+ * in the example above).
  * see: https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html
  * @param event The ResolverEvent to get the descriptive name for
  * @returns { descriptiveName } An attempt at providing a readable name to the user
  */
-export function descriptiveName(event: ResolverEvent): string {
+export function descriptiveName(event: ResolverEvent): { subject: string; descriptor?: string } {
   if (isLegacyEvent(event)) {
-    return eventName(event);
+    return { subject: eventName(event) };
   }
 
   /**
@@ -148,15 +152,18 @@ export function descriptiveName(event: ResolverEvent): string {
 
   if (namableNetworkEvent) {
     if (namableNetworkEvent.network.forwarded_ip) {
-      return `${
-        namableNetworkEvent.network.direction ? `${namableNetworkEvent.network.direction} ` : ''
-      }${namableNetworkEvent.network.forwarded_ip}`;
+      return {
+        subject: String(namableNetworkEvent.network.forwarded_ip),
+        descriptor: String(namableNetworkEvent.network.direction),
+      };
     }
   }
 
   if (namableFileEvent) {
     if (namableFileEvent.file.path) {
-      return String(namableFileEvent.file.path);
+      return {
+        subject: String(namableFileEvent.file.path),
+      };
     }
   }
 
@@ -164,15 +171,17 @@ export function descriptiveName(event: ResolverEvent): string {
   if (namableRegistryEvent) {
     const pathOrKey = namableRegistryEvent.registry.path || namableRegistryEvent.registry.key;
     if (pathOrKey) {
-      return String(pathOrKey);
+      return {
+        subject: String(pathOrKey),
+      };
     }
   }
   if (namableDNSEvent) {
     if (namableDNSEvent.dns.question.name) {
-      return String(namableDNSEvent.dns.question.name);
+      return { subject: String(namableDNSEvent.dns.question.name) };
     }
   }
 
   // Fall back on entityId if we can't fish a more descriptive name out.
-  return entityId(event);
+  return { subject: entityId(event) };
 }

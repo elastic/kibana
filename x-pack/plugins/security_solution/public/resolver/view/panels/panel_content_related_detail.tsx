@@ -205,6 +205,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     ];
   }, [pushToQueryParams, eventsString]);
 
+  const { subject, descriptor = '' } = event.descriptiveName(relatedEventToShowDetailsFor!);
   const crumbs = useMemo(() => {
     return [
       {
@@ -251,9 +252,15 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         },
       },
       {
-        text: relatedEventToShowDetailsFor
-          ? event.descriptiveName(relatedEventToShowDetailsFor)
-          : naString,
+        text: relatedEventToShowDetailsFor ? (
+          <FormattedMessage
+            id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.eventDescriptiveName"
+            values={{ subject, descriptor }}
+            defaultMessage="{descriptor} {subject}"
+          />
+        ) : (
+          naString
+        ),
         onClick: () => {},
       },
     ];
@@ -267,6 +274,8 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     naString,
     relatedEventCategory,
     relatedEventToShowDetailsFor,
+    subject,
+    descriptor,
   ]);
 
   /**
@@ -327,7 +336,13 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiText>{event.descriptiveName(relatedEventToShowDetailsFor)}</EuiText>
+      <EuiText>
+        <FormattedMessage
+          id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.eventDescriptiveNameInTitle"
+          values={{ subject, descriptor }}
+          defaultMessage="{descriptor} {subject}"
+        />
+      </EuiText>
       <EuiSpacer size="l" />
       {sections.map(({ sectionTitle, entries }, index) => {
         return (

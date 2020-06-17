@@ -30,7 +30,7 @@ interface MatchingEventEntry {
   formattedDate: string;
   eventType: string;
   eventCategory: string;
-  name: string;
+  name: { subject: string; descriptor?: string };
   entityId: string;
   setQueryParams: () => void;
 }
@@ -48,6 +48,7 @@ const DisplayList = memo(function DisplayList({
       <EuiSpacer size="l" />
       <>
         {matchingEventEntries.map((eventView, index) => {
+          const { subject, descriptor = '' } = eventView.name;
           return (
             <Fragment key={index}>
               <EuiText>
@@ -68,7 +69,13 @@ const DisplayList = memo(function DisplayList({
                 />
               </EuiText>
               <EuiSpacer size="xs" />
-              <EuiButtonEmpty onClick={eventView.setQueryParams}>{eventView.name}</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={eventView.setQueryParams}>
+                <FormattedMessage
+                  id="xpack.securitySolution.enpoint.resolver.panel.processEventListByType.eventDescriptiveName"
+                  values={{ subject, descriptor }}
+                  defaultMessage="{descriptor} {subject}"
+                />
+              </EuiButtonEmpty>
               {index === matchingEventEntries.length - 1 ? null : <EuiHorizontalRule margin="m" />}
             </Fragment>
           );
@@ -155,6 +162,7 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
         const eventTime = event.eventTimestamp(resolverEvent);
         const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime);
         const entityId = event.eventId(resolverEvent);
+
         return {
           formattedDate,
           eventCategory: `${eventType}`,
