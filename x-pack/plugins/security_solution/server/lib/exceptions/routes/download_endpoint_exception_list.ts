@@ -5,10 +5,9 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { ArtifactConstants } from '../../../exceptions';
-import { DownloadExceptionListRequestParams } from '../../exceptions/types';
-import { buildRouteValidation } from '../utils';
-import { downloadExceptionListSchema } from '../schemas/download_exception_list_schema';
+import { buildRouteValidation } from '../../../utils';
+import { ArtifactConstants } from '../task';
+import { DownloadArtifactReqParamsSchema, downloadArtifactReqParamsSchema } from '../schemas';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 
@@ -20,9 +19,10 @@ export function downloadEndpointExceptionList(router: IRouter) {
     {
       path: `${allowlistBaseRoute}/download/{artifactName}/{sha256}`,
       validate: {
-        params: buildRouteValidation<DownloadExceptionListRequestParams>(
-          downloadExceptionListSchema
-        ),
+        params: buildRouteValidation<
+          typeof downloadArtifactReqParamsSchema,
+          DownloadArtifactReqParamsSchema
+        >(downloadArtifactReqParamsSchema),
       },
       options: { tags: [] },
     },
