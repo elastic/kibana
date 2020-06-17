@@ -5,3 +5,4 @@
  */
 
 export { UptimeUrlParams, getSupportedUrlParams } from './get_supported_url_params';
+export { resolveStateChanges, resolveUrlUpdates } from './resolve_url_store_state';
