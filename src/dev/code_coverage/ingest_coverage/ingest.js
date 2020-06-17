@@ -21,13 +21,13 @@ const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
 import { RESEARCH_CI_JOB_NAME } from './constants';
 import { errMsg, redact, maybeTeamAssign, whichIndex } from './ingest_helpers';
-import { pretty } from './utils';
+import { pretty, green } from './utils';
 import { right, left } from './either';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
 
 const client = new Client({ node });
-const redacted = redact(node);
+const redactedEsHostUrl = redact(node);
 
 export const ingest = (log) => async (body) => {
   const isTotal = !!body.isTotal;
@@ -42,26 +42,30 @@ export const ingest = (log) => async (body) => {
 
   const justLog = dontSendButLog(log);
   const doSendToIndex = doSend(index);
-  const doSendRedacted = doSendToIndex(redacted)(log);
+  const doSendRedacted = doSendToIndex(redactedEsHostUrl)(log);
 
   eitherSendOrNotAndParseForPrint(payloadWithIndex).fold(justLog, doSendRedacted);
 };
 
-async function send(idx, redacted, requestBody) {
+async function send(idx, redactedEsHostUrl, requestBody) {
   try {
     await client.index(requestBody);
   } catch (e) {
     const { body } = requestBody;
     const parsed = parse(body);
-    throw createFailError(errMsg(idx, redacted, parsed, e));
+    throw createFailError(errMsg(idx, redactedEsHostUrl, parsed, e));
   }
 }
 
 function doSend(index) {
-  return (redacted) => (log) => async (payload) => {
+  return (redactedEsHostUrl) => (log) => async (payload) => {
     const { body } = payload;
-    log.verbose(`\n### Sent: \n\t### Index: ${index}\n\t### payload.body: ${body}`);
-    await send(index, redacted, payload);
+    log.verbose(
+      `\n### Sent: \n\t### ES Host: ${redactedEsHostUrl}\n\t### Index: ${green(
+        index
+      )}\n\t### payload.body: ${body}`
+    );
+    await send(index, redactedEsHostUrl, payload);
   };
 }
 
