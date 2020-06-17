@@ -8,9 +8,11 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { HostsContainer } from './pages';
+import { NotFoundPage } from '../app/404';
 
 export const HostsRoutes = () => (
   <Switch>
     <Route path="/" render={({ match }) => <HostsContainer url={match.url} />} />
+    <Route render={() => <NotFoundPage />} />
   </Switch>
 );

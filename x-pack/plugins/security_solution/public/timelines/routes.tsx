@@ -8,9 +8,11 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { Timelines } from './pages';
+import { NotFoundPage } from '../app/404';
 
 export const TimelinesRoutes = () => (
   <Switch>
     <Route path="/" render={() => <Timelines />} />
+    <Route render={() => <NotFoundPage />} />
   </Switch>
 );

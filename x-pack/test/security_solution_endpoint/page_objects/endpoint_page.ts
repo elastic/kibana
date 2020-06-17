@@ -17,10 +17,9 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
      * Navigate to the Endpoints list page
      */
     async navigateToEndpointList(searchParams?: string) {
-      await pageObjects.common.navigateToUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'securitySolution:management',
-        `/endpoints${searchParams ? `?${searchParams}` : ''}`,
-        { shouldUseHashForSubUrl: false }
+        `/endpoints${searchParams ? `?${searchParams}` : ''}`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },

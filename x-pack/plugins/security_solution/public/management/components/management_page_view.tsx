@@ -4,35 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { PageView, PageViewProps } from '../../common/components/endpoint/page_view';
 import { ManagementSubTab } from '../types';
 import { SecurityPageName } from '../../app/types';
 import { useFormatUrl } from '../../common/components/link_to';
 import { getEndpointListPath, getPoliciesPath } from '../common/routing';
+import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 
 export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) => {
-  const history = useHistory();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
   const { tabName } = useParams<{ tabName: ManagementSubTab }>();
 
-  const goToEndpoint = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      history.push(getEndpointListPath({ name: 'endpointList' }, search));
-    },
-    [history, search]
+  const goToEndpoint = useNavigateByRouterEventHandler(
+    getEndpointListPath({ name: 'endpointList' }, search)
   );
 
-  const goToPolicies = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      history.push(getPoliciesPath(search));
-    },
-    [history, search]
-  );
+  const goToPolicies = useNavigateByRouterEventHandler(getPoliciesPath(search));
 
   const tabs = useMemo((): PageViewProps['tabs'] | undefined => {
     if (options.viewType === 'details') {

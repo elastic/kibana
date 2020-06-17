@@ -8,6 +8,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { NetworkContainer } from './pages';
+import { NotFoundPage } from '../app/404';
 
 export const NetworkRoutes = () => (
   <Switch>
@@ -15,5 +16,6 @@ export const NetworkRoutes = () => (
       path="/"
       render={({ location, match }) => <NetworkContainer location={location} url={match.url} />}
     />
+    <Route render={() => <NotFoundPage />} />
   </Switch>
 );

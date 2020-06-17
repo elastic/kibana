@@ -8,9 +8,11 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { Overview } from './pages';
+import { NotFoundPage } from '../app/404';
 
 export const OverviewRoutes = () => (
   <Switch>
     <Route path="/" render={() => <Overview />} />
+    <Route render={() => <NotFoundPage />} />
   </Switch>
 );

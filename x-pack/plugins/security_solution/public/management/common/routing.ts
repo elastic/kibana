@@ -74,10 +74,10 @@ export const getEndpointDetailsPath = (
 export const getPoliciesPath = (search?: string) =>
   `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
     tabName: ManagementSubTab.policies,
-  })}${appendSearch(search ?? undefined)}`;
+  })}${appendSearch(search)}`;
 
 export const getPolicyDetailPath = (policyId: string, search?: string) =>
   `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
     tabName: ManagementSubTab.policies,
     policyId,
-  })}${appendSearch(search ?? undefined)}`;
+  })}${appendSearch(search)}`;

@@ -15,9 +15,10 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * Navigates to the Endpoint Policy List
      */
     async navigateToPolicyList() {
-      await pageObjects.common.navigateToUrl('securitySolution:management', '/policy', {
-        shouldUseHashForSubUrl: false,
-      });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolution:management',
+        '/policy'
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -53,9 +54,10 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * @param policyId
      */
     async navigateToPolicyDetails(policyId: string) {
-      await pageObjects.common.navigateToUrl('securitySolution:management', `/policy/${policyId}`, {
-        shouldUseHashForSubUrl: false,
-      });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolution:management',
+        `/policy/${policyId}`
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
