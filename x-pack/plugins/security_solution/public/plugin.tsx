@@ -78,6 +78,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const services = {
         ...coreStart,
         ...startPlugins,
+        storage,
         security: plugins.security,
       } as StartServices;
       return { coreStart, startPlugins, services, store: this.store, storage };
