@@ -9,9 +9,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('endpoint', function () {
     this.tags('ciGroup7');
 
-    loadTestFile(require.resolve('./endpoint_list'));
+    // loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_list'));
-    loadTestFile(require.resolve('./policy_details'));
+    // loadTestFile(require.resolve('./policy_details'));
 
     // loadTestFile(require.resolve('./alerts'));
     // loadTestFile(require.resolve('./resolver'));

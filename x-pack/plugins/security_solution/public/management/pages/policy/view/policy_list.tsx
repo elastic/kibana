@@ -446,6 +446,7 @@ export const PolicyList = React.memo(() => {
                   loading={loading}
                   onActionClick={handleCreatePolicyClick}
                   actionDisabled={isFetchingPackageInfo}
+                  dataTestSubj="emptyPolicyTable"
                 />
               )}
             </>
@@ -471,7 +472,8 @@ const EmptyPolicyTable = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled: boolean;
-}>(({ loading, onActionClick, actionDisabled }) => {
+  dataTestSubj: string;
+}>(({ loading, onActionClick, actionDisabled, dataTestSubj }) => {
   const policySteps = [
     {
       title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepOneTitle', {
@@ -514,7 +516,7 @@ const EmptyPolicyTable = React.memo<{
     },
   ];
   return (
-    <>
+    <div data-test-subj={dataTestSubj}>
       {loading ? (
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policyList.loading"
@@ -561,7 +563,7 @@ const EmptyPolicyTable = React.memo<{
           </EuiFlexGroup>
         </>
       )}
-    </>
+    </div>
   );
 });
 

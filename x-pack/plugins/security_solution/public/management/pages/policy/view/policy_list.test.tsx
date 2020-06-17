@@ -23,9 +23,9 @@ describe('when on the policies page', () => {
     render = () => mockedContext.render(<PolicyList />);
   });
 
-  it('should show a table', async () => {
+  it('should show the empty state', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('policyTable');
+    const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
   });
 

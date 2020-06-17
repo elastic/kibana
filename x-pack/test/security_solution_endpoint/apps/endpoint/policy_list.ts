@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
   const RELATIVE_DATE_FORMAT = /\d (?:seconds|minutes) ago/i;
+  const retry = getService('retry');
 
   describe('When on the Endpoint Policy List', function () {
     this.tags(['ciGroup7']);
@@ -36,29 +37,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const createButtonTitle = await testSubjects.getVisibleText('headerCreateNewPolicyButton');
       expect(createButtonTitle).to.equal('Create new policy');
     });
-    it('shows policy count total', async () => {
-      const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
-      expect(policyTotal).to.equal('0 Policies');
-    });
-    it('has correct table headers', async () => {
-      const allHeaderCells = await pageObjects.endpointPageUtils.tableHeaderVisibleText(
-        'policyTable'
-      );
-      expect(allHeaderCells).to.eql([
-        'Policy Name',
-        'Created By',
-        'Created Date',
-        'Last Updated By',
-        'Last Updated',
-        'Version',
-        'Actions',
-      ]);
-    });
-    it('should show empty table results message', async () => {
-      const [, [noItemsFoundMessage]] = await pageObjects.endpointPageUtils.tableData(
-        'policyTable'
-      );
-      expect(noItemsFoundMessage).to.equal('No items found');
+    it('shows empty state', async () => {
+      await testSubjects.existOrFail('emptyPolicyTable');
     });
 
     describe('and policies exists', () => {
@@ -74,6 +54,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (policyInfo) {
           await policyInfo.cleanup();
         }
+      });
+
+      it('has correct table headers', async () => {
+        const allHeaderCells = await pageObjects.endpointPageUtils.tableHeaderVisibleText(
+          'policyTable'
+        );
+        expect(allHeaderCells).to.eql([
+          'Policy Name',
+          'Created By',
+          'Created Date',
+          'Last Updated By',
+          'Last Updated',
+          'Version',
+          'Actions',
+        ]);
       });
 
       it('should show policy on the list', async () => {
@@ -106,9 +101,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.launchAndFindDeleteModal();
         await testSubjects.existOrFail('policyListDeleteModal');
         await pageObjects.common.clickConfirmOnModal();
-        await pageObjects.endpoint.waitForTableToNotHaveData('policyTable');
-        const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
-        expect(policyTotal).to.equal('0 Policies');
+        let emptyPolicyTable;
+        await retry.waitForWithTimeout(
+          'table to not have data and empty state returns',
+          2000,
+          async () => {
+            emptyPolicyTable = await testSubjects.find('emptyPolicyTable');
+            if (emptyPolicyTable) {
+              return true;
+            }
+            return false;
+          }
+        );
+        expect(emptyPolicyTable).not.to.be(null);
       });
     });
 
