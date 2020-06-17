@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { License } from '../../services';
-import { isEsError, wrapEsError } from '../../lib';
+import { wrapEsError } from '../../lib';
+import { isEsError } from '../../shared_imports';
 
 const license = new License();
 license.getStatus = jest.fn().mockReturnValue({ isValid: true });
