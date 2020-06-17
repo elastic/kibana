@@ -61,14 +61,54 @@ export function Controls() {
   const { urlParams } = useUrlParams();
   const currentSearch = urlParams.kuery ?? '';
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
+  const [downloadUrl, setDownloadUrl] = useState<string | undefined>(undefined);
+  const debug = sessionStorage.getItem('apm_debug') === 'true';
 
+  // Handle zoom events
   useEffect(() => {
+    const zoomHandler: cytoscape.EventHandler = (event) => {
+      setZoom(event.cy.zoom());
+    };
+
     if (cy) {
-      cy.on('zoom', (event) => {
-        setZoom(event.cy.zoom());
-      });
+      cy.on('zoom', zoomHandler);
     }
+
+    return () => {
+      if (cy) {
+        cy.off('zoom', undefined, zoomHandler);
+      }
+    };
   }, [cy]);
+
+  // Handle elements changes to update the download URL
+  useEffect(() => {
+    const elementsHandler: cytoscape.EventHandler = (event) => {
+      // @ts-ignore The `true` argument to `cy.json` is to flatten the elements
+      // (instead of having them broken into nodes/edges.) DefinitelyTyped has
+      // this wrong.
+      const elementsJson = event.cy.json(true)?.elements.map((element) => ({
+        data: element.data,
+      }));
+      setDownloadUrl(
+        elementsJson.length > 0 && debug
+          ? `data:application/json;charset=utf-8,${encodeURIComponent(
+              JSON.stringify({ elements: elementsJson }, null, '  ')
+            )}`
+          : undefined
+      );
+    };
+
+    if (cy) {
+      cy.on('add remove', elementsHandler);
+    }
+
+    return () => {
+      if (cy) {
+        cy.off('add remove', undefined, elementsHandler);
+      }
+    };
+  }, [cy, debug]);
 
   function center() {
     if (cy) {
@@ -80,11 +120,6 @@ export function Controls() {
       });
     }
   }
-
-  // Only used for debugging purposes
-  const downloadUrl = `data:application/json;charset=utf-8,${encodeURIComponent(
-    JSON.stringify(cy?.json(), null, '  ')
-  )}`;
 
   function zoomIn() {
     doZoom(cy, increment);
@@ -121,7 +156,6 @@ export function Controls() {
   });
 
   const showViewFullMapButton = cy.nodes('.primary').length > 0;
-  const showDownloadButton = sessionStorage.getItem('apm_debug') === 'true';
 
   return (
     <ControlsContainer>
@@ -174,7 +208,7 @@ export function Controls() {
           </EuiToolTip>
         </Panel>
       )}
-      {showDownloadButton && (
+      {downloadUrl && (
         <Panel hasShadow={true} paddingSize="none">
           <EuiToolTip
             anchorClassName="eui-displayInline"

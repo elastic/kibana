@@ -117,55 +117,59 @@ storiesOf(STORYBOOK_PATH, module).add(
     return (
       <div>
         <Cytoscape elements={elements} height={600} width={1340} />
-        <EuiForm isInvalid={error} error={error}>
+        <EuiForm isInvalid={error !== undefined} error={error}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiButton
-                onClick={() => {
-                  try {
-                    setElements(JSON.parse(json).elements);
-                    setSessionJson(json);
-                    setError(undefined);
-                  } catch (e) {
-                    setError(e.message);
-                  }
+              <EuiCodeEditor
+                mode="json"
+                theme="github"
+                width="100%"
+                value={json}
+                setOptions={{ fontSize: '12px' }}
+                onChange={(value) => {
+                  setJson(value);
                 }}
-              >
-                Render JSON
-              </EuiButton>
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column">
+                <EuiFilePicker
+                  display={'large'}
+                  fullWidth={true}
+                  style={{ height: '100%' }}
+                  initialPromptText="Upload a JSON file"
+                  onChange={(event) => {
+                    const item = event?.item(0);
+
+                    if (item) {
+                      const f = new FileReader();
+                      f.onload = (onloadEvent) => {
+                        const result = onloadEvent?.target?.result;
+                        if (typeof result === 'string') {
+                          setJson(result);
+                        }
+                      };
+                      f.readAsText(item);
+                    }
+                  }}
+                />
+                <EuiSpacer />
+                <EuiButton
+                  onClick={() => {
+                    try {
+                      setElements(JSON.parse(json).elements);
+                      setSessionJson(json);
+                      setError(undefined);
+                    } catch (e) {
+                      setError(e.message);
+                    }
+                  }}
+                >
+                  Render JSON
+                </EuiButton>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer />
-          <EuiCodeEditor
-            mode="json"
-            theme="github"
-            width="100%"
-            value={json}
-            setOptions={{ fontSize: '12px' }}
-            onChange={(value) => {
-              setJson(value);
-            }}
-          />
-          <EuiSpacer />
-          <EuiFilePicker
-            display={'large'}
-            fullWidth={true}
-            initialPromptText="Upload a JSON file"
-            onChange={(event) => {
-              const item = event?.item(0);
-
-              if (item) {
-                const f = new FileReader();
-                f.onload = (onloadEvent) => {
-                  const result = onloadEvent?.target?.result;
-                  if (typeof result === 'string') {
-                    setJson(result);
-                  }
-                };
-                f.readAsText(item);
-              }
-            }}
-          />
         </EuiForm>
       </div>
     );
