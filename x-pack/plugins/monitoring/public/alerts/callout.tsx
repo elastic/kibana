@@ -9,6 +9,20 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { CommonAlertStatus } from '../../common/types';
 import { AlertSeverity } from '../../common/enums';
 import { replaceTokens } from './replace_tokens';
+import { AlertMessage } from '../../server/alerts/types';
+
+const TYPES = [
+  {
+    severity: AlertSeverity.Warning,
+    color: 'warning',
+    label: 'Warning alert(s)',
+  },
+  {
+    severity: AlertSeverity.Danger,
+    color: 'danger',
+    label: 'Danger alert(s)',
+  },
+];
 
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
@@ -16,56 +30,47 @@ interface Props {
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
   const { alerts } = props;
 
-  let warningCallout;
-  let dangerCallout;
-
-  const warnings = [];
-  const dangers = [];
-  for (const alertTypeId of Object.keys(alerts)) {
-    const alertInstance = alerts[alertTypeId];
-    for (const { state } of alertInstance.states) {
-      if (state.ui.severity === AlertSeverity.Warning) {
-        warnings.push(state);
-      } else if (state.ui.severity === AlertSeverity.Danger) {
-        dangers.push(state);
+  const callouts = TYPES.map((type) => {
+    const list = [];
+    for (const alertTypeId of Object.keys(alerts)) {
+      const alertInstance = alerts[alertTypeId];
+      for (const { state } of alertInstance.states) {
+        if (state.ui.severity === type.severity) {
+          list.push(state);
+        }
       }
     }
-  }
 
-  if (warnings.length) {
-    warningCallout = (
-      <Fragment>
-        <EuiCallOut title="Warning alert(s)" color="warning" iconType="bell">
-          <ul>
-            {warnings.map((state, index) => {
-              return <li key={index}>{replaceTokens(state.ui.message)}</li>;
-            })}
-          </ul>
-        </EuiCallOut>
-        <EuiSpacer />
-      </Fragment>
-    );
-  }
+    if (list.length) {
+      return (
+        <Fragment>
+          <EuiCallOut title={type.label} color={type.severity} iconType="bell">
+            <ul>
+              {list.map((state, index) => {
+                const nextStepsUi =
+                  state.ui.message.nextSteps && state.ui.message.nextSteps.length ? (
+                    <ul>
+                      {state.ui.message.nextSteps.map(
+                        (step: AlertMessage, nextStepIndex: number) => (
+                          <li key={nextStepIndex}>{replaceTokens(step)}</li>
+                        )
+                      )}
+                    </ul>
+                  ) : null;
 
-  if (dangers.length) {
-    dangerCallout = (
-      <Fragment>
-        <EuiCallOut title="Danger alert(s)" color="danger" iconType="bell">
-          <ul>
-            {dangers.map((state, index) => {
-              return <li key={index}>{replaceTokens(state.ui.message)}</li>;
-            })}
-          </ul>
-        </EuiCallOut>
-        <EuiSpacer />
-      </Fragment>
-    );
-  }
-
-  return (
-    <Fragment>
-      {warningCallout}
-      {dangerCallout}
-    </Fragment>
-  );
+                return (
+                  <li key={index}>
+                    {replaceTokens(state.ui.message)}
+                    {nextStepsUi}
+                  </li>
+                );
+              })}
+            </ul>
+          </EuiCallOut>
+          <EuiSpacer />
+        </Fragment>
+      );
+    }
+  });
+  return <Fragment>{callouts}</Fragment>;
 };

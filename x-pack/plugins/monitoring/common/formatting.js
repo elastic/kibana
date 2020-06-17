@@ -17,10 +17,10 @@ export const LARGE_ABBREVIATED = '0,0.[0]a';
  * @param date Either a numeric Unix timestamp or a {@code Date} object
  * @returns The date formatted using 'LL LTS'
  */
-export function formatDateTimeLocal(date, useUTC = false) {
+export function formatDateTimeLocal(date, useUTC = false, timezone = null) {
   return useUTC
     ? moment.utc(date).format('LL LTS')
-    : moment.tz(date, moment.tz.guess()).format('LL LTS');
+    : moment.tz(date, timezone || moment.tz.guess()).format('LL LTS');
 }
 
 /**

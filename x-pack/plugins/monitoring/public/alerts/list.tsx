@@ -4,20 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiContextMenu,
-  EuiTextColor,
   EuiPopover,
   EuiBadge,
   EuiFlexGrid,
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { CommonAlertStatus } from '../../common/types';
+import { CommonAlertStatus, CommonAlertState } from '../../common/types';
 import { AlertSeverity } from '../../common/enums';
+// @ts-ignore
+import { formatDateTimeLocal } from '../../common/formatting';
 import { AlertState } from '../../server/alerts/types';
 import { AlertStatus } from './status';
+import { Legacy } from '../legacy_shims';
+
+function getDateFromState(states: CommonAlertState[]) {
+  const timestamp = states[0].state.ui.triggeredMS;
+  const tz = Legacy.shims.uiSettings.get('dateFormat:tz');
+  return formatDateTimeLocal(timestamp, false, tz === 'Browser' ? null : tz);
+}
 
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
@@ -61,24 +69,25 @@ export const AlertsList: React.FC<Props> = (props: Props) => {
     const panels = [
       {
         id: 0,
-        title: `${list.length} alert(s)`,
+        title: `Alerts`,
         items: list.map(({ alert, states }, index) => {
-          const severity = states[0].state.ui.severity;
           return {
             name: (
-              <EuiTextColor color={severity}>
-                <EuiText size="s">{alert.label}</EuiText>
-              </EuiTextColor>
+              <Fragment>
+                <EuiText size="s">
+                  <h4>{getDateFromState(states)}</h4>
+                </EuiText>
+                <EuiText>{alert.label}</EuiText>
+              </Fragment>
             ),
             panel: index + 1,
           };
         }),
       },
       ...list.map((alertStatus, index) => {
-        const alert = alertStatus.alert;
         return {
           id: index + 1,
-          title: alert.label,
+          title: getDateFromState(alertStatus.states),
           width: 400,
           content: (
             <div style={{ padding: '1rem' }}>

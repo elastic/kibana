@@ -6,14 +6,9 @@
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiCallOut, EuiButton } from '@elastic/eui';
 
-import {
-  CommonAlertStatus,
-  CommonActionDefaultParameters,
-  CommonBaseAlert,
-} from '../../common/types';
+import { CommonAlertStatus } from '../../common/types';
 import { AlertMessage } from '../../server/alerts/types';
 import { Legacy } from '../legacy_shims';
-import { ActionType, ActionResult } from '../../../actions/common';
 import { replaceTokens } from './replace_tokens';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
