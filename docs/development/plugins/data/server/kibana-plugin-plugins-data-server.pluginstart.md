@@ -15,4 +15,5 @@ export interface DataPluginStart
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.pluginstart.fieldformats.md) | <code>FieldFormatsStart</code> |  |
+|  [search](./kibana-plugin-plugins-data-server.pluginstart.search.md) | <code>ISearchStart</code> |  |
 
