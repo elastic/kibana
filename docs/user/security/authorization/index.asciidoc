@@ -12,7 +12,7 @@ NOTE: When running multiple tenants of Kibana by changing the `kibana.index` in 
 [[xpack-kibana-role-management]]
 === {kib} role management
 
-To create a role that grants {kib} privileges, go to **Management -> Security -> Roles** and click **Create role**.
+To create a role that grants {kib} privileges, open the menu, go to *Stack Management > Security > Roles* and click **Create role**. 
 
 [[adding_kibana_privileges]]
 ==== Adding {kib} privileges

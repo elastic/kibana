@@ -63,8 +63,7 @@ const ExceptionItemComponent = ({
   }, [setShowComments, showComments]);
 
   const formattedComments = useMemo((): EuiCommentProps[] => {
-    // TODO: return back to exceptionItem.comments once updated
-    return getFormattedComments(exceptionItem.comment);
+    return getFormattedComments(exceptionItem.comments);
   }, [exceptionItem]);
 
   const disableDelete = useMemo((): boolean => {
