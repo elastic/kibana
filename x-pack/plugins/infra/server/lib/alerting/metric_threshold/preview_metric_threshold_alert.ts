@@ -76,13 +76,6 @@ export const previewMetricThresholdAlert: (
     const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
     const previewResults = await Promise.all(
       groups.map(async (group) => {
-        const tooManyBuckets = alertResults.some((alertResult) =>
-          isTooManyBucketsPreviewException(alertResult[group])
-        );
-        if (tooManyBuckets) {
-          return TOO_MANY_BUCKETS_PREVIEW_EXCEPTION;
-        }
-
         const isNoData = alertResults.some((alertResult) => alertResult[group].isNoData);
         if (isNoData) {
           return null;

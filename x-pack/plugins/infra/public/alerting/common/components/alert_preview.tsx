@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { omit } from 'lodash';
 import { HttpSetup } from 'kibana/public';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiFormRow,
@@ -27,7 +26,10 @@ import { i18n } from '@kbn/i18n';
 import { FORMATTERS } from '../../../../common/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
-import { AlertPreviewSuccessResponsePayload } from '../../../../common/alerting/metrics';
+import {
+  AlertPreviewSuccessResponsePayload,
+  AlertPreviewRequestParams,
+} from '../../../../common/alerting/metrics';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIntervalInSeconds } from '../../../../server/utils/get_interval_in_seconds';
 import { getAlertPreview, PreviewableAlertTypes } from './get_alert_preview';
@@ -36,7 +38,7 @@ interface Props {
   alertInterval: string;
   alertType: PreviewableAlertTypes;
   fetch: HttpSetup['fetch'];
-  alertParams: Partial<{ criteria: any; sourceId: string }>;
+  alertParams: { criteria: any[]; sourceId: string } & Record<string, any>;
   validate: (params: any) => ValidationResult;
   showNoDataResults?: boolean;
   groupByDisplayName?: string;
@@ -54,10 +56,10 @@ export const AlertPreview: React.FC<Props> = (props) => {
   } = props;
   const [previewLookbackInterval, setPreviewLookbackInterval] = useState<string>('h');
   const [isPreviewLoading, setIsPreviewLoading] = useState<boolean>(false);
-  const [previewError, setPreviewError] = useState<boolean>(false);
-  const [previewResult, setPreviewResult] = useState<AlertPreviewSuccessResponsePayload | null>(
-    null
-  );
+  const [previewError, setPreviewError] = useState<any | false>(false);
+  const [previewResult, setPreviewResult] = useState<
+    (AlertPreviewSuccessResponsePayload & Record<string, any>) | null
+  >(null);
   const [isErrorModalVisible, setIsErrorModalVisible] = useState<boolean>(false);
   const onOpenModal = useCallback(() => setIsErrorModalVisible(true), [setIsErrorModalVisible]);
   const onCloseModal = useCallback(() => setIsErrorModalVisible(false), [setIsErrorModalVisible]);
@@ -77,7 +79,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
           ...alertParams,
           lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
           alertInterval,
-        },
+        } as AlertPreviewRequestParams,
         alertType,
       });
       setPreviewResult({ ...result, groupByDisplayName, previewLookbackInterval });
