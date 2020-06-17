@@ -580,28 +580,9 @@ export class EndpointDocGenerator {
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
-  public *alertsGenerator(
-    numAlerts: number,
-    alertAncestors?: number,
-    childGenerations?: number,
-    maxChildrenPerNode?: number,
-    relatedEventsPerNode?: number,
-    relatedAlertsPerNode?: number,
-    percentNodesWithRelated?: number,
-    percentTerminated?: number,
-    alwaysGenMaxChildrenPerNode?: boolean
-  ) {
+  public *alertsGenerator(numAlerts: number, options: TreeOptions = {}) {
     for (let i = 0; i < numAlerts; i++) {
-      yield* this.fullResolverTreeGenerator(
-        alertAncestors,
-        childGenerations,
-        maxChildrenPerNode,
-        relatedEventsPerNode,
-        relatedAlertsPerNode,
-        percentNodesWithRelated,
-        percentTerminated,
-        alwaysGenMaxChildrenPerNode
-      );
+      yield* this.fullResolverTreeGenerator(options);
     }
   }
 
@@ -619,21 +600,12 @@ export class EndpointDocGenerator {
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
-  public *fullResolverTreeGenerator(
-    alertAncestors?: number,
-    childGenerations?: number,
-    maxChildrenPerNode?: number,
-    relatedEventsPerNode?: RelatedEventInfo[] | number,
-    relatedAlertsPerNode?: number,
-    percentNodesWithRelated?: number,
-    percentTerminated?: number,
-    alwaysGenMaxChildrenPerNode?: boolean
-  ) {
+  public *fullResolverTreeGenerator(options: TreeOptions = {}) {
     const ancestry = this.createAlertEventAncestry(
-      alertAncestors,
-      relatedEventsPerNode,
-      percentNodesWithRelated,
-      percentTerminated
+      options.ancestors,
+      options.relatedEvents,
+      options.percentWithRelated,
+      options.percentTerminated
     );
     for (let i = 0; i < ancestry.length; i++) {
       yield ancestry[i];
@@ -641,13 +613,13 @@ export class EndpointDocGenerator {
     // ancestry will always have at least 2 elements, and the last element will be the alert
     yield* this.descendantsTreeGenerator(
       ancestry[ancestry.length - 1],
-      childGenerations,
-      maxChildrenPerNode,
-      relatedEventsPerNode,
-      relatedAlertsPerNode,
-      percentNodesWithRelated,
-      percentTerminated,
-      alwaysGenMaxChildrenPerNode
+      options.generations,
+      options.children,
+      options.relatedEvents,
+      options.relatedAlerts,
+      options.percentWithRelated,
+      options.percentTerminated,
+      options.alwaysGenMaxChildrenPerNode
     );
   }
 
@@ -959,7 +931,7 @@ export class EndpointDocGenerator {
       host: {
         id: this.commonInfo.host.id,
       },
-      endpoint: {
+      Endpoint: {
         policy: {
           applied: {
             actions: [

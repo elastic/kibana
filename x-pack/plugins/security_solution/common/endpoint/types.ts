@@ -672,7 +672,7 @@ export interface HostPolicyResponseAppliedAction {
   message: string;
 }
 
-export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['policy']['applied']['response']['configurations'];
+export type HostPolicyResponseConfiguration = HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
@@ -717,7 +717,7 @@ export interface HostPolicyResponse {
     version: string;
     id: string;
   };
-  endpoint: {
+  Endpoint: {
     policy: {
       applied: {
         version: string;

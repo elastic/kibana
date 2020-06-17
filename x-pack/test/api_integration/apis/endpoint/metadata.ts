@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.total).to.eql(2);
         const resultOsVariantValue: Set<string> = new Set(
-          body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.os.variant)
+          body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.os.Ext.variant)
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
         expect(body.hosts.length).to.eql(2);
@@ -204,15 +204,14 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `not endpoint.policy.applied.status:success`,
+            filter: `not Endpoint.policy.applied.status:success`,
           })
           .expect(200);
         const statuses: Set<string> = new Set(
           body.hosts.map(
-            (hostInfo: Record<string, any>) => hostInfo.metadata.endpoint.policy.applied.status
+            (hostInfo: Record<string, any>) => hostInfo.metadata.Endpoint.policy.applied.status
           )
         );
-
         expect(statuses.size).to.eql(1);
         expect(Array.from(statuses)).to.eql(['failure']);
       });
