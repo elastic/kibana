@@ -27,8 +27,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { AlertsList } from '../../../alerts/list';
 
-const getColumns = (setupMode) => {
+const getColumns = (setupMode, alerts) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -77,6 +78,25 @@ const getColumns = (setupMode) => {
             {setupModeStatus}
           </div>
         );
+      },
+    },
+    {
+      name: i18n.translate('xpack.monitoring.kibana.listing.alertsColumnTitle', {
+        defaultMessage: 'Alerts',
+      }),
+      field: 'isOnline',
+      width: '175px',
+      sortable: true,
+      render: () => {
+        if (alerts) {
+          return (
+            <div>
+              <AlertsList alerts={alerts} />
+            </div>
+          );
+        }
+
+        return null;
       },
     },
     {
@@ -158,7 +178,7 @@ const getColumns = (setupMode) => {
 
 export class KibanaInstances extends PureComponent {
   render() {
-    const { clusterStatus, setupMode, sorting, pagination, onTableChange } = this.props;
+    const { clusterStatus, alerts, setupMode, sorting, pagination, onTableChange } = this.props;
 
     let setupModeCallOut = null;
     // Merge the instances data with the setup data if enabled
@@ -262,7 +282,7 @@ export class KibanaInstances extends PureComponent {
             <EuiMonitoringTable
               className="kibanaInstancesTable"
               rows={dataFlattened}
-              columns={getColumns(setupMode)}
+              columns={getColumns(setupMode, alerts)}
               sorting={sorting}
               pagination={pagination}
               setupMode={setupMode}

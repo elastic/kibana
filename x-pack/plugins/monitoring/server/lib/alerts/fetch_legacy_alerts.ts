@@ -31,6 +31,7 @@ export async function fetchLegacyAlerts(
       ],
       query: {
         bool: {
+          minimum_should_match: 1,
           filter: [
             {
               terms: {

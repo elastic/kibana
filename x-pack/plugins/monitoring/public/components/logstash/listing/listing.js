@@ -77,7 +77,7 @@ export class Listing extends PureComponent {
         },
       },
       {
-        name: i18n.translate('xpack.monitoring.elasticsearch.nodes.alertsColumnTitle', {
+        name: i18n.translate('xpack.monitoring.logstash.nodes.alertsColumnTitle', {
           defaultMessage: 'Alerts',
         }),
         field: 'isOnline',

@@ -12,7 +12,12 @@ import { getPageData } from './get_page_data';
 import template from './index.html';
 import { KibanaInstances } from '../../../components/kibana/instances';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { KIBANA_SYSTEM_ID, CODE_PATH_KIBANA } from '../../../../common/constants';
+import {
+  KIBANA_SYSTEM_ID,
+  CODE_PATH_KIBANA,
+  ALERT_KIBANA_VERSION_MISMATCH,
+} from '../../../../common/constants';
+import { AlertRenderer } from '../../../alerts/renderer';
 
 uiRoutes.when('/kibana/instances', {
   template,
@@ -44,13 +49,19 @@ uiRoutes.when('/kibana/instances', {
             render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
               <Fragment>
                 {flyoutComponent}
-                <KibanaInstances
-                  instances={this.data.kibanas}
-                  setupMode={setupMode}
-                  sorting={this.sorting}
-                  pagination={this.pagination}
-                  onTableChange={this.onTableChange}
-                  clusterStatus={this.data.clusterStatus}
+                <AlertRenderer
+                  alertTypeIds={[ALERT_KIBANA_VERSION_MISMATCH]}
+                  render={({ alerts }) => (
+                    <KibanaInstances
+                      instances={this.data.kibanas}
+                      alerts={alerts}
+                      setupMode={setupMode}
+                      sorting={this.sorting}
+                      pagination={this.pagination}
+                      onTableChange={this.onTableChange}
+                      clusterStatus={this.data.clusterStatus}
+                    />
+                  )}
                 />
                 {bottomBarComponent}
               </Fragment>
