@@ -31,7 +31,6 @@ describe('Transform: Transform List <ExpandedRow />', () => {
 
     const { getByText, getByTestId } = render(<ExpandedRow item={item} />);
 
-    expect(getByText('Settings')).toBeInTheDocument();
     expect(getByText('Details')).toBeInTheDocument();
     expect(getByText('Stats')).toBeInTheDocument();
     expect(getByText('JSON')).toBeInTheDocument();
@@ -41,7 +40,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
     const tabContent = getByTestId('transformDetailsTabContent');
     expect(tabContent).toBeInTheDocument();
 
-    expect(getByTestId('transformSettingsTab')).toHaveAttribute('aria-selected', 'true');
+    expect(getByTestId('transformDetailsTab')).toHaveAttribute('aria-selected', 'true');
     expect(within(tabContent).getByText('General')).toBeInTheDocument();
 
     fireEvent.click(getByTestId('transformStatsTab'));

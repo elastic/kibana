@@ -224,7 +224,7 @@ export const getColumns = (
     {
       name: i18n.translate('xpack.transform.tableActionLabel', { defaultMessage: 'Actions' }),
       actions,
-      width: '100px',
+      width: '80px',
     },
   ];
 

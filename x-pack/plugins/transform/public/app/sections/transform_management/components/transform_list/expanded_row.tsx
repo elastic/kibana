@@ -61,7 +61,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const state: SectionConfig = {
     title: 'State',
     items: stateItems,
-    position: 'left',
+    position: 'right',
   };
 
   const configItems: Item[] = [
@@ -96,7 +96,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     },
   ];
 
-  const settings: SectionConfig = {
+  const general: SectionConfig = {
     title: 'General',
     items: configItems,
     position: 'left',
@@ -159,18 +159,6 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
 
   const tabs = [
     {
-      id: `transform-settings-tab-${item.id}`,
-      'data-test-subj': 'transformSettingsTab',
-      name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.tabs.transformSettingsLabel',
-        {
-          defaultMessage: 'Settings',
-        }
-      ),
-      content: <ExpandedRowDetailsPane sections={[settings]} />,
-    },
-
-    {
       id: `transform-details-tab-${item.id}`,
       'data-test-subj': 'transformDetailsTab',
       name: i18n.translate(
@@ -179,7 +167,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           defaultMessage: 'Details',
         }
       ),
-      content: <ExpandedRowDetailsPane sections={[state, checkpointing]} />,
+      content: <ExpandedRowDetailsPane sections={[general, state, checkpointing]} />,
     },
     {
       id: `transform-stats-tab-${item.id}`,
