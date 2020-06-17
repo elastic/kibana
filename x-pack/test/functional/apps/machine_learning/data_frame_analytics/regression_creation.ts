@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         dependentVariable: 'stab',
         trainingPercent: '20',
-        modelMemory: '105mb',
+        modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
           row: {

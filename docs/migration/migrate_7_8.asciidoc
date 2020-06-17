@@ -1,0 +1,523 @@
+[[breaking-changes-7.8]]
+== Breaking changes in 7.8
+++++
+<titleabbrev>7.8</titleabbrev>
+++++
+
+This page discusses the breaking changes that you need to be aware of when migrating
+your application to Kibana 7.8.
+
+* <<user-facing-changes-78, Breaking changes for users>>
+* <<general-plugin-API-changes-78, Breaking changes for plugin developers>>
+
+
+// The following section is re-used in the Installation and Upgrade Guide
+
+
+// tag::notable-breaking-changes[]
+
+[float]
+[[user-facing-changes-78]]
+=== Breaking changes for users
+
+[float]
+[[breaking_78_metrics_alerts]]
+==== Metrics alerts action messaging refactored to report on the no data state
+*Details* +
+Metrics alerts no longer expose `context.valueOf`, `context.metricOf`, or
+`context.thresholdOf` to action messages. These variables are replaced
+by `context.reason`. This variable explains the reason that the alert
+fired and automatically includes the metric, threshold, and current value of
+all configured conditions.
+
+*Impact* +
+Alerts configured in 7.7 still function as normal,
+but their action messages might no longer provide useful information and
+must be reconfigured. The new default action message will show an example
+of how to use `context.reason`.
+
+*via https://github.com/elastic/kibana/pull/64365[#64365]*
+
+
+[float]
+[[breaking_fixes_back_button]]
+==== Panels removed from the URL in dashboard view mode
+
+====
+*Details* +
+In dashboard in view mode, `.panels` are no longer synced with the URL.
+
+*Impact* +
+This fixes the Back button when navigating between dashboards using drilldowns.
+
+*via https://github.com/elastic/kibana/pull/62415[#62415]*
+====
+
+
+// end::notable-breaking-changes[]
+
+
+[float]
+[[general-plugin-API-changes-78]]
+=== Breaking changes for plugin developers
+
+[[breaking_78_actions_api]]
+.The actions API endpoint changed
+[%collapsible]
+====
+
+The following action plugin REST APIs changed so that they are consistent with the
+{kib} styleguide.
+
+* `GET /api/action/_getAll` -> `GET /api/actions`
+* `GET /api/action/types` -> `GET /api/actions/list_action_types`
+* `POST /api/action` -> `POST /api/actions/action`
+* `GET /api/action/{id}` -> `GET /api/actions/action/{id}`
+* `PUT /api/action/{id}` -> `PUT /api/actions/action/{id}`
+* `DELETE /api/action/{id}` -> `DELETE /api/actions/action/{id}`
+* `POST /api/action/{id}/_execute` -> `POST /api/actions/action/{id}/_execute`
+
+*via https://github.com/elastic/kibana/pull/65936[#65936]*
+
+====
+
+
+[[breaking_78_canvas]]
+.Canvas applications now run on the new {kib} platform
+[%collapsible]
+====
+
+Any existing user-created plugins that extend
+Canvas functionality must also move to the Kibana Platform to continue extending Canvas.
+
+*via https://github.com/elastic/kibana/pull/64831[#64831]*
+
+====
+
+[[breaking-78-filter-expression-function]]
+.The `filter` function uses `filterType` instead of `type`
+[%collapsible]
+====
+
+If you used the `type` argument of the `filter` function, you now
+must use `filterType` instead.
+
+Old code:
+
+```ts
+filter type={...} | ...
+```
+
+New code:
+
+```ts
+filter filterType={...} | ...
+```
+
+The `type` field is used internally by the expression interpreter to
+discriminate between the different values it passes between functions.
+The `filter` function was the only function that exposed this field to users.
+After this change, all expression values will consistently use `type` to determine a type of expression value.
+
+*via https://github.com/elastic/kibana/pull/64215[#64215]*
+
+====
+
+[[breaking_78_redirect-to-full-path]]
+.Calling `navigateToApp` to a legacy app redirects to full path
+[%collapsible]
+====
+Calling `core.application.navigateToApp` to a legacy
+application now retains the `path` specified.
+
+*via https://github.com/elastic/kibana/pull/65112[#65112]*
+
+====
+
+[[breaking_78_remove_aggs]]
+.The legacy aggs APIs were removed
+[%collapsible]
+====
+
+The following legacy aggs APIs from the `data` plugin `search` service
+have been removed because they are no longer in use:
+
+```ts
+data.search.__LEGACY.AggConfig;
+data.search.__LEGACY.AggType;
+data.search.__LEGACY.aggTypeFieldFilters;
+data.search.__LEGACY.FieldParamType;
+data.search.__LEGACY.MetricAggType;
+data.search.__LEGACY.parentPipelineAggHelper;
+data.search.__LEGACY.siblingPipelineAggHelper;
+```
+
+Additionally, the following unused static exports have been removed:
+
+```ts
+AggTypeFieldFilters,
+AggTypeFilters,
+IAggGroupNames, // renamed to AggGroupName
+DateRangeKey,
+IpRangeKey,
+OptionedParamEditorProps, // moved to vis_default_editor
+search.aggs.AggConfigs;
+search.aggs.aggGroupNamesMap, // renamed to AggGroupLabels
+search.aggs.aggTypeFilters,
+search.aggs.convertDateRangeToString,
+search.aggs.convertIPRangeToString,
+```
+
+*via https://github.com/elastic/kibana/pull/64719[#64719]*
+
+====
+
+[[breaking_78_update_default_path]]
+.Applications are now allowed to define and update a `defaultPath`
+[%collapsible]
+====
+
+{kib} platform applications can now define and update the `defaultPath`
+to use when navigating to them from another application or from the navigation bar.
+
+
+```ts
+core.application.register({
+    id: 'my-app',
+    // ...
+    defaultPath: '/some-path',
+})
+```
+
+```ts
+const appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+core.application.register({
+    id: 'my-app',
+    // ...
+    updater$: appUpdater,
+})
+
+// later
+appUpdater.next(() => ({ defaultPath: '/some-updated-path' }));
+```
+
+*via https://github.com/elastic/kibana/pull/64498[#64498]*
+
+====
+
+[[breaking_78_cache_busting]]
+.Static assets are now served under a release-specific URL
+[%collapsible]
+====
+
+{kib} static assets are now served under a release-specific URL
+with long-term caching headers `Cache-Control: max-age=31536000`.
+
+Before:
+
+http://localhost:5601/bundles/plugin/dashboard/dashboard.plugin.js
+
+After:
+
+http://localhost:5601/bundles/8467/plugin/dashboard/dashboard.plugin.js
+
+*via https://github.com/elastic/kibana/pull/64414[#64414]*
+
+====
+
+[[breaking_78_add_example_plugins]]
+.Example plugins are now allowed in X-Pack
+[%collapsible]
+====
+
+{kib} developers can now create example plugins in
+X-Pack&mdash;create your plugin in `/x-pack/examples` folder and start {kib} with:
+
+```ts
+yarn start --run-examples
+```
+
+*via https://github.com/elastic/kibana/pull/63823[#63823]*
+
+====
+
+[[breaking_78_improves_drilldows]]
+.`action.getHref()` has improvements for drilldowns
+[%collapsible]
+====
+
+`getHref` on `Action` interfaces in the uiActions plugin is now async.
+`getHref` is now used only to support right click behavior.
+`execute()` takes control on regular click.
+
+*via https://github.com/elastic/kibana/pull/63228[#63228]*
+
+====
+
+[[breaking_78_scopedhistory]]
+.State syncing utils now support `ScopedHistory`
+[%collapsible]
+====
+
+State syncing utils now seamlessly support the platform's `ScopedHistory`.
+
+*via https://github.com/elastic/kibana/pull/62761[#62761]*
+
+====
+
+[[breaking_78_tsvb]]
+.Configuration properties were removed from TSVB
+[%collapsible]
+====
+
+When the TSVB visualization was added to {kib},
+two configuration properties were declared: `chartResolution` and `minimumBucketSize`.
+No one used these properties, and
+an implementation has not been added.
+The `chartResolution` and `minimumBucketSize` are now marked as deprecated configuration
+properties for TSVB.
+
+*via https://github.com/elastic/kibana/pull/62543[#62543]*
+
+====
+
+[[breaking_add_subservice]]
+.The `HttpResources` service is available for responding to requests
+[%collapsible]
+====
+
+If your server-side plugin needs to respond to an incoming request with the
+HTML page bootstrapping {kib} client app, a custom HTML page, or a custom JS script,
+you can use the `HttpResources` service.
+
+```js
+httpResources.register({ path: 'my_app', validate: false }, (context, req, res) =>
+  res.renderCoreApp()
+);
+
+httpResources.register({ path: 'my_app/foo', validate: false }, (context, req, res) =>
+  res.renderHtml({ body: '<html><p>Hi</p></html>' })
+);
+
+httpResources.register({ path: 'my_app/bar', validate: false }, (context, req, res) =>
+  res.renderJs({ body: 'alert(...);'})
+);
+```
+
+*via https://github.com/elastic/kibana/pull/61797[#61797]*
+
+====
+
+[[breaking_delete_embeddable_plugin]]
+.The legacy `embeddable_api` plugin has been removed
+[%collapsible]
+====
+
+The legacy `embeddable_api` plugin in `src/legacy/core_plugins/embeddable_api`
+has been removed in favor of the `embeddable` plugin in the new {kib} Platform.
+If you used the `embeddable_api` in `7.7`, you already used the new
+`embeddable` plugin API, which was re-exported from the legacy platform as a convenience.
+
+As of 7.8, you must update your imports to pull everything from the new location:
+
+```diff
+// for types & static imports
+- import { ViewMode } from '../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
++ import { ViewMode } from '../../../src/plugins/embeddable/public';
+
+// for runtime APIs in legacy platform plugins
+- import { start } from '../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
++ import { npStart } from 'ui/new_platform';
++ const { embeddable } = npStart.plugins;
+
+// for runtime APIs in new platform plugins
+- import { start } from '../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
++ class MyPlugin {
++  start(core, { embeddable }) {
++    ...
++  }
++ }
+```
+
+For plugins using the legacy platform, you also must remove
+the `embeddable_api` from your list of required plugins in your plugin's `index.ts`:
+
+```diff
+export default function MyPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'my_plugin',
+-    require: ['kibana', 'elasticsearch', 'embeddable_api'],
++    require: ['kibana', 'elasticsearch'],
+    ...,
+  };
+  return new kibana.Plugin(config);
+}
+```
+
+For plugins using the new {kib} platform, make sure to list `embeddable` as
+either a required or optional dependency in your `kibana.json`:
+
+```diff
+{
+  "id": "my_plugin",
+  ...,
+-  "requiredPlugins": [],
++  "requiredPlugins": ["embeddable"],
+  "optionalPlugins": [],
+  "server": true,
+  "ui": true
+}
+```
+
+*via https://github.com/elastic/kibana/pull/61767[#61767]*
+
+====
+
+[[breaking_move_to_data_plugin]]
+.`src/legacy/server/index_patterns` has moved to data plugin
+[%collapsible]
+====
+
+The legacy folder `src/legacy/server/index_patterns` has been deleted.
+The corresponding code was previously moved to the new platform.
+
+For more information on where to locate new platform `data` services,
+refer to the
+https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+in `src/core/MIGRATION.md`.
+
+*via https://github.com/elastic/kibana/pull/61618[#61618]*
+
+====
+
+[[breaking_78_static_assets]]
+.Static assets are now served from the new platform
+[%collapsible]
+====
+
+The {kib} Platform serves plugin static assets from the
+`my_plugin/public/assets` folder. No additional configuration is required.
+
+*via https://github.com/elastic/kibana/pull/60490[#60490]*
+
+====
+
+[[breaking_78_refactor_connectors]]
+.Connectors have been refactored
+[%collapsible]
+====
+
+The API changed to support executor actions. The supported actions are `pushToService`,
+`handshake`, and `getIncident`. This change implements only the `pushToService` action.
+
+The following response fields have changed:
+
+* `incidentId` changed to `id`.
+* `number` changed to `title`.
+
+*Create an incident to ServiceNow*
+
+When the `incidentId` attribute **is not** in `actionParams`,
+the executor will **create** the incident.
+
+[%hardbreaks]
+Endpoint: `api/action/<action_id>/_execute`
+Method: `POST`
+
+Payload
+
+```ts
+{
+    "params": {
+        "action": "pushToService",
+        "actionParams": {
+	    	"caseId": "d4387ac5-0899-4dc2-bbfa-0dd605c934aa",
+	        "title": "A new incident",
+	        "description": "A description",
+	        "comments": [
+	            {
+	                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
+	                "version": "WzU3LDFd",
+	                "comment": "A comment"
+	            }
+	        ]
+        }
+    }
+}
+```
+
+Response
+
+```ts
+{
+    "status": "ok",
+    "actionId": "f631be57-0a59-4e28-8833-16fc3b309374",
+    "data": {
+        "id": "7d7aad9c072fc0100e48fbbf7c1ed0c2",
+        "title": "INC0010044",
+        "pushedDate": "2020-03-10T13:02:59.000Z",
+        "comments": [
+            {
+                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
+                "pushedDate": "2020-03-10T13:03:00.000Z"
+            }
+        ]
+    }
+}
+```
+
+
+*Update an incident to ServiceNow*
+
+When the `incidentId` attribute **is** in `actionParams`,
+the executor will update the incident.
+
+[%hardbreaks]
+Endpoint: `api/action/<action_id>/_execute`
+Method: `POST`
+
+Payload
+
+```ts
+{
+    "params": {
+        "action": "pushToService",
+	    "actionParmas": {
+			"caseId": "d4387ac5-0899-4dc2-bbfa-0dd605c934aa",
+	        "incidentId": "7d7aad9c072fc0100e48fbbf7c1ed0c2"
+	        "title": "A new incident",
+	        "description": "A description",
+	        "comments": [
+	            {
+	                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
+	                "version": "WzU3LDFd",
+	                "comment": "A comment"
+	            }
+	        ]
+		}
+    }
+}
+```
+
+Response
+
+```ts
+{
+    "status": "ok",
+    "actionId": "f631be57-0a59-4e28-8833-16fc3b309374",
+    "data": {
+        "id": "7d7aad9c072fc0100e48fbbf7c1ed0c2",
+        "title": "INC0010044",
+        "pushedDate": "2020-03-10T13:02:59.000Z",
+        "comments": [
+            {
+                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
+                "pushedDate": "2020-03-10T13:03:00.000Z"
+            }
+        ]
+    }
+}
+```
+
+*via https://github.com/elastic/kibana/pull/63450[#63450]*
+====
