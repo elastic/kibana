@@ -3,22 +3,38 @@
 exports[`ui reducer adds integration popover status to state 1`] = `
 Object {
   "alertFlyoutVisible": false,
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
   "basePath": "",
+  "dateRange": Object {
+    "from": "now-15m",
+    "to": "now",
+  },
   "esKuery": "",
   "integrationsPopoverOpen": Object {
     "id": "popover-2",
     "open": true,
   },
   "searchText": "",
+  "selectedFilters": "",
+  "statusFilter": "",
 }
 `;
 
 exports[`ui reducer sets the application's base path 1`] = `
 Object {
   "alertFlyoutVisible": false,
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
   "basePath": "yyz",
+  "dateRange": Object {
+    "from": "now-15m",
+    "to": "now",
+  },
   "esKuery": "",
   "integrationsPopoverOpen": null,
   "searchText": "",
+  "selectedFilters": "",
+  "statusFilter": "",
 }
 `;

@@ -41,6 +41,7 @@ describe('PingHistogram component', () => {
       ],
       interval: '1s',
     },
+    updateDateRange: jest.fn(),
   };
 
   it('shallow renders the component without errors', () => {

@@ -239,6 +239,7 @@ exports[`PingHistogram component shallow renders the component without errors 1`
         "interval": "1s",
       }
     }
+    updateDateRange={[MockFunction]}
   />
 </ContextProvider>
 `;

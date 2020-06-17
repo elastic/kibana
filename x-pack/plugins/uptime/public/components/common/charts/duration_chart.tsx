@@ -6,7 +6,6 @@
 
 import React, { useCallback, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   Axis,
@@ -17,7 +16,6 @@ import {
   SeriesIdentifier,
   BrushEndListener,
 } from '@elastic/charts';
-import { useSelector, useDispatch } from 'react-redux';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';

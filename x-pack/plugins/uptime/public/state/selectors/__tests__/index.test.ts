@@ -40,11 +40,19 @@ describe('state selectors', () => {
       loading: false,
     },
     ui: {
+      autorefreshInterval: 60000,
+      autorefreshIsPaused: false,
       alertFlyoutVisible: false,
       basePath: 'yyz',
+      dateRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       esKuery: '',
       integrationsPopoverOpen: null,
       searchText: '',
+      selectedFilters: '',
+      statusFilter: '',
     },
     monitorStatus: {
       status: null,

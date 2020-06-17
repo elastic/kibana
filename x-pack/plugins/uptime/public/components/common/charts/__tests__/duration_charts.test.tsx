@@ -49,9 +49,12 @@ describe('MonitorCharts component', () => {
   it('renders the component without errors', () => {
     const component = shallowWithRouter(
       <DurationChartComponent
-        loading={false}
         anomalies={null}
+        loading={false}
         locationDurationLines={chartResponse.monitorChartsData.locationDurationLines}
+        max={1548700620000}
+        min={1548697620000}
+        updateDateRange={jest.fn()}
       />
     );
     expect(component).toMatchSnapshot();
