@@ -138,11 +138,11 @@ describe('useCamera on an unpainted element', () => {
       it('should zoom in', () => {
         expect(projectionMatrix).toMatchInlineSnapshot(`
           Array [
-            1.0635255481707058,
+            1.0292841801261479,
             0,
             400,
             0,
-            -1.0635255481707058,
+            -1.0292841801261479,
             300,
             0,
             0,

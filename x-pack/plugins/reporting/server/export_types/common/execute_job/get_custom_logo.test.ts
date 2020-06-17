@@ -6,7 +6,7 @@
 
 import { ReportingCore } from '../../../core';
 import { createMockReportingCore } from '../../../test_helpers';
-import { JobDocPayloadPDF } from '../../printable_pdf/types';
+import { ScheduledTaskParamsPDF } from '../../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './index';
 
 const mockConfigGet = jest.fn().mockImplementation((key: string) => {
@@ -37,7 +37,7 @@ test(`gets logo from uiSettings`, async () => {
   });
 
   const conditionalHeaders = await getConditionalHeaders({
-    job: {} as JobDocPayloadPDF,
+    job: {} as ScheduledTaskParamsPDF,
     filteredHeaders: permittedHeaders,
     config: mockConfig,
   });
@@ -45,7 +45,7 @@ test(`gets logo from uiSettings`, async () => {
   const { logo } = await getCustomLogo({
     reporting: mockReportingPlugin,
     config: mockConfig,
-    job: {} as JobDocPayloadPDF,
+    job: {} as ScheduledTaskParamsPDF,
     conditionalHeaders,
   });
 
