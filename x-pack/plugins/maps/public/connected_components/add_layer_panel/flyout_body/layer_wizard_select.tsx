@@ -14,6 +14,7 @@ import {
   EuiLoadingContent,
   EuiFacetGroup,
   EuiFacetButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -165,7 +166,8 @@ export class LayerWizardSelect extends Component<Props, State> {
     return (
       <>
         {this._renderCategoryFacets()}
-        <EuiFlexGrid columns={2} gutterSize="s">
+        <EuiSpacer size="s" />
+        <EuiFlexGrid columns={2} gutterSize="m">
           {wizardCards}
         </EuiFlexGrid>
       </>
