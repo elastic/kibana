@@ -42,7 +42,6 @@ export function MapsTopNavMenu({
   closeFlyout,
   enableFullScreen,
   openMapSettings,
-  syncSavedMap,
   inspectorAdapters,
   syncAppAndGlobalState,
   currentPath,
@@ -71,7 +70,6 @@ export function MapsTopNavMenu({
     closeFlyout,
     enableFullScreen,
     openMapSettings,
-    syncSavedMap,
     inspectorAdapters,
     currentPath
   );
@@ -129,7 +127,6 @@ function getTopNavConfig(
   closeFlyout,
   enableFullScreen,
   openMapSettings,
-  syncSavedMap,
   inspectorAdapters,
   currentPath
 ) {
@@ -218,7 +215,6 @@ function getTopNavConfig(
                   saveOptions,
                   initialLayerListConfig,
                   closeFlyout,
-                  syncSavedMap,
                   currentPath
                 ).then((response) => {
                   // If the save wasn't successful, put the original values back.
@@ -247,16 +243,9 @@ function getTopNavConfig(
   ];
 }
 
-async function doSave(
-  savedMap,
-  saveOptions,
-  initialLayerListConfig,
-  closeFlyout,
-  syncSavedMap,
-  currentPath
-) {
+async function doSave(savedMap, saveOptions, initialLayerListConfig, closeFlyout, currentPath) {
   closeFlyout();
-  syncSavedMap(savedMap);
+  savedMap.syncWithStore();
   let id;
 
   try {

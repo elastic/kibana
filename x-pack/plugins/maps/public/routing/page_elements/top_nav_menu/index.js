@@ -15,7 +15,6 @@ import {
   updateFlyout,
 } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
-import { getStore } from '../../store_operations';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import { getFlyoutDisplay } from '../../../selectors/ui_selectors';
 
@@ -36,9 +35,6 @@ function mapDispatchToProps(dispatch) {
     setRefreshStoreConfig: (refreshConfig) => dispatch(setRefreshConfig(refreshConfig)),
     enableFullScreen: () => dispatch(enableFullScreen()),
     openMapSettings: () => dispatch(openMapSettings()),
-    syncSavedMap: (savedGisMap) => {
-      savedGisMap.syncWithStore(getStore().getState());
-    },
   };
 }
 

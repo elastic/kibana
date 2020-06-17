@@ -18,8 +18,8 @@ export const LoadListAndRender = class extends React.Component {
   };
 
   componentDidMount() {
-    this.loadMapsList();
     this._isMounted = true;
+    this.loadMapsList();
   }
 
   componentWillUnmount() {
@@ -28,10 +28,9 @@ export const LoadListAndRender = class extends React.Component {
 
   async loadMapsList() {
     try {
-      const { hits = [] } = await getMapsSavedObjectLoader().find();
-      const hasSavedMaps = !!hits.length;
+      const { hits = [] } = await getMapsSavedObjectLoader().find('', 1);
       if (this._isMounted) {
-        this.setState({ hasSavedMaps, savedMapsList: hits });
+        this.setState({ mapsLoaded: true, hasSavedMaps: !!hits.length });
       }
     } catch (err) {
       getToasts().addDanger({
@@ -47,8 +46,7 @@ export const LoadListAndRender = class extends React.Component {
   }
 
   render() {
-    const { savedMapsList, hasSavedMaps } = this.state;
-    const mapsLoaded = !!savedMapsList;
+    const { mapsLoaded, hasSavedMaps } = this.state;
 
     if (mapsLoaded) {
       return hasSavedMaps ? <MapsListView /> : <Redirect to="/map" />;

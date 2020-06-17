@@ -8,7 +8,7 @@ import { createMapStore } from '../reducers/store';
 
 const store = createMapStore();
 
-export const getStoreSyncSubscription = (storeSyncCallback) => {
+export const subscribeToSyncStore = (storeSyncCallback) => {
   return store.subscribe(async () => {
     await storeSyncCallback(store);
   });

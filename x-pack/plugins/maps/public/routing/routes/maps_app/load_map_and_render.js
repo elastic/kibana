@@ -18,15 +18,15 @@ export const LoadMapAndRender = class extends React.Component {
   };
 
   componentDidMount() {
-    this.loadSavedMap();
     this._isMounted = true;
+    this._loadSavedMap();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async loadSavedMap() {
+  async _loadSavedMap() {
     const { savedMapId } = this.props.match.params;
     try {
       const savedMap = await getMapsSavedObjectLoader().get(savedMapId);
