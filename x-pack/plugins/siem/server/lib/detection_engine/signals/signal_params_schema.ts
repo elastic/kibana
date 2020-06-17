@@ -39,5 +39,7 @@ export const signalParamsSchema = () =>
     type: schema.string(),
     references: schema.arrayOf(schema.string(), { defaultValue: [] }),
     version: schema.number({ defaultValue: 1 }),
+    // For backwards compatibility with customers that had a data bug in 7.7. Once we use a migration script please remove this.
+    lists: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
     exceptions_list: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   });

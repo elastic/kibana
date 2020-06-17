@@ -76,7 +76,6 @@ export const patchRules = async ({
     references,
     version,
     note,
-    exceptions_list,
     anomalyThreshold,
     machineLearningJobId,
   });
