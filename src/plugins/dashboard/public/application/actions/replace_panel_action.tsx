@@ -35,7 +35,7 @@ export interface ReplacePanelActionContext {
 }
 
 export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PANEL> {
-  public readonly type = ACTION_REPLACE_PANEL;
+  public readonly factoryId = ACTION_REPLACE_PANEL;
   public readonly id = ACTION_REPLACE_PANEL;
   public order = 3;
 

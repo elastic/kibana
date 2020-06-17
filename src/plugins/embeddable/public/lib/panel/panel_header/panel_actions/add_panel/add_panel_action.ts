@@ -31,7 +31,7 @@ interface ActionContext {
 }
 
 export class AddPanelAction implements Action<ActionContext> {
-  public readonly type = ACTION_ADD_PANEL;
+  public readonly factoryId = ACTION_ADD_PANEL;
   public readonly id = ACTION_ADD_PANEL;
 
   constructor(

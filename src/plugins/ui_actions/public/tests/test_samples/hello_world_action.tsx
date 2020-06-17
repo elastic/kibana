@@ -45,7 +45,7 @@ export function createHelloWorldAction(
   overlays: CoreStart['overlays']
 ): ActionByType<typeof ACTION_HELLO_WORLD> {
   return createAction<typeof ACTION_HELLO_WORLD>({
-    type: ACTION_HELLO_WORLD,
+    factoryId: ACTION_HELLO_WORLD,
     getIconType: () => 'lock',
     MenuItem: UiMenuItem,
     execute: async () => {

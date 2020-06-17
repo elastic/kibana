@@ -33,7 +33,7 @@ interface ActionContext {
 }
 
 export class EditPanelAction implements Action<ActionContext> {
-  public readonly type = ACTION_EDIT_PANEL;
+  public readonly factoryId = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
   public order = 50;
   public currentAppId: string | undefined;

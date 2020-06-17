@@ -23,7 +23,7 @@ import { expectErrorAsync } from '../../tests/helpers';
 test('has ACTION_APPLY_FILTER type and id', () => {
   const action = createFilterAction();
   expect(action.id).toBe('ACTION_APPLY_FILTER');
-  expect(action.type).toBe('ACTION_APPLY_FILTER');
+  expect(action.factoryId).toBe('ACTION_APPLY_FILTER');
 });
 
 test('has expected display name', () => {

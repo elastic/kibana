@@ -45,7 +45,7 @@ export function createSendMessageAction(overlays: CoreStart['overlays']) {
   };
 
   return createAction<typeof ACTION_SEND_MESSAGE>({
-    type: ACTION_SEND_MESSAGE,
+    factoryId: ACTION_SEND_MESSAGE,
     getDisplayName: () => 'Send message',
     isCompatible,
     execute: async (context: ActionContext) => {

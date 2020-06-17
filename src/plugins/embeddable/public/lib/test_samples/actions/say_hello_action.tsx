@@ -43,7 +43,7 @@ export interface SayHelloActionContext {
 }
 
 export class SayHelloAction implements ActionByType<typeof SAY_HELLO_ACTION> {
-  public readonly type = SAY_HELLO_ACTION;
+  public readonly factoryId = SAY_HELLO_ACTION;
   public readonly id = SAY_HELLO_ACTION;
 
   private sayHello: (name: string) => void;

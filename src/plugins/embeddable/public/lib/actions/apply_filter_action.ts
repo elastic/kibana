@@ -40,7 +40,7 @@ async function isCompatible(context: FilterActionContext) {
 
 export function createFilterAction(): ActionByType<typeof ACTION_APPLY_FILTER> {
   return createAction<typeof ACTION_APPLY_FILTER>({
-    type: ACTION_APPLY_FILTER,
+    factoryId: ACTION_APPLY_FILTER,
     id: ACTION_APPLY_FILTER,
     getIconType: () => 'filter',
     getDisplayName: () => {

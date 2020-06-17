@@ -44,7 +44,7 @@ export function selectRangeAction(
   timeFilter: TimefilterContract
 ): ActionByType<typeof ACTION_SELECT_RANGE> {
   return createAction<typeof ACTION_SELECT_RANGE>({
-    type: ACTION_SELECT_RANGE,
+    factoryId: ACTION_SELECT_RANGE,
     id: ACTION_SELECT_RANGE,
     getIconType: () => 'filter',
     getDisplayName: () => {

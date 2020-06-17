@@ -33,7 +33,7 @@ export function createAction<T extends ActionType>(
   return {
     getIconType: () => undefined,
     order: 0,
-    id: action.type,
+    id: action.factoryId,
     isCompatible: () => Promise.resolve(true),
     getDisplayName: () => '',
     ...action,

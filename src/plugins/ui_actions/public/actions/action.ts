@@ -37,9 +37,9 @@ export interface Action<Context extends {} = {}, T = ActionType>
   id: string;
 
   /**
-   * The action type is what determines the context shape.
+   * ID of the factory for this action. Used to construct dynamic actions.
    */
-  readonly type: T;
+  readonly factoryId: T;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
@@ -83,7 +83,7 @@ export interface ActionDefinition<Context extends object = object>
   /**
    * ID of the factory for this action. Used to construct dynamic actions.
    */
-  readonly type?: ActionType;
+  readonly factoryId?: ActionType;
 
   /**
    * Executes the action.

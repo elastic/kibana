@@ -39,7 +39,7 @@ function createTestAction<C extends object>(
   checkCompatibility: (context: C) => boolean
 ): Action<object> {
   return createAction<typeof TEST_ACTION_TYPE>({
-    type: type as ActionType,
+    factoryId: type as ActionType,
     id: type,
     isCompatible: (context: C) => Promise.resolve(checkCompatibility(context)),
     execute: (context) => executeFn(context),

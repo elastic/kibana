@@ -29,7 +29,7 @@ interface ActionContext {
 }
 
 export class InspectPanelAction implements Action<ActionContext> {
-  public readonly type = ACTION_INSPECT_PANEL;
+  public readonly factoryId = ACTION_INSPECT_PANEL;
   public readonly id = ACTION_INSPECT_PANEL;
   public order = 20;
 

@@ -28,7 +28,7 @@ let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
 beforeEach(() => {
   uiActions = uiActionsPluginMock.createPlugin();
   action = createAction({
-    type: 'test' as ActionType,
+    factoryId: 'test' as ActionType,
     execute: () => Promise.resolve(),
   });
 
@@ -70,7 +70,7 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
 test('filters out actions not applicable based on the context', async () => {
   const { setup, doStart } = uiActions;
   const action1 = createAction({
-    type: 'test1' as ActionType,
+    factoryId: 'test1' as ActionType,
     isCompatible: async (context: { accept: boolean }) => {
       return Promise.resolve(context.accept);
     },

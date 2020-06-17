@@ -39,7 +39,7 @@ function hasExpandedPanelInput(
 }
 
 export class RemovePanelAction implements Action<ActionContext> {
-  public readonly type = REMOVE_PANEL_ACTION;
+  public readonly factoryId = REMOVE_PANEL_ACTION;
   public readonly id = REMOVE_PANEL_ACTION;
   public order = 1;
 

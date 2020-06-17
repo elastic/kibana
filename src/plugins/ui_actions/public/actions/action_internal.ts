@@ -29,7 +29,7 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
-  public readonly type: ActionType = this.definition.type || '';
+  public readonly factoryId: ActionType = this.definition.factoryId || '';
   public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;

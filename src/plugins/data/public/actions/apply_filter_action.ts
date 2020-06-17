@@ -40,7 +40,7 @@ export function createFilterAction(
   timeFilter: TimefilterContract
 ): ActionByType<typeof ACTION_GLOBAL_APPLY_FILTER> {
   return createAction<typeof ACTION_GLOBAL_APPLY_FILTER>({
-    type: ACTION_GLOBAL_APPLY_FILTER,
+    factoryId: ACTION_GLOBAL_APPLY_FILTER,
     id: ACTION_GLOBAL_APPLY_FILTER,
     getIconType: () => 'filter',
     getDisplayName: () => {

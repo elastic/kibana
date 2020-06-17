@@ -31,7 +31,7 @@ interface ActionContext {
 }
 
 export class CustomizePanelTitleAction implements Action<ActionContext> {
-  public readonly type = ACTION_CUSTOMIZE_PANEL;
+  public readonly factoryId = ACTION_CUSTOMIZE_PANEL;
   public id = ACTION_CUSTOMIZE_PANEL;
   public order = 40;
 

@@ -32,7 +32,7 @@ const MY_TRIGGER: TriggerId = 'MY_TRIGGER' as TriggerId;
 const testAction1: Action = {
   id: 'action1',
   order: 1,
-  type: 'type1' as ActionType,
+  factoryId: 'type1' as ActionType,
   execute: async () => {},
   getDisplayName: () => 'test1',
   getIconType: () => '',
@@ -42,7 +42,7 @@ const testAction1: Action = {
 const testAction2: Action = {
   id: 'action2',
   order: 2,
-  type: 'type2' as ActionType,
+  factoryId: 'type2' as ActionType,
   execute: async () => {},
   getDisplayName: () => 'test2',
   getIconType: () => '',
@@ -123,7 +123,7 @@ describe('UiActionsService', () => {
     const action1: Action = {
       id: 'action1',
       order: 1,
-      type: 'type1' as ActionType,
+      factoryId: 'type1' as ActionType,
       execute: async () => {},
       getDisplayName: () => 'test',
       getIconType: () => '',
@@ -132,7 +132,7 @@ describe('UiActionsService', () => {
     const action2: Action = {
       id: 'action2',
       order: 2,
-      type: 'type2' as ActionType,
+      factoryId: 'type2' as ActionType,
       execute: async () => {},
       getDisplayName: () => 'test',
       getIconType: () => '',
@@ -207,7 +207,7 @@ describe('UiActionsService', () => {
     test('filters out actions not applicable based on the context', async () => {
       const service = new UiActionsService();
       const action = createAction({
-        type: 'test' as ActionType,
+        factoryId: 'test' as ActionType,
         isCompatible: ({ accept }: { accept: boolean }) => Promise.resolve(accept),
         execute: () => Promise.resolve(),
       });

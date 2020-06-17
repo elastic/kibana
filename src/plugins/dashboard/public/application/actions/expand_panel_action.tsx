@@ -41,7 +41,7 @@ export interface ExpandPanelActionContext {
 }
 
 export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANEL> {
-  public readonly type = ACTION_EXPAND_PANEL;
+  public readonly factoryId = ACTION_EXPAND_PANEL;
   public readonly id = ACTION_EXPAND_PANEL;
   public order = 7;
 

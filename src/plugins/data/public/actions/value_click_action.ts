@@ -48,7 +48,7 @@ export function valueClickAction(
   timeFilter: TimefilterContract
 ): ActionByType<typeof ACTION_VALUE_CLICK> {
   return createAction<typeof ACTION_VALUE_CLICK>({
-    type: ACTION_VALUE_CLICK,
+    factoryId: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
     getIconType: () => 'filter',
     getDisplayName: () => {

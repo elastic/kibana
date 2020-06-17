@@ -27,7 +27,7 @@ export const EDIT_MODE_ACTION = 'EDIT_MODE_ACTION' as ActionType;
 
 export function createEditModeAction() {
   return createAction<typeof EDIT_MODE_ACTION>({
-    type: EDIT_MODE_ACTION,
+    factoryId: EDIT_MODE_ACTION,
     getDisplayName: () => 'I only show up in edit mode',
     isCompatible: async (context: { embeddable: IEmbeddable }) =>
       context.embeddable.getInput().viewMode === ViewMode.EDIT,
