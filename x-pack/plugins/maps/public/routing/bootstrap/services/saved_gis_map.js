@@ -18,9 +18,7 @@ import {
   getMapSettings,
 } from '../../../selectors/map_selectors';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
-
 import { formatEnvelopeAsPolygon } from '../../../elasticsearch_geo_utils';
-
 import { copyPersistentState } from '../../../reducers/util';
 import { extractReferences, injectReferences } from '../../../../common/migrations/references';
 import { MAP_BASE_URL, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
@@ -81,15 +79,15 @@ export function createSavedGisMapClass(services) {
       this.showInRecentlyAccessed = true;
     }
 
-    getFullPath = () => {
+    getFullPath() {
       return `${MAP_BASE_URL}/${this.id}`;
-    };
+    }
 
     getLayerList() {
       return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
     }
 
-    syncWithStore = (state) => {
+    syncWithStore(state) {
       const layerList = getLayerListRaw(state);
       const layerListConfigOnly = copyPersistentState(layerList);
       this.layerListJSON = JSON.stringify(layerListConfigOnly);
@@ -110,7 +108,7 @@ export function createSavedGisMapClass(services) {
       });
 
       this.bounds = formatEnvelopeAsPolygon(getMapExtent(state));
-    };
+    }
   }
   return SavedGisMap;
 }

@@ -69,9 +69,8 @@ export const MapsAppView = class extends React.Component {
     const { savedMap, currentPath } = this.props;
     this.setState({ currentPath });
 
-    const { id, title, getFullPath } = savedMap;
-    getCoreChrome().docTitle.change(title);
-    getCoreChrome().recentlyAccessed.add(getFullPath(), title, id);
+    getCoreChrome().docTitle.change(savedMap.title);
+    getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap.id);
 
     // Init sync utils
     // eslint-disable-next-line react-hooks/rules-of-hooks
