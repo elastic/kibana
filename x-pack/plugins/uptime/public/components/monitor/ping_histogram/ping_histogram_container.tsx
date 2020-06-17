@@ -27,9 +27,9 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
 
   const { loading, pingHistogram: data } = useSelector(selectPingHistogram);
 
-  const { from, to, updateDateRange } = useAbsoluteDateRange();
-
+  const { from: absFrom, to: absTo, updateDateRange } = useAbsoluteDateRange();
   const { from: dateStart, to: dateEnd } = useSelector(dateRangeSelector);
+
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(
@@ -45,8 +45,8 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
   return (
     <PingHistogramComponent
       data={data}
-      absoluteStartDate={from}
-      absoluteEndDate={to}
+      absoluteStartDate={absFrom}
+      absoluteEndDate={absTo}
       height={height}
       loading={loading}
       updateDateRange={updateDateRange}
