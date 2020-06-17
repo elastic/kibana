@@ -37,6 +37,7 @@ import { GisMap } from '../../../connected_components/gis_map';
 export class MapsAppView extends React.Component {
   _visibleSubscription = null;
   _globalSyncUnsubscribe = null;
+  _globalSyncChangeMonitorSubscription = null;
   _appSyncUnsubscribe = null;
   _appStateManager = new AppStateManager();
 
@@ -51,7 +52,6 @@ export class MapsAppView extends React.Component {
       savedQuery: null,
       currentPath: '',
       initialLayerListConfig: null,
-      globalStateSnapshot: {},
     };
   }
 
@@ -67,6 +67,9 @@ export class MapsAppView extends React.Component {
     this._globalSyncUnsubscribe = useGlobalStateSyncing();
     // eslint-disable-next-line react-hooks/rules-of-hooks
     this._appSyncUnsubscribe = useAppStateSyncing(this._appStateManager);
+    this._globalSyncChangeMonitorSubscription = getData().query.state$.subscribe(
+      this._updateFromGlobalState
+    );
 
     // Check app state in case of refresh
     const initAppState = this._appStateManager.getAppState();
@@ -89,48 +92,34 @@ export class MapsAppView extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { currentPath: prevCurrentPath } = prevState;
-    const { currentPath, initialLayerListConfig, globalStateSnapshot } = this.state;
+    const { currentPath, initialLayerListConfig } = this.state;
     const { savedMap } = this.props;
     if (savedMap && initialLayerListConfig && currentPath !== prevCurrentPath) {
       updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
     }
     // TODO: Handle null when converting to TS
-    const globalState = getGlobalState();
-    if (globalState && !_.isEqual(globalStateSnapshot, globalState)) {
-      this.setState({ globalStateSnapshot: globalState });
-      this._updateFromGlobalState(globalState);
-    }
     this._handleStoreChanges();
   }
 
-  _updateFromGlobalState(globalState) {
-    const { filterManager } = getData().query;
-    const { filters, refreshInterval, time } = this.state;
+  _updateFromGlobalState = ({ changes, state: globalState }) => {
+    if (!changes || !globalState) {
+      return;
+    }
     const newState = {};
+    Object.keys(changes).forEach((key) => {
+      if (changes[key]) {
+        newState[key] = globalState[key];
+      }
+    });
 
-    let newFilters;
-    if (!_.isEqual(globalState.filters, filters)) {
-      filterManager.setFilters(filters); // Maps and merges filters
-      newFilters = filterManager.getFilters();
-      newState.filters = newFilters;
-    }
-    if (!_.isEqual(globalState.refreshInterval, refreshInterval)) {
-      newState.refreshInterval = globalState.refreshInterval;
-    }
-    if (!_.isEqual(globalState.time, time)) {
-      newState.time = globalState.time;
-    }
-    if (!_.isEmpty(newState)) {
-      this.setState(newState, () => {
-        const { query, filters, refreshInterval, time } = this.state;
-        this._appStateManager.setQueryAndFilters({
-          query: this.state.query,
-          filters: filterManager.getAppFilters(),
-        });
-        this.props.dispatchSetQuery(refreshInterval, filters, query, time);
+    this.setState(newState, () => {
+      this._appStateManager.setQueryAndFilters({
+        filters: getData().query.filterManager.getAppFilters(),
       });
-    }
-  }
+      const { time, filters, refreshInterval } = globalState;
+      this.props.dispatchSetQuery(refreshInterval, filters, this.state.query, time);
+    });
+  };
 
   componentWillUnmount() {
     if (this._globalSyncUnsubscribe) {
@@ -141,6 +130,9 @@ export class MapsAppView extends React.Component {
     }
     if (this._visibleSubscription) {
       this._visibleSubscription.unsubscribe();
+    }
+    if (this._globalSyncChangeMonitorSubscription) {
+      this._globalSyncChangeMonitorSubscription.unsubscribe();
     }
 
     // Clean up app state filters
