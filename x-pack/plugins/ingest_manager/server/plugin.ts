@@ -52,6 +52,7 @@ import {
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
+  datasourceService,
 } from './services';
 import { getAgentStatusById } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
@@ -107,6 +108,10 @@ export type ExternalCallbacksStorage = Map<ExternalCallbacks[0], Set<ExternalCal
 export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   agentService: AgentService;
+  /**
+   * Services for Ingest's Datasources
+   */
+  datasourceService: typeof datasourceService;
   /**
    * Register callbacks for inclusion in ingest API processing
    * @param args
@@ -239,6 +244,7 @@ export class IngestManagerPlugin
       agentService: {
         getAgentStatusById,
       },
+      datasourceService,
       register: (...args: ExternalCallbacks) => {
         return this.registerCallback(...args);
       },
