@@ -77,6 +77,7 @@ export const createDatasourceHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const logger = appContextService.getLogger();
   let newData = { ...request.body };
   try {
     // If we have external callbacks, then process those now before creating the actual datasource
@@ -88,7 +89,9 @@ export const createDatasourceHandler: RequestHandler<
         try {
           updatedNewData = await callback(updatedNewData);
         } catch (error) {
-          // FIXME: what do we do here?
+          // Log the error, but keep going and process the other callbacks
+          logger.error('An external registered [datasourceCreate] callback failed when executed');
+          logger.error(error);
         }
       }
 
