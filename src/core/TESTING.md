@@ -1238,15 +1238,6 @@ interface SomeDataType {
   id: string;
 }
 
-class ProcessError extends Error {
-  constructor(message: string) {
-    super(message);
-    // Set the prototype explicitly, see:
-    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    Object.setPrototypeOf(this, ProcessError.prototype);
-  }
-}
-
 class BarService {
   setup() {
     return {
@@ -1254,7 +1245,7 @@ class BarService {
         return data$.pipe(
           map((data) => {
             if (data.id === 'invalid') {
-              throw new ProcessError(`invalid data: '${data.id}'`);
+              throw new Error(`invalid data: '${data.id}'`);
             }
             return {
               ...data,
@@ -1287,7 +1278,7 @@ it('processDataStream throw an error when processing invalid data', () => {
       {
         a: { id: 'a', processed: 'additional-data' },
       },
-      new ProcessError(`invalid data: 'invalid'`)
+      `'[Error: invalid data: 'invalid']'`
     );
   });
 });
@@ -1296,7 +1287,8 @@ it('processDataStream throw an error when processing invalid data', () => {
 Notes:
  - the `-` symbol represents one virtual time frame.
  - the `#` symbol represents an error.
- - when throwing a base `Error`, the assertion must be against a string: `'[Error: {message}]'`
+ - when throwing custom `Error` classes, the assertion can be against an error instance, but this doesn't work
+   with base errors.
  
 #### Testing promise based observables
 
@@ -1346,6 +1338,7 @@ Note that when doing so, the test suite must also include tests using a real pro
 it('callServerAPI result observable emits when the response is received', () => {
   const http = httpServiceMock.createStartContract();
   getTestScheduler().run(({ expectObservable, hot }) => {
+    // need to cast the observable as `any` because http.post.mockReturnValue expects a promise, see previous comment
     http.post.mockReturnValue(hot('---(a|)', { a: { someData: 'foo' } }) as any);
 
     const results = callServerAPI(http, { query: 'term' }, {});
@@ -1359,6 +1352,7 @@ it('callServerAPI result observable emits when the response is received', () => 
 it('completes without returning results if aborted$ emits before the response', () => {
   const http = httpServiceMock.createStartContract();
   getTestScheduler().run(({ expectObservable, hot }) => {
+    // need to cast the observable as `any` because http.post.mockReturnValue expects a promise, see previous comment
     http.post.mockReturnValue(hot('---(a|)', { a: { someData: 'foo' } }) as any);
     const aborted$ = hot('-(a|)', { a: undefined });
     const results = callServerAPI(http, { query: 'term' }, { aborted$ });
