@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.7.2>>
 * <<release-notes-7.7.1>>
 * <<release-notes-7.7.0>>
 * <<release-notes-7.6.2>>
@@ -37,6 +38,48 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.7.2]]
+== {kib} 7.7.2
+
+Refer to <<breaking-changes-7.7,breaking changes in 7.7>>.
+
+[float]
+[[enhancement-7.7.2]]
+=== Enhancement
+Security::
+* Makes SameSite cookie attribute configurable {pull}68108[#68108]
+
+[float]
+[[bug-7.7.2]]
+=== Bug fixes
+Canvas::
+* Fix embeddables not showing up on PDF reports {pull}61149[#61149]
+Discover::
+* Replaces EuiTooltip by native title for better performance {pull}68280[#68280]
+* Fixes missing histogram time range update when query is refreshed {pull}67582[#67582]
+Lens and visualizations::
+* Fixes chart split orientation {pull}67840[#67840]
+* Fixes visualize and lens telemetry {pull}67749[#67749]
+* Uses correct text color in metric vis on dark background {pull}67481[#67481]
+* Adds AggConfig.toSerializedFieldFormat {pull}69114[#69114]
+Logs::
+* Ensures live stream always gets latest entries {pull}67935[#67935]
+Machine Learning::
+* Fixes cloud deployment ID check {pull}68695[#68695]
+* Removes assignment_explanation when cloning job {pull}68226[#68226]
+Management::
+* Fixes a bug in Index Lifecycle Management where the "Linked indices" column always displayed 0 even if a policy had an index associated to it {pull}67827[#67827]
+* Fixes a bug that made Console unable to communicate with IPv6 hosts {pull}69891[#69891]
+* Fixes a regression in which Watcher will occasionally not render in the Management navigation {pull}68602[#68602]
+Monitoring::
+* Ensures we use existing Elasticsearch config {pull}68389[#68389]
+Security::
+* Fixes support for `xpack.spaces.maxSpaces` {pull}67846[#67846]
+* Fixes authentication loop when upgrading {kib} from 6.8 to 7.7+ {pull}67687[#67687]
+SIEM::
+* Fixes bug where rule failed to run on first execution {pull}68429[#68429]
+* Fixes timeline buildGlobalQuery {pull}68320[#668320]
+
 [[release-notes-7.7.1]]
 == {kib} 7.7.1
 
