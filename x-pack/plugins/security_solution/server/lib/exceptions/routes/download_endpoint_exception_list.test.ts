@@ -21,7 +21,7 @@ import {
   httpServerMock,
 } from 'src/core/server/mocks';
 import { ArtifactConstants, CompressExceptionList } from '../../../exceptions';
-import { downloadEndpointExceptionList } from './download_endpoint_exception_list';
+import { downloadEndpointExceptionListRoute } from './download_endpoint_exception_list';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
 const expectedEndpointExceptions = {
@@ -61,7 +61,7 @@ describe('test alerts route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
 
-    downloadEndpointExceptionList(routerMock);
+    downloadEndpointExceptionListRoute(routerMock);
   });
 
   it('should serve the compressed artifact to download', async () => {

@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { buildRouteValidation } from '../../../utils';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { ArtifactConstants } from '../task';
 import { DownloadArtifactReqParamsSchema, downloadArtifactReqParamsSchema } from '../schemas';
 
@@ -14,7 +14,7 @@ const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 /**
  * Registers the exception list route to enable sensors to download a compressed  allowlist
  */
-export function downloadEndpointExceptionList(router: IRouter) {
+export function downloadEndpointExceptionListRoute(router: IRouter) {
   router.get(
     {
       path: `${allowlistBaseRoute}/download/{artifactName}/{sha256}`,
