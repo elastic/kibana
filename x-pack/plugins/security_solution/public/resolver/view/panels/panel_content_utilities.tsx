@@ -5,10 +5,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, Breadcrumb } from '@elastic/eui';
+import { EuiBreadcrumbs, Breadcrumb, EuiCode } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
+
+/**
+ * A bold version of EuiCode to display certain titles with
+ */
+export const BoldCode = styled(EuiCode)`
+  &.euiCodeBlock code.euiCodeBlock__code {
+    font-weight: 900;
+  }
+`;
 
 /**
  * The two query parameters we read/write on to control which view the table presents:

@@ -6,29 +6,16 @@
 
 import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSpacer,
-  EuiText,
-  EuiDescriptionList,
-  EuiCode,
-  EuiTextColor,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
+import { CrumbInfo, formatDate, StyledBreadcrumbs, BoldCode } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
-
-export const BoldCode = styled(EuiCode)`
-  &.euiCodeBlock code.euiCodeBlock__code {
-    font-weight: 900;
-  }
-`;
 
 /**
  * A helper function to turn objects into EuiDescriptionList entries.
