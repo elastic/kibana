@@ -84,22 +84,24 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
 
     const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
 
-    useEffect(() => {
-      fetchAllTimeline({
-        pageInfo: {
-          pageIndex: 1,
-          pageSize: PAGE_SIZE,
-        },
-        search: '',
-        sort: {
-          sortField: SortFieldTimeline.updated,
-          sortOrder: Direction.desc,
-        },
-        onlyUserFavorite: filterBy === 'favorites',
-        timelineType: TimelineType.default,
-      });
+    useEffect(
+      () =>
+        fetchAllTimeline({
+          pageInfo: {
+            pageIndex: 1,
+            pageSize: PAGE_SIZE,
+          },
+          search: '',
+          sort: {
+            sortField: SortFieldTimeline.updated,
+            sortOrder: Direction.desc,
+          },
+          onlyUserFavorite: filterBy === 'favorites',
+          timelineType: TimelineType.default,
+        }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filterBy]);
+      [filterBy]
+    );
 
     return (
       <>

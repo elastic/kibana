@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { ApolloConsumer } from 'react-apollo';
 import { Switch, Route, useHistory } from 'react-router-dom';
 
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
@@ -55,7 +54,7 @@ export const Timelines = React.memo(() => {
   return (
     <Switch>
       <Route exact path={timelinesPagePath}>
-        <ApolloConsumer>{(client) => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
+        <TimelinesPage />
       </Route>
       <Route
         path="/"
