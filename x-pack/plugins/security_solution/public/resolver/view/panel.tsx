@@ -147,14 +147,14 @@ const PanelContent = memo(function PanelContent() {
    * for the table & breadcrumb nav.
    *
    */
-  const whichTableViewAndBreadcrumbsToRender = useMemo(() => {
+  const panelToShow = useMemo(() => {
     if (crumbEvent === '' && crumbId === '') {
       /**
        * | Crumb/Table            | &crumbId                   | &crumbEvent              |
        * | :--------------------- | :------------------------- | :----------------------  |
        * | all processes/default  | null                       | null                     |
        */
-      return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
+      return 'processListWithCounts';
     }
 
     if (graphableProcessEntityIds.has(crumbId)) {
@@ -164,9 +164,7 @@ const PanelContent = memo(function PanelContent() {
        * | process detail         | entity_id of process       | null                     |
        */
       if (crumbEvent === '' && uiSelectedEvent) {
-        return (
-          <ProcessDetails processEvent={uiSelectedEvent} pushToQueryParams={pushToQueryParams} />
-        );
+        return 'processDetails';
       }
 
       /**
@@ -176,13 +174,7 @@ const PanelContent = memo(function PanelContent() {
        */
 
       if (crumbEvent === 'all' && uiSelectedEvent) {
-        return (
-          <EventCountsForProcess
-            processEvent={uiSelectedEvent}
-            pushToQueryParams={pushToQueryParams}
-            relatedStats={relatedStatsForIdFromParams!}
-          />
-        );
+        return 'eventCountsForProcess';
       }
 
       /**
@@ -192,14 +184,7 @@ const PanelContent = memo(function PanelContent() {
        */
 
       if (crumbEvent in displayNameRecord && uiSelectedEvent) {
-        return (
-          <ProcessEventListNarrowedByType
-            processEvent={uiSelectedEvent}
-            pushToQueryParams={pushToQueryParams}
-            relatedStats={relatedStatsForIdFromParams!}
-            eventType={crumbEvent}
-          />
-        );
+        return 'processEventListNarrowedByType';
       }
     }
 
@@ -209,6 +194,42 @@ const PanelContent = memo(function PanelContent() {
        * | :--------------------- | :------------------------- | :----------------------  |
        * | related event detail   | event_id of related event  | entity_id of process     |
        */
+      return 'relatedEventDetail';
+    }
+
+    // The default 'Event List' / 'List of all processes' view
+    return 'processListWithCounts';
+  }, [uiSelectedEvent, crumbEvent, crumbId, graphableProcessEntityIds]);
+
+  const panelInstance = useMemo(() => {
+    if (panelToShow === 'processDetails') {
+      return (
+        <ProcessDetails processEvent={uiSelectedEvent!} pushToQueryParams={pushToQueryParams} />
+      );
+    }
+
+    if (panelToShow === 'eventCountsForProcess') {
+      return (
+        <EventCountsForProcess
+          processEvent={uiSelectedEvent!}
+          pushToQueryParams={pushToQueryParams}
+          relatedStats={relatedStatsForIdFromParams!}
+        />
+      );
+    }
+
+    if (panelToShow === 'processEventListNarrowedByType') {
+      return (
+        <ProcessEventListNarrowedByType
+          processEvent={uiSelectedEvent!}
+          pushToQueryParams={pushToQueryParams}
+          relatedStats={relatedStatsForIdFromParams!}
+          eventType={crumbEvent}
+        />
+      );
+    }
+
+    if (panelToShow === 'relatedEventDetail') {
       const parentCount: number = Object.values(
         relatedStatsForIdFromParams?.events.byCategory || {}
       ).reduce((sum, val) => sum + val, 0);
@@ -221,7 +242,6 @@ const PanelContent = memo(function PanelContent() {
         />
       );
     }
-
     // The default 'Event List' / 'List of all processes' view
     return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
   }, [
@@ -230,10 +250,10 @@ const PanelContent = memo(function PanelContent() {
     crumbId,
     pushToQueryParams,
     relatedStatsForIdFromParams,
-    graphableProcessEntityIds,
+    panelToShow,
   ]);
 
-  return <>{whichTableViewAndBreadcrumbsToRender}</>;
+  return <>{panelInstance}</>;
 });
 PanelContent.displayName = 'PanelContent';
 
