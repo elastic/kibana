@@ -58,29 +58,16 @@ export const TreeNode: FunctionComponent<Props> = ({
       return;
     }
 
-    const onFailureHandlerLabelClasses = classNames({
-      'pipelineProcessorsEditor__tree__onFailureHandlerLabel--withDropZone':
-        movingProcessor != null &&
-        movingProcessor.id !== processor.onFailure[0].id &&
-        movingProcessor.id !== processor.id,
-    });
-
     return (
       <div
         className="pipelineProcessorsEditor__tree__onFailureHandlerContainer"
         style={{ marginLeft: `${level * INDENTATION_PX}px` }}
       >
-        <div className="pipelineProcessorsEditor__tree__onFailureHandlerLabelContainer">
-          <EuiText
-            size="m"
-            className={`pipelineProcessorsEditor__tree__onFailureHandlerLabel ${onFailureHandlerLabelClasses}`}
-            color="subdued"
-          >
-            {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
-              defaultMessage: 'Failure handlers',
-            })}
-          </EuiText>
-        </div>
+        <EuiText size="m" color="subdued">
+          {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
+            defaultMessage: 'Failure handlers',
+          })}
+        </EuiText>
         <PrivateTree
           level={level + 1}
           movingProcessor={movingProcessor}

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import classNames from 'classnames';
 import React, { FunctionComponent, useState, useEffect, useCallback } from 'react';
 import { EuiFieldText, EuiText, keyCodes } from '@elastic/eui';
 
@@ -23,6 +23,10 @@ export const InlineTextInput: FunctionComponent<Props> = ({
   const [isShowingTextInput, setIsShowingTextInput] = useState<boolean>(false);
   const [textValue, setTextValue] = useState<string>(text ?? '');
 
+  const containerClasses = classNames({
+    'pipelineProcessorsEditor__item__textContainer--notEditing': !isShowingTextInput,
+  });
+
   const content = isShowingTextInput ? (
     <EuiFieldText
       controlOnly
@@ -36,7 +40,9 @@ export const InlineTextInput: FunctionComponent<Props> = ({
     />
   ) : (
     <EuiText size="s" color="subdued">
-      {text || <em>{placeholder}</em>}
+      <div className="pipelineProcessorsEditor__item__description">
+        {text || <em>{placeholder}</em>}
+      </div>
     </EuiText>
   );
 
@@ -64,7 +70,7 @@ export const InlineTextInput: FunctionComponent<Props> = ({
 
   return (
     <div
-      className="pipelineProcessorsEditor__item__textContainer"
+      className={`pipelineProcessorsEditor__item__textContainer ${containerClasses}`}
       tabIndex={0}
       onFocus={() => setIsShowingTextInput(true)}
       onBlur={submitChange}

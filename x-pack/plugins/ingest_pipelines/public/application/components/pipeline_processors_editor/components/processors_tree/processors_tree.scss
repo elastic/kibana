@@ -1,33 +1,35 @@
 @import '@elastic/eui/src/global_styling/variables/size';
 
 .pipelineProcessorsEditor__tree {
-
   &__container {
     background-color: $euiColorLightestShade;
     padding: $euiSizeS;
   }
 
   &__dropZoneContainer {
+    position: relative;
     margin: 2px;
     visibility: hidden;
-    border: 2px dashed $euiColorLightShade;
-    height: 12px;
-    border-radius: 2px;
-
-    transition: border .5s;
+    background-color: transparent;
+    height: 2px;
 
     &--active {
       &:hover {
-        border: 2px dashed $euiColorPrimary;
+        background-color: $euiColorPrimary;
       }
       visibility: visible;
     }
   }
 
   &__dropZoneButton {
-    height: 8px;
+    position: absolute;
+    padding: 0;
+    height: 60px;
+    width: 100%;
+    margin-top: -30px;
     opacity: 0;
     text-decoration: none !important;
+    z-index: 1; /* Prevent the next item down from obscuring the button */
 
     &--active {
       &:hover {
@@ -42,19 +44,6 @@
       }
     }
   }
-
-  &__onFailureHandlerLabelContainer {
-    position: relative;
-    height: 14px;
-  }
-  &__onFailureHandlerLabel {
-    position: absolute;
-    bottom: -16px;
-    &--withDropZone {
-      bottom: -4px;
-    }
-  }
-
 
   &__onFailureHandlerContainer {
     margin-top: $euiSizeS;

@@ -55,35 +55,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <InlineTextInput
-                onChange={(nextDescription) => {
-                  let nextOptions: Record<string, any>;
-                  if (!nextDescription) {
-                    const { description: __, ...restOptions } = processor.options;
-                    nextOptions = restOptions;
-                  } else {
-                    nextOptions = {
-                      ...processor.options,
-                      description: nextDescription,
-                    };
-                  }
-                  processorsDispatch({
-                    type: 'updateProcessor',
-                    payload: {
-                      processor: {
-                        ...processor,
-                        options: nextOptions,
-                      },
-                      selector,
-                    },
-                  });
-                }}
-                ariaLabel={editorItemMessages.processorTypeLabel({ type: processor.type })}
-                text={description}
-                placeholder={editorItemMessages.descriptionPlaceholder}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 disabled={disabled}
                 aria-label={editorItemMessages.editorButtonLabel}
@@ -116,6 +87,35 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   />
                 </EuiToolTip>
               )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <InlineTextInput
+                onChange={(nextDescription) => {
+                  let nextOptions: Record<string, any>;
+                  if (!nextDescription) {
+                    const { description: __, ...restOptions } = processor.options;
+                    nextOptions = restOptions;
+                  } else {
+                    nextOptions = {
+                      ...processor.options,
+                      description: nextDescription,
+                    };
+                  }
+                  processorsDispatch({
+                    type: 'updateProcessor',
+                    payload: {
+                      processor: {
+                        ...processor,
+                        options: nextOptions,
+                      },
+                      selector,
+                    },
+                  });
+                }}
+                ariaLabel={editorItemMessages.processorTypeLabel({ type: processor.type })}
+                text={description}
+                placeholder={editorItemMessages.descriptionPlaceholder}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
