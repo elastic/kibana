@@ -19,16 +19,9 @@
 
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
-import {
-  // COVERAGE_INDEX,
-  // TOTALS_INDEX,
-  RESEARCH_CI_JOB_NAME,
-  // TEAM_ASSIGNMENT_PIPELINE_NAME,
-  // RESEARCH_TOTALS_INDEX,
-  // RESEARCH_COVERAGE_INDEX,
-} from './constants';
+import { RESEARCH_CI_JOB_NAME } from './constants';
 import { errMsg, redact, maybeTeamAssign, whichIndex } from './ingest_helpers';
-import { noop } from './utils';
+import { pretty } from './utils';
 import { right, left } from './either';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
@@ -42,23 +35,46 @@ export const ingest = (log) => async (body) => {
   const index = whichIndex(isResearchJob)(isTotal);
   const isACoverageIndex = isTotal ? false : true;
 
-  const maybeWithPipeline = maybeTeamAssign(isACoverageIndex, body);
-  const withIndex = { index, body: maybeWithPipeline };
-  const dontSend = noop;
+  const payload = maybeTeamAssign(isACoverageIndex, body);
 
-  log.verbose(withIndex);
+  const stringified = pretty(payload);
+  const payloadWithIndex = { index, body: stringified };
 
-  process.env.NODE_ENV === 'integration_test'
-    ? left(null)
-    : right(withIndex).fold(dontSend, async function doSend(finalPayload) {
-        await send(index, redacted, finalPayload);
-      });
+  const justLog = dontSendButLog(log);
+  const doSendToIndex = doSend(index);
+  const doSendRedacted = doSendToIndex(redacted)(log);
+
+  eitherSendOrNotAndParseForPrint(payloadWithIndex).fold(justLog, doSendRedacted);
 };
 
 async function send(idx, redacted, requestBody) {
   try {
     await client.index(requestBody);
   } catch (e) {
-    throw createFailError(errMsg(idx, redacted, requestBody, e));
+    const { body } = requestBody;
+    const parsed = parse(body);
+    throw createFailError(errMsg(idx, redacted, parsed, e));
   }
+}
+
+function doSend(index) {
+  return (redacted) => (log) => async (payload) => {
+    const { body } = payload;
+    log.verbose(`\n### Sent: \n\t### Index: ${index}\n\t### payload.body: ${body}`);
+    await send(index, redacted, payload);
+  };
+}
+
+function dontSendButLog(log) {
+  return (payload) => log.verbose(payload);
+}
+
+function eitherSendOrNotAndParseForPrint(payload) {
+  const { body } = payload;
+  const parsed = parse(body);
+  return process.env.NODE_ENV === 'integration_test' ? left(parsed) : right(payload);
+}
+
+function parse(body) {
+  return JSON.parse(body);
 }

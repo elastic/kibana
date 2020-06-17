@@ -145,11 +145,11 @@ def ingestWithVault(jobName, buildNum, buildUrl, title) {
   }
 }
 
-def ingest(timestamp, title) {
+def ingest(jobName, buildNumber, buildUrl, timestamp, title) {
   withEnv([
     "TIME_STAMP=${timestamp}",
   ]) {
-    ingestWithVault(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, title)
+    ingestWithVault(jobName, buildNumber, buildUrl, title)
   }
 }
 
