@@ -196,7 +196,8 @@ export const usePivotData = (
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPatternTitle,
-    JSON.stringify([aggsArr, groupByArr, query]),
+    aggsArr,
+    JSON.stringify([groupByArr, query]),
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
