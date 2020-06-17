@@ -5,7 +5,7 @@
  */
 
 import d3 from 'd3';
-
+import { useMemo } from 'react';
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
@@ -150,7 +150,7 @@ export const useColorRange = (
   colorRangeScale = COLOR_RANGE_SCALE.LINEAR,
   featureCount = 1
 ) => {
-  const euiTheme = useUiSettings().get('theme:darkMode') ? euiThemeDark : euiThemeLight;
+  const { euiTheme } = useCurrentEuiTheme();
 
   const colorRanges: Record<COLOR_RANGE, string[]> = {
     [COLOR_RANGE.BLUE]: [
@@ -186,3 +186,11 @@ export const useColorRange = (
 
   return scaleTypes[colorRangeScale];
 };
+
+export function useCurrentEuiTheme() {
+  const uiSettings = useUiSettings();
+  return useMemo(
+    () => ({ euiTheme: uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight }),
+    [uiSettings]
+  );
+}
