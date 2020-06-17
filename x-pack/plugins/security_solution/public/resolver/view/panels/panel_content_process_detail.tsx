@@ -48,11 +48,8 @@ export const ProcessDetails = memo(function ProcessDetails({
 }) {
   const processName = event.eventName(processEvent);
   const processInfoEntry = useMemo(() => {
-    let dateTime = '';
     const eventTime = event.eventTimestamp(processEvent);
-    if (eventTime) {
-      dateTime = formatDate(eventTime);
-    }
+    const dateTime = eventTime ? formatDate(eventTime) : '';
 
     const createdEntry = {
       title: i18n.translate(
