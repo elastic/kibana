@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/63621
-  describe('endpoint list', function () {
+  describe.skip('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     before(async () => {
@@ -82,37 +82,44 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('hostDetailsFlyout');
     });
 
-    it('display details flyout when the hostname is clicked on', async () => {
-      await (await testSubjects.find('hostnameCellLink')).click();
-      await testSubjects.existOrFail('hostDetailsUpperList');
-      await testSubjects.existOrFail('hostDetailsLowerList');
-    });
+    describe('when the hostname is clicked on', () => {
+      it('display details flyout', async () => {
+        await (await testSubjects.find('hostnameCellLink')).click();
+        await testSubjects.existOrFail('hostDetailsUpperList');
+        await testSubjects.existOrFail('hostDetailsLowerList');
+      });
 
-    it('update details flyout when new hostname is clicked on', async () => {
-      // display flyout for the first host in the list
-      await (await testSubjects.findAll('hostnameCellLink'))[0].click();
-      await testSubjects.existOrFail('hostDetailsFlyoutTitle');
-      const hostDetailTitle0 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
-      // select the 2nd host in the host list
-      await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-      await pageObjects.endpoint.waitForVisibleTextToChange(
-        'hostDetailsFlyoutTitle',
-        hostDetailTitle0
-      );
-      const hostDetailTitle1 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
-      expect(hostDetailTitle1).to.not.eql(hostDetailTitle0);
-    });
+      it('updates details flyout when new hostname is clicked on', async () => {
+        // display flyout for the first host in the list
+        await (await testSubjects.findAll('hostnameCellLink'))[0].click();
+        await testSubjects.existOrFail('hostDetailsFlyoutTitle');
+        const hostDetailTitle0 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+        // select the 2nd host in the host list
+        await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+        await pageObjects.endpoint.waitForVisibleTextToChange(
+          'hostDetailsFlyoutTitle',
+          hostDetailTitle0
+        );
+        const hostDetailTitle1 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+        expect(hostDetailTitle1).to.not.eql(hostDetailTitle0);
+      });
 
-    it('details flyout remains the same when current hostname is clicked on', async () => {
-      // display flyout for the first host in the list
-      await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-      await testSubjects.existOrFail('hostDetailsFlyoutTitle');
-      const hostDetailTitleInitial = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
-      // select the same host in the host list
-      await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-      await sleep(500); // give page time to refresh and verify it did not change
-      const hostDetailTitleNew = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
-      expect(hostDetailTitleNew).to.equal(hostDetailTitleInitial);
+      it('has the same flyout info when the same hostname is clicked on', async () => {
+        // display flyout for the first host in the list
+        await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+        await testSubjects.existOrFail('hostDetailsFlyoutTitle');
+        const hostDetailTitleInitial = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+        // select the same host in the host list
+        await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+        await sleep(500); // give page time to refresh and verify it did not change
+        const hostDetailTitleNew = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+        expect(hostDetailTitleNew).to.equal(hostDetailTitleInitial);
+      });
+
+      it('navigates to ingest fleet when link is clicked', async () => {
+        await (await testSubjects.find('hostDetailsLinkToIngest')).click();
+        await testSubjects.existOrFail('fleetAgentListTable');
+      });
     });
 
     describe('no data', () => {
