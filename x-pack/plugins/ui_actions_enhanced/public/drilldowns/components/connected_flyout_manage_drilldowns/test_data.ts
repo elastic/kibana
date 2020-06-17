@@ -9,9 +9,9 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedDynamicActionManagerState as DynamicActionManagerState,
   UiActionsEnhancedSerializedAction,
-} from '../../../../ui_actions_enhanced/public';
-import { TriggerContextMapping } from '../../../../../../src/plugins/ui_actions/public';
-import { createStateContainer } from '../../../../../../src/plugins/kibana_utils/common';
+} from '../../../index';
+import { TriggerContextMapping } from '../../../../../../../src/plugins/ui_actions/public';
+import { createStateContainer } from '../../../../../../../src/plugins/kibana_utils/common';
 
 class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> {
   public readonly state = createStateContainer<DynamicActionManagerState>({

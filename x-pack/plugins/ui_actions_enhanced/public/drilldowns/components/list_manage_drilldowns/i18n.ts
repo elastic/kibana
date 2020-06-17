@@ -7,29 +7,32 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtCreateDrilldown = i18n.translate(
-  'xpack.drilldowns.components.ListManageDrilldowns.createDrilldownButtonLabel',
+  'xpack.uiActionsEnhanced.drilldowns.components.ListManageDrilldowns.createDrilldownButtonLabel',
   {
     defaultMessage: 'Create new',
   }
 );
 
 export const txtEditDrilldown = i18n.translate(
-  'xpack.drilldowns.components.ListManageDrilldowns.editDrilldownButtonLabel',
+  'xpack.uiActionsEnhanced.drilldowns.components.ListManageDrilldowns.editDrilldownButtonLabel',
   {
     defaultMessage: 'Edit',
   }
 );
 
 export const txtDeleteDrilldowns = (count: number) =>
-  i18n.translate('xpack.drilldowns.components.ListManageDrilldowns.deleteDrilldownsButtonLabel', {
-    defaultMessage: 'Delete ({count})',
-    values: {
-      count,
-    },
-  });
+  i18n.translate(
+    'xpack.uiActionsEnhanced.drilldowns.components.ListManageDrilldowns.deleteDrilldownsButtonLabel',
+    {
+      defaultMessage: 'Delete ({count})',
+      values: {
+        count,
+      },
+    }
+  );
 
 export const txtSelectDrilldown = i18n.translate(
-  'xpack.drilldowns.components.ListManageDrilldowns.selectThisDrilldownCheckboxLabel',
+  'xpack.uiActionsEnhanced.drilldowns.components.ListManageDrilldowns.selectThisDrilldownCheckboxLabel',
   {
     defaultMessage: 'Select this drilldown',
   }

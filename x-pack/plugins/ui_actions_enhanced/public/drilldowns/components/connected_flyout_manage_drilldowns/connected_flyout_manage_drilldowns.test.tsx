@@ -8,29 +8,30 @@ import React from 'react';
 import { cleanup, fireEvent, render, wait } from '@testing-library/react/pure';
 import '@testing-library/jest-dom/extend-expect';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
-import {
-  dashboardFactory,
-  urlFactory,
-} from '../../../../ui_actions_enhanced/public/components/action_wizard/test_data';
-import { StubBrowserStorage } from '../../../../../../src/test_utils/public/stub_browser_storage';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { dashboardFactory, urlFactory } from '../../../components/action_wizard/test_data';
+import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
+import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { mockDynamicActionManager } from './test_data';
 import { TEST_SUBJ_DRILLDOWN_ITEM } from '../list_manage_drilldowns';
 import { WELCOME_MESSAGE_TEST_SUBJ } from '../drilldown_hello_bar';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { NotificationsStart } from 'kibana/public';
 import { toastDrilldownsCRUDError } from './i18n';
+import { ActionFactory } from '../../../dynamic_actions';
 
 const storage = new Storage(new StubBrowserStorage());
 const notifications = coreMock.createStart().notifications;
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
-  uiActionsEnhanced: {
-    getActionFactories() {
-      return [dashboardFactory, urlFactory];
+  actionFactories: [dashboardFactory as ActionFactory, urlFactory as ActionFactory],
+  storage: new Storage(new StubBrowserStorage()),
+  toastService: {
+    addError: (...args: any[]) => {
+      alert(JSON.stringify(args));
+    },
+    addSuccess: (...args: any[]) => {
+      alert(JSON.stringify(args));
     },
   } as any,
-  storage,
-  notifications,
 });
 
 // https://github.com/elastic/kibana/issues/59469

@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { FormDrilldownWizard } from '.';
+import { FormDrilldownWizard } from './index';
 
 const DemoEditName: React.FC = () => {
   const [name, setName] = React.useState('');

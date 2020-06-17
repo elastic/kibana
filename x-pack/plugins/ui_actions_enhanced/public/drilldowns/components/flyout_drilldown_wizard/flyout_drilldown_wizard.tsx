@@ -16,7 +16,7 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
-import { UiActionsEnhancedActionFactory as ActionFactory } from '../../../../ui_actions_enhanced/public';
+import { ActionFactory } from '../../../dynamic_actions';
 
 export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;

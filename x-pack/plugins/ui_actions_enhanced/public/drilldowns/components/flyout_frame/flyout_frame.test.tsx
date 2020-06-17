@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { render as renderTestingLibrary, fireEvent, cleanup } from '@testing-library/react/pure';
-import { FlyoutFrame } from '.';
+import { FlyoutFrame } from './index';
 
 afterEach(cleanup);
 

@@ -5,24 +5,17 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { ToastsStart } from 'kibana/public';
 import useMountedState from 'react-use/lib/useMountedState';
-import {
-  UiActionsEnhancedActionFactory as ActionFactory,
-  AdvancedUiActionsStart,
-  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
-  UiActionsEnhancedSerializedAction,
-  UiActionsEnhancedSerializedEvent,
-} from '../../../../ui_actions_enhanced/public';
-import { NotificationsStart } from '../../../../../../src/core/public';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
-import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
+import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import {
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   TriggerContextMapping,
-} from '../../../../../../src/plugins/ui_actions/public';
-import { useContainerState } from '../../../../../../src/plugins/kibana_utils/public';
+} from '../../../../../../../src/plugins/ui_actions/public';
+import { useContainerState } from '../../../../../../../src/plugins/kibana_utils/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
 import {
   toastDrilldownCreated,
@@ -31,6 +24,12 @@ import {
   toastDrilldownsCRUDError,
   toastDrilldownsDeleted,
 } from './i18n';
+import {
+  ActionFactory,
+  DynamicActionManager,
+  SerializedAction,
+  SerializedEvent,
+} from '../../../dynamic_actions';
 
 interface ConnectedFlyoutManageDrilldownsProps {
   dynamicActionManager: DynamicActionManager;
@@ -48,17 +47,14 @@ enum Routes {
 }
 
 export function createFlyoutManageDrilldowns({
-  uiActionsEnhanced,
+  actionFactories: allActionFactories,
   storage,
-  notifications,
+  toastService,
 }: {
-  uiActionsEnhanced: AdvancedUiActionsStart;
+  actionFactories: ActionFactory[];
   storage: IStorageWrapper;
-  notifications: NotificationsStart;
+  toastService: ToastsStart;
 }) {
-  // fine to assume this is static,
-  // because all action factories should be registered in setup phase
-  const allActionFactories = uiActionsEnhanced.getActionFactories();
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
     return acc;
@@ -96,7 +92,7 @@ export function createFlyoutManageDrilldowns({
       createDrilldown,
       editDrilldown,
       deleteDrilldown,
-    } = useDrilldownsStateManager(props.dynamicActionManager, notifications);
+    } = useDrilldownsStateManager(props.dynamicActionManager, toastService);
 
     /**
      * isCompatible promise is not yet resolved.
@@ -128,9 +124,7 @@ export function createFlyoutManageDrilldowns({
     /**
      * Maps drilldown to list item view model
      */
-    function mapToDrilldownToDrilldownListItem(
-      drilldown: UiActionsEnhancedSerializedEvent
-    ): DrilldownListItem {
+    function mapToDrilldownToDrilldownListItem(drilldown: SerializedEvent): DrilldownListItem {
       const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
       return {
         id: drilldown.eventId,
@@ -256,10 +250,7 @@ function useWelcomeMessage(storage: IStorageWrapper): [boolean, () => void] {
   ];
 }
 
-function useDrilldownsStateManager(
-  actionManager: DynamicActionManager,
-  notifications: NotificationsStart
-) {
+function useDrilldownsStateManager(actionManager: DynamicActionManager, toastService: ToastsStart) {
   const { events: drilldowns } = useContainerState(actionManager.state);
   const [isLoading, setIsLoading] = useState(false);
   const isMounted = useMountedState();
@@ -269,7 +260,7 @@ function useDrilldownsStateManager(
     try {
       await op();
     } catch (e) {
-      notifications.toasts.addError(e, {
+      toastService.addError(e, {
         title: toastDrilldownsCRUDError,
       });
       if (!isMounted) return;
@@ -279,12 +270,12 @@ function useDrilldownsStateManager(
   }
 
   async function createDrilldown(
-    action: UiActionsEnhancedSerializedAction,
+    action: SerializedAction,
     selectedTriggers: Array<keyof TriggerContextMapping>
   ) {
     await run(async () => {
       await actionManager.createEvent(action, selectedTriggers);
-      notifications.toasts.addSuccess({
+      toastService.addSuccess({
         title: toastDrilldownCreated.title(action.name),
         text: toastDrilldownCreated.text,
       });
@@ -293,12 +284,12 @@ function useDrilldownsStateManager(
 
   async function editDrilldown(
     drilldownId: string,
-    action: UiActionsEnhancedSerializedAction,
+    action: SerializedAction,
     selectedTriggers: Array<keyof TriggerContextMapping>
   ) {
     await run(async () => {
       await actionManager.updateEvent(drilldownId, action, selectedTriggers);
-      notifications.toasts.addSuccess({
+      toastService.addSuccess({
         title: toastDrilldownEdited.title(action.name),
         text: toastDrilldownEdited.text,
       });
@@ -309,7 +300,7 @@ function useDrilldownsStateManager(
     await run(async () => {
       drilldownIds = Array.isArray(drilldownIds) ? drilldownIds : [drilldownIds];
       await actionManager.deleteEvents(drilldownIds);
-      notifications.toasts.addSuccess(
+      toastService.addSuccess(
         drilldownIds.length === 1
           ? {
               title: toastDrilldownDeleted.title,
