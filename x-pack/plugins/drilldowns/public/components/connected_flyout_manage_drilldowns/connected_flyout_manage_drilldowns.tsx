@@ -53,10 +53,12 @@ export function createFlyoutManageDrilldowns({
   uiActionsEnhanced,
   storage,
   notifications,
+  docsLink,
 }: {
   uiActionsEnhanced: AdvancedUiActionsStart;
   storage: IStorageWrapper;
   notifications: NotificationsStart;
+  docsLink?: string;
 }) {
   // fine to assume this is static,
   // because all action factories should be registered in setup phase
@@ -152,6 +154,7 @@ export function createFlyoutManageDrilldowns({
       case Routes.Edit:
         return (
           <FlyoutDrilldownWizard
+            docsLink={docsLink}
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldownActionFactories={actionFactories}
@@ -204,6 +207,7 @@ export function createFlyoutManageDrilldowns({
       default:
         return (
           <FlyoutListManageDrilldowns
+            docsLink={docsLink}
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
