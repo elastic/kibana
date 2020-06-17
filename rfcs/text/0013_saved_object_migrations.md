@@ -174,7 +174,7 @@ migrations.](https://github.com/elastic/kibana/blob/75444a9f1879c5702f9f2b8ad4a7
 
 ## 4.3 Automatically retry failed migrations until they succeed
 
-> Achieves goals: (2.2)
+> Achieves goals: (2.2), (2.6)
 > Mitigates errors (3.3) and (3.4)
 
 External conditions such as failures from an unhealthy Elasticsearch cluster
@@ -255,6 +255,12 @@ Note:
 Together with the limitations, this algorithm ensures that migrations are
 idempotent. If two nodes are started simultaneously, both of them will start
 transforming documents in that version's target index, but because migrations are idempotent, it doesn’t matter which node’s writes win.
+
+<details>
+  <summary>In the future, this algorithm could enable (2.6) "read-only functionality during the downtime window" but this is outside of the scope of this RFC.</summary>
+
+  Although the migration algorithm guarantees there's no data loss while providing read-only access to outdated nodes, this could cause plugins to behave in unexpected ways. If we wish to persue it in the future, enabling read-only functionality during the downtime window will be it's own project and must include an audit of all plugins' behaviours.
+<details>
 
 ### 4.3.1.3 Upgrade and rollback procedure
 When a newer Kibana starts an upgrade, it blocks all writes to the outdated index to prevent data loss. Since Kibana is not designed to gracefully handle a read-only index this could have unintended consequences such as a task executing multiple times but never being able to write that the task was completed successfully. To prevent unintended consequences, the following procedure should be followed when upgrading Kibana:
