@@ -6,10 +6,13 @@
 
 import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
+import React from 'react';
 
 import { useObservable } from 'react-use';
 
 import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
@@ -23,9 +26,8 @@ const BAR_COLOR = euiPaletteColorBlind()[0];
 const BAR_COLOR_BLUR = euiPaletteColorBlind({ rotations: 2 })[10];
 const MAX_CHART_COLUMNS = 20;
 
-const getXScaleType = (
-  kbnFieldType: KBN_FIELD_TYPES | undefined
-): 'ordinal' | 'time' | 'linear' | undefined => {
+type XScaleType = 'ordinal' | 'time' | 'linear' | undefined;
+const getXScaleType = (kbnFieldType: KBN_FIELD_TYPES | undefined): XScaleType => {
   switch (kbnFieldType) {
     case KBN_FIELD_TYPES.BOOLEAN:
     case KBN_FIELD_TYPES.IP:
@@ -248,9 +250,7 @@ export const fetchChartsData = async (
       }
 
       return {
-        type: 'ordinal',
-        cardinality: 0,
-        data: [],
+        type: 'unsupported',
         id: c.id,
       };
     }
@@ -305,10 +305,72 @@ export const isOrdinalChartData = (arg: any): arg is OrdinalChartData => {
   );
 };
 
-type ChartDataItem = NumericDataItem | OrdinalDataItem;
-export type ChartData = NumericChartData | OrdinalChartData;
+interface UnsupportedChartData {
+  id: string;
+  type: 'unsupported';
+}
 
-export const useColumnChart = (chartData: ChartData, columnType: EuiDataGridColumn) => {
+export const isUnsupportedChartData = (arg: any): arg is UnsupportedChartData => {
+  return arg.hasOwnProperty('type') && arg.type === 'unsupported';
+};
+
+type ChartDataItem = NumericDataItem | OrdinalDataItem;
+export type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
+
+type LegendText = string | JSX.Element;
+const getLegendText = (chartData: ChartData): LegendText => {
+  if (chartData.type === 'unsupported') {
+    return i18n.translate('xpack.ml.dataGridChart.histogramNotAvailable', {
+      defaultMessage: `Histogram chart not supported for this type of column.`,
+    });
+  }
+  if (chartData.type === 'boolean') {
+    return (
+      <table className="mlDataGridChart__legendBoolean">
+        <tbody>
+          <tr>
+            <td>{chartData.data[0].key_as_string}</td>
+            <td>{chartData.data[1].key_as_string}</td>
+          </tr>
+        </tbody>
+      </table>
+    );
+  }
+
+  if (isOrdinalChartData(chartData) && chartData.cardinality <= MAX_CHART_COLUMNS) {
+    return i18n.translate('xpack.ml.dataGridChart.singleCategoryLegend', {
+      defaultMessage: `{cardinality, plural, one {# category} other {# categories}}`,
+      values: { cardinality: chartData.cardinality },
+    });
+  }
+
+  if (isOrdinalChartData(chartData) && chartData.cardinality > MAX_CHART_COLUMNS) {
+    return i18n.translate('xpack.ml.dataGridChart.topCategoriesLegend', {
+      defaultMessage: `top {MAX_CHART_COLUMNS} of {cardinality} categories`,
+      values: { cardinality: chartData.cardinality, MAX_CHART_COLUMNS },
+    });
+  }
+
+  if (isNumericChartData(chartData)) {
+    const fromValue = Math.round(chartData.stats[0] * 100) / 100;
+    const toValue = Math.round(chartData.stats[1] * 100) / 100;
+
+    return fromValue !== toValue ? `${fromValue} - ${toValue}` : '' + fromValue;
+  }
+
+  throw new Error('Invalid chart data.');
+};
+
+interface ColumnChart {
+  data: ChartDataItem[];
+  legendText: LegendText;
+  xScaleType: XScaleType;
+}
+
+export const useColumnChart = (
+  chartData: ChartData,
+  columnType: EuiDataGridColumn
+): ColumnChart => {
   const fieldType = getFieldType(columnType.schema);
 
   const hoveredRow = useObservable(hoveredRow$);
@@ -349,27 +411,25 @@ export const useColumnChart = (chartData: ChartData, columnType: EuiDataGridColu
     return BAR_COLOR_BLUR;
   };
 
+  let data: ChartDataItem[] = [];
+
   // The if/else if/else is a work-around because `.map()` doesn't work with union types.
   // See TS Caveats for details: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-3.html#caveats
   if (isOrdinalChartData(chartData)) {
-    const coloredData = chartData.data.map((d: ChartDataItem) => ({ ...d, color: getColor(d) }));
-    return {
-      cardinality: chartData.cardinality,
-      coloredData,
-      fieldType,
-      xScaleType,
-      MAX_CHART_COLUMNS,
-    };
+    data = chartData.data.map((d: OrdinalDataItem) => ({
+      ...d,
+      color: getColor(d),
+    }));
   } else if (isNumericChartData(chartData)) {
-    const coloredData = chartData.data.map((d: ChartDataItem) => ({ ...d, color: getColor(d) }));
-    return {
-      coloredData,
-      fieldType,
-      stats: chartData.stats,
-      xScaleType,
-      MAX_CHART_COLUMNS,
-    };
-  } else {
-    throw new Error('invalid chart data.');
+    data = chartData.data.map((d: NumericDataItem) => ({
+      ...d,
+      color: getColor(d),
+    }));
   }
+
+  return {
+    data,
+    legendText: getLegendText(chartData),
+    xScaleType,
+  };
 };
