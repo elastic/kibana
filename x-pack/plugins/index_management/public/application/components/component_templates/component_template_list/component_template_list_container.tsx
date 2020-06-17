@@ -5,16 +5,28 @@
  */
 
 import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { ComponentTemplatesAuthProvider } from './auth_provider';
 import { ComponentTemplatesWithPrivileges } from './with_privileges';
 import { ComponentTemplateList } from './component_template_list';
 
-export const ComponentTemplateListContainer: React.FunctionComponent = () => {
+interface MatchParams {
+  componentTemplateName?: string;
+}
+
+export const ComponentTemplateListContainer: React.FunctionComponent<RouteComponentProps<
+  MatchParams
+>> = ({
+  match: {
+    params: { componentTemplateName },
+  },
+  history,
+}) => {
   return (
     <ComponentTemplatesAuthProvider>
       <ComponentTemplatesWithPrivileges>
-        <ComponentTemplateList />
+        <ComponentTemplateList componentTemplateName={componentTemplateName} history={history} />
       </ComponentTemplatesWithPrivileges>
     </ComponentTemplatesAuthProvider>
   );
