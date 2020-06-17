@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await transform.testResources.deleteIndexPattern(transformConfig.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfig.dest.index);
       await transform.api.deleteIndices(transformConfig.dest.index);
       await transform.api.cleanTransformIndices();
     });

@@ -7,32 +7,6 @@
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { xpackMocks } from '../../../../mocks';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
-import { IndexPatternRetriever } from './alerts/index_pattern';
-
-/**
- * Creates a mock IndexPatternRetriever for use in tests.
- *
- * @param indexPattern a string index pattern to return when any of the mock's public methods are called.
- * @returns the same string passed in via `indexPattern`
- */
-export const createMockIndexPatternRetriever = (indexPattern: string): IndexPatternRetriever => {
-  const mockGetFunc = jest.fn().mockResolvedValue(indexPattern);
-  return {
-    getIndexPattern: mockGetFunc,
-    getEventIndexPattern: mockGetFunc,
-    getMetadataIndexPattern: mockGetFunc,
-    getPolicyResponseIndexPattern: mockGetFunc,
-  };
-};
-
-export const MetadataIndexPattern = 'metrics-endpoint-*';
-
-/**
- * Creates a mock IndexPatternRetriever for use in tests that returns `metrics-endpoint-*`
- */
-export const createMockMetadataIndexPatternRetriever = () => {
-  return createMockIndexPatternRetriever(MetadataIndexPattern);
-};
 
 /**
  * Creates a mock AgentService

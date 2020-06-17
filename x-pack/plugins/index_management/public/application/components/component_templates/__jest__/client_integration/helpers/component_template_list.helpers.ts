@@ -15,7 +15,7 @@ import {
   nextTick,
 } from '../../../../../../../../../test_utils';
 import { WithAppDependencies } from './setup_environment';
-import { ComponentTemplateList } from '../../../component_template_list';
+import { ComponentTemplateList } from '../../../component_template_list/component_template_list';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {

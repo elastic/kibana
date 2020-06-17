@@ -6,7 +6,7 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { NOTIFICATIONS_ID } from '../../../../common/constants';
+import { NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
 import { getSignalsCount } from './get_signals_count';
@@ -25,7 +25,7 @@ export const rulesNotificationAlertType = ({
   name: 'SIEM notification',
   actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',
-  producer: 'siem',
+  producer: SERVER_APP_ID,
   validate: {
     params: schema.object({
       ruleAlertId: schema.string(),
