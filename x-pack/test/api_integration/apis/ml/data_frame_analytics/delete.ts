@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
       includes: [],
       excludes: [],
     },
-    model_memory_limit: '350mb',
+    model_memory_limit: '60mb',
   };
 
   const testJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>> = [
