@@ -1,13 +1,18 @@
 [role="xpack"]
 [[maps-troubleshooting]]
-== Elastic Maps troubleshooting
+== Troubleshoot Maps
+
+++++
+<titleabbrev>Troubleshoot</titleabbrev>
+++++
+
 
 Use the information in this section to inspect Elasticsearch requests and find solutions to common problems.
 
 [float]
 === Inspect Elasticsearch requests
 
-*Elastic Maps* uses the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}. To troubleshoot these requests, open the Inspector, which shows the most recent requests for each layer. You can switch between different requests using the *Request* dropdown.
+Maps uses the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}. To troubleshoot these requests, open the Inspector, which shows the most recent requests for each layer. You can switch between different requests using the *Request* dropdown.
 
 [role="screenshot"]
 image::maps/images/inspector.png[]
@@ -33,6 +38,6 @@ image::maps/images/inspector.png[]
 [float]
 ==== Coordinate and region map visualizations not available in New Visualization menu
 
-Kibana’s out-of-the-box settings no longer offers coordinate and region maps as a choice in the New Visualization menu because you can create these maps in *Elastic Maps*.
+Kibana’s out-of-the-box settings no longer offers coordinate and region maps as a
+choice in the New Visualization menu because you can create these maps in the Maps app.
 If you want to create new coordinate and region map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.
-
