@@ -50,12 +50,15 @@ def getCommits(String branch, maximumCommitsToCheck, maximumCommitsToBuild) {
 
     if (!status) {
       commitsToBuild << commit
+    } else {
+      // Stop at the first commit we find that's already been triggered
+      break
     }
 
     if (commitsToBuild.size() >= maximumCommitsToBuild) {
-      break;
+      break
     }
   }
 
-  return commitsToBuild.reverse()
+  return commitsToBuild.reverse() // We want the builds to trigger oldest-to-newest
 }
