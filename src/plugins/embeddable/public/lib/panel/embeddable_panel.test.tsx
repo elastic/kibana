@@ -218,7 +218,7 @@ const renderInEditModeAndOpenContextMenu = async (
 test('HelloWorldContainer in edit mode hides disabledActions', async () => {
   const action = {
     id: 'FOO',
-    type: 'FOO' as ActionType,
+    factoryId: 'FOO' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'foo',
     isCompatible: async () => true,
@@ -254,7 +254,7 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
 test('HelloWorldContainer hides disabled badges', async () => {
   const action = {
     id: 'BAR',
-    type: 'BAR' as ActionType,
+    factoryId: 'BAR' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'bar',
     isCompatible: async () => true,
