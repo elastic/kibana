@@ -8726,7 +8726,6 @@
     "xpack.lens.indexPatterns.noFields.extendTimeBullet": "延伸时间范围",
     "xpack.lens.indexPatterns.noFields.tryText": "尝试：",
     "xpack.lens.indexPatterns.noFieldsLabel": "在此索引模式中不存在任何字段。",
-    "xpack.lens.indexPatterns.noFilteredFieldsLabel": "没有任何字段匹配当前筛选。",
     "xpack.lens.indexPatternSuggestion.removeLayerLabel": "仅显示 {indexPatternTitle}",
     "xpack.lens.indexPatternSuggestion.removeLayerPositionLabel": "仅显示图层 {layerNumber}",
     "xpack.lens.lensSavedObjectLabel": "Lens 可视化",

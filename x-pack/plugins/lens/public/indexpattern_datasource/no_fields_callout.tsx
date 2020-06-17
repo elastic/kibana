@@ -25,11 +25,11 @@ export const NoFieldsCallout = ({
       title={
         isAffectedByFieldFilter
           ? i18n.translate('xpack.lens.indexPatterns.noFilteredFieldsLabel', {
-              defaultMessage: 'No fields match the current filters.',
+              defaultMessage: 'No fields match the selected filters.',
             })
           : existFieldsInIndex
           ? i18n.translate('xpack.lens.indexPatterns.noDataLabel', {
-              defaultMessage: `Looks like you don't have any fields with data`,
+              defaultMessage: `There are no available fields that contain data.`,
             })
           : i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
               defaultMessage: 'No fields exist in this index pattern.',
@@ -56,7 +56,7 @@ export const NoFieldsCallout = ({
             {isAffectedByFieldFilter ? (
               <li>
                 {i18n.translate('xpack.lens.indexPatterns.noFields.fieldTypeFilterBullet', {
-                  defaultMessage: 'Changing the field filters',
+                  defaultMessage: 'Using different field filters',
                 })}
               </li>
             ) : null}

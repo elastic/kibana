@@ -8722,7 +8722,6 @@
     "xpack.lens.indexPatterns.noFields.extendTimeBullet": "時間範囲を拡張中",
     "xpack.lens.indexPatterns.noFields.tryText": "試行対象:",
     "xpack.lens.indexPatterns.noFieldsLabel": "このインデックスパターンにはフィールドがありません。",
-    "xpack.lens.indexPatterns.noFilteredFieldsLabel": "現在のフィルターと一致するフィールドはありません。",
     "xpack.lens.indexPatternSuggestion.removeLayerLabel": "{indexPatternTitle}のみを表示",
     "xpack.lens.indexPatternSuggestion.removeLayerPositionLabel": "レイヤー{layerNumber}のみを表示",
     "xpack.lens.lensSavedObjectLabel": "レンズビジュアライゼーション",
