@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { parse } from 'query-string';
-import { uiSelector } from '../state/selectors';
-import { setUiState } from '../state/actions';
-import { getSupportedUrlParams, UptimeUrlParams } from '../lib/helper';
-import { useUrlParams } from './use_url_params';
-import { UiState } from '../state/reducers/ui';
+import { UiState } from '../../../state/reducers/ui';
+import { UptimeUrlParams } from './get_supported_url_params';
 
-const resolveUrlUpdates = (
+export const resolveUrlUpdates = (
   params: UptimeUrlParams,
   storeState: UiState
 ): Partial<UptimeUrlParams> => {
@@ -54,7 +47,10 @@ const resolveUrlUpdates = (
   return urlState;
 };
 
-const resolveStateChanges = (params: UptimeUrlParams, storeState: UiState): Partial<UiState> => {
+export const resolveStateChanges = (
+  params: UptimeUrlParams,
+  storeState: UiState
+): Partial<UiState> => {
   const uiState: Partial<UiState> = {};
   if (
     params.dateRangeStart !== storeState.dateRange.from ||
@@ -88,46 +84,4 @@ const resolveStateChanges = (params: UptimeUrlParams, storeState: UiState): Part
   }
 
   return uiState;
-};
-
-/**
- * TODO: it is probably best to move this hook to the router component,
- * and not export it from the module, because we probably only ever want it to be
- * called in one place.
- */
-export const useSynchronizedState = () => {
-  const [get, set] = useUrlParams();
-  const params = get();
-  const history = useHistory();
-  const storeState = useSelector(uiSelector);
-  const dispatch = useDispatch();
-  useEffect(() => {
-    const uiStateDelta = resolveStateChanges(params, storeState);
-    if (Object.keys(uiStateDelta).length > 0) {
-      dispatch(setUiState(uiStateDelta));
-    }
-    /*
-     * We only want this effect to fire on initial render, so we can
-     * override default store values with initial URL params. Subsequent
-     * updates are performed in the history listener below.
-     */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    history.listen((newHistory) => {
-      const supportedParams = getSupportedUrlParams(parse(newHistory.search));
-      const uiStateDelta = resolveStateChanges(supportedParams, storeState);
-      if (Object.keys(uiStateDelta).length > 0) {
-        dispatch(setUiState(uiStateDelta));
-      }
-    });
-  }, [dispatch, storeState, history]);
-
-  useEffect(() => {
-    const urlStateDelta = resolveUrlUpdates(params, storeState);
-    if (Object.keys(urlStateDelta).length > 0) {
-      set(urlStateDelta);
-    }
-  }, [params, storeState, set]);
 };

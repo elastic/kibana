@@ -5,7 +5,12 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { parse } from 'query-string';
+import { uiSelector } from './state/selectors';
+import { setUiState } from './state/actions';
+import { getSupportedUrlParams } from './lib/helper';
 import { OverviewPage } from './components/overview/overview_container';
 import {
   CERTIFICATES_ROUTE,
@@ -15,7 +20,8 @@ import {
 } from '../common/constants';
 import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
-import { UptimePage, useUptimeTelemetry, useSynchronizedState } from './hooks';
+import { UptimePage, useUptimeTelemetry, useUrlParams } from './hooks';
+import { resolveStateChanges, resolveUrlUpdates } from './lib/helper/url_params';
 
 interface RouteProps {
   path: string;
@@ -85,4 +91,41 @@ export const PageRouter: FC = () => {
       <Route component={NotFoundPage} />
     </Switch>
   );
+};
+
+const useSynchronizedState = () => {
+  const [get, set] = useUrlParams();
+  const params = get();
+  const history = useHistory();
+  const storeState = useSelector(uiSelector);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const uiStateDelta = resolveStateChanges(params, storeState);
+    if (Object.keys(uiStateDelta).length > 0) {
+      dispatch(setUiState(uiStateDelta));
+    }
+    /*
+     * We only want this effect to fire on initial render, so we can
+     * override default store values with initial URL params. Subsequent
+     * updates are performed in the history listener below.
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    history.listen((newHistory) => {
+      const supportedParams = getSupportedUrlParams(parse(newHistory.search));
+      const uiStateDelta = resolveStateChanges(supportedParams, storeState);
+      if (Object.keys(uiStateDelta).length > 0) {
+        dispatch(setUiState(uiStateDelta));
+      }
+    });
+  }, [dispatch, storeState, history]);
+
+  useEffect(() => {
+    const urlStateDelta = resolveUrlUpdates(params, storeState);
+    if (Object.keys(urlStateDelta).length > 0) {
+      set(urlStateDelta);
+    }
+  }, [params, storeState, set]);
 };
