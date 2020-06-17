@@ -40,7 +40,7 @@ repeated production process, but rather for the initial exploration of your data
 === Upload geospatial data
 
 To visualize geospatial data in a point or shape file, you can upload it using the <<geojson-upload, GeoJSON Upload>>
-feature in *Elastic Maps*, and then use that data as a layer in a map.
+feature in Maps, and then use that data as a layer in a map.
 The data is also available for use in the broader Kibana ecosystem, for example,
 in visualizations and Canvas workpads.
 With GeoJSON Upload, you can upload a file up to 50 MB.
