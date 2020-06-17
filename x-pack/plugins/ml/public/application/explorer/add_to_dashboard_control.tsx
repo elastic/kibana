@@ -121,6 +121,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
       },
       box: {
         incremental: true,
+        'data-test-subj': 'mlDashboardsSearchBox',
       },
     };
   }, []);

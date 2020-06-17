@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
 
   return {
     async assertAnomalyExplorerEmptyListMessageExists() {
@@ -91,8 +90,7 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
 
     async filterWithSearchString(filter: string) {
       await this.waitForDashboardsToLoad();
-      const tableListContainer = await testSubjects.find('mlDashboardSelectionContainer');
-      const searchBarInput = await tableListContainer.findByClassName('euiFieldSearch');
+      const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
     },
