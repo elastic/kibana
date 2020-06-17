@@ -5,9 +5,8 @@
  */
 import Url from 'url';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { kbnTestConfig } from '@kbn/test';
 
-function renderBody(iframeUrl: string = 'https://localhost:5601') {
+function renderBody(iframeUrl: string) {
   return `
 <!DOCTYPE html>
 <html>
@@ -25,21 +24,18 @@ export class IframeEmbeddedPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-    router.get(
+    core.http.resources.register(
       {
         path: '/iframe_embedded',
         validate: false,
       },
       async (context, request, response) => {
-        const { hostname, port } = kbnTestConfig.getUrlParts();
-        const kibanaUrl = Url.format({ protocol: 'https', hostname, port });
+        const { protocol, port, host } = core.http.getServerInfo();
 
-        return response.ok({
+        const kibanaUrl = Url.format({ protocol, hostname: host, port });
+
+        return response.renderHtml({
           body: renderBody(kibanaUrl),
-          headers: {
-            'content-type': 'text/html',
-          },
         });
       }
     );
