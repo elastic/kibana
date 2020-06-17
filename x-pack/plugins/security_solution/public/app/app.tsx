@@ -15,7 +15,6 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
@@ -91,7 +90,6 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   <KibanaContextProvider
     services={{
       appName: APP_NAME,
-      storage: new Storage(localStorage),
       ...services,
     }}
   >

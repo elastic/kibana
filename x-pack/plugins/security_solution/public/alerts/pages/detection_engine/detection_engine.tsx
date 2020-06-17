@@ -11,6 +11,7 @@ import { connect, ConnectedProps } from 'react-redux';
 
 import { useHistory } from 'react-router-dom';
 import { SecurityPageName } from '../../../app/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { GlobalTime } from '../../../common/containers/global_time';
 import {
   indicesExistOrDataTemporarilyUnavailable,
@@ -152,6 +153,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
                         />
                         <EuiSpacer size="l" />
                         <AlertsTable
+                          timelineId={TimelineId.alertsPage}
                           loading={loading}
                           hasIndexWrite={hasIndexWrite ?? false}
                           canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}

@@ -17,6 +17,7 @@ import {
 import { State, SubPluginsInitReducer } from '../common/store';
 import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
+import { TimelineState } from '../timelines/store/timeline/types';
 
 export enum SecurityPageName {
   alerts = 'alerts',
@@ -35,6 +36,7 @@ export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> 
 
 export interface SecuritySubPlugin {
   SubPluginRoutes: React.FC;
+  storageTimelines?: Pick<TimelineState, 'timelineById'>;
 }
 
 type SecuritySubPluginKeyStore =

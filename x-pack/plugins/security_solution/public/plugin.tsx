@@ -17,6 +17,7 @@ import {
   Plugin as IPlugin,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
@@ -68,9 +69,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
     const mountSecurityFactory = async () => {
+      const storage = new Storage(localStorage);
       const [coreStart, startPlugins] = await core.getStartServices();
       if (this.store == null) {
-        await this.buildStore(coreStart, startPlugins);
+        await this.buildStore(coreStart, startPlugins, storage);
       }
 
       const services = {
@@ -78,7 +80,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...startPlugins,
         security: plugins.security,
       } as StartServices;
-      return { coreStart, startPlugins, services, store: this.store };
+      return { coreStart, startPlugins, services, store: this.store, storage };
     };
 
     // Waiting for https://github.com/elastic/kibana/issues/69110
@@ -134,7 +136,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_ALERTS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services },
+          { coreStart, store, services, storage },
           { renderApp, composeLibs },
           { alertsSubPlugin },
         ] = await Promise.all([
@@ -147,7 +149,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...params,
           services,
           store,
-          SubPluginRoutes: alertsSubPlugin.start().SubPluginRoutes,
+          SubPluginRoutes: alertsSubPlugin.start(storage).SubPluginRoutes,
         });
       },
     });
@@ -161,7 +163,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_HOSTS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services },
+          { coreStart, store, services, storage },
           { renderApp, composeLibs },
           { hostsSubPlugin },
         ] = await Promise.all([
@@ -174,7 +176,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...params,
           services,
           store,
-          SubPluginRoutes: hostsSubPlugin.start().SubPluginRoutes,
+          SubPluginRoutes: hostsSubPlugin.start(storage).SubPluginRoutes,
         });
       },
     });
@@ -188,7 +190,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_NETWORK_PATH,
       mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services },
+          { coreStart, store, services, storage },
           { renderApp, composeLibs },
           { networkSubPlugin },
         ] = await Promise.all([
@@ -201,7 +203,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...params,
           services,
           store,
-          SubPluginRoutes: networkSubPlugin.start().SubPluginRoutes,
+          SubPluginRoutes: networkSubPlugin.start(storage).SubPluginRoutes,
         });
       },
     });
@@ -349,10 +351,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
   }
 
-  private async buildStore(coreStart: CoreStart, startPlugins: StartPlugins) {
+  private async buildStore(coreStart: CoreStart, startPlugins: StartPlugins, storage: Storage) {
     const { composeLibs } = await this.downloadAssets();
 
     const {
+      alertsSubPlugin,
       hostsSubPlugin,
       networkSubPlugin,
       timelinesSubPlugin,
@@ -362,17 +365,30 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const libs$ = new BehaviorSubject(composeLibs(coreStart));
 
-    const hostsStart = hostsSubPlugin.start();
-    const networkStart = networkSubPlugin.start();
+    const alertsStart = alertsSubPlugin.start(storage);
+    const hostsStart = hostsSubPlugin.start(storage);
+    const networkStart = networkSubPlugin.start(storage);
     const timelinesStart = timelinesSubPlugin.start();
     const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
     const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
+
+    const timelineInitialState = {
+      timeline: {
+        ...timelinesStart.store.initialState.timeline!,
+        timelineById: {
+          ...timelinesStart.store.initialState.timeline!.timelineById,
+          ...alertsStart.storageTimelines!.timelineById,
+          ...hostsStart.storageTimelines!.timelineById,
+          ...networkStart.storageTimelines!.timelineById,
+        },
+      },
+    };
 
     this.store = createStore(
       createInitialState({
         ...hostsStart.store.initialState,
         ...networkStart.store.initialState,
-        ...timelinesStart.store.initialState,
+        ...timelineInitialState,
         ...endpointAlertsStart.store.initialState,
         ...managementSubPluginStart.store.initialState,
       }),
@@ -384,6 +400,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...managementSubPluginStart.store.reducer,
       },
       libs$.pipe(pluck('apolloClient')),
+      storage,
       [
         ...(endpointAlertsStart.store.middleware ?? []),
         ...(managementSubPluginStart.store.middleware ?? []),

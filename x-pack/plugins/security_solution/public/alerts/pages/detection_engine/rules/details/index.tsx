@@ -23,6 +23,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
@@ -401,6 +402,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         <EuiSpacer />
                         {ruleId != null && (
                           <AlertsTable
+                            timelineId={TimelineId.alertsRulesDetailsPage}
                             canUserCRUD={canUserCRUD ?? false}
                             defaultFilters={alertDefaultFilters}
                             hasIndexWrite={hasIndexWrite ?? false}
