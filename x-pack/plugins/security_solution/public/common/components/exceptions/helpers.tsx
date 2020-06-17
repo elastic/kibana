@@ -184,9 +184,9 @@ export const getDescriptionListContent = (
  */
 export const getFormattedComments = (comments: Comment[]): EuiCommentProps[] =>
   comments.map((comment) => ({
-    username: comment.user,
-    timestamp: moment(comment.timestamp).format('on MMM Do YYYY @ HH:mm:ss'),
+    username: comment.created_by,
+    timestamp: moment(comment.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
     event: i18n.COMMENT_EVENT,
-    timelineIcon: <EuiAvatar size="l" name={comment.user.toUpperCase()} />,
+    timelineIcon: <EuiAvatar size="l" name={comment.created_by.toUpperCase()} />,
     children: <EuiText size="s">{comment.comment}</EuiText>,
   }));

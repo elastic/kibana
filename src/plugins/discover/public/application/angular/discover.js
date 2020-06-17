@@ -970,13 +970,17 @@ function discoverController(
   };
 
   $scope.addColumn = function addColumn(columnName) {
-    $scope.indexPattern.popularizeField(columnName, 1);
+    if (uiCapabilities.discover.save) {
+      $scope.indexPattern.popularizeField(columnName, 1);
+    }
     const columns = columnActions.addColumn($scope.state.columns, columnName);
     setAppState({ columns });
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
-    $scope.indexPattern.popularizeField(columnName, 1);
+    if (uiCapabilities.discover.save) {
+      $scope.indexPattern.popularizeField(columnName, 1);
+    }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
     setAppState({ columns });
   };

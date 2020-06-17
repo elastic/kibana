@@ -22,10 +22,14 @@ def call(branchOverride) {
   ).trim()
 
   if (repoInfo.targetBranch) {
-    sh(
-      script: "git fetch origin ${repoInfo.targetBranch}",
-      label: "fetch latest from '${repoInfo.targetBranch}' at origin"
-    )
+    // Try to clone fetch from Github up to 8 times, waiting 15 secs between attempts
+    retryWithDelay(8, 15) {
+      sh(
+        script: "git fetch origin ${repoInfo.targetBranch}",
+        label: "fetch latest from '${repoInfo.targetBranch}' at origin"
+      )
+    }
+
     repoInfo.mergeBase = sh(
       script: "git merge-base HEAD FETCH_HEAD",
       label: "determining merge point with '${repoInfo.targetBranch}' at origin",

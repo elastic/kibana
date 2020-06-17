@@ -7,7 +7,7 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiSideNav, EuiSideNavItemType, EuiFieldNumber } from '@elastic/eui';
+import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiFieldNumber } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
@@ -303,18 +303,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
         />
       );
 
-      interface ItemType {
-        name: string;
-        'data-test-subj': string;
-      }
-      const items: Array<EuiSideNavItemType<ItemType>> = wrapper.find(EuiSideNav).prop('items');
-      const options = (items[0].items as unknown) as ItemType[];
+      const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-      expect(options.find(({ name }) => name === 'Minimum')!['data-test-subj']).not.toContain(
+      expect(items.find(({ label }) => label === 'Minimum')!['data-test-subj']).not.toContain(
         'Incompatible'
       );
 
-      expect(options.find(({ name }) => name === 'Date histogram')!['data-test-subj']).toContain(
+      expect(items.find(({ label }) => label === 'Date histogram')!['data-test-subj']).toContain(
         'Incompatible'
       );
     });
@@ -977,13 +972,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         />
       );
 
-      interface ItemType {
-        name: React.ReactNode;
-      }
-      const items: Array<EuiSideNavItemType<ItemType>> = wrapper.find(EuiSideNav).prop('items');
-      const options = (items[0].items as unknown) as ItemType[];
+      const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-      expect(options.map(({ name }: { name: React.ReactNode }) => name)).toEqual([
+      expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
         'Unique count',
         'Average',
         'Count',

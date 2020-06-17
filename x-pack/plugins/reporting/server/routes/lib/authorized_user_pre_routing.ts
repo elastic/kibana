@@ -19,7 +19,6 @@ export type RequestHandlerUser = RequestHandler extends (...a: infer U) => infer
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
   reporting: ReportingCore
 ) {
-  const config = reporting.getConfig();
   const setupDeps = reporting.getPluginSetupDeps();
   const getUser = getUserFactory(setupDeps.security);
   return <P, Q, B>(handler: RequestHandlerUser): RequestHandler<P, Q, B, RouteMethod> => {
@@ -36,6 +35,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
 
       if (user) {
         // check allowance with the configured set of roleas + "superuser"
+        const config = reporting.getConfig();
         const allowedRoles = config.get('roles', 'allow') || [];
         const authorizedRoles = [superuserRole, ...allowedRoles];
 

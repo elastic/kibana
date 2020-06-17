@@ -70,12 +70,12 @@ describe('zooming', () => {
         expect(actual).toMatchInlineSnapshot(`
           Object {
             "maximum": Array [
-              25.000000000000007,
-              16.666666666666668,
+              75,
+              50,
             ],
             "minimum": Array [
-              -25,
-              -16.666666666666668,
+              -75,
+              -50,
             ],
           }
         `);
