@@ -85,7 +85,7 @@ interface FetchDataParams {
   bucketSize: string;
 }
 
-type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
+export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 type HasData = () => Promise<boolean>;
