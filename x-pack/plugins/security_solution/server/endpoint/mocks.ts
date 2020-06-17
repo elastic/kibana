@@ -6,7 +6,12 @@
 
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { xpackMocks } from '../../../../mocks';
-import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
+import {
+  AgentService,
+  IngestManagerStartContract,
+  ExternalCallbacks,
+  DatasourceServiceInterface,
+} from '../../../ingest_manager/server';
 
 /**
  * Creates a mock AgentService
@@ -14,6 +19,20 @@ import { AgentService, IngestManagerStartContract } from '../../../ingest_manage
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
+  };
+};
+
+const createMockDatasourceService = (): jest.Mocked<DatasourceServiceInterface> => {
+  return {
+    assignPackageStream: jest.fn(),
+    buildDatasourceFromPackage: jest.fn(),
+    bulkCreate: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    get: jest.fn(),
+    getByIDs: jest.fn(),
+    list: jest.fn(),
+    update: jest.fn(),
   };
 };
 
@@ -32,6 +51,8 @@ export const createMockIngestManagerStartContract = (
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
     agentService: createMockAgentService(),
+    register: jest.fn((...args: ExternalCallbacks) => {}),
+    datasourceService: createMockDatasourceService(),
   };
 };
 
