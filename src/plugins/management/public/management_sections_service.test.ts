@@ -27,9 +27,15 @@ describe('ManagementService', () => {
     managementService = new ManagementSectionsService();
   });
 
+  const capabilities = {
+    navLinks: {},
+    catalogue: {},
+    management: {},
+  };
+
   test('Provides default sections', () => {
     managementService.setup();
-    const start = managementService.start();
+    const start = managementService.start({ capabilities });
 
     expect(start.getAllSections().length).toEqual(6);
     expect(start.getSection(ManagementSectionId.Ingest)).toBeDefined();
@@ -48,7 +54,7 @@ describe('ManagementService', () => {
     expect(setup.getSection('test-section')).not.toBeUndefined();
 
     // Start phase:
-    const start = managementService.start();
+    const start = managementService.start({ capabilities });
 
     expect(start.getSectionsEnabled().length).toEqual(7);
 
