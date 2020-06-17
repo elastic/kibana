@@ -182,6 +182,7 @@ export function SavedQueryManagementComponent({
         panelPaddingSize="none"
         buffer={-8}
         ownFocus
+        repositionOnScroll
       >
         <div
           className="kbnSavedQueryManagement__popover"

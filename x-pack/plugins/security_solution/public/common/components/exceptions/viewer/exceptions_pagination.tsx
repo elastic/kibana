@@ -100,6 +100,7 @@ const ExceptionsViewerPaginationComponent = ({
           isOpen={isOpen}
           closePopover={handleClosePerPageMenu}
           panelPaddingSize="none"
+          repositionOnScroll
         >
           <EuiContextMenuPanel items={items} />
         </EuiPopover>

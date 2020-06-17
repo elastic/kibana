@@ -274,6 +274,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
             }
             isOpen={isOpen}
             closePopover={() => setIsOpen(!isOpen)}
+            repositionOnScroll
           >
             <MoreContainer
               idPrefix={idPrefix}

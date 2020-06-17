@@ -188,6 +188,7 @@ const NodeSubMenuComponents = React.memo(
           button={submenuPopoverButton}
           isOpen={menuIsOpen}
           closePopover={closePopover}
+          repositionOnScroll
         >
           {menuIsOpen && typeof optionsWithActions === 'object' && (
             <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />

@@ -178,6 +178,7 @@ export const EventColumnView = React.memo<Props>(
                 closePopover={closePopover}
                 panelPaddingSize="none"
                 anchorPosition="downLeft"
+                repositionOnScroll
               >
                 <ContextMenuPanel items={grouped.contextMenu} />
               </EuiPopover>

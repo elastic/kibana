@@ -42,6 +42,7 @@ export const TakeActionDropdown = memo(() => {
       anchorPosition="downRight"
       closePopover={closePopover}
       data-test-subj="alertListTakeActionDropdownContent"
+      repositionOnScroll
     >
       <EuiFormRow>
         <EuiButtonEmpty
