@@ -77,11 +77,16 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       await this.filterWithSearchString(dashboardTitle);
       await testSubjects.isDisplayed('mlDashboardSelectionTable > checkboxSelectAll');
       await testSubjects.click('mlDashboardSelectionTable > checkboxSelectAll');
-      await testSubjects.isChecked('mlDashboardSelectionTable > checkboxSelectAll');
+      expect(await testSubjects.isChecked('mlDashboardSelectionTable > checkboxSelectAll')).to.be(
+        true
+      );
       await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper');
       const swimlane = await embeddable.findByClassName('ml-swimlanes');
-      expect(await swimlane.isDisplayed()).to.be(true);
+      expect(await swimlane.isDisplayed()).to.eql(
+        true,
+        'Anomaly swimlane should be displayed in dashboard'
+      );
     },
 
     async waitForDashboardsToLoad() {

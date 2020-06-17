@@ -315,8 +315,8 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     },
 
     async deleteDashboards() {
-      for (const search of Object.values(dashboards)) {
-        await this.deleteDashboardByTitle(search.requestBody.attributes.title);
+      for (const dashboard of Object.values(dashboards)) {
+        await this.deleteDashboardByTitle(dashboard.requestBody.attributes.title);
       }
     },
 
