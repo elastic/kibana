@@ -52,7 +52,7 @@ export class UiActionsService {
     triggers = new Map(),
     actions = new Map(),
     triggerToActions = new Map(),
-    actionHooks = new Set(),
+    actionHooks = [],
   }: UiActionsServiceParams = {}) {
     this.triggers = triggers;
     this.actions = actions;
@@ -88,9 +88,7 @@ export class UiActionsService {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
 
-    const action = new ActionInternal(definition, () =>
-      Array.from(this.actionHooksRegistry.values())
-    );
+    const action = new ActionInternal(definition, () => this.actionHooksRegistry);
 
     this.actions.set(action.id, action);
 
@@ -155,7 +153,7 @@ export class UiActionsService {
   };
 
   public readonly registerActionHook = (hook: ActionHook) => {
-    this.actionHooksRegistry.add(hook);
+    this.actionHooksRegistry.push(hook);
   };
 
   public readonly getAction = <T extends ActionDefinition>(

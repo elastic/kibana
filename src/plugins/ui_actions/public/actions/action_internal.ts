@@ -58,11 +58,10 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   }
 
   public async isCompatible(context: Context<A>): Promise<boolean> {
-    const isCompatibleFromHooks = this.getActionHooks()
-      .map((hook) => hook.onIsCompatible)
-      .filter(Boolean)
-      .reduce((isCompatible, nextHook) => isCompatible && nextHook!(this, context), true);
-    if (!isCompatibleFromHooks) return false;
+    for (const { onIsCompatible } of this.getActionHooks()) {
+      if (onIsCompatible && !onIsCompatible(this, context)) return false;
+    }
+
     if (!this.definition.isCompatible) return true;
     return await this.definition.isCompatible(context);
   }

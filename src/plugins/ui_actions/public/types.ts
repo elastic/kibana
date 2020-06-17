@@ -28,7 +28,7 @@ import { ActionHook } from './actions';
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionInternal>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
-export type ActionHooksRegistry = Set<ActionHook>;
+export type ActionHooksRegistry = ActionHook[];
 
 const DEFAULT_TRIGGER = '';
 
