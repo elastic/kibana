@@ -68,21 +68,6 @@ describe('<PipelinesCreate />', () => {
       expect(exists('versionField')).toBe(true);
     });
 
-    test('should toggle the on-failure processors editor', async () => {
-      const { actions, component, exists } = testBed;
-
-      // On-failure editor should be hidden by default
-      expect(exists('onFailureEditor')).toBe(false);
-
-      await act(async () => {
-        actions.toggleOnFailureSwitch();
-        await nextTick();
-        component.update();
-      });
-
-      expect(exists('onFailureEditor')).toBe(true);
-    });
-
     test('should show the request flyout', async () => {
       const { actions, component, find, exists } = testBed;
 
