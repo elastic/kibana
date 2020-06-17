@@ -15,7 +15,12 @@ import { AlertIndex } from '../index';
 import { RouteCapture } from '../../../common/components/endpoint/route_capture';
 import { depsStartMock } from '../../../common/mock/endpoint';
 import { createStore } from '../../../common/store';
-import { SUB_PLUGINS_REDUCER, mockGlobalState, apolloClientObservable } from '../../../common/mock';
+import {
+  SUB_PLUGINS_REDUCER,
+  mockGlobalState,
+  apolloClientObservable,
+  createSecuritySolutionStorageMock,
+} from '../../../common/mock';
 
 export const alertPageTestRender = () => {
   /**
@@ -25,7 +30,8 @@ export const alertPageTestRender = () => {
   /**
    * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
    */
-  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   const depsStart = depsStartMock();
   depsStart.data.ui.SearchBar.mockImplementation(() => <div />);
