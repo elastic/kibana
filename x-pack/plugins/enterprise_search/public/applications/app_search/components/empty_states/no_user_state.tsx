@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { getUserName } from '../../../shared/get_username';
 import { EngineOverviewHeader } from '../engine_overview_header';
-import { getUserName } from '../../utils/get_username';
 
 import './empty_states.scss';
 
