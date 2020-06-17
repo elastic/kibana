@@ -24,13 +24,16 @@ import { PanelContentError } from './panel_content_error';
  * data perhaps appearing inscrutable/daunting, but the benefit of presenting these fields
  * to the user "as they occur" in ECS, which may help them with e.g. EQL queries.
  *
+ * Given an object like: {a:{b: 1}, c: 'd'} it will yield title/description entries like so:
+ * {title: "a.b", description: "1"}, {title: "c", description: "d"}
+ *
  * @param {object} obj The object to turn into `<dt><dd>` entries
  */
 const objectToDescriptionListEntries = function* (
   obj: object,
   prefix = ''
 ): Generator<{ title: string; description: string }> {
-  const nextPrefix = prefix.length ? `${prefix}/` : '';
+  const nextPrefix = prefix.length ? `${prefix}.` : '';
   for (const [metaKey, metaValue] of Object.entries(obj)) {
     if (typeof metaValue === 'number' || typeof metaValue === 'string') {
       yield { title: nextPrefix + metaKey, description: `${metaValue}` };
