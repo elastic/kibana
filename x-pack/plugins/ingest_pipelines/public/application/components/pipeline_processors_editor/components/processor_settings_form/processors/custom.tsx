@@ -59,7 +59,6 @@ const customConfig: FieldConfig = {
 
 interface Props {
   defaultOptions?: any;
-  helpText?: string | React.ReactNode;
 }
 
 /**
@@ -68,10 +67,9 @@ interface Props {
  *
  * We store the settings in a field called "customOptions"
  **/
-export const Custom: FunctionComponent<Props> = ({ defaultOptions, helpText }) => {
+export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
   return (
     <UseField
-      helpText={helpText}
       path="customOptions"
       component={JsonEditorField}
       config={customConfig}
