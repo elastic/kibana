@@ -3,9 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FetchDataResponse } from '../../typings/data_handler';
+import { FetchDataResponse, FetchData } from '../typings/data_handler';
 
-export const uptimeData: FetchDataResponse = {
+export const fetchUptimeData: FetchData = () => {
+  return Promise.resolve(response);
+};
+
+const response: FetchDataResponse = {
   title: 'Uptiome',
   appLink: '/app/uptime',
   stats: [

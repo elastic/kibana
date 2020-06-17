@@ -5,9 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FetchDataResponse } from '../../typings/data_handler';
+import { FetchDataResponse, FetchData } from '../typings/data_handler';
 
-export const logsData: FetchDataResponse = {
+export const fetchLogsData: FetchData = () => {
+  return Promise.resolve(response);
+};
+
+const response: FetchDataResponse = {
   title: i18n.translate('xpack.logs.observabilityDashboard.title', {
     defaultMessage: 'Logs',
   }),

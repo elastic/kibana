@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { ObservabilityApp } from '../../../typings/common';
 
 export interface ISection {
-  id: string;
+  id: ObservabilityApp;
   title: string;
   icon: string;
   description: string;
@@ -17,7 +18,7 @@ export interface ISection {
 
 export const appsSection: ISection[] = [
   {
-    id: 'logs',
+    id: 'infra_logs',
     title: i18n.translate('xpack.observability.section.apps.logs.title', {
       defaultMessage: 'Logs',
     }),
@@ -47,7 +48,7 @@ export const appsSection: ISection[] = [
     href: 'https://www.elastic.co',
   },
   {
-    id: 'metrics',
+    id: 'infra_metrics',
     title: i18n.translate('xpack.observability.section.apps.metrics.title', {
       defaultMessage: 'Metrics',
     }),
@@ -76,15 +77,4 @@ export const appsSection: ISection[] = [
     }),
     href: 'https://www.elastic.co',
   },
-  // {
-  //   id: 'alert',
-  //   title: i18n.translate('xpack.observability.section.apps.alert.title', {
-  //     defaultMessage: 'Alert',
-  //   }),
-  //   icon: 'watchesApp',
-  //   description: i18n.translate('xpack.observability.section.apps.alert.description', {
-  //     defaultMessage:
-  //       '503 errors stacking up. Applications not responding. CPU and RAM utilization jumping. See these warnings as they happen - not as part of the post-mortem.',
-  //   }),
-  // },
 ];

@@ -11,6 +11,10 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { RegisterDataHandler, registerDataHandler } from './data_handler';
+import { fetchApmData } from './mock/apm.mock';
+import { fetchLogsData } from './mock/logs.mock';
+import { fetchMetricsData } from './mock/metrics.mock';
+import { fetchUptimeData } from './mock/uptime.mock';
 
 export interface ObservabilityPluginSetup {
   dashboard: { register: RegisterDataHandler };
@@ -37,6 +41,27 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
 
         return renderApp(coreStart, params);
       },
+    });
+
+    registerDataHandler({
+      appName: 'apm',
+      fetchData: fetchApmData,
+      hasData: () => Promise.resolve(true),
+    });
+    registerDataHandler({
+      appName: 'infra_logs',
+      fetchData: fetchLogsData,
+      hasData: () => Promise.resolve(true),
+    });
+    registerDataHandler({
+      appName: 'infra_metrics',
+      fetchData: fetchMetricsData,
+      hasData: () => Promise.resolve(true),
+    });
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: fetchUptimeData,
+      hasData: () => Promise.resolve(true),
     });
 
     return {
