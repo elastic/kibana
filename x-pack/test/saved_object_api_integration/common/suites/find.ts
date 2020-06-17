@@ -67,10 +67,9 @@ export const getTestCases = (
       }
 
       return allCases.filter((t) => {
-        const hasNamespaces = Array.isArray(t.namespaces);
         const hasOtherNamespaces =
           hasNamespaces && t.namespaces!.some((ns) => ns !== (currentSpace ?? 'default'));
-        return (!hasNamespaces || hasOtherNamespaces) && predicate(t);
+        return hasOtherNamespaces && predicate(t);
       });
     }
     return allCases.filter(
