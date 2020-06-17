@@ -12,8 +12,8 @@ import { EuiEmptyPrompt, EuiButton, EuiCode, EuiLoadingContent } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n/react';
 import { shallowWithIntl } from '../../../__mocks__';
 
-jest.mock('../../utils/get_username', () => ({ getUserName: jest.fn() }));
-import { getUserName } from '../../utils/get_username';
+jest.mock('../../../shared/get_username', () => ({ getUserName: jest.fn() }));
+import { getUserName } from '../../../shared/get_username';
 
 jest.mock('../../../shared/telemetry', () => ({
   sendTelemetry: jest.fn(),
