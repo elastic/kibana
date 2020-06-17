@@ -69,7 +69,7 @@ function color(whichColor) {
 
 export function maybeTeamAssign(isACoverageIndex, body) {
   const doAddTeam = isACoverageIndex ? true : false;
-  const payload = doAddTeam ? { body, pipeline: TEAM_ASSIGNMENT_PIPELINE_NAME } : body;
+  const payload = doAddTeam ? { ...body, pipeline: TEAM_ASSIGNMENT_PIPELINE_NAME } : body;
   return payload;
 }
 
