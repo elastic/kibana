@@ -47,7 +47,7 @@ export function TimelionInterval($timeout) {
         // Only run this on initialization
         if (newVal !== oldVal || oldVal == null) return;
 
-        if (_.contains($scope.intervalOptions, newVal)) {
+        if (_.includes($scope.intervalOptions, newVal)) {
           $scope.interval = newVal;
         } else {
           $scope.interval = 'other';

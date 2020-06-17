@@ -91,7 +91,7 @@ export function sortByKey(list, reverse, comparator) {
     keys = keys.reverse();
   }
 
-  return _.object(
+  return _.zipObject(
     keys,
     _.map(keys, (key) => {
       return list[key];

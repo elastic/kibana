@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { eq, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
+import { eq, head, gt, gte, last, lt, lte, sortBy } from 'lodash';
 import { mix, parseToRgb, toColorString } from 'polished';
 import {
   InfraWaffleMapBounds,
@@ -79,7 +79,7 @@ export const calculateSteppedGradientColor = (
       return rule.color;
     }
     return color;
-  }, first(rules).color || defaultColor);
+  }, head(rules).color || defaultColor);
 };
 
 export const calculateStepColor = (
@@ -116,7 +116,7 @@ export const calculateGradientColor = (
       return rule;
     }
     return acc;
-  }, first(sortedRules));
+  }, head(sortedRules));
   const endRule = sortedRules.filter((r) => r !== startRule).find((r) => r.value >= normValue);
   if (!endRule) {
     return startRule.color;

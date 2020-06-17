@@ -16,8 +16,8 @@ export function getFieldTypeFromMapping(index, fieldName) {
       ml.getFieldCaps({ index, fields: [fieldName] })
         .then((resp) => {
           let fieldType = '';
-          _.each(resp.fields, (field) => {
-            _.each(field, (type) => {
+          _.forEach(resp.fields, (field) => {
+            _.forEach(field, (type) => {
               if (fieldType === '') {
                 fieldType = type.type;
               }

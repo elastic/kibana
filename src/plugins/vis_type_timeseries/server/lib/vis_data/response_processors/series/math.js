@@ -18,7 +18,7 @@
  */
 
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
-import { startsWith, flatten, values, first, last } from 'lodash';
+import { startsWith, flatten, values, head, last } from 'lodash';
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
 import { getSplits } from '../../helpers/get_splits';
@@ -69,7 +69,7 @@ export function mathAgg(resp, panel, series, meta) {
         // Get the first var and check that it shows up in the split data otherwise
         // we need to return an empty array for the data since we can't operate
         // without the first variable
-        const firstVar = first(mathMetric.variables);
+        const firstVar = head(mathMetric.variables);
         if (!splitData[firstVar.name]) {
           return {
             id: split.id,
@@ -80,7 +80,7 @@ export function mathAgg(resp, panel, series, meta) {
           };
         }
         // Use the first var to collect all the timestamps
-        const timestamps = splitData[firstVar.name].map((r) => first(r));
+        const timestamps = splitData[firstVar.name].map((r) => head(r));
         // Map the timestamps to actual data
         const data = timestamps.map((ts, index) => {
           const params = mathMetric.variables.reduce((acc, v) => {

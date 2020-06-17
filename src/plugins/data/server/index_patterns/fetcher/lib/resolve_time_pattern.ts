@@ -65,7 +65,7 @@ export async function resolveTimePattern(callCluster: APICaller, timePattern: st
         isMatch: indexName === parsed.format(timePattern),
       };
     })
-    .sortByOrder(['valid', 'order'], ['desc', 'desc'])
+    .orderBy(['valid', 'order'], ['desc', 'desc'])
     .value();
 
   return {

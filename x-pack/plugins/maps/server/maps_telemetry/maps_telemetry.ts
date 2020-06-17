@@ -120,7 +120,7 @@ export function buildMapsTelemetry({
         const isEmsFile = _.get(layer, 'sourceDescriptor.type') === SOURCE_TYPES.EMS_FILE;
         return isEmsFile && _.get(layer, 'sourceDescriptor.id');
       })
-      .pick((val, key) => key !== 'false')
+      .pickBy((val, key) => key !== 'false')
       .value()
   );
 

@@ -132,7 +132,7 @@ export default function chainRunner(tlConfig) {
       });
     });
     return Bluebird.all(seriesList).then(function (args) {
-      const list = _.chain(args).pluck('list').flatten().value();
+      const list = _.chain(args).map('list').flatten().value();
       const seriesList = _.merge.apply(this, _.flatten([{}, args]));
       seriesList.list = list;
       return seriesList;
@@ -141,7 +141,7 @@ export default function chainRunner(tlConfig) {
 
   function preProcessSheet(sheet) {
     let queries = {};
-    _.each(sheet, function (chainList, i) {
+    _.forEach(sheet, function (chainList, i) {
       try {
         const queriesInCell = _.mapValues(preprocessChain(chainList), function (val) {
           val.cell = i;
@@ -164,7 +164,7 @@ export default function chainRunner(tlConfig) {
     return Bluebird.settle(promises).then(function (resolvedDatasources) {
       stats.queryTime = new Date().getTime();
 
-      _.each(queries, function (query, i) {
+      _.forEach(queries, function (query, i) {
         const functionDef = tlConfig.getFunction(query.function);
         const resolvedDatasource = resolvedDatasources[i];
 

@@ -310,7 +310,7 @@ export const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs,
     // Iterate through the anomaly records, adding anomalyScore properties
     // to the chartData entries for anomalous buckets.
     const chartDataForPointSearch = getChartDataForPointSearch(chartData, records[0], chartType);
-    _.each(records, (record) => {
+    _.forEach(records, (record) => {
       // Look for a chart point with the same time as the record.
       // If none found, insert a point for anomalies due to a gap in the data.
       const recordTime = record[ML_TIME_FIELD_NAME];
@@ -332,7 +332,7 @@ export const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs,
           chartPoint.numberOfCauses = causes.length;
           if (causes.length === 1) {
             // If only a single cause, copy actual and typical values to the top level.
-            const cause = _.first(record.causes);
+            const cause = _.head(record.causes);
             chartPoint.actual = cause.actual;
             chartPoint.typical = cause.typical;
           }
@@ -347,7 +347,7 @@ export const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs,
     // Add a scheduledEvents property to any points in the chart data set
     // which correspond to times of scheduled events for the job.
     if (scheduledEvents !== undefined) {
-      _.each(scheduledEvents, (events, time) => {
+      _.forEach(scheduledEvents, (events, time) => {
         const chartPoint = findChartPointForTime(chartDataForPointSearch, Number(time));
         if (chartPoint !== undefined) {
           // Note if the scheduled event coincides with an absence of the underlying metric data,
@@ -384,7 +384,7 @@ export const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs,
       const allDataPoints = _.reduce(
         processedData,
         (datapoints, series) => {
-          _.each(series, (d) => datapoints.push(d));
+          _.forEach(series, (d) => datapoints.push(d));
           return datapoints;
         },
         []
@@ -416,7 +416,7 @@ function processRecordsForDisplay(anomalyRecords) {
 
   // Aggregate by job, detector, and analysis fields (partition, by, over).
   const aggregatedData = {};
-  _.each(anomalyRecords, (record) => {
+  _.forEach(anomalyRecords, (record) => {
     // Check if we can plot a chart for this record, depending on whether the source data
     // is chartable, and if model plot is enabled for the job.
     const job = mlJobService.getJob(record.job_id);
@@ -520,20 +520,20 @@ function processRecordsForDisplay(anomalyRecords) {
 
   let recordsForSeries = [];
   // Convert to an array of the records with the highest record_score per unique series.
-  _.each(aggregatedData, (detectorsForJob) => {
-    _.each(detectorsForJob, (groupsForDetector) => {
+  _.forEach(aggregatedData, (detectorsForJob) => {
+    _.forEach(detectorsForJob, (groupsForDetector) => {
       if (groupsForDetector.maxScoreRecord !== undefined) {
         // Detector with no partition / by field.
         recordsForSeries.push(groupsForDetector.maxScoreRecord);
       } else {
-        _.each(groupsForDetector, (valuesForGroup) => {
-          _.each(valuesForGroup, (dataForGroupValue) => {
+        _.forEach(groupsForDetector, (valuesForGroup) => {
+          _.forEach(valuesForGroup, (dataForGroupValue) => {
             if (dataForGroupValue.maxScoreRecord !== undefined) {
               recordsForSeries.push(dataForGroupValue.maxScoreRecord);
             } else {
               // Second level of aggregation for partition and by/over.
-              _.each(dataForGroupValue, (splitsForGroup) => {
-                _.each(splitsForGroup, (dataForSplitValue) => {
+              _.forEach(dataForGroupValue, (splitsForGroup) => {
+                _.forEach(splitsForGroup, (dataForSplitValue) => {
                   recordsForSeries.push(dataForSplitValue.maxScoreRecord);
                 });
               });
@@ -560,7 +560,7 @@ function calculateChartRange(
   // Calculate the time range for the charts.
   // Fit in as many points in the available container width plotted at the job bucket span.
   const midpointMs = Math.ceil((earliestMs + latestMs) / 2);
-  const maxBucketSpanMs = Math.max.apply(null, _.pluck(seriesConfigs, 'bucketSpanSeconds')) * 1000;
+  const maxBucketSpanMs = Math.max.apply(null, _.map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
 
   const pointsToPlotFullSelection = Math.ceil((latestMs - earliestMs) / maxBucketSpanMs);
 
@@ -584,7 +584,7 @@ function calculateChartRange(
     let minMs = recordsToPlot[0][timeFieldName];
     let maxMs = recordsToPlot[0][timeFieldName];
 
-    _.each(recordsToPlot, (record) => {
+    _.forEach(recordsToPlot, (record) => {
       const diffMs = maxMs - minMs;
       if (diffMs < maxTimeSpan) {
         const recordTime = record[timeFieldName];

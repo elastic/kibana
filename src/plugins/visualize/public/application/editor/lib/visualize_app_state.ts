@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction, omit, union } from 'lodash';
+import { isFunction, omitBy, union } from 'lodash';
 
 import { migrateAppState } from './migrate_app_state';
 import {
@@ -35,7 +35,7 @@ interface Arguments {
 }
 
 function toObject(state: PureVisState): PureVisState {
-  return omit(state, (value, key: string) => {
+  return omitBy(state, (value, key: string) => {
     return key.charAt(0) === '$' || key.charAt(0) === '_' || isFunction(value);
   });
 }

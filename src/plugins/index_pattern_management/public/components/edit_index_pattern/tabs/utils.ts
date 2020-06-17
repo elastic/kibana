@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Dictionary, countBy, defaults, unique } from 'lodash';
+import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
 import { IndexPatternManagementStart } from '../../../../../../plugins/index_pattern_management/public';
@@ -145,7 +145,7 @@ export function convertToEuiSelectOption(options: string[], type: string) {
         ]
       : [];
   return euiOptions.concat(
-    unique(options).map((option) => {
+    uniq(options).map((option) => {
       return {
         value: option,
         text: option,

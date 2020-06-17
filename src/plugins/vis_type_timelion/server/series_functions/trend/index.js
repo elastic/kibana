@@ -72,7 +72,7 @@ export default new Chainable('trend', {
   fn: function absFn(args) {
     const newSeries = _.cloneDeep(args.byName.inputSeries);
 
-    _.each(newSeries.list, function (series) {
+    _.forEach(newSeries.list, function (series) {
       const length = series.data.length;
       let start = args.byName.start == null ? 0 : args.byName.start;
       let end = args.byName.end == null ? length : args.byName.end;
@@ -83,11 +83,11 @@ export default new Chainable('trend', {
 
       const result = args.byName.mode === 'log' ? log(subset) : linear(subset);
 
-      _.each(series.data, function (point) {
+      _.forEach(series.data, function (point) {
         point[1] = null;
       });
 
-      _.each(result, function (point, i) {
+      _.forEach(result, function (point, i) {
         series.data[start + i] = point;
       });
     });

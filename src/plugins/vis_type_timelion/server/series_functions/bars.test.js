@@ -32,9 +32,9 @@ describe('bars.js', () => {
   it('creates the bars property, with defaults, on all series', () => {
     return invoke(fn, [seriesList]).then((r) => {
       const bars = _.map(r.output.list, 'bars');
-      _.each(bars, (bar) => expect(bar).to.be.a('object'));
-      _.each(bars, (bar) => expect(bar.lineWidth).to.equal(6));
-      _.each(bars, (bar) => expect(bar.show).to.equal(1));
+      _.forEach(bars, (bar) => expect(bar).to.be.a('object'));
+      _.forEach(bars, (bar) => expect(bar.lineWidth).to.equal(6));
+      _.forEach(bars, (bar) => expect(bar.show).to.equal(1));
     });
   });
 

@@ -22,7 +22,7 @@ export const vents = {
     const args = Array.prototype.slice.call(arguments);
     const id = args.shift();
     if (_vents[id]) {
-      _.each(_vents[id], function (cb) {
+      _.forEach(_vents[id], function (cb) {
         cb.apply(null, args);
       });
     }

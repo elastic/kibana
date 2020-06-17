@@ -133,12 +133,12 @@ function loadApisFromJson(
     bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
   const api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
   const names = [];
-  _.each(json, function (apiJson, name) {
+  _.forEach(json, function (apiJson, name) {
     names.unshift(name);
-    _.each(apiJson.globals || {}, function (globalJson, globalName) {
+    _.forEach(apiJson.globals || {}, function (globalJson, globalName) {
       api.addGlobalAutocompleteRules(globalName, globalJson);
     });
-    _.each(apiJson.endpoints || {}, function (endpointJson, endpointName) {
+    _.forEach(apiJson.endpoints || {}, function (endpointJson, endpointName) {
       api.addEndpointDescription(endpointName, endpointJson);
     });
   });

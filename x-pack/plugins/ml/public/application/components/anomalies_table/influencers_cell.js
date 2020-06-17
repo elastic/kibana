@@ -148,7 +148,7 @@ export class InfluencersCell extends Component {
 
     const influencers = [];
     recordInfluencers.forEach((influencer) => {
-      _.each(influencer, (influencerFieldValue, influencerFieldName) => {
+      _.forEach(influencer, (influencerFieldValue, influencerFieldName) => {
         influencers.push({
           influencerFieldName,
           influencerFieldValue,

@@ -27,7 +27,7 @@ function unflatten(data) {
 
   const regex = new RegExp(/\.?([^.\[\]]+)|\[(\d+)\]/g);
   const result = {};
-  _.each(data, function (val, p) {
+  _.forEach(data, function (val, p) {
     let cur = result;
     let prop = '';
     let m;
@@ -71,7 +71,7 @@ export default new Chainable('props', {
     },
   }),
   fn: function firstFn(args) {
-    const properties = unflatten(_.omit(args.byName, 'inputSeries', 'global'));
+    const properties = unflatten(_.omit(args.byName, ['inputSeries', 'global']));
 
     if (args.byName.global) {
       _.assign(args.byName.inputSeries, properties);

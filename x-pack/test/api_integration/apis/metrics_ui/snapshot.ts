@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { first, last } from 'lodash';
+import { head, last } from 'lodash';
 
 import {
   InfraSnapshotMetricInput,
@@ -60,14 +60,14 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(5);
-            const firstNode = first(nodes);
+            const firstNode = head(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
-            expect(first(firstNode.path)).to.have.property(
+            expect(head(firstNode.path)).to.have.property(
               'value',
               '242fddb9d376bbf0e38025d81764847ee5ec0308adfa095918fd3266f9d06c6a'
             );
-            expect(first(firstNode.path)).to.have.property('label', 'docker-autodiscovery_nginx_1');
+            expect(head(firstNode.path)).to.have.property('label', 'docker-autodiscovery_nginx_1');
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
@@ -103,14 +103,14 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(65);
-            const firstNode = first(nodes);
+            const firstNode = head(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
-            expect(first(firstNode.path)).to.have.property(
+            expect(head(firstNode.path)).to.have.property(
               'value',
               '00597dd7-a348-11e9-9a96-42010a84004d'
             );
-            expect(first(firstNode.path)).to.have.property(
+            expect(head(firstNode.path)).to.have.property(
               'label',
               '00597dd7-a348-11e9-9a96-42010a84004d'
             );
@@ -135,14 +135,14 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(136);
-            const firstNode = first(nodes);
+            const firstNode = head(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
-            expect(first(firstNode.path)).to.have.property(
+            expect(head(firstNode.path)).to.have.property(
               'value',
               '01078c21eef4194b0b96253c7c6c32796aba66e3f3f37e26ac97d1dff3e2e91a'
             );
-            expect(first(firstNode.path)).to.have.property(
+            expect(head(firstNode.path)).to.have.property(
               'label',
               'k8s_prometheus-to-sd-exporter_fluentd-gcp-v3.2.0-wcmm4_kube-system_b214d17a-9ae0-11e9-9a96-42010a84004d_0'
             );
@@ -174,11 +174,11 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = head(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
-            expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
-            expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
+            expect(head(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
+            expect(head(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
@@ -211,11 +211,11 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = head(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
-            expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
-            expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
+            expect(head(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
+            expect(head(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.have.property('timeseries');
             expect(firstNode.metric.timeseries?.rows.length).to.equal(58);
@@ -246,11 +246,11 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = head(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
-            expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
-            expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
+            expect(head(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
+            expect(head(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.have.property('timeseries');
             expect(firstNode.metric.timeseries?.rows.length).to.equal(7);
@@ -281,11 +281,11 @@ export default function ({ getService }: FtrProviderContext) {
         if (snapshot) {
           const { nodes } = snapshot;
           expect(nodes.length).to.equal(1);
-          const firstNode = first(nodes);
+          const firstNode = head(nodes);
           expect(firstNode).to.have.property('path');
           expect(firstNode.path.length).to.equal(1);
-          expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
-          expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
+          expect(head(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
+          expect(head(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
           expect(firstNode).to.have.property('metric');
           expect(firstNode.metric).to.eql({
             name: 'custom',
@@ -314,10 +314,10 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = head(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(2);
-            expect(first(firstNode.path)).to.have.property('value', 'virtualbox');
+            expect(head(firstNode.path)).to.have.property('value', 'virtualbox');
             expect(last(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
           }
         });
@@ -342,10 +342,10 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = head(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(3);
-            expect(first(firstNode.path)).to.have.property('value', 'vagrant');
+            expect(head(firstNode.path)).to.have.property('value', 'vagrant');
             expect(firstNode.path[1]).to.have.property('value', 'virtualbox');
             expect(last(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
           }

@@ -102,7 +102,7 @@ describe('get_local_stats', () => {
     cluster_uuid: clusterUuid,
     cluster_name: clusterName,
     version,
-    cluster_stats: omit(clusterStats, '_nodes', 'cluster_name'),
+    cluster_stats: omit(clusterStats, ['_nodes', 'cluster_name']),
     stack_stats: {
       kibana: {
         great: 'googlymoogly',

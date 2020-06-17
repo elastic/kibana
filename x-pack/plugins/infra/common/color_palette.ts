@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { difference, first, values } from 'lodash';
+import { difference, head, values } from 'lodash';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
 export enum MetricsExplorerColor {
@@ -55,5 +55,5 @@ export const colorTransformer = createPaletteTransformer(defaultPalette);
 
 export const sampleColor = (usedColors: MetricsExplorerColor[] = []): MetricsExplorerColor => {
   const available = difference(values(MetricsExplorerColor) as MetricsExplorerColor[], usedColors);
-  return first(available) || MetricsExplorerColor.color0;
+  return head(available) || MetricsExplorerColor.color0;
 };

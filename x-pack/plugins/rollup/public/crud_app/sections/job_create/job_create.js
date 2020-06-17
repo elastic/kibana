@@ -6,10 +6,10 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import mapValues from 'lodash/object/mapValues';
-import cloneDeep from 'lodash/lang/cloneDeep';
-import debounce from 'lodash/function/debounce';
-import first from 'lodash/array/first';
+import mapValues from 'lodash/mapValues';
+import cloneDeep from 'lodash/cloneDeep';
+import debounce from 'lodash/debounce';
+import first from 'lodash/first';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

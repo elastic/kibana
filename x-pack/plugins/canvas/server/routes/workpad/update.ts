@@ -38,7 +38,7 @@ const workpadUpdateHandler = async (
     CANVAS_TYPE,
     {
       ...workpadObject.attributes,
-      ...omit(payload, 'id'), // never write the id property
+      ...omit(payload, ['id']), // never write the id property
       '@timestamp': now, // always update the modified time
       '@created': workpadObject.attributes['@created'], // ensure created is not modified
     },

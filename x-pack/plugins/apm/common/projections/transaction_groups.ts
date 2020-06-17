@@ -25,7 +25,7 @@ export function getTransactionGroupsProjection({
 }) {
   const transactionsProjection = getTransactionsProjection({
     setup,
-    ...(omit(options, 'type') as Omit<typeof options, 'type'>),
+    ...(omit(options, ['type']) as Omit<typeof options, ['type']>),
   });
 
   const bool =

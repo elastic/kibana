@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { each, union } from 'lodash';
+import { forEach, union } from 'lodash';
 import { Filter } from '../../es_query';
 import { dedupFilters } from './dedup_filters';
 
@@ -31,7 +31,7 @@ import { dedupFilters } from './dedup_filters';
 export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
   let results: Filter[] = [];
 
-  each(filters, (filter: Filter) => {
+  forEach(filters, (filter: Filter) => {
     results = union(results, dedupFilters(results, [filter]), comparatorOptions);
   });
 

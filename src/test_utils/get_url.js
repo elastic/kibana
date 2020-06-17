@@ -44,12 +44,12 @@ export default function getUrl(config, app) {
 }
 
 getUrl.noAuth = function getUrlNoAuth(config, app) {
-  config = _.pick(config, function (val, param) {
+  config = _.pickBy(config, function (val, param) {
     return param !== 'auth';
   });
   return getUrl(config, app);
 };
 
 getUrl.baseUrl = function getBaseUrl(config) {
-  return url.format(_.pick(config, 'protocol', 'hostname', 'port'));
+  return url.format(_.pick(config, ['protocol', 'hostname', 'port']));
 };

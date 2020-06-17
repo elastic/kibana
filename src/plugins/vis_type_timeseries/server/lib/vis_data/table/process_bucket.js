@@ -21,7 +21,7 @@ import { buildProcessorFunction } from '../build_processor_function';
 import { processors } from '../response_processors/table';
 import { getLastValue } from '../../../../common/get_last_value';
 import regression from 'regression';
-import { first, get } from 'lodash';
+import { head, get } from 'lodash';
 import { overwrite } from '../helpers';
 import { getActiveSeries } from '../helpers/get_active_series';
 
@@ -40,7 +40,7 @@ export function processBucket(panel) {
       }
 
       const processor = buildProcessorFunction(processors, bucket, panel, series);
-      const result = first(processor([]));
+      const result = head(processor([]));
       if (!result) return null;
       const data = get(result, 'data', []);
       const linearRegression = regression.linear(data);

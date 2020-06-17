@@ -45,7 +45,7 @@ export default (function () {
     help += 'Argument | Accepts | Description\n';
     help += '--- | --- | ---\n';
 
-    _.each(args, function (arg) {
+    _.forEach(args, function (arg) {
       help += arg.name + ' | *' + _.without(arg.types, 'null').join('/') + '* | ';
       help += arg.help ? arg.help : '*no help available*';
       help += '  \n';

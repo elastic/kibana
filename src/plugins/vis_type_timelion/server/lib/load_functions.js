@@ -47,9 +47,9 @@ export default function (directory) {
     })
     .value();
 
-  const functions = _.zipObject(files.concat(directories));
+  const functions = _.fromPairs(files.concat(directories));
 
-  _.each(functions, function (func) {
+  _.forEach(functions, function (func) {
     _.assign(functions, processFunctionDefinition(func));
   });
 

@@ -116,7 +116,7 @@ function _groupValues(allValues, params) {
       k = value == null ? undefined : [value];
     }
 
-    _.each(k, function (key) {
+    _.forEach(k, function (key) {
       if (groups.hasOwnProperty(key)) {
         groups[key].count++;
       } else {

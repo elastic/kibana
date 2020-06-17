@@ -166,9 +166,9 @@ describe('Vislib Labels Module Test Suite', function () {
       seriesArr = Array.isArray(seriesLabels);
       rowsArr = Array.isArray(rowsLabels);
       uniqSeriesLabels = _.chain(rowsData.rows)
-        .pluck('series')
+        .map('series')
         .flattenDeep()
-        .pluck('label')
+        .map('label')
         .uniq()
         .value();
     });

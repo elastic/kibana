@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { first } from 'lodash';
+import { head } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { InfraBackendLibs } from '../lib/infra_types';
 
@@ -48,7 +48,7 @@ export const initIpToHostName = ({ framework }: InfraBackendLibs) => {
             body: { message: 'Host with matching IP address not found.' },
           });
         }
-        const hostDoc = first(hits.hits);
+        const hostDoc = head(hits.hits);
         return response.ok({ body: { host: hostDoc._source.host.name } });
       } catch ({ statusCode = 500, message = 'Unknown error occurred' }) {
         return response.customError({

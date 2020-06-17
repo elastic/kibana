@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { get, first } from 'lodash';
+import { get, head } from 'lodash';
 import { getTitle } from './get_title';
 import { getUnits } from './get_units';
 import { MonitoringTimeseries } from './monitoring_timeseries';
@@ -56,7 +56,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
   const title = getTitle(series);
   const titleForAriaIds = title.replace(/\s+/, '--');
   const units = getUnits(series);
-  const bucketSize = get(first(series), 'bucket_size'); // bucket size will be the same for all metrics in all series
+  const bucketSize = get(head(series), 'bucket_size'); // bucket size will be the same for all metrics in all series
 
   const seriesScreenReaderTextList = [
     i18n.translate('xpack.monitoring.chart.seriesScreenReaderListDescription', {

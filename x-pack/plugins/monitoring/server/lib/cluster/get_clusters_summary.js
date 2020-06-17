@@ -84,7 +84,7 @@ export function getClustersSummary(server, clusters, kibanaUuid, isCcrEnabled) {
         logs,
       },
       logstash,
-      kibana: omit(kibana, 'uuids'),
+      kibana: omit(kibana, ['uuids']),
       ml,
       ccs,
       beats,

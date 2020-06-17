@@ -72,7 +72,7 @@ function commandsSummary(program) {
   }, 0);
 
   return cmds.reduce(function (help, cmd) {
-    return `${help || ''}${_.padRight(cmd[0], cmdLColWidth)} ${cmd[1] || ''}\n`;
+    return `${help || ''}${_.padEnd(cmd[0], cmdLColWidth)} ${cmd[1] || ''}\n`;
   }, '');
 }
 

@@ -13,7 +13,7 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
   const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
 
   function isOnPage(hash) {
-    return _.contains(window.location.hash, hash);
+    return _.includes(window.location.hash, hash);
   }
 
   /*

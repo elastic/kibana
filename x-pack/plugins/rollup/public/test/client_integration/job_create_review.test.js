@@ -5,12 +5,12 @@
  */
 
 import { pageHelpers, mockHttpRequest } from './helpers';
-import { first } from 'lodash';
+import { head } from 'lodash';
 import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash/function/debounce', () => (fn) => fn);
+jest.mock('lodash/debounce', () => (fn) => fn);
 
 jest.mock('../../kibana_services', () => {
   const services = require.requireActual('../../kibana_services');
@@ -138,7 +138,7 @@ describe('Create Rollup Job, step 6: Review', () => {
     describe('without starting job after creation', () => {
       it('should call the "create" Api server endpoint', async () => {
         mockHttpRequest(startMock.http, {
-          createdJob: first(JOBS.jobs),
+          createdJob: head(JOBS.jobs),
         });
 
         await goToStep(6);
@@ -159,7 +159,7 @@ describe('Create Rollup Job, step 6: Review', () => {
     describe('with starting job after creation', () => {
       it('should call the "create" and "start" Api server endpoints', async () => {
         mockHttpRequest(startMock.http, {
-          createdJob: first(JOBS.jobs),
+          createdJob: head(JOBS.jobs),
         });
 
         await goToStep(6);

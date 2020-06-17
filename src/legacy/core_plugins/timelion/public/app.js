@@ -427,7 +427,7 @@ app.controller('timelion', function (
     const httpResult = $http
       .post('../api/timelion/run', {
         sheet: $scope.state.sheet,
-        time: _.extend(
+        time: _.assignIn(
           {
             from: timeRangeBounds.min,
             to: timeRangeBounds.max,
@@ -447,7 +447,7 @@ app.controller('timelion', function (
       .then(function (resp) {
         $scope.stats = resp.stats;
         $scope.sheet = resp.sheet;
-        _.each(resp.sheet, function (cell) {
+        _.forEach(resp.sheet, function (cell) {
           if (cell.exception) {
             $scope.state.selected = cell.plot;
           }

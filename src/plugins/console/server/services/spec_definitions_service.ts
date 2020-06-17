@@ -45,7 +45,7 @@ export class SpecDefinitionsService {
       copiedDescription = { ...this.endpoints[endpoint] };
     }
     let urlParamsDef: any;
-    _.each(description.patterns || [], function (p) {
+    _.forEach(description.patterns || [], function (p) {
       if (p.indexOf('{indices}') >= 0) {
         urlParamsDef = urlParamsDef || {};
         urlParamsDef.ignore_unavailable = '__flag__';

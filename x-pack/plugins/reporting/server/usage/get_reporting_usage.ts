@@ -75,8 +75,8 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
   // merge pdf stats into pdf jobtype key
   const pdfJobs = jobTypes[PRINTABLE_PDF_JOBTYPE];
   if (pdfJobs) {
-    const pdfAppBuckets = get<KeyCountBucket[]>(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
-    const pdfLayoutBuckets = get<KeyCountBucket[]>(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
+    const pdfAppBuckets = get<KeyCountBucket[]>(aggs[OBJECT_TYPES_KEY], 'pdf.buckets', []);
+    const pdfLayoutBuckets = get<KeyCountBucket[]>(aggs[LAYOUT_TYPES_KEY], 'pdf.buckets', []);
     pdfJobs.app = getKeyCount<AppCounts>(pdfAppBuckets);
     pdfJobs.layout = getKeyCount<LayoutCounts>(pdfLayoutBuckets);
   }

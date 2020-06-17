@@ -26,16 +26,12 @@ export function wrapComponentWithDefaults(component, defaults) {
     if (!result) {
       return result;
     }
-    result = _.map(
-      result,
-      function (term) {
-        if (!_.isObject(term)) {
-          term = { name: term };
-        }
-        return _.defaults(term, defaults);
-      },
-      this
-    );
+    result = _.map(result, (term) => {
+      if (!_.isObject(term)) {
+        term = { name: term };
+      }
+      return _.defaults(term, defaults);
+    });
     return result;
   };
   return component;
@@ -77,9 +73,9 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
 
   tracer('starting token evaluation [' + token + ']');
 
-  _.each(walkingStates, function (ws) {
+  _.forEach(walkingStates, function (ws) {
     const contextForState = passThroughContext(context, ws.contextExtensionList);
-    _.each(ws.components, function (component) {
+    _.forEach(ws.components, function (component) {
       tracer('evaluating [' + token + '] with [' + component.name + ']', component);
       const result = component.match(token, contextForState, editor);
       if (result && !_.isEmpty(result)) {
@@ -134,10 +130,10 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
   );
   if (includeAutoComplete) {
     let autoCompleteSet = [];
-    _.each(walkStates, function (ws) {
+    _.forEach(walkStates, function (ws) {
       const contextForState = passThroughContext(context, ws.contextExtensionList);
-      _.each(ws.components, function (component) {
-        _.each(component.getTerms(contextForState, editor), function (term) {
+      _.forEach(ws.components, function (component) {
+        _.forEach(component.getTerms(contextForState, editor), function (term) {
           if (!_.isObject(term)) {
             term = { name: term };
           }
@@ -145,7 +141,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
         });
       });
     });
-    autoCompleteSet = _.uniq(autoCompleteSet, false);
+    autoCompleteSet = _.uniq(autoCompleteSet);
     context.autoCompleteSet = autoCompleteSet;
   }
 
@@ -170,7 +166,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
       wsToUse = walkStates[0];
     }
 
-    _.each(wsToUse.contextExtensionList, function (extension) {
+    _.forEach(wsToUse.contextExtensionList, function (extension) {
       _.assign(context, extension);
     });
   }

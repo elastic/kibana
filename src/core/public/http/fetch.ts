@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { merge } from 'lodash';
+import { merge, omitBy, isNil } from 'lodash';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
 
@@ -112,6 +112,10 @@ export class Fetch {
   };
 
   private createRequest(options: HttpFetchOptionsWithPath): Request {
+    const filteredOptions = {
+      ...options,
+      query: omitBy(options.query, isNil),
+    };
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
       query,
@@ -125,15 +129,16 @@ export class Fetch {
         credentials: 'same-origin',
         prependBasePath: true,
       },
-      options,
+      filteredOptions,
       {
         headers: {
           'Content-Type': 'application/json',
-          ...options.headers,
+          ...filteredOptions.headers,
           'kbn-version': this.params.kibanaVersion,
         },
       }
     );
+
     const url = format({
       pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
       query,

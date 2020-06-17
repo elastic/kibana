@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues, first } from 'lodash';
+import { mapValues, head } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
@@ -54,7 +54,7 @@ const getCurrentValueFromAggregations = (
     }
     if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
       const values = mostRecentBucket.aggregatedValue?.values || [];
-      const firstValue = first(values);
+      const firstValue = head(values);
       if (!firstValue) return null;
       return firstValue.value;
     }
@@ -296,7 +296,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
     );
 
     // Because each alert result has the same group definitions, just grap the groups from the first one.
-    const groups = Object.keys(first(alertResults));
+    const groups = Object.keys(head(alertResults));
     for (const group of groups) {
       const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
 

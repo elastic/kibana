@@ -60,7 +60,7 @@ export function migrateFilter(filter: Filter, indexPattern?: IIndexPattern) {
               ...params,
               query,
             },
-            'type'
+            ['type']
           ),
         },
       },

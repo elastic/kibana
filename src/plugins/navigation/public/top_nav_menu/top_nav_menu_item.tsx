@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { capitalize, isFunction } from 'lodash';
+import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
@@ -50,11 +50,11 @@ export function TopNavMenuItem(props: TopNavMenuData) {
 
   const btn = props.emphasize ? (
     <EuiButton {...commonButtonProps} size="s" fill>
-      {capitalize(props.label || props.id!)}
+      {upperFirst(props.label || props.id!)}
     </EuiButton>
   ) : (
     <EuiButtonEmpty {...commonButtonProps} size="xs">
-      {capitalize(props.label || props.id!)}
+      {upperFirst(props.label || props.id!)}
     </EuiButtonEmpty>
   );
 

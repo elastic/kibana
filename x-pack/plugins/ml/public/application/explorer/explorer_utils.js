@@ -8,7 +8,7 @@
  * utils for Anomaly Explorer.
  */
 
-import { chain, each, get, union, uniq } from 'lodash';
+import { chain, forEach, get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
@@ -450,7 +450,7 @@ export function processOverallResults(scoresByTime, searchBounds, interval) {
   if (Object.keys(scoresByTime).length > 0) {
     // Store the earliest and latest times of the data returned by the ES aggregations,
     // These will be used for calculating the earliest and latest times for the swimlane charts.
-    each(scoresByTime, (score, timeMs) => {
+    forEach(scoresByTime, (score, timeMs) => {
       const time = timeMs / 1000;
       dataset.points.push({
         laneLabel: overallLabel,
@@ -490,11 +490,11 @@ export function processViewByResults(
   const laneLabels = [];
   const maxScoreByLaneLabel = {};
 
-  each(scoresByInfluencerAndTime, (influencerData, influencerFieldValue) => {
+  forEach(scoresByInfluencerAndTime, (influencerData, influencerFieldValue) => {
     laneLabels.push(influencerFieldValue);
     maxScoreByLaneLabel[influencerFieldValue] = 0;
 
-    each(influencerData, (anomalyScore, timeMs) => {
+    forEach(influencerData, (anomalyScore, timeMs) => {
       const time = timeMs / 1000;
       dataset.points.push({
         laneLabel: influencerFieldValue,

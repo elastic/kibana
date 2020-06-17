@@ -277,7 +277,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           if (legendCaption) {
             legendCaption.html(emptyCaption);
           }
-          _.each(legendValueNumbers, function (num) {
+          _.forEach(legendValueNumbers, function (num) {
             $(num).empty();
           });
         }
@@ -346,7 +346,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
             }
 
             if (serie._global) {
-              _.merge(options, serie._global, function (objVal, srcVal) {
+              _.mergeWith(options, serie._global, function (objVal, srcVal) {
                 // This is kind of gross, it means that you can't replace a global value with a null
                 // best you can do is an empty string. Deal with it.
                 if (objVal == null) return srcVal;
@@ -380,7 +380,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           legendScope = $scope.$new();
           // Used to toggle the series, and for displaying values on hover
           legendValueNumbers = canvasElem.find('.ngLegendValueNumber');
-          _.each(canvasElem.find('.ngLegendValue'), function (elem) {
+          _.forEach(canvasElem.find('.ngLegendValue'), function (elem) {
             $compile(elem)(legendScope);
           });
 

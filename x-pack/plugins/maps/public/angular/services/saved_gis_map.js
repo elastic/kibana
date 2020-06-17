@@ -97,7 +97,7 @@ export function createSavedGisMapClass(services) {
         center: getMapCenter(state),
         timeFilters: getTimeFilters(state),
         refreshConfig: getRefreshConfig(state),
-        query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
+        query: _.omit(getQuery(state), ['queryLastTriggeredAt']),
         filters: getFilters(state),
         settings: getMapSettings(state),
       });

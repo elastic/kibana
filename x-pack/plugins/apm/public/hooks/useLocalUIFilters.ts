@@ -45,7 +45,7 @@ export function useLocalUIFilters({
   const values = pickKeys(uiFilters, ...filterNames);
 
   const setFilterValue = (name: LocalUIFilterName, value: string[]) => {
-    const search = omit(toQuery(history.location.search), name);
+    const search = omit(toQuery(history.location.search), [name]);
 
     history.push({
       ...history.location,

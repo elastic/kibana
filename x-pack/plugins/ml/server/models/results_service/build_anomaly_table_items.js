@@ -172,10 +172,10 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
   // Flatten the aggregatedData to give a list of records with
   // the highest score per bucketed time / jobId / detectorIndex.
   const summaryRecords = [];
-  _.each(aggregatedData, (times, roundedTime) => {
-    _.each(times, (jobIds) => {
-      _.each(jobIds, (entityDetectors) => {
-        _.each(entityDetectors, (record) => {
+  _.forEach(aggregatedData, (times, roundedTime) => {
+    _.forEach(times, (jobIds) => {
+      _.forEach(jobIds, (entityDetectors) => {
+        _.forEach(entityDetectors, (record) => {
           summaryRecords.push({
             time: +roundedTime,
             source: record,

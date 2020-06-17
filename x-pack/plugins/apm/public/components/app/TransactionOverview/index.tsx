@@ -13,7 +13,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { Location } from 'history';
-import { first } from 'lodash';
+import { head } from 'lodash';
 import React, { useMemo } from 'react';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
@@ -46,7 +46,7 @@ function getRedirectLocation({
   serviceTransactionTypes: string[];
 }): Location | undefined {
   const { transactionType } = urlParams;
-  const firstTransactionType = first(serviceTransactionTypes);
+  const firstTransactionType = head(serviceTransactionTypes);
 
   if (!transactionType && firstTransactionType) {
     return {

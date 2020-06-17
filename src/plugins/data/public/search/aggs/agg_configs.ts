@@ -39,7 +39,7 @@ function removeParentAggs(obj: any) {
 
 function parseParentAggs(dslLvlCursor: any, dsl: any) {
   if (dsl.parentAggs) {
-    _.each(dsl.parentAggs, (agg, key) => {
+    _.forEach(dsl.parentAggs, (agg, key) => {
       dslLvlCursor[key as string] = agg;
       parseParentAggs(dslLvlCursor, agg);
     });
@@ -95,7 +95,7 @@ export class AggConfigs {
     this.timeRange = timeRange;
 
     const updateAggTimeRange = (agg: AggConfig) => {
-      _.each(agg.params, (param) => {
+      _.forEach(agg.params, (param) => {
         if (param instanceof AggConfig) {
           updateAggTimeRange(param);
         }

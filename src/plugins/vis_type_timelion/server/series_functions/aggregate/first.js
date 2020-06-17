@@ -20,5 +20,5 @@
 import _ from 'lodash';
 
 export default function (points) {
-  return _.first(points);
+  return _.head(points);
 }

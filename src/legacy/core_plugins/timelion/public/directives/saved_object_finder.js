@@ -165,7 +165,7 @@ module
         };
 
         self.getLabel = function () {
-          return _.words(self.properties.nouns).map(_.capitalize).join(' ');
+          return _.words(self.properties.nouns).map(_.upperFirst).join(' ');
         };
 
         //key handler for the filter text box

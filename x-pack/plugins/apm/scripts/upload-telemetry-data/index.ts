@@ -15,7 +15,7 @@ import fs from 'fs';
 import path from 'path';
 // @ts-ignore
 import { Octokit } from '@octokit/rest';
-import { merge, chunk, flatten, pick, identity } from 'lodash';
+import { merge, chunk, flatten, pickBy, identity } from 'lodash';
 import axios from 'axios';
 import yaml from 'js-yaml';
 import { Client } from 'elasticsearch';
@@ -51,7 +51,7 @@ const loadedKibanaConfig = (yaml.safeLoad(
   )
 ) || {}) as {};
 
-const cliEsCredentials = pick(
+const cliEsCredentials = pickBy(
   {
     'elasticsearch.username': process.env.ELASTICSEARCH_USERNAME,
     'elasticsearch.password': process.env.ELASTICSEARCH_PASSWORD,

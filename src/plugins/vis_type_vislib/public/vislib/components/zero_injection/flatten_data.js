@@ -35,9 +35,9 @@ export function flattenData(obj) {
   }
 
   return _(charts ? charts : [obj])
-    .pluck('series')
+    .map('series')
     .flattenDeep()
-    .pluck('values')
+    .map('values')
     .flattenDeep()
     .filter(Boolean)
     .value();

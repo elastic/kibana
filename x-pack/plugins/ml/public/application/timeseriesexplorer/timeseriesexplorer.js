@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { debounce, each, find, get, has, isEqual } from 'lodash';
+import { debounce, forEach, find, get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -103,7 +103,7 @@ function getEntityControlOptions(fieldValues) {
 function getViewableDetectors(selectedJob) {
   const jobDetectors = selectedJob.analysis_config.detectors;
   const viewableDetectors = [];
-  each(jobDetectors, (dtr, index) => {
+  forEach(jobDetectors, (dtr, index) => {
     if (isTimeSeriesViewDetector(selectedJob, index)) {
       viewableDetectors.push({
         index,

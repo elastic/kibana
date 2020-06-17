@@ -24,7 +24,7 @@ import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { sortBy, first, get, gt, gte, lt, lte } from 'lodash';
+import { sortBy, head, get, gt, gte, lt, lte } from 'lodash';
 const OPERATORS = { gt, gte, lt, lte };
 
 function sortByDirection(data, direction, fn) {
@@ -38,7 +38,7 @@ function sortSeries(visData, model) {
   const series = get(visData, `${model.id}.series`, []);
   return model.series.reduce((acc, item) => {
     const itemSeries = series.filter((s) => {
-      const id = first(s.id.split(/:/));
+      const id = head(s.id.split(/:/));
       return id === item.id;
     });
     const direction = item.terms_direction || 'desc';
@@ -51,7 +51,7 @@ export function TopNVisualization(props) {
   const { backgroundColor, model, visData } = props;
 
   const series = sortSeries(visData, model).map((item) => {
-    const id = first(item.id.split(/:/));
+    const id = head(item.id.split(/:/));
     const seriesConfig = model.series.find((s) => s.id === id);
     if (seriesConfig) {
       const tickFormatter = createTickFormatter(

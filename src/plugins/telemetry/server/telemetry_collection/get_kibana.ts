@@ -72,7 +72,7 @@ export function handleKibanaStats(
   // combine core stats (os types, saved objects) with plugin usage stats
   // organize the object into the same format as monitoring-enabled telemetry
   return {
-    ...omit(kibana, 'index'), // discard index
+    ...omit(kibana, ['index']), // discard index
     count: 1,
     indices: 1,
     os: formattedOsStats,

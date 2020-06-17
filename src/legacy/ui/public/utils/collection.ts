@@ -50,7 +50,7 @@ export function move(
   }
 
   below = !!below;
-  qualifier = qualifier && _.callback(qualifier);
+  qualifier = qualifier && _.iteratee(qualifier);
 
   const above = !below;
   const finder = below ? _.findIndex : _.findLastIndex;

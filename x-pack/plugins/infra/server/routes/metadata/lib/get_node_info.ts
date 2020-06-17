@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, set, startsWith } from 'lodash';
+import { head, set, startsWith } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
@@ -73,7 +73,7 @@ export const getNodeInfo = async (
     'search',
     params
   );
-  const firstHit = first(response.hits.hits);
+  const firstHit = head(response.hits.hits);
   if (firstHit) {
     return firstHit._source;
   }

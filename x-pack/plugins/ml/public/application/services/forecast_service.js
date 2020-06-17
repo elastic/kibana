@@ -223,7 +223,7 @@ function getForecastData(
   ];
 
   // Add in term queries for each of the specified criteria.
-  _.each(criteriaFields, (criteria) => {
+  _.forEach(criteriaFields, (criteria) => {
     filterCriteria.push({
       term: {
         [criteria.fieldName]: criteria.fieldValue,
@@ -284,7 +284,7 @@ function getForecastData(
     .pipe(
       map((resp) => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, (dataForTime) => {
+        _.forEach(aggregationsByTime, (dataForTime) => {
           const time = dataForTime.key;
           obj.results[time] = {
             prediction: _.get(dataForTime, ['prediction', 'value']),
@@ -357,7 +357,7 @@ function getForecastRequestStats(job, forecastId) {
     })
       .then((resp) => {
         if (resp.hits.total !== 0) {
-          obj.stats = _.first(resp.hits.hits)._source;
+          obj.stats = _.head(resp.hits.hits)._source;
         }
         resolve(obj);
       })

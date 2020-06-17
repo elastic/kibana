@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, capitalize } from 'lodash';
+import { pick, upperFirst } from 'lodash';
 import moment from 'moment';
 
 import { getSearchValue } from '../../lib/get_search_value';
@@ -26,7 +26,7 @@ export class PipelineListItem {
 
     if (props.lastModified) {
       this.lastModified = getMomentDate(props.lastModified);
-      this.lastModifiedHumanized = capitalize(this.lastModified.fromNow());
+      this.lastModifiedHumanized = upperFirst(this.lastModified.fromNow());
     }
   }
 

@@ -142,7 +142,7 @@ describe('fieldCalculator', function () {
     let hits: any;
 
     beforeEach(function () {
-      hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit);
+      hits = _.forEach(_.cloneDeep(realHits), indexPattern.flattenHit);
     });
 
     it('Should return an array of values for _source fields', function () {
@@ -186,7 +186,7 @@ describe('fieldCalculator', function () {
       expect(extensions).toBeInstanceOf(Object);
       expect(extensions.buckets).toBeInstanceOf(Array);
       expect(extensions.buckets.length).toBe(3);
-      expect(_.pluck(extensions.buckets, 'value')).toEqual(['html', 'php', 'gif']);
+      expect(_.map(extensions.buckets, 'value')).toEqual(['html', 'php', 'gif']);
       expect(extensions.error).toBe(undefined);
     });
 

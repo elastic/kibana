@@ -97,7 +97,7 @@ function getMetricData(
       )
       .pipe(
         map((resp) => {
-          _.each(resp.results, (value, time) => {
+          _.forEach(resp.results, (value, time) => {
             // @ts-ignore
             obj.results[time] = {
               actual: value,
@@ -155,7 +155,7 @@ function getChartDetails(
         latestMs,
       })
         .then((results: any) => {
-          _.each(blankEntityFields, (field) => {
+          _.forEach(blankEntityFields, (field) => {
             // results will not contain keys for non-aggregatable fields,
             // so store as 0 to indicate over all field values.
             obj.results.entityData.entities.push({

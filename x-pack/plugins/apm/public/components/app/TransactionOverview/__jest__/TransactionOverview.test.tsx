@@ -37,7 +37,7 @@ function setup({
 }) {
   const defaultLocation = {
     pathname: '/services/foo/transactions',
-    search: fromQuery(omit(urlParams, 'serviceName')),
+    search: fromQuery(omit(urlParams, ['serviceName'])),
   } as any;
 
   history.replace({

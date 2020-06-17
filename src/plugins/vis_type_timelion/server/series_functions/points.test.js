@@ -62,7 +62,7 @@ describe('points.js', () => {
 
   describe('symbol', () => {
     const symbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
-    _.each(symbols, (symbol) => {
+    _.forEach(symbols, (symbol) => {
       it(`is ${symbol}`, () => {
         return invoke(fn, [seriesList, null, null, null, null, symbol]).then((r) => {
           expect(r.output.list[0].points.symbol).to.equal(symbol);

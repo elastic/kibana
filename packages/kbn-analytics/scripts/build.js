@@ -26,7 +26,7 @@ const { run, withProcRunner } = require('@kbn/dev-utils');
 const ROOT_DIR = resolve(__dirname, '..');
 const BUILD_DIR = resolve(ROOT_DIR, 'target');
 
-const padRight = (width, str) =>
+const padEnd = (width, str) =>
   str.length >= width ? str : `${str}${' '.repeat(width - str.length)}`;
 
 run(
@@ -44,7 +44,7 @@ run(
       log.info(`Starting babel and typescript${flags.watch ? ' in watch mode' : ''}`);
       await Promise.all([
         ...['web', 'node'].map((subTask) =>
-          proc.run(padRight(10, `babel:${subTask}`), {
+          proc.run(padEnd(10, `babel:${subTask}`), {
             cmd: 'babel',
             args: [
               'src',
@@ -68,7 +68,7 @@ run(
           })
         ),
 
-        proc.run(padRight(10, 'tsc'), {
+        proc.run(padEnd(10, 'tsc'), {
           cmd: 'tsc',
           args: [
             '--emitDeclarationOnly',

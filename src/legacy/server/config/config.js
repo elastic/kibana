@@ -47,7 +47,7 @@ export class Config {
     }
 
     if (!key) {
-      return _.each(extension._inner.children, (child) => {
+      return _.forEach(extension._inner.children, (child) => {
         this.extendSchema(child.schema, _.get(settings, child.key), child.key);
       });
     }

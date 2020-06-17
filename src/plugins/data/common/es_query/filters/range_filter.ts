@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { map, reduce, mapValues, get, keys, pick } from 'lodash';
+import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
 
@@ -148,7 +148,7 @@ export const buildRangeFilter = (
 };
 
 export const getRangeScript = (field: IFieldType, params: RangeFilterParams) => {
-  const knownParams = pick(params, (val, key: any) => key in operators);
+  const knownParams = pickBy(params, (val, key: any) => key in operators);
   let script = map(
     knownParams,
     (val: any, key: string) => '(' + field.script + ')' + get(operators, key) + key

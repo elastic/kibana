@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual, difference } from 'lodash';
+import { isEqual, isEqualWith, difference } from 'lodash';
 import { IClusterClient, Logger } from '../../../../../src/core/server';
 
 import { serializePrivileges } from './privileges_serializer';
@@ -22,7 +22,7 @@ export async function registerPrivilegesWithCluster(
   ) => {
     // when comparing privileges, the order of the actions doesn't matter, lodash's isEqual
     // doesn't know how to compare Sets
-    return isEqual(existingPrivileges, expectedPrivileges, (value, other, key) => {
+    return isEqualWith(existingPrivileges, expectedPrivileges, (value, other, key) => {
       if (key === 'actions' && Array.isArray(value) && Array.isArray(other)) {
         // Array.sort() is in-place, and we don't want to be modifying the actual order
         // of the arrays permanently, and there's potential they're frozen, so we're copying

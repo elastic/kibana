@@ -30,8 +30,8 @@ const users = [
 ];
 
 // this is how we used to accomplish this, before IndexedArray
-users.byName = _.indexBy(users, 'name');
-users.byUsername = _.indexBy(users, 'username');
+users.byName = _.keyBy(users, 'name');
+users.byUsername = _.keyBy(users, 'username');
 users.byGroup = _.groupBy(users, 'group');
 users.inIdOrder = _.sortBy(users, 'id');
 

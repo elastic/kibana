@@ -280,7 +280,7 @@ export class AggConfig {
 
     const outParams = _.transform(
       this.getAggParams(),
-      (out, aggParam) => {
+      (out: any, aggParam) => {
         let val = params[aggParam.name];
 
         // don't serialize undefined/null values
@@ -361,7 +361,7 @@ export class AggConfig {
   }
 
   getAggParams() {
-    return [...(_.has(this, 'type.params') ? this.type.params : [])];
+    return [...(_.hasIn(this, 'type.params') ? this.type.params : [])];
   }
 
   getRequestAggs() {
@@ -452,14 +452,10 @@ export class AggConfig {
 
   public set type(type) {
     if (this.__typeDecorations) {
-      _.forOwn(
-        this.__typeDecorations,
-        function (prop, name: string | undefined) {
-          // @ts-ignore
-          delete this[name];
-        },
-        this
-      );
+      _.forOwn(this.__typeDecorations, (prop, name: string | undefined) => {
+        // @ts-ignore
+        delete this[name];
+      });
     }
 
     if (type && _.isFunction(type.decorateAggConfig)) {

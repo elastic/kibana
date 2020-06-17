@@ -82,7 +82,7 @@ export default new Datasource('worldbank', {
 
         const deduped = {};
         let description;
-        _.each(respSeries, function (bucket) {
+        _.forEach(respSeries, function (bucket) {
           if (bucket.value != null) hasData = true;
           description = bucket.country.value + ' ' + bucket.indicator.value;
           deduped[bucket.date] = bucket.value;

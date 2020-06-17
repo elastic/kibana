@@ -349,7 +349,7 @@ export function basicJobValidation(
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
       let v = true;
-      _.each(job.analysis_config.categorization_filters, (d) => {
+      _.forEach(job.analysis_config.categorization_filters, (d) => {
         try {
           new RegExp(d);
         } catch (e) {
@@ -381,7 +381,7 @@ export function basicJobValidation(
       valid = false;
     } else {
       let v = true;
-      _.each(job.analysis_config.detectors, (d) => {
+      _.forEach(job.analysis_config.detectors, (d) => {
         if (_.isEmpty(d.function)) {
           v = false;
         }

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { get, every, any } from 'lodash';
+import { get, every, some } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 
@@ -129,7 +129,7 @@ export const ilmSummaryExtension = (index, getUrlForApp) => {
 };
 
 export const ilmFilterExtension = (indices) => {
-  const hasIlm = any(indices, (index) => index.ilm && index.ilm.managed);
+  const hasIlm = some(indices, (index) => index.ilm && index.ilm.managed);
   if (!hasIlm) {
     return [];
   } else {

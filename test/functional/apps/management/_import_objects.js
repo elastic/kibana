@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -50,15 +50,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickImportDone();
 
         // get all the elements in the table, and index them by the 'title' visible text field
-        const elements = indexBy(
-          await PageObjects.settings.getSavedObjectElementsInTable(),
-          'title'
-        );
+        const elements = keyBy(await PageObjects.settings.getSavedObjectElementsInTable(), 'title');
         log.debug("check that 'Log Agents' is in table as a visualization");
         expect(elements['Log Agents'].objectType).to.eql('visualization');
 
         await elements['logstash-*'].relationshipsElement.click();
-        const flyout = indexBy(await PageObjects.settings.getRelationshipFlyout(), 'title');
+        const flyout = keyBy(await PageObjects.settings.getRelationshipFlyout(), 'title');
         log.debug(
           "check that 'Shared-Item Visualization AreaChart' shows 'logstash-*' as it's Parent"
         );
@@ -153,10 +150,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
-        const elements = indexBy(
-          await PageObjects.settings.getSavedObjectElementsInTable(),
-          'title'
-        );
+        const elements = keyBy(await PageObjects.settings.getSavedObjectElementsInTable(), 'title');
         await elements['logstash-*'].checkbox.click();
         await PageObjects.settings.clickSavedObjectsDelete();
 
@@ -188,10 +182,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
         // First, we need to delete the index pattern
-        const elements = indexBy(
-          await PageObjects.settings.getSavedObjectElementsInTable(),
-          'title'
-        );
+        const elements = keyBy(await PageObjects.settings.getSavedObjectElementsInTable(), 'title');
         await elements['logstash-*'].checkbox.click();
         await PageObjects.settings.clickSavedObjectsDelete();
 
@@ -330,10 +321,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickImportDone();
 
         // Second, we need to delete the index pattern
-        const elements = indexBy(
-          await PageObjects.settings.getSavedObjectElementsInTable(),
-          'title'
-        );
+        const elements = keyBy(await PageObjects.settings.getSavedObjectElementsInTable(), 'title');
         await elements['logstash-*'].checkbox.click();
         await PageObjects.settings.clickSavedObjectsDelete();
 
@@ -365,10 +353,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
         // First, we need to delete the index pattern
-        const elements = indexBy(
-          await PageObjects.settings.getSavedObjectElementsInTable(),
-          'title'
-        );
+        const elements = keyBy(await PageObjects.settings.getSavedObjectElementsInTable(), 'title');
         await elements['logstash-*'].checkbox.click();
         await PageObjects.settings.clickSavedObjectsDelete();
 

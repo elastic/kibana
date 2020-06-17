@@ -39,7 +39,7 @@ export function seriesAgg(resp, panel, series) {
       results.push({
         id: `${series.id}`,
         label: series.label || calculateLabel(_.last(series.metrics), series.metrics),
-        data: _.first(data),
+        data: _.head(data),
       });
     }
     return next(results);

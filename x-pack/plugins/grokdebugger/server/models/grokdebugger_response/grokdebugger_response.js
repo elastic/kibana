@@ -32,7 +32,7 @@ export class GrokdebuggerResponse {
       };
       return new GrokdebuggerResponse(opts);
     }
-    const structuredEvent = omit(get(docs, '0.doc._source'), 'rawEvent');
+    const structuredEvent = omit(get(docs, '0.doc._source'), ['rawEvent']);
     const opts = { structuredEvent };
     return new GrokdebuggerResponse(opts);
   }

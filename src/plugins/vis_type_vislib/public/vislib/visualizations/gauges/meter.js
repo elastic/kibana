@@ -182,7 +182,7 @@ export class MeterGauge {
     const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
 
     const extendRange = this.gaugeConfig.extendRange;
-    const maxY = _.max(data.values, 'y').y;
+    const maxY = _.maxBy(data.values, 'y').y;
     const min = this.gaugeConfig.colorsRange[0].from;
     const max = _.last(this.gaugeConfig.colorsRange).to;
     const angle = d3.scale

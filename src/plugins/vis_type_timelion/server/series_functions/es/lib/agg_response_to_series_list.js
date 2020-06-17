@@ -20,9 +20,9 @@
 import _ from 'lodash';
 
 export function timeBucketsToPairs(buckets) {
-  const timestamps = _.pluck(buckets, 'key');
+  const timestamps = _.map(buckets, 'key');
   const series = {};
-  _.each(buckets, function (bucket) {
+  _.forEach(buckets, function (bucket) {
     _.forOwn(bucket, function (val, key) {
       if (_.isPlainObject(val)) {
         if (val.values) {
@@ -51,13 +51,13 @@ export function flattenBucket(bucket, splitKey, path, result) {
   _.forOwn(bucket, function (val, key) {
     if (!_.isPlainObject(val)) return;
     if (_.get(val, 'meta.type') === 'split') {
-      _.each(val.buckets, function (bucket, bucketKey) {
+      _.forEach(val.buckets, function (bucket, bucketKey) {
         if (bucket.key == null) bucket.key = bucketKey; // For handling "keyed" response formats, e.g., filters agg
         flattenBucket(bucket, bucket.key, path.concat([key + ':' + bucket.key]), result);
       });
     } else if (_.get(val, 'meta.type') === 'time_buckets') {
       const metrics = timeBucketsToPairs(val.buckets);
-      _.each(metrics, function (pairs, metricName) {
+      _.forEach(metrics, function (pairs, metricName) {
         result[path.concat([metricName]).join(' > ')] = {
           data: pairs,
           splitKey: splitKey,

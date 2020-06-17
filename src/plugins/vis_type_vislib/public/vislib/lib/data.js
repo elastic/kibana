@@ -248,7 +248,7 @@ export class Data {
     const visData = this.getVisData();
 
     return _.reduce(
-      _.pluck(visData, 'geoJson.properties'),
+      _.map(visData, 'geoJson.properties'),
       function (minMax, props) {
         return {
           min: Math.min(props.min, minMax.min),
@@ -312,7 +312,7 @@ export class Data {
    * @returns {Array} Value objects
    */
   flatten() {
-    return _(this.chartData()).pluck('series').flattenDeep().pluck('values').flattenDeep().value();
+    return _(this.chartData()).map('series').flattenDeep().map('values').flattenDeep().value();
   }
 
   /**
@@ -383,7 +383,7 @@ export class Data {
         .sortBy(function (obj) {
           return obj.index;
         })
-        .unique(function (d) {
+        .uniqBy(function (d) {
           return d.label;
         })
         .value();
@@ -452,7 +452,7 @@ export class Data {
       });
     });
 
-    return _.uniq(names, 'label');
+    return _.uniqBy(names, 'label');
   }
 
   /**

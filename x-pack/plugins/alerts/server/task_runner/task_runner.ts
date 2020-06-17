@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, mapValues, omit, without } from 'lodash';
+import { pickBy, mapValues, omit, without } from 'lodash';
 import { Logger, SavedObject, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
@@ -224,7 +224,7 @@ export class TaskRunner {
     eventLogger.logEvent(event);
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
-    const instancesWithScheduledActions = pick<AlertInstances, AlertInstances>(
+    const instancesWithScheduledActions = pickBy<AlertInstances, AlertInstances>(
       alertInstances,
       (alertInstance: AlertInstance) => alertInstance.hasScheduledActions()
     );

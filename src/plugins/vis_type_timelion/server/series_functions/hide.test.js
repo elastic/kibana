@@ -31,7 +31,7 @@ describe('hide.js', () => {
 
   it('hides a series', () => {
     return invoke(fn, [seriesList, true]).then((r) => {
-      _.each(r.output.list, (series) => expect(series._hide).to.equal(true));
+      _.forEach(r.output.list, (series) => expect(series._hide).to.equal(true));
     });
   });
 

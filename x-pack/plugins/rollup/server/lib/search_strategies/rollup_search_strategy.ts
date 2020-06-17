@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { indexBy, isString } from 'lodash';
+import { keyBy, isString } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 
 import { CallWithRequestFactoryShim } from '../../types';
@@ -74,7 +74,7 @@ export const getRollupSearchStrategy = (
       }: { fieldsCapabilities: { [key: string]: any }; rollupIndex: string }
     ) {
       const fields = await super.getFieldsForWildcard(req, indexPattern);
-      const fieldsFromFieldCapsApi = indexBy(fields, 'name');
+      const fieldsFromFieldCapsApi = keyBy(fields, 'name');
       const rollupIndexCapabilities = fieldsCapabilities[rollupIndex].aggs;
 
       return mergeCapabilitiesWithFields(rollupIndexCapabilities, fieldsFromFieldCapsApi);

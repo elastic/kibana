@@ -491,7 +491,7 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
 }
 
 function getMetricColumn(indexPattern: IndexPattern, layerId: string, field: IndexPatternField) {
-  const operationDefinitionsMap = _.indexBy(operationDefinitions, 'type');
+  const operationDefinitionsMap = _.keyBy(operationDefinitions, 'type');
   const [column] = getOperationTypesForField(field)
     .map((type) =>
       operationDefinitionsMap[type].buildColumn({

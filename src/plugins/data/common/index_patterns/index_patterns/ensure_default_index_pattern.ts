@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { contains } from 'lodash';
+import { includes } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { IndexPatternsContract } from './index_patterns';
 
@@ -35,7 +35,7 @@ export const createEnsureDefaultIndexPattern = (
     const patterns = await this.getIds();
     let defaultId = uiSettings.get('defaultIndex');
     let defined = !!defaultId;
-    const exists = contains(patterns, defaultId);
+    const exists = includes(patterns, defaultId);
 
     if (defined && !exists) {
       uiSettings.remove('defaultIndex');

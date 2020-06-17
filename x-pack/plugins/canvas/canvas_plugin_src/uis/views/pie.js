@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, uniq } from 'lodash';
+import { map, uniqBy } from 'lodash';
 import { legendOptions } from '../../../public/lib/legend_options';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { ViewStrings } from '../../../i18n';
@@ -93,6 +93,6 @@ export const pie = () => ({
     if (getState(context) !== 'ready') {
       return { labels: [] };
     }
-    return { labels: uniq(map(getValue(context).rows, 'color').filter((v) => v !== undefined)) };
+    return { labels: uniqBy(map(getValue(context).rows, 'color').filter((v) => v !== undefined)) };
   },
 });

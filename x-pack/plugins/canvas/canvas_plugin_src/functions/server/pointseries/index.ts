@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore Untyped library
-import uniqBy from 'lodash.uniqby';
 // @ts-ignore Untyped Elastic library
 import { evaluate } from 'tinymath';
-import { groupBy, zipObject, omit } from 'lodash';
+import { groupBy, zipObject, omit, uniqBy } from 'lodash';
 import moment from 'moment';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import {
@@ -212,7 +210,7 @@ export function pointseries(): ExpressionFunctionDefinition<
 
       // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
       const resultingRows = uniqBy(
-        Object.values(results).map((row) => omit(row, PRIMARY_KEY)),
+        Object.values(results).map((row) => omit(row, [PRIMARY_KEY])),
         JSON.stringify
       );
 

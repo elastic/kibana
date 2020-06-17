@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, sortByOrder, last } from 'lodash';
+import { flatten, orderBy, last } from 'lodash';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,
@@ -138,13 +138,13 @@ export async function getTransactionBreakdown({
   };
 
   const visibleKpis = resp.aggregations
-    ? sortByOrder(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
+    ? orderBy(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
         0,
         MAX_KPIS
       )
     : [];
 
-  const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
+  const kpis = orderBy(visibleKpis, 'name').map((kpi, index) => {
     return {
       ...kpi,
       color: getVizColorForIndex(index),

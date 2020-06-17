@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { each } from 'lodash';
+import { forEach } from 'lodash';
 import { mlMessageBarService } from '../../../components/messagebar';
 import rison from 'rison-node';
 
@@ -323,7 +323,7 @@ export function filterJobs(jobs, clauses) {
 
   // loop through the matches and return only those jobs which have match all the clauses
   const filteredJobs = [];
-  each(matches, (m) => {
+  forEach(matches, (m) => {
     if (m.count >= clauses.length) {
       filteredJobs.push(m.job);
     }

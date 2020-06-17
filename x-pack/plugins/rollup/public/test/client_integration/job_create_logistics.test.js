@@ -17,7 +17,7 @@ import { setHttp } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash/function/debounce', () => (fn) => fn);
+jest.mock('lodash/debounce', () => (fn) => fn);
 
 const { setup } = pageHelpers.jobCreate;
 

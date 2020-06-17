@@ -9,7 +9,7 @@ import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash/function/debounce', () => (fn) => fn);
+jest.mock('lodash/debounce', () => (fn) => fn);
 
 const { setup } = pageHelpers.jobClone;
 const {
