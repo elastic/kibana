@@ -40,7 +40,7 @@ interface ConnectorAddModalProps {
   >;
   capabilities: ApplicationStart['capabilities'];
   docLinks: DocLinksStart;
-  consumer: string;
+  consumer?: string;
 }
 
 export const ConnectorAddModal = ({

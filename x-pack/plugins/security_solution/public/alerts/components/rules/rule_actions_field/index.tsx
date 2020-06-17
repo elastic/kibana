@@ -137,7 +137,6 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
         actionTypes={supportedActionTypes}
         defaultActionMessage={DEFAULT_ACTION_MESSAGE}
         toastNotifications={notifications.toasts}
-        consumer={'security'}
       />
     </>
   );

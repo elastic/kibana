@@ -64,7 +64,7 @@ interface ActionAccordionFormProps {
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   capabilities: ApplicationStart['capabilities'];
-  consumer: string;
+  consumer?: string;
 }
 
 interface ActiveActionConnectorState {

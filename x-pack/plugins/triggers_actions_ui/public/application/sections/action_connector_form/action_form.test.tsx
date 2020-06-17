@@ -156,6 +156,7 @@ describe('action_form', () => {
           name: 'Non consumer connector',
           config: {},
           isPreconfigured: false,
+          consumer: 'case',
         },
       ]);
       const mocks = coreMock.createSetup();
@@ -333,9 +334,9 @@ describe('action_form', () => {
           "label": "Test connector ",
         },
         Object {
-          "id": "test5",
-          "key": "test5",
-          "label": "Non consumer connector",
+          "id": "test2",
+          "key": "test2",
+          "label": "Test connector 2 (preconfigured)",
         },
       ]
       `);

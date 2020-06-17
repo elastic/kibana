@@ -73,7 +73,6 @@ describe('connector_add_modal', () => {
         toastNotifications={deps!.toastNotifications}
         docLinks={deps!.docLinks}
         capabilities={deps!.capabilities}
-        consumer={'alerts'}
       />
     );
     expect(wrapper.exists('.euiModalHeader')).toBeTruthy();
