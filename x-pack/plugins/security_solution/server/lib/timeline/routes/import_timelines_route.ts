@@ -11,13 +11,12 @@ import { createPromiseFromStreams } from '../../../../../../../src/legacy/utils'
 import { IRouter } from '../../../../../../../src/core/server';
 
 import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
+import { validate } from '../../../../common/validate';
 
 import { SetupPlugins } from '../../../plugin';
 import { ConfigType } from '../../../config';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-
 import { importRulesSchema } from '../../../../common/detection_engine/schemas/response/import_rules_schema';
-import { validate } from '../../detection_engine/routes/rules/validate';
 import {
   buildSiemResponse,
   createBulkErrorObject,
