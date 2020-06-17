@@ -7,7 +7,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 import { MSearchQuery } from './multi_searcher';
 

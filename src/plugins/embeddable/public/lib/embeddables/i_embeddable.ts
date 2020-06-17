@@ -23,6 +23,11 @@ import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
 
+export interface EmbeddableError {
+  name: string;
+  message: string;
+}
+
 export interface EmbeddableInput {
   viewMode?: ViewMode;
   title?: string;
@@ -54,6 +59,10 @@ export interface EmbeddableInput {
 }
 
 export interface EmbeddableOutput {
+  // Whether the embeddable is actively loading.
+  loading?: boolean;
+  // Whether the embeddable finshed loading with an error.
+  error?: EmbeddableError;
   editUrl?: string;
   editApp?: string;
   editPath?: string;

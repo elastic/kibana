@@ -12,30 +12,21 @@ import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app
 import {
   CustomConfigureDatasourceContent,
   CustomConfigureDatasourceProps,
-  NewDatasource,
 } from '../../../../../../../ingest_manager/public';
 import { getManagementUrl } from '../../../..';
-
-type DatasourceWithId = NewDatasource & { id: string };
 
 /**
  * Exports Endpoint-specific datasource configuration instructions
  * for use in the Ingest app create / edit datasource config
  */
 export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent>(
-  ({
-    from,
-    datasource,
-  }: {
-    from: string;
-    datasource: CustomConfigureDatasourceProps['datasource'];
-  }) => {
+  ({ from, datasourceId }: CustomConfigureDatasourceProps) => {
     const { services } = useKibana();
     let policyUrl = '';
-    if (from === 'edit') {
+    if (from === 'edit' && datasourceId) {
       policyUrl = getManagementUrl({
         name: 'policyDetails',
-        policyId: (datasource as DatasourceWithId).id,
+        policyId: datasourceId,
       });
     }
 
@@ -46,9 +37,9 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
             <p>
               {from === 'edit' ? (
                 <LinkToApp
-                  appId="siem"
+                  appId="securitySolution"
                   appPath={policyUrl}
-                  href={`${services.application.getUrlForApp('siem')}${policyUrl}`}
+                  href={`${services.application.getUrlForApp('securitySolution')}${policyUrl}`}
                 >
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.ingestManager.editDatasource.stepConfigure"

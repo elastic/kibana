@@ -25,6 +25,7 @@ describe('Async search strategy', () => {
     mockCoreSetup = coreMock.createSetup();
     mockDataStart = dataPluginMock.createStartContract();
     (mockDataStart.search.getSearchStrategy as jest.Mock).mockReturnValue({ search: mockSearch });
+
     mockCoreSetup.getStartServices.mockResolvedValue([
       undefined as any,
       { data: mockDataStart },
@@ -92,6 +93,7 @@ describe('Async search strategy', () => {
 
     await asyncSearch.search(mockRequest, mockOptions).toPromise();
 
+    expect(mockDataStart.search.getSearchStrategy).toBeCalledTimes(1);
     expect(mockSearch).toBeCalledTimes(2);
     expect(mockSearch.mock.calls[0][0]).toEqual(mockRequest);
     expect(mockSearch.mock.calls[1][0]).toEqual({ id: 1, serverStrategy: 'foo' });

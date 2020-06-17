@@ -32,6 +32,30 @@ jest.mock('use-resize-observer/polyfilled');
 
 mockUseResizeObserver.mockImplementation(() => ({}));
 
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+  return {
+    ...originalModule,
+    useHistory: jest.fn(),
+  };
+});
+jest.mock('../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
+        },
+      },
+    }),
+    useGetUserSavedObjectPermissions: jest.fn(),
+  };
+});
 describe('Timeline', () => {
   let props = {} as TimelineComponentProps;
   const sort: Sort = {

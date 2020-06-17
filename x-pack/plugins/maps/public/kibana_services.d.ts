@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
 import { MapsConfigType } from '../config';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 
@@ -14,9 +16,7 @@ export function getIndexPatternSelectComponent(): any;
 export function getHttp(): any;
 export function getTimeFilter(): any;
 export function getToasts(): any;
-export function getIndexPatternService(): {
-  get: (id: string) => IIndexPattern | undefined;
-};
+export function getIndexPatternService(): IndexPatternsService;
 export function getAutocompleteService(): any;
 export function getSavedObjectsClient(): any;
 export function getMapsCapabilities(): any;

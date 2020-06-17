@@ -43,7 +43,6 @@ export {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableFactoryNotFoundError,
-  EmbeddableFactoryRenderer,
   EmbeddableInput,
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
@@ -70,6 +69,8 @@ export {
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  EmbeddableRenderer,
+  EmbeddableRendererProps,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

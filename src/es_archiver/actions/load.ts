@@ -49,6 +49,7 @@ const pipeline = (...streams: Readable[]) =>
 export async function loadAction({
   name,
   skipExisting,
+  useCreate,
   client,
   dataDir,
   log,
@@ -56,6 +57,7 @@ export async function loadAction({
 }: {
   name: string;
   skipExisting: boolean;
+  useCreate: boolean;
   client: Client;
   dataDir: string;
   log: ToolingLog;
@@ -87,7 +89,7 @@ export async function loadAction({
   await createPromiseFromStreams([
     recordStream,
     createCreateIndexStream({ client, stats, skipExisting, log }),
-    createIndexDocRecordsStream(client, stats, progress),
+    createIndexDocRecordsStream(client, stats, progress, useCreate),
   ]);
 
   progress.deactivate();

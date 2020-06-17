@@ -13,6 +13,7 @@ export interface Document {
   type?: string;
   visualizationType: string | null;
   title: string;
+  description?: string;
   expression: string | null;
   state: {
     datasourceMetaData: {

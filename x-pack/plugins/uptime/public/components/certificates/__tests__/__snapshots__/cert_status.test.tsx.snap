@@ -1,6 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CertStatus renders expected elements for valid props 1`] = `
+.c0 {
+  display: inline-block;
+  margin-left: 5px;
+}
+
 <div
   class="euiHealth"
 >
@@ -19,7 +24,16 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <span>
-        OK
+        OK  
+        <div
+          class="euiText euiText--extraSmall c0"
+        >
+          <div
+            class="euiTextColor euiTextColor--subdued"
+          >
+             for 4 months
+          </div>
+        </div>
       </span>
     </div>
   </div>

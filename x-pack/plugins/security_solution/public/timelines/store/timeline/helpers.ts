@@ -36,6 +36,7 @@ export const initialTimelineState: TimelineState = {
     newTimelineModel: null,
   },
   showCallOutUnauthorizedMsg: false,
+  insertTimeline: null,
 };
 
 interface AddTimelineHistoryParams {

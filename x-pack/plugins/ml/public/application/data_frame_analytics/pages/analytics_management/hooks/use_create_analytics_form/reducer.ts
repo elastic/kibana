@@ -442,12 +442,6 @@ export function reducer(state: State, action: Action): State {
     case ACTION.RESET_REQUEST_MESSAGES:
       return { ...state, requestMessages: [] };
 
-    case ACTION.CLOSE_MODAL:
-      return { ...state, isModalVisible: false };
-
-    case ACTION.OPEN_MODAL:
-      return { ...state, isModalVisible: true };
-
     case ACTION.RESET_ADVANCED_EDITOR_MESSAGES:
       return { ...state, advancedEditorMessages: [] };
 
@@ -535,12 +529,6 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.SET_IS_JOB_STARTED:
       return { ...state, isJobStarted: action.isJobStarted };
-
-    case ACTION.SET_IS_MODAL_BUTTON_DISABLED:
-      return { ...state, isModalButtonDisabled: action.isModalButtonDisabled };
-
-    case ACTION.SET_IS_MODAL_VISIBLE:
-      return { ...state, isModalVisible: action.isModalVisible };
 
     case ACTION.SET_JOB_CONFIG:
       return validateAdvancedEditor({ ...state, jobConfig: action.payload });

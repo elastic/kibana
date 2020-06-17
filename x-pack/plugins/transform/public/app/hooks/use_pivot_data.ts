@@ -31,11 +31,24 @@ import {
   PivotGroupByConfig,
   PivotQuery,
   PreviewMappings,
+  PivotAggsConfig,
 } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 import { isPivotAggsWithExtendedForm } from '../common/pivot_aggs';
+
+/**
+ * Checks if the aggregations collection is invalid.
+ */
+function isConfigInvalid(aggsArray: PivotAggsConfig[]): boolean {
+  return aggsArray.some((agg) => {
+    return (
+      (isPivotAggsWithExtendedForm(agg) && !agg.isValid()) ||
+      (agg.subAggs && isConfigInvalid(Object.values(agg.subAggs)))
+    );
+  });
+}
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -62,7 +75,7 @@ export const usePivotData = (
   const [previewMappings, setPreviewMappings] = useState<PreviewMappings>({ properties: {} });
   const api = useApi();
 
-  const aggsArr = dictionaryToArray(aggs);
+  const aggsArr = useMemo(() => dictionaryToArray(aggs), [aggs]);
   const groupByArr = dictionaryToArray(groupBy);
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
@@ -136,11 +149,7 @@ export const usePivotData = (
       return;
     }
 
-    const isConfigInvalid = aggsArr.some(
-      (agg) => isPivotAggsWithExtendedForm(agg) && !agg.isValid()
-    );
-
-    if (isConfigInvalid) {
+    if (isConfigInvalid(aggsArr)) {
       return;
     }
 
@@ -185,7 +194,7 @@ export const usePivotData = (
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPatternTitle,
-    JSON.stringify(aggsArr),
+    aggsArr,
     JSON.stringify(groupByArr),
     JSON.stringify(query),
     /* eslint-enable react-hooks/exhaustive-deps */

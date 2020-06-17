@@ -7,6 +7,8 @@
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
 import {
+  CommentsArrayOrUndefined,
+  CommentsPartialArrayOrUndefined,
   ExceptionListItemSchema,
   ExceptionListSchema,
   ExceptionListSoSchema,
@@ -125,7 +127,7 @@ export const transformSavedObjectToExceptionListItem = ({
   const {
     attributes: {
       _tags,
-      comment,
+      comments,
       created_at,
       created_by,
       description,
@@ -147,7 +149,7 @@ export const transformSavedObjectToExceptionListItem = ({
   // TODO: Do a throw if item_id or entries is not defined.
   return {
     _tags,
-    comment,
+    comments: comments ?? [],
     created_at,
     created_by,
     description,
@@ -179,7 +181,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   const {
     attributes: {
       _tags,
-      comment,
+      comments,
       description,
       entries,
       meta,
@@ -196,7 +198,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
     _tags: _tags ?? exceptionListItem._tags,
-    comment: comment ?? exceptionListItem.comment,
+    comments: comments ?? exceptionListItem.comments,
     created_at: exceptionListItem.created_at,
     created_by: exceptionListItem.created_by,
     description: description ?? exceptionListItem.description,
@@ -215,7 +217,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   };
 };
 
-export const transformSavedObjectsToFounExceptionListItem = ({
+export const transformSavedObjectsToFoundExceptionListItem = ({
   savedObjectsFindResponse,
   namespaceType,
 }: {
@@ -232,7 +234,7 @@ export const transformSavedObjectsToFounExceptionListItem = ({
   };
 };
 
-export const transformSavedObjectsToFounExceptionList = ({
+export const transformSavedObjectsToFoundExceptionList = ({
   savedObjectsFindResponse,
   namespaceType,
 }: {
@@ -247,4 +249,25 @@ export const transformSavedObjectsToFounExceptionList = ({
     per_page: savedObjectsFindResponse.per_page,
     total: savedObjectsFindResponse.total,
   };
+};
+
+export const transformComments = ({
+  comments,
+  user,
+}: {
+  comments: CommentsPartialArrayOrUndefined;
+  user: string;
+}): CommentsArrayOrUndefined => {
+  const dateNow = new Date().toISOString();
+  if (comments != null) {
+    return comments.map((comment) => {
+      return {
+        comment: comment.comment,
+        created_at: comment.created_at ?? dateNow,
+        created_by: comment.created_by ?? user,
+      };
+    });
+  } else {
+    return comments;
+  }
 };

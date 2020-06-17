@@ -204,7 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                securitySolution: ['read'],
+                siem: ['read'],
               },
               spaces: [space1Id],
             },

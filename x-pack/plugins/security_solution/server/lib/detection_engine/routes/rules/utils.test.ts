@@ -21,7 +21,7 @@ import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
-import { getSimpleRule, getOutputRuleAlertForRest } from '../__mocks__/utils';
+import { getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
 import { PartialAlert } from '../../../../../../alerts/server';
 import { SanitizedAlert } from '../../../../../../alerts/server/types';
@@ -30,6 +30,7 @@ import { RuleAlertType } from '../../rules/types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -62,14 +63,6 @@ describe('utils', () => {
       expect(rule).toEqual(expectedWithoutFromWithoutLanguage);
     });
 
-    test('should omit query if query is null', () => {
-      const fullRule = getResult();
-      fullRule.params.query = null;
-      const rule = transformAlertToRule(fullRule);
-      const { query, ...expectedWithoutQuery } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutQuery);
-    });
-
     test('should omit query if query is undefined', () => {
       const fullRule = getResult();
       fullRule.params.query = undefined;
@@ -81,7 +74,7 @@ describe('utils', () => {
     test('should omit a mix of undefined, null, and missing fields', () => {
       const fullRule = getResult();
       fullRule.params.query = undefined;
-      fullRule.params.language = null;
+      fullRule.params.language = undefined;
       const { from, ...omitParams } = fullRule.params;
       fullRule.params = omitParams as RuleTypeParams;
       const { enabled, ...omitEnabled } = fullRule;
@@ -532,8 +525,8 @@ describe('utils', () => {
     });
 
     test('returns tuple of duplicate conflict error and single rule when rules with matching rule-ids passed in and `overwrite` is false', async () => {
-      const rule = getSimpleRule('rule-1');
-      const rule2 = getSimpleRule('rule-1');
+      const rule = getCreateRulesSchemaMock('rule-1');
+      const rule2 = getCreateRulesSchemaMock('rule-1');
       const ndJsonStream = new Readable({
         read() {
           this.push(`${JSON.stringify(rule)}\n`);
@@ -561,9 +554,9 @@ describe('utils', () => {
     });
 
     test('returns tuple of duplicate conflict error and single rule when rules with matching ids passed in and `overwrite` is false', async () => {
-      const rule = getSimpleRule('rule-1');
+      const rule = getCreateRulesSchemaMock('rule-1');
       delete rule.rule_id;
-      const rule2 = getSimpleRule('rule-1');
+      const rule2 = getCreateRulesSchemaMock('rule-1');
       delete rule2.rule_id;
       const ndJsonStream = new Readable({
         read() {
@@ -585,8 +578,8 @@ describe('utils', () => {
     });
 
     test('returns tuple of empty duplicate errors array and single rule when rules with matching rule-ids passed in and `overwrite` is true', async () => {
-      const rule = getSimpleRule('rule-1');
-      const rule2 = getSimpleRule('rule-1');
+      const rule = getCreateRulesSchemaMock('rule-1');
+      const rule2 = getCreateRulesSchemaMock('rule-1');
       const ndJsonStream = new Readable({
         read() {
           this.push(`${JSON.stringify(rule)}\n`);
@@ -606,7 +599,7 @@ describe('utils', () => {
     });
 
     test('returns tuple of empty duplicate errors array and single rule when rules without a rule-id is passed in', async () => {
-      const simpleRule = getSimpleRule();
+      const simpleRule = getCreateRulesSchemaMock();
       delete simpleRule.rule_id;
       const multipartPayload = `${JSON.stringify(simpleRule)}\n`;
       const ndJsonStream = new Readable({

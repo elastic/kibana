@@ -28,7 +28,7 @@ import {
   resetFields,
 } from '../tasks/fields_browser';
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/siem_main';
+import { openTimeline } from '../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../tasks/timeline';
 
 import { HOSTS_PAGE } from '../urls/navigation';

@@ -6,8 +6,13 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
-import { IndexList } from '../../../public/application/sections/home/index_list'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import {
+  registerTestBed,
+  TestBed,
+  TestBedConfig,
+  findTestSubject,
+} from '../../../../../test_utils';
+import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
@@ -15,18 +20,19 @@ const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
     initialEntries: [`/indices?includeHiddenIndices=true`],
-    componentRoutePath: `/:section(indices|templates)`,
+    componentRoutePath: `/:section(indices|data_streams)`,
   },
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(IndexList), testBedConfig);
+const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
 
 export interface IndicesTestBed extends TestBed<TestSubjects> {
   actions: {
     selectIndexDetailsTab: (tab: 'settings' | 'mappings' | 'stats' | 'edit_settings') => void;
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
+    clickDataStreamAt: (index: number) => void;
   };
 }
 
@@ -59,12 +65,25 @@ export const setup = async (): Promise<IndicesTestBed> => {
     component.update();
   };
 
+  const clickDataStreamAt = async (index: number) => {
+    const { component, table, router } = testBed;
+    const { rows } = table.getMetaData('indexTable');
+    const dataStreamLink = findTestSubject(rows[index].reactWrapper, 'dataStreamLink');
+
+    await act(async () => {
+      router.navigateTo(dataStreamLink.props().href!);
+    });
+
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
       selectIndexDetailsTab,
       getIncludeHiddenIndicesToggleStatus,
       clickIncludeHiddenIndicesToggle,
+      clickDataStreamAt,
     },
   };
 };
