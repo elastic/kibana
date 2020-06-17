@@ -1252,10 +1252,11 @@ export interface IResponseTypesMap {
 // @public (undocumented)
 export type ISearch<T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY> = (request: IRequestTypesMap[T], options?: ISearchOptions) => Observable<IResponseTypesMap[T]>;
 
+// Warning: (ae-forgotten-export) The symbol "IStrategyOptions" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ISearchGeneric" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ISearchGeneric = <T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY>(request: IRequestTypesMap[T], options?: ISearchOptions, strategy?: T) => Observable<IResponseTypesMap[T]>;
+export type ISearchGeneric = <T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY>(request: IRequestTypesMap[T], options?: IStrategyOptions) => Observable<IResponseTypesMap[T]>;
 
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1755,7 +1756,7 @@ export class SearchInterceptor {
     protected longRunningToast?: Toast;
     // (undocumented)
     protected readonly requestTimeout?: number | undefined;
-    search: (search: ISearchGeneric, request: IKibanaSearchRequest, options?: ISearchOptions | undefined) => import("rxjs").Observable<import("../../common/search").IEsSearchResponse<unknown>>;
+    search: <T extends string>(search: ISearch<T>, request: IKibanaSearchRequest, options?: ISearchOptions | undefined) => import("rxjs").Observable<import("./i_search").IResponseTypesMap[T]>;
     // (undocumented)
     protected showToast: () => void;
     protected timeoutSubscriptions: Set<Subscription>;

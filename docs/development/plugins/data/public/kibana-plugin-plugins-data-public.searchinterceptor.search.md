@@ -9,5 +9,5 @@ Searches using the given `search` method. Overrides the `AbortSignal` with one t
 <b>Signature:</b>
 
 ```typescript
-search: (search: ISearchGeneric, request: IKibanaSearchRequest, options?: ISearchOptions | undefined) => import("rxjs").Observable<import("../../common/search").IEsSearchResponse<unknown>>;
+search: <T extends string>(search: ISearch<T>, request: IKibanaSearchRequest, options?: ISearchOptions | undefined) => import("rxjs").Observable<import("./i_search").IResponseTypesMap[T]>;
 ```
