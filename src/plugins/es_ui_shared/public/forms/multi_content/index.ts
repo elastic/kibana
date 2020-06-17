@@ -22,7 +22,6 @@ export {
   MultiContentConsumer,
   useMultiContentContext,
   useContent,
-  useMultiContentState,
 } from './multi_content_context';
 
 export { useMultiContent, HookProp, Content, MultiContent } from './use_multi_content';
