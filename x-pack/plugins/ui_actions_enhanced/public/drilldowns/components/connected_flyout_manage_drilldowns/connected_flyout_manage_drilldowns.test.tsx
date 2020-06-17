@@ -20,18 +20,11 @@ import { toastDrilldownsCRUDError } from './i18n';
 import { ActionFactory } from '../../../dynamic_actions';
 
 const storage = new Storage(new StubBrowserStorage());
-const notifications = coreMock.createStart().notifications;
+const toasts = coreMock.createStart().notifications.toasts;
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   actionFactories: [dashboardFactory as ActionFactory, urlFactory as ActionFactory],
   storage: new Storage(new StubBrowserStorage()),
-  toastService: {
-    addError: (...args: any[]) => {
-      alert(JSON.stringify(args));
-    },
-    addSuccess: (...args: any[]) => {
-      alert(JSON.stringify(args));
-    },
-  } as any,
+  toastService: toasts,
 });
 
 // https://github.com/elastic/kibana/issues/59469
@@ -39,8 +32,8 @@ afterEach(cleanup);
 
 beforeEach(() => {
   storage.clear();
-  (notifications.toasts as jest.Mocked<NotificationsStart['toasts']>).addSuccess.mockClear();
-  (notifications.toasts as jest.Mocked<NotificationsStart['toasts']>).addError.mockClear();
+  (toasts as jest.Mocked<NotificationsStart['toasts']>).addSuccess.mockClear();
+  (toasts as jest.Mocked<NotificationsStart['toasts']>).addError.mockClear();
 });
 
 test('Allows to manage drilldowns', async () => {
@@ -164,7 +157,7 @@ test('Create only mode', async () => {
   });
   fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
 
-  await wait(() => expect(notifications.toasts.addSuccess).toBeCalled());
+  await wait(() => expect(toasts.addSuccess).toBeCalled());
   expect(onClose).toBeCalled();
   expect(await mockDynamicActionManager.state.get().events.length).toBe(1);
 });
@@ -195,7 +188,7 @@ test('After switching between action factories state is restored', async () => {
   expect(screen.getByLabelText(/name/i)).toHaveValue('test');
 
   fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
-  await wait(() => expect(notifications.toasts.addSuccess).toBeCalled());
+  await wait(() => expect(toasts.addSuccess).toBeCalled());
   expect(await (mockDynamicActionManager.state.get().events[0].action.config as any).url).toBe(
     'https://elastic.co'
   );
@@ -221,7 +214,7 @@ test("Error when can't save drilldown changes", async () => {
   });
   fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
   await wait(() =>
-    expect(notifications.toasts.addError).toBeCalledWith(error, { title: toastDrilldownsCRUDError })
+    expect(toasts.addError).toBeCalledWith(error, { title: toastDrilldownsCRUDError })
   );
 });
 
