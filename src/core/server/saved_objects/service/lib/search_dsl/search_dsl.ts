@@ -66,15 +66,17 @@ export function getSearchDsl(
     throw Boom.notAcceptable('sortOrder requires a sortField');
   }
 
-  if (namespaces?.some((namespace) => namespace.indexOf('*') >= 0)) {
-    throw Boom.notAcceptable(`namespaces cannot contain wildcards ("*")`);
-  }
+  const normalizedNamespaces = namespaces
+    ? Array.from(
+        new Set(namespaces.map((namespace) => (namespace === '*' ? 'default' : namespace)))
+      )
+    : undefined;
 
   return {
     ...getQueryParams({
       mappings,
       registry,
-      namespaces,
+      namespaces: normalizedNamespaces,
       type,
       search,
       searchFields,

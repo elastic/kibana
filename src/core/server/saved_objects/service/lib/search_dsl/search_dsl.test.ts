@@ -54,16 +54,6 @@ describe('getSearchDsl', () => {
         });
       }).toThrowError(/sortOrder requires a sortField/);
     });
-
-    it('throws when namespaces contains a wildcard', () => {
-      expect(() => {
-        getSearchDsl(mappings, registry, {
-          type: 'foo',
-          sortField: 'title',
-          namespaces: ['foo*'],
-        });
-      }).toThrowError(/namespaces cannot contain wildcards \("\*"\)/);
-    });
   });
 
   describe('passes control', () => {
@@ -86,6 +76,33 @@ describe('getSearchDsl', () => {
         mappings,
         registry,
         namespaces: opts.namespaces,
+        type: opts.type,
+        search: opts.search,
+        searchFields: opts.searchFields,
+        defaultSearchOperator: opts.defaultSearchOperator,
+        hasReference: opts.hasReference,
+      });
+    });
+
+    it('normalizes and de-duplicates provided namespaces', () => {
+      const opts = {
+        namespaces: ['foo-namespace', '*', 'bar-namespace', 'foo-namespace'],
+        type: 'foo',
+        search: 'bar',
+        searchFields: ['baz'],
+        defaultSearchOperator: 'AND',
+        hasReference: {
+          type: 'bar',
+          id: '1',
+        },
+      };
+
+      getSearchDsl(mappings, registry, opts);
+      expect(getQueryParams).toHaveBeenCalledTimes(1);
+      expect(getQueryParams).toHaveBeenCalledWith({
+        mappings,
+        registry,
+        namespaces: ['foo-namespace', 'default', 'bar-namespace'],
         type: opts.type,
         search: opts.search,
         searchFields: opts.searchFields,
