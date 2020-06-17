@@ -34,7 +34,10 @@ export const OnFailureProcessorsTitle: FunctionComponent = () => {
             defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={links.learnMoreAboutOnFailureProcessorsUrl} target="_blank">
+                <EuiLink
+                  href={links.esDocsBasePath + '/handling-failure-in-pipelines.html'}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.onFailureProcessorsDocumentationLink',
                     {
