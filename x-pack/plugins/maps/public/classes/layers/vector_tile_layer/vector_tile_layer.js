@@ -277,4 +277,8 @@ export class VectorTileLayer extends TileLayer {
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
     });
   }
+
+  bubbleLabelsToTop() {
+    return true;
+  }
 }

@@ -60,6 +60,48 @@ export function moveLayerToTop(mbMap, layer) {
   });
 }
 
+function isTextLayer(mbLayer) {
+  if (mbLayer.type !== 'symbol') {
+    return false;
+  }
+
+  const styleNames = [];
+  if (mbLayer.paint) {
+    styleNames.push(...Object.keys(mbLayer.paint));
+  }
+  if (mbLayer.layout) {
+    styleNames.push(...Object.keys(mbLayer.layout));
+  }
+  return styleNames.some((styleName) => {
+    return styleName.startsWith('text-');
+  });
+}
+
+export function moveLabelsToTop(mbMap, layerList, spatialFiltersLayer) {
+  const mbStyle = mbMap.getStyle();
+  if (!mbStyle.layers || mbStyle.layers.length === 0) {
+    return;
+  }
+  const reversedMbStyleLayers = mbStyle.layers.reverse();
+
+  // Start placing layers beneath spatial filters layer (which is always the layer on top)
+  let beneathLayerId = spatialFiltersLayer.getMbLayerIds()[0];
+
+  layerList
+    .filter((layer) => {
+      return layer.bubbleLabelsToTop();
+    })
+    .forEach((layer) => {
+      reversedMbStyleLayers.forEach((mbLayer) => {
+        if (layer.ownsMbLayerId(mbLayer.id) && isTextLayer(mbLayer)) {
+          mbMap.moveLayer(mbLayer.id, beneathLayerId);
+          // advance beneathLayerId so next moved layer will be beneath previously moved layer.
+          beneathLayerId = mbLayer.id;
+        }
+      });
+    });
+}
+
 /**
  * This is function assumes only a single layer moved in the layerList, compared to mbMap
  * It is optimized to minimize the amount of mbMap.moveLayer calls.

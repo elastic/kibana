@@ -12,6 +12,7 @@ import {
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap,
   moveLayerToTop,
+  moveLabelsToTop,
 } from './utils';
 import { getGlyphUrl, isRetina } from '../../../meta';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
@@ -267,6 +268,7 @@ export class MBMapContainer extends React.Component {
     this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap));
     syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
     moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
+    moveLabelsToTop(this.state.mbMap, this.props.layerList, this.props.spatialFiltersLayer);
   };
 
   _syncMbMapWithInspector = () => {
