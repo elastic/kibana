@@ -35,8 +35,7 @@ import { Services, ActionType, PreConfiguredAction } from './types';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import { ExecuteOptions } from './create_execute_function';
-import { createExecuteFunction } from './create_execute_function';
+import { createExecutionEnqueuerFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 
@@ -68,7 +67,6 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   isActionTypeEnabled(id: string): boolean;
   isActionExecutable(actionId: string, actionTypeId: string): boolean;
-  execute(options: ExecuteOptions): Promise<void>;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
   preconfiguredActions: PreConfiguredAction[];
 }
@@ -203,7 +201,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     getAllActionRoute(router, this.licenseState);
     updateActionRoute(router, this.licenseState);
     listActionTypesRoute(router, this.licenseState);
-    executeActionRoute(router, this.licenseState, actionExecutor);
+    executeActionRoute(router, this.licenseState);
 
     return {
       registerType: (actionType: ActionType) => {
@@ -269,14 +267,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
 
     return {
-      execute: createExecuteFunction({
-        taskManager: plugins.taskManager,
-        actionTypeRegistry: actionTypeRegistry!,
-        getScopedSavedObjectsClient,
-        getBasePath: this.getBasePath,
-        isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
-        preconfiguredActions,
-      }),
       isActionTypeEnabled: (id) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id);
       },
@@ -296,6 +286,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           defaultKibanaIndex: await kibanaIndex,
           scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
           preconfiguredActions,
+          request,
+          actionExecutor: actionExecutor!,
+          executionEnqueuer: createExecutionEnqueuerFunction({
+            taskManager: plugins.taskManager,
+            actionTypeRegistry: actionTypeRegistry!,
+            isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
+            preconfiguredActions,
+          }),
         });
       },
       preconfiguredActions,
@@ -319,10 +317,15 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     core: CoreSetup<ActionsPluginsStart>,
     defaultKibanaIndex: string
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
-    const { actionTypeRegistry, isESOUsingEphemeralEncryptionKey, preconfiguredActions } = this;
+    const {
+      actionTypeRegistry,
+      isESOUsingEphemeralEncryptionKey,
+      preconfiguredActions,
+      actionExecutor,
+    } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [{ savedObjects }] = await core.getStartServices();
+      const [{ savedObjects }, { taskManager }] = await core.getStartServices();
       return {
         getActionsClient: () => {
           if (isESOUsingEphemeralEncryptionKey === true) {
@@ -336,6 +339,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             defaultKibanaIndex,
             scopedClusterClient: context.core.elasticsearch.legacy.client,
             preconfiguredActions,
+            request,
+            actionExecutor: actionExecutor!,
+            executionEnqueuer: createExecutionEnqueuerFunction({
+              taskManager,
+              actionTypeRegistry: actionTypeRegistry!,
+              isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
+              preconfiguredActions,
+            }),
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
