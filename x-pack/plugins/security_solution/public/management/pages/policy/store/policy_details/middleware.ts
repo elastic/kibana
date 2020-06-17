@@ -34,8 +34,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       let policyItem: PolicyData;
 
       try {
-        const response = await sendGetDatasource(http, id);
-        policyItem = response.item;
+        policyItem = (await sendGetDatasource(http, id)).item;
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',
