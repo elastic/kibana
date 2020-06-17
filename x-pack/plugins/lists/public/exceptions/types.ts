@@ -51,7 +51,7 @@ export interface UseExceptionListSuccess {
 export interface UseExceptionListProps {
   http: HttpStart;
   lists: ExceptionIdentifiers[];
-  onError: (arg: string[]) => void;
+  onError?: (arg: string[]) => void;
   filterOptions?: FilterExceptionsOptions;
   pagination?: Pagination;
   onSuccess?: (arg: UseExceptionListSuccess) => void;

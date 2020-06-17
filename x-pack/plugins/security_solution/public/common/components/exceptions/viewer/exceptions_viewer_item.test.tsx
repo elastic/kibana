@@ -9,7 +9,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { getExceptionListItemSchemaMock } from '../../../../lists_plugin_deps.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
 
 describe('ExceptionsViewerItems', () => {

@@ -13,7 +13,7 @@ import { ExceptionsViewer } from './';
 import { ExceptionListType } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useExceptionList, useApi } from '../../../../../public/lists_plugin_deps';
-import { getExceptionListSchemaMock } from '../../../../../public/lists_plugin_deps.mock';
+import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../../public/lists_plugin_deps');

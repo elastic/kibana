@@ -9,17 +9,21 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import * as api from '../api';
 import { getCreateExceptionListSchemaMock } from '../../../common/schemas/request/create_exception_list_schema.mock';
 import { getUpdateExceptionListSchemaMock } from '../../../common/schemas/request/update_exception_list_schema.mock';
+import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { PersistHookProps } from '../types';
 
 import { ReturnPersistExceptionList, usePersistExceptionList } from './persist_exception_list';
 
-jest.mock('../api');
-
 const mockKibanaHttpService = createKibanaCoreStartMock().http;
 
 describe('usePersistExceptionList', () => {
   const onError = jest.fn();
+
+  beforeEach(() => {
+    jest.spyOn(api, 'addExceptionList').mockResolvedValue(getExceptionListSchemaMock());
+    jest.spyOn(api, 'updateExceptionList').mockResolvedValue(getExceptionListSchemaMock());
+  });
 
   afterEach(() => {
     jest.clearAllMocks();

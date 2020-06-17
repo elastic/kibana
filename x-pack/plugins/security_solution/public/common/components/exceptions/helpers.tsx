@@ -14,16 +14,12 @@ import { FormattedEntry, OperatorOption, DescriptionListItem, Comment } from './
 import { EXCEPTION_OPERATORS, isOperator } from './operators';
 import {
   Entry,
-  EntryExists,
-  EntryNested,
   EntriesArray,
   ExceptionListItemSchema,
   OperatorTypeEnum,
+  entriesNested,
+  entriesExists,
 } from '../../../lists_plugin_deps';
-
-export const isEntryNested = (tbd: unknown): tbd is EntryNested =>
-  Boolean((tbd as EntryNested).type === 'nested');
-export const isEntryExists = (tbd: Entry): tbd is EntryExists => Boolean(tbd.type === 'exists');
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -50,7 +46,7 @@ export const getOperatorType = (entry: Entry): OperatorTypeEnum => {
  * @param entry a single ExceptionItem entry
  */
 export const getExceptionOperatorSelect = (entry: Entry): OperatorOption => {
-  if (isEntryNested(entry)) {
+  if (entriesNested.is(entry)) {
     return isOperator;
   } else {
     const operatorType = getOperatorType(entry);
@@ -70,7 +66,7 @@ export const getExceptionOperatorSelect = (entry: Entry): OperatorOption => {
  */
 export const getFormattedEntries = (entries: EntriesArray): FormattedEntry[] => {
   const formattedEntries = entries.map((entry) => {
-    if (isEntryNested(entry)) {
+    if (entriesNested.is(entry)) {
       const parent = { fieldName: entry.field, operator: null, value: null, isNested: false };
       return entry.entries.reduce<FormattedEntry[]>(
         (acc, nestedEntry) => {
@@ -104,7 +100,7 @@ export const formatEntry = ({
   item: Entry;
 }): FormattedEntry => {
   const operator = getExceptionOperatorSelect(item);
-  const value = !isEntryExists(item) ? item.value : null;
+  const value = !entriesExists.is(item) ? item.value : null;
 
   return {
     fieldName: isNested ? `${parent}.${item.field}` : item.field,

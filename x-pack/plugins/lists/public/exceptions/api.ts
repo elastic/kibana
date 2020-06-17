@@ -26,8 +26,8 @@ import {
   updateExceptionListItemSchema,
   updateExceptionListSchema,
 } from '../../common/schemas';
+import { validate } from '../../common/siem_common_deps';
 
-import { validate } from './validate';
 import {
   AddExceptionListItemProps,
   AddExceptionListProps,
@@ -56,7 +56,7 @@ export const addExceptionList = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListItemSchema>(`${EXCEPTION_LIST_URL}`, {
+      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
         body: JSON.stringify(list),
         method: 'POST',
         signal,
@@ -96,7 +96,7 @@ export const addExceptionListItem = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}`, {
+      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
         body: JSON.stringify(listItem),
         method: 'POST',
         signal,
@@ -110,7 +110,7 @@ export const addExceptionListItem = async ({
         return Promise.resolve(validatedResponse);
       }
     } catch (error) {
-      return error;
+      return Promise.reject(error);
     }
   } else {
     return Promise.reject(errorsRequest);
@@ -136,7 +136,7 @@ export const updateExceptionList = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}`, {
+      const response = await http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
         body: JSON.stringify(list),
         method: 'PUT',
         signal,
@@ -150,7 +150,7 @@ export const updateExceptionList = async ({
         return Promise.resolve(validatedResponse);
       }
     } catch (error) {
-      return error;
+      return Promise.reject(error);
     }
   } else {
     return Promise.reject(errorsRequest);
@@ -176,7 +176,7 @@ export const updateExceptionListItem = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListItemSchema>(`${EXCEPTION_LIST_URL}`, {
+      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
         body: JSON.stringify(listItem),
         method: 'PUT',
         signal,
@@ -190,7 +190,7 @@ export const updateExceptionListItem = async ({
         return Promise.resolve(validatedResponse);
       }
     } catch (error) {
-      return error;
+      return Promise.reject(error);
     }
   } else {
     return Promise.reject(errorsRequest);
@@ -220,7 +220,7 @@ export const fetchExceptionListById = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}`, {
+      const response = await http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
         method: 'GET',
         query: { id, namespace_type: namespaceType },
         signal,
@@ -234,7 +234,7 @@ export const fetchExceptionListById = async ({
         return Promise.resolve(validatedResponse);
       }
     } catch (error) {
-      return error;
+      return Promise.reject(error);
     }
   } else {
     return Promise.reject(errorsRequest);
@@ -270,7 +270,9 @@ export const fetchExceptionListItemsByListId = async ({
     ...(filterOptions.filter.length
       ? [`${namespace}.attributes.entries.field:${filterOptions.filter}*`]
       : []),
-    ...(filterOptions.tags?.map((t) => `${namespace}.attributes.tags:${t}`) ?? []),
+    ...(filterOptions.tags.length
+      ? filterOptions.tags.map((t) => `${namespace}.attributes.tags:${t}`)
+      : []),
   ];
 
   const query = {
@@ -301,7 +303,7 @@ export const fetchExceptionListItemsByListId = async ({
         return Promise.resolve(validatedResponse);
       }
     } catch (error) {
-      return error;
+      return Promise.reject(error);
     }
   } else {
     return Promise.reject(errorsRequest);
@@ -331,7 +333,7 @@ export const fetchExceptionListItemById = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}`, {
+      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
         method: 'GET',
         query: { id, namespace_type: namespaceType },
         signal,
@@ -344,7 +346,7 @@ export const fetchExceptionListItemById = async ({
         return Promise.resolve(validatedResponse);
       }
     } catch (error) {
-      return error;
+      return Promise.reject(error);
     }
   } else {
     return Promise.reject(errorsRequest);
@@ -374,7 +376,7 @@ export const deleteExceptionListById = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}`, {
+      const response = await http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
         method: 'DELETE',
         query: { id, namespace_type: namespaceType },
         signal,
@@ -388,7 +390,7 @@ export const deleteExceptionListById = async ({
         return Promise.resolve(validatedResponse);
       }
     } catch (error) {
-      return error;
+      return Promise.reject(error);
     }
   } else {
     return Promise.reject(errorsRequest);
@@ -418,7 +420,7 @@ export const deleteExceptionListItemById = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}`, {
+      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
         method: 'DELETE',
         query: { id, namespace_type: namespaceType },
         signal,
@@ -432,7 +434,7 @@ export const deleteExceptionListItemById = async ({
         return Promise.resolve(validatedResponse);
       }
     } catch (error) {
-      return error;
+      return Promise.reject(error);
     }
   } else {
     return Promise.reject(errorsRequest);

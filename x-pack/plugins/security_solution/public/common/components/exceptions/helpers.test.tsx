@@ -10,7 +10,6 @@ import moment from 'moment-timezone';
 import {
   getOperatorType,
   getExceptionOperatorSelect,
-  isEntryNested,
   getFormattedEntries,
   formatEntry,
   getOperatingSystems,
@@ -30,16 +29,15 @@ import {
   doesNotExistOperator,
 } from './operators';
 import { OperatorTypeEnum } from '../../../lists_plugin_deps';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import {
   getEntryExistsMock,
   getEntryListMock,
   getEntryMatchMock,
-  getEntryNestedMock,
   getEntryMatchAnyMock,
   getEntriesArrayMock,
-  getCommentsMock,
-  getExceptionListItemSchemaMock,
-} from '../../../lists_plugin_deps.mock';
+} from '../../../../../lists/common/schemas/types/entries.mock';
+import { getCommentsMock } from '../../../../../lists/common/schemas/types/comments.mock';
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -139,22 +137,6 @@ describe('Exception helpers', () => {
       const result = getExceptionOperatorSelect(payload);
 
       expect(result).toEqual(isNotInListOperator);
-    });
-  });
-
-  describe('#isEntryNested', () => {
-    test('it returns true if type EntryNested', () => {
-      const payload = getEntryNestedMock();
-      const result = isEntryNested(payload);
-
-      expect(result).toBeTruthy();
-    });
-
-    test('it returns false if NOT type EntryNested', () => {
-      const payload = getEntryMatchMock();
-      const result = isEntryNested(payload);
-
-      expect(result).toBeFalsy();
     });
   });
 
