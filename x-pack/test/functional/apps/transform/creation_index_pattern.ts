@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
             progress: '100',
           },
           indexPreview: {
-            columns: 20,
+            columns: 10,
             rows: 5,
           },
         },
@@ -229,7 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
             progress: '100',
           },
           indexPreview: {
-            columns: 20,
+            columns: 10,
             rows: 5,
           },
         },

@@ -78,7 +78,7 @@ export const usePivotData = (
   const api = useApi();
 
   const aggsArr = useMemo(() => dictionaryToArray(aggs), [aggs]);
-  const groupByArr = dictionaryToArray(groupBy);
+  const groupByArr = useMemo(() => dictionaryToArray(groupBy), [groupBy]);
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
   const columnKeys = Object.keys(previewMappings.properties).filter(
@@ -196,9 +196,7 @@ export const usePivotData = (
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPatternTitle,
-    aggsArr,
-    JSON.stringify(groupByArr),
-    JSON.stringify(query),
+    JSON.stringify([aggsArr, groupByArr, query]),
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
