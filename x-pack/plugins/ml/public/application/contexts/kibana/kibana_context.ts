@@ -18,10 +18,9 @@ interface StartPlugins {
   data: DataPublicPluginStart;
   security?: SecurityPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
-  kibanaVersion: string;
   share: SharePluginStart;
 }
-export type StartServices = CoreStart & StartPlugins;
+export type StartServices = CoreStart & StartPlugins & { kibanaVersion: string };
 // eslint-disable-next-line react-hooks/rules-of-hooks
 export const useMlKibana = () => useKibana<StartServices>();
 export type MlKibanaReactContextValue = KibanaReactContextValue<StartServices>;
