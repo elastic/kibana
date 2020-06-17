@@ -26,8 +26,8 @@ import { MonitorIdParam } from '../../../../common/types';
 import { useAbsoluteDateRange } from '../../../hooks/use_absolute_date_range';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
-  const dateRange = useSelector(dateRangeSelector);
-  const { from, to } = useAbsoluteDateRange();
+  const { from, to } = useSelector(dateRangeSelector);
+  const { from: absFrom, to: absTo } = useAbsoluteDateRange();
 
   const { durationLines, loading } = useSelector(selectDurationLines);
 
@@ -49,20 +49,20 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
     if (isMLAvailable) {
       const anomalyParams = {
         listOfMonitorIds: [monitorId],
-        dateStart: from,
-        dateEnd: to,
+        dateStart: absFrom,
+        dateEnd: absTo,
       };
 
       dispatch(getAnomalyRecordsAction.get(anomalyParams));
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, dispatch, lastRefresh, monitorId, isMLAvailable]);
+  }, [absFrom, absTo, dispatch, lastRefresh, monitorId, isMLAvailable]);
 
   useEffect(() => {
-    const params = { monitorId, dateStart: dateRange.from, dateEnd: dateRange.to };
+    const params = { monitorId, dateStart: from, dateEnd: to };
     dispatch(getMonitorDurationAction(params));
-  }, [dateRange, dispatch, lastRefresh, monitorId]);
+  }, [from, to, dispatch, lastRefresh, monitorId]);
 
   useEffect(() => {
     dispatch(getMLCapabilitiesAction.get());
