@@ -44,7 +44,6 @@ describe('action_connector_form', () => {
       actionTypeId: actionType.id,
       config: {},
       secrets: {},
-      consumer: 'alerts',
     } as ActionConnector;
     let wrapper;
     if (deps) {

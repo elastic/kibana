@@ -22,7 +22,6 @@ describe('PagerDutyActionConnectorFields renders', () => {
       config: {
         apiUrl: 'http:\\test',
       },
-      consumer: 'alerts',
     } as PagerDutyActionConnector;
     const deps = {
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,

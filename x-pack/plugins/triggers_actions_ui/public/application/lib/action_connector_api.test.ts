@@ -64,7 +64,6 @@ describe('createActionConnector', () => {
       name: 'My test',
       config: {},
       secrets: {},
-      consumer: 'alerts',
     };
     const resolvedValue: ActionConnector = { ...connector, id: '123' };
     http.post.mockResolvedValueOnce(resolvedValue);
@@ -75,7 +74,7 @@ describe('createActionConnector', () => {
       Array [
         "/api/actions/action",
         Object {
-          "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"consumer\\":\\"alerts\\"}",
+          "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
       ]
     `);

@@ -25,7 +25,6 @@ describe('WebhookActionConnectorFields renders', () => {
         url: 'http:\\test',
         headers: { 'content-type': 'text' },
       },
-      consumer: 'alerts',
     } as WebhookActionConnector;
     const wrapper = mountWithIntl(
       <WebhookActionConnectorFields

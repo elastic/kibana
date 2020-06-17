@@ -333,9 +333,9 @@ describe('action_form', () => {
           "label": "Test connector ",
         },
         Object {
-          "id": "test2",
-          "key": "test2",
-          "label": "Test connector 2 (preconfigured)",
+          "id": "test5",
+          "key": "test5",
+          "label": "Non consumer connector",
         },
       ]
       `);

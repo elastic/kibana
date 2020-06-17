@@ -118,7 +118,6 @@ describe('actions_connectors_list component with items', () => {
         isPreconfigured: false,
         referencedByCount: 1,
         config: {},
-        consumer: 'alerts',
       },
       {
         id: '2',
@@ -127,7 +126,6 @@ describe('actions_connectors_list component with items', () => {
         referencedByCount: 1,
         isPreconfigured: false,
         config: {},
-        consumer: 'alerts',
       },
       {
         id: '3',
@@ -136,7 +134,6 @@ describe('actions_connectors_list component with items', () => {
         referencedByCount: 1,
         isPreconfigured: true,
         config: {},
-        consumer: 'alerts',
       },
     ]);
     loadActionTypes.mockResolvedValueOnce([
@@ -310,7 +307,6 @@ describe('actions_connectors_list with show only capability', () => {
         description: 'My test',
         referencedByCount: 1,
         config: {},
-        consumer: 'alerts',
       },
       {
         id: '2',
@@ -318,7 +314,6 @@ describe('actions_connectors_list with show only capability', () => {
         description: 'My test 2',
         referencedByCount: 1,
         config: {},
-        consumer: 'alerts',
       },
     ]);
     loadActionTypes.mockResolvedValueOnce([
@@ -406,7 +401,6 @@ describe('actions_connectors_list component with disabled items', () => {
         description: 'My test',
         referencedByCount: 1,
         config: {},
-        consumer: 'alerts',
       },
       {
         id: '2',
@@ -414,7 +408,6 @@ describe('actions_connectors_list component with disabled items', () => {
         description: 'My test 2',
         referencedByCount: 1,
         config: {},
-        consumer: 'alerts',
       },
     ]);
     loadActionTypes.mockResolvedValueOnce([

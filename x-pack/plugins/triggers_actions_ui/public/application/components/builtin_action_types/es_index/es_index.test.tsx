@@ -39,7 +39,6 @@ describe('index connector validation', () => {
         refresh: false,
         executionTimeField: '1',
       },
-      consumer: 'alerts',
     } as EsIndexActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
@@ -60,7 +59,6 @@ describe('index connector validation with minimal config', () => {
       config: {
         index: 'test_es_index',
       },
-      consumer: 'alerts',
     } as EsIndexActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({

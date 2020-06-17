@@ -1429,7 +1429,6 @@ const connector = {
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
           capabilities: capabilities,
           docLinks,
-          consumer: 'alerts',
         }}
       >
         <ConnectorAddFlyout
@@ -1484,7 +1483,7 @@ export interface ActionsConnectorsContextValue {
 |capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
 |toastNotifications|Toast messages.|
 |reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
-|consumer|Name of the plugin that creates an action.|
+|consumer|Optional name of the plugin that creates an action.|
 
 
 ## Embed the Edit Connector flyout within any Kibana plugin

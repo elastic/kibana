@@ -44,7 +44,6 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
       },
-      consumer: 'alerts',
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
@@ -74,7 +73,6 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
       },
-      consumer: 'alerts',
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
@@ -127,7 +125,6 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
       },
-      consumer: 'alerts',
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
@@ -156,7 +153,6 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
       },
-      consumer: 'alerts',
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({

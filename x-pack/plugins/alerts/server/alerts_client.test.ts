@@ -53,7 +53,6 @@ beforeEach(() => {
       config: {
         foo: 'bar',
       },
-      consumer: 'alerts',
     },
     {
       id: '2',
@@ -63,14 +62,12 @@ beforeEach(() => {
       config: {
         foo: 'bar',
       },
-      consumer: 'alerts',
     },
     {
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
       name: 'test',
-      consumer: 'alerts',
     },
   ]);
   alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
