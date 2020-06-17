@@ -167,6 +167,7 @@ const TopNav = ({
       showSearchBar
       showSaveQuery={false}
       showDatePicker={false}
+      showQueryInput={false}
     />
   ) : null;
 };

@@ -20,7 +20,7 @@
 import { useState, useEffect } from 'react';
 import { ChromeStart } from 'kibana/public';
 
-export const useChrome = (chrome: ChromeStart) => {
+export const useChromeVisibility = (chrome: ChromeStart) => {
   const [isVisible, setIsVisible] = useState<boolean>();
 
   useEffect(() => {
