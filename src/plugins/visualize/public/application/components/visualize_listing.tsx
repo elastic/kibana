@@ -126,34 +126,29 @@ export const VisualizeListing = () => {
   );
 
   return (
-    <div
-      className="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem"
-      data-test-subj="visualizeLandingPage"
-    >
-      <TableListView
-        headingId="visualizeListingHeading"
-        // we allow users to create visualizations even if they can't save them
-        // for data exploration purposes
-        createItem={createNewVis}
-        findItems={fetchItems}
-        deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
-        editItem={visualizeCapabilities.save ? editItem : undefined}
-        tableColumns={tableColumns}
-        listingLimit={listingLimit}
-        initialPageSize={savedObjectsPublic.settings.getPerPage()}
-        initialFilter={''}
-        noItemsFragment={noItemsFragment}
-        entityName={i18n.translate('visualize.listing.table.entityName', {
-          defaultMessage: 'visualization',
-        })}
-        entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
-          defaultMessage: 'visualizations',
-        })}
-        tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
-          defaultMessage: 'Visualizations',
-        })}
-        toastNotifications={toastNotifications}
-      />
-    </div>
+    <TableListView
+      headingId="visualizeListingHeading"
+      // we allow users to create visualizations even if they can't save them
+      // for data exploration purposes
+      createItem={createNewVis}
+      findItems={fetchItems}
+      deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
+      editItem={visualizeCapabilities.save ? editItem : undefined}
+      tableColumns={tableColumns}
+      listingLimit={listingLimit}
+      initialPageSize={savedObjectsPublic.settings.getPerPage()}
+      initialFilter={''}
+      noItemsFragment={noItemsFragment}
+      entityName={i18n.translate('visualize.listing.table.entityName', {
+        defaultMessage: 'visualization',
+      })}
+      entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
+        defaultMessage: 'visualizations',
+      })}
+      tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
+        defaultMessage: 'Visualizations',
+      })}
+      toastNotifications={toastNotifications}
+    />
   );
 };
