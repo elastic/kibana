@@ -25,6 +25,5 @@
   "configPath": [
     "xpack",
     "apm"
-  ],
-  "extraPublicDirs": ["public/style/variables"]
+  ]
 }

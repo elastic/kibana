@@ -6,6 +6,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["data"],
-  "optionalPlugins": [],
-  "extraPublicDirs": ["common"]
+  "optionalPlugins": []
 }

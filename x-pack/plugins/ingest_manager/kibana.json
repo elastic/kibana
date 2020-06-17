@@ -5,6 +5,5 @@
   "ui": true,
   "configPath": ["xpack", "ingestManager"],
   "requiredPlugins": ["licensing", "data", "encryptedSavedObjects"],
-  "optionalPlugins": ["security", "features", "cloud"],
-  "extraPublicDirs": ["common"]
+  "optionalPlugins": ["security", "features", "cloud"]
 }

@@ -31,7 +31,7 @@ export function getPluginBundles(plugins: KibanaPlatformPlugin[], repoRoot: stri
         new Bundle({
           type: 'plugin',
           id: p.id,
-          publicDirNames: ['public', ...p.extraPublicDirs],
+          entry: './public/index',
           sourceRoot: repoRoot,
           contextDir: p.directory,
           outputDir: Path.resolve(p.directory, 'target/public'),

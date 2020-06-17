@@ -5,6 +5,5 @@
   "optionalPlugins": ["visTypeTimelion"],
   "configPath": ["xpack", "features"],
   "server": true,
-  "ui": true,
-  "extraPublicDirs": ["common"]
+  "ui": true
 }

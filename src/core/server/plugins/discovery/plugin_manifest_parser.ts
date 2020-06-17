@@ -57,7 +57,6 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     optionalPlugins: true,
     ui: true,
     server: true,
-    extraPublicDirs: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -71,11 +70,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  * @param packageInfo Kibana package info.
  * @internal
  */
-export async function parseManifest(
-  pluginPath: string,
-  packageInfo: PackageInfo,
-  log: Logger
-): Promise<PluginManifest> {
+export async function parseManifest(pluginPath: string, packageInfo: PackageInfo, log: Logger) {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;
@@ -135,19 +130,6 @@ export async function parseManifest(
     );
   }
 
-  if (
-    manifest.extraPublicDirs &&
-    (!Array.isArray(manifest.extraPublicDirs) ||
-      !manifest.extraPublicDirs.every((dir) => typeof dir === 'string'))
-  ) {
-    throw PluginDiscoveryError.invalidManifest(
-      manifestPath,
-      new Error(
-        `The "extraPublicDirs" in plugin manifest for "${manifest.id}" should be an array of strings.`
-      )
-    );
-  }
-
   const expectedKibanaVersion =
     typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
       ? manifest.kibanaVersion
@@ -193,7 +175,6 @@ export async function parseManifest(
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
     ui: includesUiPlugin,
     server: includesServerPlugin,
-    extraPublicDirs: manifest.extraPublicDirs,
   };
 }
 

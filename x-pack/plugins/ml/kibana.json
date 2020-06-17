@@ -24,13 +24,5 @@
     "licenseManagement"
   ],
   "server": true,
-  "ui": true,
-  "extraPublicDirs": [
-    "common/constants/anomalies",
-    "common/util/anomaly_utils",
-    "common/util/errors",
-    "common/util/validators",
-    "public/application/components/data_grid",
-    "public/application/data_frame_analytics/common"
-  ]
+  "ui": true
 }

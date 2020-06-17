@@ -17,37 +17,25 @@
  * under the License.
  */
 
-import { CoreWindow, read } from './plugin_reader';
+import { CoreWindow, read, UnknownPluginInitializer } from './plugin_reader';
 
-const coreWindow: CoreWindow & {
-  __kbnBundles__: { stub(key: string, value: any): void };
-} = window as any;
-
+const coreWindow: CoreWindow = window as any;
 beforeEach(() => {
-  const stubs = new Map<string, any>();
-  coreWindow.__kbnBundles__ = {
-    get(key) {
-      return stubs.get(key);
-    },
-    has(key) {
-      return stubs.has(key);
-    },
-    stub(key, value) {
-      stubs.set(key, value);
-    },
-  };
+  coreWindow.__kbnBundles__ = {};
 });
 
 it('handles undefined plugin exports', () => {
+  coreWindow.__kbnBundles__['plugin/foo'] = undefined;
+
   expect(() => {
     read('foo');
   }).toThrowError(`Definition of plugin "foo" not found and may have failed to load.`);
 });
 
 it('handles plugin exports with a "plugin" export that is not a function', () => {
-  coreWindow.__kbnBundles__.stub('plugin/foo/public', {
+  coreWindow.__kbnBundles__['plugin/foo'] = {
     plugin: 1234,
-  });
+  } as any;
 
   expect(() => {
     read('foo');
@@ -55,8 +43,11 @@ it('handles plugin exports with a "plugin" export that is not a function', () =>
 });
 
 it('returns the plugin initializer when the "plugin" named export is a function', () => {
-  const plugin = () => {};
-  coreWindow.__kbnBundles__.stub('plugin/foo/public', { plugin });
+  const plugin: UnknownPluginInitializer = () => {
+    return undefined as any;
+  };
+
+  coreWindow.__kbnBundles__['plugin/foo'] = { plugin };
 
   expect(read('foo')).toBe(plugin);
 });

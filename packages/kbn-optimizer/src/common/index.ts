@@ -19,7 +19,6 @@
 
 export * from './bundle';
 export * from './bundle_cache';
-export * from './bundle_refs';
 export * from './worker_config';
 export * from './worker_messages';
 export * from './compiler_messages';

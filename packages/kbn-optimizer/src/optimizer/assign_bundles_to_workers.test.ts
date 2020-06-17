@@ -57,7 +57,7 @@ const assertReturnVal = (workers: Assignments[]) => {
 const testBundle = (id: string) =>
   new Bundle({
     contextDir: `/repo/plugin/${id}/public`,
-    publicDirNames: ['public'],
+    entry: 'index.ts',
     id,
     outputDir: `/repo/plugins/${id}/target/public`,
     sourceRoot: `/repo`,

@@ -25,7 +25,6 @@ export interface State {
   cacheKey?: unknown;
   moduleCount?: number;
   files?: string[];
-  bundleRefExportIds?: string[];
 }
 
 const DEFAULT_STATE: State = {};
@@ -86,10 +85,6 @@ export class BundleCache {
 
   public getReferencedFiles() {
     return this.get().files;
-  }
-
-  public getBundleRefExportIds() {
-    return this.get().bundleRefExportIds;
   }
 
   public getCacheKey() {

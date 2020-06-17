@@ -23,7 +23,7 @@ jest.mock('fs');
 
 const SPEC: BundleSpec = {
   contextDir: '/foo/bar',
-  publicDirNames: ['public'],
+  entry: 'entry',
   id: 'bar',
   outputDir: '/foo/bar/target',
   sourceRoot: '/foo',
@@ -49,11 +49,9 @@ it('creates cache keys', () => {
       },
       "spec": Object {
         "contextDir": "/foo/bar",
+        "entry": "entry",
         "id": "bar",
         "outputDir": "/foo/bar/target",
-        "publicDirNames": Array [
-          "public",
-        ],
         "sourceRoot": "/foo",
         "type": "plugin",
       },
@@ -84,11 +82,9 @@ it('parses bundles from JSON specs', () => {
           "state": undefined,
         },
         "contextDir": "/foo/bar",
+        "entry": "entry",
         "id": "bar",
         "outputDir": "/foo/bar/target",
-        "publicDirNames": Array [
-          "public",
-        ],
         "sourceRoot": "/foo",
         "type": "plugin",
       },

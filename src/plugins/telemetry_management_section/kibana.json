@@ -6,6 +6,5 @@
   "requiredPlugins": [
     "advancedSettings",
     "telemetry"
-  ],
-  "extraPublicDirs": ["public/components"]
+  ]
 }

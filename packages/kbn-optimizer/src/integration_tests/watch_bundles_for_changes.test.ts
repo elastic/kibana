@@ -29,14 +29,14 @@ jest.mock('fs');
 jest.mock('watchpack');
 
 const MockWatchPack: jest.MockedClass<typeof ActualWatchpack> = jest.requireMock('watchpack');
-const bundleEntryPath = (bundle: Bundle) => `${bundle.contextDir}/public/index.ts`;
+const bundleEntryPath = (bundle: Bundle) => `${bundle.contextDir}/${bundle.entry}`;
 
 const makeTestBundle = (id: string) => {
   const bundle = new Bundle({
     type: 'plugin',
     id,
     contextDir: `/repo/plugins/${id}/public`,
-    publicDirNames: ['public'],
+    entry: 'index.ts',
     outputDir: `/repo/plugins/${id}/target/public`,
     sourceRoot: `/repo`,
   });

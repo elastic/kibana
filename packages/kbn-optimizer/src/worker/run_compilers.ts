@@ -35,9 +35,7 @@ import {
   WorkerConfig,
   ascending,
   parseFilePath,
-  BundleRefs,
 } from '../common';
-import { BundleRefModule } from './bundle_ref_module';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {
@@ -45,6 +43,7 @@ import {
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
+  WebpackNormalModule,
   getModulePath,
 } from './webpack_helpers';
 
@@ -99,43 +98,40 @@ const observeCompiler = (
         });
       }
 
-      const bundleRefExportIds: string[] = [];
-      const referencedFiles = new Set<string>();
-      let normalModuleCount = 0;
-
-      for (const module of stats.compilation.modules) {
-        if (isNormalModule(module)) {
-          normalModuleCount += 1;
-          const path = getModulePath(module);
-          const parsedPath = parseFilePath(path);
-
-          if (!parsedPath.dirs.includes('node_modules')) {
-            referencedFiles.add(path);
-            continue;
+      const normalModules = stats.compilation.modules.filter(
+        (module): module is WebpackNormalModule => {
+          if (isNormalModule(module)) {
+            return true;
           }
 
-          const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
-          const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
-          referencedFiles.add(
-            Path.join(
-              parsedPath.root,
-              ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
-              'package.json'
-            )
-          );
+          if (isExternalModule(module) || isIgnoredModule(module) || isConcatenatedModule(module)) {
+            return false;
+          }
+
+          throw new Error(`Unexpected module type: ${inspect(module)}`);
+        }
+      );
+
+      const referencedFiles = new Set<string>();
+
+      for (const module of normalModules) {
+        const path = getModulePath(module);
+        const parsedPath = parseFilePath(path);
+
+        if (!parsedPath.dirs.includes('node_modules')) {
+          referencedFiles.add(path);
           continue;
         }
 
-        if (module instanceof BundleRefModule) {
-          bundleRefExportIds.push(module.exportId);
-          continue;
-        }
-
-        if (isExternalModule(module) || isIgnoredModule(module) || isConcatenatedModule(module)) {
-          continue;
-        }
-
-        throw new Error(`Unexpected module type: ${inspect(module)}`);
+        const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
+        const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
+        referencedFiles.add(
+          Path.join(
+            parsedPath.root,
+            ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
+            'package.json'
+          )
+        );
       }
 
       const files = Array.from(referencedFiles).sort(ascending((p) => p));
@@ -154,15 +150,14 @@ const observeCompiler = (
       );
 
       bundle.cache.set({
-        bundleRefExportIds,
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
-        moduleCount: normalModuleCount,
+        moduleCount: normalModules.length,
         files,
       });
 
       return compilerMsgs.compilerSuccess({
-        moduleCount: normalModuleCount,
+        moduleCount: normalModules.length,
       });
     })
   );
@@ -190,14 +185,8 @@ const observeCompiler = (
 /**
  * Run webpack compilers
  */
-export const runCompilers = (
-  workerConfig: WorkerConfig,
-  bundles: Bundle[],
-  bundleRefs: BundleRefs
-) => {
-  const multiCompiler = webpack(
-    bundles.map((def) => getWebpackConfig(def, bundleRefs, workerConfig))
-  );
+export const runCompilers = (workerConfig: WorkerConfig, bundles: Bundle[]) => {
+  const multiCompiler = webpack(bundles.map((def) => getWebpackConfig(def, workerConfig)));
 
   return Rx.merge(
     /**
