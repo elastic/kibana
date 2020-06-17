@@ -173,7 +173,7 @@ export class TimelionPlugin implements Plugin {
           values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
         }),
         type: 'select',
-        options: config.graphiteUrls,
+        options: config.graphiteUrls || [],
         category: ['timelion'],
         schema: schema.nullable(schema.string()),
       },
