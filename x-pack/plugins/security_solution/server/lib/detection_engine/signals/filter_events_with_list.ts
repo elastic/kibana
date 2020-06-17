@@ -28,7 +28,9 @@ export const filterEventsAgainstList = async ({
   eventSearchResult,
 }: FilterEventsAgainstList): Promise<SignalSearchResponse> => {
   try {
+    logger.debug(`exceptionsList: ${JSON.stringify(exceptionsList, null, 4)}`);
     if (exceptionsList == null || exceptionsList.length === 0) {
+      logger.debug('about to return original search result');
       return eventSearchResult;
     }
 

@@ -84,6 +84,7 @@ export const singleBulkCreate = async ({
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
   filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
   if (filteredEvents.hits.hits.length === 0) {
+    logger.debug(`all events were duplicates`);
     return { success: true, createdItemsCount: 0 };
   }
   // index documents after creating an ID based on the

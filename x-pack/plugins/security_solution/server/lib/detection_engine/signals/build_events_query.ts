@@ -84,13 +84,14 @@ export const buildEventsSearchQuery = ({
     },
   };
   if (searchAfterSortId) {
-    return {
+    const thing = {
       ...searchQuery,
       body: {
         ...searchQuery.body,
         search_after: [searchAfterSortId],
       },
     };
+    return thing;
   }
   return searchQuery;
 };

@@ -121,6 +121,7 @@ export const signalRulesAlertType = ({
       });
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
+      logger.debug(buildRuleMessage(`interval: ${interval}`));
       await ruleStatusService.goingToRun();
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
