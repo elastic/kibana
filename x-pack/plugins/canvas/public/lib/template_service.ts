@@ -19,7 +19,7 @@ interface ListResponse {
 }
 
 export async function list() {
-  const templateResponse = await fetch.get<ListResponse>(`${getApiPath()}/`);
+  const templateResponse = await fetch.get<ListResponse>(`${getApiPath()}`);
 
   return templateResponse.data.templates;
 }
