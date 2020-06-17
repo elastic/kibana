@@ -22,7 +22,7 @@ import { Form, useForm, FormDataProvider } from '../../../../../shared_imports';
 import { usePipelineProcessorsContext } from '../../context';
 import { ProcessorInternal } from '../../types';
 
-import { LearnMoreFormButton } from './learn_more_form_button';
+import { DocumentationButton } from './documentation_button';
 import { ProcessorSettingsFromOnSubmitArg } from './processor_settings_form.container';
 import { getProcessorFormDescriptor } from './map_processor_type_to_form';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
@@ -83,7 +83,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
 
                     if (formDescriptor) {
                       return (
-                        <LearnMoreFormButton
+                        <DocumentationButton
                           processorLabel={formDescriptor.label}
                           docLink={esDocsBasePath + formDescriptor.docLinkPath}
                         />

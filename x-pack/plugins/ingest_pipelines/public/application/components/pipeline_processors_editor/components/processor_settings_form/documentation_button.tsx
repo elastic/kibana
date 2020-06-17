@@ -13,7 +13,7 @@ interface Props {
   docLink: string;
 }
 
-export const LearnMoreFormButton: FunctionComponent<Props> = ({ processorLabel, docLink }) => {
+export const DocumentationButton: FunctionComponent<Props> = ({ processorLabel, docLink }) => {
   return (
     <EuiButtonEmpty size="s" flush="right" href={docLink} target="_blank" iconType="help">
       {i18n.translate(

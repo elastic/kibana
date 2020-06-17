@@ -19,7 +19,7 @@ interface FieldsFormDescriptor {
   label: string;
 }
 
-const mapProcessorTypeToFormOrDocPath: Record<string, FieldsFormDescriptor> = {
+const mapProcessorTypeToFormDescriptor: Record<string, FieldsFormDescriptor> = {
   append: {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/append-processor.html',
@@ -262,12 +262,12 @@ const mapProcessorTypeToFormOrDocPath: Record<string, FieldsFormDescriptor> = {
   },
 };
 
-export const types = Object.keys(mapProcessorTypeToFormOrDocPath).sort();
+export const types = Object.keys(mapProcessorTypeToFormDescriptor).sort();
 
-export type ProcessorType = keyof typeof mapProcessorTypeToFormOrDocPath;
+export type ProcessorType = keyof typeof mapProcessorTypeToFormDescriptor;
 
 export const getProcessorFormDescriptor = (
   type: ProcessorType | string
 ): FieldsFormDescriptor | undefined => {
-  return mapProcessorTypeToFormOrDocPath[type as ProcessorType];
+  return mapProcessorTypeToFormDescriptor[type as ProcessorType];
 };
