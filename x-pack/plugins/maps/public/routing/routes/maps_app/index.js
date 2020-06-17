@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { MapsAppView } from './maps_app';
+import { MapsAppView } from './maps_app_view';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
 import { getQueryableUniqueIndexPatternIds } from '../../../selectors/map_selectors';
 import {

@@ -30,11 +30,11 @@ import {
 } from '../../state_syncing/global_sync';
 import { AppStateManager } from '../../state_syncing/app_state_manager';
 import { useAppStateSyncing } from '../../state_syncing/app_sync';
-import { MapsRoot } from '../../page_elements/maps_root';
 import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { GisMap } from '../../../connected_components/gis_map';
 
-export const MapsAppView = class extends React.Component {
+export class MapsAppView extends React.Component {
   _visibleSubscription = null;
   _globalSyncUnsubscribe = null;
   _appSyncUnsubscribe = null;
@@ -470,8 +470,17 @@ export const MapsAppView = class extends React.Component {
       <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
-        <MapsRoot filters={filters} updateFiltersAndDispatch={this._updateFiltersAndDispatch} />
+        <div id="react-maps-root">
+          <GisMap
+            addFilters={(newFilters) => {
+              newFilters.forEach((filter) => {
+                filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
+              });
+              this._updateFiltersAndDispatch([...filters, ...newFilters]);
+            }}
+          />
+        </div>
       </div>
     ) : null;
   }
-};
+}

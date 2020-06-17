@@ -8,10 +8,10 @@ import React from 'react';
 import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { getToasts } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { MapsListView } from './list';
+import { MapsListView } from './maps_list_view';
 import { Redirect } from 'react-router-dom';
 
-export const LoadListAndRender = class extends React.Component {
+export class LoadListAndRender extends React.Component {
   state = {
     mapsLoaded: false,
     hasSavedMaps: null,
@@ -19,14 +19,14 @@ export const LoadListAndRender = class extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.loadMapsList();
+    this._loadMapsList();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async loadMapsList() {
+  async _loadMapsList() {
     try {
       const { hits = [] } = await getMapsSavedObjectLoader().find('', 1);
       if (this._isMounted) {
@@ -54,4 +54,4 @@ export const LoadListAndRender = class extends React.Component {
       return null;
     }
   }
-};
+}
