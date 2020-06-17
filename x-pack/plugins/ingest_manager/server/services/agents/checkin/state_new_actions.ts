@@ -25,12 +25,10 @@ import {
 } from '../../../types';
 import { agentConfigService } from '../../agent_config';
 import * as APIKeysService from '../../api_keys';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENT_SAVED_OBJECT_TYPE, AGENT_UPDATE_ACTIONS_INTERVAL_MS } from '../../../constants';
 import { createAgentAction, getNewActionsSince } from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError } from './rxjs_utils';
-
-const UPDATE_ACTIONS_INTERVAL_MS = 10000;
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -53,7 +51,7 @@ function getInternalUserSOClient() {
 
 function createAgentConfigSharedObservable(configId: string) {
   const internalSOClient = getInternalUserSOClient();
-  return timer(0, UPDATE_ACTIONS_INTERVAL_MS).pipe(
+  return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
     switchMap(() =>
       from(agentConfigService.get(internalSOClient, configId) as Promise<AgentConfig>)
     ),
@@ -64,7 +62,7 @@ function createAgentConfigSharedObservable(configId: string) {
 }
 
 function createNewActionsSharedObservable(): Observable<AgentAction[]> {
-  return timer(0, UPDATE_ACTIONS_INTERVAL_MS).pipe(
+  return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
     switchMap(() => {
       const internalSOClient = getInternalUserSOClient();
 

@@ -9,8 +9,7 @@ import { Agent } from '../../../types';
 import { appContextService } from '../../app_context';
 import { agentCheckinStateConnectedAgentsFactory } from './state_connected_agents';
 import { agentCheckinStateNewActionsFactory } from './state_new_actions';
-
-const UPDATE_LAST_CHECKIN_INTERVAL_MS = 15000;
+import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../constants';
 
 function agentCheckinStateFactory() {
   const agentConnected = agentCheckinStateConnectedAgentsFactory();
@@ -23,7 +22,7 @@ function agentCheckinStateFactory() {
       } catch (err) {
         appContextService.getLogger().error(err);
       }
-    }, UPDATE_LAST_CHECKIN_INTERVAL_MS);
+    }, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS);
   }
 
   return {
