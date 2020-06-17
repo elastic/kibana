@@ -39,6 +39,22 @@ export interface FindTestCase {
   };
 }
 
+const TEST_CASES = [
+  { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, namespaces: ['default'] },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_1, namespaces: ['space_1'] },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_2, namespaces: ['space_2'] },
+  { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, namespaces: ['default', 'space_1'] },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, namespaces: ['space_1'] },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, namespaces: ['space_2'] },
+  { ...CASES.NAMESPACE_AGNOSTIC, namespaces: undefined },
+  { ...CASES.HIDDEN, namespaces: undefined },
+];
+
+expect(TEST_CASES.length).to.eql(
+  Object.values(CASES).length,
+  'Unhandled test cases in `find` suite'
+);
+
 export const getTestCases = (
   { currentSpace, crossSpaceSearch }: { currentSpace?: string; crossSpaceSearch?: string[] } = {
     currentSpace: undefined,
@@ -57,22 +73,22 @@ export const getTestCases = (
     crossSpaceSearch ? `${title} (cross-space ${isWildcardSearch ? 'with wildcard' : ''})` : title;
 
   type CasePredicate = (testCase: TestCase) => boolean;
-  const allCases = Object.values(CASES);
   const getExpectedSavedObjects = (predicate: CasePredicate) => {
     if (isCrossSpaceSearch) {
       // all other cross-space tests are written to test that we exclude the current space.
       // the wildcard scenario verifies current space functionality
       if (isWildcardSearch) {
-        return allCases.filter(predicate);
+        return TEST_CASES.filter(predicate);
       }
 
-      return allCases.filter((t) => {
+      return TEST_CASES.filter((t) => {
         const hasOtherNamespaces =
-          hasNamespaces && t.namespaces!.some((ns) => ns !== (currentSpace ?? 'default'));
+          Array.isArray(t.namespaces) &&
+          t.namespaces!.some((ns) => ns !== (currentSpace ?? 'default'));
         return hasOtherNamespaces && predicate(t);
       });
     }
-    return allCases.filter(
+    return TEST_CASES.filter(
       (t) => (!t.namespaces || t.namespaces.includes(currentSpace ?? 'default')) && predicate(t)
     );
   };

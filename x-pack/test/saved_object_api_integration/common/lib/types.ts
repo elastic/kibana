@@ -21,7 +21,6 @@ export interface TestSuite<T> {
 export interface TestCase {
   type: string;
   id: string;
-  namespaces?: string[];
   failure?: 400 | 403 | 404 | 409;
 }
 
