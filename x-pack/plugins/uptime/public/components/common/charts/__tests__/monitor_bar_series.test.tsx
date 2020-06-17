@@ -5,26 +5,21 @@
  */
 
 import React from 'react';
-import * as reactRedux from 'react-redux';
-import { MonitorBarSeries, MonitorBarSeriesProps } from '../monitor_bar_series';
-import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
+import { MonitorBarSeriesComponent as MonitorBarSeries, Props } from '../monitor_bar_series';
+import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import { HistogramPoint } from '../../../../../common/runtime_types';
 
 describe('MonitorBarSeries component', () => {
-  let props: MonitorBarSeriesProps;
+  let props: Props;
   let histogramSeries: HistogramPoint[];
-  beforeAll(() => {
-    const useSelectorSpy = jest.spyOn(reactRedux, 'useSelector');
-    useSelectorSpy.mockReturnValue({
-      dateRange: {
-        from: 'now-15m',
-        to: 'now',
-      },
-    });
-  });
+  let updateDateRange: any;
 
   beforeEach(() => {
+    updateDateRange = jest.fn();
     props = {
+      updateDateRange,
+      from: 1580387865000,
+      to: 1580388769000,
       histogramSeries: [
         {
           timestamp: 124,
@@ -169,10 +164,6 @@ describe('MonitorBarSeries component', () => {
     ];
   });
 
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
-
   it('shallow renders a series when there are down items', () => {
     const component = shallowWithRouter(<MonitorBarSeries {...props} />);
     expect(component).toMatchSnapshot();
@@ -184,7 +175,7 @@ describe('MonitorBarSeries component', () => {
     expect(component).toEqual({});
   });
 
-  it(' shallow renders nothing if the down count has no counts', () => {
+  it('shallow renders nothing if the down count has no counts', () => {
     props.histogramSeries = [
       {
         timestamp: 123,
@@ -207,15 +198,25 @@ describe('MonitorBarSeries component', () => {
   });
 
   it('shallow renders nothing if the data series is null', () => {
-    const component = shallowWithRouter(<MonitorBarSeries histogramSeries={null} />);
+    const component = shallowWithRouter(
+      <MonitorBarSeries
+        from={1580387865000}
+        to={1580388769000}
+        updateDateRange={updateDateRange}
+        histogramSeries={null}
+      />
+    );
     expect(component).toEqual({});
   });
 
   it('renders if the data series is present', () => {
     const component = renderWithRouter(
-      <MountWithReduxProvider>
-        <MonitorBarSeries histogramSeries={histogramSeries} />
-      </MountWithReduxProvider>
+      <MonitorBarSeries
+        from={1580387865000}
+        to={1580388769000}
+        updateDateRange={updateDateRange}
+        histogramSeries={histogramSeries}
+      />
     );
     expect(component).toMatchSnapshot();
   });

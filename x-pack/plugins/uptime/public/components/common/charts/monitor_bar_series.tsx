@@ -37,7 +37,7 @@ export const MonitorBarSeries: React.FC<MonitorBarSeriesProps> = (props) => {
   );
 };
 
-type Props = MonitorBarSeriesProps & {
+export type Props = MonitorBarSeriesProps & {
   from: number;
   to: number;
   updateDateRange: (min: number, max: number) => void;

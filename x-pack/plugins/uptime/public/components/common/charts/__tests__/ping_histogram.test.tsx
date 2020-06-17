@@ -50,12 +50,7 @@ describe('PingHistogram component', () => {
   });
 
   it('renders the component without errors', () => {
-    const component = renderWithRouter(
-      <MountWithReduxProvider>
-        <PingHistogramComponent {...props} />
-      </MountWithReduxProvider>
-    );
-
+    const component = renderWithRouter(<PingHistogramComponent {...props} />);
     expect(component).toMatchSnapshot();
   });
 });
