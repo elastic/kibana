@@ -58,7 +58,7 @@ export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
-export interface JobDocPayload<JobParamsType> {
+export interface ScheduledTaskParams<JobParamsType> {
   headers?: string; // serialized encrypted headers
   jobParams: JobParamsType;
   title: string;
@@ -70,13 +70,13 @@ export interface JobSource<JobParamsType> {
   _index: string;
   _source: {
     jobtype: string;
-    output: JobDocOutput;
-    payload: JobDocPayload<JobParamsType>;
+    output: TaskRunResult;
+    payload: ScheduledTaskParams<JobParamsType>;
     status: JobStatus;
   };
 }
 
-export interface JobDocOutput {
+export interface TaskRunResult {
   content_type: string;
   content: string | null;
   size: number;
@@ -173,43 +173,43 @@ export type ReportingSetup = object;
  * Internal Types
  */
 
+export type CaptureConfig = ReportingConfigType['capture'];
+export type ScrollConfig = ReportingConfigType['csv']['scroll'];
+
 export type ESQueueCreateJobFn<JobParamsType> = (
   jobParams: JobParamsType,
   context: RequestHandlerContext,
   request: KibanaRequest
 ) => Promise<JobParamsType>;
 
-export type ESQueueWorkerExecuteFn<JobDocPayloadType> = (
+export type ESQueueWorkerExecuteFn<ScheduledTaskParamsType> = (
   jobId: string,
-  job: JobDocPayloadType,
-  cancellationToken?: CancellationToken
+  job: ScheduledTaskParamsType,
+  cancellationToken: CancellationToken
 ) => Promise<any>;
 
-export type CaptureConfig = ReportingConfigType['capture'];
-export type ScrollConfig = ReportingConfigType['csv']['scroll'];
-
-export type CreateJobFactory<CreateJobFnType> = (
+export type ScheduleTaskFnFactory<ScheduleTaskFnType> = (
   reporting: ReportingCore,
   logger: LevelLogger
-) => CreateJobFnType;
+) => ScheduleTaskFnType;
 
-export type ExecuteJobFactory<ExecuteJobFnType> = (
+export type RunTaskFnFactory<RunTaskFnType> = (
   reporting: ReportingCore,
   logger: LevelLogger
-) => Promise<ExecuteJobFnType>; // FIXME: does not "need" to be async
+) => RunTaskFnType;
 
 export interface ExportTypeDefinition<
   JobParamsType,
-  CreateJobFnType,
+  ScheduleTaskFnType,
   JobPayloadType,
-  ExecuteJobFnType
+  RunTaskFnType
 > {
   id: string;
   name: string;
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFactory: CreateJobFactory<CreateJobFnType>;
-  executeJobFactory: ExecuteJobFactory<ExecuteJobFnType>;
+  scheduleTaskFnFactory: ScheduleTaskFnFactory<ScheduleTaskFnType>;
+  runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
