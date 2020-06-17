@@ -24,6 +24,10 @@ const {
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
+  FILTERS,
+  PAGINATION,
+  SEARCH,
+  STATUS_FILTER,
 } = CLIENT_DEFAULTS;
 
 export interface UiState {
@@ -49,15 +53,15 @@ const initialState: UiState = {
   autorefreshInterval: AUTOREFRESH_INTERVAL,
   autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
   basePath: '',
-  currentMonitorListPage: '',
+  currentMonitorListPage: PAGINATION,
   dateRange: {
     from: DATE_RANGE_START,
     to: DATE_RANGE_END,
   },
   esKuery: '',
-  searchText: '',
-  selectedFilters: '',
-  statusFilter: '',
+  searchText: SEARCH,
+  selectedFilters: FILTERS,
+  statusFilter: STATUS_FILTER,
   integrationsPopoverOpen: null,
 };
 
