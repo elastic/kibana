@@ -7,29 +7,38 @@
 import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiHorizontalRule, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
-function redirectToAnalyticsManagementPage() {
-  window.location.href = '#/data_frame_analytics?';
-}
+export const BackToListPanel: FC = () => {
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
 
-export const BackToListPanel: FC = () => (
-  <Fragment>
-    <EuiHorizontalRule />
-    <EuiCard
-      // @ts-ignore
-      style={{ width: '300px' }}
-      icon={<EuiIcon size="xxl" type="list" />}
-      title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
-        defaultMessage: 'Data Frame Analytics',
-      })}
-      description={i18n.translate(
-        'xpack.ml.dataframe.analytics.create.analyticsListCardDescription',
-        {
-          defaultMessage: 'Return to the analytics management page.',
-        }
-      )}
-      onClick={redirectToAnalyticsManagementPage}
-      data-test-subj="analyticsWizardCardManagement"
-    />
-  </Fragment>
-);
+  const redirectToAnalyticsManagementPage = async () => {
+    await navigateToUrl('#/data_frame_analytics?');
+  };
+
+  return (
+    <Fragment>
+      <EuiHorizontalRule />
+      <EuiCard
+        // @ts-ignore
+        style={{ width: '300px' }}
+        icon={<EuiIcon size="xxl" type="list" />}
+        title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
+          defaultMessage: 'Data Frame Analytics',
+        })}
+        description={i18n.translate(
+          'xpack.ml.dataframe.analytics.create.analyticsListCardDescription',
+          {
+            defaultMessage: 'Return to the analytics management page.',
+          }
+        )}
+        onClick={redirectToAnalyticsManagementPage}
+        data-test-subj="analyticsWizardCardManagement"
+      />
+    </Fragment>
+  );
+};
