@@ -101,7 +101,7 @@ describe('exception_list_item_schema', () => {
 
   // TODO: Should this throw an error? "namespace_type" gets auto-populated
   // with default "single", is that desired behavior?
-  xtest('it should NOT accept an undefined for "namespace_type"', () => {
+  test.skip('it should NOT accept an undefined for "namespace_type"', () => {
     const payload = getExceptionListItemSchemaMock();
     delete payload.namespace_type;
     const decoded = exceptionListItemSchema.decode(payload);
