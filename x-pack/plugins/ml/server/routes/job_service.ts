@@ -17,7 +17,10 @@ import {
   lookBackProgressSchema,
   topCategoriesSchema,
   updateGroupsSchema,
+  revertModelSnapshotSchema,
 } from './schemas/job_service_schema';
+
+import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
@@ -152,6 +155,40 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         const { closeJobs } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
         const resp = await closeJobs(jobIds);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/force_stop_and_close_job Force stop and close job
+   * @apiName ForceStopAndCloseJob
+   * @apiDescription Force stops the datafeed and then force closes the anomaly detection job specified by job ID
+   *
+   * @apiSchema (body) jobIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/force_stop_and_close_job',
+      validate: {
+        body: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canCloseJob', 'access:ml:canStartStopDatafeed'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const { forceStopAndCloseJob } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { jobId } = request.body;
+        const resp = await forceStopAndCloseJob(jobId);
 
         return response.ok({
           body: resp,
@@ -682,6 +719,54 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         const { topCategories } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobId, count } = request.body;
         const resp = await topCategories(jobId, count);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/revert_model_snapshot Revert model snapshot
+   * @apiName RevertModelSnapshot
+   * @apiDescription Reverts a job to a specified snapshot. Also allows the job to replayed to a specified date and to auto create calendars to skip analysis of specified date ranges
+   *
+   * @apiSchema (body) revertModelSnapshotSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/revert_model_snapshot',
+      validate: {
+        body: revertModelSnapshotSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob', 'access:ml:canStartStopDatafeed'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const { revertModelSnapshot } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const {
+          jobId,
+          snapshotId,
+          replay,
+          end,
+          deleteInterveningResults,
+          calendarEvents,
+        } = request.body;
+        const resp = await revertModelSnapshot(
+          jobId,
+          snapshotId,
+          replay,
+          end,
+          deleteInterveningResults,
+          calendarEvents
+        );
 
         return response.ok({
           body: resp,

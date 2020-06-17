@@ -150,7 +150,14 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
             path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
             component={TemplateList}
           />
-          <Route exact path={`/${Section.ComponentTemplates}`} component={ComponentTemplateList} />
+          <Route
+            exact
+            path={[
+              `/${Section.ComponentTemplates}`,
+              `/${Section.ComponentTemplates}/:componentTemplateName?`,
+            ]}
+            component={ComponentTemplateList}
+          />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
