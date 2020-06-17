@@ -93,6 +93,11 @@ export const PageRouter: FC = () => {
   );
 };
 
+/**
+ * This is a hook dedicated for the router. It synchronizes the state store
+ * and the URL parameters from one place. The main purpose is to make it
+ * so application components can remain agnostic to the values in the URL.
+ */
 const useSynchronizedState = () => {
   const [get, set] = useUrlParams();
   const params = get();
