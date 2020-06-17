@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import querystring from 'querystring';
+import { Assign } from '@kbn/utility-types';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
@@ -20,11 +21,14 @@ export interface FindTestDefinition extends TestDefinition {
   request: { query: string };
 }
 export type FindTestSuite = TestSuite<FindTestDefinition>;
+
+type FindSavedObjectCase = Assign<TestCase, { namespaces: string[] }>;
+
 export interface FindTestCase {
   title: string;
   query: string;
   successResult?: {
-    savedObjects?: TestCase | TestCase[];
+    savedObjects?: FindSavedObjectCase | FindSavedObjectCase[];
     page?: number;
     perPage?: number;
     total?: number;
