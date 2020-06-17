@@ -83,6 +83,15 @@ interface UserRequestedRelatedEventData {
 }
 
 /**
+ * The action dispatched when the app requests related event data for one
+ * subject (whose entity_id should be included as `payload`)
+ */
+interface AppDetectedMissingEventData {
+  readonly type: 'appDetectedMissingEventData';
+  readonly payload: string;
+}
+
+/**
  * When the user switches the "active descendant" of the Resolver.
  * The "active descendant" (from the point of view of the parent element)
  * corresponds to the "current" child element. "active" or "current" here meaning
@@ -153,4 +162,5 @@ export type ResolverAction =
   | UserSelectedRelatedEventCategory
   | UserSelectedRelatedAlerts
   | AppDetectedNewIdFromQueryParams
-  | AppDisplayedDifferentPanel;
+  | AppDisplayedDifferentPanel
+  | AppDetectedMissingEventData;

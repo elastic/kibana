@@ -136,7 +136,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
   useEffect(() => {
     if (typeof relatedsReady === 'undefined') {
       dispatch({
-        type: 'userRequestedRelatedEventData',
+        type: 'appDetectedMissingEventData',
         payload: processEntityId,
       });
     }

@@ -93,7 +93,11 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
           });
         }
       }
-    } else if (action.type === 'userRequestedRelatedEventData' && context) {
+    } else if (
+      (action.type === 'userRequestedRelatedEventData' ||
+        action.type === 'appDetectedMissingEventData') &&
+      context
+    ) {
       const entityIdToFetchFor = action.payload;
       let result: ResolverRelatedEvents;
       try {

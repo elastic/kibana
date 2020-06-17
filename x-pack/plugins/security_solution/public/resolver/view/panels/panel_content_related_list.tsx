@@ -126,7 +126,7 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
   useEffect(() => {
     if (typeof relatedsReady === 'undefined') {
       dispatch({
-        type: 'userRequestedRelatedEventData',
+        type: 'appDetectedMissingEventData',
         payload: processEntityId,
       });
     }

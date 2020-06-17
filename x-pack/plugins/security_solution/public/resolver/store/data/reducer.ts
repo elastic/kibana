@@ -38,7 +38,10 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       hasError: true,
     };
-  } else if (action.type === 'userRequestedRelatedEventData') {
+  } else if (
+    action.type === 'userRequestedRelatedEventData' ||
+    action.type === 'appDetectedMissingEventData'
+  ) {
     return {
       ...state,
       relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload, false]]),
