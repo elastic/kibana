@@ -15,6 +15,7 @@ import { ListPluginSetup } from '../../../../lists/server';
 import { ConfigType } from '../../config';
 import { GetFullEndpointExceptionList, CompressExceptionList } from './fetch_endpoint_exceptions';
 import { ArtifactSoSchema } from './schemas';
+import { ExceptionsCache } from './cache';
 
 const PackagerTaskConstants = {
   TIMEOUT: '1m',
@@ -43,6 +44,7 @@ interface PackagerTaskContext {
   logger: Logger;
   taskManager: TaskManagerSetupContract;
   lists: ListPluginSetup;
+  cache: ExceptionsCache;
 }
 
 interface PackagerTaskRunnerContext {
@@ -100,6 +102,9 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
             exceptionSO,
             { id: `${artifactName}`, overwrite: true }
           );
+
+          const cacheKey = `${artifactName}-${sha256Hash}`;
+          context.cache.set(cacheKey, compressedExceptions.toString('binary'));
 
           context.logger.debug(`Current artifact ${artifactName} with hash ${sha256Hash}`);
         } catch (error) {

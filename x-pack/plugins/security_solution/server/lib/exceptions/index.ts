@@ -6,3 +6,4 @@
 
 export * from './fetch_endpoint_exceptions';
 export * from './task';
+export * from './cache';

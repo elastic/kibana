@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter, KibanaResponse } from 'src/core/server';
 import { validate } from '../../../../common/validate';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { ExceptionsCache } from '../cache';
 import { ArtifactConstants } from '../task';
 import {
   ArtifactDownloadSchema,
@@ -20,7 +21,7 @@ const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 /**
  * Registers the exception list route to enable sensors to download a compressed  allowlist
  */
-export function downloadEndpointExceptionListRoute(router: IRouter) {
+export function downloadEndpointExceptionListRoute(router: IRouter, cache: ExceptionsCache) {
   router.get(
     {
       path: `${allowlistBaseRoute}/download/{artifactName}/{sha256}`,
@@ -32,44 +33,60 @@ export function downloadEndpointExceptionListRoute(router: IRouter) {
       },
       options: { tags: [] },
     },
-    handleEndpointExceptionDownload
-  );
-}
+    async (context, req, res) => {
+      const soClient = context.core.savedObjects.client;
 
-/**
- * Handles the GET request for downloading the allowlist
- */
-async function handleEndpointExceptionDownload(context, req, res) {
-  // TODO: api key validation
-  const soClient = context.core.savedObjects.client;
-
-  return soClient
-    .get<ArtifactDownloadSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, `${req.params.artifactName}`)
-    .then((artifact) => {
-      const outBuffer = Buffer.from(artifact.attributes.body, 'binary');
-
-      if (artifact.attributes.sha256 !== req.params.sha256) {
-        return res.notFound(
-          `No artifact matching sha256: ${req.params.sha256} for type ${req.params.artifactName}`
-        );
-      }
-
-      const downloadResponse = {
-        body: outBuffer,
-        headers: {
-          'content-encoding': 'xz',
-          'content-disposition': `attachment; filename=${artifact.attributes.name}.xz`,
-        },
+      const validateResponse = (resp: object): KibanaResponse => {
+        const [validated, errors] = validate(resp, downloadArtifactResponseSchema);
+        if (errors != null) {
+          return res.internalError({ body: errors });
+        } else {
+          return res.ok(validated);
+        }
       };
 
-      const [validated, errors] = validate(downloadResponse, downloadArtifactResponseSchema);
-      if (errors != null) {
-        return res.internalError({ body: errors });
+      const cacheKey = `${req.params.artifactName}-${req.params.sha256}`;
+      const cacheResp = cache.get(cacheKey);
+
+      if (cacheResp) {
+        // CACHE HIT
+        const downloadResponse = {
+          body: Buffer.from(cacheResp, 'binary'),
+          headers: {
+            'content-encoding': 'xz',
+            'content-disposition': `attachment; filename=${req.params.artifactName}.xz`,
+          },
+        };
+        return validateResponse(downloadResponse);
       } else {
-        return res.ok(validated);
+        // CACHE MISS
+        return soClient
+          .get<ArtifactDownloadSchema>(
+            ArtifactConstants.SAVED_OBJECT_TYPE,
+            `${req.params.artifactName}`
+          )
+          .then((artifact) => {
+            const outBuffer = Buffer.from(artifact.attributes.body, 'binary');
+
+            if (artifact.attributes.sha256 !== req.params.sha256) {
+              return res.notFound({
+                body: `No artifact matching sha256: ${req.params.sha256} for type ${req.params.artifactName}`,
+              });
+            }
+
+            const downloadResponse = {
+              body: outBuffer,
+              headers: {
+                'content-encoding': 'xz',
+                'content-disposition': `attachment; filename=${artifact.attributes.name}.xz`,
+              },
+            };
+            return validateResponse(downloadResponse);
+          })
+          .catch((err) => {
+            return res.internalError({ body: err });
+          });
       }
-    })
-    .catch((err) => {
-      return res.internalError({ body: err });
-    });
+    }
+  );
 }
