@@ -9,9 +9,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiForm,
   EuiFieldNumber,
   EuiToolTip,
   EuiCodeEditor,
+  EuiSpacer,
 } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import React, { useState, useEffect } from 'react';
@@ -99,12 +101,14 @@ storiesOf(STORYBOOK_PATH, module).add(
     const [json, setJson] = useState<string>(
       getSessionJson() || JSON.stringify(exampleResponseTodo, null, 2)
     );
+    const [error, setError] = useState<string | undefined>();
+
     const [elements, setElements] = useState<any[]>([]);
     useEffect(() => {
       try {
         setElements(JSON.parse(json).elements);
-      } catch (error) {
-        console.log(error);
+      } catch (e) {
+        setError(e.message);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -112,34 +116,64 @@ storiesOf(STORYBOOK_PATH, module).add(
     return (
       <div>
         <Cytoscape elements={elements} height={600} width={1340} />
-
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiButton
-              onClick={() => {
-                setElements(JSON.parse(json).elements);
-                setSessionJson(json);
-              }}
-            >
-              Render JSON
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiCodeEditor
-          mode="json"
-          theme="github"
-          width="100%"
-          value={json}
-          setOptions={{ fontSize: '12px' }}
-          onChange={(value) => {
-            setJson(value);
-          }}
-        />
+        <EuiForm isInvalid={error} error={error}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiButton
+                onClick={() => {
+                  try {
+                    setElements(JSON.parse(json).elements);
+                    setSessionJson(json);
+                    setError(undefined);
+                  } catch (e) {
+                    setError(e.message);
+                  }
+                }}
+              >
+                Render JSON
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiCodeEditor
+            isInvalid={true}
+            mode="json"
+            theme="github"
+            width="100%"
+            value={json}
+            setOptions={{ fontSize: '12px' }}
+            onChange={(value) => {
+              setJson(value);
+            }}
+          />
+          <EuiSpacer />
+          <input
+            type="file"
+            onChange={(event) => {
+              const f = new FileReader();
+              f.onload = (onloadEvent) => {
+                setJson(onloadEvent.currentTarget.result);
+              };
+              f.readAsText(event.target.files[0]);
+            }}
+          />
+        </EuiForm>
       </div>
     );
   },
   {
-    info: { propTables: false, source: false },
+    info: {
+      propTables: false,
+      source: false,
+      text: `
+      Enter JSON map data into the text box or upload a file and click "Render JSON" to see the results. You can enable a download button on the service map by putting
+
+      \`\`\`
+      sessionStorage.setItem('apm_debug', 'true')
+      \`\`\`
+
+      into the JavaScript console and reloading the page.`,
+    },
   }
 );
 

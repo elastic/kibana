@@ -81,6 +81,11 @@ export function Controls() {
     }
   }
 
+  // Only used for debugging purposes
+  const downloadUrl = `data:application/json;charset=utf-8,${encodeURIComponent(
+    JSON.stringify(cy?.json(), null, '  ')
+  )}`;
+
   function zoomIn() {
     doZoom(cy, increment);
   }
@@ -113,6 +118,7 @@ export function Controls() {
   });
 
   const showViewFullMapButton = cy.nodes('.primary').length > 0;
+  const showDownloadButton = sessionStorage.getItem('apm_debug') === 'true';
 
   return (
     <ControlsContainer>
@@ -161,6 +167,19 @@ export function Controls() {
                 urlParams as APMQueryParams
               )}
               iconType="apps"
+            />
+          </EuiToolTip>
+        </Panel>
+      )}
+      {showDownloadButton && (
+        <Panel hasShadow={true} paddingSize="none">
+          <EuiToolTip anchorClassName="eui-displayInline" content={'Download'}>
+            <Button
+              aria-label={'Download'}
+              color="text"
+              download="service-map.json"
+              href={downloadUrl}
+              iconType="download"
             />
           </EuiToolTip>
         </Panel>
