@@ -243,6 +243,7 @@ describe('Lens App', () => {
               "query": "",
             },
             "savedQuery": undefined,
+            "showNoDataPopover": [Function],
           },
         ],
       ]

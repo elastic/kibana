@@ -51,6 +51,7 @@ describe('editor_frame service', () => {
           dateRange: { fromDate: '', toDate: '' },
           query: { query: '', language: 'lucene' },
           filters: [],
+          showNoDataPopover: jest.fn(),
         });
         instance.unmount();
       })()
@@ -70,6 +71,7 @@ describe('editor_frame service', () => {
       dateRange: { fromDate: '', toDate: '' },
       query: { query: '', language: 'lucene' },
       filters: [],
+      showNoDataPopover: jest.fn(),
     });
     instance.unmount();
 

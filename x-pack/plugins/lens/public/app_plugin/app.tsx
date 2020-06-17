@@ -38,9 +38,9 @@ import {
   SavedQuery,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
-import { useNoDataPopover } from './no_data_popover';
 
 interface State {
+  indicateNoData: boolean;
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
@@ -92,8 +92,6 @@ export function App({
     storage.get('kibana.userQueryLanguage') ||
     core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
 
-  const [noDataPopoverProps, showNoDataPopover] = useNoDataPopover(storage);
-
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
@@ -107,8 +105,26 @@ export function App({
         toDate: currentRange.to,
       },
       filters: [],
+      indicateNoData: false,
     };
   });
+
+  const showNoDataPopover = useCallback(() => {
+    setState((prevState) => ({ ...prevState, indicateNoData: true }));
+  }, [setState]);
+
+  useEffect(() => {
+    if (state.indicateNoData) {
+      setState((prevState) => ({ ...prevState, indicateNoData: false }));
+    }
+  }, [
+    setState,
+    state.indicateNoData,
+    state.query,
+    state.filters,
+    state.dateRange,
+    state.indexPatternsForTopNav,
+  ]);
 
   const { lastKnownDoc } = state;
 
@@ -468,7 +484,7 @@ export function App({
               query={state.query}
               dateRangeFrom={state.dateRange.fromDate}
               dateRangeTo={state.dateRange.toDate}
-              datePickerTourComponentProps={noDataPopoverProps}
+              indicateNoData={state.indicateNoData}
             />
           </div>
 

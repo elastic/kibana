@@ -30,8 +30,6 @@ import {
   EuiSuperDatePicker,
   EuiFieldText,
   prettyDuration,
-  EuiTourStep,
-  EuiTourStepProps,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
@@ -42,6 +40,7 @@ import { useKibana, toMountPoint } from '../../../../kibana_react/public';
 import { QueryStringInput } from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
+import { NoDataPopover } from './no_data_popover';
 
 interface Props {
   query?: Query;
@@ -65,7 +64,7 @@ interface Props {
   customSubmitButton?: any;
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
-  datePickerTourComponentProps?: Omit<EuiTourStepProps, 'children'>;
+  indicateNoData?: boolean;
 }
 
 export function QueryBarTopRow(props: Props) {
@@ -267,31 +266,25 @@ export function QueryBarTopRow(props: Props) {
         };
       });
 
-    let datePickerElement = (
-      <EuiSuperDatePicker
-        start={props.dateRangeFrom}
-        end={props.dateRangeTo}
-        isPaused={props.isRefreshPaused}
-        refreshInterval={props.refreshInterval}
-        onTimeChange={onTimeChange}
-        onRefresh={onRefresh}
-        onRefreshChange={props.onRefreshChange}
-        showUpdateButton={false}
-        recentlyUsedRanges={recentlyUsedRanges}
-        commonlyUsedRanges={commonlyUsedRanges}
-        dateFormat={uiSettings!.get('dateFormat')}
-        isAutoRefreshOnly={props.showAutoRefreshOnly}
-      />
-    );
-
-    if (props.datePickerTourComponentProps) {
-      datePickerElement = (
-        <EuiTourStep {...props.datePickerTourComponentProps}>{datePickerElement}</EuiTourStep>
-      );
-    }
-
     return (
-      <EuiFlexItem className="kbnQueryBar__datePickerWrapper">{datePickerElement}</EuiFlexItem>
+      <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
+        <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
+          <EuiSuperDatePicker
+            start={props.dateRangeFrom}
+            end={props.dateRangeTo}
+            isPaused={props.isRefreshPaused}
+            refreshInterval={props.refreshInterval}
+            onTimeChange={onTimeChange}
+            onRefresh={onRefresh}
+            onRefreshChange={props.onRefreshChange}
+            showUpdateButton={false}
+            recentlyUsedRanges={recentlyUsedRanges}
+            commonlyUsedRanges={commonlyUsedRanges}
+            dateFormat={uiSettings!.get('dateFormat')}
+            isAutoRefreshOnly={props.showAutoRefreshOnly}
+          />
+        </NoDataPopover>
+      </EuiFlexItem>
     );
   }
 

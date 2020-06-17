@@ -56,6 +56,7 @@ function getDefaultProps() {
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
     },
+    showNoDataPopover: jest.fn(),
   };
 }
 

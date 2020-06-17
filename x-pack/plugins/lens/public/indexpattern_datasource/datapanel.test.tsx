@@ -204,12 +204,15 @@ const initialState: IndexPatternPrivateState = {
       ],
     },
   },
+  isFirstExistenceFetch: false,
 };
 
 const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
 
 describe('IndexPattern Data Panel', () => {
-  let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0];
+  let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {
+    showNoDataPopover: () => void;
+  };
   let core: ReturnType<typeof coreMock['createSetup']>;
 
   beforeEach(() => {
@@ -231,6 +234,7 @@ describe('IndexPattern Data Panel', () => {
       filters: [],
       showEmptyFields: false,
       onToggleEmptyFields: jest.fn(),
+      showNoDataPopover: jest.fn(),
     };
   });
 
@@ -304,6 +308,7 @@ describe('IndexPattern Data Panel', () => {
           indexPatternRefs: [],
           existingFields: {},
           showEmptyFields: false,
+          isFirstExistenceFetch: false,
           currentIndexPatternId: 'a',
           indexPatterns: {
             a: { id: 'a', title: 'aaa', timeFieldName: 'atime', fields: [] },

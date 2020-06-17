@@ -366,6 +366,7 @@ describe('loader', () => {
         existingFields: {},
         layers: {},
         showEmptyFields: true,
+        isFirstExistenceFetch: false,
       };
 
       await changeIndexPattern({
@@ -396,6 +397,7 @@ describe('loader', () => {
         indexPatterns: {},
         layers: {},
         showEmptyFields: true,
+        isFirstExistenceFetch: false,
       };
 
       await changeIndexPattern({
@@ -450,6 +452,7 @@ describe('loader', () => {
           },
         },
         showEmptyFields: true,
+        isFirstExistenceFetch: false,
       };
 
       await changeLayerIndexPattern({
@@ -513,6 +516,7 @@ describe('loader', () => {
           },
         },
         showEmptyFields: true,
+        isFirstExistenceFetch: false,
       };
 
       await changeLayerIndexPattern({
@@ -563,6 +567,9 @@ describe('loader', () => {
         indexPatterns: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
         setState,
         dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
       });
 
       expect(fetchJson).toHaveBeenCalledTimes(3);
@@ -576,12 +583,47 @@ describe('loader', () => {
 
       expect(newState).toEqual({
         foo: 'bar',
+        isFirstExistenceFetch: false,
         existingFields: {
           a: { a_field_1: true, a_field_2: true },
           b: { b_field_1: true, b_field_2: true },
           c: { c_field_1: true, c_field_2: true },
         },
       });
+    });
+
+    it('should call showNoDataPopover callback if current index pattern returns no fields', async () => {
+      const setState = jest.fn();
+      const showNoDataPopover = jest.fn();
+      const fetchJson = jest.fn((path: string) => {
+        const indexPatternTitle = _.last(path.split('/'));
+        return {
+          indexPatternTitle,
+          existingFieldNames:
+            indexPatternTitle === 'a'
+              ? ['field_1', 'field_2'].map((fieldName) => `${indexPatternTitle}_${fieldName}`)
+              : [],
+        };
+      });
+
+      const args = {
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fetchJson: fetchJson as any,
+        indexPatterns: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+        setState,
+        dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
+      };
+
+      await syncExistingFields(args);
+
+      expect(showNoDataPopover).not.toHaveBeenCalled();
+
+      await syncExistingFields({ ...args, isFirstExistenceFetch: true });
+      expect(showNoDataPopover).not.toHaveBeenCalled();
     });
   });
 });

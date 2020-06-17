@@ -43,6 +43,7 @@ describe('state_helpers', () => {
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -97,6 +98,7 @@ describe('state_helpers', () => {
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -148,6 +150,7 @@ describe('state_helpers', () => {
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -189,6 +192,7 @@ describe('state_helpers', () => {
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -223,6 +227,7 @@ describe('state_helpers', () => {
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -285,6 +290,7 @@ describe('state_helpers', () => {
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -338,6 +344,7 @@ describe('state_helpers', () => {
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -418,6 +425,7 @@ describe('state_helpers', () => {
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',

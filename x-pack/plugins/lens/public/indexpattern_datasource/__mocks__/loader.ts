@@ -20,6 +20,7 @@ export function loadInitialState() {
     },
     layers: {},
     showEmptyFields: false,
+    isFirstExistenceFetch: false,
   };
   return result;
 }
