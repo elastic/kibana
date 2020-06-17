@@ -325,7 +325,6 @@ export const MapsAppView = class extends React.Component {
     this.setState(newState);
     updateGlobalState(
       {
-        query: newState.query,
         time: newState.time,
         refreshInterval: {
           value: newState.refreshConfig.interval,

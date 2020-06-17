@@ -13,8 +13,8 @@ import { Redirect } from 'react-router-dom';
 
 export const LoadListAndRender = class extends React.Component {
   state = {
+    mapsLoaded: false,
     hasSavedMaps: null,
-    savedMapsList: null,
   };
 
   componentDidMount() {
@@ -33,14 +33,14 @@ export const LoadListAndRender = class extends React.Component {
         this.setState({ mapsLoaded: true, hasSavedMaps: !!hits.length });
       }
     } catch (err) {
-      getToasts().addDanger({
-        title: i18n.translate('xpack.maps.mapListing.errorAttemptingToLoadSavedMaps', {
-          defaultMessage: `Unable to load maps`,
-        }),
-        text: `${err}`,
-      });
       if (this._isMounted) {
-        this.setState({ hasSavedMaps: false, savedMapsList: [] });
+        this.setState({ mapsLoaded: true, hasSavedMaps: false });
+        getToasts().addDanger({
+          title: i18n.translate('xpack.maps.mapListing.errorAttemptingToLoadSavedMaps', {
+            defaultMessage: `Unable to load maps`,
+          }),
+          text: `${err}`,
+        });
       }
     }
   }
