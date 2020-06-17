@@ -29,6 +29,7 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
 
     return (
       <EuiEmptyPrompt
+        data-test-subj={`endpointDatasourceConfig_${from === 'edit' ? 'edit' : 'create'}`}
         body={
           <EuiText>
             <p>
