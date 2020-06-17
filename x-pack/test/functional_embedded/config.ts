@@ -37,6 +37,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers,
     services: kibanaFunctionalConfig.get('services'),
     pageObjects,
+    browser: {
+      acceptInsecureCerts: true,
+    },
     junit: {
       reportName: 'Kibana Embedded in iframe with X-Pack Security',
     },

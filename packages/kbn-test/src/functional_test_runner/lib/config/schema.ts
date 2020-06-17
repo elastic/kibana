@@ -130,6 +130,7 @@ export const schema = Joi.object()
         type: Joi.string().valid('chrome', 'firefox', 'ie', 'msedge').default('chrome'),
 
         logPollingMs: Joi.number().default(100),
+        acceptInsecureCerts: Joi.boolean().default(false),
       })
       .default(),
 
