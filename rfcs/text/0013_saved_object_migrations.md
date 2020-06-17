@@ -13,20 +13,21 @@
   - [4.3 Automatically retry failed migrations until they succeed](#43-automatically-retry-failed-migrations-until-they-succeed)
   - [4.3.1 Idempotent migrations performed without coordination](#431-idempotent-migrations-performed-without-coordination)
     - [4.3.1.1 Restrictions](#4311-restrictions)
-    - [4.3.1.2 Algorithm](#4312-algorithm)
-  - [4.5 Changes in 8.0](#45-changes-in-80)
-    - [4.5.1 Migration algorithm (8.0):](#451-migration-algorithm-80)
-    - [4.5.2 Upgrade and rollback procedure](#452-upgrade-and-rollback-procedure)
+    - [4.3.1.2 Migration algorithm: Cloned index per version](#4312-migration-algorithm-cloned-index-per-version)
+    - [4.3.1.3 Upgrade and rollback procedure](#4313-upgrade-and-rollback-procedure)
+    - [4.3.1.4 Handling documents that belong to a disabled plugin](#4314-handling-documents-that-belong-to-a-disabled-plugin)
 - [5. Alternatives](#5-alternatives)
-- [5.1 Rolling upgrades](#51-rolling-upgrades)
+  - [5.1 Rolling upgrades](#51-rolling-upgrades)
   - [5.2 Single node migrations coordinated through a lease/lock](#52-single-node-migrations-coordinated-through-a-leaselock)
     - [5.2.1 Migration algorithm](#521-migration-algorithm)
     - [5.2.2 Document lock algorithm](#522-document-lock-algorithm)
     - [5.2.3 Checking for "weak lease" expiry](#523-checking-for-weak-lease-expiry)
   - [5.3 Minimize data loss with mixed Kibana versions during 7.x](#53-minimize-data-loss-with-mixed-kibana-versions-during-7x)
-  - [5.4 Minimizing data loss with unsupported upgrade configurations (8.0)](#54-minimizing-data-loss-with-unsupported-upgrade-configurations-80)
+  - [5.4 In-place migrations that re-use the same index (8.0)](#54-in-place-migrations-that-re-use-the-same-index-80)
+    - [5.4.1 Migration algorithm (8.0):](#541-migration-algorithm-80)
+    - [5.4.2 Minimizing data loss with unsupported upgrade configurations (8.0)](#542-minimizing-data-loss-with-unsupported-upgrade-configurations-80)
 - [6. How we teach this](#6-how-we-teach-this)
-- [Unresolved questions](#unresolved-questions)
+- [7. Unresolved questions](#7-unresolved-questions)
 
 # 1. Summary
 
@@ -214,138 +215,120 @@ documents](https://github.com/elastic/kibana/issues/26602). To ensure that
 these migrations are idempotent, they will have to generate new saved object
 id's deterministically with e.g. UUIDv5.
 
-### 4.3.1.2 Algorithm
 
-1. On startup, find the index to which the `.kibana` alias points,
-   `.kibana_n`, and check if any documents have an outdated `migrationVersion`
-   indicating that a migration needs to be performed. 
-2. Create `.kibana_n+1` with mappings set to the combination of the previous
-   index's mappings and the expected mappings. Included in the mappings should
-   be [`migrationMappingPropertyHashes` metadata](https://github.com/elastic/kibana/blob/97d1685c3dea682f80fd1a907bbc1d6f3702ea85/src/core/server/saved_objects/migrations/core/build_active_mappings.ts#L49)
-   1. If the index already exists, compare the `migrationMappingPropertyHashes`
-      metadata to verify that the mappings are compatible using the [existing `diffMappings` method](https://github.com/elastic/kibana/blob/97d1685c3dea682f80fd1a907bbc1d6f3702ea85/src/core/server/saved_objects/migrations/core/build_active_mappings.ts#L54-L60).
-      If these mappings aren't compatible, fail the migration. This could
-      happen if a newer kibana node has already attempted the migration, or a
-      kibana node on the same version which didn't have all the plugins that
-      the current node has.
-3. Migrate documents by reading from `.kibana_n` and creating documents in
-   `.kibana_n+1`. If a document already exists, don't overwrite it and ignore.
-4. Move the `.kibana` alias to point to `.kibana_n+1` (ignore if it has
-   already been moved).
-5. To prevent lost deletes in step (3) all saved object deletes will be
-   converted into "soft" deletes by setting the document's `status:'deleted'`.
-   1. We will introduce an `updated_at` root property for all saved objects
-      which will also be updated when a document is deleted.
-   2. A background task will periodically perform a hard delete on documents
-      with `status: 'deleted'` and `current_time - updated_at > retention_period`.  
-      By setting `retention_period` to a large period like 72 hours we
-      mitigate clock synchronization problems like clock skew and daylight
-      savings time updates.
+### 4.3.1.2 Migration algorithm: Cloned index per version
+Note:
+- The description below assumes the migration algorithm is released in 7.10.0.
+  So < 7.10.0 will use `.kibana` and >= 7.10.0 will use `.kibana_current`.
+- We refer to the alias and index that outdated nodes use as the source alias
+  and source index.
+- Every version performs a migration even if mappings or documents aren't outdated.
+
+1. Locate the source index by fetching aliases (including `.kibana` for versions prior to v7.10.0) `GET '/_alias/.kibana_current,.kibana_7.10.0,.kibana'`. The source index is the index the `.kibana_current` alias points to, or if it doesn’t exist, the index the `.kibana` alias points to.
+2. If `.kibana_current` and `.kibana_7.10.0` both exists and are pointing to the same index this version's migration has already been completed.
+   1. Because the same version can have plugins enabled at any point in time, perform the mappings update in step (6).
+   2. If the target index contains any documents with an outdated migrationVersion number, log an error explaining that a re-migration is required and mark the saved object type these documents belong to as unavailable. See section (4.3.1.4).
+   3. Skip to step (9) to start serving traffic.
+3. If `.kibana_current` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001` fail the migration.
+4. Mark the source index as read-only and wait for all in-flight operations to drain (requires new functionality in Elasticsearch). This prevents any further writes from outdated nodes. Assuming this API is similar to the existing `/<index>/_close` API, we expect to receive `"acknowledged" : true` and `"shards_acknowledged" : true`. If all shards don’t acknowledge within the timeout, retry the operation until it succeeds.
+5. Clone the source index into a new target index which has writes enabled. All nodes on the same version will use the same fixed index name e.g. `.kibana_7.10.0_001`. The `001` postfix can be changed with the configuration option i.e. `migrations.target_index_postfix: '002'`
+   1. `POST /.kibana_n/_clone/.kibana_7.10.0_001?wait_for_active_shards=all {"settings": {"index.blocks.write": true}}`. Ignore errors if the clone already exists.
+   2. Wait for the cloning to complete `GET /_cluster/health/.kibana_7.10.0_001?wait_for_status=green&timeout=60s` If cloning doesn’t complete within the 60s timeout, log a warning for visibility and poll again.
+6. Update the mappings of the target index
+   1. Retrieve the existing mappings including the `migrationMappingPropertyHashes` metadata.
+   2. Update the mappings with `PUT /.kibana_7.10.0_001/_mapping`. The API deeply merges any updates so this won't remove the mappings of any plugins that were enabled in a previous version but are now disabled.
+   3. Ensure that fields are correctly indexed using the target index's latest mappings `POST /.kibana_7.10.0_001/_update_by_query?conflicts=proceed`. In the future we could optimize this query by only targeting documents:
+      1. That belong to a known saved object type.
+      2. Which don't have outdated migrationVersion numbers since these will be transformed anyway.
+      3. That belong to a type whose mappings were changed by comparing the `migrationMappingPropertyHashes`. (Metadata, unlike the mappings isn't commutative, so there is a small chance that the metadata hashes do not accurately reflect the latest mappings, however, this will just result in an less efficient query).
+7. Transform documents by reading batches from the source index then transforming and updating them with optimistic concurrency control.
+   1. Ignore any version conflict errors.
+   2. If a document transform fails mark the saved object type as unavailable but continue trying to transform other documents of the same type.
+8. Mark the migration as complete by doing a single atomic operation (new Elasticsearch functionality) that:
+   1. Checks that `.kibana-current` alias is still pointing to the source index
+   2. Points the `.kibana-7.10.0`  and `.kibana_current` aliases to the target index.
+   3. If this fails with a "required alias [.kibana_current] does not exist" error fetch `.kibana_current` again:
+      1. If `.kibana_current` is not pointing to our target index fail the migration.
+      2. If `.kibana_current` is pointing to our target index the migration has succeeded and we can proceed to step (9).
+9. Start serving traffic.
 
 Together with the limitations, this algorithm ensures that migrations are
 idempotent. If two nodes are started simultaneously, both of them will start
-writing into `.kibana_n+1` but because migrations are idempotent, it doesn’t
-matter which node’s writes win.
+transforming documents in that version's target index, but because migrations are idempotent, it doesn’t matter which node’s writes win.
 
-> Note: This algorithm doesn't support mixed Kibana versions attempting to
-> perform a migration at the same time. E.g. if a v7.8.0 and a v7.9.0 node
-> attempts to simultaneously migrate a 7.6.0 index the result could be an
-> inconsistent state that leads to data loss.
-> 
-> Similarly, if two nodes on the same version and with different plugins
-> attempt a migration at the same time, it could cause two back-to-back
-> migrations which might lead to data loss.
->
-> Because these scenarios are unlikely in practise they are acceptable
-> limitations. We will document that these are unsupported configurations that
-> could lead to data loss.
-
-## 4.5 Changes in 8.0
-1. Migrations will be in-place and re-use the same index for minor and patch
-   upgrades. 
-2. Only allow breaking field mapping changes (which requires creating a new
-   index) in a major.
-3. All update operations should use optimistic concurrency control.
-
-### 4.5.1 Migration algorithm (8.0):
-
-1. Exit Kibana with a fatal error if a newer node has started a migration by
-   checking for:
-   1. Documents with a newer `migrationVersion` numbers.
-2. If the mappings are out of date, update the mappings to the combination of
-   the index's current mappings and the expected mappings.
-3. If there are outdated documents, migrate these in batches:
-   1. Read a batch of outdated documents from the index.
-   2. Transform documents by applying the migration transformation functions.
-   3. Update the document batch in the same index using optimistic concurrency
-      control. If a batch fails due to an update version mismatch continue
-      migrating the other batches.
-   4. If a batch fails due other reasons repeat the entire migration process.
-4. If any of the batches in step (3.3) failed, repeat the entire migration
-   process. This ensures that in-progress bulk update operations from an
-   outdated node won't lead to unmigrated documents still being present after
-   the migration.
-5. Once all documents are up to date, the migration is complete and Kibana can
-   start serving traffic.
-
-Advantages:
-- Not duplicating all documents into a new index will speed up migrations and
-  reduce the downtime window. This will be especially important for the future
-  requirement to support > 10k or > 100k documents.
-- We can check the health of an existing index before starting the migration,
-  but we cannot detect what kind of failures might occur while creating a new
-  index. Whereas retrying migrations will eventually recover from the errors
-  in (3.3), re-using an index allows us to detect these problems before trying
-  and avoid errors like (3.3.1) altogether.
-- Single index to backup instead of “index pattern” that matches any
-  `.kibana_n`.
-- Simplifies Kibana system index Elasticsearch plugin since it needs to work
-  on one index per "tenant".
-- By leveraging optimistic concurrency control we can further minimize data
-  loss for unsupported upgrade configurations in the future.
-
-Drawbacks:
-- Cannot make breaking mapping changes (even though it was possible, we have not
-  introduced a breaking mapping change during 7.x).
-- Rollback is only possible by restoring a snapshot which requires educating
-  users to ensure that they don't rely on `.kibana_n` indices as backups.
-  (Apart from the need to educate users, snapshot restores provide many
-  benefits).
-- It narrows the second restriction under (4.3.1) even further: migrations
-  cannot rely on any state that could change as part of a migration because we
-  can no longer use the previous index as a snapshot of unmigrated state.
-- We can’t automatically perform a rollback from a half-way done migration.
-- It’s impossible to provide read-only functionality for outdated nodes which
-  means we can't achieve goal (2.7).
-
-### 4.5.2 Upgrade and rollback procedure
-To prevent data loss, the following procedure should be followed when
-upgrading Kibana:
+### 4.3.1.3 Upgrade and rollback procedure
+When a newer Kibana starts an upgrade, it blocks all writes to the outdated index to prevent data loss. Since Kibana is not designed to gracefully handle a read-only index this could have unintended consequences such as a task executing multiple times but never being able to write that the task was completed successfully. To prevent unintended consequences, the following procedure should be followed when upgrading Kibana:
 
 1. Gracefully shutdown outdated nodes by sending a `SIGTERM` signal
-   1. Node starts returning `500` from it's healthcheck endpoint to signal to
+   1. Node starts returning `503` from it's healthcheck endpoint to signal to
       the load balancer that it's no longer accepting new traffic (requires https://github.com/elastic/kibana/issues/46984).
    2. Allows ungoing HTTP requests to complete with a configurable timeout
-      before forcefully closing these.
+      before forcefully terminating any open connections.
    3. Closes any keep-alive sockets by sending a `connection: close` header. 
    4. Shutdown all plugins and Core services.
-2. Take a snapshot of all Kibana's Saved Objects indices.
+2. (recommended) Take a snapshot of all Kibana's Saved Objects indices. This simplifies doing a rollback to a simple snapshot restore, but is not required in order to do a rollback if a migration fails.
 3. Start the upgraded Kibana nodes. All running Kibana nodes should be on the
-   same version, have the same plugins installed and use the same
-   configuration. We recommend only bringing up a single node, let it finish
-   the migration and only when it's status is green, bring up additional nodes
-   if required.
+   same version, have the same plugins enabled and use the same
+   configuration.
 
-To rollback to a previous version of Kibana:
- 4. Shutdown all Kibana nodes.
- 5. Restore the Kibana Saved Objects indices and aliases from the snapshot in
-    (2).
- 6. Start the Kibana nodes. All running Kibana nodes should be on the same
-    rollback version, have the same plugins installed and use the same
-    configuration.
+To rollback to a previous version of Kibana with a snapshot
+1. Shutdown all Kibana nodes.
+2. Restore the Saved Object indices and aliases from the snapshot
+3. Start the rollback Kibana nodes. All running Kibana nodes should be on the same rollback version, have the same plugins enabled and use the same configuration.
+
+To rollback to a previous version of Kibana without a snapshot:
+1. Shutdown all Kibana nodes.
+2. Remove the index created by the failed Kibana migration by using the version-specific alias e.g. `DELETE /.kibana_7.10.0` 
+3. Identify the rollback index:
+   1. If rolling back to a Kibana version < 7.10.0 use `.kibana`
+   2. If rolling back to a Kibana version >= 7.10.0 use the version alias of the Kibana version you wish to rollback to e.g. `.kibana_7.10.0`
+4. Point the `.kibana_current` alias to the rollback index.
+5. Remove the write block from the rollback index.
+6. Start the rollback Kibana nodes. All running Kibana nodes should be on the same rollback version, have the same plugins enabled and use the same configuration.
+
+### 4.3.1.4 Handling documents that belong to a disabled plugin
+It is possible for a plugin to create documents in one version of Kibana, but then when upgrading Kibana to a newer version, that plugin is disabled. Because the plugin is disabled it cannot register it's Saved Objects type including the mappings or any migration transformation functions. These "orphan" documents could cause future problems:
+ - A major version introduces breaking mapping changes that cannot be applied to the data in these documents.
+ - Two majors later migrations will no longer be able to migrate this old schema and could fail unexpectadly when the plugin is suddenly enabled.
+
+There are several approaches we could take to dealing with this orphan data
+
+1. Start up but refuse to query on types with outdated documents until a user manually triggers a re-migration
+   
+   This is the approach implemented by the migration algorithm in (4.3.1.2)
+   
+   Advantages:
+    - The impact is limited to the single plugin which if it was disabled before can’t have a critical impact
+    - We can use the same mechanism to treat documents which fail to transform (bug in migration transform function, or invalid document)
+    
+   Disadvantages:
+    - It might be less obvious that a plugin is in a degraded state unless you read the logs (not possible on Cloud) or view the `/status` endpoint.
+    - If a user doesn't care to that the plugin is degraded, orphan documents are carried forward indefinitely.
+
+    To perform a re-migration:
+      - Remove the `.kibana_7.10.0` alias
+      - Take a snapshot OR set the configuration option `migrations.target_index_postfix: '002'` to create a new target index `.kibana_7.10.0_002` and keep the `.kibana_7.10.0_001` index to be able to perform a rollback.
+      - Start up Kibana
+  
+2. Refuse to start Kibana
+
+    Advantages:
+    - Admin’s are forced to deal with the problem as soon as they disable a plugin
+
+    Disadvantages:
+    - Cannot temporarily disable a plugin to aid in debugging or to reduce the load a Kibana plugin places on as ES cluster.
+
+3. Refuse to start a migration
+
+    Advantages:
+    - We force users to enable a plugin or delete the documents which prevents these documents from creating future problems like a mapping update not being compatible because there are fields which are assumed to have been migrated. - We keep the index “clean”.
+
+    Disadvantages:
+    - Since users have to take down outdated nodes before they can start the upgrade, they have to enter the downtime window before they know about this problem. This prolongs the downtime window and in many cases might cause an operations team to have to reschedule their downtime window to give them time to investigate the documents that need to be deleted. Logging an error on every startup could warn users ahead of time to mitigate this.
+    - We don’t expose Kibana logs on Cloud so this will have to be escalated to support and could take 48hrs to resolve (users can safely rollback, but without visibility into the logs they might not know this). Exposing Kibana logs is on the cloud team’s roadmap.
 
 # 5. Alternatives
-# 5.1 Rolling upgrades
+## 5.1 Rolling upgrades
 We considered implementing rolling upgrades to provide zero downtime
 migrations. However, this would introduce significant complexity for plugins:
 they will need to maintain up and down migration transformations and ensure
@@ -540,12 +523,64 @@ problems than what it solves.
     it will be pointing to a read-only index which prevent writes from
     6.8+ releases which are already online.
 
-## 5.4 Minimizing data loss with unsupported upgrade configurations (8.0)
+## 5.4 In-place migrations that re-use the same index (8.0)
+> We considered an algorithm that re-uses the same index for migrations and an approach to minimize data-loss if our upgrade procedures aren't followed. This is no longer our preferred approach because of several downsides:
+>  - It requires taking snapshots to prevent data loss so we can only release this in 8.x
+>  - Minimizing data loss with unsupported upgrade configurations adds significant complexity and still doesn't guarantee that data isn't lost.
+
+### 5.4.1 Migration algorithm (8.0):
+1. Exit Kibana with a fatal error if a newer node has started a migration by
+   checking for:
+   1. Documents with a newer `migrationVersion` numbers.
+2. If the mappings are out of date, update the mappings to the combination of
+   the index's current mappings and the expected mappings.
+3. If there are outdated documents, migrate these in batches:
+   1. Read a batch of outdated documents from the index.
+   2. Transform documents by applying the migration transformation functions.
+   3. Update the document batch in the same index using optimistic concurrency
+      control. If a batch fails due to an update version mismatch continue
+      migrating the other batches.
+   4. If a batch fails due other reasons repeat the entire migration process.
+4. If any of the batches in step (3.3) failed, repeat the entire migration
+   process. This ensures that in-progress bulk update operations from an
+   outdated node won't lead to unmigrated documents still being present after
+   the migration.
+5. Once all documents are up to date, the migration is complete and Kibana can
+   start serving traffic.
+
+Advantages:
+- Not duplicating all documents into a new index will speed up migrations and
+  reduce the downtime window. This will be especially important for the future
+  requirement to support > 10k or > 100k documents.
+- We can check the health of an existing index before starting the migration,
+  but we cannot detect what kind of failures might occur while creating a new
+  index. Whereas retrying migrations will eventually recover from the errors
+  in (3.3), re-using an index allows us to detect these problems before trying
+  and avoid errors like (3.3.1) altogether.
+- Single index to backup instead of “index pattern” that matches any
+  `.kibana_n`.
+- Simplifies Kibana system index Elasticsearch plugin since it needs to work
+  on one index per "tenant".
+- By leveraging optimistic concurrency control we can further minimize data
+  loss for unsupported upgrade configurations in the future.
+
+Drawbacks:
+- Cannot make breaking mapping changes (even though it was possible, we have not
+  introduced a breaking mapping change during 7.x).
+- Rollback is only possible by restoring a snapshot which requires educating
+  users to ensure that they don't rely on `.kibana_n` indices as backups.
+  (Apart from the need to educate users, snapshot restores provide many
+  benefits).
+- It narrows the second restriction under (4.3.1) even further: migrations
+  cannot rely on any state that could change as part of a migration because we
+  can no longer use the previous index as a snapshot of unmigrated state.
+- We can’t automatically perform a rollback from a half-way done migration.
+- It’s impossible to provide read-only functionality for outdated nodes which
+  means we can't achieve goal (2.7).
+
+### 5.4.2 Minimizing data loss with unsupported upgrade configurations (8.0)
 > This alternative can reduce some data loss when our upgrade procedure isn't
-> followed. We see value in adopting these protections but because of the
-> significant complexity they add, these won't be included in the initial
-> implementation for 8.x. Instead, we will re-evaluate adding these at a
-> future date.
+> followed with the algorithm in (5.4.1).
 
 Even if (4.5.2) is the only supported upgrade procedure, we should try to
 prevent data loss when these instructions aren't followed.
@@ -560,7 +595,7 @@ the alias.
 
 As a result, Kibana cannot guarantee that there would be no data loss but
 instead, aims to minimize it as much as possible by adding the bold sections
-to the migration algorithm from (4.5.1)
+to the migration algorithm from (5.4.1)
 
 1. **Disable `action.auto_create_index` for the Kibana system indices.**
 2. Exit Kibana with a fatal error if a newer node has started a migration by
@@ -636,7 +671,5 @@ to enumarate some scenarios and their worst case impact:
 2. Update developer documentation and educate developers with best practices
    for writing migration functions. 
 
-# Unresolved questions
-- What does major version migrations look like? If we need to re-index we
-  could leverage painless to improve the performance. But that increases the
-  risk of type errors since we cannot rely on our Typescript types.
+# 7. Unresolved questions
+1. How do we want to deal with orphan data as described in (4.3.1.4) "Handling documents that belong to a disabled plugin"
