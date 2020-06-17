@@ -181,6 +181,8 @@ interface DataPanelState {
   nameFilter: string;
   typeFilter: DataType[];
   isTypeFilterOpen: boolean;
+  isAvailableAccordionOpen: boolean;
+  isEmptyAccordionOpen: boolean;
 }
 
 export interface FieldsGroup {
