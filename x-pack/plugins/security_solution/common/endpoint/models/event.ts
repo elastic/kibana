@@ -95,35 +95,7 @@ export function ecsEventType(event: ResolverEvent): string[] {
  * There are drawbacks to trying to do this: It *will* require ongoing maintenance. It presents temptations to overarticulate.
  * On balance, however, it seems that the benefit of giving the user some form of information they can recognize & scan outweighs the drawbacks.
  */
-
-/**
- * A type that annotates the basic requirements for giving the event a `descriptive name`
- */
-type detailRecord<T> = T extends 'registry'
-  ? { path: unknown; key: unknown }
-  : T extends 'dns'
-  ? { question: { name: unknown } }
-  : T extends 'network'
-  ? { direction: unknown; forwarded_ip: unknown }
-  : T extends 'file'
-  ? { path: unknown }
-  : unknown;
-type ecsRecordWithType<T extends string> = Record<T, detailRecord<T>>;
-
-/**
- * Verify that the `ecsCategory` exists as a key on the event record. i.e. if ecsCategory is `registry`, the event is shaped like {registry: object}
- *
- * @param event
- * @param ecsCategory
- */
-export function isRecordNamable<T extends string>(
-  event: object,
-  ecsCategory: T
-): event is ecsRecordWithType<T> {
-  // The goal here is to reach in and grab a better name for the event (if one exists) without being too obtrusive/assertive about ECS
-  return typeof (event as ecsRecordWithType<T>)[ecsCategory] === 'object';
-}
-
+type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 /**
  * Based on the ECS category of the event, attempt to provide a more descriptive name
  * (e.g. the `event.registry.key` for `registry` or the `dns.question.name` for `dns`, etc.).
@@ -140,46 +112,38 @@ export function descriptiveName(event: ResolverEvent): { subject: string; descri
     return { subject: eventName(event) };
   }
 
+  // To be somewhat defensive, we'll check for the presence of these.
+  const partialEvent: DeepPartial<ResolverEvent> = event;
+
   /**
    * This list of attempts can be expanded/adjusted as the underlying model changes over time:
    */
 
   // Stable, per ECS 1.5: https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html
-  const namableNetworkEvent = isRecordNamable(event, 'network') && event;
-  const namableFileEvent = isRecordNamable(event, 'file') && event;
-  const namableRegistryEvent = isRecordNamable(event, 'registry') && event;
-  const namableDNSEvent = isRecordNamable(event, 'dns') && event;
 
-  if (namableNetworkEvent) {
-    if (namableNetworkEvent.network.forwarded_ip) {
-      return {
-        subject: String(namableNetworkEvent.network.forwarded_ip),
-        descriptor: String(namableNetworkEvent.network.direction),
-      };
-    }
+  if (partialEvent.network?.forwarded_ip) {
+    return {
+      subject: String(partialEvent.network?.forwarded_ip),
+      descriptor: String(partialEvent.network?.direction),
+    };
   }
 
-  if (namableFileEvent) {
-    if (namableFileEvent.file.path) {
-      return {
-        subject: String(namableFileEvent.file.path),
-      };
-    }
+  if (partialEvent.file?.path) {
+    return {
+      subject: String(partialEvent.file?.path),
+    };
   }
 
   // Extended categories (per ECS 1.5):
-  if (namableRegistryEvent) {
-    const pathOrKey = namableRegistryEvent.registry.path || namableRegistryEvent.registry.key;
-    if (pathOrKey) {
-      return {
-        subject: String(pathOrKey),
-      };
-    }
+  const pathOrKey = partialEvent.registry?.path || partialEvent.registry?.key;
+  if (pathOrKey) {
+    return {
+      subject: String(pathOrKey),
+    };
   }
-  if (namableDNSEvent) {
-    if (namableDNSEvent.dns.question.name) {
-      return { subject: String(namableDNSEvent.dns.question.name) };
-    }
+
+  if (partialEvent.dns?.question?.name) {
+    return { subject: String(partialEvent.dns?.question?.name) };
   }
 
   // Fall back on entityId if we can't fish a more descriptive name out.
