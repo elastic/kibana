@@ -23,6 +23,7 @@ import {
 import { CompressExceptionList } from '../fetch_endpoint_exceptions';
 import { ArtifactConstants } from '../task';
 import { downloadEndpointExceptionListRoute } from './download_endpoint_exception_list';
+import { ExceptionsCache } from '../cache';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
 const expectedEndpointExceptions = {
@@ -53,6 +54,7 @@ describe('test alerts route', () => {
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let routeConfig: RouteConfig<unknown, unknown, unknown, never>;
   let routeHandler: RequestHandler<unknown, unknown, unknown>;
+  let cache: ExceptionsCache;
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
@@ -61,8 +63,9 @@ describe('test alerts route', () => {
     mockResponse = httpServerMock.createResponseFactory();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
+    cache = new ExceptionsCache(10000); // TODO
 
-    downloadEndpointExceptionListRoute(routerMock);
+    downloadEndpointExceptionListRoute(routerMock, cache);
   });
 
   it('should serve the compressed artifact to download', async () => {
@@ -168,5 +171,38 @@ describe('test alerts route', () => {
       mockResponse
     );
     expect(mockResponse.notFound).toBeCalled();
+  });
+
+  it('should utilize the cache', async () => {
+    const mockSha = '123456789';
+    const mockRequest = httpServerMock.createKibanaRequest({
+      path: `/api/endpoint/allowlist/download/${mockArtifactName}/${mockSha}`,
+      method: 'get',
+      params: { sha256: mockSha, artifactName: mockArtifactName },
+    });
+
+    // Add to the download cache
+    const mockCompressedArtifact = await CompressExceptionList(expectedEndpointExceptions);
+    const cacheKey = `${mockArtifactName}-${mockSha}`;
+    cache.set(cacheKey, mockCompressedArtifact.toString('binary'));
+
+    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+      path.startsWith('/api/endpoint/allowlist/download')
+    )!;
+
+    await routeHandler(
+      ({
+        core: {
+          savedObjects: {
+            client: mockSavedObjectClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext,
+      mockRequest,
+      mockResponse
+    );
+    expect(mockResponse.ok).toBeCalled();
+    // The saved objects client should be bypassed as the cache will contain the download
+    expect(mockSavedObjectClient.get.mock.calls.length).toEqual(0);
   });
 });

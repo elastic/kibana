@@ -33,7 +33,7 @@ import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
-import { PackagerTask, setupPackagerTask } from './lib/exceptions';
+import { PackagerTask, setupPackagerTask, ExceptionsCache } from './lib/exceptions';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
@@ -45,6 +45,7 @@ import { registerAlertRoutes } from './endpoint/alerts/routes';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
+import { downloadEndpointExceptionListRoute } from './lib/exceptions/routes/download_endpoint_exception_list';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -75,12 +76,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private appClientFactory: AppClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private exceptionsPackagerTask: PackagerTask;
+  private exceptionsCache: ExceptionsCache;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
+    this.exceptionsCache = new ExceptionsCache(10000); // TODO ttl
 
     this.logger.debug('plugin initialized');
   }
@@ -127,6 +130,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerResolverRoutes(router, endpointContext);
     registerAlertRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
+    downloadEndpointExceptionListRoute(router, this.exceptionsCache);
 
     plugins.features.registerFeature({
       id: SERVER_APP_ID,
@@ -222,6 +226,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         logger: this.logger,
         taskManager: plugins.taskManager,
         lists: plugins.lists,
+        cache: this.exceptionsCache,
       });
     }
 
