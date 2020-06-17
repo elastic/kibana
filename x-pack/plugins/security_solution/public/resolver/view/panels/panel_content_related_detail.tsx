@@ -315,7 +315,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
             id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.categoryAndType"
             values={{
               category: relatedEventCategory,
-              eventType: event.ecsEventType(relatedEventToShowDetailsFor),
+              eventType: String(event.ecsEventType(relatedEventToShowDetailsFor)),
             }}
             defaultMessage="{category} {eventType}"
           />
