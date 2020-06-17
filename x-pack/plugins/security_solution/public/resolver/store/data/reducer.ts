@@ -41,13 +41,13 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
   } else if (action.type === 'userRequestedRelatedEventData') {
     return {
       ...state,
-      relatedEventsReady: new Map(state.relatedEventsReady.set(action.payload, false)),
+      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload, false]]),
     };
   } else if (action.type === 'serverReturnedRelatedEventData') {
     return {
       ...state,
-      relatedEventsReady: new Map(state.relatedEventsReady.set(action.payload.entityID, true)),
-      relatedEvents: new Map(state.relatedEvents.set(action.payload.entityID, action.payload)),
+      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload.entityID, true]]),
+      relatedEvents: new Map([...state.relatedEvents, [action.payload.entityID, action.payload]]),
     };
   } else {
     return state;
