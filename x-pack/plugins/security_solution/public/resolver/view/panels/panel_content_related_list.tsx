@@ -146,7 +146,7 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
   const matchingEventEntries: MatchingEventEntry[] = useMemo(() => {
     const relateds = relatedEventsToDisplay
       .reduce((a: ResolverEvent[], candidate) => {
-        if (event.eventCategory(candidate) === eventType) {
+        if (event.primaryEventCategory(candidate) === eventType) {
           a.push(candidate);
         }
         return a;

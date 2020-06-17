@@ -56,7 +56,7 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
 /**
  * @param event The event to get the category for
  */
-export function eventCategory(event: ResolverEvent): string {
+export function primaryEventCategory(event: ResolverEvent): string {
   // Returning "Process" as a catch-all here because it seems pretty general
   let eventCategoryToReturn: string = 'Process';
   if (isLegacyEvent(event)) {
