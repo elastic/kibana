@@ -279,8 +279,6 @@ export class IndexPattern implements IIndexPattern {
     const savedObject = await this.savedObjectsClient.get(type, this.id);
 
     const response = {
-      id: savedObject.id,
-      // type: savedObject.type,
       version: savedObject._version,
       found: savedObject._version ? true : false,
       ...(_.cloneDeep(savedObject.attributes) as Record<string, any>),
