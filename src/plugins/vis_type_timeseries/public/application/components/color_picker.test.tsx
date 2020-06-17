@@ -24,17 +24,13 @@ import { ReactWrapper } from 'enzyme';
 import { EuiColorPicker, EuiIconTip } from '@elastic/eui';
 
 describe('ColorPicker', () => {
-  let defaultProps: ColorPickerProps;
+  const defaultProps: ColorPickerProps = {
+    name: 'color',
+    value: null,
+    onChange: jest.fn(),
+    disableTrash: true,
+  };
   let component: ReactWrapper<ColorPickerProps>;
-
-  beforeAll(() => {
-    defaultProps = {
-      name: 'color',
-      value: null,
-      onChange: jest.fn(),
-      disableTrash: true,
-    };
-  });
 
   it('should render the EuiColorPicker', () => {
     component = mount(<ColorPicker {...defaultProps} />);
