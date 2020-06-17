@@ -56,9 +56,8 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
 /**
  * @param event The event to get the category for
  */
-export function primaryEventCategory(event: ResolverEvent): string {
+export function primaryEventCategory(event: ResolverEvent): string | undefined {
   // Returning "Process" as a catch-all here because it seems pretty general
-  let eventCategoryToReturn: string = 'Process';
   if (isLegacyEvent(event)) {
     const legacyFullType = event.endgame.event_type_full;
     if (legacyFullType) {
@@ -66,14 +65,10 @@ export function primaryEventCategory(event: ResolverEvent): string {
     }
   } else {
     const eventCategories = event.event.category;
-    const category =
-      typeof eventCategories === 'string' ? eventCategories : eventCategories[0] || '';
+    const category = typeof eventCategories === 'string' ? eventCategories : eventCategories[0];
 
-    if (category) {
-      eventCategoryToReturn = category;
-    }
+    return category;
   }
-  return eventCategoryToReturn;
 }
 
 /**
