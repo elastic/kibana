@@ -17,7 +17,7 @@ import { ActionType, ActionResult } from '../../../actions/common';
 import { replaceTokens } from './replace_tokens';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import AlertEdit from '../../../triggers_actions_ui/public/application/sections/alert_form/alert_edit';
+import { AlertEdit } from '../../../triggers_actions_ui/public';
 
 interface Props {
   alert: CommonAlertStatus;

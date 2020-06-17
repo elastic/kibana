@@ -49,19 +49,19 @@ export const AlertsList: React.FC<Props> = (props: Props) => {
 
     const button = (
       <EuiBadge
-        iconType="alert"
+        iconType="bell"
         color={type}
-        onClickAriaLabel={`${list.length} ${type}(s)`}
+        onClickAriaLabel={`${list.length} alert(s)`}
         onClick={() => setShowPopover(type)}
       >
-        {list.length} {type}(s)
+        {list.length} alert(s)
       </EuiBadge>
     );
 
     const panels = [
       {
         id: 0,
-        title: `${list.length} ${type} alert(s)`,
+        title: `${list.length} alert(s)`,
         items: list.map(({ alert, states }, index) => {
           const severity = states[0].state.ui.severity;
           return {

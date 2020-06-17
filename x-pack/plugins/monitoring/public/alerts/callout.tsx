@@ -35,7 +35,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
   if (warnings.length) {
     warningCallout = (
       <Fragment>
-        <EuiCallOut title="Warnings" color="warning" iconType="alert">
+        <EuiCallOut title="Warning alert(s)" color="warning" iconType="bell">
           <ul>
             {warnings.map((state, index) => {
               return <li key={index}>{replaceTokens(state.ui.message)}</li>;
@@ -50,7 +50,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
   if (dangers.length) {
     dangerCallout = (
       <Fragment>
-        <EuiCallOut title="Dangers" color="danger" iconType="alert">
+        <EuiCallOut title="Danger alert(s)" color="danger" iconType="bell">
           <ul>
             {dangers.map((state, index) => {
               return <li key={index}>{replaceTokens(state.ui.message)}</li>;

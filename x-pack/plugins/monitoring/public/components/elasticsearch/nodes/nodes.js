@@ -478,20 +478,6 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             }}
             onTableChange={onTableChange}
             fetchMoreData={fetchMoreData}
-            rowProps={(row) => {
-              for (const { states } of Object.values(alerts)) {
-                for (const { state } of states) {
-                  if (state.nodeId === row.resolver) {
-                    return {
-                      style: {
-                        border: `solid 2px ${CommonAlertSeverityColorMap[state.ui.severity]}`,
-                      },
-                    };
-                  }
-                }
-              }
-              return {};
-            }}
           />
         </EuiPageContent>
       </EuiPageBody>
