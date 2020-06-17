@@ -103,7 +103,7 @@ export const SubscriptionSplashContent: React.FC = () => {
               <EuiSpacer />
               {cta}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
               <EuiImage
                 alt={i18n.translate('xpack.infra.logs.logAnalysis.splash.splashImageAlt', {
                   defaultMessage: 'Placeholder image',
@@ -111,7 +111,7 @@ export const SubscriptionSplashContent: React.FC = () => {
                 url={services.http.basePath.prepend(
                   '/plugins/infra/assets/anomaly_chart_minified.svg'
                 )}
-                size="l"
+                size="fullWidth"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
