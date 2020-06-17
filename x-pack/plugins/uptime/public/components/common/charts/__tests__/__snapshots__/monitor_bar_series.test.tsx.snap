@@ -8,10 +8,6 @@ exports[`MonitorBarSeries component renders if the data series is present 1`] = 
     class="echChart"
   >
     <div
-      class="echChartBackground"
-      style="background-color:transparent"
-    />
-    <div
       class="echChartStatus"
       data-ech-render-complete="false"
       data-ech-render-count="0"
@@ -21,7 +17,15 @@ exports[`MonitorBarSeries component renders if the data series is present 1`] = 
     />
     <div
       class="echContainer"
-    />
+    >
+      <div
+        class="echReactiveChart_unavailable"
+      >
+        <p>
+          No data to display
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -77,7 +81,8 @@ exports[`MonitorBarSeries component shallow renders a series when there are down
     }
   }
 >
-  <MonitorBarSeries
+  <MonitorBarSeriesComponent
+    from={1580387865000}
     histogramSeries={
       Array [
         Object {
@@ -97,6 +102,8 @@ exports[`MonitorBarSeries component shallow renders a series when there are down
         },
       ]
     }
+    to={1580388769000}
+    updateDateRange={[MockFunction]}
   />
 </ContextProvider>
 `;
