@@ -1,5 +1,6 @@
 {
   "id": "kibanaUtils",
   "version": "kibana",
-  "ui": true
+  "ui": true,
+  "extraPublicDirs": ["common", "common/state_containers", "demos/state_containers/todomvc"]
 }
