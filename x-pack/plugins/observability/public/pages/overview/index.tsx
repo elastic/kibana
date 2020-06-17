@@ -24,35 +24,32 @@ import { WithHeaderLayout } from '../../components/layout/with_header';
 import { appsSection } from '../home/section';
 import { getDataHandler } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
+import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
+import { useQueryParams } from '../../hooks/use_query_params';
+import { getParsedDate } from '../../utils/date';
+import { useKibanaUISettings, UI_SETTINGS } from '../../hooks/use_kibana_ui_settings';
 
 export const Overview = () => {
   const theme = useContext(ThemeContext);
-  const [withAlert, setWithAlert] = useState(false);
+  const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
 
-  const { data: apmData } = useFetcher(() => {
-    const dataHandler = getDataHandler('apm');
-    if (dataHandler) {
-      return dataHandler.fetchData({ startTime: '1', endTime: '2', bucketSize: '3' });
+  const { rangeFrom = timePickerTime.from, rangeTo = timePickerTime.to } = useQueryParams<any>();
+
+  const { data = [] } = useFetcher(() => {
+    const startTime = getParsedDate(rangeFrom);
+    const endTime = getParsedDate(rangeTo);
+    if (startTime && endTime) {
+      const params = { startTime, endTime, bucketSize: '3' };
+      const apmHandler = getDataHandler('apm')?.fetchData(params);
+      const logsHandler = getDataHandler('infra_logs')?.fetchData(params);
+      const metricsHandler = getDataHandler('infra_metrics')?.fetchData(params);
+      const uptimeHandler = getDataHandler('uptime')?.fetchData(params);
+
+      return Promise.all([apmHandler, logsHandler, metricsHandler, uptimeHandler]);
     }
-  }, []);
-  const { data: logsData } = useFetcher(() => {
-    const dataHandler = getDataHandler('infra_logs');
-    if (dataHandler) {
-      return dataHandler.fetchData({ startTime: '1', endTime: '2', bucketSize: '3' });
-    }
-  }, []);
-  const { data: metricsData } = useFetcher(() => {
-    const dataHandler = getDataHandler('infra_metrics');
-    if (dataHandler) {
-      return dataHandler.fetchData({ startTime: '1', endTime: '2', bucketSize: '3' });
-    }
-  }, []);
-  const { data: uptimeData } = useFetcher(() => {
-    const dataHandler = getDataHandler('uptime');
-    if (dataHandler) {
-      return dataHandler.fetchData({ startTime: '1', endTime: '2', bucketSize: '3' });
-    }
-  }, []);
+  }, [rangeFrom, rangeTo]);
+
+  const [apmData, logsData, metricsData, uptimeData] = data;
 
   const emptySections = appsSection.filter((app) => {
     switch (app.id) {
@@ -76,16 +73,9 @@ export const Overview = () => {
     >
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiDatePicker selected={moment()} onChange={() => {}} />
+          <DatePicker rangeFrom={rangeFrom} rangeTo={rangeTo} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiSwitch
-        label="With alert data?"
-        checked={withAlert}
-        onChange={(e) => setWithAlert((currState) => !currState)}
-      />
-      <EuiSpacer />
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={6}>
           <EuiFlexGroup direction="column">
@@ -103,11 +93,9 @@ export const Overview = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {withAlert && (
-          <EuiFlexItem grow={4}>
-            <ChartContainer title="alert">chart goes here</ChartContainer>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={4}>
+          <ChartContainer title="alert">chart goes here</ChartContainer>
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer />
