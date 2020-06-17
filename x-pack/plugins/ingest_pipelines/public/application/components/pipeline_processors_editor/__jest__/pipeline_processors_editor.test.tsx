@@ -36,8 +36,7 @@ describe('Pipeline Editor', () => {
       onUpdate,
       isTestButtonDisabled: false,
       onTestPipelineClick: jest.fn(),
-      learnMoreAboutProcessorsUrl: 'test',
-      learnMoreAboutOnFailureProcessorsUrl: 'test',
+      esDocsBasePath: 'test',
     });
 
     const {
@@ -56,8 +55,7 @@ describe('Pipeline Editor', () => {
       onUpdate: jest.fn(),
       isTestButtonDisabled: false,
       onTestPipelineClick: jest.fn(),
-      learnMoreAboutProcessorsUrl: 'test',
-      learnMoreAboutOnFailureProcessorsUrl: 'test',
+      esDocsBasePath: 'test',
     });
 
     expect(exists('pipelineEditorOnFailureTree')).toBe(false);
