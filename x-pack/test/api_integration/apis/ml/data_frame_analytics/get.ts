@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
           includes: [],
           excludes: [],
         },
-        model_memory_limit: '350mb',
+        model_memory_limit: '60mb',
       },
       {
         id: `${jobId}_2`,
@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
           includes: [],
           excludes: [],
         },
-        model_memory_limit: '350mb',
+        model_memory_limit: '60mb',
       },
     ];
 
