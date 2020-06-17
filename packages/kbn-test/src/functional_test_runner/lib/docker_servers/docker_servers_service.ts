@@ -214,7 +214,7 @@ export class DockerServersService {
     await Promise.all(
       this.servers.map(async (server) => {
         if (server.enabled) {
-          this.startServer(server);
+          await this.startServer(server);
         }
       })
     );
