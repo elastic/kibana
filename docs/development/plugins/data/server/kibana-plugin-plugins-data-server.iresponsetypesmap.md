@@ -4,6 +4,8 @@
 
 ## IResponseTypesMap interface
 
+The map of search strategy IDs to the corresponding response type definitions.
+
 <b>Signature:</b>
 
 ```typescript

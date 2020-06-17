@@ -11,9 +11,9 @@ import { ReportingCore } from '../../../../';
 import { CancellationToken } from '../../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../../lib';
 import { createMockReportingCore } from '../../../../test_helpers';
-import { JobDocPayloadPDF } from '../../types';
+import { ScheduledTaskParamsPDF } from '../../types';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { executeJobFactory } from './';
+import { runTaskFnFactory } from './';
 
 let mockReporting: ReportingCore;
 
@@ -36,7 +36,7 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   return await crypto.encrypt(headers);
 };
 
-const getJobDocPayload = (baseObj: any) => baseObj as JobDocPayloadPDF;
+const getScheduledTaskParams = (baseObj: any) => baseObj as ScheduledTaskParamsPDF;
 
 beforeEach(async () => {
   const kbnConfig = {
@@ -79,11 +79,12 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const generatePdfObservable = (await generatePdfObservableFactory(mockReporting)) as jest.Mock;
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
-  await executeJob(
+  await runTask(
     'pdfJobId',
-    getJobDocPayload({
+    getScheduledTaskParams({
+      title: 'PDF Params Timezone Test',
       relativeUrl: '/app/kibana#/something',
       browserTimezone,
       headers: encryptedHeaders,
@@ -91,52 +92,21 @@ test(`passes browserTimezone to generatePdf`, async () => {
     cancellationToken
   );
 
-  expect(generatePdfObservable.mock.calls).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        LevelLogger {
-          "_logger": Object {
-            "get": [MockFunction],
-          },
-          "_tags": Array [
-            "printable_pdf",
-            "execute",
-            "pdfJobId",
-          ],
-          "warning": [Function],
-        },
-        undefined,
-        Array [
-          "http://localhost:5601/sbp/app/kibana#/something",
-        ],
-        "UTC",
-        Object {
-          "conditions": Object {
-            "basePath": "/sbp",
-            "hostname": "localhost",
-            "port": 5601,
-            "protocol": "http",
-          },
-          "headers": Object {},
-        },
-        undefined,
-        false,
-      ],
-    ]
-  `);
+  const tzParam = generatePdfObservable.mock.calls[0][3];
+  expect(tzParam).toBe('UTC');
 });
 
 test(`returns content_type of application/pdf`, async () => {
   const logger = getMockLogger();
-  const executeJob = await executeJobFactory(mockReporting, logger);
+  const runTask = await runTaskFnFactory(mockReporting, logger);
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
 
-  const { content_type: contentType } = await executeJob(
+  const { content_type: contentType } = await runTask(
     'pdfJobId',
-    getJobDocPayload({ relativeUrls: [], headers: encryptedHeaders }),
+    getScheduledTaskParams({ relativeUrls: [], headers: encryptedHeaders }),
     cancellationToken
   );
   expect(contentType).toBe('application/pdf');
@@ -147,11 +117,11 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
-  const { content } = await executeJob(
+  const { content } = await runTask(
     'pdfJobId',
-    getJobDocPayload({ relativeUrls: [], headers: encryptedHeaders }),
+    getScheduledTaskParams({ relativeUrls: [], headers: encryptedHeaders }),
     cancellationToken
   );
 

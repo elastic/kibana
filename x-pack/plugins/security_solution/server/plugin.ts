@@ -43,7 +43,6 @@ import { registerAlertRoutes } from './endpoint/alerts/routes';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { IngestIndexPatternRetriever } from './endpoint/alerts/index_pattern';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -219,10 +218,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     this.endpointAppContextService.start({
-      indexPatternRetriever: new IngestIndexPatternRetriever(
-        plugins.ingestManager.esIndexPatternService,
-        this.context.logger
-      ),
       agentService: plugins.ingestManager.agentService,
     });
     return {};
