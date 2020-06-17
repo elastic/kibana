@@ -20,6 +20,7 @@
 import * as Rx from 'rxjs';
 
 export interface DockerServerSpec {
+  enabled: boolean;
   portInContainer: number;
   port: number;
   image: string;

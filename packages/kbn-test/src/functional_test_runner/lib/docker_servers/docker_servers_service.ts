@@ -55,6 +55,10 @@ export class DockerServersService {
     });
   }
 
+  isEnabled(name: string) {
+    return this.get(name).enabled;
+  }
+
   has(name: string) {
     return this.servers.some((s) => s.name === name);
   }

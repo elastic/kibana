@@ -15,10 +15,12 @@ export default function () {
     dockerServers: defineDockerServersConfig({
       // unique names are used in logging and to get the details of this server in the tests
       helloWorld: {
+        /** disable this docker server unless the user sets some flag/env var */
+        enabled: !!process.env.SOME_APP_PORT,
         /** the docker image to pull and run */
         image: 'hello-world',
         /** The port that this application will be accessible via locally */
-        port: 8080,
+        port: process.env.SOME_APP_PORT,
         /** The port that the container binds to in the container */
         portInContainer: 8080,
         /**
