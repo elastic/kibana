@@ -5,10 +5,12 @@
  */
 import Boom from 'boom';
 import { combineLatest } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
-
+import { TypeOf } from '@kbn/config-schema';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
   Logger,
   PluginInitializerContext,
@@ -26,7 +28,8 @@ import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
 } from '../common/constants';
-import { MonitoringConfig } from './config';
+import { MonitoringConfig, createConfig, configSchema } from './config';
+// @ts-ignore
 import { requireUIRoutes } from './routes';
 // @ts-ignore
 import { initBulkUploader } from './kibana_monitoring';
@@ -81,7 +84,9 @@ export class Plugin {
 
   async setup(core: CoreSetup, plugins: PluginsSetup) {
     const [config, legacyConfig] = await combineLatest([
-      this.initializerContext.config.create<MonitoringConfig>(),
+      this.initializerContext.config
+        .create<TypeOf<typeof configSchema>>()
+        .pipe(map((rawConfig) => createConfig(rawConfig))),
       this.initializerContext.config.legacy.globalConfig$,
     ])
       .pipe(first())
