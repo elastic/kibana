@@ -1,0 +1,263 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadConfig WorkpadCSS 1`] = `
+<div
+  style={
+    Object {
+      "width": 325,
+    }
+  }
+>
+  <div
+    className="canvasArg--expandable"
+  >
+    <div
+      className="euiAccordion canvasArg__accordion"
+    >
+      <div
+        className="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="accordion-global-css"
+          aria-expanded={false}
+          className="euiAccordion__button"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiAccordion__iconWrapper"
+          >
+            <div
+              className="euiAccordion__icon"
+              data-euiicon-type="arrowRight"
+              size="m"
+            />
+          </span>
+          <span
+            className="euiIEFlexWrapFix"
+          >
+            <span
+              className="euiToolTipAnchor"
+              onKeyUp={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              <div
+                className="euiText euiText--small"
+                onBlur={[Function]}
+                onFocus={[Function]}
+              >
+                <div
+                  className="euiTextColor euiTextColor--subdued"
+                >
+                  Global CSS overrides
+                </div>
+              </div>
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiAccordion__childWrapper"
+        id="accordion-global-css"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadConfig WorkpadSize 1`] = `
+<div
+  style={
+    Object {
+      "width": 325,
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Width
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldNumber euiFieldNumber--compressed"
+                id="generated-id"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                type="number"
+                value={800}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <span
+            className="euiToolTipAnchor"
+            onKeyUp={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <button
+              aria-label="Swap the page's width and height"
+              className="euiButtonIcon euiButtonIcon--text"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              type="button"
+            >
+              <div
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                data-euiicon-type="merge"
+                size="m"
+              />
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Height
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldNumber euiFieldNumber--compressed"
+                id="generated-id"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                type="number"
+                value={600}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+  <div>
+    <button
+      aria-label="Preset page size: 1080p"
+      className="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft"
+      onClick={[Function]}
+    >
+      <span
+        className="euiBadge__content"
+      >
+        <span
+          className="euiBadge__text"
+        >
+          1080p
+        </span>
+      </span>
+    </button>
+    <button
+      aria-label="Preset page size: 720p"
+      className="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft"
+      onClick={[Function]}
+    >
+      <span
+        className="euiBadge__content"
+      >
+        <span
+          className="euiBadge__text"
+        >
+          720p
+        </span>
+      </span>
+    </button>
+    <button
+      aria-label="Preset page size: A4"
+      className="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft"
+      onClick={[Function]}
+    >
+      <span
+        className="euiBadge__content"
+      >
+        <span
+          className="euiBadge__text"
+        >
+          A4
+        </span>
+      </span>
+    </button>
+    <button
+      aria-label="Preset page size: US Letter"
+      className="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft"
+      onClick={[Function]}
+    >
+      <span
+        className="euiBadge__content"
+      >
+        <span
+          className="euiBadge__text"
+        >
+          US Letter
+        </span>
+      </span>
+    </button>
+  </div>
+   
+</div>
+`;

@@ -76,11 +76,15 @@ import { RenderedElement } from '../shareable_runtime/components/rendered_elemen
 jest.mock('../shareable_runtime/components/rendered_element');
 RenderedElement.mockImplementation(() => 'RenderedElement');
 
+import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
+jest.mock('@elastic/eui/test-env/components/observer/observer');
+EuiObserver.mockImplementation(() => 'EuiObserver');
+
 addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
   configPath: path.resolve(__dirname, './../.storybook'),
   test: multiSnapshotWithOptions({}),
-  storyNameRegex:/^((?!.*?redux).)*$/
+  storyNameRegex:/^((?!.*?redux).)*$/,
 });

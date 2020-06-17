@@ -7,11 +7,8 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { createStore } from 'redux';
-import { Provider } from 'react-redux';
-import { handleActions } from 'redux-actions';
 
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../public/state/defaults';
 import { WorkpadConfig } from '../';
 import { WorkpadCSS } from '../workpad_css/workpad_css';
