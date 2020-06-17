@@ -21,7 +21,7 @@ export interface ServiceNowActionParams {
     title: string;
     description: string;
     comment: string;
-    externalId: string;
+    externalId: string | null;
     severity: string;
     urgency: string;
     impact: string;

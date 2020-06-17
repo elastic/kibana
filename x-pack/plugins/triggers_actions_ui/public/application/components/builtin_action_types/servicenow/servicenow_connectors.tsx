@@ -30,7 +30,7 @@ export interface ConnectorFlyoutFormProps<T> {
   onBlurConfig: (key: string) => void;
 }
 
-const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
+const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector
 >> = ({ action, editActionSecrets, editActionConfig, errors, editActionProperty }) => {
   // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
@@ -164,7 +164,7 @@ const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup>
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="case-servicenow-mappings">
               <FieldMapping
                 disabled={true}
                 connectorActionTypeId={connectorConfiguration.id}
@@ -190,4 +190,4 @@ export const createDefaultMapping = (fields: Record<string, any>): CasesConfigur
   );
 
 // eslint-disable-next-line import/no-default-export
-export { ServiceNowConnectorFlyout as default };
+export { ServiceNowConnectorFields as default };

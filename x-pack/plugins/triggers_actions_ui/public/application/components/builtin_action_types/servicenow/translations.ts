@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const SERVICENOW_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.selectMessageText',
   {
-    defaultMessage: 'Push or update data to a new incident in ServiceNow',
+    defaultMessage: 'Push or update data to a new incident in ServiceNow.',
   }
 );
 
@@ -30,14 +30,14 @@ export const API_URL_LABEL = i18n.translate(
 export const API_URL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiUrlTextField',
   {
-    defaultMessage: 'URL is required',
+    defaultMessage: 'URL is required.',
   }
 );
 
 export const API_URL_INVALID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.invalidApiUrlTextField',
   {
-    defaultMessage: 'URL is invalid',
+    defaultMessage: 'URL is invalid.',
   }
 );
 
@@ -51,7 +51,7 @@ export const USERNAME_LABEL = i18n.translate(
 export const USERNAME_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUsernameTextField',
   {
-    defaultMessage: 'Username is required',
+    defaultMessage: 'Username is required.',
   }
 );
 
@@ -65,7 +65,7 @@ export const PASSWORD_LABEL = i18n.translate(
 export const PASSWORD_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPasswordTextField',
   {
-    defaultMessage: 'Password is required',
+    defaultMessage: 'Password is required.',
   }
 );
 
@@ -79,7 +79,7 @@ export const API_TOKEN_LABEL = i18n.translate(
 export const API_TOKEN_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiTokenTextField',
   {
-    defaultMessage: 'Api token is required',
+    defaultMessage: 'Api token is required.',
   }
 );
 
@@ -93,7 +93,7 @@ export const EMAIL_LABEL = i18n.translate(
 export const EMAIL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredEmailTextField',
   {
-    defaultMessage: 'Email is required',
+    defaultMessage: 'Email is required.',
   }
 );
 
@@ -121,13 +121,13 @@ export const MAPPING_FIELD_COMMENTS = i18n.translate(
 export const DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredDescriptionTextField',
   {
-    defaultMessage: 'Description is required',
+    defaultMessage: 'Description is required.',
   }
 );
 
 export const TITLE_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredTitleTextField',
   {
-    defaultMessage: 'Title is required',
+    defaultMessage: 'Title is required.',
   }
 );

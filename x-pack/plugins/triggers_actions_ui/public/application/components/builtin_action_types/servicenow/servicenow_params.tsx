@@ -190,8 +190,6 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
       </EuiFormRow>
       <EuiFormRow
         fullWidth
-        error={errors.description}
-        isInvalid={errors.description.length > 0 && description !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.descriptionTextAreaFieldLabel',
           {
@@ -210,7 +208,6 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
       >
         <EuiTextArea
           fullWidth
-          isInvalid={errors.description.length > 0 && description !== undefined}
           name="description"
           value={description || ''}
           data-test-subj="incidentDescriptionTextArea"

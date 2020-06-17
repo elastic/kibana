@@ -59,7 +59,6 @@ export function getActionType(): ActionTypeModel<
     validateParams: (actionParams: ServiceNowActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
-        description: new Array<string>(),
         title: new Array<string>(),
       };
       validationResult.errors = errors;
