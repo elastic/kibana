@@ -10,7 +10,7 @@ import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from './formatting';
 
-export function SetupModeTooltip({ setupModeData, badgeClickAction, productName }) {
+export function SetupModeTooltip({ setupModeData, badgeClickLink, productName }) {
   if (!setupModeData) {
     return null;
   }
@@ -45,7 +45,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
           <EuiBadge
             color="warning"
             iconType="flag"
-            onClick={badgeClickAction}
+            href={badgeClickLink}
             onClickAriaLabel={detectedText}
           >
             {detectedText}
@@ -70,7 +70,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
           <EuiBadge
             color="hollow"
             iconType="flag"
-            onClick={badgeClickAction}
+            href={badgeClickLink}
             onClickAriaLabel={noMonitoringText}
           >
             {noMonitoringText}
@@ -98,7 +98,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
         <EuiBadge
           color="danger"
           iconType="flag"
-          onClick={badgeClickAction}
+          href={badgeClickLink}
           onClickAriaLabel={internalCollection}
         >
           {internalCollection}
@@ -122,7 +122,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
         <EuiBadge
           color="warning"
           iconType="flag"
-          onClick={badgeClickAction}
+          href={badgeClickLink}
           onClickAriaLabel={internalAndMB}
         >
           {internalAndMB}
@@ -146,7 +146,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
         <EuiBadge
           color="secondary"
           iconType="flag"
-          onClick={badgeClickAction}
+          href={badgeClickLink}
           onClickAriaLabel={metricbeatCollection}
         >
           {metricbeatCollection}

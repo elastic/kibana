@@ -27,6 +27,7 @@ import {
   ErrorEmbeddable,
   IContainer,
   AttributeService,
+  EmbeddableFactory,
 } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
@@ -44,7 +45,14 @@ interface StartServices {
   openModal: OverlayStart['openModal'];
 }
 
-export class BookEmbeddableFactory
+export type BookEmbeddableFactory = EmbeddableFactory<
+  BookEmbeddableInput,
+  BookEmbeddableOutput,
+  BookEmbeddable,
+  BookSavedObjectAttributes
+>;
+
+export class BookEmbeddableFactoryDefinition
   implements
     EmbeddableFactoryDefinition<
       BookEmbeddableInput,
