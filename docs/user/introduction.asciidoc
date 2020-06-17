@@ -85,16 +85,16 @@ image::images/intro-dashboard.png[]
 
 * <<visualize, Visualize>> allows you to display your data in
 line charts, bar graphs, pie charts, histograms, and tables
-(just to name a few). It's also home to *Lens*, the drag-and-drop interface.
-*Visualize* supports the ability to add interactive
+(just to name a few). It's also home to Lens, the drag-and-drop interface.
+Visualize supports the ability to add interactive
 controls to your dashboard, and filter dashboard content in real time.
 
 * <<canvas, Canvas>> gives you the ability to present your data in a
 visually compelling, pixel-perfect report. Give your data the “wow” factor
 needed to impress your CEO or to captivate people with a big-screen display.
 
-* <<maps, Elastic Maps>> enables you to ask (and answer) meaningful
-questions of your location-based data. *Elastic Maps* supports multiple
+* <<maps, Maps>> enables you to ask (and answer) meaningful
+questions of your location-based data. Maps supports multiple
 layers and data sources, mapping of individual geo points and shapes,
 and dynamic client-side styling.
 
