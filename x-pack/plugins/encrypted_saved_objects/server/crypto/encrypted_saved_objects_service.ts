@@ -5,13 +5,13 @@
  */
 
 import nodeCrypto, { Crypto } from '@elastic/node-crypto';
-import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 import { Logger } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
+import { getAAD } from './get_aad';
 
 /**
  * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users
@@ -126,6 +126,17 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
+   * Returns a registered type from the registry.
+   * @param type Saved object type.
+   */
+  public getType(type: string) {
+    if (!this.typeDefinitions.has(type)) {
+      throw new Error(`Cannot get the "${type}" saved object type as it has not been registered.`);
+    }
+    return this.typeDefinitions.get(type);
+  }
+
+  /**
    * Takes saved object attributes for the specified type and, depending on the type definition,
    * either decrypts or strips encrypted attributes (e.g. in case AAD or encryption key has changed
    * and decryption is no longer possible).
@@ -212,7 +223,7 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
 
-    const encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+    const encryptionAAD = getAAD(typeDefinition, descriptor, attributes, this.logger);
     const encryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
@@ -283,7 +294,7 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
 
-    const encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+    const encryptionAAD = getAAD(typeDefinition, descriptor, attributes, this.logger);
     const decryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
@@ -341,36 +352,5 @@ export class EncryptedSavedObjectsService {
       ...attributes,
       ...decryptedAttributes,
     };
-  }
-
-  /**
-   * Generates string representation of the Additional Authenticated Data based on the specified saved
-   * object type and attributes.
-   * @param typeDefinition Encrypted saved object type definition.
-   * @param descriptor Descriptor of the saved object to get AAD for.
-   * @param attributes All attributes of the saved object instance of the specified type.
-   */
-  private getAAD(
-    typeDefinition: EncryptedSavedObjectAttributesDefinition,
-    descriptor: SavedObjectDescriptor,
-    attributes: Record<string, unknown>
-  ) {
-    // Collect all attributes (both keys and values) that should contribute to AAD.
-    const attributesAAD: Record<string, unknown> = {};
-    for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
-      if (!typeDefinition.shouldBeExcludedFromAAD(attributeKey)) {
-        attributesAAD[attributeKey] = attributeValue;
-      }
-    }
-
-    if (Object.keys(attributesAAD).length === 0) {
-      this.logger.debug(
-        `The AAD for saved object "${descriptorToArray(
-          descriptor
-        )}" does not include any attributes.`
-      );
-    }
-
-    return stringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 }

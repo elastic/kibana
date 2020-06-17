@@ -15,6 +15,8 @@ import {
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { setupSavedObjects, ClientInstanciator } from './saved_objects';
+import { EncryptedSavedObjectsMigrationService } from './crypto/encrypted_saved_objects_migration_service';
+import { getCreateMigration, CreateESOMigrationFn } from './create_migration';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -23,6 +25,7 @@ export interface PluginsSetup {
 export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   usingEphemeralEncryptionKey: boolean;
+  createMigration: CreateESOMigrationFn;
 }
 
 export interface EncryptedSavedObjectsPluginStart {
@@ -70,6 +73,9 @@ export class Plugin {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
       usingEphemeralEncryptionKey,
+      createMigration: getCreateMigration(
+        new EncryptedSavedObjectsMigrationService(config.encryptionKey, this.logger)
+      ),
     };
   }
 
