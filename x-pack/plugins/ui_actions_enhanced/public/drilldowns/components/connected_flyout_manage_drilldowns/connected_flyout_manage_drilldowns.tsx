@@ -50,10 +50,12 @@ export function createFlyoutManageDrilldowns({
   actionFactories: allActionFactories,
   storage,
   toastService,
+  docsLink,
 }: {
   actionFactories: ActionFactory[];
   storage: IStorageWrapper;
   toastService: ToastsStart;
+  docsLink?: string;
 }) {
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
@@ -139,6 +141,7 @@ export function createFlyoutManageDrilldowns({
       case Routes.Edit:
         return (
           <FlyoutDrilldownWizard
+            docsLink={docsLink}
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldownActionFactories={actionFactories}
@@ -191,6 +194,7 @@ export function createFlyoutManageDrilldowns({
       default:
         return (
           <FlyoutListManageDrilldowns
+            docsLink={docsLink}
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}

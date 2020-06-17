@@ -101,6 +101,7 @@ export class AdvancedUiActionsPublicPlugin
         actionFactories: this.enhancements.getActionFactories(),
         storage: new Storage(localStorage),
         toastService: core.notifications.toasts,
+        docsLink: core.docLinks.links.dashboard.drilldowns
       }),
     };
   }
