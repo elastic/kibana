@@ -15,6 +15,7 @@ import {
   IndexedEntity,
   IndexedEdgeLineSegment,
   IndexedProcessNode,
+  EdgeLineSegment,
 } from '../types';
 import { applyMatrix3 } from '../lib/vector2';
 import { factory as indexedProcessTreeFactory } from '../models/indexed_process_tree';
@@ -73,6 +74,14 @@ export const processAdjacencies = composeSelectors(
 export const terminatedProcesses = composeSelectors(
   dataStateSelector,
   dataSelectors.terminatedProcesses
+);
+
+/**
+ * Returns a map of `ResolverEvent` entity_id to their related event and alert statistics
+ */
+export const relatedEventsStats = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsStats
 );
 
 /**
@@ -169,11 +178,22 @@ const spatiallyIndexedEntities = createSelector(
       processesToIndex.push(indexedEvent);
     }
     for (const edgeLineSegment of edgeLineSegments) {
-      const transformedSegment: Vector2[] = [];
-      for (const point of edgeLineSegment) {
-        transformedSegment.push(applyMatrix3(point, dataSelectors.isometricTransformMatrix));
-      }
-      const [[x1, y1], [x2, y2]] = transformedSegment;
+      const {
+        points: [startPoint, endPoint],
+        metadata,
+      } = edgeLineSegment;
+
+      const transformedSegment: EdgeLineSegment = {
+        points: [
+          applyMatrix3(startPoint, dataSelectors.isometricTransformMatrix),
+          applyMatrix3(endPoint, dataSelectors.isometricTransformMatrix),
+        ],
+      };
+
+      if (metadata) transformedSegment.metadata = metadata;
+      const {
+        points: [[x1, y1], [x2, y2]],
+      } = transformedSegment;
       const indexedLineSegment: IndexedEdgeLineSegment = {
         minX: Math.min(x1, x2),
         minY: Math.min(y1, y2),
@@ -184,6 +204,7 @@ const spatiallyIndexedEntities = createSelector(
       };
       edgeLineSegmentsToIndex.push(indexedLineSegment);
     }
+
     tree.load([...processesToIndex, ...edgeLineSegmentsToIndex]);
     return tree;
   }

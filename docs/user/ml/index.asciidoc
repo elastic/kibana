@@ -96,7 +96,7 @@ If you have a license that includes the {ml-features}, you can create
 in {kib}. For example:
 
 [role="screenshot"]
-image::user/ml/images/outliers.jpg[{oldetection-cap} results in {kib}]
+image::user/ml/images/outliers.png[{oldetection-cap} results in {kib}]
 
 For more information about the {dfanalytics} feature, see 
 {ml-docs}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].

@@ -61,14 +61,20 @@ const Mac: HostOS[] = [];
 
 const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
 
-const POLICIES: Array<{ name: string; id: string }> = [
+const APPLIED_POLICIES: Array<{
+  name: string;
+  id: string;
+  status: HostPolicyResponseActionStatus;
+}> = [
   {
     name: 'Default',
     id: '00000000-0000-0000-0000-000000000000',
+    status: HostPolicyResponseActionStatus.success,
   },
   {
     name: 'With Eventing',
     id: 'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
+    status: HostPolicyResponseActionStatus.success,
   },
 ];
 
@@ -181,7 +187,11 @@ interface HostInfo {
   host: Host;
   endpoint: {
     policy: {
-      id: string;
+      applied: {
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
+      };
     };
   };
 }
@@ -271,7 +281,12 @@ export class EndpointDocGenerator {
    * Creates new random policy id for the host to simulate new policy application
    */
   public updatePolicyId() {
-    this.commonInfo.endpoint.policy.id = this.randomChoice(POLICIES).id;
+    this.commonInfo.endpoint.policy.applied.id = this.randomChoice(APPLIED_POLICIES).id;
+    this.commonInfo.endpoint.policy.applied.status = this.randomChoice([
+      HostPolicyResponseActionStatus.success,
+      HostPolicyResponseActionStatus.failure,
+      HostPolicyResponseActionStatus.warning,
+    ]);
   }
 
   private createHostData(): HostInfo {
@@ -293,7 +308,9 @@ export class EndpointDocGenerator {
         os: this.randomChoice(OS),
       },
       endpoint: {
-        policy: this.randomChoice(POLICIES),
+        policy: {
+          applied: this.randomChoice(APPLIED_POLICIES),
+        },
       },
     };
   }
@@ -974,7 +991,7 @@ export class EndpointDocGenerator {
                 status: HostPolicyResponseActionStatus.success,
               },
             ],
-            id: this.commonInfo.endpoint.policy.id,
+            id: this.commonInfo.endpoint.policy.applied.id,
             response: {
               configurations: {
                 events: {
@@ -1015,8 +1032,9 @@ export class EndpointDocGenerator {
                 ],
               },
             },
-            status: this.randomHostPolicyResponseActionStatus(),
+            status: this.commonInfo.endpoint.policy.applied.status,
             version: policyVersion,
+            name: this.commonInfo.endpoint.policy.applied.name,
           },
         },
       },

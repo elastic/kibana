@@ -11,13 +11,14 @@ import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_management';
-import { ML_BREADCRUMB } from '../../breadcrumbs';
+import { ML_BREADCRUMB, DATA_FRAME_ANALYTICS_BREADCRUMB } from '../../breadcrumbs';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
+  DATA_FRAME_ANALYTICS_BREADCRUMB,
   {
     text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameListLabel', {
-      defaultMessage: 'Data Frame Analytics',
+      defaultMessage: 'Job Management',
     }),
     href: '',
   },

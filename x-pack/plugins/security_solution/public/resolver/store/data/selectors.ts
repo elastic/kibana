@@ -15,8 +15,7 @@ import {
   Matrix3,
   AdjacentProcessMap,
   Vector2,
-  RelatedEventData,
-  RelatedEventDataEntryWithStats,
+  EdgeLineMetadata,
 } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as event from '../../../../common/endpoint/models/event';
@@ -33,8 +32,9 @@ import {
   size,
   levelOrder,
 } from '../../models/indexed_process_tree';
+import { getFriendlyElapsedTime } from '../../lib/date';
 
-const unit = 100;
+const unit = 140;
 const distanceBetweenNodesInUnits = 2;
 
 export function isLoading(state: DataState) {
@@ -179,6 +179,7 @@ export function processEdgeLineSegments(
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
+    const edgeLineMetadata: EdgeLineMetadata = {};
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
@@ -197,6 +198,13 @@ export function processEdgeLineSegments(
       throw new Error();
     }
 
+    const parentTime = event.eventTimestamp(parent);
+    const processTime = event.eventTimestamp(process);
+    if (parentTime && processTime) {
+      const elapsedTime = getFriendlyElapsedTime(parentTime, processTime);
+      if (elapsedTime) edgeLineMetadata.elapsedTime = elapsedTime;
+    }
+
     /**
      * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
      */
@@ -212,14 +220,17 @@ export function processEdgeLineSegments(
      *     |         |
      *     B         C
      */
-    const lineFromProcessToMidwayLine: EdgeLineSegment = [[position[0], midwayY], position];
+    const lineFromProcessToMidwayLine: EdgeLineSegment = {
+      points: [[position[0], midwayY], position],
+      metadata: edgeLineMetadata,
+    };
 
     const siblings = indexedProcessTreeChildren(indexedProcessTree, parent);
     const isFirstChild = process === siblings[0];
 
     if (metadata.isOnlyChild) {
       // add a single line segment directly from parent to child. We don't do the 'pitchfork' in this case.
-      edgeLineSegments.push([parentPosition, position]);
+      edgeLineSegments.push({ points: [parentPosition, position], metadata: edgeLineMetadata });
     } else if (isFirstChild) {
       /**
        * If the parent has multiple children, we draw the 'midway' line, and the line from the
@@ -235,28 +246,29 @@ export function processEdgeLineSegments(
        */
       const { firstChildWidth, lastChildWidth } = metadata;
 
-      const lineFromParentToMidwayLine: EdgeLineSegment = [
-        parentPosition,
-        [parentPosition[0], midwayY],
-      ];
+      const lineFromParentToMidwayLine: EdgeLineSegment = {
+        points: [parentPosition, [parentPosition[0], midwayY]],
+      };
 
       const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
 
       const minX = parentWidth / -2 + firstChildWidth / 2;
       const maxX = minX + widthOfMidline;
 
-      const midwayLine: EdgeLineSegment = [
-        [
-          // Position line relative to the parent's x component
-          parentPosition[0] + minX,
-          midwayY,
+      const midwayLine: EdgeLineSegment = {
+        points: [
+          [
+            // Position line relative to the parent's x component
+            parentPosition[0] + minX,
+            midwayY,
+          ],
+          [
+            // Position line relative to the parent's x component
+            parentPosition[0] + maxX,
+            midwayY,
+          ],
         ],
-        [
-          // Position line relative to the parent's x component
-          parentPosition[0] + maxX,
-          midwayY,
-        ],
-      ];
+      };
 
       edgeLineSegments.push(
         /* line from parent to midway line */
@@ -371,7 +383,7 @@ export function processPositions(
        */
       positions.set(process, [0, 0]);
     } else {
-      const { process, parent, width, parentWidth } = metadata;
+      const { process, parent, isOnlyChild, width, parentWidth } = metadata;
 
       // Reinit counters when parent changes
       if (lastProcessedParentNode !== parent) {
@@ -411,7 +423,14 @@ export function processPositions(
       /**
        * The y axis gains `-distanceBetweenNodes` as we move down the screen 1 unit at a time.
        */
-      const position = vector2Add([xOffset, -distanceBetweenNodes], parentPosition);
+      let yDistanceBetweenNodes = -distanceBetweenNodes;
+
+      if (!isOnlyChild) {
+        // Make space on leaves to show elapsed time
+        yDistanceBetweenNodes *= 2;
+      }
+
+      const position = vector2Add([xOffset, yDistanceBetweenNodes], parentPosition);
 
       positions.set(process, position);
 
@@ -432,85 +451,11 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
 });
 
 /**
- * Process events that will be graphed.
+ * This returns a map of entity_ids to stats about the related events and alerts.
  */
-export const relatedEventResults = function (data: DataState) {
-  return data.resultsEnrichedWithRelatedEventInfo;
-};
-
-/**
- * This selector compiles the related event data attached in `relatedEventResults`
- * into a `RelatedEventData` map of ResolverEvents to statistics about their related events
- */
-export const relatedEventStats = createSelector(relatedEventResults, function getRelatedEvents(
-  /* eslint-disable no-shadow */
-  relatedEventResults
-  /* eslint-enable no-shadow */
-) {
-  /* eslint-disable no-shadow */
-  const relatedEventStats: RelatedEventData = new Map();
-  /* eslint-enable no-shadow */
-  if (!relatedEventResults) {
-    return relatedEventStats;
-  }
-
-  for (const updatedEvent of relatedEventResults.keys()) {
-    const newStatsEntry = relatedEventResults.get(updatedEvent);
-    if (newStatsEntry === 'error') {
-      // If the entry is an error, return it as is
-      relatedEventStats.set(updatedEvent, newStatsEntry);
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    if (typeof newStatsEntry === 'object') {
-      /**
-       * Otherwise, it should be a valid stats entry.
-       * Do the work to compile the stats.
-       * Folowing reduction, this will be a record like
-       * {DNS: 10, File: 2} etc.
-       */
-      const statsForEntry = newStatsEntry?.relatedEvents.reduce(
-        (compiledStats: Record<string, number>, relatedEvent: { relatedEventType: string }) => {
-          compiledStats[relatedEvent.relatedEventType] =
-            (compiledStats[relatedEvent.relatedEventType] || 0) + 1;
-          return compiledStats;
-        },
-        {}
-      );
-
-      const newRelatedEventStats: RelatedEventDataEntryWithStats = Object.assign(newStatsEntry, {
-        stats: statsForEntry,
-      });
-      relatedEventStats.set(updatedEvent, newRelatedEventStats);
-    }
-  }
-  return relatedEventStats;
-});
-
-/**
- * This selects `RelatedEventData` maps specifically for graphable processes
- */
-export const relatedEvents = createSelector(
-  graphableProcesses,
-  relatedEventStats,
-  function getRelatedEvents(
-    /* eslint-disable no-shadow */
-    graphableProcesses,
-    relatedEventStats
-    /* eslint-enable no-shadow */
-  ) {
-    const eventsRelatedByProcess: RelatedEventData = new Map();
-    /* eslint-disable no-shadow */
-    return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
-      /* eslint-enable no-shadow */
-      const relatedEventDataEntry = relatedEventStats?.get(graphableProcess);
-      if (relatedEventDataEntry) {
-        relatedEvents.set(graphableProcess, relatedEventDataEntry);
-      }
-      return relatedEvents;
-    }, eventsRelatedByProcess);
-  }
-);
+export function relatedEventsStats(data: DataState) {
+  return data.relatedEventsStats;
+}
 
 export const processAdjacencies = createSelector(
   indexedProcessTree,
@@ -568,10 +513,20 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     }
 
     for (const edgeLineSegment of edgeLineSegments) {
-      const transformedSegment = [];
-      for (const point of edgeLineSegment) {
-        transformedSegment.push(applyMatrix3(point, isometricTransformMatrix));
-      }
+      const {
+        points: [startPoint, endPoint],
+        metadata,
+      } = edgeLineSegment;
+
+      const transformedSegment: EdgeLineSegment = {
+        points: [
+          applyMatrix3(startPoint, isometricTransformMatrix),
+          applyMatrix3(endPoint, isometricTransformMatrix),
+        ],
+      };
+
+      if (metadata) transformedSegment.metadata = metadata;
+
       transformedEdgeLineSegments.push(transformedSegment);
     }
 

@@ -15,125 +15,16 @@ import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
-import { SymbolDefinitions, NamedColors } from './defs';
+import { SymbolDefinitions, useResolverTheme } from './assets';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
+import * as eventModel from '../../../common/endpoint/models/event';
 
-const StyledPanel = styled(Panel)`
-  position: absolute;
-  left: 1em;
-  top: 1em;
-  max-height: calc(100% - 2em);
-  overflow: auto;
-  width: 25em;
-  max-width: 50%;
-`;
+interface StyledResolver {
+  backgroundColor: string;
+}
 
-const StyledGraphControls = styled(GraphControls)`
-  position: absolute;
-  top: 5px;
-  right: 5px;
-`;
-
-const StyledResolverContainer = styled.div`
-  display: flex;
-  flex-grow: 1;
-  contain: layout;
-`;
-
-const bgColor = NamedColors.resolverBackground;
-
-export const Resolver = styled(
-  React.memo(function Resolver({
-    className,
-    selectedEvent,
-  }: {
-    className?: string;
-    selectedEvent?: ResolverEvent;
-  }) {
-    const { visibleProcessNodePositions, visibleEdgeLineSegments } = useSelector(
-      selectors.visibleProcessNodePositionsAndEdgeLineSegments
-    );
-
-    const dispatch: (action: ResolverAction) => unknown = useDispatch();
-    const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
-
-    const { projectionMatrix, ref, onMouseDown } = useCamera();
-    const isLoading = useSelector(selectors.isLoading);
-    const hasError = useSelector(selectors.hasError);
-    const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
-    const terminatedProcesses = useSelector(selectors.terminatedProcesses);
-
-    useLayoutEffect(() => {
-      dispatch({
-        type: 'userChangedSelectedEvent',
-        payload: { selectedEvent },
-      });
-    }, [dispatch, selectedEvent]);
-
-    return (
-      <div data-test-subj="resolverEmbeddable" className={className}>
-        {isLoading ? (
-          <div className="loading-container">
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        ) : hasError ? (
-          <div className="loading-container">
-            <div>
-              {' '}
-              <FormattedMessage
-                id="xpack.endpoint.resolver.loadingError"
-                defaultMessage="Error loading data."
-              />
-            </div>
-          </div>
-        ) : (
-          <StyledResolverContainer
-            className="resolver-graph kbn-resetFocusState"
-            onMouseDown={onMouseDown}
-            ref={ref}
-            role="tree"
-            tabIndex={0}
-            aria-activedescendant={activeDescendantId || undefined}
-          >
-            {visibleEdgeLineSegments.map(({ entity: [startPosition, endPosition] }, index) => (
-              <EdgeLine
-                key={index}
-                startPosition={startPosition}
-                endPosition={endPosition}
-                projectionMatrix={projectionMatrix}
-              />
-            ))}
-            {visibleProcessNodePositions.map(({ entity, position }, index) => {
-              const adjacentNodeMap = processToAdjacencyMap.get(entity);
-              const {
-                process: { entity_id },
-              } = entity;
-              if (!adjacentNodeMap) {
-                // This should never happen
-                throw new Error('Issue calculating adjacency node map.');
-              }
-              return (
-                <ProcessEventDot
-                  key={index}
-                  position={position}
-                  projectionMatrix={projectionMatrix}
-                  event={entity}
-                  adjacentNodeMap={adjacentNodeMap}
-                  isProcessTerminated={terminatedProcesses.has(entity_id)}
-                  isProcessOrigin={false}
-                />
-              );
-            })}
-          </StyledResolverContainer>
-        )}
-        <StyledPanel />
-        <StyledGraphControls />
-        <SymbolDefinitions />
-      </div>
-    );
-  })
-)`
+const StyledResolver = styled.div<StyledResolver>`
   /**
    * Take up all availble space
    */
@@ -157,5 +48,124 @@ export const Resolver = styled(
    */
   overflow: hidden;
   contain: strict;
-  background-color: ${bgColor};
+  background-color: ${(props) => props.backgroundColor};
 `;
+
+const StyledPanel = styled(Panel)`
+  position: absolute;
+  left: 1em;
+  top: 1em;
+  max-height: calc(100% - 2em);
+  overflow: auto;
+  width: 25em;
+  max-width: 50%;
+`;
+
+const StyledResolverContainer = styled.div`
+  display: flex;
+  flex-grow: 1;
+  contain: layout;
+`;
+
+export const Resolver = React.memo(function Resolver({
+  className,
+  selectedEvent,
+}: {
+  className?: string;
+  selectedEvent?: ResolverEvent;
+}) {
+  const { visibleProcessNodePositions, visibleEdgeLineSegments } = useSelector(
+    selectors.visibleProcessNodePositionsAndEdgeLineSegments
+  );
+
+  const dispatch: (action: ResolverAction) => unknown = useDispatch();
+  const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
+  const { projectionMatrix, ref, onMouseDown } = useCamera();
+  const isLoading = useSelector(selectors.isLoading);
+  const hasError = useSelector(selectors.hasError);
+  const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+  const terminatedProcesses = useSelector(selectors.terminatedProcesses);
+  const { colorMap } = useResolverTheme();
+
+  useLayoutEffect(() => {
+    dispatch({
+      type: 'userChangedSelectedEvent',
+      payload: { selectedEvent },
+    });
+  }, [dispatch, selectedEvent]);
+
+  return (
+    <StyledResolver
+      data-test-subj="resolverEmbeddable"
+      className={className}
+      backgroundColor={colorMap.resolverBackground}
+    >
+      {isLoading ? (
+        <div className="loading-container">
+          <EuiLoadingSpinner size="xl" />
+        </div>
+      ) : hasError ? (
+        <div className="loading-container">
+          <div>
+            {' '}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.loadingError"
+              defaultMessage="Error loading data."
+            />
+          </div>
+        </div>
+      ) : (
+        <StyledResolverContainer
+          className="resolver-graph kbn-resetFocusState"
+          onMouseDown={onMouseDown}
+          ref={ref}
+          role="tree"
+          tabIndex={0}
+          aria-activedescendant={activeDescendantId || undefined}
+        >
+          {visibleEdgeLineSegments.map(
+            (
+              {
+                entity: {
+                  points: [startPosition, endPosition],
+                },
+              },
+              index
+            ) => (
+              <EdgeLine
+                key={index}
+                startPosition={startPosition}
+                endPosition={endPosition}
+                projectionMatrix={projectionMatrix}
+              />
+            )
+          )}
+          {visibleProcessNodePositions.map(({ entity, position }, index) => {
+            const adjacentNodeMap = processToAdjacencyMap.get(entity);
+            const {
+              process: { entity_id },
+            } = entity;
+            if (!adjacentNodeMap) {
+              // This should never happen
+              throw new Error('Issue calculating adjacency node map.');
+            }
+            return (
+              <ProcessEventDot
+                key={index}
+                position={position}
+                projectionMatrix={projectionMatrix}
+                event={entity}
+                adjacentNodeMap={adjacentNodeMap}
+                isProcessTerminated={terminatedProcesses.has(entity_id)}
+                isProcessOrigin={false}
+              />
+            );
+          })}
+        </StyledResolverContainer>
+      )}
+      <StyledPanel />
+      <GraphControls />
+      <SymbolDefinitions />
+    </StyledResolver>
+  );
+});

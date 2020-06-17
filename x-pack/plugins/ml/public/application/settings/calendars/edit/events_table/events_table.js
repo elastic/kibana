@@ -91,7 +91,7 @@ export const EventsTable = ({
       name: '',
       render: (event) => (
         <DeleteButton
-          data-test-subj="event_delete"
+          data-test-subj="mlEventDelete"
           canDeleteCalendar={canDeleteCalendar}
           onClick={() => {
             onDeleteClick(event.event_id);
@@ -106,7 +106,7 @@ export const EventsTable = ({
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_new_event"
-        data-test-subj="ml_new_event"
+        data-test-subj="mlNewEvent"
         size="s"
         iconType="plusInCircle"
         onClick={showNewEventModal}
@@ -119,7 +119,7 @@ export const EventsTable = ({
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_import_event"
-        data-test-subj="ml_import_events"
+        data-test-subj="mlImportEvents"
         size="s"
         iconType="importAction"
         onClick={showImportModal}

@@ -27,7 +27,6 @@ import {
 } from '../../../../common/endpoint/types';
 import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './index';
-import * as data from '../../test_data/all_metadata_data.json';
 import {
   createMockAgentService,
   createMockMetadataIndexPatternRetriever,
@@ -37,6 +36,7 @@ import { AgentService } from '../../../../../ingest_manager/server';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -78,10 +78,7 @@ describe('test endpoint route', () => {
 
   it('test find the latest of all endpoints', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({});
-
-    const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
-      HostMetadata
-    >;
+    const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/metadata')
@@ -97,8 +94,8 @@ describe('test endpoint route', () => {
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
-    expect(endpointResultList.hosts.length).toEqual(2);
-    expect(endpointResultList.total).toEqual(2);
+    expect(endpointResultList.hosts.length).toEqual(1);
+    expect(endpointResultList.total).toEqual(1);
     expect(endpointResultList.request_page_index).toEqual(0);
     expect(endpointResultList.request_page_size).toEqual(10);
   });
@@ -119,7 +116,7 @@ describe('test endpoint route', () => {
 
     mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve((data as unknown) as SearchResponse<HostMetadata>)
+      Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/metadata')
@@ -138,8 +135,8 @@ describe('test endpoint route', () => {
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
-    expect(endpointResultList.hosts.length).toEqual(2);
-    expect(endpointResultList.total).toEqual(2);
+    expect(endpointResultList.hosts.length).toEqual(1);
+    expect(endpointResultList.total).toEqual(1);
     expect(endpointResultList.request_page_index).toEqual(10);
     expect(endpointResultList.request_page_size).toEqual(10);
   });
@@ -162,7 +159,7 @@ describe('test endpoint route', () => {
 
     mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve((data as unknown) as SearchResponse<HostMetadata>)
+      Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/metadata')
@@ -194,8 +191,8 @@ describe('test endpoint route', () => {
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
-    expect(endpointResultList.hosts.length).toEqual(2);
-    expect(endpointResultList.total).toEqual(2);
+    expect(endpointResultList.hosts.length).toEqual(1);
+    expect(endpointResultList.total).toEqual(1);
     expect(endpointResultList.request_page_index).toEqual(10);
     expect(endpointResultList.request_page_size).toEqual(10);
   });
@@ -203,25 +200,9 @@ describe('test endpoint route', () => {
   describe('Endpoint Details route', () => {
     it('should return 404 on no results', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'BADID' } });
+
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-        Promise.resolve({
-          took: 3,
-          timed_out: false,
-          _shards: {
-            total: 1,
-            successful: 1,
-            skipped: 0,
-            failed: 0,
-          },
-          hits: {
-            total: {
-              value: 9,
-              relation: 'eq',
-            },
-            max_score: null,
-            hits: [],
-          },
-        })
+        Promise.resolve(createSearchResponse())
       );
       mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
@@ -241,13 +222,10 @@ describe('test endpoint route', () => {
     });
 
     it('should return a single endpoint with status online', async () => {
+      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
       const mockRequest = httpServerMock.createKibanaRequest({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        params: { id: (data as any).hits.hits[0]._id },
+        params: { id: response.hits.hits[0]._id },
       });
-      const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
-        HostMetadata
-      >;
       mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('online');
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
@@ -269,9 +247,7 @@ describe('test endpoint route', () => {
     });
 
     it('should return a single endpoint with status error when AgentService throw 404', async () => {
-      const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
-        HostMetadata
-      >;
+      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: response.hits.hits[0]._id },
@@ -299,9 +275,7 @@ describe('test endpoint route', () => {
     });
 
     it('should return a single endpoint with status error when status is not offline or online', async () => {
-      const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
-        HostMetadata
-      >;
+      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: response.hits.hits[0]._id },
@@ -327,3 +301,59 @@ describe('test endpoint route', () => {
     });
   });
 });
+
+function createSearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadata> {
+  return ({
+    took: 15,
+    timed_out: false,
+    _shards: {
+      total: 1,
+      successful: 1,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      total: {
+        value: 5,
+        relation: 'eq',
+      },
+      max_score: null,
+      hits: hostMetadata
+        ? [
+            {
+              _index: 'metrics-endpoint.metadata-default-1',
+              _id: '8FhM0HEBYyRTvb6lOQnw',
+              _score: null,
+              _source: hostMetadata,
+              sort: [1588337587997],
+              inner_hits: {
+                most_recent: {
+                  hits: {
+                    total: {
+                      value: 2,
+                      relation: 'eq',
+                    },
+                    max_score: null,
+                    hits: [
+                      {
+                        _index: 'metrics-endpoint.metadata-default-1',
+                        _id: 'W6Vo1G8BYQH1gtPUgYkC',
+                        _score: null,
+                        _source: hostMetadata,
+                        sort: [1579816615336],
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ]
+        : [],
+    },
+    aggregations: {
+      total: {
+        value: 1,
+      },
+    },
+  } as unknown) as SearchResponse<HostMetadata>;
+}
