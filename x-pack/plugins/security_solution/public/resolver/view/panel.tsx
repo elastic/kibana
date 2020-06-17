@@ -47,12 +47,11 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     event: ResolverEvent;
   }
 
-  const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
+  const { processNodePositions } = useSelector(selectors.allProcessNodePositions);
   const { timestamp } = useContext(SideEffectContext);
-
   const processTableView: ProcessTableView[] = useMemo(
     () =>
-      [...processNodePositions.keys()].map((processEvent) => {
+      processNodePositions.map(({ entity: processEvent }) => {
         let dateTime;
         const eventTime = event.eventTimestamp(processEvent);
         const name = event.eventName(processEvent);

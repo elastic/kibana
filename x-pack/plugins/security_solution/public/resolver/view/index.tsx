@@ -74,7 +74,7 @@ export const Resolver = React.memo(function Resolver({
   className?: string;
   selectedEvent?: ResolverEvent;
 }) {
-  const { visibleProcessNodePositions, visibleEdgeLineSegments } = useSelector(
+  const { processNodePositions, connectingEdgeLineSegments } = useSelector(
     selectors.visibleProcessNodePositionsAndEdgeLineSegments
   );
 
@@ -123,7 +123,7 @@ export const Resolver = React.memo(function Resolver({
           tabIndex={0}
           aria-activedescendant={activeDescendantId || undefined}
         >
-          {visibleEdgeLineSegments.map(
+          {connectingEdgeLineSegments.map(
             (
               {
                 entity: {
@@ -140,7 +140,7 @@ export const Resolver = React.memo(function Resolver({
               />
             )
           )}
-          {visibleProcessNodePositions.map(({ entity, position }, index) => {
+          {processNodePositions.map(({ entity, position }, index) => {
             const adjacentNodeMap = processToAdjacencyMap.get(entity);
             const {
               process: { entity_id },
