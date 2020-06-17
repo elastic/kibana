@@ -95,7 +95,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             <EuiSpacer size="m" />
 
             {chartWidth > 0 && swimlaneData && swimlaneType ? (
-              <EuiText color="subdued" size="s">
+              <EuiText color="subdued" size="s" data-test-subj="mlAnomalySwimlaneEmbeddableWrapper">
                 <MlTooltipComponent>
                   {(tooltipService) => (
                     <ExplorerSwimlane

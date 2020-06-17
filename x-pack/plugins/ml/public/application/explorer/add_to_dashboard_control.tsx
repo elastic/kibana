@@ -261,6 +261,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
                 defaultMessage="Select dashboards:"
               />
             }
+            data-test-subj="mlDashboardSelectionContainer"
           >
             <EuiInMemoryTable
               itemId="id"
@@ -272,7 +273,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
               search={search}
               pagination={true}
               sorting={true}
-              data-test-subj="mlDashboardSelection"
+              data-test-subj="mlDashboardSelectionTable"
             />
           </EuiFormRow>
         </EuiModalBody>

@@ -74,13 +74,27 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       await testSubjects.existOrFail('mlAddToDashboardModal');
     },
 
-    async addAndEditSwimlaneInDashboard(dashboardId: string) {
-      await testSubjects.isDisplayed('mlDashboardSelection');
-      await testSubjects.isDisplayed(`checkboxSelectRow-${dashboardId}`);
-      await testSubjects.click(`checkboxSelectRow-${dashboardId}`);
+    async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
+      await this.filterWithSearchString(dashboardTitle);
+      await testSubjects.isDisplayed('mlDashboardSelectionTable > checkboxSelectAll');
+      await testSubjects.click('mlDashboardSelectionTable > checkboxSelectAll');
+      await testSubjects.isChecked('mlDashboardSelectionTable > checkboxSelectAll');
       await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
-      const swimlane = await find.byClassName('ml-swimlanes');
+      const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper');
+      const swimlane = await embeddable.findByClassName('ml-swimlanes');
       expect(await swimlane.isDisplayed()).to.be(true);
+    },
+
+    async waitForDashboardsToLoad() {
+      await testSubjects.existOrFail('~mlDashboardSelectionTable', { timeout: 60 * 1000 });
+    },
+
+    async filterWithSearchString(filter: string) {
+      await this.waitForDashboardsToLoad();
+      const tableListContainer = await testSubjects.find('mlDashboardSelectionContainer');
+      const searchBarInput = await tableListContainer.findByClassName('euiFieldSearch');
+      await searchBarInput.clearValueWithKeyboard();
+      await searchBarInput.type(filter);
     },
   };
 }

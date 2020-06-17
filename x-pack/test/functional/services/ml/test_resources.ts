@@ -254,9 +254,32 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       }
     },
 
+    async deleteDashboard(title: string) {
+      log.debug(`Deleting dashboard with title '${title}'...`);
+
+      const dashboardId = await this.getDashboardId(title);
+      if (dashboardId === undefined) {
+        log.debug(`Dashboard with title '${title}' does not exists. Nothing to delete.`);
+        return;
+      } else {
+        await supertest
+          .delete(`/api/saved_objects/${SavedObjectType.DASHBOARD}/${dashboardId}`)
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+
+        log.debug(` > Deleted dashboard with id '${dashboardId}'`);
+      }
+    },
+
     async deleteSavedSearches() {
       for (const search of Object.values(savedSearches)) {
         await this.deleteSavedSearch(search.requestBody.attributes.title);
+      }
+    },
+
+    async deleteDashboards() {
+      for (const search of Object.values(dashboards)) {
+        await this.deleteDashboard(search.requestBody.attributes.title);
       }
     },
   };

@@ -127,10 +127,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableNotEmpty();
         });
 
+        // should be the last step because it navigates away from the Anomaly Explorer page
         it('should allow to attach anomaly swimlane embeddable to the dashboard', async () => {
           await ml.anomalyExplorer.openAddToDashboardControl();
-          const dashboardId = await ml.testResources.getDashboardId('ML Test');
-          await ml.anomalyExplorer.addAndEditSwimlaneInDashboard(dashboardId!);
+          await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
         });
       });
     }
