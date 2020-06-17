@@ -6,7 +6,7 @@ are the easiest formats to use when trying out Kibana.
 
 These packages are free to use under the Elastic license. They contain open
 source and free commercial features and access to paid commercial features.
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the
+<<managing-licenses,Start a 30-day trial>> to try out all of the
 paid commercial features. See the
 https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
@@ -105,7 +105,7 @@ include::targz-running.asciidoc[]
 
 Kibana loads its configuration from the `$KIBANA_HOME/config/kibana.yml`
 file by default.  The format of this config file is explained in
-{kibana-ref}/settings.html[Configuring Kibana].
+<<settings>>.
 
 
 [[targz-layout]]
