@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Url from 'url';
+import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -15,6 +16,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('in iframe', () => {
     it('should open Kibana for logged-in user', async () => {
+      const isChromeHiddenBefore = await PageObjects.common.isChromeHidden();
+      expect(isChromeHiddenBefore).to.be(true);
+
       await PageObjects.security.login();
 
       const { protocol, hostname, port } = config.get('servers.kibana');
@@ -31,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const iframe = await testSubjects.find('iframe_embedded');
       await browser.switchToFrame(iframe);
 
-      await testSubjects.find('kibanaChrome', 60000);
+      const isChromeHidden = await PageObjects.common.isChromeHidden();
+      expect(isChromeHidden).to.be(false);
     });
   });
 }
