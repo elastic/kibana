@@ -1,0 +1,45 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "securitySolution-exceptions-artifact:endpoint-allowlist-linux-1.0.0-0fa0ba277627f7cc116e198bac3e524e9a8befdca1591a1dd4830dc7952b2103",
+    "index": ".kibana_1",
+    "source": {
+      "references": [
+      ],
+      "securitySolution-exceptions-artifact": {
+        "body": "ý7zXZ\u0000\u0000\u0001i\"Þ6\u0002\u0000!\u0001\u0016\u0000\u0000\u0000t/å£à\u0000ÿ\u0000©]\u0000=§Ã{\u0000&W{Wï¶=\fsöÊ\u001eæõ\u0014WI1dÛtÂ\u00185ý\u0012[.?=ÃB#­òWì¦\u0006)äÕVkÌâ\b´Ï; ãÍ¥ÁÊèÕ£ÅuÜ0ê\t\u0001\u0002ÿmQ\u001b«Ï_°+Ræ­H¦,x¶½OÂ\u0004P\u001f*YP#Ð.<vC£©Ói?µ¥p\u0013ãö \r\u0001c÷y:!ã¯#»KÑ{¨\u0012jáP»°ç|²H\u0000\u0000\u0000\u0000îÍ¸Q\u0000\u0001Á\u0001\u0002\u0000\u0000)R\\Ê>0\r\u0002\u0000\u0000\u0000\u0000\u0001YZ",
+        "created": 1592414128607,
+        "encoding": "xz",
+        "name": "endpoint-allowlist-linux-1.0.0",
+        "schemaVersion": "1.0.0",
+        "sha256": "0fa0ba277627f7cc116e198bac3e524e9a8befdca1591a1dd4830dc7952b2103",
+        "size": 256
+      },
+      "type": "securitySolution-exceptions-artifact",
+      "updated_at": "2020-06-17T17:15:28.607Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "securitySolution-exceptions-artifact:endpoint-allowlist-windows-1.0.0-1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
+    "index": ".kibana_1",
+    "source": {
+      "references": [
+      ],
+      "securitySolution-exceptions-artifact": {
+        "body": "ý7zXZ\u0000\u0000\u0001i\"Þ6\u0002\u0000!\u0001\u0016\u0000\u0000\u0000t/å£\u0001\u0000\u0015{\"exceptions_list\":[]}\u0000\u0000\u000052¤\u0000\u0001*\u0016RÌ9»B\r\u0001\u0000\u0000\u0000\u0000\u0001YZ",
+        "created": 1592414129763,
+        "encoding": "xz",
+        "name": "endpoint-allowlist-windows-1.0.0",
+        "schemaVersion": "1.0.0",
+        "sha256": "1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
+        "size": 22
+      },
+      "type": "securitySolution-exceptions-artifact",
+      "updated_at": "2020-06-17T17:15:29.763Z"
+    }
+  }
+}

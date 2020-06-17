@@ -11,16 +11,9 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
-  describe('artifact manifest', () => {
-    before(() => esArchiver.load('TODO'));
-    after(() => esArchiver.unload('TODO'));
-
-    it('Do a manifest test', () => {});
-  });
-
   describe('artifact download', () => {
-    before(() => esArchiver.load('TODO'));
-    after(() => esArchiver.unload('TODO'));
+    before(() => esArchiver.load('security_solution/exceptions/api_feature/exception_list'));
+    after(() => esArchiver.unload('security_solution/exceptions/api_feature/exception_list'));
 
     it('Do a download test', () => {});
   });
