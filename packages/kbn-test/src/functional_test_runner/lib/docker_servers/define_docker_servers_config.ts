@@ -17,11 +17,28 @@
  * under the License.
  */
 
-export { Lifecycle } from './lifecycle';
-export { LifecyclePhase } from './lifecycle_phase';
-export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection, Provider } from './providers';
-export { runTests, setupMocha } from './mocha';
-export { FailureMetadata } from './failure_metadata';
-export * from './docker_servers';
-export { SuiteTracker } from './suite_tracker';
+import * as Rx from 'rxjs';
+
+export interface DockerServerSpec {
+  portInContainer: number;
+  port: number;
+  image: string;
+  waitForLogLine?: RegExp | string;
+  /** a function that should return an observable that will allow the tests to execute as soon as it emits anything */
+  waitFor?: (server: DockerServer, logLine$: Rx.Observable<string>) => Rx.Observable<unknown>;
+  /* additional command line arguments passed to docker run */
+  args?: string[];
+}
+
+export interface DockerServer extends DockerServerSpec {
+  name: string;
+  url: string;
+}
+
+/**
+ * Helper that helps authors use the type definitions for the section of the FTR config
+ * under the `dockerServers` key.
+ */
+export function defineDockerServersConfig(config: { [name: string]: DockerServerSpec } | {}) {
+  return config;
+}
