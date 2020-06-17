@@ -67,9 +67,9 @@ async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
     await client.index(requestBody);
     logF(requestBody);
   } catch (e) {
-    // const { body } = requestBody;
-    // const parsed = parse(body);
-    throw createFailError(errMsg(idx, redactedEsHostUrl, requestBody, e));
+    const { body } = requestBody;
+    const parsed = parse(body);
+    throw createFailError(errMsg(idx, redactedEsHostUrl, parsed, e));
   }
 }
 
@@ -87,6 +87,6 @@ function eitherSendOrNot(payload) {
   return process.env.NODE_ENV === 'integration_test' ? left(payload) : right(payload);
 }
 
-// function parse(body) {
-//   return JSON.parse(body);
-// }
+function parse(body) {
+  return JSON.parse(body);
+}
