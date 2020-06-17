@@ -8,4 +8,4 @@ checks-reporter-with-killswitch "X-Pack firefox smoke test" \
     --kibana-install-dir "$KIBANA_INSTALL_DIR" \
     --include-tag "includeFirefox" \
     --config test/functional/config.firefox.js \
-    --config x-pack/test/functional_embedded/config.firefox.ts;
+    --config test/functional_embedded/config.firefox.ts;
