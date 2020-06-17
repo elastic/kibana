@@ -48,7 +48,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       comments: 'hello cool service now incident',
       short_description: 'this is a cool service now incident',
     },
-    consumer: 'alerts',
   };
   describe('servicenow', () => {
     let servicenowSimulatorURL: string = '<could not determine kibana url>';
@@ -72,7 +71,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
           },
           secrets: mockServiceNow.secrets,
-          consumer: 'alerts',
         })
         .expect(403, {
           statusCode: 403,

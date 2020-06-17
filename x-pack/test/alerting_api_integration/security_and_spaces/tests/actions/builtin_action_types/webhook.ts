@@ -55,7 +55,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           password,
         },
         config: composedConfig,
-        consumer: 'alerts',
       })
       .expect(200);
 
@@ -88,7 +87,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           config: {
             url: webhookSimulatorURL,
           },
-          consumer: 'alerts',
         })
         .expect(200);
 
@@ -101,7 +99,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           ...defaultValues,
           url: webhookSimulatorURL,
         },
-        consumer: 'alerts',
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -119,7 +116,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           ...defaultValues,
           url: webhookSimulatorURL,
         },
-        consumer: 'alerts',
       });
     });
 
@@ -182,7 +178,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           config: {
             url: 'http://a.none.whitelisted.webhook/endpoint',
           },
-          consumer: 'alerts',
         })
         .expect(400);
 

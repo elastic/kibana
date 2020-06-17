@@ -91,7 +91,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               secrets: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
               },
-              consumer: 'alerts',
             },
             'custom-system-abc-connector': {
               actionTypeId: 'system-abc-action-type',
@@ -105,7 +104,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 xyzSecret1: 'credential1',
                 xyzSecret2: 'credential2',
               },
-              consumer: 'alerts',
             },
             'preconfigured-es-index-action': {
               actionTypeId: '.index',
@@ -115,7 +113,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 refresh: true,
                 executionTimeField: 'timestamp',
               },
-              consumer: 'alerts',
             },
             'preconfigured.test.index-record': {
               actionTypeId: 'test.index-record',
@@ -126,7 +123,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               secrets: {
                 encrypted: 'this-is-also-ignored-and-also-required',
               },
-              consumer: 'alerts',
             },
           })}`,
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),

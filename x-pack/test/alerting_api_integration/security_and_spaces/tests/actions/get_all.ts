@@ -35,7 +35,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               secrets: {
                 encrypted: 'This value should be encrypted',
               },
-              consumer: 'alerts',
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
@@ -68,7 +67,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                     unencrypted: `This value shouldn't get encrypted`,
                   },
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'preconfigured-es-index-action',
@@ -76,7 +74,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: '.index',
                   name: 'preconfigured_es_index_action',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'my-slack1',
@@ -84,7 +81,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: '.slack',
                   name: 'Slack#xyz',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'custom-system-abc-connector',
@@ -92,7 +88,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: 'system-abc-action-type',
                   name: 'SystemABC',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'preconfigured.test.index-record',
@@ -100,7 +95,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
               ]);
               break;
@@ -122,7 +116,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               secrets: {
                 encrypted: 'This value should be encrypted',
               },
-              consumer: 'alerts',
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
@@ -179,7 +172,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                     unencrypted: `This value shouldn't get encrypted`,
                   },
                   referencedByCount: 1,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'preconfigured-es-index-action',
@@ -187,7 +179,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: '.index',
                   name: 'preconfigured_es_index_action',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'my-slack1',
@@ -195,7 +186,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: '.slack',
                   name: 'Slack#xyz',
                   referencedByCount: 1,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'custom-system-abc-connector',
@@ -203,7 +193,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: 'system-abc-action-type',
                   name: 'SystemABC',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'preconfigured.test.index-record',
@@ -211,7 +200,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
               ]);
               break;
@@ -233,7 +221,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               secrets: {
                 encrypted: 'This value should be encrypted',
               },
-              consumer: 'alerts',
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
@@ -263,7 +250,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: '.index',
                   name: 'preconfigured_es_index_action',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'my-slack1',
@@ -271,7 +257,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: '.slack',
                   name: 'Slack#xyz',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'custom-system-abc-connector',
@@ -279,7 +264,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: 'system-abc-action-type',
                   name: 'SystemABC',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
                 {
                   id: 'preconfigured.test.index-record',
@@ -287,7 +271,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   actionTypeId: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
                   referencedByCount: 0,
-                  consumer: 'alerts',
                 },
               ]);
               break;

@@ -31,7 +31,6 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           secrets: {
             encrypted: 'This value should be encrypted',
           },
-          consumer: 'alerts',
         });
 
       expect(response.status).to.eql(200);
@@ -44,7 +43,6 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         config: {
           unencrypted: `This value shouldn't get encrypted`,
         },
-        consumer: 'alerts',
       });
       expect(typeof response.body.id).to.be('string');
 

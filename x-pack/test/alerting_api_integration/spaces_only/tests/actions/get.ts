@@ -30,7 +30,6 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           secrets: {
             encrypted: 'This value should be encrypted',
           },
-          consumer: 'alerts',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
@@ -45,7 +44,6 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
-          consumer: 'alerts',
         });
     });
 
@@ -62,7 +60,6 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           secrets: {
             encrypted: 'This value should be encrypted',
           },
-          consumer: 'alerts',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
@@ -84,7 +81,6 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: '.slack',
           name: 'Slack#xyz',
-          consumer: 'alerts',
         });
     });
   });

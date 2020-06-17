@@ -51,7 +51,6 @@ describe('connector_edit_flyout', () => {
       isPreconfigured: false,
       referencedByCount: 0,
       config: {},
-      consumer: 'alerts',
     };
 
     const actionType = {
@@ -83,7 +82,6 @@ describe('connector_edit_flyout', () => {
               return new Promise<void>(() => {});
             },
             docLinks: deps.docLinks,
-            consumer: 'alerts',
           }}
         >
           <ConnectorEditFlyout
@@ -110,7 +108,6 @@ describe('connector_edit_flyout', () => {
       isPreconfigured: true,
       referencedByCount: 0,
       config: {},
-      consumer: 'alerts',
     };
 
     const actionType = {
@@ -142,7 +139,6 @@ describe('connector_edit_flyout', () => {
               return new Promise<void>(() => {});
             },
             docLinks: deps.docLinks,
-            consumer: 'alerts',
           }}
         >
           <ConnectorEditFlyout

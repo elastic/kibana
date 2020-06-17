@@ -42,7 +42,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
           secrets: {
             webhookUrl: slackSimulatorURL,
           },
-          consumer: 'alerts',
         })
         .expect(200);
 
@@ -52,7 +51,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
         name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
-        consumer: 'alerts',
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -67,7 +65,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
         name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
-        consumer: 'alerts',
       });
     });
 
@@ -79,7 +76,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
           name: 'A slack action',
           actionTypeId: '.slack',
           secrets: {},
-          consumer: 'alerts',
         })
         .expect(400)
         .then((resp: any) => {
@@ -102,7 +98,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
           secrets: {
             webhookUrl: 'http://slack.mynonexistent.com/other/stuff/in/the/path',
           },
-          consumer: 'alerts',
         })
         .expect(400)
         .then((resp: any) => {
@@ -125,7 +120,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
           secrets: {
             webhookUrl: 'fee-fi-fo-fum',
           },
-          consumer: 'alerts',
         })
         .expect(400)
         .then((resp: any) => {
@@ -148,7 +142,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
           secrets: {
             webhookUrl: slackSimulatorURL,
           },
-          consumer: 'alerts',
         })
         .expect(200);
 

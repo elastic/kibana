@@ -30,7 +30,6 @@ two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action
       name: 'Slack #xyz'        <3>
       secrets:
         webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
-      consumer: 'alerts'
     webhook-service:
       actionTypeId: .webhook
       name: 'Email service'
@@ -43,7 +42,6 @@ two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action
       secrets:                  <5>
         user: elastic
         password: changeme
-      consumer: 'alerts',       <6>
 ```
 
 <1>  The key is the action connector identifier, `my-slack1` in this example.
@@ -51,7 +49,6 @@ two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action
 <3> `name` is the name of the preconfigured connector.
 <4> `config` is the action type specific to the configuration.
 <5> `secrets` is sensitive configuration, such as username, password, and keys.
-<6> `consumer` is Kibana plugin owned the action.
 
 [NOTE]
 ==============================================

@@ -79,7 +79,6 @@ describe('execute()', () => {
           isPreconfigured: true,
           name: 'x',
           secrets: {},
-          consumer: 'alerts',
         },
       ],
     });
@@ -190,7 +189,6 @@ describe('execute()', () => {
           name: 'Slack #xyz',
           secrets: {},
           isPreconfigured: true,
-          consumer: 'alerts',
         },
       ],
     });

@@ -21,7 +21,6 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         .send({
           name: 'A server.log action',
           actionTypeId: '.server-log',
-          consumer: 'alerts',
         })
         .expect(200);
     });

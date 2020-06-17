@@ -27,7 +27,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         secrets: {
           webhookUrl: 'https://test',
         },
-        consumer: 'alerts',
       });
 
       await pageObjects.common.navigateToApp('triggersActions');

@@ -42,7 +42,7 @@ interface ActionUpdate extends SavedObjectAttributes {
 
 interface Action extends ActionUpdate {
   actionTypeId: string;
-  consumer: string;
+  consumer?: string;
 }
 
 interface CreateOptions {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import {
   EuiFieldText,
@@ -32,7 +32,7 @@ export interface ConnectorFlyoutFormProps<T> {
 
 const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector
->> = ({ action, editActionSecrets, editActionConfig, errors }) => {
+>> = ({ action, editActionSecrets, editActionConfig, errors, editActionProperty }) => {
   // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
   const { apiUrl, incidentConfiguration } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
@@ -43,6 +43,13 @@ const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
 
   const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
+
+  useEffect(() => {
+    if (!action.consumer && editActionProperty) {
+      editActionProperty('consumer', 'alerts');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
   if (action.consumer === 'case' && isEmpty(mapping)) {
@@ -94,7 +101,7 @@ const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
               onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
               onBlur={() => {
                 if (!apiUrl) {
-                  editActionSecrets('apiUrl', '');
+                  editActionConfig('apiUrl', '');
                 }
               }}
             />

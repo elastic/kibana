@@ -33,7 +33,6 @@ export default function emailTest({ getService }: FtrProviderContext) {
             user: 'bob',
             password: 'supersecret',
           },
-          consumer: 'alerts',
         })
         .expect(200);
 
@@ -50,7 +49,6 @@ export default function emailTest({ getService }: FtrProviderContext) {
           secure: null,
           from: 'bob@example.com',
         },
-        consumer: 'alerts',
       });
 
       expect(typeof createdActionId).to.be('string');
@@ -71,7 +69,6 @@ export default function emailTest({ getService }: FtrProviderContext) {
           port: null,
           secure: null,
         },
-        consumer: 'alerts',
       });
     });
 
@@ -147,7 +144,6 @@ export default function emailTest({ getService }: FtrProviderContext) {
           name: 'An email action',
           actionTypeId: '.email',
           config: {},
-          consumer: 'alerts',
         })
         .expect(400)
         .then((resp: any) => {
@@ -175,7 +171,6 @@ export default function emailTest({ getService }: FtrProviderContext) {
             user: 'bob',
             password: 'changeme',
           },
-          consumer: 'alerts',
         })
         .expect(400)
         .then((resp: any) => {
@@ -202,7 +197,6 @@ export default function emailTest({ getService }: FtrProviderContext) {
             user: 'bob',
             password: 'changeme',
           },
-          consumer: 'alerts',
         })
         .expect(400)
         .then((resp: any) => {
@@ -231,7 +225,6 @@ export default function emailTest({ getService }: FtrProviderContext) {
             user: 'bob',
             password: 'changeme',
           },
-          consumer: 'alerts',
         })
         .expect(200);
       expect(typeof createdAction.id).to.be('string');
@@ -248,7 +241,6 @@ export default function emailTest({ getService }: FtrProviderContext) {
             service: '__json',
             from: 'jim@example.com',
           },
-          consumer: 'alerts',
         })
         .expect(200);
 

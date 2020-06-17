@@ -91,7 +91,6 @@ describe('updateActionConnector', () => {
       name: 'My test',
       config: {},
       secrets: {},
-      consumer: 'alerts',
     };
     const resolvedValue = { ...connector, id };
     http.put.mockResolvedValueOnce(resolvedValue);

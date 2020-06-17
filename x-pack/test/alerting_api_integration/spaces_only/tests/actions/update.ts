@@ -30,7 +30,6 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           secrets: {
             encrypted: 'This value should be encrypted',
           },
-          consumer: 'alerts',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
@@ -55,7 +54,6 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
-          consumer: 'alerts',
         });
 
       // Ensure AAD isn't broken
@@ -80,7 +78,6 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           secrets: {
             encrypted: 'This value should be encrypted',
           },
-          consumer: 'alerts',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');

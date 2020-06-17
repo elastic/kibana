@@ -69,7 +69,7 @@ export interface ActionResult {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config?: Record<string, any>;
   isPreconfigured: boolean;
-  consumer: string;
+  consumer?: string;
 }
 
 export interface PreConfiguredAction extends ActionResult {
@@ -122,7 +122,7 @@ export interface RawAction extends SavedObjectAttributes {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
-  consumer: string;
+  consumer?: string;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

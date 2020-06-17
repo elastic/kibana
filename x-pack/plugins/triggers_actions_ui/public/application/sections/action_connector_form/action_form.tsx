@@ -133,7 +133,11 @@ export const ActionForm = ({
       try {
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
-        setConnectors(loadedConnectors.filter((connector) => connector.consumer === 'alerts'));
+        setConnectors(
+          loadedConnectors.filter(
+            (connector) => !connector.consumer || connector.consumer === 'alerts'
+          )
+        );
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(

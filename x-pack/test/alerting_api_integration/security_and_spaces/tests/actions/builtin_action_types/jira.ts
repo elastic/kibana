@@ -97,7 +97,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               apiUrl: jiraSimulatorURL,
             },
             secrets: mockJira.secrets,
-            consumer: 'alerts',
           })
           .expect(200);
 
@@ -111,7 +110,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             projectKey: mockJira.config.projectKey,
             casesConfiguration: mockJira.config.casesConfiguration,
           },
-          consumer: 'alerts',
         });
 
         const { body: fetchedAction } = await supertest
@@ -128,7 +126,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             projectKey: mockJira.config.projectKey,
             casesConfiguration: mockJira.config.casesConfiguration,
           },
-          consumer: 'alerts',
         });
       });
 
@@ -140,7 +137,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             name: 'A jira action',
             actionTypeId: '.jira',
             config: { projectKey: 'CK' },
-            consumer: 'alerts',
           })
           .expect(400)
           .then((resp: any) => {
@@ -161,7 +157,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             name: 'A jira action',
             actionTypeId: '.jira',
             config: { apiUrl: jiraSimulatorURL },
-            consumer: 'alerts',
           })
           .expect(400)
           .then((resp: any) => {
@@ -187,7 +182,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               casesConfiguration: mockJira.config.casesConfiguration,
             },
             secrets: mockJira.secrets,
-            consumer: 'alerts',
           })
           .expect(400)
           .then((resp: any) => {
@@ -212,7 +206,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               projectKey: mockJira.config.projectKey,
               casesConfiguration: mockJira.config.casesConfiguration,
             },
-            consumer: 'alerts',
           })
           .expect(400)
           .then((resp: any) => {
@@ -237,7 +230,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               projectKey: mockJira.config.projectKey,
             },
             secrets: mockJira.secrets,
-            consumer: 'alerts',
           })
           .expect(400)
           .then((resp: any) => {
@@ -263,7 +255,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               casesConfiguration: { mapping: [] },
             },
             secrets: mockJira.secrets,
-            consumer: 'alerts',
           })
           .expect(400)
           .then((resp: any) => {
@@ -297,7 +288,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               },
             },
             secrets: mockJira.secrets,
-            consumer: 'alerts',
           })
           .expect(400);
       });
@@ -318,7 +308,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               casesConfiguration: mockJira.config.casesConfiguration,
             },
             secrets: mockJira.secrets,
-            consumer: 'alerts',
           });
         simulatedActionId = body.id;
       });

@@ -31,7 +31,6 @@ describe('config validation', () => {
           config: {
             webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
           },
-          consumer: 'test',
         },
       },
     };
@@ -47,7 +46,6 @@ describe('config validation', () => {
             "config": Object {
               "webhookUrl": "https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz",
             },
-            "consumer": "test",
             "name": "Slack #xyz",
             "secrets": Object {},
           },
@@ -87,13 +85,11 @@ function preConfiguredActionConfig(id: string) {
     "preconfigured": {
         ${JSON.stringify(id)}: {
             "actionTypeId": ".server-log",
-            "name": "server log 1",
-            "consumer": "alerts"
+            "name": "server log 1"
         },
         "serverLog": {
             "actionTypeId": ".server-log",
-            "name": "server log 2",
-            "consumer": "alerts"
+            "name": "server log 2"
         }
     }
   }`);

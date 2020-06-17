@@ -25,7 +25,6 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         .send({
           name: 'A server.log action',
           actionTypeId: '.server-log',
-          consumer: 'alerts',
         })
         .expect(200);
 
@@ -36,7 +35,6 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         name: 'A server.log action',
         actionTypeId: '.server-log',
         config: {},
-        consumer: 'alerts',
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -51,7 +49,6 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         name: 'A server.log action',
         actionTypeId: '.server-log',
         config: {},
-        consumer: 'alerts',
       });
     });
 

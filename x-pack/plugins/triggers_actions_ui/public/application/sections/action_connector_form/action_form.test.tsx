@@ -124,7 +124,6 @@ describe('action_form', () => {
           name: 'Test connector',
           config: {},
           isPreconfigured: false,
-          consumer: 'alerts',
         },
         {
           secrets: {},
@@ -133,7 +132,6 @@ describe('action_form', () => {
           name: 'Test connector 2',
           config: {},
           isPreconfigured: true,
-          consumer: 'alerts',
         },
         {
           secrets: {},
@@ -142,7 +140,6 @@ describe('action_form', () => {
           name: 'Preconfigured Only',
           config: {},
           isPreconfigured: true,
-          consumer: 'alerts',
         },
         {
           secrets: {},
@@ -151,7 +148,6 @@ describe('action_form', () => {
           name: 'Regular connector',
           config: {},
           isPreconfigured: false,
-          consumer: 'alerts',
         },
         {
           secrets: {},
@@ -160,7 +156,6 @@ describe('action_form', () => {
           name: 'Non consumer connector',
           config: {},
           isPreconfigured: false,
-          consumer: 'case',
         },
       ]);
       const mocks = coreMock.createSetup();

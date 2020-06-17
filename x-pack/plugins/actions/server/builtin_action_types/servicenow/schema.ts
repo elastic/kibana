@@ -9,8 +9,8 @@ import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from '.
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
-  // TODO: to remove - set it otional for the current stage to support Case ServiceNow implementation
-  incidentConfiguration: schema.maybe(IncidentConfigurationSchema),
+  // TODO: to remove - set it optional for the current stage to support Case ServiceNow implementation
+  incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
