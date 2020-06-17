@@ -20,10 +20,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIconTip,
   EuiPage,
   EuiPageBody,
-  EuiScreenReaderOnly,
+  EuiPageHeader,
+  EuiPageHeaderSection,
   EuiSelect,
   EuiSpacer,
   EuiTitle,
@@ -38,12 +40,14 @@ import {
 } from './components';
 import { ExplorerSwimlane } from './explorer_swimlane';
 import { getTimeBucketsFromCache } from '../util/time_buckets';
+import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
 import { InfluencersList } from '../components/influencers_list';
 import {
   ALLOW_CELL_RANGE_SELECTION,
   dragSelect$,
   explorerService,
 } from './explorer_dashboard_service';
+import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
@@ -89,17 +93,67 @@ function mapSwimlaneOptionsToEuiOptions(options) {
     text: option,
   }));
 }
-const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
+
+const ExplorerPage = ({
+  children,
+  jobSelectorProps,
+  noInfluencersConfigured,
+  influencers,
+  filterActive,
+  filterPlaceHolder,
+  indexPattern,
+  queryString,
+  filterIconTriggeredQuery,
+  updateLanguage,
+  resizeRef,
+}) => (
   <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
-    <NavigationMenu tabId="explorer" />
-    <EuiPage style={{ padding: '0px', background: 'none' }}>
+    <NavigationMenu tabId="anomaly_detection" />
+    <EuiPage style={{ background: 'none' }}>
       <EuiPageBody>
-        <EuiScreenReaderOnly>
-          <h1>
-            <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
-          </h1>
-        </EuiScreenReaderOnly>
+        <EuiPageHeader>
+          <EuiPageHeaderSection>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <AnomalyResultsViewSelector viewId="explorer" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTitle className="eui-textNoWrap">
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.ml.explorer.pageTitle"
+                      defaultMessage="Anomaly Explorer"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageHeaderSection>
+          <EuiPageHeaderSection style={{ width: '100%' }}>
+            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+              {noInfluencersConfigured === false && influencers !== undefined && (
+                <EuiFlexItem>
+                  <div className="mlAnomalyExplorer__filterBar">
+                    <ExplorerQueryBar
+                      filterActive={filterActive}
+                      filterPlaceHolder={filterPlaceHolder}
+                      indexPattern={indexPattern}
+                      queryString={queryString}
+                      filterIconTriggeredQuery={filterIconTriggeredQuery}
+                      updateLanguage={updateLanguage}
+                    />
+                  </div>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <DatePickerWrapper />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageHeaderSection>
+        </EuiPageHeader>
+        <EuiHorizontalRule margin="none" />
         <JobSelector {...jobSelectorProps} />
+        <EuiHorizontalRule margin="none" />
         {children}
       </EuiPageBody>
     </EuiPage>
@@ -314,7 +368,18 @@ export class Explorer extends React.Component {
 
     if (loading === true) {
       return (
-        <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
+        <ExplorerPage
+          jobSelectorProps={jobSelectorProps}
+          noInfluencersConfigured={noInfluencersConfigured}
+          influencers={influencers}
+          filterActive={filterActive}
+          filterPlaceHolder={filterPlaceHolder}
+          filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
+          indexPattern={indexPattern}
+          queryString={queryString}
+          updateLanguage={this.updateLanguage}
+          resizeRef={this.resizeRef}
+        >
           <LoadingIndicator
             label={i18n.translate('xpack.ml.explorer.loadingLabel', {
               defaultMessage: 'Loading',
@@ -356,21 +421,19 @@ export class Explorer extends React.Component {
     const bounds = timefilter.getActiveBounds();
 
     return (
-      <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
+      <ExplorerPage
+        jobSelectorProps={jobSelectorProps}
+        noInfluencersConfigured={noInfluencersConfigured}
+        influencers={influencers}
+        filterActive={filterActive}
+        filterPlaceHolder={filterPlaceHolder}
+        filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
+        indexPattern={indexPattern}
+        queryString={queryString}
+        updateLanguage={this.updateLanguage}
+        resizeRef={this.resizeRef}
+      >
         <div className="results-container">
-          {noInfluencersConfigured === false && influencers !== undefined && (
-            <div className="mlAnomalyExplorer__filterBar">
-              <ExplorerQueryBar
-                filterActive={filterActive}
-                filterPlaceHolder={filterPlaceHolder}
-                indexPattern={indexPattern}
-                queryString={queryString}
-                filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
-                updateLanguage={this.updateLanguage}
-              />
-            </div>
-          )}
-
           {noInfluencersConfigured && (
             <div className="no-influencers-warning">
               <EuiIconTip

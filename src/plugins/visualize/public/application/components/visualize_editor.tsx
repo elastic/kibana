@@ -28,7 +28,7 @@ import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../../embeddable/public'
 import { removeQueryParam } from '../../../../kibana_utils/public';
 import { useKibana } from '../../../../kibana_react/public';
 import {
-  useChrome,
+  useChromeVisibility,
   useSavedVisInstance,
   useVisualizeAppState,
   useEditorUpdates,
@@ -45,7 +45,7 @@ export const VisualizeEditor = () => {
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
 
-  const isChromeVisible = useChrome(services.chrome);
+  const isChromeVisible = useChromeVisibility(services.chrome);
   const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
     services,
     eventEmitter,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { useChrome } from './use_chrome';
+export { useChromeVisibility } from './use_chrome_visibility';
 export { useEditorUpdates } from './use_editor_updates';
 export { useSavedVisInstance } from './use_saved_vis_instance';
 export { useVisualizeAppState } from './use_visualize_app_state';
