@@ -13,6 +13,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
 } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
@@ -141,7 +142,7 @@ const state: State = {
     },
   },
 };
-const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
 
 describe('StatefulTopN', () => {
   // Suppress warnings about "react-beautiful-dnd"

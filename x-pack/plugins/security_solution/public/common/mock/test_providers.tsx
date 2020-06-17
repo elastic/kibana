@@ -19,7 +19,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
-import { createKibanaContextProviderMock } from './kibana_react';
+import { createKibanaContextProviderMock, createStartServices } from './kibana_react';
 import { FieldHook, useForm } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 
@@ -37,6 +37,7 @@ export const apolloClient = new ApolloClient({
 });
 
 export const apolloClientObservable = new BehaviorSubject(apolloClient);
+export const kibanaObservable = new BehaviorSubject(createStartServices());
 
 const localStorageMock = () => {
   let store: Record<string, unknown> = {};
@@ -63,7 +64,7 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable),
+  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable),
   onDragEnd = jest.fn(),
 }) => (
   <I18nProvider>
@@ -83,7 +84,7 @@ export const TestProviders = React.memo(TestProvidersComponent);
 
 const TestProviderWithoutDragAndDropComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable),
+  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable),
 }) => (
   <I18nProvider>
     <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>

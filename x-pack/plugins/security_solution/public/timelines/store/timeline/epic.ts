@@ -26,7 +26,6 @@ import {
   concatMap,
   delay,
   takeUntil,
-  catchError,
 } from 'rxjs/operators';
 
 import {
@@ -45,7 +44,6 @@ import { AppApolloClient } from '../../../common/lib/lib';
 import { addError } from '../../../common/store/app/actions';
 import { NotesById } from '../../../common/store/app/model';
 import { inputsModel } from '../../../common/store/inputs';
-import { useKibana } from '../../../common/lib/kibana';
 
 import { persistTimeline } from '../../containers/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
@@ -87,6 +85,7 @@ import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
+import { StartServices } from '../../../types';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -94,6 +93,7 @@ interface TimelineEpicDependencies<State> {
   selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
   selectNotesByIdSelector: (state: State) => NotesById;
   apolloClient$: Observable<AppApolloClient>;
+  kibana$: Observable<StartServices>;
 }
 
 const timelineActionsType = [
@@ -135,9 +135,9 @@ export const createTimelineEpic = <State>(): Epic<
     timelineByIdSelector,
     timelineTimeRangeSelector,
     apolloClient$,
+    kibana$,
   }
 ) => {
-  const { notifications } = useKibana().services;
   const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
   const allTimelineQuery$ = state$.pipe(
@@ -246,21 +246,21 @@ export const createTimelineEpic = <State>(): Epic<
               },
             })
           ).pipe(
-            catchError((error: TimelineErrorResponse) => {
+            withLatestFrom(timeline$, allTimelineQuery$, kibana$),
+            mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
+              const error = result as TimelineErrorResponse;
               if (error.status_code != null && error.status_code === 405) {
-                notifications!.toasts.addDanger({
+                kibana.notifications!.toasts.addDanger({
                   title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
                   text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
                 });
+                return [
+                  endTimelineSaving({
+                    id: action.payload.id,
+                  }),
+                ];
               }
-              return [
-                endTimelineSaving({
-                  id: action.payload.id,
-                }),
-              ];
-            }),
-            withLatestFrom(timeline$, allTimelineQuery$),
-            mergeMap(([result, recentTimeline, allTimelineQuery]) => {
+
               const savedTimeline = recentTimeline[action.payload.id];
               const response: ResponseTimeline = get('data.persistTimeline', result);
               if (response == null) {

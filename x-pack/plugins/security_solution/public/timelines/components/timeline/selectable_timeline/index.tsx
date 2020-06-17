@@ -115,7 +115,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
   const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
-  const { timelineStatus } = useTimelineStatus({ timelineType });
+  const { timelineStatus, templateTimelineType } = useTimelineStatus({ timelineType });
 
   const onSearchTimeline = useCallback((val) => {
     setSearchTimelineValue(val);
@@ -260,10 +260,17 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       onlyUserFavorite: onlyFavorites,
       status: timelineStatus,
       timelineType,
-      templateTimelineType: null,
+      templateTimelineType,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onlyFavorites, pageSize, searchTimelineValue, timelineType, timelineStatus]);
+  }, [
+    onlyFavorites,
+    pageSize,
+    searchTimelineValue,
+    timelineType,
+    timelineStatus,
+    templateTimelineType,
+  ]);
 
   return (
     <EuiSelectableContainer isLoading={loading}>

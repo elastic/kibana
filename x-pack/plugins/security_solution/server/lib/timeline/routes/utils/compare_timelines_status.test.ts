@@ -17,7 +17,6 @@ import { CompareTimelinesStatus as TimelinesStatusType } from './compare_timelin
 import {
   EMPTY_TITLE_ERROR_MESSAGE,
   UPDATE_STATUS_ERROR_MESSAGE,
-  CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
   UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
   CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
@@ -663,7 +662,7 @@ describe('CompareTimelinesStatus', () => {
     });
   });
 
-  describe('Throw error if create template timeline without template timeline id', () => {
+  describe('If create template timeline without template timeline id', () => {
     const mockGetTimeline: jest.Mock = jest.fn();
     const mockGetTemplateTimeline: jest.Mock = jest.fn();
 
@@ -707,21 +706,21 @@ describe('CompareTimelinesStatus', () => {
     });
 
     test('should not be creatable', () => {
-      expect(timelineObj.isCreatable).toEqual(false);
+      expect(timelineObj.isCreatable).toEqual(true);
     });
 
-    test(`throw error when create`, () => {
+    test(`throw no error when create`, () => {
       const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
-      expect(error?.body).toEqual(CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE);
+      expect(error?.body).toBeUndefined();
     });
 
-    test('should not be Creatable via import', () => {
-      expect(timelineObj.isCreatableViaImport).toEqual(false);
+    test('should be Creatable via import', () => {
+      expect(timelineObj.isCreatableViaImport).toEqual(true);
     });
 
-    test(`throw error when CreatableViaImport`, () => {
+    test(`throw no error when CreatableViaImport`, () => {
       const error = timelineObj.checkIsFailureCases(TimelineStatusActions.createViaImport);
-      expect(error?.body).toEqual(CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE);
+      expect(error?.body).toBeUndefined();
     });
   });
 

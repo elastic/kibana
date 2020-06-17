@@ -157,8 +157,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sortField,
         sortDirection,
         timelineType,
-        onlyFavorites,
         timelineStatus,
+        templateTimelineType,
+        onlyFavorites,
       ]
     );
 

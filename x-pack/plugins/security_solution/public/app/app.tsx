@@ -84,6 +84,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
     createInitialState(subPluginsStore.initialState),
     subPluginsStore.reducer,
     libs$.pipe(pluck('apolloClient')),
+    libs$.pipe(pluck('kibana')),
     subPluginsStore.middlewares
   );
 

@@ -7,6 +7,7 @@
 import { extname } from 'path';
 import { chunk, omit } from 'lodash/fp';
 
+import uuid from 'uuid';
 import { createPromiseFromStreams } from '../../../../../../../src/legacy/utils';
 import { IRouter } from '../../../../../../../src/core/server';
 
@@ -155,6 +156,7 @@ export const importTimelinesRoute = (
                         frameworkRequest,
                       });
                       await compareTimelinesStatus.init();
+                      const isTemplateTimeline = compareTimelinesStatus.isHandlingTemplateTimeline;
                       if (compareTimelinesStatus.isCreatableViaImport) {
                         // create timeline / template timeline
                         newTimeline = await createTimelines({
@@ -162,16 +164,18 @@ export const importTimelinesRoute = (
                           timeline: {
                             ...parsedTimelineObject,
                             status:
-                              parsedTimelineObject.status === TimelineStatus.draft
+                              status === TimelineStatus.draft
                                 ? TimelineStatus.active
-                                : parsedTimelineObject.status,
+                                : status ?? TimelineStatus.active,
+                            templateTimelineVersion: isTemplateTimeline
+                              ? templateTimelineVersion
+                              : null,
+                            templateTimelineId: isTemplateTimeline
+                              ? templateTimelineId ?? uuid.v4()
+                              : null,
                           },
-                          pinnedEventIds: compareTimelinesStatus.isHandlingTemplateTimeline
-                            ? null
-                            : pinnedEventIds,
-                          notes: compareTimelinesStatus.isHandlingTemplateTimeline
-                            ? globalNotes
-                            : [...globalNotes, ...eventNotes],
+                          pinnedEventIds: isTemplateTimeline ? null : pinnedEventIds,
+                          notes: isTemplateTimeline ? globalNotes : [...globalNotes, ...eventNotes],
                         });
 
                         resolve({

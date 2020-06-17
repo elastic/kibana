@@ -9,12 +9,12 @@ import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CoreStart } from '../../../../../../../src/core/public';
 import introspectionQueryResultData from '../../../graphql/introspection.json';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
+import { StartServices } from '../../../types';
 
-export function compose(core: CoreStart): AppFrontendLibs {
+export function compose(core: StartServices): AppFrontendLibs {
   const cache = new InMemoryCache({
     dataIdFromObject: () => null,
     fragmentMatcher: new IntrospectionFragmentMatcher({
@@ -31,6 +31,7 @@ export function compose(core: CoreStart): AppFrontendLibs {
 
   const libs: AppFrontendLibs = {
     apolloClient,
+    kibana: core,
   };
   return libs;
 }

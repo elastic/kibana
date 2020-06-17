@@ -13,7 +13,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { StartPlugins } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
-import { apolloClientObservable } from '../test_providers';
+import { apolloClientObservable, kibanaObservable } from '../test_providers';
 import { createStore, State, substateMiddlewareFactory } from '../../store';
 import { alertMiddlewareFactory } from '../../../endpoint_alerts/store/middleware';
 import { AppRootProvider } from './app_root_provider';
@@ -56,14 +56,20 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
-  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable, [
-    substateMiddlewareFactory(
-      (globalState) => globalState.alertList,
-      alertMiddlewareFactory(coreStart, depsStart)
-    ),
-    ...managementMiddlewareFactory(coreStart, depsStart),
-    middlewareSpy.actionSpyMiddleware,
-  ]);
+  const store = createStore(
+    mockGlobalState,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    [
+      substateMiddlewareFactory(
+        (globalState) => globalState.alertList,
+        alertMiddlewareFactory(coreStart, depsStart)
+      ),
+      ...managementMiddlewareFactory(coreStart, depsStart),
+      middlewareSpy.actionSpyMiddleware,
+    ]
+  );
   const MockKibanaContextProvider = createKibanaContextProviderMock();
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (

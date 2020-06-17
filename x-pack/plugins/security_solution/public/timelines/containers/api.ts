@@ -77,7 +77,7 @@ const patchTimeline = async ({
       body: JSON.stringify({ timeline, timelineId, version }),
     });
   } catch (err) {
-    return Promise.reject(decodeTimelineErrorResponse(err.body));
+    return Promise.resolve(decodeTimelineErrorResponse(err.body));
   }
   return decodeTimelineResponse(response);
 };

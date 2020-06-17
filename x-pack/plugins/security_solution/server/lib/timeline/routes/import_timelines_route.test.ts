@@ -150,7 +150,12 @@ describe('import timelines', () => {
     test('should Create a new timeline savedObject with given timeline', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistTimeline.mock.calls[0][3]).toEqual(mockParsedTimelineObject);
+      expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
+        ...mockParsedTimelineObject,
+        status: TimelineStatus.active,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
+      });
     });
 
     test('should throw error if given an untitle timeline', async () => {
@@ -334,7 +339,7 @@ describe('import timelines', () => {
         mockDuplicateIdErrors,
         [
           {
-            ...mockUniqueParsedObjects[0],
+            ...mockGetTimelineValue,
             timelineType: TimelineType.template,
           },
         ],
@@ -415,6 +420,7 @@ describe('import template timelines', () => {
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
   let mockGetTupleDuplicateErrorsAndUniqueTimeline: jest.Mock;
+  const mockNewTemplateTimelineId = 'new templateTimelineId';
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
@@ -461,6 +467,10 @@ describe('import template timelines', () => {
         ),
       };
     });
+
+    jest.doMock('uuid', () => ({
+      v4: jest.fn().mockReturnValue(mockNewTemplateTimelineId),
+    }));
   });
 
   describe('Import a new template timeline', () => {
@@ -529,7 +539,10 @@ describe('import template timelines', () => {
     test('should Create a new timeline savedObject witn given timeline and skip the omitted fields', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistTimeline.mock.calls[0][3]).toEqual(mockParsedTemplateTimelineObject);
+      expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
+        ...mockParsedTemplateTimelineObject,
+        status: TimelineStatus.active,
+      });
     });
 
     test('should NOT Create new pinned events', async () => {
@@ -563,6 +576,23 @@ describe('import template timelines', () => {
     test('returns 200 when import timeline successfully', async () => {
       const response = await server.inject(getImportTimelinesRequest(), context);
       expect(response.status).toEqual(200);
+    });
+
+    test('should assign a templateTimeline Id automatically if not given one', async () => {
+      mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+        mockDuplicateIdErrors,
+        [
+          {
+            ...mockUniqueParsedTemplateTimelineObjects[0],
+            templateTimelineId: null,
+          },
+        ],
+      ]);
+      const mockRequest = getImportTimelinesRequest();
+      await server.inject(mockRequest, context);
+      expect(mockPersistTimeline.mock.calls[0][3].templateTimelineId).toEqual(
+        mockNewTemplateTimelineId
+      );
     });
   });
 

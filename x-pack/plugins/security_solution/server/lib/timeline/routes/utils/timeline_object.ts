@@ -69,10 +69,6 @@ export class TimelineObject {
   }
 
   public get isCreatable() {
-    if (this.type === TimelineType.template) {
-      // Cannot create template timeline without template timeline id
-      return !this.isExists && this.id != null;
-    }
     return !this.isExists;
   }
 

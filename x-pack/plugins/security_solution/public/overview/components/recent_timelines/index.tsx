@@ -88,7 +88,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
           templateTimelineType,
         });
       }, // eslint-disable-next-line react-hooks/exhaustive-deps
-      [filterBy, timelineStatus, timelineType]
+      [filterBy, timelineStatus, timelineType, templateTimelineType]
     );
 
     return (

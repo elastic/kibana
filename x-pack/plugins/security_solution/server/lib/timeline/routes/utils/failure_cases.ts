@@ -23,8 +23,6 @@ export const CREATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE timeline with POST is not allowed, please use PATCH instead';
 export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE template timeline with POST is not allowed, please use PATCH instead';
-export const CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE =
-  'Create template timeline without a template timeline ID is not allowed';
 export const EMPTY_TITLE_ERROR_MESSAGE = 'Title cannot be empty';
 export const UPDATE_STATUS_ERROR_MESSAGE = 'Update an immutable timeline is is not allowed';
 export const CREATE_TEMPLATE_TIMELINE_WITHOUT_VERSION_ERROR_MESSAGE =
@@ -75,12 +73,13 @@ const commonUpdateTemplateTimelineCheck = (
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
   if (isHandlingTemplateTimeline) {
-    if (templateTimelineId == null) {
+    if (existTimeline != null && timelineType !== existTimeline.timelineType) {
       return {
-        body: CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
+        body: NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
         statusCode: 403,
       };
     }
+
     if (existTemplateTimeline == null && templateTimelineVersion != null) {
       // template timeline !exists
       // Throw error to create template timeline in patch
@@ -196,11 +195,6 @@ const createTemplateTimelineCheck = (
     return {
       body: CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
       statusCode: 405,
-    };
-  } else if (isHandlingTemplateTimeline && templateTimelineId == null) {
-    return {
-      body: CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
-      statusCode: 403,
     };
   } else if (isHandlingTemplateTimeline && templateTimelineVersion == null) {
     return {
@@ -374,11 +368,6 @@ export const checkIsCreateViaImportFailureCases = (
       // Throw error to create template timeline in patch
       return {
         body: getImportExistingTimelineError(existTemplateTimeline.savedObjectId),
-        statusCode: 405,
-      };
-    } else if (templateTimelineId == null) {
-      return {
-        body: CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
         statusCode: 405,
       };
     }
