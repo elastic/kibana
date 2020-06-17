@@ -263,7 +263,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       await this.deleteSavedObjectById(id, SavedObjectType.VISUALIZATION);
     },
 
-    async deleteDashboardByTtitle(title: string) {
+    async deleteDashboardByTitle(title: string) {
       log.debug(`Deleting dashboard with title '${title}'...`);
 
       const dashboardId = await this.getDashboardId(title);

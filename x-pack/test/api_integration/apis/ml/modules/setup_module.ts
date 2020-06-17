@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -515,6 +515,16 @@ export default ({ getService }: FtrProviderContext) => {
     return 0;
   }
 
+  function mapIdsToSuccessObjects(ids: string[]) {
+    const successObjects = ids
+      .map((id) => {
+        return { id, success: true };
+      })
+      .sort(compareById);
+
+    return successObjects;
+  }
+
   describe('module setup', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -556,11 +566,8 @@ export default ({ getService }: FtrProviderContext) => {
             // jobs
             expect(rspBody).to.have.property('jobs');
 
-            const expectedRspJobs = testData.expected.jobs
-              .map((job) => {
-                return { id: job.jobId, success: true };
-              })
-              .sort(compareById);
+            const expectedJobIds = testData.expected.jobs.map((job) => job.jobId);
+            const expectedRspJobs = mapIdsToSuccessObjects(expectedJobIds);
 
             const actualRspJobs = rspBody.jobs.sort(compareById);
 
@@ -599,29 +606,15 @@ export default ({ getService }: FtrProviderContext) => {
             let actualVisualizations = [];
             let actualDashboards = [];
 
-            if (_.isEmpty(rspKibana) === false) {
+            if (isEmpty(rspKibana) === false) {
               actualSearches = rspBody.kibana.search.sort(compareById);
               actualVisualizations = rspBody.kibana.visualization.sort(compareById);
               actualDashboards = rspBody.kibana.dashboard.sort(compareById);
             }
 
-            const expectedSearches = testData.expected.searches
-              .map((search) => {
-                return { id: search, success: true };
-              })
-              .sort(compareById);
-
-            const expectedVisualizations = testData.expected.visualizations
-              .map((visualization) => {
-                return { id: visualization, success: true };
-              })
-              .sort(compareById);
-
-            const expectedDashboards = testData.expected.dashboards
-              .map((dashboard) => {
-                return { id: dashboard, success: true };
-              })
-              .sort(compareById);
+            const expectedSearches = mapIdsToSuccessObjects(testData.expected.searches);
+            const expectedVisualizations = mapIdsToSuccessObjects(testData.expected.visualizations);
+            const expectedDashboards = mapIdsToSuccessObjects(testData.expected.dashboards);
 
             expect(actualSearches).to.eql(
               expectedSearches,
