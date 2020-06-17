@@ -41,6 +41,16 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
   const relatedEventsState = { stats: relatedStats.events.byCategory };
   const processName = processEvent && event.eventName(processEvent);
   const processEntityId = event.entityId(processEvent);
+  /**
+   * totalCount: This will reflect the aggregated total by category for all related events
+   * e.g. [dns,file],[dns,file],[registry] will have an aggregate total of 5. This is to keep the
+   * total number consistent with the "broken out" totals we see elsewhere in the app.
+   * E.g. on the rleated list by type, the above would show as:
+   * 2 dns
+   * 2 file
+   * 1 registry
+   * So it would be extremely disorienting to show the user a "3" above that as a total.
+   */
   const totalCount = Object.values(relatedStats.events.byCategory).reduce(
     (sum, val) => sum + val,
     0
