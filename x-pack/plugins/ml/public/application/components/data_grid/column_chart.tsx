@@ -12,12 +12,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import './column_chart.scss';
 
-import {
-  isNumericChartData,
-  isUnsupportedChartData,
-  useColumnChart,
-  ChartData,
-} from './use_column_chart';
+import { isUnsupportedChartData, useColumnChart, ChartData } from './use_column_chart';
 
 interface Props {
   chartData: ChartData;
@@ -36,9 +31,9 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
               theme={{
                 background: { color: 'transparent' },
                 chartMargins: {
-                  left: 4,
-                  right: 4,
-                  top: 5,
+                  left: 0,
+                  right: 0,
+                  top: 0,
                   bottom: 1,
                 },
                 chartPaddings: {
