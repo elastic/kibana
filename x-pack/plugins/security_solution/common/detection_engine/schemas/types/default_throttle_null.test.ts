@@ -25,7 +25,7 @@ describe('default_throttle_null', () => {
     const decoded = DefaultThrottleNull.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "string"']);
     expect(message.schema).toEqual({});
   });
 

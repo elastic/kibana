@@ -33,7 +33,7 @@ describe('default_string_boolean_false', () => {
     const decoded = DefaultStringBooleanFalse.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "boolean"']);
     expect(message.schema).toEqual({});
   });
 
@@ -78,7 +78,7 @@ describe('default_string_boolean_false', () => {
     const decoded = DefaultStringBooleanFalse.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "boolean"']);
     expect(message.schema).toEqual({});
   });
 
@@ -87,7 +87,7 @@ describe('default_string_boolean_false', () => {
     const decoded = DefaultStringBooleanFalse.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "boolean"']);
     expect(message.schema).toEqual({});
   });
 });

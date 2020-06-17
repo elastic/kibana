@@ -39,7 +39,9 @@ describe('default_actions_array', () => {
     const decoded = DefaultActionsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "Array<{| group: string, id: string, action_type_id: string, params: object |}>"',
+    ]);
     expect(message.schema).toEqual({});
   });
 

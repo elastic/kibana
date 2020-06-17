@@ -625,7 +625,9 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "Array<string>"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -776,7 +778,9 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -789,7 +793,9 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -837,9 +843,9 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to ""',
-      'Invalid value "1" supplied to ""',
-      'Invalid value "2" supplied to ""',
+      'Invalid value "0" supplied to "Array<string>"',
+      'Invalid value "1" supplied to "Array<string>"',
+      'Invalid value "2" supplied to "Array<string>"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -959,8 +965,8 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to ""',
-      'Invalid value "4" supplied to ""',
+      'Invalid value "5" supplied to "Array<string>"',
+      'Invalid value "4" supplied to "Array<string>"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1323,8 +1329,7 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
-        // TODO: Fix/Change the formatErrors to be better able to handle objects
-        'Invalid value "[object Object]" supplied to "note"',
+        'Invalid value "{"somethingHere":"something else"}" supplied to "note"',
       ]);
       expect(message.schema).toEqual({});
     });

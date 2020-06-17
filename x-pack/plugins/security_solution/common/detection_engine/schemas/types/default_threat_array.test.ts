@@ -47,7 +47,9 @@ describe('default_threat_null', () => {
     const decoded = DefaultThreatArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "Array<{| framework: string, tactic: { id: string, name: string, reference: string }, technique: Array<{| id: string, name: string, reference: string |}> |}>"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
