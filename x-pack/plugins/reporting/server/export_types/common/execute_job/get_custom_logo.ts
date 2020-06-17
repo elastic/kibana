@@ -7,7 +7,7 @@
 import { ReportingConfig, ReportingCore } from '../../../';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { ConditionalHeaders } from '../../../types';
-import { JobDocPayloadPDF } from '../../printable_pdf/types'; // Logo is PDF only
+import { ScheduledTaskParamsPDF } from '../../printable_pdf/types'; // Logo is PDF only
 
 export const getCustomLogo = async ({
   reporting,
@@ -17,7 +17,7 @@ export const getCustomLogo = async ({
 }: {
   reporting: ReportingCore;
   config: ReportingConfig;
-  job: JobDocPayloadPDF;
+  job: ScheduledTaskParamsPDF;
   conditionalHeaders: ConditionalHeaders;
 }) => {
   const serverBasePath: string = config.kbnConfig.get('server', 'basePath');

@@ -23,8 +23,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await transform.testResources.deleteSavedSearches();
 
-      await transform.testResources.deleteIndexPattern('ft_farequote');
-      await transform.testResources.deleteIndexPattern('ft_ecommerce');
+      await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
 
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/ecommerce');
