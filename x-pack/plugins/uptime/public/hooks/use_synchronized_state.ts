@@ -19,14 +19,6 @@ const resolveUrlUpdates = (
   storeState: UiState
 ): Partial<UptimeUrlParams> => {
   const urlState: Partial<UptimeUrlParams> = {};
-  if (
-    params.dateRangeStart !== storeState.dateRange.from ||
-    params.dateRangeEnd !== storeState.dateRange.to
-  ) {
-    urlState.dateRangeStart = storeState.dateRange.from;
-    urlState.dateRangeEnd = storeState.dateRange.to;
-  }
-
   if (params.autorefreshInterval !== storeState.autorefreshInterval) {
     urlState.autorefreshInterval = storeState.autorefreshInterval;
   }
@@ -35,20 +27,28 @@ const resolveUrlUpdates = (
     urlState.autorefreshIsPaused = storeState.autorefreshIsPaused;
   }
 
-  if (params.search !== storeState.searchText) {
-    urlState.search = storeState.searchText;
+  if (
+    params.dateRangeStart !== storeState.dateRange.from ||
+    params.dateRangeEnd !== storeState.dateRange.to
+  ) {
+    urlState.dateRangeStart = storeState.dateRange.from;
+    urlState.dateRangeEnd = storeState.dateRange.to;
   }
 
-  if (params.statusFilter !== storeState.statusFilter) {
-    urlState.statusFilter = storeState.statusFilter;
+  if (params.filters !== storeState.selectedFilters) {
+    urlState.filters = storeState.selectedFilters;
   }
 
   if (params.pagination !== storeState.currentMonitorListPage) {
     urlState.pagination = storeState.currentMonitorListPage;
   }
 
-  if (params.filters !== storeState.selectedFilters) {
-    urlState.filters = storeState.selectedFilters;
+  if (params.search !== storeState.searchText) {
+    urlState.search = storeState.searchText;
+  }
+
+  if (params.statusFilter !== storeState.statusFilter) {
+    urlState.statusFilter = storeState.statusFilter;
   }
 
   return urlState;

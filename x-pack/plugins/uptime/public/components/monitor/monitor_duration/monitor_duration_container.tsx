@@ -6,7 +6,6 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useGetUrlParams } from '../../../hooks';
 import {
   getAnomalyRecordsAction,
   getMLCapabilitiesAction,
@@ -17,20 +16,18 @@ import {
   hasMLFeatureAvailable,
   hasMLJobSelector,
   selectDurationLines,
+  dateRangeSelector,
 } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getMLJobId } from '../../../state/api/ml_anomaly';
 import { JobStat } from '../../../../../ml/public';
 import { MonitorDurationComponent } from './monitor_duration';
 import { MonitorIdParam } from '../../../../common/types';
+import { useAbsoluteDateRange } from '../../../hooks/use_absolute_date_range';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    absoluteDateRangeStart,
-    absoluteDateRangeEnd,
-  } = useGetUrlParams();
+  const dateRange = useSelector(dateRangeSelector);
+  const { from, to } = useAbsoluteDateRange();
 
   const { durationLines, loading } = useSelector(selectDurationLines);
 
@@ -52,20 +49,20 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
     if (isMLAvailable) {
       const anomalyParams = {
         listOfMonitorIds: [monitorId],
-        dateStart: absoluteDateRangeStart,
-        dateEnd: absoluteDateRangeEnd,
+        dateStart: from,
+        dateEnd: to,
       };
 
       dispatch(getAnomalyRecordsAction.get(anomalyParams));
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId, isMLAvailable]);
+  }, [from, to, dispatch, lastRefresh, monitorId, isMLAvailable]);
 
   useEffect(() => {
-    const params = { monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd };
+    const params = { monitorId, dateStart: dateRange.from, dateEnd: dateRange.to };
     dispatch(getMonitorDurationAction(params));
-  }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId]);
+  }, [dateRange, dispatch, lastRefresh, monitorId]);
 
   useEffect(() => {
     dispatch(getMLCapabilitiesAction.get());

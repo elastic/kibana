@@ -15,7 +15,6 @@ describe('stringifyUrlParams', () => {
       dateRangeEnd: 'now',
       filters: 'monitor.id: bar',
       search: 'monitor.id: foo',
-      selectedPingStatus: 'down',
       statusFilter: 'up',
     });
     expect(result).toMatchSnapshot();
@@ -30,7 +29,6 @@ describe('stringifyUrlParams', () => {
         dateRangeEnd: 'now',
         filters: 'monitor.id: bar',
         search: undefined,
-        selectedPingStatus: undefined,
         statusFilter: '',
         pagination: undefined,
       },
@@ -40,6 +38,5 @@ describe('stringifyUrlParams', () => {
 
     expect(result.includes('pagination')).toBeFalsy();
     expect(result.includes('search')).toBeFalsy();
-    expect(result.includes('selectedPingStatus')).toBeFalsy();
   });
 });

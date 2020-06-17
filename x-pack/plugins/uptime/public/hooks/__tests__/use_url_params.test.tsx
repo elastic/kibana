@@ -64,7 +64,7 @@ describe('useUrlParams', () => {
     setUrlParamsButton.simulate('click');
     expect(history.push).toHaveBeenCalledWith({
       pathname: '/',
-      search: 'dateRangeStart=now-12d&dateRangeEnd=now',
+      search: 'dateRangeStart=now-12d',
     });
   });
 
@@ -121,7 +121,7 @@ describe('useUrlParams', () => {
 
     expect(history.push).toHaveBeenCalledWith({
       pathname: '/',
-      search: 'dateRangeEnd=now&dateRangeStart=now-12&g=%22%22',
+      search: 'dateRangeStart=now-12&g=%22%22',
     });
   });
 });

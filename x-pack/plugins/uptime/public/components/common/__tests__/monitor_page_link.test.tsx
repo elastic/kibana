@@ -17,7 +17,7 @@ describe('MonitorPageLink component', () => {
   });
 
   it('renders a help link when link parameters present', () => {
-    const linkParameters = 'selectedPingStatus=down';
+    const linkParameters = 'dateRangeStart=now-13m';
     const component = shallowWithIntl(
       <MonitorPageLink monitorId="bad-ssl" linkParameters={linkParameters} />
     );

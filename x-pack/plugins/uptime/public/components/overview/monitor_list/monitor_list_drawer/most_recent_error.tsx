@@ -30,8 +30,7 @@ interface MostRecentErrorProps {
 }
 
 export const MostRecentError = ({ error, monitorId, timestamp }: MostRecentErrorProps) => {
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
-  params.selectedPingStatus = 'down';
+  const params = useGetUrlParams();
   const linkParameters = stringifyUrlParams(params, true);
 
   const timestampStr = timestamp ? moment(new Date(timestamp).valueOf()).fromNow() : '';
