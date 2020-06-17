@@ -21,22 +21,22 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ApmServerInstance({ summary, metrics, ...props }) {
   const seriesToShow = [
+    metrics.apm_requests,
     metrics.apm_responses_valid,
+
     metrics.apm_responses_errors,
+    metrics.apm_acm_request_count,
+
+    metrics.apm_acm_response,
+    metrics.apm_acm_response_errors,
 
     metrics.apm_output_events_rate_success,
     metrics.apm_output_events_rate_failure,
 
-    metrics.apm_acm_response,
-    metrics.apm_acm_response_errors,
-    metrics.apm_acm_request_count,
-
-    metrics.apm_requests,
     metrics.apm_transformations,
-
     metrics.apm_cpu,
-    metrics.apm_memory,
 
+    metrics.apm_memory,
     metrics.apm_os_load,
   ];
 

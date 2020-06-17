@@ -458,7 +458,7 @@ export const metrics = {
       defaultMessage: 'Count',
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.countDescription', {
-      defaultMessage: 'fill in',
+      defaultMessage: 'HTTP requests responded to by APM Server',
     }),
   }),
   apm_acm_response_errors_count: new ApmEventsRateClusterMetric({
@@ -470,7 +470,7 @@ export const metrics = {
       defaultMessage: 'Error Count',
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errorCountDescription', {
-      defaultMessage: 'fill in',
+      defaultMessage: 'HTTP errors count',
     }),
   }),
   apm_acm_response_valid_ok: new ApmEventsRateClusterMetric({
@@ -482,7 +482,7 @@ export const metrics = {
       defaultMessage: 'OK',
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.validOkDescription', {
-      defaultMessage: 'fill in',
+      defaultMessage: '200 OK response count',
     }),
   }),
   apm_acm_response_valid_notmodified: new ApmEventsRateClusterMetric({
@@ -496,7 +496,7 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.apm.acmResponse.validNotModifiedDescription',
       {
-        defaultMessage: 'fill in',
+        defaultMessage: '304 Not modified response count',
       }
     ),
   }),
@@ -511,7 +511,7 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.apm.acmResponse.errors.forbiddenDescription',
       {
-        defaultMessage: 'fill in',
+        defaultMessage: 'Forbidden HTTP requests rejected count',
       }
     ),
   }),
@@ -526,7 +526,7 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.apm.acmResponse.errors.unauthorizedDescription',
       {
-        defaultMessage: 'fill in',
+        defaultMessage: 'Unauthorized HTTP requests rejected count',
       }
     ),
   }),
@@ -541,7 +541,8 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.apm.acmResponse.errors.unavailableDescription',
       {
-        defaultMessage: 'fill in',
+        defaultMessage:
+          'Unavailable HTTP response count. Possible misconfiguration or unsupported version of Kibana',
       }
     ),
   }),
@@ -556,7 +557,7 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.apm.acmResponse.errors.methodDescription',
       {
-        defaultMessage: 'fill in',
+        defaultMessage: 'HTTP requests rejected due to incorrect HTTP method',
       }
     ),
   }),
@@ -571,7 +572,7 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.apm.acmResponse.errors.invalidqueryDescription',
       {
-        defaultMessage: 'fill in',
+        defaultMessage: 'Invalid HTTP query',
       }
     ),
   }),
@@ -584,7 +585,7 @@ export const metrics = {
       defaultMessage: 'Count',
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.acmRequest.countTitleDescription', {
-      defaultMessage: 'fill in',
+      defaultMessage: 'HTTP Requests received by agent configuration managemen',
     }),
   }),
 };
