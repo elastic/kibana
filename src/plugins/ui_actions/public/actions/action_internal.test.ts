@@ -27,7 +27,16 @@ const defaultActionDef: ActionDefinition = {
 
 describe('ActionInternal', () => {
   test('can instantiate from action definition', () => {
-    const action = new ActionInternal(defaultActionDef);
+    const action = new ActionInternal(defaultActionDef, () => []);
     expect(action.id).toBe('test-action');
+  });
+
+  test('can hook into action methods', async () => {
+    const action = new ActionInternal(defaultActionDef, () => [
+      {
+        onIsCompatible: () => false,
+      },
+    ]);
+    expect(await action.isCompatible({})).toBe(false);
   });
 });
