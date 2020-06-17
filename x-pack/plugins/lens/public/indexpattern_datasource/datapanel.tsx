@@ -63,7 +63,7 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
 }
 
 const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
-const PAGINATION_SIZE = 10;
+const PAGINATION_SIZE = 50;
 
 const fieldTypeNames: Record<DataType, string> = {
   document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
@@ -531,7 +531,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={!!filters.length}
                     isAffectedByFieldFilter={hasFieldFilter}
-                    isAffectedByTimerange={!!filteredFieldGroups.emptyFields.length}
+                    isAffectedByTimerange={true}
                     existFieldsInIndex={!!fieldGroups.emptyFields.length}
                   />
                 )}
