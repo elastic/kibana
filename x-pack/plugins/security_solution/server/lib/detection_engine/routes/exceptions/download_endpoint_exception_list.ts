@@ -18,13 +18,13 @@ const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 export function downloadEndpointExceptionList(router: IRouter) {
   router.get(
     {
-      path: `${allowlistBaseRoute}/download/{sha256}`,
+      path: `${allowlistBaseRoute}/download/{artifactName}/{sha256}`,
       validate: {
         params: buildRouteValidation<DownloadExceptionListRequestParams>(
           downloadExceptionListSchema
         ),
       },
-      options: { authRequired: true },
+      options: { tags: [] },
     },
     handleEndpointExceptionDownload
   );
@@ -34,17 +34,18 @@ export function downloadEndpointExceptionList(router: IRouter) {
  * Handles the GET request for downloading the allowlist
  */
 async function handleEndpointExceptionDownload(context, req, res) {
-  try {
-    const soClient = context.core.savedObjects.client;
-    const resp = await soClient.find({
+  // TODO: api key validation
+  const soClient = context.core.savedObjects.client;
+
+  soClient
+    .get({
       type: ArtifactConstants.SAVED_OBJECT_TYPE,
-      search: req.params.sha256,
-      searchFields: ['sha256'],
-    });
-    if (resp.total > 0) {
-      const artifact = resp.saved_objects[0];
+      id: `${req.params.artifactName}-${req.params.sha256}`,
+    })
+    .then((artifact) => {
       const outBuffer = Buffer.from(artifact.attributes.body, 'binary');
 
+      // TODO: validate response before returning
       return res.ok({
         body: outBuffer,
         headers: {
@@ -52,10 +53,8 @@ async function handleEndpointExceptionDownload(context, req, res) {
           'content-disposition': `attachment; filename=${artifact.attributes.name}.xz`,
         },
       });
-    } else {
-      return res.notFound();
-    }
-  } catch (err) {
-    return res.internalError({ body: err });
-  }
+    })
+    .catch((err) => {
+      return res.internalError({ body: err });
+    });
 }

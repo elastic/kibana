@@ -12,7 +12,7 @@ import {
   RequestHandler,
   KibanaResponseFactory,
   RequestHandlerContext,
-  SavedObjectsFindResponse,
+  SavedObject,
 } from 'kibana/server';
 import {
   elasticsearchServiceMock,
@@ -20,10 +20,10 @@ import {
   httpServiceMock,
   httpServerMock,
 } from 'src/core/server/mocks';
+import { ArtifactConstants, CompressExceptionList } from '../../../exceptions';
 import { downloadEndpointExceptionList } from './download_endpoint_exception_list';
-import { CompressExceptionList } from '../../../exceptions/fetch_endpoint_exceptions';
 
-const mockArtifactName = 'test-artifact-windows';
+const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
 const expectedEndpointExceptions = {
   exceptions_list: [
     {
@@ -66,7 +66,7 @@ describe('test alerts route', () => {
 
   it('should serve the compressed artifact to download', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
-      path: '/api/endpoint/allowlist/download/123456',
+      path: `/api/endpoint/allowlist/download/${mockArtifactName}/123456`,
       method: 'get',
     });
 
@@ -87,11 +87,8 @@ describe('test alerts route', () => {
       },
     };
 
-    const soFindResp: SavedObjectsFindResponse<unknown> = {
-      page: 1,
-      per_page: 1,
-      saved_objects: [mockArtifact],
-      total: 1,
+    const soFindResp: SavedObject<unknown> = {
+      ...mockArtifact,
     };
 
     mockSavedObjectClient.find.mockImplementationOnce(() => Promise.resolve(soFindResp));

@@ -5,11 +5,6 @@
  */
 
 export interface DownloadExceptionListRequestParams {
-  // TODO: this should probably be id?
+  artifactName: string;
   sha256: string;
-}
-
-export interface GetExceptionListManifestRequestParams {
-  manifestVersion: string;
-  schemaVersion: string;
 }

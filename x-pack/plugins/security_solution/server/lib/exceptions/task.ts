@@ -68,34 +68,37 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
     const exceptionListClient = context.lists.getExceptionListClient(soClient, 'kibana');
 
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
-      const exceptions = await GetFullEndpointExceptionList(exceptionListClient, os);
-      const compressedExceptions: Buffer = await CompressExceptionList(exceptions);
-
-      const sha256Hash = createHash('sha256')
-        .update(compressedExceptions.toString('utf8'), 'utf8')
-        .digest('hex');
-
       for (const schemaVersion of ArtifactConstants.SUPPORTED_SCHEMA_VERSIONS) {
-        const artifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}`;
-        const exceptionSO = {
-          name: artifactName,
-          schemaVersion,
-          sha256: sha256Hash,
-          encoding: 'xz',
-          created: Date.now(),
-          body: compressedExceptions.toString('binary'),
-          size: Buffer.from(JSON.stringify(exceptions)).byteLength,
-        };
+        const artifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`;
 
         try {
+          const exceptions = await GetFullEndpointExceptionList(
+            exceptionListClient,
+            os,
+            schemaVersion
+          );
+          const compressedExceptions: Buffer = await CompressExceptionList(exceptions);
+
+          const sha256Hash = createHash('sha256')
+            .update(compressedExceptions.toString('utf8'), 'utf8')
+            .digest('hex');
+
+          const exceptionSO = {
+            name: artifactName,
+            schemaVersion,
+            sha256: sha256Hash,
+            encoding: 'xz',
+            created: Date.now(),
+            body: compressedExceptions.toString('binary'),
+            size: Buffer.from(JSON.stringify(exceptions)).byteLength,
+          };
+
           // Create the new artifact
-          // TODO: let id be auto-generated... revert to previous algorithm, doesn't need to be atomic.
           const soResponse = await soClient.create(
             ArtifactConstants.SAVED_OBJECT_TYPE,
             exceptionSO,
             { id: `${artifactName}-${sha256Hash}` }
           );
-          context.logger.debug(JSON.stringify(soResponse));
 
           // Clean up old artifacts
           const otherArtifacts = await soClient.find({
