@@ -46,10 +46,10 @@ export const ProcessDetails = memo(function ProcessDetails({
   processEvent: ResolverEvent;
   pushToQueryParams: (arg0: CrumbInfo) => unknown;
 }) {
-  const processName = processEvent && event.eventName(processEvent);
+  const processName = event.eventName(processEvent);
   const processInfoEntry = useMemo(() => {
     let dateTime = '';
-    const eventTime = processEvent && event.eventTimestamp(processEvent);
+    const eventTime = event.eventTimestamp(processEvent);
     if (eventTime) {
       dateTime = formatDate(eventTime);
     }
