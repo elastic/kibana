@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiCodeEditor,
   EuiSpacer,
+  EuiFilePicker,
 } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import React, { useState, useEffect } from 'react';
@@ -136,7 +137,6 @@ storiesOf(STORYBOOK_PATH, module).add(
           </EuiFlexGroup>
           <EuiSpacer />
           <EuiCodeEditor
-            isInvalid={true}
             mode="json"
             theme="github"
             width="100%"
@@ -147,14 +147,23 @@ storiesOf(STORYBOOK_PATH, module).add(
             }}
           />
           <EuiSpacer />
-          <input
-            type="file"
+          <EuiFilePicker
+            display={'large'}
+            fullWidth={true}
+            initialPromptText="Upload a JSON file"
             onChange={(event) => {
-              const f = new FileReader();
-              f.onload = (onloadEvent) => {
-                setJson(onloadEvent.currentTarget.result);
-              };
-              f.readAsText(event.target.files[0]);
+              const item = event?.item(0);
+
+              if (item) {
+                const f = new FileReader();
+                f.onload = (onloadEvent) => {
+                  const result = onloadEvent?.target?.result;
+                  if (typeof result === 'string') {
+                    setJson(result);
+                  }
+                };
+                f.readAsText(item);
+              }
             }}
           />
         </EuiForm>
