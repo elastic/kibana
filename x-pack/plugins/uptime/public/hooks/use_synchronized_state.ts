@@ -8,12 +8,11 @@ import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { parse } from 'query-string';
-import { dateRangeSelector, uiSelector } from '../state/selectors';
-import { setDateRange, setUiState } from '../state/actions';
+import { uiSelector } from '../state/selectors';
+import { setUiState } from '../state/actions';
 import { getSupportedUrlParams, UptimeUrlParams } from '../lib/helper';
 import { useUrlParams } from './use_url_params';
 import { UiState } from '../state/reducers/ui';
-import { OverviewFiltersState } from '../state/reducers/overview_filters';
 
 const resolveUrlUpdates = (
   params: UptimeUrlParams,
@@ -99,10 +98,8 @@ const resolveStateChanges = (params: UptimeUrlParams, storeState: UiState): Part
 export const useSynchronizedState = () => {
   const [get, set] = useUrlParams();
   const params = get();
-  // console.log('params', params);
   const history = useHistory();
   const storeState = useSelector(uiSelector);
-  const { autorefreshInterval, autorefreshIsPaused, dateRange } = storeState;
   const dispatch = useDispatch();
   useEffect(() => {
     const uiStateDelta = resolveStateChanges(params, storeState);
@@ -124,14 +121,6 @@ export const useSynchronizedState = () => {
       if (Object.keys(uiStateDelta).length > 0) {
         dispatch(setUiState(uiStateDelta));
       }
-      // if (
-      //   dateRange.from !== supportedParams.dateRangeStart ||
-      //   dateRange.to !== supportedParams.dateRangeEnd
-      // ) {
-      //   dispatch(
-      //     setDateRange({ from: supportedParams.dateRangeStart, to: supportedParams.dateRangeEnd })
-      //   );
-      // }
     });
   }, [dispatch, storeState, history]);
 
@@ -141,21 +130,4 @@ export const useSynchronizedState = () => {
       set(urlStateDelta);
     }
   }, [params, storeState, set]);
-
-  // useEffect(() => {
-  //   if (params.dateRangeStart !== dateRange.from || params.dateRangeEnd !== dateRange.to) {
-  //     set({
-  //       dateRangeStart: dateRange.from,
-  //       dateRangeEnd: dateRange.to,
-  //     });
-  //   }
-  // }, [dateRange, params, set]);
-
-  // useEffect(() => {
-  //   if (params.autorefreshInterval !== autorefreshInterval) {
-  //     set({
-  //       autorefreshInterval,
-  //     });
-  //   }
-  // });
 };

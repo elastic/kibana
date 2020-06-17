@@ -107,6 +107,9 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         },
       ]
     }
+    max={1548700620000}
+    min={1548697620000}
+    updateDateRange={[MockFunction]}
   />
 </ContextProvider>
 `;

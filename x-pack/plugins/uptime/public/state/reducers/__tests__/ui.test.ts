@@ -24,6 +24,11 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          autorefreshInterval: 60000,
+          autorefreshIsPaused: false,
+          dateRange: { from: 'now-15m', to: 'now' },
+          statusFilter: '',
+          selectedFilters: '',
         },
         action
       )
@@ -43,6 +48,11 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          autorefreshInterval: 60000,
+          autorefreshIsPaused: false,
+          dateRange: { from: 'now-15m', to: 'now' },
+          statusFilter: '',
+          selectedFilters: '',
         },
         action
       )
@@ -59,16 +69,29 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          autorefreshInterval: 60000,
+          autorefreshIsPaused: false,
+          dateRange: { from: 'now-15m', to: 'now' },
+          statusFilter: '',
+          selectedFilters: '',
         },
         action
       )
     ).toMatchInlineSnapshot(`
       Object {
         "alertFlyoutVisible": true,
+        "autorefreshInterval": 60000,
+        "autorefreshIsPaused": false,
         "basePath": "",
+        "dateRange": Object {
+          "from": "now-15m",
+          "to": "now",
+        },
         "esKuery": "",
         "integrationsPopoverOpen": null,
         "searchText": "",
+        "selectedFilters": "",
+        "statusFilter": "",
       }
     `);
   });
@@ -83,16 +106,29 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          autorefreshInterval: 60000,
+          autorefreshIsPaused: false,
+          dateRange: { from: 'now-15m', to: 'now' },
+          statusFilter: '',
+          selectedFilters: '',
         },
         action
       )
     ).toMatchInlineSnapshot(`
       Object {
         "alertFlyoutVisible": false,
+        "autorefreshInterval": 60000,
+        "autorefreshIsPaused": false,
         "basePath": "",
+        "dateRange": Object {
+          "from": "now-15m",
+          "to": "now",
+        },
         "esKuery": "",
         "integrationsPopoverOpen": null,
         "searchText": "lorem ipsum",
+        "selectedFilters": "",
+        "statusFilter": "",
       }
     `);
   });
