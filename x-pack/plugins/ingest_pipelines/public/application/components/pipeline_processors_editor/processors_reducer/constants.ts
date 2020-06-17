@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  ProcessorSettingsForm,
-  ProcessorSettingsFromOnSubmitArg,
-  OnSubmitHandler,
-} from './processor_settings_form.container';
+export const PROCESSOR_STATE_SCOPE = 'processors';
+export const ON_FAILURE_STATE_SCOPE = 'onFailure';
