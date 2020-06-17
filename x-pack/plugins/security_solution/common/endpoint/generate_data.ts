@@ -514,7 +514,7 @@ export class EndpointDocGenerator {
         domain: this.randomString(10),
         name: this.randomString(10),
       },
-    };
+    } as EndpointEvent;
   }
 
   /**
