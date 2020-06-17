@@ -102,7 +102,15 @@ export const EventColumnView = React.memo<Props>(
       setPopover(false);
     }, []);
 
-    const button = <EuiButtonIcon size="s" iconType="boxesHorizontal" onClick={onButtonClick} />;
+    const button = (
+      <EuiButtonIcon
+        data-test-subj="timeline-context-menu-button"
+        size="s"
+        iconType="boxesHorizontal"
+        onClick={onButtonClick}
+      />
+    );
+
     const onClickCb = useCallback((cb: () => void) => {
       cb();
       closePopover();

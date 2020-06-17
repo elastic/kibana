@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import Fs from 'fs';
 import Path from 'path';
 
-import normalizePath from 'normalize-path';
 import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
 // @ts-ignore
@@ -32,88 +30,22 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { Bundle, BundleRefs, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { BundleRefsPlugin } from './bundle_refs_plugin';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
-const SHARED_BUNDLES = [
-  {
-    type: 'entry',
-    id: 'core',
-    rootRelativeDir: 'src/core/public',
-  },
-  {
-    type: 'plugin',
-    id: 'data',
-    rootRelativeDir: 'src/plugins/data/public',
-  },
-  {
-    type: 'plugin',
-    id: 'kibanaReact',
-    rootRelativeDir: 'src/plugins/kibana_react/public',
-  },
-  {
-    type: 'plugin',
-    id: 'kibanaUtils',
-    rootRelativeDir: 'src/plugins/kibana_utils/public',
-  },
-  {
-    type: 'plugin',
-    id: 'esUiShared',
-    rootRelativeDir: 'src/plugins/es_ui_shared/public',
-  },
-];
-
-/**
- * Determine externals statements for require/import statements by looking
- * for requests resolving to the primary public export of the data, kibanaReact,
- * amd kibanaUtils plugins. If this module is being imported then rewrite
- * the import to access the global `__kbnBundles__` variables and access
- * the relavent properties from that global object.
- *
- * @param bundle
- * @param context the directory containing the module which made `request`
- * @param request the request for a module from a commonjs require() call or import statement
- */
-function dynamicExternals(bundle: Bundle, context: string, request: string) {
-  // ignore imports that have loaders defined or are not relative seeming
-  if (request.includes('!') || !request.startsWith('.')) {
-    return;
-  }
-
-  // determine the most acurate resolution string we can without running full resolution
-  const rootRelative = normalizePath(
-    Path.relative(bundle.sourceRoot, Path.resolve(context, request))
-  );
-  for (const sharedBundle of SHARED_BUNDLES) {
-    if (
-      rootRelative !== sharedBundle.rootRelativeDir ||
-      `${bundle.type}/${bundle.id}` === `${sharedBundle.type}/${sharedBundle.id}`
-    ) {
-      continue;
-    }
-
-    return `__kbnBundles__['${sharedBundle.type}/${sharedBundle.id}']`;
-  }
-
-  // import doesn't match a root public import
-  return undefined;
-}
-
-export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
-  const extensions = ['.js', '.ts', '.tsx', '.json'];
-  const entryExtension = extensions.find((ext) =>
-    Fs.existsSync(Path.resolve(bundle.contextDir, bundle.entry) + ext)
-  );
+export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
+  const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
     node: { fs: 'empty' },
     context: bundle.contextDir,
     cache: true,
     entry: {
-      [bundle.id]: `${bundle.entry}${entryExtension}`,
+      [bundle.id]: ENTRY_CREATOR,
     },
 
     devtool: worker.dist ? false : '#cheap-source-map',
@@ -128,27 +60,19 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           info.absoluteResourcePath
         )}${info.query}`,
       jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
-      // When the entry point is loaded, assign it's default export
-      // to a key on the global `__kbnBundles__` object.
-      library: ['__kbnBundles__', `${bundle.type}/${bundle.id}`],
     },
 
     optimization: {
       noEmitOnErrors: true,
     },
 
-    externals: [
-      UiSharedDeps.externals,
-      function (context, request, cb) {
-        try {
-          cb(undefined, dynamicExternals(bundle, context, request));
-        } catch (error) {
-          cb(error, undefined);
-        }
-      },
-    ],
+    externals: [UiSharedDeps.externals],
 
-    plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
+    plugins: [
+      new CleanWebpackPlugin(),
+      new DisallowedSyntaxPlugin(),
+      new BundleRefsPlugin(bundle, bundleRefs),
+    ],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements
@@ -157,16 +81,39 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       noParse: [
         /[\/\\]node_modules[\/\\]elasticsearch-browser[\/\\]/,
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega-lib[\/\\]build[\/\\]vega\.js$/,
+        /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
       ],
 
       rules: [
         {
-          include: [`${Path.resolve(bundle.contextDir, bundle.entry)}${entryExtension}`],
-          loader: UiSharedDeps.publicPathLoader,
-          options: {
-            key: bundle.id,
-          },
+          include: [ENTRY_CREATOR],
+          use: [
+            {
+              loader: UiSharedDeps.publicPathLoader,
+              options: {
+                key: bundle.id,
+              },
+            },
+            {
+              loader: require.resolve('val-loader'),
+              options: {
+                entries: bundle.publicDirNames.map((name) => {
+                  const absolute = Path.resolve(bundle.contextDir, name);
+                  const newContext = Path.dirname(ENTRY_CREATOR);
+                  const importId = `${bundle.type}/${bundle.id}/${name}`;
+
+                  // relative path from context of the ENTRY_CREATOR, with linux path separators
+                  let requirePath = Path.relative(newContext, absolute).split('\\').join('/');
+                  if (!requirePath.startsWith('.')) {
+                    // ensure requirePath is identified by node as relative
+                    requirePath = `./${requirePath}`;
+                  }
+
+                  return { importId, requirePath };
+                }),
+              },
+            },
+          ],
         },
         {
           test: /\.css$/,
@@ -310,7 +257,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     },
 
     resolve: {
-      extensions,
+      extensions: ['.js', '.ts', '.tsx', 'json'],
       mainFields: ['browser', 'main'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),

@@ -11,6 +11,7 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
   TestProviders,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
@@ -30,7 +31,7 @@ jest.mock('../../../../common/lib/kibana', () => {
       services: {
         application: {
           capabilities: {
-            securitySolution: {
+            siem: {
               crud: true,
             },
           },
@@ -97,12 +98,14 @@ const defaultProps = {
 };
 describe('Properties', () => {
   const state: State = mockGlobalState;
+  const { storage } = createSecuritySolutionStorageMock();
   let mockedWidth = 1000;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
     (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: mockedWidth });
   });
 

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ITransactionGroup } from '../../../../server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
-import { convertTo } from '../../../utils/formatters';
+import { asMillisecondDuration } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
@@ -67,11 +67,7 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (time: number) =>
-      convertTo({
-        unit: 'milliseconds',
-        microseconds: time,
-      }).formatted,
+    render: (time: number) => asMillisecondDuration(time),
   },
   {
     field: 'transactionsPerMinute',

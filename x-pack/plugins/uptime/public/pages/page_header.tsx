@@ -19,6 +19,7 @@ interface PageHeaderProps {
   extraLinks?: boolean;
   datePicker?: boolean;
 }
+
 const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
   defaultMessage: 'Settings',
 });
@@ -41,6 +42,10 @@ const StyledPicker = styled(EuiFlexItem)`
       }
     }
   }
+`;
+
+const H1Text = styled.h1`
+  white-space: nowrap;
 `;
 
 export const PageHeader = React.memo(
@@ -89,7 +94,7 @@ export const PageHeader = React.memo(
         >
           <EuiFlexItem grow={true}>
             <EuiTitle>
-              <h1>{headingText}</h1>
+              <H1Text>{headingText}</H1Text>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{extraLinkComponents}</EuiFlexItem>
