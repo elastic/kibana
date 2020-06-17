@@ -114,7 +114,7 @@ const mapProcessorTypeToFormOrDocPath: Record<string, FieldsFormDescriptor> = {
   geoip: {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/geoip-processor.html',
-    label: i18n.translate('xpack.ingestPipelines.processors.label.foreach', {
+    label: i18n.translate('xpack.ingestPipelines.processors.label.geoip', {
       defaultMessage: 'GeoIP',
     }),
   },
