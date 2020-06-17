@@ -205,7 +205,9 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     ];
   }, [pushToQueryParams, eventsString]);
 
-  const { subject, descriptor = '' } = event.descriptiveName(relatedEventToShowDetailsFor!);
+  const { subject = '', descriptor = '' } = relatedEventToShowDetailsFor
+    ? event.descriptiveName(relatedEventToShowDetailsFor)
+    : {};
   const crumbs = useMemo(() => {
     return [
       {
