@@ -50,6 +50,10 @@ export interface ResolverUIState {
    * The entity_id of the process for the resolver's currently selected descendant.
    */
   readonly processEntityIdOfSelectedDescendant: string | null;
+  /**
+   * Which panel the ui should display
+   */
+  readonly panelToDisplay: string | null;
 }
 
 /**

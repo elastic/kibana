@@ -39,3 +39,8 @@ export const selectedDescendantProcessId = createSelector(
     return processEntityIdOfSelectedDescendant;
   }
 );
+
+// Select the current panel to be displayed
+export const currentPanelView = (uiState: ResolverUIState) => {
+  return uiState.panelToDisplay;
+};
