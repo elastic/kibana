@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, CSSProperties, useState, MouseEvent } from 'react';
 import {
   EuiBasicTable,
   EuiText,
@@ -469,7 +469,7 @@ PolicyList.displayName = 'PolicyList';
 
 const EmptyPolicyTable = React.memo<{
   loading: boolean;
-  onActionClick: () => void;
+  onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled: boolean;
 }>(({ loading, onActionClick, actionDisabled }) => {
   const policySteps = [
