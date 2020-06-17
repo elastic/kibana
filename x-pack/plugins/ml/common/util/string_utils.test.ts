@@ -48,8 +48,10 @@ describe('ML - string utils', () => {
   });
 
   describe('stringHash', () => {
-    test('should return a number based off a string', () => {
-      expect(typeof stringHash('the-string')).toBe('number');
+    test('should return a unique number based off a string', () => {
+      const hash1 = stringHash('the-string-1');
+      const hash2 = stringHash('the-string-2');
+      expect(hash1).not.toBe(hash2);
     });
   });
 });
