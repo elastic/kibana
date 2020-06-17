@@ -6,48 +6,36 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  Axis,
-  Chart,
-  ScaleType,
-  LineSeries,
-  CurveType,
-  BrushEndListener,
-  Settings,
-  TooltipValueFormatter,
-  TooltipValue,
-} from '@elastic/charts';
-import { Position } from '@elastic/charts/dist/utils/commons';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { ChartWrapper } from '../ChartWrapper';
-import { PercentileAnnotations } from './PercentileAnnotations';
-import {
-  PageLoadDistLabel,
-  PageLoadTimeLabel,
-  PercPageLoadedLabel,
-  ResetZoomLabel,
-} from '../translations';
+import { PageLoadDistLabel, ResetZoomLabel } from '../translations';
 import { BreakdownFilter } from '../BreakdownFilter';
+import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
+
+export interface PercentileR {
+  min: string | null;
+  max: string | null;
+}
 
 export const PageLoadDistribution = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end } = urlParams;
 
-  const [percentileRange, setPercentileRange] = useState<{
-    min: string | null;
-    max: string | null;
-  }>({
+  const [percentileRange, setPercentileRange] = useState<PercentileR>({
     min: null,
     max: null,
   });
+
+  const [breakdowns, setBreakdowns] = useState<Map<string, string[]>>(
+    new Map()
+  );
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -73,24 +61,12 @@ export const PageLoadDistribution = () => {
     [end, start, uiFilters, percentileRange.min, percentileRange.max]
   );
 
-  const onBrushEnd: BrushEndListener = ({ x }) => {
-    if (!x) {
-      return;
-    }
-    const [minX, maxX] = x;
-    setPercentileRange({ min: String(minX), max: String(maxX) });
+  const onPercentileChange = (min: number, max: number) => {
+    setPercentileRange({ min: String(min), max: String(max) });
   };
 
-  const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
-    return (
-      <div>
-        <p>{tooltip.value} seconds</p>
-      </div>
-    );
-  };
-
-  const tooltipProps = {
-    headerFormatter,
+  const onBreakdownChange = (values: Map<string, string[]>) => {
+    setBreakdowns(values);
   };
 
   return (
@@ -103,47 +79,34 @@ export const PageLoadDistribution = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonEmpty
             iconType="inspect"
             size="s"
             onClick={() => {
               setPercentileRange({ min: null, max: null });
             }}
-            fill={percentileRange.min !== null && percentileRange.max !== null}
+            disabled={
+              percentileRange.min === null && percentileRange.max === null
+            }
           >
             {ResetZoomLabel}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <BreakdownFilter fieldName="pageLoadBreakdown" />
+          <BreakdownFilter
+            fieldName="pageLoadBreakdown"
+            onBreakdownChange={onBreakdownChange}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <ChartWrapper loading={status !== 'success'} height="200px">
-        <Chart className="story-chart">
-          <Settings onBrushEnd={onBrushEnd} tooltip={tooltipProps} />
-          <PercentileAnnotations percentiles={data?.percentiles} />
-          <Axis
-            id="bottom"
-            title={PageLoadTimeLabel}
-            position={Position.Bottom}
-          />
-          <Axis
-            id="left"
-            title={PercPageLoadedLabel}
-            position={Position.Left}
-            tickFormat={(d) => Number(d).toFixed(1) + ' %'}
-          />
-          <LineSeries
-            id={'PagesPercentage'}
-            name={PercPageLoadedLabel}
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            data={data?.pageLoadDistribution ?? []}
-            curve={CurveType.CURVE_NATURAL}
-          />
-        </Chart>
-      </ChartWrapper>
+      <PageLoadDistChart
+        data={data}
+        onPercentileChange={onPercentileChange}
+        loading={status !== 'success'}
+        breakdowns={breakdowns}
+        percentileRange={percentileRange}
+      />
     </div>
   );
 };

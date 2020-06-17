@@ -23,6 +23,7 @@ export interface FilterPopoverProps {
   btnContent?: JSX.Element;
   forceOpen?: boolean;
   setForceOpen?: (val: boolean) => void;
+  size?: string;
 }
 
 const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>
@@ -40,6 +41,7 @@ export const FilterPopover = ({
   btnContent,
   forceOpen,
   setForceOpen,
+  size,
 }: FilterPopoverProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [itemsToDisplay, setItemsToDisplay] = useState<string[]>([]);
@@ -79,6 +81,7 @@ export const FilterPopover = ({
               onFilterFieldChange(fieldName, tempSelectedItems);
             }}
             title={title}
+            size={size}
           />
         )
       }

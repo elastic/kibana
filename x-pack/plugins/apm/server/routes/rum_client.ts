@@ -60,10 +60,19 @@ export const breakdownFiltersRoute = createRoute(() => ({
 export const rumPageViewsTrendRoute = createRoute(() => ({
   path: '/api/apm/rum-client/page-view-trends',
   params: {
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.partial({ breakdowns: t.string }),
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return getPageViewTrends({ setup });
+
+    const {
+      query: { breakdowns },
+    } = context.params;
+
+    return getPageViewTrends({ setup, breakdowns });
   },
 }));

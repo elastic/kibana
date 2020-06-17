@@ -14,12 +14,30 @@ import {
 
 export async function getPageViewTrends({
   setup,
+  breakdowns,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  breakdowns: string;
 }) {
   const projection = getRumOverviewProjection({
     setup,
   });
+  const breakdownAggs: any = {};
+  if (breakdowns) {
+    const breakdownMap: Map<string, string[]> = new Map(JSON.parse(breakdowns));
+    Array.from(breakdownMap.keys()).map((field) => {
+      const values = breakdownMap.get(field);
+      values.forEach((value) => {
+        breakdownAggs[field + '__' + value] = {
+          filter: {
+            term: {
+              [field]: value,
+            },
+          },
+        };
+      });
+    });
+  }
 
   const params = mergeProjection(projection, {
     body: {
@@ -39,6 +57,7 @@ export async function getPageViewTrends({
                 field: 'transaction.type',
               },
             },
+            ...breakdownAggs,
           },
         },
       },
@@ -50,8 +69,15 @@ export async function getPageViewTrends({
   const response = await client.search(params);
 
   const result = response.aggregations?.pageViews.buckets ?? [];
-  return result.map(({ key, trans_count }) => ({
-    x: key,
-    y: trans_count.value,
-  }));
+  return result.map(({ key: xVal, trans_count, ...rest }) => {
+    const res = {
+      x: xVal,
+      y: trans_count.value,
+    };
+    Object.keys(breakdownAggs).forEach((key) => {
+      res[key] = rest[key]?.doc_count;
+    });
+
+    return res;
+  });
 }

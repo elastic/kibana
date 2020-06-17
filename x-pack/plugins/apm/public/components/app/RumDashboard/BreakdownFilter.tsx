@@ -5,7 +5,6 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFilterButton } from '@elastic/eui';
 import { FilterPopover } from '../../../../../uptime/public';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
@@ -13,17 +12,19 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
 interface Props {
   fieldName: string;
+  onBreakdownChange: (values: Map<string, string[]>) => void;
 }
 
-export const BreakdownFilter = ({ fieldName }: Props) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+export const BreakdownFilter = ({ fieldName, onBreakdownChange }: Props) => {
+  const [selectedFilters, setSelectedFilters] = useState<Set<string>>(
+    new Set([])
+  );
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['transactionUrl', 'location', 'device', 'os', 'browser'],
       projection: PROJECTION.RUM_OVERVIEW,
+      params: { uiFilters: '{}' },
     };
 
     return config;
@@ -31,7 +32,7 @@ export const BreakdownFilter = ({ fieldName }: Props) => {
 
   const { filters } = useLocalUIFilters(localUIFiltersConfig);
 
-  const items = [];
+  const items: string[] = [];
 
   filters.forEach(({ options }) => {
     options.forEach(({ name }) => {
@@ -39,19 +40,28 @@ export const BreakdownFilter = ({ fieldName }: Props) => {
     });
   });
 
-  const button = (
-    <EuiFilterButton
-      iconType="arrowDown"
-      onClick={() => setIsOpen(!isOpen)}
-      isSelected={isOpen}
-      numFilters={items.length}
-      hasActiveFilters={true}
-      numActiveFilters={2}
-      withNext={false}
-    >
-      Breakdown
-    </EuiFilterButton>
-  );
+  const onFilterFieldChange = (field: string, selValues: string[]) => {
+    setSelectedFilters((prevState) => {
+      return new Set<string>(selValues);
+    });
+
+    const newValues: Map<string, string[]> = new Map();
+
+    filters.forEach(({ options, fieldName: fieldLabel }) => {
+      const selItems: string[] = [];
+
+      options.forEach(({ name }) => {
+        if (selValues.includes(name)) {
+          selItems.push(name);
+        }
+      });
+
+      if (selItems.length > 0) {
+        newValues.set(fieldLabel, selItems);
+      }
+    });
+    onBreakdownChange(newValues);
+  };
 
   return (
     <FilterPopover
@@ -59,14 +69,10 @@ export const BreakdownFilter = ({ fieldName }: Props) => {
       id={fieldName}
       items={items}
       loading={false}
-      onFilterFieldChange={() => {}}
+      onFilterFieldChange={onFilterFieldChange}
       selectedItems={[]}
-      title={''}
-      btnContent={button}
-      forceOpen={isOpen}
-      setForceOpen={() => {
-        setIsOpen(!isOpen);
-      }}
+      title={'Breakdown'}
+      size={'s'}
     />
   );
 };

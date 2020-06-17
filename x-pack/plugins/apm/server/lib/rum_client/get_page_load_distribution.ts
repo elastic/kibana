@@ -89,7 +89,7 @@ const getPercentilesDistribution = async (
 ) => {
   const stepValue = (maxPercentile - minPercentiles) / 50;
   const stepValues = [];
-  for (let i = 1; i < 50; i++) {
+  for (let i = 1; i < 51; i++) {
     stepValues.push((stepValue * i + minPercentiles).toFixed(2));
   }
 

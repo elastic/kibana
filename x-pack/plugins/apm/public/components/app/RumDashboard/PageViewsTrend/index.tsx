@@ -4,33 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import {
-  Axis,
-  BarSeries,
-  BrushEndListener,
-  Chart,
-  niceTimeFormatByDay,
-  ScaleType,
-  Settings,
-  timeFormatter,
-} from '@elastic/charts';
-import moment from 'moment';
-import { Position } from '@elastic/charts/dist/utils/commons';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { ChartWrapper } from '../ChartWrapper';
-import { DateTimeLabel, PageViewsLabel } from '../translations';
-import { history } from '../../../../utils/history';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { formatBigValue } from '../ClientMetrics';
+import { PageViewsLabel } from '../translations';
+import { BreakdownFilter } from '../BreakdownFilter';
+import { PageViewsChart } from '../Charts/PageViewsChart';
 
 export const PageViewsTrend = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end } = urlParams;
+
+  const [breakdowns, setBreakdowns] = useState<Map<string, string[]>>(
+    new Map()
+  );
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -42,71 +31,48 @@ export const PageViewsTrend = () => {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
+              ...(breakdowns.size > 0
+                ? {
+                    breakdowns: JSON.stringify(
+                      Array.from(breakdowns.entries())
+                    ),
+                  }
+                : {}),
             },
           },
         });
       }
     },
-    [end, start, uiFilters]
+    [end, start, uiFilters, breakdowns]
   );
-  const formatter = timeFormatter(niceTimeFormatByDay(2));
 
-  const onBrushEnd: BrushEndListener = ({ x }) => {
-    if (!x) {
-      return;
-    }
-    const [minX, maxX] = x;
-
-    const rangeFrom = moment(minX).toISOString();
-    const rangeTo = moment(maxX).toISOString();
-
-    history.push({
-      ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        rangeFrom,
-        rangeTo,
-      }),
-    });
+  const onBreakdownChange = (values: Map<string, string[]>) => {
+    setBreakdowns(values);
   };
 
   return (
     <div>
       <EuiSpacer size="l" />
-      <EuiTitle size="s">
-        <h3>{PageViewsLabel}</h3>
-      </EuiTitle>
-      <ChartWrapper loading={status !== 'success'} height="200px">
-        <Chart>
-          <Settings
-            showLegend={false}
-            showLegendExtra
-            legendPosition={Position.Bottom}
-            onBrushEnd={onBrushEnd}
+
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>{PageViewsLabel}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BreakdownFilter
+            fieldName="pageLoadBreakdown"
+            onBreakdownChange={onBreakdownChange}
           />
-          <Axis
-            id="date_time"
-            position={Position.Bottom}
-            title={DateTimeLabel}
-            tickFormat={formatter}
-          />
-          <Axis
-            id="page_views"
-            title={PageViewsLabel}
-            position={Position.Left}
-            tickFormat={(d) => formatBigValue(Number(d))}
-          />
-          <BarSeries
-            id={PageViewsLabel}
-            color={[euiLightVars.euiColorLightShade]}
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={data ?? []}
-          />
-        </Chart>
-      </ChartWrapper>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <PageViewsChart
+        data={data}
+        loading={status !== 'success'}
+        breakdowns={breakdowns}
+      />
     </div>
   );
 };

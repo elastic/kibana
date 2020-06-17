@@ -33,7 +33,7 @@ export function RumDashboard() {
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <ClientMetrics />
         </EuiFlexItem>
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem grow={4}>
           <PageLoadDistribution />
           <EuiSpacer size="xxl" />
           <PageViewsTrend />

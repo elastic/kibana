@@ -14,6 +14,7 @@ interface UptimeFilterButtonProps {
   numActiveFilters: number;
   onClick: () => void;
   title: string;
+  size?: string;
 }
 
 export const UptimeFilterButton = ({
@@ -23,6 +24,7 @@ export const UptimeFilterButton = ({
   numActiveFilters,
   onClick,
   title,
+  size = 'l',
 }: UptimeFilterButtonProps) => (
   <EuiFilterButton
     hasActiveFilters={numActiveFilters !== 0}
@@ -32,6 +34,7 @@ export const UptimeFilterButton = ({
     numActiveFilters={numActiveFilters}
     numFilters={numFilters}
     onClick={onClick}
+    size={size as const}
   >
     {title}
   </EuiFilterButton>
