@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "kibana_sample_data_logs",
+    "index": "ft_module_sample_logs",
     "mappings": {
       "properties": {
         "@timestamp": {
@@ -158,8 +158,7 @@
     },
     "settings": {
       "index": {
-        "auto_expand_replicas": "0-1",
-        "number_of_replicas": "0",
+        "number_of_replicas": "1",
         "number_of_shards": "1"
       }
     }
