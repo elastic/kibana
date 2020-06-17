@@ -9,7 +9,7 @@ https://github.com/elastic/dockerfiles/tree/{branch}/kibana[GitHub].
 
 These images are free to use under the Elastic license. They contain open source 
 and free commercial features and access to paid commercial features.  
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the 
+<<managing-licenses,Start a 30-day trial>> to try out all of the 
 paid commercial features. See the 
 https://www.elastic.co/subscriptions[Subscriptions] page for information about 
 Elastic license levels.
@@ -54,7 +54,7 @@ endif::[]
 
 The Docker images provide several methods for configuring Kibana. The
 conventional approach is to provide a `kibana.yml` file as described in
-{kibana-ref}/settings.html[Configuring Kibana], but it's also possible to use
+<<settings>>, but it's also possible to use
 environment variables to define settings.
 
 [float]

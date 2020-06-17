@@ -11,7 +11,7 @@ such as SLES 11 and CentOS 5.  Please see <<targz>> instead.
 
 This package is free to use under the Elastic license. It contains open source 
 and free commercial features and access to paid commercial features. 
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the 
+<<managing-licenses,Start a 30-day trial>> to try out all of the 
 paid commercial features. See the 
 https://www.elastic.co/subscriptions[Subscriptions] page for information about 
 Elastic license levels.
@@ -164,7 +164,7 @@ include::systemd.asciidoc[]
 
 Kibana loads its configuration from the `/etc/kibana/kibana.yml`
 file by default.  The format of this config file is explained in
-{kibana-ref}/settings.html[Configuring Kibana].
+<<settings>>.
 
 [[rpm-layout]]
 ==== Directory layout of RPM
