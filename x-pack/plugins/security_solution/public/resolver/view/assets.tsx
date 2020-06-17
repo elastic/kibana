@@ -417,6 +417,12 @@ const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
   unknownEvent: 'runningProcessCube',
 };
 
+/**
+ * This will return which type the ResolverEvent will display as in the Node component
+ * it will be something like 'runningProcessCube' or 'terminatedProcessCube'
+ *
+ * @param processEvent {ResolverEvent} the event to get the Resolver Component Node type of
+ */
 export function nodeType(processEvent: ResolverEvent): keyof NodeStyleMap {
   const processType = processModel.eventType(processEvent);
   if (processType in processTypeToCube) {
@@ -425,6 +431,9 @@ export function nodeType(processEvent: ResolverEvent): keyof NodeStyleMap {
   return 'runningProcessCube';
 }
 
+/**
+ * A hook to bring Resolver theming information into components.
+ */
 export const useResolverTheme = (): {
   colorMap: ColorMap;
   nodeAssets: NodeStyleMap;
