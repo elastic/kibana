@@ -40,13 +40,13 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
-      casesConfiguration: { mapping },
+      incidentConfiguration: { mapping },
     },
     secrets: {
       password: 'elastic',
       username: 'changeme',
     },
-    params: {
+    /* params: {
       subAction: 'pushToService',
       subActionParams: {
         savedObjectId: '123',
@@ -64,7 +64,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         comments: [
           {
             commentId: '456',
-            version: 'WzU3LDFd',
             comment: 'first comment',
             createdAt: '2020-03-13T08:34:53.450Z',
             createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -72,6 +71,29 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             updatedBy: null,
           },
         ],
+      },
+    },*/
+    params: {
+      subAction: 'pushToService',
+      subActionParams: {
+        savedObjectId: '123',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
+        comments: [
+          {
+            commentId: '456',
+            comment: 'first comment',
+            createdAt: '2020-03-13T08:34:53.450Z',
+            createdBy: { fullName: 'Elastic User', username: 'elastic' },
+            updatedAt: null,
+            updatedBy: null,
+          },
+        ],
+        description: 'a description',
+        externalId: null,
+        title: 'a title',
+        updatedAt: '2020-06-17T04:37:45.147Z',
+        updatedBy: { fullName: null, username: 'elastic' },
       },
     },
     consumer: 'case',
@@ -98,7 +120,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              casesConfiguration: mockServiceNow.config.casesConfiguration,
+              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
             },
             secrets: mockServiceNow.secrets,
             consumer: mockServiceNow.consumer,
@@ -112,7 +134,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            casesConfiguration: mockServiceNow.config.casesConfiguration,
+            incidentConfiguration: mockServiceNow.config.incidentConfiguration,
           },
           consumer: mockServiceNow.consumer,
         });
@@ -128,7 +150,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            casesConfiguration: mockServiceNow.config.casesConfiguration,
+            incidentConfiguration: mockServiceNow.config.incidentConfiguration,
           },
           consumer: mockServiceNow.consumer,
         });
@@ -164,7 +186,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: 'http://servicenow.mynonexistent.com',
-              casesConfiguration: mockServiceNow.config.casesConfiguration,
+              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
             },
             secrets: mockServiceNow.secrets,
             consumer: mockServiceNow.consumer,
@@ -189,7 +211,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              casesConfiguration: mockServiceNow.config.casesConfiguration,
+              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
             },
             consumer: mockServiceNow.consumer,
           })
@@ -204,7 +226,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action without casesConfiguration', async () => {
+      it('should create a servicenow action without incidentConfiguration', async () => {
         await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -217,15 +239,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             secrets: mockServiceNow.secrets,
             consumer: mockServiceNow.consumer,
           })
-          .expect(400)
-          .then((resp: any) => {
-            expect(resp.body).to.eql({
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'error validating action type config: [casesConfiguration.mapping]: expected value of type [array] but got [undefined]',
-            });
-          });
+          .expect(200);
       });
 
       it('should respond with a 400 Bad Request when creating a servicenow action with empty mapping', async () => {
@@ -237,7 +251,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              casesConfiguration: { mapping: [] },
+              incidentConfiguration: { mapping: [] },
             },
             secrets: mockServiceNow.secrets,
             consumer: mockServiceNow.consumer,
@@ -248,7 +262,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [casesConfiguration.mapping]: expected non-empty but got empty',
+                'error validating action type config: [incidentConfiguration.mapping]: expected non-empty but got empty',
             });
           });
       });
@@ -262,7 +276,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              casesConfiguration: {
+              incidentConfiguration: {
                 mapping: [
                   {
                     source: 'title',
@@ -290,7 +304,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              casesConfiguration: mockServiceNow.config.casesConfiguration,
+              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
             },
             secrets: mockServiceNow.secrets,
             consumer: mockServiceNow.consumer,
@@ -440,7 +454,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -468,7 +482,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
               });
             });
         });

@@ -38,15 +38,26 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
-      casesConfiguration: { mapping: [...mapping] },
+      incidentConfiguration: { mapping: [...mapping] },
     },
     secrets: {
       password: 'elastic',
       username: 'changeme',
     },
     params: {
-      comments: 'hello cool service now incident',
-      short_description: 'this is a cool service now incident',
+      savedObjectId: '123',
+      title: 'a title',
+      description: 'a description',
+      comment: 'test-alert comment',
+      severity: '1',
+      urgency: '2',
+      impact: '1',
+      comments: [
+        {
+          commentId: '456',
+          comment: 'first comment',
+        },
+      ],
     },
   };
   describe('servicenow', () => {
@@ -68,7 +79,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
+            incidentConfiguration: { ...mockServiceNow.config.incidentConfiguration },
           },
           secrets: mockServiceNow.secrets,
         })
