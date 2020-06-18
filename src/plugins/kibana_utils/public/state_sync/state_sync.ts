@@ -52,11 +52,12 @@ export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorag
 /**
  * Utility for syncing application state wrapped in state container
  * with some kind of storage (e.g. URL)
- * Refer {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples
+ *
+ * Go {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.
  *
  * @example
  *
- * 1. the simplest use case
+ * the simplest use case
  * ```ts
  * const stateStorage = createKbnUrlStateStorage();
  * syncState({
@@ -67,7 +68,7 @@ export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorag
  * ```
  *
  * @example
- * 2. conditionally configuring sync strategy
+ * conditionally configuring sync strategy
  * ```ts
  * const stateStorage = createKbnUrlStateStorage({useHash: config.get('state:stateContainerInSessionStorage')})
  * syncState({
@@ -78,7 +79,7 @@ export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorag
  * ```
  *
  * @example
- * 3. implementing custom sync strategy
+ * implementing custom sync strategy
  * ```ts
  * const localStorageStateStorage = {
  *   set: (storageKey, state) => localStorage.setItem(storageKey, JSON.stringify(state)),
@@ -92,7 +93,7 @@ export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorag
  * ```
  *
  * @example
- * 4. Transform state before serialising
+ * transform state before serialising
  *  Useful for:
  *  * Migration / backward compatibility
  *  * Syncing part of state
@@ -109,11 +110,6 @@ export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorag
  *   stateStorage
  * });
  * ```
- *
- * @remarks
- *
- * 1. It is responsibility of consumer to make sure that initial app state and storage are in sync before starting syncing
- *    No initial sync happens when syncState() is called
  *
  * @param - syncing config {@link IStateSyncConfig}
  * @returns - {@link ISyncStateRef}
