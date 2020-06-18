@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/run_telemetry_check');
+require('@kbn/telemetry-tools').runTelemetryCheck();

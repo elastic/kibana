@@ -22,7 +22,7 @@ import { parseTelemetryRC } from '../config';
 import { TaskContext } from './task_context';
 
 export function parseConfigsTask() {
-  const kibanaRoot = path.join(__dirname, '../../../../');
+  const kibanaRoot = process.cwd();
   const xpackRoot = path.join(kibanaRoot, 'x-pack');
 
   const configRoots = [kibanaRoot, xpackRoot];

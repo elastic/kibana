@@ -27,7 +27,7 @@ import {
   extractCollectorsTask,
   generateSchemasTask,
   writeToFileTask,
-} from './telemetry/tasks';
+} from '../tools/tasks';
 
 run(
   async ({ flags: {}, log }) => {

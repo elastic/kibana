@@ -16,26 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet } from '../../../plugins/usage_collection/server/collector';
-import { loggingServiceMock } from '../../../core/server/mocks';
-import { Usage } from './constants';
 
-const { makeUsageCollector } = new CollectorSet({
-  logger: loggingServiceMock.createLogger(),
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
-
-export const myCollector = makeUsageCollector<Usage>({
-  type: 'imported_usage_interface_collector',
-  isReady: () => true,
-  fetch() {
-    return {
-      locale: 'en',
-    };
-  },
-  schema: {
-    locale: {
-      type: 'keyword',
-    },
-  },
-});
+export { runTelemetryCheck } from './cli/run_telemetry_check';
+export { runTelemetryExtract } from './cli/run_telemetry_extract';

@@ -16,34 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
-import { loggingServiceMock } from '../../../core/server/mocks';
+import moment, { Moment } from 'moment';
+import { MakeSchemaFrom } from '../../../../src/plugins/usage_collection/server';
 
-const collectorSet = new CollectorSet({
-  logger: loggingServiceMock.createLogger(),
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
-
-interface Usage {
-  locale?: string;
+export interface Usage {
+  locale: string;
 }
 
-export class NestedInside {
-  collector?: UsageCollector<Usage, Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      isReady: () => true,
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      schema: {
-        locale: {
-          type: 'keyword',
-        },
-      },
-    });
-  }
+export interface WithUnion {
+  prop1: string | null;
+  prop2: string | null | undefined;
+  prop3?: string | null;
+  prop4: 'opt1' | 'opt2';
+  prop5: 123 | 431;
 }
+
+export interface WithMoment {
+  prop1: Moment;
+  prop2: moment.Moment;
+  prop3: Moment[];
+  prop4: Date[];
+}
+
+export interface WithConflictingUnion {
+  prop1: 123 | 'str';
+}
+
+export interface WithUnsupportedUnion {
+  prop1: 123 | Moment;
+}
+
+export const externallyDefinedSchema: MakeSchemaFrom<{ locale: string }> = {
+  locale: {
+    type: 'keyword',
+  },
+};

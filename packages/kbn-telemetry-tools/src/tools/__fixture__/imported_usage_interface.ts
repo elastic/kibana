@@ -16,26 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet } from '../../../plugins/usage_collection/server/collector';
-import { loggingServiceMock } from '../../../core/server/mocks';
-import { externallyDefinedSchema } from './constants';
+import { CollectorSet } from '../../../../src/plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../../src/core/server/mocks';
+import { Usage } from './constants';
 
 const { makeUsageCollector } = new CollectorSet({
   logger: loggingServiceMock.createLogger(),
   maximumWaitTimeForAllCollectorsInS: 0,
 });
 
-interface Usage {
-  locale?: string;
-}
-
 export const myCollector = makeUsageCollector<Usage>({
-  type: 'with_imported_schema',
+  type: 'imported_usage_interface_collector',
   isReady: () => true,
-  schema: externallyDefinedSchema,
-  fetch(): Usage {
+  fetch() {
     return {
       locale: 'en',
     };
+  },
+  schema: {
+    locale: {
+      type: 'keyword',
+    },
   },
 });

@@ -18,7 +18,7 @@
  */
 
 import { ParsedUsageCollection } from './ts_parser';
-import { AllowedSchemaTypes } from '../../plugins/usage_collection/server';
+import { AllowedSchemaTypes } from '../../../src/plugins/usage_collection/server';
 
 export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
   switch (type) {

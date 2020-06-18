@@ -16,6 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CollectorSet } from '../../../../src/plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../../src/core/server/mocks';
 
-require('../src/setup_node_env');
-require('@kbn/telemetry-tools').runTelemetryExtract();
+const { makeUsageCollector } = new CollectorSet({
+  logger: loggingServiceMock.createLogger(),
+  maximumWaitTimeForAllCollectorsInS: 0,
+});
+
+interface Usage {
+  locale: string;
+}
+
+export const myCollector = makeUsageCollector<Usage>({
+  type: 'unmapped_collector',
+  isReady: () => true,
+  fetch(): Usage {
+    return {
+      locale: 'en',
+    };
+  },
+});

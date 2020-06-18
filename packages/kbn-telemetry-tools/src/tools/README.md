@@ -82,7 +82,7 @@ Currently auto-fixer (`--fix`) can automatically fix the json files with the fol
 ### Usage
 
 ```bash
-node scripts/telemetry_check --path src/plugins/my_plugin --fix
+node scripts/telemetry_check --fix
 ```
 
 * `--path` specifies a collector path instead of checking all collectors specified in the `.telemetryrc.json` files. Accepts a `.ts` file. The file must be discoverable by at least one rc file.

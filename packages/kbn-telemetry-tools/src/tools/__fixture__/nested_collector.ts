@@ -16,8 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, CollectorOptions } from '../../../plugins/usage_collection/server/collector';
-import { loggingServiceMock } from '../../../core/server/mocks';
+import {
+  CollectorSet,
+  UsageCollector,
+} from '../../../../src/plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../../src/core/server/mocks';
 
 const collectorSet = new CollectorSet({
   logger: loggingServiceMock.createLogger(),
@@ -25,47 +28,25 @@ const collectorSet = new CollectorSet({
 });
 
 interface Usage {
-  locale: string;
+  locale?: string;
 }
 
-function createCollector(): CollectorOptions<Usage> {
-  return {
-    type: 'from_fn_collector',
-    isReady: () => true,
-    fetch(): Usage {
-      return {
-        locale: 'en',
-      };
-    },
-    schema: {
-      locale: {
-        type: 'keyword',
+export class NestedInside {
+  collector?: UsageCollector<Usage, Usage>;
+  createMyCollector() {
+    this.collector = collectorSet.makeUsageCollector<Usage>({
+      type: 'my_nested_collector',
+      isReady: () => true,
+      fetch: async () => {
+        return {
+          locale: 'en',
+        };
       },
-    },
-  };
-}
-
-export function defineCollectorFromVariable() {
-  const fromVarCollector: CollectorOptions<Usage> = {
-    type: 'from_variable_collector',
-    isReady: () => true,
-    fetch(): Usage {
-      return {
-        locale: 'en',
-      };
-    },
-    schema: {
-      locale: {
-        type: 'keyword',
+      schema: {
+        locale: {
+          type: 'keyword',
+        },
       },
-    },
-  };
-
-  collectorSet.makeUsageCollector<Usage>(fromVarCollector);
-}
-
-export function defineCollectorFromFn() {
-  const fromFnCollector = createCollector();
-
-  collectorSet.makeUsageCollector<Usage>(fromFnCollector);
+    });
+  }
 }

@@ -16,38 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import moment, { Moment } from 'moment';
-import { MakeSchemaFrom } from '../../../plugins/usage_collection/server';
 
-export interface Usage {
-  locale: string;
-}
-
-export interface WithUnion {
-  prop1: string | null;
-  prop2: string | null | undefined;
-  prop3?: string | null;
-  prop4: 'opt1' | 'opt2';
-  prop5: 123 | 431;
-}
-
-export interface WithMoment {
-  prop1: Moment;
-  prop2: moment.Moment;
-  prop3: Moment[];
-  prop4: Date[];
-}
-
-export interface WithConflictingUnion {
-  prop1: 123 | 'str';
-}
-
-export interface WithUnsupportedUnion {
-  prop1: 123 | Moment;
-}
-
-export const externallyDefinedSchema: MakeSchemaFrom<{ locale: string }> = {
-  locale: {
-    type: 'keyword',
-  },
+module.exports = {
+  presets: ['@kbn/babel-preset/node_preset'],
+  ignore: ['**/*.test.ts', '**/__fixture__/**'],
 };
