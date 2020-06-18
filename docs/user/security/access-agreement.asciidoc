@@ -1,12 +1,12 @@
 [role="xpack"]
 [[xpack-security-access-agreement]]
-=== Access Agreement
+=== Access agreement
 
-Some work environments require you to acknowledge and accept an agreement before accessing a product that may contain sensitive information. You can define such an agreement individually for every authentication provider in {kib} as well. The agreement text supports Markdown format and can be specified using `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message` setting.
+Some work environments require you to acknowledge and accept an agreement before you can access {kib}, which can contain sensitive information. The agreement text supports Markdown format and can be specified using the `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message` setting.
 
 [NOTE]
 ============================================================================
-Users need to acknowledge access agreement only once per session, and {kib} will record the fact of acknowledgement in the audit logs.
+You need to acknowledge the access agreement only once per session, and {kib} reports the acknowledgement in the audit logs.
 ============================================================================
 
 Here is how your `kibana.yml` can look like if you define an access agreement:

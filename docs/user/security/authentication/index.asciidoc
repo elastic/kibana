@@ -17,9 +17,9 @@
 
 Enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
 
-When two or more providers are configured, you can choose the provider you want to use on the Login Selector UI. The order the providers appear is determined by the `order` setting. The appearance of the specific provider entry can be customized with the `description`, `hint` and `icon` settings.
+When two or more providers are configured, you can choose the provider you want to use on the Login Selector UI. The order the providers appear is determined by the `order` setting. The appearance of the specific provider entry can be customized with the `description`, `hint`, and `icon` settings.
 
-TIP: You can also provide users with a more generic guidance on the login process using `xpack.security.loginHelp` setting that supports Markdown format. When you specify this setting Login Selector UI will display a `Need help?` link that will let users to access an additional help information.
+TIP: You can also provide users with a more generic guidance on the login process using `xpack.security.loginHelp` setting that supports Markdown format. When you specify the `xpack.security.loginHelp` setting, the Login Selector UI displays a `Need help?` link that lets users access login help information.
 
 If you don't want a specific provider to show up at the Login Selector UI (e.g. to only support third-party initiated login) you can hide it with `showInSelector` setting set to `false`. However, in this case, the provider is presented in the provider chain and may be consulted during authentication based on its `order`. To disable the provider, use the `enabled` setting.
 
@@ -52,7 +52,7 @@ xpack.security.authc.providers:
 [role="screenshot"]
 image::user/security/images/kibana-login.png["Login Selector UI"]
 
-For more information, see <<authentication-security-settings, authentication security settings>>.
+For more information, refer to <<authentication-security-settings, authentication security settings>>.
 
 [[basic-authentication]]
 ==== Basic authentication
