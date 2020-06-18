@@ -29,7 +29,7 @@ const linkToCategories = {
   [ALERT_TYPE_LICENSE_EXPIRATION]: 'License expiration',
   [ALERT_TYPE_CLUSTER_STATE]: 'Cluster state',
 };
-const getColumns = (kbnUrl, scope, timezone) => [
+const getColumns = (timezone) => [
   {
     name: i18n.translate('xpack.monitoring.alerts.statusColumnTitle', {
       defaultMessage: 'Status',
@@ -109,11 +109,6 @@ const getColumns = (kbnUrl, scope, timezone) => [
           suffix={alert.suffix}
           message={message}
           metadata={alert.metadata}
-          changeUrl={(target) => {
-            scope.$evalAsync(() => {
-              kbnUrl.changePath(target);
-            });
-          }}
         />
       );
     },
@@ -155,7 +150,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
   },
 ];
 
-export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) => {
+export const Alerts = ({ alerts, sorting, pagination, onTableChange }) => {
   const alertsFlattened = alerts.map((alert) => ({
     ...alert,
     status: get(alert, 'metadata.severity', get(alert, 'severity', 0)),
@@ -169,7 +164,7 @@ export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) 
     <EuiMonitoringTable
       className="alertsTable"
       rows={alertsFlattened}
-      columns={getColumns(angular.kbnUrl, angular.scope, timezone)}
+      columns={getColumns(timezone)}
       sorting={{
         ...sorting,
         sort: {

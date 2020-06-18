@@ -14,7 +14,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '<rootDir>/legacy/server',
       '<rootDir>/test_utils/jest/contract_tests',
     ],
-    moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+    moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
     moduleNameMapper: {
       '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
       '@elastic/eui/lib/(.*)?': `${kibanaDirectory}/node_modules/@elastic/eui/test-env/$1`,

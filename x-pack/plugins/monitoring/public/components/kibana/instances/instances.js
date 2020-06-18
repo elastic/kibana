@@ -157,7 +157,7 @@ const getColumns = (setupMode) => {
 
 export class KibanaInstances extends PureComponent {
   render() {
-    const { clusterStatus, angular, setupMode, sorting, pagination, onTableChange } = this.props;
+    const { clusterStatus, setupMode, sorting, pagination, onTableChange } = this.props;
 
     let setupModeCallOut = null;
     // Merge the instances data with the setup data if enabled
@@ -253,7 +253,7 @@ export class KibanaInstances extends PureComponent {
             <EuiMonitoringTable
               className="kibanaInstancesTable"
               rows={dataFlattened}
-              columns={getColumns(angular.kbnUrl, angular.$scope, setupMode)}
+              columns={getColumns(setupMode)}
               sorting={sorting}
               pagination={pagination}
               setupMode={setupMode}

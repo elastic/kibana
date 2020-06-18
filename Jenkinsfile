@@ -4,8 +4,8 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
-  ciStats.trackBuild {
-    githubPr.withDefaultPrComments {
+  githubPr.withDefaultPrComments {
+    ciStats.trackBuild {
       catchError {
         retryable.enable()
         parallel([
@@ -53,10 +53,10 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
         ])
       }
     }
+  }
 
-    if (params.NOTIFY_ON_FAILURE) {
-      slackNotifications.onFailure()
-      kibanaPipeline.sendMail()
-    }
+  if (params.NOTIFY_ON_FAILURE) {
+    slackNotifications.onFailure()
+    kibanaPipeline.sendMail()
   }
 }

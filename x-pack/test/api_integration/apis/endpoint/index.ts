@@ -10,7 +10,8 @@ export default function endpointAPIIntegrationTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  describe('Endpoint plugin', function () {
+  // endpoint was not released in 7.8 so disabling all the tests
+  describe.skip('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
     this.tags(['endpoint']);
     before(async () => {
