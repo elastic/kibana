@@ -60,7 +60,9 @@ describe('test endpoint route', () => {
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+    const startContract = createMockEndpointAppContextServiceStartContract();
+    endpointAppContextService.start(startContract);
+    mockAgentService = startContract.agentService;
 
     registerEndpointRoutes(routerMock, {
       logFactory: loggingServiceMock.create(),
