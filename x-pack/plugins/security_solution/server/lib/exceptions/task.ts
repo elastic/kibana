@@ -5,7 +5,12 @@
  */
 
 import { createHash } from 'crypto';
-import { CoreSetup, Logger, SavedObjectsClient } from '../../../../../../src/core/server';
+import {
+  CoreSetup,
+  Logger,
+  SavedObjectsClient,
+  SavedObjectsPluginStart,
+} from '../../../../../../src/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -15,19 +20,13 @@ import { ListPluginSetup } from '../../../../lists/server';
 import { ConfigType } from '../../config';
 import { ExceptionsCache } from './cache';
 import { GetFullEndpointExceptionList, CompressExceptionList } from './lists';
+import { ManifestService } from './manifest';
 import { ArtifactSoSchema } from './schemas';
 
 const PackagerTaskConstants = {
   TIMEOUT: '1m',
   TYPE: 'securitySolution:endpoint:exceptions-packager',
   VERSION: '1.0.0',
-};
-
-export const ArtifactConstants = {
-  GLOBAL_ALLOWLIST_NAME: 'endpoint-allowlist',
-  SAVED_OBJECT_TYPE: 'securitySolution-exceptions-artifact',
-  SUPPORTED_OPERATING_SYSTEMS: ['linux', 'windows'],
-  SUPPORTED_SCHEMA_VERSIONS: ['1.0.0'],
 };
 
 export interface PackagerTask {
@@ -66,6 +65,18 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       return state;
     }
 
+    // Update manifest and return state
+    const [{ savedObjects }] = await context.core.getStartServices();
+    const manifest = ManifestService.getInstance({
+      lists: context.lists,
+      savedObjects,
+    });
+
+    await manifest.refresh();
+    return manifest.getState();
+  };
+
+  /*
     // Get clients
     const [{ savedObjects }] = await context.core.getStartServices();
     const savedObjectsRepository = savedObjects.createInternalRepository();
@@ -157,6 +168,11 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
 
     return state;
   };
+  */
+
+  const getContext = (): PackagerTaskContext => {
+    return context;
+  };
 
   const getTaskRunner = (runnerContext: PackagerTaskRunnerContext): PackagerTaskRunner => {
     return {
@@ -187,8 +203,11 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         return {
           run: async () => {
-            // const state = Object.assign({}, ...taskInstance.state);
             const state = await run(taskInstance.id, taskInstance.state);
+            // console.log(state);
+
+            // TODO: compare state to taskInstance.state
+            // If different, update manifest
 
             const nextRun = new Date();
             nextRun.setSeconds(nextRun.getSeconds() + context.config.packagerTaskInterval);
@@ -205,6 +224,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
   });
 
   return {
+    getContext,
     getTaskRunner,
   };
 }

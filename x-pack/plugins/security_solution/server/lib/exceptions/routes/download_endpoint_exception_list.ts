@@ -8,7 +8,7 @@ import { IRouter, KibanaResponse } from 'src/core/server';
 import { validate } from '../../../../common/validate';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { ExceptionsCache } from '../cache';
-import { ArtifactConstants } from '../task';
+import { ArtifactConstants } from '../manifest';
 import {
   ArtifactDownloadSchema,
   DownloadArtifactRequestParamsSchema,

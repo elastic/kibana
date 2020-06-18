@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './cache';
 export * from './lists';
 export * from './manifest';
 export * from './task';
-export * from './cache';
