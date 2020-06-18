@@ -78,7 +78,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
         />
       </LogEntryColumn>
       <LogEntryColumn {...columnWidths[iconColumnId]}>
-        {isHovered ? (
+        {isHovered || isMenuOpen ? (
           <LogEntryContextMenu
             isOpen={isMenuOpen}
             onOpen={openMenu}
