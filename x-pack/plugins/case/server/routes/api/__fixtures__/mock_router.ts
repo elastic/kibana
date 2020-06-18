@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
 import { loggingServiceMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
 import { CaseService, CaseConfigureService } from '../../../services';
 import { authenticationMock } from '../__fixtures__';
@@ -16,7 +15,7 @@ export const createRoute = async (
   badAuth = false
 ) => {
   const httpService = httpServiceMock.createSetupContract();
-  const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+  const router = httpService.createRouter();
 
   const log = loggingServiceMock.create().get('case');
 
