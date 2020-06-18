@@ -30,7 +30,7 @@ import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
 import { CrossClusterReplicationConfig } from './config';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 
 interface CrossClusterReplicationContext {

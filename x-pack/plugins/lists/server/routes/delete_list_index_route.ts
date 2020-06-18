@@ -7,7 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_INDEX } from '../../common/constants';
-import { buildSiemResponse, transformError, validate } from '../siem_server_deps';
+import { buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/siem_common_deps';
 import { acknowledgeSchema } from '../../common/schemas';
 
 import { getListClient } from '.';

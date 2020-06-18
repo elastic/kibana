@@ -37,10 +37,12 @@ export const FILTER_ACTION = {
   REMOVE: '-',
 };
 
-export enum SWIMLANE_TYPE {
-  OVERALL = 'overall',
-  VIEW_BY = 'viewBy',
-}
+export const SWIMLANE_TYPE = {
+  OVERALL: 'overall',
+  VIEW_BY: 'viewBy',
+} as const;
+
+export type SwimlaneType = typeof SWIMLANE_TYPE[keyof typeof SWIMLANE_TYPE];
 
 export const CHART_TYPE = {
   EVENT_DISTRIBUTION: 'event_distribution',
