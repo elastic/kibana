@@ -164,7 +164,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       basePath: deps.http.basePath,
       auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
       csp: deps.http.csp,
-      isTlsEnabled: deps.http.isTlsEnabled,
       getServerInfo: deps.http.getServerInfo,
     },
     metrics: {
@@ -214,7 +213,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,
-      isTlsEnabled: deps.http.isTlsEnabled,
       getServerInfo: deps.http.getServerInfo,
     },
     savedObjects: {

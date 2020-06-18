@@ -18,5 +18,4 @@ export interface HttpServiceStart
 |  [auth](./kibana-plugin-core-server.httpservicestart.auth.md) | <code>HttpAuth</code> | Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md) |
 |  [basePath](./kibana-plugin-core-server.httpservicestart.basepath.md) | <code>IBasePath</code> | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
 |  [getServerInfo](./kibana-plugin-core-server.httpservicestart.getserverinfo.md) | <code>() =&gt; HttpServerInfo</code> | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running http server. |
-|  [isTlsEnabled](./kibana-plugin-core-server.httpservicestart.istlsenabled.md) | <code>boolean</code> | Flag showing whether a server was configured to use TLS connection. |
 

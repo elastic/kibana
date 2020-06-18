@@ -87,7 +87,6 @@ async (context, request, response) => {
 |  [createRouter](./kibana-plugin-core-server.httpservicesetup.createrouter.md) | <code>() =&gt; IRouter</code> | Provides ability to declare a handler function for a particular path and HTTP request method. |
 |  [csp](./kibana-plugin-core-server.httpservicesetup.csp.md) | <code>ICspConfig</code> | The CSP config used for Kibana. |
 |  [getServerInfo](./kibana-plugin-core-server.httpservicesetup.getserverinfo.md) | <code>() =&gt; HttpServerInfo</code> | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running http server. |
-|  [isTlsEnabled](./kibana-plugin-core-server.httpservicesetup.istlsenabled.md) | <code>boolean</code> | Flag showing whether a server was configured to use TLS connection. |
 |  [registerAuth](./kibana-plugin-core-server.httpservicesetup.registerauth.md) | <code>(handler: AuthenticationHandler) =&gt; void</code> | To define custom authentication and/or authorization mechanism for incoming requests. |
 |  [registerOnPostAuth](./kibana-plugin-core-server.httpservicesetup.registeronpostauth.md) | <code>(handler: OnPostAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |
 |  [registerOnPreAuth](./kibana-plugin-core-server.httpservicesetup.registeronpreauth.md) | <code>(handler: OnPreAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |

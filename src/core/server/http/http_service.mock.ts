@@ -98,7 +98,6 @@ const createInternalSetupContractMock = () => {
     csp: CspConfig.DEFAULT,
     auth: createAuthMock(),
     getAuthHeaders: jest.fn(),
-    isTlsEnabled: false,
     getServerInfo: jest.fn(),
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
@@ -124,7 +123,6 @@ const createSetupContractMock = () => {
     registerOnPreResponse: internalMock.registerOnPreResponse,
     basePath: internalMock.basePath,
     csp: CspConfig.DEFAULT,
-    isTlsEnabled: internalMock.isTlsEnabled,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
     auth: {
@@ -144,7 +142,6 @@ const createStartContractMock = () => {
     auth: createAuthMock(),
     basePath: createBasePathMock(),
     getServerInfo: jest.fn(),
-    isTlsEnabled: false,
   };
 
   return mock;

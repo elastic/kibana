@@ -213,11 +213,6 @@ export interface HttpServiceSetup {
   csp: ICspConfig;
 
   /**
-   * Flag showing whether a server was configured to use TLS connection.
-   */
-  isTlsEnabled: boolean;
-
-  /**
    * Provides ability to declare a handler function for a particular path and HTTP request method.
    *
    * @remarks
@@ -296,11 +291,6 @@ export interface HttpServiceStart {
    * See {@link HttpAuth}
    */
   auth: HttpAuth;
-
-  /**
-   * Flag showing whether a server was configured to use TLS connection.
-   */
-  isTlsEnabled: boolean;
 
   /**
    * Provides common {@link HttpServerInfo | information} about the running http server.

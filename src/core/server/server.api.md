@@ -962,7 +962,6 @@ export interface HttpServiceSetup {
     createRouter: () => IRouter;
     csp: ICspConfig;
     getServerInfo: () => HttpServerInfo;
-    isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
@@ -975,7 +974,6 @@ export interface HttpServiceStart {
     auth: HttpAuth;
     basePath: IBasePath;
     getServerInfo: () => HttpServerInfo;
-    isTlsEnabled: boolean;
 }
 
 // @public

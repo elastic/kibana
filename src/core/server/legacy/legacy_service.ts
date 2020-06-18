@@ -267,7 +267,6 @@ export class LegacyService implements CoreService {
       http: {
         auth: startDeps.core.http.auth,
         basePath: startDeps.core.http.basePath,
-        isTlsEnabled: startDeps.core.http.isTlsEnabled,
         getServerInfo: startDeps.core.http.getServerInfo,
       },
       savedObjects: {
@@ -308,7 +307,6 @@ export class LegacyService implements CoreService {
           isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
         },
         csp: setupDeps.core.http.csp,
-        isTlsEnabled: setupDeps.core.http.isTlsEnabled,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
       metrics: {
