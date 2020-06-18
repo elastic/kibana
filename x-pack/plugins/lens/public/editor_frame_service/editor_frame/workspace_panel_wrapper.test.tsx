@@ -33,6 +33,7 @@ describe('workspace_panel_wrapper', () => {
         framePublicAPI={mockFrameAPI}
         visualizationState={{}}
         activeVisualization={mockVisualization}
+        emptyExpression={false}
       >
         <MyChild />
       </WorkspacePanelWrapper>
@@ -51,6 +52,7 @@ describe('workspace_panel_wrapper', () => {
         visualizationState={visState}
         children={<span />}
         activeVisualization={{ ...mockVisualization, renderToolbar: renderToolbarMock }}
+        emptyExpression={false}
       />
     );
 
