@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { FilterPopover } from '../../../../../uptime/public';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
@@ -16,10 +16,6 @@ interface Props {
 }
 
 export const BreakdownFilter = ({ fieldName, onBreakdownChange }: Props) => {
-  const [selectedFilters, setSelectedFilters] = useState<Set<string>>(
-    new Set([])
-  );
-
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['transactionUrl', 'location', 'device', 'os', 'browser'],
@@ -41,10 +37,6 @@ export const BreakdownFilter = ({ fieldName, onBreakdownChange }: Props) => {
   });
 
   const onFilterFieldChange = (field: string, selValues: string[]) => {
-    setSelectedFilters((prevState) => {
-      return new Set<string>(selValues);
-    });
-
     const newValues: Map<string, string[]> = new Map();
 
     filters.forEach(({ options, fieldName: fieldLabel }) => {

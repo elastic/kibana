@@ -56,7 +56,7 @@ export const PageViewsChart: FC<Props> = ({
     });
   };
 
-  let breakdownAccessors = [];
+  let breakdownAccessors: string[] = [];
   if (data && data.length > 0) {
     const allKeys = Object.keys(data[0]);
     breakdownAccessors = allKeys.filter((key) => key !== 'x');
@@ -67,13 +67,13 @@ export const PageViewsChart: FC<Props> = ({
       return 'Overall';
     }
 
-    return yAccessor.split('__')[1];
+    return yAccessor.toString().split?.('__')[1];
   };
 
   return (
     <ChartWrapper loading={loading} height="200px">
       <Chart>
-        <Settings showLegend showLegendExtra onBrushEnd={onBrushEnd} />
+        <Settings showLegend onBrushEnd={onBrushEnd} />
         <Axis
           id="date_time"
           position={Position.Bottom}

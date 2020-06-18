@@ -56,7 +56,7 @@ export const PageViewsTrend = () => {
 
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3>{PageViewsLabel}</h3>
           </EuiTitle>
         </EuiFlexItem>

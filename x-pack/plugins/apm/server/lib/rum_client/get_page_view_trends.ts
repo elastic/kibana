@@ -11,31 +11,34 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import { AggregationInputMap } from '../../../typings/elasticsearch/aggregations';
 
 export async function getPageViewTrends({
   setup,
   breakdowns,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
-  breakdowns: string;
+  breakdowns?: string;
 }) {
   const projection = getRumOverviewProjection({
     setup,
   });
-  const breakdownAggs: any = {};
+  const breakdownAggs: AggregationInputMap = {};
   if (breakdowns) {
     const breakdownMap: Map<string, string[]> = new Map(JSON.parse(breakdowns));
     Array.from(breakdownMap.keys()).map((field) => {
       const values = breakdownMap.get(field);
-      values.forEach((value) => {
-        breakdownAggs[field + '__' + value] = {
-          filter: {
-            term: {
-              [field]: value,
+      if (values) {
+        values.forEach((value) => {
+          breakdownAggs[field + '__' + value] = {
+            filter: {
+              term: {
+                [field]: value,
+              },
             },
-          },
-        };
-      });
+          };
+        });
+      }
     });
   }
 
@@ -52,7 +55,7 @@ export async function getPageViewTrends({
             buckets: 50,
           },
           aggs: {
-            trans_count: {
+            transCount: {
               value_count: {
                 field: 'transaction.type',
               },
@@ -69,13 +72,15 @@ export async function getPageViewTrends({
   const response = await client.search(params);
 
   const result = response.aggregations?.pageViews.buckets ?? [];
-  return result.map(({ key: xVal, trans_count, ...rest }) => {
-    const res = {
+  return result.map((bucket) => {
+    const { key: xVal, transCount } = bucket;
+    const res: Record<string, null | number> = {
       x: xVal,
-      y: trans_count.value,
+      y: transCount.value,
     };
     Object.keys(breakdownAggs).forEach((key) => {
-      res[key] = rest[key]?.doc_count;
+      // @ts-ignore
+      res[key] = bucket[key]?.doc_count;
     });
 
     return res;
