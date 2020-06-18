@@ -153,5 +153,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await policyTestResources.deletePolicyByName(newPolicyName);
       });
     });
+
+    describe('and user clicks on page header create button', () => {
+      it('should direct users to the ingest management integrations add datasource', async () => {
+        await pageObjects.policy.navigateToPolicyList();
+        await (await pageObjects.policy.findEmptyStateButton()).click();
+        await pageObjects.ingestManagerCreateDatasource.ensureOnCreatePageOrFail();
+      });
+    });
   });
 }

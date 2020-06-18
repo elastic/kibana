@@ -29,6 +29,12 @@ describe('when on the policies page', () => {
     expect(table).not.toBeNull();
   });
 
+  it('should display the onboarding steps', async () => {
+    const renderResult = render();
+    const table = await renderResult.findByTestId('onBoardingSteps');
+    expect(table).not.toBeNull();
+  });
+
   describe('when list data loads', () => {
     let firstPolicyID: string;
     beforeEach(() => {
@@ -50,11 +56,13 @@ describe('when on the policies page', () => {
         });
       });
     });
+
     it('should display rows in the table', async () => {
       const renderResult = render();
       const rows = await renderResult.findAllByRole('row');
       expect(rows).toHaveLength(4);
     });
+
     it('should display policy name value as a link', async () => {
       const renderResult = render();
       const policyNameLink = (await renderResult.findAllByTestId('policyNameLink'))[0];

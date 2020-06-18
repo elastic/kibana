@@ -543,7 +543,7 @@ const EmptyPolicyTable = React.memo<{
           <EuiSpacer size="xxl" />
           <EuiFlexGroup alignItems="center" justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiSteps steps={policySteps} />
+              <EuiSteps steps={policySteps} data-test-subj={'onboardingSteps'} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="center" justifyContent="center">
@@ -552,7 +552,7 @@ const EmptyPolicyTable = React.memo<{
                 fill
                 onClick={onActionClick}
                 isDisabled={actionDisabled}
-                data-test-subj="emptyCreateNewPolicyButton"
+                data-test-subj="onboardingStartButton"
               >
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.emptyCreateNewButton"
