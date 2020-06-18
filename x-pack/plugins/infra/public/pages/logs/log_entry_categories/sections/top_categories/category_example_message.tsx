@@ -5,6 +5,7 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
@@ -26,6 +27,8 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   message: string;
   timestamp: number;
 }> = ({ dataset, message, timestamp }) => {
+  const history = useHistory();
+
   // the dataset must be encoded for the field column and the empty value must
   // be turned into a user-friendly value
   const encodedDatasetFieldValue = useMemo(
@@ -85,7 +88,10 @@ export const CategoryExampleMessage: React.FunctionComponent<{
                 label: i18n.translate('xpack.infra.logs.categoryExample.viewInStreamText', {
                   defaultMessage: 'View in stream',
                 }),
-                onClick: () => {},
+                onClick: () => {
+                  // FIXME
+                  history.push(`/link-to?time=${timestamp}`);
+                },
               },
               {
                 label: i18n.translate('xpack.infra.logs.categoryExample.viewInContextText', {
