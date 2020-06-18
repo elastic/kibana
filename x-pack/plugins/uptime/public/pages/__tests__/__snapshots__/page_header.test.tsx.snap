@@ -100,6 +100,29 @@ Array [
             </button>
           </a>
         </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content"
+            >
+              <div
+                aria-hidden="true"
+                class="euiButtonEmpty__icon"
+                data-euiicon-type="plusInCircle"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Add data
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
     <div

@@ -6,5 +6,6 @@
   "requiredPlugins": [
     "telemetryCollectionManager",
     "usageCollection"
-  ]
+  ],
+  "extraPublicDirs": ["common/constants"]
 }
