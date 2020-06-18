@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/63621
-  describe.skip('endpoint list', function () {
+  describe('Endpoint List', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     before(async () => {
@@ -22,12 +22,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.endpoint.navigateToEndpointList();
     });
 
-    it('finds title', async () => {
+    it('finds page title', async () => {
       const title = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
       expect(title).to.equal('Endpoints');
     });
 
-    it('displays table data', async () => {
+    it.skip('displays table data', async () => {
       const expectedData = [
         [
           'Hostname',
@@ -78,18 +78,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(tableData).to.eql(expectedData);
     });
 
-    it('no details flyout when endpoint page displayed', async () => {
+    it('does not show the details flyout initially', async () => {
       await testSubjects.missingOrFail('hostDetailsFlyout');
     });
 
-    describe('when the hostname is clicked on', () => {
-      it('display details flyout', async () => {
+    describe('when the hostname is clicked on,', () => {
+      it(' display the details flyout', async () => {
         await (await testSubjects.find('hostnameCellLink')).click();
         await testSubjects.existOrFail('hostDetailsUpperList');
         await testSubjects.existOrFail('hostDetailsLowerList');
       });
 
-      it('updates details flyout when new hostname is clicked on', async () => {
+      it(' updates the details flyout when a new hostname is selected from the list', async () => {
         // display flyout for the first host in the list
         await (await testSubjects.findAll('hostnameCellLink'))[0].click();
         await testSubjects.existOrFail('hostDetailsFlyoutTitle');
@@ -104,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(hostDetailTitle1).to.not.eql(hostDetailTitle0);
       });
 
-      it('has the same flyout info when the same hostname is clicked on', async () => {
+      it(' has the same flyout info when the same hostname is selected', async () => {
         // display flyout for the first host in the list
         await (await testSubjects.findAll('hostnameCellLink'))[1].click();
         await testSubjects.existOrFail('hostDetailsFlyoutTitle');
@@ -116,13 +116,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(hostDetailTitleNew).to.equal(hostDetailTitleInitial);
       });
 
-      it('navigates to ingest fleet when link is clicked', async () => {
+      it(' navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
         await (await testSubjects.find('hostDetailsLinkToIngest')).click();
         await testSubjects.existOrFail('fleetAgentListTable');
       });
     });
 
-    describe('no data', () => {
+    describe('when there is no data,', () => {
       before(async () => {
         // clear out the data and reload the page
         await deleteMetadataStream(getService);
@@ -132,7 +132,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // reload the data so the other tests continue to pass
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
       });
-      it('displays no items found when empty', async () => {
+      it(' displays No items found when empty', async () => {
         // get the endpoint list table data and verify message
         const [, [noItemsFoundMessage]] = await pageObjects.endpointPageUtils.tableData(
           'hostListTable'
@@ -174,7 +174,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'Windows 10',
           '',
           '0',
-          '00000000-0000-0000-0000-000000000000',
+          'Default',
           'Unknown',
           '10.101.149.262606:a000:ffc0:39:11ef:37b9:3371:578c',
           'rezzani-7.example.com',
