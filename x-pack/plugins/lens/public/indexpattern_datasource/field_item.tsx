@@ -243,7 +243,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   );
 };
 
-export const FieldItem = React.memo(debouncedComponent(InnerFieldItem));
+export const FieldItem = debouncedComponent(InnerFieldItem);
 
 function FieldItemPopoverContents(props: State & FieldItemProps) {
   const {
