@@ -4,6 +4,8 @@
 
 ## IRequestTypesMap interface
 
+The map of search strategy IDs to the corresponding request type definitions.
+
 <b>Signature:</b>
 
 ```typescript
