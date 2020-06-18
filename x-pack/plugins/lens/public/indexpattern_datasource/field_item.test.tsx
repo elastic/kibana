@@ -7,7 +7,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
-import { FieldItem, InnerFieldItem, FieldItemProps } from './field_item';
+import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
