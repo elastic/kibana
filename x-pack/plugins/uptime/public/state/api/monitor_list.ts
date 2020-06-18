@@ -9,11 +9,11 @@ import { apiService } from './utils';
 import {
   FetchMonitorStatesQueryArgs,
   MonitorSummaryResult,
-  MonitorSummaryResultType,
+  MonitorSummariesResultType,
 } from '../../../common/runtime_types';
 
 export const fetchMonitorList = async (
   params: FetchMonitorStatesQueryArgs
 ): Promise<MonitorSummaryResult> => {
-  return await apiService.get(API_URLS.MONITOR_LIST, params, MonitorSummaryResultType);
+  return await apiService.get(API_URLS.MONITOR_LIST, params, MonitorSummariesResultType);
 };

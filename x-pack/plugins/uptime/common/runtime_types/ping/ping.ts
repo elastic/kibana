@@ -123,6 +123,7 @@ export const PingType = t.intersection([
     observer: t.partial({
       geo: t.partial({
         name: t.string,
+        location: t.partial({ lat: t.number, lon: t.number }),
       }),
     }),
     resolve: t.partial({
@@ -155,6 +156,28 @@ export const PingType = t.intersection([
 ]);
 
 export type Ping = t.TypeOf<typeof PingType>;
+
+export const makePing = (f: {
+  docId: string;
+  type: string;
+  id: string;
+  timestamp: string;
+  ip: string;
+  status: string;
+  duration: number;
+}): Ping => {
+  return {
+    docId: f.docId,
+    timestamp: f.timestamp,
+    monitor: {
+      id: f.id,
+      type: f.type,
+      ip: f.ip,
+      status: f.status,
+      duration: { us: f.duration },
+    },
+  };
+};
 
 export const PingsResponseType = t.type({
   total: t.number,

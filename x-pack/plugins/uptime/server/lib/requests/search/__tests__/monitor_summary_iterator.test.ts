@@ -11,18 +11,18 @@ import {
   MonitorSummaryIterator,
 } from '../monitor_summary_iterator';
 import { simpleQueryContext } from './test_helpers';
-import { MonitorGroups } from '../fetch_page';
 import { QueryContext } from '../query_context';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 
 describe('iteration', () => {
-  let iterator: MonitorGroupIterator | null = null;
-  let fetched: MonitorGroups[];
+  let iterator: MonitorSummaryIterator | null = null;
+  let fetched: MonitorSummary[];
 
   const setup = async (numGroups: number) => {
     fetched = [];
     const expectedMonitorGroups = makeMonitorGroups(numGroups);
     const chunkFetcher = mockChunkFetcher(expectedMonitorGroups);
-    iterator = new MonitorGroupIterator(simpleQueryContext(), [], -1, chunkFetcher);
+    iterator = new MonitorSummaryIterator(simpleQueryContext(), [], -1, chunkFetcher);
 
     while (true) {
       const got = await iterator.next();
@@ -59,41 +59,40 @@ describe('iteration', () => {
   });
 });
 
-const makeMonitorGroups = (count: number): MonitorGroups[] => {
-  const groups: MonitorGroups[] = [];
+const makeMonitorGroups = (count: number): MonitorSummary[] => {
+  const groups: MonitorSummary[] = [];
   for (let i = 0; i < count; i++) {
     const id = `monitor-${i}`;
 
     groups.push({
-      id,
-      groups: [
-        {
-          monitorId: id,
-          location: 'a-location',
-          status: 'up',
-          checkGroup: `check-group-${i}`,
-          summaryTimestamp: new Date(),
-        },
-      ],
+      monitor_id: id,
+      state: {
+        timestamp: '123',
+        url: {},
+        tls: { not_before: null, not_after: null },
+        observer: { geo: { name: ['a-location'] } },
+        summaryPings: [],
+        summary: { up: 1, down: 0 },
+      },
     });
   }
   return groups;
 };
 
-const mockChunkFetcher = (groups: MonitorGroups[]): ChunkFetcher => {
+const mockChunkFetcher = (groups: MonitorSummary[]): ChunkFetcher => {
   const buffer = groups.slice(0); // Clone it since we'll modify it
   return async (
     queryContext: QueryContext,
     searchAfter: any,
     size: number
   ): Promise<ChunkResult> => {
-    const resultMonitorGroups = buffer.splice(0, size);
+    const resultMonitorSummaries = buffer.splice(0, size);
     const resultSearchAfter =
       buffer.length === 0
         ? null
-        : { monitor_id: resultMonitorGroups[resultMonitorGroups.length - 1].id };
+        : { monitor_id: resultMonitorSummaries[resultMonitorSummaries.length - 1].monitor_id };
     return {
-      monitorGroups: resultMonitorGroups,
+      monitorSummaries: resultMonitorSummaries,
       searchAfter: resultSearchAfter,
     };
   };

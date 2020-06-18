@@ -36,7 +36,7 @@ interface MonitorListDrawerProps {
 export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorListDrawerProps) {
   const monitorUrl = summary?.state?.url?.full || '';
 
-  return summary && summary.state.checks ? (
+  return summary && summary.state.summaryPings ? (
     <ContainerDiv>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
@@ -52,7 +52,7 @@ export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorL
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <MonitorStatusList checks={summary.state.checks} />
+      <MonitorStatusList summaryPings={summary.state.summaryPings} />
       {monitorDetails && monitorDetails.error && (
         <MostRecentError
           error={monitorDetails.error}

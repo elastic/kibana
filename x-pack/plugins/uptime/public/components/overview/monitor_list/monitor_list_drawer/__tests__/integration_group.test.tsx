@@ -17,9 +17,11 @@ describe('IntegrationGroup', () => {
       monitor_id: '12345',
       state: {
         summary: {},
-        checks: [],
+        summaryPings: [],
         timestamp: '123',
         url: {},
+        tls: { not_before: null, not_after: null },
+        observer: { geo: { name: [] } },
       },
     };
   });
