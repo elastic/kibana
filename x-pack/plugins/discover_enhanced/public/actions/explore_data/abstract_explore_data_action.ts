@@ -15,15 +15,15 @@ import * as shared from './shared';
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
-interface PluginDeps {
+export interface PluginDeps {
   discover: Pick<DiscoverStart, 'urlGenerator'>;
 }
 
-interface CoreDeps {
+export interface CoreDeps {
   application: Pick<CoreStart['application'], 'navigateToApp'>;
 }
 
-interface Params {
+export interface Params {
   start: StartServicesGetter<PluginDeps, unknown, CoreDeps>;
 }
 

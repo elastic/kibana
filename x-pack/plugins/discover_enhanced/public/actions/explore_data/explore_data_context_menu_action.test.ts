@@ -7,9 +7,8 @@
 import {
   ExploreDataContextMenuAction,
   ACTION_EXPLORE_DATA,
-  Params,
-  PluginDeps,
 } from './explore_data_context_menu_action';
+import { Params, PluginDeps } from './abstract_explore_data_action';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
 import { i18n } from '@kbn/i18n';
