@@ -22,7 +22,7 @@ const BOUNDARIES_OPTIONS = [
   {
     id: BOUNDARIES_SOURCE.ELASTICSEARCH,
     label: i18n.translate('xpack.maps.choropleth.boundaries.elasticsearch', {
-      defaultMessage: 'Points, lines, or polygons from Elasticsearch',
+      defaultMessage: 'Points, lines, and polygons from Elasticsearch',
     }),
   },
   {

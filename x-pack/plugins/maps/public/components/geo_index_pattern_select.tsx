@@ -130,6 +130,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             })}
             fieldTypes={ES_GEO_FIELD_TYPES}
             onNoIndexPatterns={this._onNoIndexPatterns}
+            isClearable={false}
           />
         </EuiFormRow>
       </>
