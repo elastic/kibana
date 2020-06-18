@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
@@ -33,8 +33,14 @@ import { InventoryAlertDropdown } from '../../components/alerting/inventory/aler
 import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 
+const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
+  defaultMessage: 'Add data',
+});
+
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
+
+  const kibana = useKibana();
 
   return (
     <EuiErrorBoundary>
@@ -50,12 +56,70 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     })}
                   />
 
-                  <HelpCenterContent
-                    feedbackLink="https://discuss.elastic.co/c/metrics"
-                    appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+                  <Header
+                    breadcrumbs={[
+                      {
+                        text: i18n.translate('xpack.infra.header.infrastructureTitle', {
+                          defaultMessage: 'Metrics',
+                        }),
+                      },
+                    ]}
+                    readOnlyBadge={!uiCapabilities?.infrastructure?.save}
+                  />
+                  <AppNavigation
+                    aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
                       defaultMessage: 'Metrics',
                     })}
-                  />
+                  >
+                    <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
+                      <EuiFlexItem>
+                        <RoutedTabs
+                          tabs={[
+                            {
+                              app: 'metrics',
+                              title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+                                defaultMessage: 'Inventory',
+                              }),
+                              pathname: '/inventory',
+                            },
+                            {
+                              app: 'metrics',
+                              title: i18n.translate(
+                                'xpack.infra.homePage.metricsExplorerTabTitle',
+                                {
+                                  defaultMessage: 'Metrics Explorer',
+                                }
+                              ),
+                              pathname: '/explorer',
+                            },
+                            {
+                              app: 'metrics',
+                              title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+                                defaultMessage: 'Settings',
+                              }),
+                              pathname: '/settings',
+                            },
+                          ]}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <Route path={'/explorer'} component={MetricsAlertDropdown} />
+                        <Route path={'/inventory'} component={InventoryAlertDropdown} />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          href={kibana.services?.application?.getUrlForApp(
+                            '/home#/tutorial_directory/metrics'
+                          )}
+                          size="s"
+                          color="primary"
+                          iconType="plusInCircle"
+                        >
+                          {ADD_DATA_LABEL}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </AppNavigation>
 
                   <Header
                     breadcrumbs={[

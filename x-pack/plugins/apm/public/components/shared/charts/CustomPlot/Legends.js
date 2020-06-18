@@ -105,7 +105,9 @@ export default function Legends({
         return (
           <Legend
             key={i}
-            onClick={() => clickLegend(i)}
+            onClick={
+              serie.legendClickDisabled ? undefined : () => clickLegend(i)
+            }
             disabled={seriesEnabledState[i]}
             text={text}
             color={serie.color}

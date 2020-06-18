@@ -10,7 +10,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, kibanaResponseFactory, IRouter, RouteValidatorConfig } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
   loggingServiceMock,
   httpServerMock,
@@ -30,7 +30,7 @@ describe('Spaces Public API', () => {
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
     const coreStart = coreMock.createStart();
 

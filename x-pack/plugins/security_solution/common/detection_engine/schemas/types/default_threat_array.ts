@@ -15,7 +15,8 @@ import { Threat, threat } from '../common/schemas';
 export const DefaultThreatArray = new t.Type<Threat, Threat, unknown>(
   'DefaultThreatArray',
   threat.is,
-  (input): Either<t.Errors, Threat> => (input == null ? t.success([]) : threat.decode(input)),
+  (input, context): Either<t.Errors, Threat> =>
+    input == null ? t.success([]) : threat.validate(input, context),
   t.identity
 );
 
