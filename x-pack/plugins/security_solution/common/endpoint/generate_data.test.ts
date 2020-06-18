@@ -47,7 +47,7 @@ describe('data generator', () => {
     const metadata = generator.generateHostMetadata(timestamp);
     expect(metadata['@timestamp']).toEqual(timestamp);
     expect(metadata.event.created).toEqual(timestamp);
-    expect(metadata.endpoint).not.toBeNull();
+    expect(metadata.Endpoint).not.toBeNull();
     expect(metadata.agent).not.toBeNull();
     expect(metadata.host).not.toBeNull();
   });
@@ -57,10 +57,10 @@ describe('data generator', () => {
     const hostPolicyResponse = generator.generatePolicyResponse(timestamp);
     expect(hostPolicyResponse['@timestamp']).toEqual(timestamp);
     expect(hostPolicyResponse.event.created).toEqual(timestamp);
-    expect(hostPolicyResponse.endpoint).not.toBeNull();
+    expect(hostPolicyResponse.Endpoint).not.toBeNull();
     expect(hostPolicyResponse.agent).not.toBeNull();
     expect(hostPolicyResponse.host).not.toBeNull();
-    expect(hostPolicyResponse.endpoint.policy.applied).not.toBeNull();
+    expect(hostPolicyResponse.Endpoint.policy.applied).not.toBeNull();
   });
 
   it('creates alert event documents', () => {
@@ -68,7 +68,7 @@ describe('data generator', () => {
     const alert = generator.generateAlert(timestamp);
     expect(alert['@timestamp']).toEqual(timestamp);
     expect(alert.event.action).not.toBeNull();
-    expect(alert.endpoint).not.toBeNull();
+    expect(alert.Endpoint).not.toBeNull();
     expect(alert.agent).not.toBeNull();
     expect(alert.host).not.toBeNull();
     expect(alert.process.entity_id).not.toBeNull();
@@ -364,7 +364,9 @@ describe('data generator', () => {
   it('creates full resolver tree', () => {
     const alertAncestors = 3;
     const generations = 2;
-    const events = [...generator.fullResolverTreeGenerator(alertAncestors, generations)];
+    const events = [
+      ...generator.fullResolverTreeGenerator({ ancestors: alertAncestors, generations }),
+    ];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, alertAncestors + generations);
     expect(visitedEvents).toEqual(events.length);

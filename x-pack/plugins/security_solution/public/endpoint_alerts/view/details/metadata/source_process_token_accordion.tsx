@@ -20,7 +20,7 @@ export const SourceProcessTokenAccordion = memo(
               defaultMessage: 'SID',
             }
           ),
-          description: alertData.process.token.sid,
+          description: alertData.process.Ext.token.sid,
         },
         {
           title: i18n.translate(
@@ -29,7 +29,7 @@ export const SourceProcessTokenAccordion = memo(
               defaultMessage: 'Integrity Level',
             }
           ),
-          description: alertData.process.token.integrity_level,
+          description: alertData.process.Ext.token.integrity_level,
         },
       ];
     }, [alertData]);

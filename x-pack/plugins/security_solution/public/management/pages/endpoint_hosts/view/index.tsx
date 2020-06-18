@@ -154,13 +154,13 @@ export const HostList = () => {
         },
       },
       {
-        field: 'metadata.endpoint.policy.applied',
+        field: 'metadata.Endpoint.policy.applied',
         name: i18n.translate('xpack.securitySolution.endpointList.policy', {
           defaultMessage: 'Policy',
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
-        render: (policy: HostInfo['metadata']['endpoint']['policy']['applied']) => {
+        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
           const toRoutePath = getManagementUrl({
             name: 'policyDetails',
             policyId: policy.id,
@@ -181,12 +181,12 @@ export const HostList = () => {
         },
       },
       {
-        field: 'metadata.endpoint.policy.applied',
+        field: 'metadata.Endpoint.policy.applied',
         name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
           defaultMessage: 'Policy Status',
         }),
         // eslint-disable-next-line react/display-name
-        render: (policy: HostInfo['metadata']['endpoint']['policy']['applied'], item: HostInfo) => {
+        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           const toRoutePath = getManagementUrl({
             name: 'endpointPolicyResponse',
             selected_host: item.metadata.host.id,
