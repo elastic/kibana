@@ -40,3 +40,9 @@ export declare class Field implements IFieldType
 |  [type](./kibana-plugin-plugins-data-public.indexpatternfield.type.md) |  | <code>string</code> |  |
 |  [visualizable](./kibana-plugin-plugins-data-public.indexpatternfield.visualizable.md) |  | <code>boolean</code> |  |
 
+## Methods
+
+|  Method | Modifiers | Description |
+|  --- | --- | --- |
+|  [toSpec()](./kibana-plugin-plugins-data-public.indexpatternfield.tospec.md) |  |  |
+
