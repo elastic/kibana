@@ -9,6 +9,7 @@ export {
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
+  showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
 } from './common';
 export { fetchChartsData, ChartData } from './use_column_chart';

@@ -8,11 +8,14 @@ import { useEffect } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
+import { CoreSetup } from 'src/core/public';
+
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import {
   fetchChartsData,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   EsSorting,
@@ -25,7 +28,11 @@ import { ml } from '../../../../services/ml_api_service';
 
 type IndexSearchResponse = SearchResponse7;
 
-export const useIndexData = (indexPattern: IndexPattern, query: any): UseIndexDataReturnType => {
+export const useIndexData = (
+  indexPattern: IndexPattern,
+  query: any,
+  toastNotifications: CoreSetup['notifications']['toasts']
+): UseIndexDataReturnType => {
   const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
   // EuiDataGrid State
@@ -97,13 +104,17 @@ export const useIndexData = (indexPattern: IndexPattern, query: any): UseIndexDa
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
   const fetchColumnChartsData = async function () {
-    const columnChartsData = await fetchChartsData(
-      indexPattern.title,
-      ml,
-      query,
-      columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-    );
-    dataGrid.setColumnCharts(columnChartsData);
+    try {
+      const columnChartsData = await fetchChartsData(
+        indexPattern.title,
+        ml,
+        query,
+        columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+      );
+      dataGrid.setColumnCharts(columnChartsData);
+    } catch (e) {
+      showDataGridColumnChartErrorMessageToast(e, toastNotifications);
+    }
   };
 
   useEffect(() => {

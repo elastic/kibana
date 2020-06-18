@@ -67,7 +67,12 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
       setEvaluateSearchQuery(searchQuery);
     }, [JSON.stringify(searchQuery)]);
 
-    const classificationData = useExplorationResults(indexPattern, jobConfig, searchQuery);
+    const classificationData = useExplorationResults(
+      indexPattern,
+      jobConfig,
+      searchQuery,
+      getToastNotifications()
+    );
     const docFieldsCount = classificationData.columnsWithCharts.length;
     const {
       columnsWithCharts,

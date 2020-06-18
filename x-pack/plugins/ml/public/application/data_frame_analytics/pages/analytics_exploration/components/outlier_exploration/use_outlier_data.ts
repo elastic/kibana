@@ -18,12 +18,14 @@ import {
 import {
   fetchChartsData,
   getDataGridSchemasFromFieldTypes,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { ml } from '../../../../../services/ml_api_service';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import { DEFAULT_RESULTS_FIELD, FEATURE_INFLUENCE } from '../../../../common/constants';
@@ -78,14 +80,18 @@ export const useOutlierData = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const fetchColumnChartsData = async function () {
-    if (jobConfig !== undefined) {
-      const columnChartsData = await fetchChartsData(
-        jobConfig.dest.index,
-        ml,
-        searchQuery,
-        columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-      );
-      dataGrid.setColumnCharts(columnChartsData);
+    try {
+      if (jobConfig !== undefined) {
+        const columnChartsData = await fetchChartsData(
+          jobConfig.dest.index,
+          ml,
+          searchQuery,
+          columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+        );
+        dataGrid.setColumnCharts(columnChartsData);
+      }
+    } catch (e) {
+      showDataGridColumnChartErrorMessageToast(e, getToastNotifications());
     }
   };
 

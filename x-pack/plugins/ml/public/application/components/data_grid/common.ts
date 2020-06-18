@@ -13,12 +13,18 @@ import {
   EuiDataGridStyle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
+import { CoreSetup } from 'src/core/public';
+
 import {
   IndexPattern,
   IFieldType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
 } from '../../../../../../../src/plugins/data/public';
+
+import { extractErrorMessage } from '../../../../common/util/errors';
 
 import {
   BASIC_NUMERICAL_TYPES,
@@ -297,4 +303,18 @@ export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['colum
   };
 
   return sortFn;
+};
+
+export const showDataGridColumnChartErrorMessageToast = (
+  e: any,
+  toastNotifications: CoreSetup['notifications']['toasts']
+) => {
+  const error = extractErrorMessage(e);
+
+  toastNotifications.addDanger(
+    i18n.translate('xpack.ml.dataGrid.columnChart.ErrorMessageToast', {
+      defaultMessage: 'An error occurred fetching the histogram charts data: {error}',
+      values: { error: error !== '' ? error : e },
+    })
+  );
 };

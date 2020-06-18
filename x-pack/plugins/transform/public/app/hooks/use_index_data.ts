@@ -13,6 +13,7 @@ import {
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   getErrorMessage,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   EsSorting,
@@ -26,6 +27,8 @@ import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
+import { useToastNotifications } from '../app_dependencies';
+
 type IndexSearchResponse = SearchResponse7;
 
 export const useIndexData = (
@@ -33,6 +36,7 @@ export const useIndexData = (
   query: PivotQuery
 ): UseIndexDataReturnType => {
   const api = useApi();
+  const toastNotifications = useToastNotifications();
 
   const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
@@ -102,14 +106,18 @@ export const useIndexData = (
   };
 
   const fetchColumnChartsData = async function () {
-    const columnChartsData = await fetchChartsData(
-      indexPattern.title,
-      api,
-      isDefaultQuery(query) ? matchAllQuery : query,
-      columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-    );
+    try {
+      const columnChartsData = await fetchChartsData(
+        indexPattern.title,
+        api,
+        isDefaultQuery(query) ? matchAllQuery : query,
+        columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+      );
 
-    setColumnCharts(columnChartsData);
+      setColumnCharts(columnChartsData);
+    } catch (e) {
+      showDataGridColumnChartErrorMessageToast(e, toastNotifications);
+    }
   };
 
   useEffect(() => {
