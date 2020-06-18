@@ -39,6 +39,7 @@ export class DrilldownsPlugin
         uiActionsEnhanced: plugins.uiActionsEnhanced,
         storage: new Storage(localStorage),
         notifications: core.notifications,
+        docsLink: core.docLinks.links.dashboard.drilldowns,
       }),
     };
   }

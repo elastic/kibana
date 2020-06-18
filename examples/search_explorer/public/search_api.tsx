@@ -23,11 +23,6 @@ import { GuideSection } from './guide_section';
 import publicSearch from '!!raw-loader!./../../../src/plugins/data/public/search/i_search';
 // @ts-ignore
 import publicPlugin from '!!raw-loader!./../../../src/plugins/data/public/search/search_service';
-
-// @ts-ignore
-import serverSetupContract from '!!raw-loader!./../../../src/plugins/data/server/search/i_search_setup';
-// @ts-ignore
-import serverSearch from '!!raw-loader!./../../../src/plugins/data/server/search/i_search';
 // @ts-ignore
 import serverPlugin from '!!raw-loader!./../../../src/plugins/data/server/search/search_service';
 
@@ -53,14 +48,6 @@ export const SearchApiPage = () => (
           {
             description: 'search_service.ts',
             snippet: serverPlugin,
-          },
-          {
-            description: `i_search_setup.ts`,
-            snippet: serverSetupContract,
-          },
-          {
-            description: 'i_search',
-            snippet: serverSearch,
           },
         ],
       },
