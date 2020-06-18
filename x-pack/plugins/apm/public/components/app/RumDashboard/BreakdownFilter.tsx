@@ -5,66 +5,66 @@
  */
 
 import React, { useMemo } from 'react';
-import { FilterPopover } from '../../../../../uptime/public';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { BreakdownGroup } from './BreakdownGroup';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { BreakdownItem } from '../../../../typings/ui_filters';
 
 interface Props {
-  fieldName: string;
-  onBreakdownChange: (values: Map<string, string[]>) => void;
+  selectedBreakdowns: BreakdownItem[];
+  onBreakdownChange: (values: BreakdownItem[]) => void;
 }
 
-export const BreakdownFilter = ({ fieldName, onBreakdownChange }: Props) => {
+export const BreakdownFilter = ({
+  selectedBreakdowns,
+  onBreakdownChange,
+}: Props) => {
+  const { uiFilters, urlParams } = useUrlParams();
+
+  const { start, end } = urlParams;
+
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['location', 'device', 'os', 'browser'],
       projection: PROJECTION.RUM_OVERVIEW,
-      params: { uiFilters: '{}' },
+      params: { uiFilters: JSON.stringify(uiFilters), start, end },
     };
 
     return config;
-  }, []);
+  }, [uiFilters, start, end]);
 
   const { filters } = useLocalUIFilters(localUIFiltersConfig);
 
-  const items: string[] = [];
+  const newItems: BreakdownItem[] = [];
 
-  filters.forEach(({ options }) => {
-    options.forEach(({ name }) => {
-      items.push(name);
+  filters.forEach(({ options, fieldName }) => {
+    options.forEach((item) => {
+      if (
+        selectedBreakdowns?.find(
+          ({ name, type }) => item.name === name && fieldName === type
+        )
+      )
+        newItems.push({ ...item, type: fieldName, selected: true });
+      else newItems.push({ ...item, type: fieldName, selected: false });
     });
   });
 
-  const onFilterFieldChange = (field: string, selValues: string[]) => {
-    const newValues: Map<string, string[]> = new Map();
+  const sItems = newItems.sort((a, b) => b.count - a.count);
 
-    filters.forEach(({ options, fieldName: fieldLabel }) => {
-      const selItems: string[] = [];
-
-      options.forEach(({ name }) => {
-        if (selValues.includes(name)) {
-          selItems.push(name);
-        }
-      });
-
-      if (selItems.length > 0) {
-        newValues.set(fieldLabel, selItems);
-      }
-    });
-    onBreakdownChange(newValues);
+  const onChange = (selValues: BreakdownItem[]) => {
+    onBreakdownChange(selValues);
   };
 
   return (
-    <FilterPopover
+    <BreakdownGroup
       fieldName={fieldName}
       id={fieldName}
-      items={items}
+      items={sItems}
       loading={false}
-      onFilterFieldChange={onFilterFieldChange}
-      selectedItems={[]}
+      onChange={onChange}
       title={'Breakdown'}
-      size={'s'}
     />
   );
 };

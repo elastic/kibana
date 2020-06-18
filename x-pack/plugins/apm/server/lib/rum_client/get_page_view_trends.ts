@@ -12,6 +12,7 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 import { AggregationInputMap } from '../../../typings/elasticsearch/aggregations';
+import { BreakdownItem } from '../../../typings/ui_filters';
 
 export async function getPageViewTrends({
   setup,
@@ -25,20 +26,15 @@ export async function getPageViewTrends({
   });
   const breakdownAggs: AggregationInputMap = {};
   if (breakdowns) {
-    const breakdownMap: Map<string, string[]> = new Map(JSON.parse(breakdowns));
-    Array.from(breakdownMap.keys()).map((field) => {
-      const values = breakdownMap.get(field);
-      if (values) {
-        values.forEach((value) => {
-          breakdownAggs[field + '__' + value] = {
-            filter: {
-              term: {
-                [field]: value,
-              },
-            },
-          };
-        });
-      }
+    const breakdownList: BreakdownItem[] = JSON.parse(breakdowns);
+    breakdownList.forEach(({ name, type }) => {
+      breakdownAggs[type + '__' + name] = {
+        filter: {
+          term: {
+            [type]: name,
+          },
+        },
+      };
     });
   }
 

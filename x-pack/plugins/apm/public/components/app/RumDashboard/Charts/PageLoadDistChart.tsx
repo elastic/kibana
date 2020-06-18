@@ -23,11 +23,12 @@ import { PageLoadTimeLabel, PercPageLoadedLabel } from '../translations';
 import { ChartWrapper } from '../ChartWrapper';
 import { BreakdownSeries } from '../PageLoadDistribution/BreakdownSeries';
 import { PercentileR } from '../PageLoadDistribution';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 interface Props {
   onPercentileChange: (min: number, max: number) => void;
   data: any;
-  breakdowns: Map<string, string[]>;
+  breakdowns: BreakdownItem[];
   percentileRange: PercentileR;
   loading: boolean;
 }
@@ -91,22 +92,18 @@ export const PageLoadDistChart: FC<Props> = ({
             data={data?.pageLoadDistribution ?? []}
             curve={CurveType.CURVE_NATURAL}
           />
-          {Array.from(breakdowns.keys()).map((field) => {
-            const values = breakdowns.get(field);
-
-            return values?.map((value: string) => {
-              return (
-                <BreakdownSeries
-                  key={`${field}-${value}`}
-                  field={field}
-                  value={value}
-                  percentileRange={percentileRange}
-                  onLoadingChange={(bLoading) => {
-                    setBreakdownLoading(bLoading);
-                  }}
-                />
-              );
-            });
+          {breakdowns.map(({ name, type }) => {
+            return (
+              <BreakdownSeries
+                key={`${type}-${name}`}
+                field={type}
+                value={name}
+                percentileRange={percentileRange}
+                onLoadingChange={(bLoading) => {
+                  setBreakdownLoading(bLoading);
+                }}
+              />
+            );
           })}
         </PageLoadChart>
       )}

@@ -78,3 +78,17 @@ export const OverallLabel = i18n.translate(
     defaultMessage: 'Overall',
   }
 );
+
+export const LoadingLabel = i18n.translate(
+  'xpack.apm.filterGroup.loadingMessage',
+  {
+    defaultMessage: 'Loading...',
+  }
+);
+
+export const SearchBreakdownLabel = i18n.translate(
+  'xpack.uptime.filterGroup.searchMessage',
+  {
+    defaultMessage: 'Search breakdown',
+  }
+);

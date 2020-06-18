@@ -11,15 +11,14 @@ import { useFetcher } from '../../../../hooks/useFetcher';
 import { PageViewsLabel } from '../translations';
 import { BreakdownFilter } from '../BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 export const PageViewsTrend = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end } = urlParams;
 
-  const [breakdowns, setBreakdowns] = useState<Map<string, string[]>>(
-    new Map()
-  );
+  const [breakdowns, setBreakdowns] = useState<BreakdownItem[]>([]);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -31,11 +30,9 @@ export const PageViewsTrend = () => {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
-              ...(breakdowns.size > 0
+              ...(breakdowns.length > 0
                 ? {
-                    breakdowns: JSON.stringify(
-                      Array.from(breakdowns.entries())
-                    ),
+                    breakdowns: JSON.stringify(breakdowns),
                   }
                 : {}),
             },
@@ -46,7 +43,7 @@ export const PageViewsTrend = () => {
     [end, start, uiFilters, breakdowns]
   );
 
-  const onBreakdownChange = (values: Map<string, string[]>) => {
+  const onBreakdownChange = (values: BreakdownItem[]) => {
     setBreakdowns(values);
   };
 
@@ -60,7 +57,7 @@ export const PageViewsTrend = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <BreakdownFilter
-            fieldName="pageLoadBreakdown"
+            selectedBreakdowns={breakdowns}
             onBreakdownChange={onBreakdownChange}
           />
         </EuiFlexItem>

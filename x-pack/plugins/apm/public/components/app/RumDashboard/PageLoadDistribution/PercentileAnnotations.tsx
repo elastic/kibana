@@ -62,7 +62,9 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
             <PercentileMarker>
               <EuiToolTip
                 title={<PercentileTooltip details={annotation.details} />}
-                content={<span>Pages loaded {annotation.dataValue}</span>}
+                content={
+                  <span>Pages loaded: {annotation.dataValue.toFixed(2)}</span>
+                }
               >
                 <span>{annotation.details}th</span>
               </EuiToolTip>

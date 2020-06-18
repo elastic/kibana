@@ -41,7 +41,6 @@ export const FilterPopover = ({
   btnContent,
   forceOpen,
   setForceOpen,
-  size,
 }: FilterPopoverProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [itemsToDisplay, setItemsToDisplay] = useState<string[]>([]);
@@ -81,7 +80,6 @@ export const FilterPopover = ({
               onFilterFieldChange(fieldName, tempSelectedItems);
             }}
             title={title}
-            size={size}
           />
         )
       }

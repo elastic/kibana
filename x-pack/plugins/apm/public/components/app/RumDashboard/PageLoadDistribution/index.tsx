@@ -17,6 +17,7 @@ import { useFetcher } from '../../../../hooks/useFetcher';
 import { PageLoadDistLabel, ResetZoomLabel } from '../translations';
 import { BreakdownFilter } from '../BreakdownFilter';
 import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 export interface PercentileR {
   min: string | null;
@@ -33,9 +34,7 @@ export const PageLoadDistribution = () => {
     max: null,
   });
 
-  const [breakdowns, setBreakdowns] = useState<Map<string, string[]>>(
-    new Map()
-  );
+  const [breakdowns, setBreakdowns] = useState<BreakdownItem[]>([]);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -65,7 +64,7 @@ export const PageLoadDistribution = () => {
     setPercentileRange({ min: String(min), max: String(max) });
   };
 
-  const onBreakdownChange = (values: Map<string, string[]>) => {
+  const onBreakdownChange = (values: BreakdownItem[]) => {
     setBreakdowns(values);
   };
 
@@ -93,7 +92,7 @@ export const PageLoadDistribution = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <BreakdownFilter
-            fieldName="pageLoadBreakdown"
+            selectedBreakdowns={breakdowns}
             onBreakdownChange={onBreakdownChange}
           />
         </EuiFlexItem>
