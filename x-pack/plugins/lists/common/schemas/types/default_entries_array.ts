@@ -22,7 +22,7 @@ export const DefaultEntryArray: DefaultEntriesArrayC = new t.Type<
 >(
   'DefaultEntryArray',
   t.array(entries).is,
-  (input): Either<t.Errors, EntriesArray> =>
-    input == null ? t.success([]) : t.array(entries).decode(input),
+  (input, context): Either<t.Errors, EntriesArray> =>
+    input == null ? t.success([]) : t.array(entries).validate(input, context),
   t.identity
 );

@@ -113,6 +113,7 @@ export const StepSelectConfig: React.FunctionComponent<{
               label: name,
               key: id,
               checked: selectedConfigId === id ? 'on' : undefined,
+              'data-test-subj': 'agentConfigItem',
             };
           })}
           renderOption={(option) => (
