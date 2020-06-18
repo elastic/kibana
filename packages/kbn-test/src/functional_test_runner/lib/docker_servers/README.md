@@ -57,8 +57,11 @@ The docker servers service is a core service that is always available in functio
 
 ### `has(name: string): boolean`
 
-Determine if a name resolves to a known docker server
+Determine if a name resolves to a known docker server.
 
+### `isEnabled(name: string): boolean`
+
+Determine if a named server is enabled.
 
 ### `get(name: string): DockerServer`
 
