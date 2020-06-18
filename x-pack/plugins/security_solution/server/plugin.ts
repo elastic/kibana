@@ -241,6 +241,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentService: plugins.ingestManager.agentService,
     });
 
+    if (plugins.lists) {
+      // TODO: register callback to initialize manifest
+      // https://github.com/elastic/kibana/pull/69428
+    }
+
     if (this.exceptionsPackagerTask) {
       this.exceptionsPackagerTask
         .getTaskRunner({

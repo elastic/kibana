@@ -13,9 +13,9 @@ import {
 } from '../../../../../plugins/task_manager/server';
 import { ListPluginSetup } from '../../../../lists/server';
 import { ConfigType } from '../../config';
-import { GetFullEndpointExceptionList, CompressExceptionList } from './fetch_endpoint_exceptions';
-import { ArtifactSoSchema } from './schemas';
 import { ExceptionsCache } from './cache';
+import { GetFullEndpointExceptionList, CompressExceptionList } from './lists';
+import { ArtifactSoSchema } from './schemas';
 
 const PackagerTaskConstants = {
   TIMEOUT: '1m',
@@ -56,12 +56,14 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
     return `${PackagerTaskConstants.TYPE}:${PackagerTaskConstants.VERSION}`;
   };
 
-  const run = async (taskId: int, state: Record<string, string>) => {
+  const run = async (taskId: int, taskState: Record<string, string>): Record<string, string> => {
+    const state = Object.assign({}, ...taskState);
+
     // Check that this task is current
     if (taskId !== getTaskId()) {
       // old task, return
       context.logger.debug(`Outdated task running: ${taskId}`);
-      return;
+      return state;
     }
 
     // Get clients
@@ -88,7 +90,6 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
             const cacheKey = `${artifactName}-${soGetResponse.attributes.sha256}`;
             context.cache.set(cacheKey, soGetResponse.attributes.body);
 
-            // eslint-disable-next-line require-atomic-updates
             state[artifactName] = soGetResponse.attributes.sha256;
 
             updated = true;
@@ -133,7 +134,6 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
               `Change to artifact[${artifactName}] detected hash[${soResponse.attributes.sha256}]`
             );
 
-            // eslint-disable-next-line require-atomic-updates
             state[artifactName] = soResponse.attributes.sha256;
 
             updated = true;
@@ -154,6 +154,8 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       context.logger.debug('One or more changes detected. Updating manifest...');
       // TODO: update manifest
     }
+
+    return state;
   };
 
   const getTaskRunner = (runnerContext: PackagerTaskRunnerContext): PackagerTaskRunner => {
@@ -185,8 +187,8 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         return {
           run: async () => {
-            const state = Object.assign({}, ...taskInstance.state);
-            await run(taskInstance.id, state);
+            // const state = Object.assign({}, ...taskInstance.state);
+            const state = await run(taskInstance.id, taskInstance.state);
 
             const nextRun = new Date();
             nextRun.setSeconds(nextRun.getSeconds() + context.config.packagerTaskInterval);
