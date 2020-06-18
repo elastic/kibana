@@ -6,14 +6,14 @@
 
 import _ from 'lodash';
 import { createSavedGisMapClass } from './saved_gis_map';
-import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
+import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
 import {
   getCoreChrome,
   getSavedObjectsClient,
   getIndexPatternService,
   getCoreOverlays,
   getData,
-} from '../../kibana_services';
+} from '../../../kibana_services';
 
 export const getMapsSavedObjectLoader = _.once(function () {
   const services = {
