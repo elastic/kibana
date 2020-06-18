@@ -5,5 +5,4 @@
  */
 
 export { ASYNC_SEARCH_STRATEGY, asyncSearchStrategyProvider } from './async_search_strategy';
-export { enhancedEsSearchStrategyProvider } from './es_search_strategy';
 export { IAsyncSearchRequest, IAsyncSearchOptions } from './types';

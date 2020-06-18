@@ -39,17 +39,6 @@ import { DemoDataSearchSetupDependencies, DemoDataSearchStartDependencies } from
  * If the caller does not pass in the right `request` shape, typescript will
  * complain. The caller will also get a typed response.
  */
-declare module '../../../src/plugins/data/public' {
-  export interface IRequestTypesMap {
-    [DEMO_SEARCH_STRATEGY]: IDemoRequest;
-    [ASYNC_DEMO_SEARCH_STRATEGY]: IAsyncDemoRequest;
-  }
-
-  export interface IResponseTypesMap {
-    [DEMO_SEARCH_STRATEGY]: IDemoResponse;
-    [ASYNC_DEMO_SEARCH_STRATEGY]: IAsyncDemoResponse;
-  }
-}
 
 export class DemoDataPlugin
   implements Plugin<void, void, DemoDataSearchSetupDependencies, DemoDataSearchStartDependencies> {

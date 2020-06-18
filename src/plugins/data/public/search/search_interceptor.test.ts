@@ -35,8 +35,12 @@ describe('SearchInterceptor', () => {
     mockCoreStart = coreMock.createStart();
     mockSearch.mockClear();
     searchInterceptor = new SearchInterceptor(
-      mockCoreStart.notifications.toasts,
-      mockCoreStart.application,
+      {
+        toasts: mockCoreStart.notifications.toasts,
+        application: mockCoreStart.application,
+        uiSettings: mockCoreStart.uiSettings,
+        http: mockCoreStart.http,
+      },
       1000
     );
   });
@@ -46,7 +50,7 @@ describe('SearchInterceptor', () => {
       const mockResponse = new Subject();
       mockSearch.mockReturnValue(mockResponse.asObservable());
       const mockRequest: IKibanaSearchRequest = {};
-      const response = searchInterceptor.search(mockSearch, mockRequest);
+      const response = searchInterceptor.search(mockRequest);
       mockResponse.complete();
 
       response.subscribe();
@@ -56,7 +60,7 @@ describe('SearchInterceptor', () => {
     test('should mirror the observable to completion if the request does not time out', () => {
       const mockResponse = new Subject();
       mockSearch.mockReturnValue(mockResponse.asObservable());
-      const response = searchInterceptor.search(mockSearch, {});
+      const response = searchInterceptor.search({});
 
       setTimeout(() => mockResponse.next('hi'), 250);
       setTimeout(() => mockResponse.complete(), 500);
@@ -74,7 +78,7 @@ describe('SearchInterceptor', () => {
     test('should mirror the observable to error if the request does not time out', () => {
       const mockResponse = new Subject();
       mockSearch.mockReturnValue(mockResponse.asObservable());
-      const response = searchInterceptor.search(mockSearch, {});
+      const response = searchInterceptor.search({});
 
       setTimeout(() => mockResponse.next('hi'), 250);
       setTimeout(() => mockResponse.error('error'), 500);
@@ -91,7 +95,7 @@ describe('SearchInterceptor', () => {
 
     test('should return a `RequestTimeoutError` if the request times out', () => {
       mockSearch.mockReturnValue(new Observable());
-      const response = searchInterceptor.search(mockSearch, {});
+      const response = searchInterceptor.search({});
 
       const error = jest.fn();
       response.subscribe({ error });
@@ -115,8 +119,8 @@ describe('SearchInterceptor', () => {
       pendingCount$.subscribe(next);
 
       const error = jest.fn();
-      searchInterceptor.search(mockSearch, {}).subscribe({ error });
-      searchInterceptor.search(mockSearch, {}).subscribe({ error });
+      searchInterceptor.search({}).subscribe({ error });
+      searchInterceptor.search({}).subscribe({ error });
 
       setTimeout(() => mockResponses[0].complete(), 250);
       setTimeout(() => mockResponses[1].error('error'), 500);

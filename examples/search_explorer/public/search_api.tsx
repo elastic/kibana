@@ -20,8 +20,6 @@ import React from 'react';
 import { GuideSection } from './guide_section';
 
 // @ts-ignore
-import publicSearch from '!!raw-loader!./../../../src/plugins/data/public/search/i_search';
-// @ts-ignore
 import publicPlugin from '!!raw-loader!./../../../src/plugins/data/public/search/search_service';
 // @ts-ignore
 import serverPlugin from '!!raw-loader!./../../../src/plugins/data/server/search/search_service';
@@ -35,10 +33,6 @@ export const SearchApiPage = () => (
           {
             description: 'search_service.ts',
             snippet: publicPlugin,
-          },
-          {
-            description: 'i_search',
-            snippet: publicSearch,
           },
         ],
       },
