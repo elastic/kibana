@@ -206,7 +206,8 @@ export class MapsAppView extends React.Component {
   };
 
   _syncAppAndGlobalState = () => {
-    const { query, time, refreshConfig, initialized } = this.state;
+    const { query, time, initialized } = this.state;
+    const { refreshConfig } = this.props;
     const { filterManager } = getData().query;
 
     // appState
@@ -282,7 +283,7 @@ export class MapsAppView extends React.Component {
         globalState,
       }),
     };
-    this.setState(newState);
+    this.setState({ query: newState.query, time: newState.time });
     updateGlobalState(
       {
         time: newState.time,
@@ -322,7 +323,7 @@ export class MapsAppView extends React.Component {
   };
 
   _onRefreshChange = ({ isPaused, refreshInterval }) => {
-    const { refreshConfig } = this.state;
+    const { refreshConfig } = this.props;
     const newRefreshConfig = {
       isPaused,
       interval: isNaN(refreshInterval) ? refreshConfig.interval : refreshInterval,
@@ -411,14 +412,13 @@ export class MapsAppView extends React.Component {
     const {
       query,
       time,
-      refreshConfig,
       savedQuery,
       initialLayerListConfig,
       isVisible,
       indexPatterns,
       currentPath,
     } = this.state;
-    const { savedMap } = this.props;
+    const { savedMap, refreshConfig } = this.props;
 
     return isVisible ? (
       <MapsTopNavMenu

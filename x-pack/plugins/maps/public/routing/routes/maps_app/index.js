@@ -7,7 +7,10 @@
 import { connect } from 'react-redux';
 import { MapsAppView } from './maps_app_view';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
-import { getQueryableUniqueIndexPatternIds } from '../../../selectors/map_selectors';
+import {
+  getQueryableUniqueIndexPatternIds,
+  getRefreshConfig,
+} from '../../../selectors/map_selectors';
 import {
   replaceLayerList,
   setGotoWithCenter,
@@ -28,6 +31,7 @@ function mapStateToProps(state = {}) {
     isFullScreen: getIsFullScreen(state),
     nextIndexPatternIds: getQueryableUniqueIndexPatternIds(state),
     flyoutDisplay: getFlyoutDisplay(state),
+    refreshConfig: getRefreshConfig(state),
   };
 }
 
