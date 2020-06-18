@@ -48,7 +48,7 @@ export class MapsAppView extends React.Component {
       prevIndexPatternIds: [],
       initialized: false,
       isVisible: true,
-      savedQuery: null,
+      savedQuery: '',
       currentPath: '',
       initialLayerListConfig: null,
     };
@@ -254,11 +254,11 @@ export class MapsAppView extends React.Component {
         query || this.state.query,
         time || this.state.time
       );
-      updateGlobalState(
-        { ...newState, filters: filterManager.getGlobalFilters() },
-        !this.state.initialized
-      );
     });
+    updateGlobalState(
+      { ...newState, filters: filterManager.getGlobalFilters() },
+      !this.state.initialized
+    );
   };
 
   _initQueryTimeRefresh() {
@@ -331,6 +331,10 @@ export class MapsAppView extends React.Component {
   };
 
   _updateStateFromSavedQuery(savedQuery) {
+    if (!savedQuery) {
+      this.setState({ savedQuery: '' });
+      return;
+    }
     const { filterManager } = getData().query;
     const savedQueryFilters = savedQuery.attributes.filters || [];
     const globalFilters = filterManager.getGlobalFilters();
