@@ -25,6 +25,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
+const mockGetUrlForApp = jest.fn();
 jest.mock('../../lib/kibana', () => {
   return {
     useKibana: () => ({
@@ -32,6 +33,7 @@ jest.mock('../../lib/kibana', () => {
         chrome: undefined,
         application: {
           navigateToApp: jest.fn(),
+          getUrlForApp: mockGetUrlForApp,
         },
       },
     }),
@@ -171,7 +173,8 @@ describe('SIEM Navigation', () => {
           },
         },
       },
-      undefined
+      undefined,
+      mockGetUrlForApp
     );
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
@@ -270,7 +273,8 @@ describe('SIEM Navigation', () => {
           },
         },
       },
-      undefined
+      undefined,
+      mockGetUrlForApp
     );
   });
 });
