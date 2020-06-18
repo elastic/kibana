@@ -6,7 +6,7 @@
 
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
@@ -176,7 +176,7 @@ export class CreateSourceEditor extends Component {
 
   render() {
     return (
-      <Fragment>
+      <EuiPanel>
         <GeoIndexPatternSelect
           value={this.state.indexPattern ? this.state.indexPattern.id : ''}
           onChange={this._onIndexPatternSelect}
@@ -185,7 +185,7 @@ export class CreateSourceEditor extends Component {
         {this._renderGeoSelect()}
 
         {this._renderScalingPanel()}
-      </Fragment>
+      </EuiPanel>
     );
   }
 }

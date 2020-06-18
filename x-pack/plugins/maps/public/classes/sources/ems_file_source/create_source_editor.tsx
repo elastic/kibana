@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiPanel } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FileLayer } from '@elastic/ems-client';
@@ -23,18 +23,19 @@ interface State {
 }
 
 export class EMSFileCreateSourceEditor extends Component<Props, State> {
-  private _isMounted: boolean = false;
-
   state = {
     emsFileId: null,
   };
 
   _onChange = (emsFileId: string) => {
-    this.setState({ emsFileId });
     this.props.onSourceConfigChange({ id: emsFileId });
   };
 
   render() {
-    return <EMSFileSelect value={this.state.emsFileId} onChange={this._onChange} />;
+    return (
+      <EuiPanel>
+        <EMSFileSelect value={this.state.emsFileId} onChange={this._onChange} />
+      </EuiPanel>
+    );
   }
 }

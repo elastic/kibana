@@ -6,7 +6,8 @@
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFormRow, EuiPanel, EuiRadioGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { EMSFileSelect } from '../../../components/ems_file_select';
@@ -123,7 +124,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     this.props.previewLayers(layerDescriptor ? [layerDescriptor] : []);*/
   }
 
-  _renderLeftSource() {
+  _renderLeftSourceForm() {
     if (this.state.leftSource === BOUNDARIES_SOURCE.ELASTICSEARCH) {
       let geoFieldSelect;
       if (this.state.leftGeoFields.length) {
@@ -180,14 +181,21 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     }
   }
 
-  render() {
+  _renderLeftPanel() {
     return (
-      <>
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.choropleth.boundariesLabel', {
-            defaultMessage: 'Boundaries source',
-          })}
-        >
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.maps.choropleth.boundariesLabel"
+              defaultMessage="Boundaries source"
+            />
+          </h5>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow>
           <EuiRadioGroup
             options={BOUNDARIES_OPTIONS}
             idSelected={this.state.leftSource}
@@ -195,7 +203,40 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
           />
         </EuiFormRow>
 
-        {this._renderLeftSource()}
+        {this._renderLeftSourceForm()}
+      </EuiPanel>
+    );
+  }
+
+  _renderRightPanel() {
+    if (!this._isLeftConfigComplete()) {
+      return null;
+    }
+
+    return (
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.maps.choropleth.statisticsLabel"
+              defaultMessage="Statistics source"
+            />
+          </h5>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+      </EuiPanel>
+    );
+  }
+
+  render() {
+    return (
+      <>
+        {this._renderLeftPanel()}
+
+        <EuiSpacer size="s" />
+
+        {this._renderRightPanel()}
       </>
     );
   }

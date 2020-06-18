@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiPanel } from '@elastic/eui';
 import {
   getFieldsWithGeoTileAgg,
   getGeoFields,
@@ -115,14 +115,14 @@ export class CreateSourceEditor extends Component {
 
   render() {
     return (
-      <Fragment>
+      <EuiPanel>
         <GeoIndexPatternSelect
           value={this.state.indexPattern ? this.state.indexPattern.id : ''}
           onChange={this.onIndexPatternSelect}
         />
         {this._renderGeoSelect()}
         {this._renderRenderAsSelect()}
-      </Fragment>
+      </EuiPanel>
     );
   }
 }

@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { IFieldType } from 'src/plugins/data/public';
+import { EuiPanel } from '@elastic/eui';
 import {
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_RESULT_WINDOW,
@@ -92,13 +93,15 @@ export const uploadLayerWizardConfig: LayerWizard = {
     }
 
     return (
-      <ClientFileCreateSourceEditor
-        previewGeojsonFile={previewGeojsonFile}
-        isIndexingTriggered={isIndexingTriggered}
-        onIndexingComplete={viewIndexedData}
-        onRemove={onRemove}
-        onIndexReady={onIndexReady}
-      />
+      <EuiPanel>
+        <ClientFileCreateSourceEditor
+          previewGeojsonFile={previewGeojsonFile}
+          isIndexingTriggered={isIndexingTriggered}
+          onIndexingComplete={viewIndexedData}
+          onRemove={onRemove}
+          onIndexReady={onIndexReady}
+        />
+      </EuiPanel>
     );
   },
   title: i18n.translate('xpack.maps.source.geojsonFileTitle', {
