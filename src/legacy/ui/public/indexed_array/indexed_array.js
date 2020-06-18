@@ -52,7 +52,7 @@ export class IndexedArray {
 
     this._indexNames = _.union(
       this._setupIndex(config.group, inflectIndex, organizeByIndexedArray(config)),
-      this._setupIndex(config.index, inflectIndex, _.indexBy),
+      this._setupIndex(config.index, inflectIndex, _.keyBy),
       this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
         return [...raw].sort((itemA, itemB) => {
           const a = pluckValue(itemA);
