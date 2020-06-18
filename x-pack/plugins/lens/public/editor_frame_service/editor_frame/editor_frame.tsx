@@ -276,6 +276,7 @@ export function EditorFrame(props: EditorFrameProps) {
         workspacePanel={
           allLoaded && (
             <WorkspacePanelWrapper
+              title={state.title}
               framePublicAPI={framePublicAPI}
               dispatch={dispatch}
               visualizationState={state.visualization.state}

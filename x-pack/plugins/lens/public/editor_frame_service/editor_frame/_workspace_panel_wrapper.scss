@@ -15,6 +15,11 @@
     margin-bottom: 0 !important; // sass-lint:disable-line no-important
   }
 
+  .lnsWorkspacePanelWrapper__pageContentHeader--unsaved {
+    @include euiTitle('xxs');
+    color: $euiTextSubduedColor;
+  }
+
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiScrollBar;
     flex-grow: 1;

@@ -5,7 +5,15 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPageContent, EuiPageContentBody, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
+import {
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageContentHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { FramePublicAPI, Visualization } from '../../types';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
@@ -16,6 +24,7 @@ export interface WorkspacePanelWrapperProps {
   visualizationState: unknown;
   activeVisualization?: Visualization;
   dispatch: (action: Action) => void;
+  title?: string;
 }
 
 export function WorkspacePanelWrapper({
@@ -24,6 +33,7 @@ export function WorkspacePanelWrapper({
   visualizationState,
   activeVisualization,
   dispatch,
+  title,
 }: WorkspacePanelWrapperProps) {
   const setVisualizationState = useCallback(
     (newState: unknown) => {
@@ -55,6 +65,15 @@ export function WorkspacePanelWrapper({
       )}
       <EuiFlexItem>
         <EuiPageContent className="lnsWorkspacePanelWrapper">
+          <EuiPageContentHeader
+            className={classNames('lnsWorkspacePanelWrapper__pageContentHeader', {
+              'lnsWorkspacePanelWrapper__pageContentHeader--unsaved': !title,
+            })}
+          >
+            <span data-test-subj="lns_ChartTitle">
+              {title || i18n.translate('lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
+            </span>
+          </EuiPageContentHeader>
           <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
             {children}
           </EuiPageContentBody>
