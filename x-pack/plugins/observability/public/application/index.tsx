@@ -3,22 +3,40 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import * as t from 'io-ts';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Route, Router, Switch, useLocation } from 'react-router-dom';
 import { createHashHistory } from 'history';
+import { isLeft } from 'fp-ts/lib/Either';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import { Home } from '../pages/home';
-import { Overview } from '../pages/overview';
 import { PluginContext } from '../context/plugin_context';
+import { routes } from '../routes';
+import { useUrlParams } from '../hooks/use_url_params';
 
 const App = () => {
   return (
     <>
       <Switch>
-        <Route path="/" exact={true} component={Home} />
-        <Route path="/overview" exact={true} component={Overview} />
+        {Object.keys(routes).map((path) => {
+          const route = routes[path];
+          return (
+            <Route
+              key={path}
+              path={path}
+              exact={true}
+              component={() => {
+                const { query, path: pathParams } = useUrlParams(route);
+
+                return route.handler({ query, path: pathParams });
+              }}
+            />
+          );
+        })}
+        {/* <Route path="/" exact={true} component={Home} />
+        <Route path="/overview" exact={true} component={Overview} /> */}
       </Switch>
     </>
   );
