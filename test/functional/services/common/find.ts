@@ -162,6 +162,27 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       return wrapAll(elements);
     }
 
+    public async allByButtonText(
+      buttonText: string,
+      element: WebDriver | WebElement | WebElementWrapper = driver,
+      timeout: number = defaultFindTimeout
+    ): Promise<string[]> {
+      log.debug(`Find.byButtonText('${buttonText}') with timeout=${timeout}`);
+      return await retry.tryForTime(timeout, async () => {
+        // tslint:disable-next-line:variable-name
+        const _element = element instanceof WebElementWrapper ? element._webElement : element;
+        await this._withTimeout(0);
+        const allButtons = wrapAll(await _element.findElements(By.tagName('button')));
+        await this._withTimeout(defaultFindTimeout);
+        const buttonTexts = await Promise.all(
+          allButtons.map(async (el) => {
+            return el.getVisibleText();
+          })
+        );
+        return buttonTexts.filter((text) => text.trim() === buttonText.trim());
+      });
+    }
+
     public async allByCssSelector(
       selector: string,
       timeout: number = defaultFindTimeout
