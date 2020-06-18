@@ -35,6 +35,21 @@ test(`#create`, async () => {
   expect(result).toBe(returnValue);
 });
 
+test(`#checkConflicts`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    checkConflicts: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const objects = Symbol();
+  const options = Symbol();
+  const result = await client.checkConflicts(objects, options);
+
+  expect(mockRepository.checkConflicts).toHaveBeenCalledWith(objects, options);
+  expect(result).toBe(returnValue);
+});
+
 test(`#bulkCreate`, async () => {
   const returnValue = Symbol();
   const mockRepository = {

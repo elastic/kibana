@@ -44,6 +44,7 @@ export {
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
   SavedObject,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
 } from '../../types';

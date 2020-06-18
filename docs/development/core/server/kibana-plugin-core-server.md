@@ -145,6 +145,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-server.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-server.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsBulkUpdateResponse](./kibana-plugin-core-server.savedobjectsbulkupdateresponse.md) |  |
+|  [SavedObjectsCheckConflictsObject](./kibana-plugin-core-server.savedobjectscheckconflictsobject.md) |  |
+|  [SavedObjectsCheckConflictsResponse](./kibana-plugin-core-server.savedobjectscheckconflictsresponse.md) |  |
 |  [SavedObjectsClientProviderOptions](./kibana-plugin-core-server.savedobjectsclientprovideroptions.md) | Options to control the creation of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-core-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
 |  [SavedObjectsComplexFieldMapping](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |

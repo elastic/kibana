@@ -1433,6 +1433,123 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#checkConflicts', () => {
+    const obj1 = { type: 'dashboard', id: 'one' };
+    const obj2 = { type: 'dashboard', id: 'two' };
+    const obj3 = { type: MULTI_NAMESPACE_TYPE, id: 'three' };
+    const obj4 = { type: MULTI_NAMESPACE_TYPE, id: 'four' };
+    const obj5 = { type: MULTI_NAMESPACE_TYPE, id: 'five' };
+    const obj6 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'six' };
+    const obj7 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'seven' };
+    const namespace = 'foo-namespace';
+
+    const checkConflicts = async (objects, options) =>
+      savedObjectsRepository.checkConflicts(
+        objects.map(({ type, id }) => ({ type, id })), // checkConflicts only uses type and id
+        options
+      );
+    const checkConflictsSuccess = async (objects, options) => {
+      const response = getMockMgetResponse(objects, options?.namespace);
+      callAdminCluster.mockResolvedValue(response); // this._callCluster('mget', ...)
+      const result = await checkConflicts(objects, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    const _expectClusterCallArgs = (
+      objects,
+      { _index = expect.any(String), getId = () => expect.any(String) }
+    ) => {
+      expectClusterCallArgs({
+        body: {
+          docs: objects.map(({ type, id }) =>
+            expect.objectContaining({
+              _index,
+              _id: getId(type, id),
+            })
+          ),
+        },
+      });
+    };
+
+    describe('cluster calls', () => {
+      it(`doesn't make a cluster call if the objects array is empty`, async () => {
+        await checkConflicts([]);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        const getId = (type, id) => `${namespace}:${type}:${id}`;
+        await checkConflictsSuccess([obj1, obj2], { namespace });
+        _expectClusterCallArgs([obj1, obj2], { getId });
+      });
+
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        await checkConflictsSuccess([obj1, obj2]);
+        _expectClusterCallArgs([obj1, obj2], { getId });
+      });
+
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        // obj3 is multi-namespace, and obj6 is namespace-agnostic
+        await checkConflictsSuccess([obj3, obj6], { namespace });
+        _expectClusterCallArgs([obj3, obj6], { getId });
+      });
+    });
+
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        let callAdminClusterCount = 0;
+        migrator.runMigrations = jest.fn(async () =>
+          // runMigrations should resolve before callAdminCluster is initiated
+          expect(callAdminCluster).toHaveBeenCalledTimes(callAdminClusterCount++)
+        );
+        await expect(checkConflictsSuccess([obj1, obj2])).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveReturnedTimes(1);
+      });
+    });
+
+    describe('returns', () => {
+      it(`expected results`, async () => {
+        const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7];
+        const response = {
+          status: 200,
+          docs: [
+            getMockGetResponse(obj1),
+            { found: false },
+            getMockGetResponse(obj3),
+            getMockGetResponse({ ...obj4, namespace: 'bar-namespace' }),
+            { found: false },
+            getMockGetResponse(obj6),
+            { found: false },
+          ],
+        };
+        callAdminCluster.mockResolvedValueOnce(response); // this._callCluster('mget', ...)
+
+        const result = await checkConflicts(objects);
+        expectClusterCalls('mget');
+        expect(result).toEqual({
+          errors: [
+            { ...obj1, error: createConflictError(obj1.type, obj1.id) },
+            // obj2 was not found so it does not result in a conflict error
+            { ...obj3, error: createConflictError(obj3.type, obj3.id) },
+            {
+              ...obj4,
+              error: {
+                ...createConflictError(obj4.type, obj4.id),
+                metadata: { isNotOverwritable: true },
+              },
+            },
+            // obj5 was not found so it does not result in a conflict error
+            { ...obj6, error: createConflictError(obj6.type, obj6.id) },
+            // obj7 was not found so it does not result in a conflict error
+          ],
+        });
+      });
+    });
+  });
+
   describe('#create', () => {
     beforeEach(() => {
       callAdminCluster.mockImplementation((method, params) => ({

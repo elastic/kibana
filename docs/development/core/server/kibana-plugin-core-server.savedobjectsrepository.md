@@ -19,6 +19,7 @@ export declare class SavedObjectsRepository
 |  [bulkCreate(objects, options)](./kibana-plugin-core-server.savedobjectsrepository.bulkcreate.md) |  | Creates multiple documents at once |
 |  [bulkGet(objects, options)](./kibana-plugin-core-server.savedobjectsrepository.bulkget.md) |  | Returns an array of objects by id |
 |  [bulkUpdate(objects, options)](./kibana-plugin-core-server.savedobjectsrepository.bulkupdate.md) |  | Updates multiple objects in bulk |
+|  [checkConflicts(objects, options)](./kibana-plugin-core-server.savedobjectsrepository.checkconflicts.md) |  | Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten. |
 |  [create(type, attributes, options)](./kibana-plugin-core-server.savedobjectsrepository.create.md) |  | Persists an object |
 |  [delete(type, id, options)](./kibana-plugin-core-server.savedobjectsrepository.delete.md) |  | Deletes an object |
 |  [deleteByNamespace(namespace, options)](./kibana-plugin-core-server.savedobjectsrepository.deletebynamespace.md) |  | Deletes all objects from the provided namespace. |

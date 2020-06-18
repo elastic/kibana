@@ -176,6 +176,34 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
     });
 
+    describe('#checkConflicts', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = await createSpacesSavedObjectsClient();
+
+        await expect(
+          // @ts-ignore
+          client.checkConflicts(null, { namespace: 'bar' })
+        ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = await createSpacesSavedObjectsClient();
+        const expectedReturnValue = { errors: [] };
+        baseClient.checkConflicts.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const objects = Symbol();
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-ignore
+        const actualReturnValue = await client.checkConflicts(objects, options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.checkConflicts).toHaveBeenCalledWith(objects, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
     describe('#create', () => {
       test(`throws error if options.namespace is specified`, async () => {
         const { client } = await createSpacesSavedObjectsClient();

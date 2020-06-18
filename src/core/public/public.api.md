@@ -1162,13 +1162,10 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectError" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    error?: {
-        error: string;
-        message: string;
-        statusCode: number;
-        metadata?: Record<string, unknown>;
-    };
+    error?: SavedObjectError;
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     namespaces?: string[];

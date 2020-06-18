@@ -207,6 +207,8 @@ export {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsResponse,
   SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,

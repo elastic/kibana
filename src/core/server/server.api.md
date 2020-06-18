@@ -1697,13 +1697,10 @@ export type SafeRouteMethod = 'get' | 'options';
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectError" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    error?: {
-        error: string;
-        message: string;
-        statusCode: number;
-        metadata?: Record<string, unknown>;
-    };
+    error?: SavedObjectError;
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     namespaces?: string[];
@@ -1821,6 +1818,24 @@ export interface SavedObjectsBulkUpdateResponse<T = unknown> {
 }
 
 // @public (undocumented)
+export interface SavedObjectsCheckConflictsObject {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsCheckConflictsResponse {
+    // (undocumented)
+    errors: Array<{
+        id: string;
+        type: string;
+        error: SavedObjectError;
+    }>;
+}
+
+// @public (undocumented)
 export class SavedObjectsClient {
     // @internal
     constructor(repository: ISavedObjectsRepository);
@@ -1828,6 +1843,7 @@ export class SavedObjectsClient {
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
+    checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
@@ -2251,6 +2267,7 @@ export class SavedObjectsRepository {
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
+    checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //

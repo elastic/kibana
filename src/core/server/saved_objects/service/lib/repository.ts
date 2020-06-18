@@ -39,6 +39,8 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
@@ -433,6 +435,51 @@ export class SavedObjectsRepository {
         });
       }),
     };
+  }
+
+  /**
+   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
+   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
+   */
+  async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsCheckConflictsResponse> {
+    if (objects.length === 0) {
+      return { errors: [] };
+    }
+
+    const { namespace } = options;
+    const bulkGetDocs = objects.map(({ type, id }) => ({
+      _id: this._serializer.generateRawId(namespace, type, id),
+      _index: this.getIndexForType(type),
+      _source: ['type', 'namespaces'],
+    }));
+    const bulkGetResponse = await this._callCluster('mget', {
+      body: { docs: bulkGetDocs },
+      ignore: [404],
+    });
+
+    const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
+    const indexFound = bulkGetResponse.status !== 404;
+    objects.forEach(({ type, id }, index) => {
+      const actualResult = indexFound ? bulkGetResponse.docs[index] : undefined;
+      const docFound = actualResult?.found === true;
+      if (docFound) {
+        errors.push({
+          id,
+          type,
+          error: {
+            ...SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
+            ...(!this.rawDocExistsInNamespace(actualResult, namespace) && {
+              metadata: { isNotOverwritable: true },
+            }),
+          },
+        });
+      }
+    });
+
+    return { errors };
   }
 
   /**

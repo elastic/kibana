@@ -13,6 +13,7 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -50,6 +51,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   // only include namespace in AAD descriptor if the specified type is single-namespace
   private getDescriptorNamespace = (type: string, namespace?: string) =>
     this.options.baseTypeRegistry.isSingleNamespace(type) ? namespace : undefined;
+
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options?: SavedObjectsBaseOptions
+  ) {
+    return await this.options.baseClient.checkConflicts(objects, options);
+  }
 
   public async create<T>(
     type: string,

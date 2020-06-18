@@ -474,6 +474,36 @@ describe('#bulkUpdate', () => {
   });
 });
 
+describe('#checkConflicts', () => {
+  const obj1 = Object.freeze({ type: 'foo', otherThing: 'sup' });
+  const obj2 = Object.freeze({ type: 'bar', otherThing: 'everyone' });
+  const options = Object.freeze({ namespace: 'some-ns' });
+
+  test(`throws decorated GeneralError when checkPrivileges.globally rejects promise`, async () => {
+    const objects = [obj1, obj2];
+    await expectGeneralError(client.checkConflicts, { objects });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const objects = [obj1, obj2];
+    await expectForbiddenError(client.checkConflicts, { objects, options });
+  });
+
+  test(`returns result of baseClient.create when authorized`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.checkConflicts.mockResolvedValue(apiCallReturnValue as any);
+
+    const objects = [obj1, obj2];
+    const result = await expectSuccess(client.checkConflicts, { objects, options });
+    expect(result).toBe(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const objects = [obj1, obj2];
+    await expectPrivilegeCheck(client.checkConflicts, { objects, options });
+  });
+});
+
 describe('#create', () => {
   const type = 'foo';
   const attributes = { some_attr: 's' };

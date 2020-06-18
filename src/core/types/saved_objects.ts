@@ -86,12 +86,7 @@ export interface SavedObject<T = unknown> {
   version?: string;
   /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
-  error?: {
-    error: string;
-    message: string;
-    statusCode: number;
-    metadata?: Record<string, unknown>;
-  };
+  error?: SavedObjectError;
   /** {@inheritdoc SavedObjectAttributes} */
   attributes: T;
   /** {@inheritdoc SavedObjectReference} */
@@ -107,4 +102,11 @@ export interface SavedObject<T = unknown> {
    * space.
    */
   originId?: string;
+}
+
+export interface SavedObjectError {
+  error: string;
+  message: string;
+  statusCode: number;
+  metadata?: Record<string, unknown>;
 }
