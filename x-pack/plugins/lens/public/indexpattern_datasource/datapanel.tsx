@@ -6,7 +6,7 @@
 
 import './datapanel.scss';
 import { uniq, indexBy, groupBy } from 'lodash';
-import React, { useState, useEffect, memo, useCallback } from 'react';
+import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -86,7 +86,6 @@ export function IndexPatternDataPanel({
   changeIndexPattern,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
-
   const onChangeIndexPattern = useCallback(
     (id: string) => changeIndexPattern(id, state, setState),
     [state, setState]
@@ -234,7 +233,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const allFields = currentIndexPattern.fields;
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
-
+  const hasSyncedExistingFields = existingFields[currentIndexPattern.title];
   useEffect(() => {
     // Reset the scroll if we have made material changes to the field list
     if (scrollContainer) {
@@ -257,48 +256,59 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     );
   };
 
-  const allSupportedTypesFields = allFields.filter((field) => supportedFieldTypes.has(field.type));
+  const fieldGroups: FieldsGroup = useMemo(() => {
+    const allSupportedTypesFields = allFields.filter((field) =>
+      supportedFieldTypes.has(field.type)
+    );
+    const sorted = allSupportedTypesFields.sort(sortFields);
+    // optimization before existingFields are synced
+    if (!hasSyncedExistingFields) {
+      return {
+        ...defaultFieldGroups,
+        ...groupBy(sorted, (field) => {
+          if (field.type === 'document') {
+            return 'specialFields';
+          } else {
+            return 'emptyFields';
+          }
+        }),
+      };
+    }
+    return {
+      ...defaultFieldGroups,
+      ...groupBy(sorted, (field) => {
+        if (field.type === 'document') {
+          return 'specialFields';
+        } else if (containsData(field)) {
+          return 'availableFields';
+        } else return 'emptyFields';
+      }),
+    };
+  }, [allFields, existingFields[currentIndexPattern.title], currentIndexPattern]);
 
-  const fieldGroups: FieldsGroup = {
-    ...defaultFieldGroups,
-    ...groupBy(allSupportedTypesFields, (field) => {
-      if (field.type === 'document') {
-        return 'specialFields';
-      } else if (containsData(field)) {
-        return 'availableFields';
-      } else return 'emptyFields';
-    }),
-  };
+  const filteredFieldGroups: FieldsGroup = useMemo(() => {
+    const filterFieldGroup = (fieldGroup: IndexPatternField[]) =>
+      fieldGroup.filter((field) => {
+        if (
+          localState.nameFilter.length &&
+          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
+        ) {
+          return false;
+        }
 
-  const filterFieldGroup = (fieldGroup: IndexPatternField[]) =>
-    fieldGroup.filter((field) => {
-      if (
-        localState.nameFilter.length &&
-        !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
-      ) {
-        return false;
-      }
+        if (localState.typeFilter.length > 0) {
+          return localState.typeFilter.includes(field.type as DataType);
+        }
+        return true;
+      });
 
-      if (localState.typeFilter.length > 0) {
-        return localState.typeFilter.includes(field.type as DataType);
-      }
-      return true;
-    });
-
-  const filteredFieldGroups: FieldsGroup = Object.entries(fieldGroups).reduce(
-    (acc, [name, fields]) => {
+    return Object.entries(fieldGroups).reduce((acc, [name, fields]) => {
       return {
         ...acc,
-        [name]: filterFieldGroup(fields).sort(sortFields),
+        [name]: filterFieldGroup(fields),
       };
-    },
-    defaultFieldGroups
-  );
-
-  const paginatedFields = [
-    ...(localState.isAvailableAccordionOpen ? filteredFieldGroups.availableFields : []),
-    ...(localState.isEmptyAccordionOpen ? filteredFieldGroups.emptyFields : []),
-  ].slice(0, pageSize);
+    }, defaultFieldGroups);
+  }, [fieldGroups, localState.nameFilter, localState.typeFilter]);
 
   const lazyScroll = () => {
     if (scrollContainer) {
@@ -314,10 +324,35 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     }
   };
 
-  const [paginatedAvailableFields, paginatedEmptyFields] = _.partition(
-    paginatedFields,
-    containsData
-  );
+  // to test
+  const [paginatedAvailableFields, paginatedEmptyFields]: [
+    IndexPatternField[],
+    IndexPatternField[]
+  ] = useMemo(() => {
+    const { availableFields, emptyFields } = filteredFieldGroups;
+    const { isAvailableAccordionOpen, isEmptyAccordionOpen } = localState;
+
+    if (isAvailableAccordionOpen && isEmptyAccordionOpen) {
+      if (availableFields.length > pageSize) {
+        return [availableFields.slice(0, pageSize), []];
+      } else {
+        return [availableFields, emptyFields.slice(0, pageSize - availableFields.length)];
+      }
+    }
+    if (isAvailableAccordionOpen && !isEmptyAccordionOpen) {
+      return [availableFields.slice(0, pageSize), []];
+    }
+
+    if (!isAvailableAccordionOpen && isEmptyAccordionOpen) {
+      return [[], emptyFields.slice(0, pageSize)];
+    }
+    return [[], []];
+  }, [
+    localState.isAvailableAccordionOpen,
+    localState.isEmptyAccordionOpen,
+    filteredFieldGroups,
+    pageSize,
+  ]);
 
   const hilight = localState.nameFilter.toLowerCase();
   const hasFieldFilter = !!(localState.typeFilter.length || localState.nameFilter.length);
