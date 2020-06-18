@@ -15,7 +15,7 @@ import {
 } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
-import { from, Observable, empty, merge } from 'rxjs';
+import { from, empty, merge } from 'rxjs';
 import {
   filter,
   map,
@@ -34,16 +34,14 @@ import {
   MatchAllFilter,
 } from '../../../../../../.../../../src/plugins/data/public';
 import { TimelineStatus } from '../../../../common/types/timeline';
+import { inputsModel } from '../../../common/store/inputs';
 import {
   TimelineType,
   TimelineInput,
   ResponseTimeline,
   TimelineResult,
 } from '../../../graphql/types';
-import { AppApolloClient } from '../../../common/lib/lib';
 import { addError } from '../../../common/store/app/actions';
-import { NotesById } from '../../../common/store/app/model';
-import { inputsModel } from '../../../common/store/inputs';
 
 import {
   applyKqlFilterQuery,
@@ -80,17 +78,9 @@ import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { ActionTimeline, TimelineById } from './types';
+import { ActionTimeline, TimelineEpicDependencies } from './types';
 import { persistTimeline } from '../../containers/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
-
-interface TimelineEpicDependencies<State> {
-  timelineByIdSelector: (state: State) => TimelineById;
-  timelineTimeRangeSelector: (state: State) => inputsModel.TimeRange;
-  selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
-  selectNotesByIdSelector: (state: State) => NotesById;
-  apolloClient$: Observable<AppApolloClient>;
-}
 
 const timelineActionsType = [
   applyKqlFilterQuery.type,
