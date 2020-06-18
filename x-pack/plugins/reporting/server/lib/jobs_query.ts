@@ -6,10 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { errors as elasticsearchErrors } from 'elasticsearch';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
+import { ReportingCore } from '../';
 import { AuthenticatedUser } from '../../../security/server';
-import { ReportingConfig } from '../';
 import { JobSource } from '../types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
@@ -42,11 +41,8 @@ interface CountAggResult {
 
 const getUsername = (user: AuthenticatedUser | null) => (user ? user.username : false);
 
-export function jobsQueryFactory(
-  config: ReportingConfig,
-  elasticsearch: ElasticsearchServiceSetup
-) {
-  const index = config.get('index');
+export function jobsQueryFactory(reportingCore: ReportingCore) {
+  const { elasticsearch } = reportingCore.getPluginSetupDeps();
   const { callAsInternalUser } = elasticsearch.legacy.client;
 
   function execQuery(queryType: string, body: QueryBody) {
@@ -60,6 +56,8 @@ export function jobsQueryFactory(
       },
     };
 
+    const config = reportingCore.getConfig();
+    const index = config.get('index');
     const query = {
       index: `${index}-*`,
       body: Object.assign(defaultBody[queryType] || {}, body),

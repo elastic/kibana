@@ -63,6 +63,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -88,6 +89,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -118,6 +120,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -148,6 +151,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -237,6 +241,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -262,6 +267,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -292,6 +298,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -322,6 +329,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >

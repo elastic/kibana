@@ -1,0 +1,26 @@
+{
+  "list_id": "detection_list",
+  "_tags": ["detection"],
+  "tags": ["test_tag", "detection", "no_more_bad_guys"],
+  "type": "simple",
+  "description": "This is a sample detection type exception that has no item_id so it creates a new id each time",
+  "name": "Sample Detection Exception List Item",
+  "comments": [{ "comment": "This is a short little comment." }],
+  "entries": [
+    {
+      "field": "host.name",
+      "operator": "included",
+      "match": "sampleHostName"
+    },
+    {
+      "field": "event.category",
+      "operator": "included",
+      "match_any": ["process", "malware"]
+    },
+    {
+      "field": "event.action",
+      "operator": "included",
+      "match": "user-password-change"
+    }
+  ]
+}

@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-// import { DeepReadonly } from '../../../../../../../common/types/common';
+import { DeepReadonly } from '../../../../../../../common/types/common';
 
 import {
   checkPermission,
@@ -21,7 +21,7 @@ import {
   isClassificationAnalysis,
 } from '../../../../common/analytics';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
-// import { CloneAction } from './action_clone';
+import { CloneAction } from './action_clone';
 
 import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
@@ -82,7 +82,7 @@ export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
             iconType="stop"
             onClick={() => stopAnalytics(item)}
             aria-label={buttonStopText}
-            data-test-sub="mlAnalyticsJobStopButton"
+            data-test-subj="mlAnalyticsJobStopButton"
           >
             {buttonStopText}
           </EuiButtonEmpty>
@@ -106,10 +106,10 @@ export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
         return <DeleteAction item={item} />;
       },
     },
-    // {
-    //   render: (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
-    //     return <CloneAction item={item} createAnalyticsForm={createAnalyticsForm} />;
-    //   },
-    // },
+    {
+      render: (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
+        return <CloneAction item={item} createAnalyticsForm={createAnalyticsForm} />;
+      },
+    },
   ];
 };

@@ -14,7 +14,7 @@ export interface InspectButtonMetadata {
   tabId?: string;
 }
 
-export const INSPECT_HOSTS_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
+export const INSPECT_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   {
     id: '[data-test-subj="stat-hosts"]',
     title: 'Hosts Stat',
@@ -50,7 +50,7 @@ export const INSPECT_HOSTS_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
   },
 ];
 
-export const INSPECT_NETWORK_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
+export const INSPECT_NETWORK_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   {
     id: '[data-test-subj="stat-networkEvents"]',
     title: 'Network events Stat',

@@ -10,7 +10,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;

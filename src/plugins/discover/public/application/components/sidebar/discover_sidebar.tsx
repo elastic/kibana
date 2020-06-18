@@ -114,10 +114,12 @@ export function DiscoverSidebar({
         setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
       } else {
         setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
-        selectedIndexPattern.popularizeField(field.name, 1);
+        if (services.capabilities.discover.save) {
+          selectedIndexPattern.popularizeField(field.name, 1);
+        }
       }
     },
-    [openFieldMap, selectedIndexPattern]
+    [openFieldMap, selectedIndexPattern, services.capabilities.discover.save]
   );
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {

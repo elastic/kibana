@@ -20,7 +20,7 @@
 import dedent from 'dedent';
 import getopts from 'getopts';
 import { resolve } from 'path';
-import { pickLevelFromFlags } from '@kbn/dev-utils';
+import { pickLevelFromFlags } from '@kbn/dev-utils/tooling_log';
 
 import { commands } from './commands';
 import { runCommand } from './run';

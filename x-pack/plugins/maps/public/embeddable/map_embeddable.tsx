@@ -12,15 +12,10 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import {
-  Embeddable,
-  IContainer,
-  EmbeddableOutput,
-} from '../../../../../src/plugins/embeddable/public';
+import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 import {
   esFilters,
-  IIndexPattern,
   TimeRange,
   Filter,
   Query,
@@ -57,12 +52,8 @@ import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n } from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 
-import { MapEmbeddableInput, MapEmbeddableConfig } from './types';
+import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from './types';
 export { MapEmbeddableInput, MapEmbeddableConfig };
-
-export interface MapEmbeddableOutput extends EmbeddableOutput {
-  indexPatterns: IIndexPattern[];
-}
 
 const GisMap = lazy(() => import('../connected_components/gis_map'));
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {

@@ -18,35 +18,35 @@ First you'll create index patterns for the Shakespeare data set, which has an
 index named `shakespeare,` and the accounts data set, which has an index named
 `bank`. These data sets don't contain time series data.
 
-. In Kibana, open *Management*, and then click *Index Patterns.*
-. If this is your first index pattern, the *Create index pattern* page opens automatically.
+. Open the menu, then go to *Stack Management > {kib} > Index Patterns*.
+. If this is your first index pattern, the *Create index pattern* page opens.
 Otherwise, click *Create index pattern*.
-. Enter `shakes*` in the *Index pattern* field.
+. In the *Index pattern field*, enter `shakes*`.
 +
 [role="screenshot"]
 image::images/tutorial-pattern-1.png[]
 
 . Click *Next step*.
-. In *Configure settings*, click *Create index pattern*.
+. Select the *Time Filter field name*, then click *Create index pattern*.
 +
 You’re presented a table of all fields and associated data types in the index.
 
-. Return to the *Index patterns* overview page and define a second index pattern named  `ba*`. 
+. Return to the *Index patterns* page and create a second index pattern named  `ba*`. 
 
 [float]
-==== Create an index pattern for time series data
+==== Create an index pattern for the time series data
 
-Now create an index pattern for the Logstash index, which
-contains time series data.
+Create an index pattern for the Logstash index, which
+contains the time series data.
 
 . Define an index pattern named `logstash*`.
 . Click *Next step*.
-. Open the *Time Filter field name* dropdown and select *@timestamp*.
+. From the *Time Filter field name* dropdown, select *@timestamp*.
 . Click *Create index pattern*.
 
 NOTE: When you define an index pattern, the indices that match that pattern must
 exist in Elasticsearch and they must contain data. To check which indices are
-available, go to *Dev Tools > Console* and enter `GET _cat/indices`.  Alternately, use
+available, open the menu, then go to *Dev Tools > Console* and enter `GET _cat/indices`.  Alternately, use
 `curl -XGET "http://localhost:9200/_cat/indices"`.
 
 

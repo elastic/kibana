@@ -31,10 +31,11 @@ import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_
 import { LicensingPluginSetup } from '../../licensing/public';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { APM_FEATURE } from './feature';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
+import { MlPluginSetup } from '../../ml/server';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -62,6 +63,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       observability?: ObservabilityPluginSetup;
       features: FeaturesPluginSetup;
       security?: SecurityPluginSetup;
+      ml?: MlPluginSetup;
     }
   ) {
     this.logger = this.initContext.logger.get();
@@ -126,6 +128,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       plugins: {
         observability: plugins.observability,
         security: plugins.security,
+        ml: plugins.ml,
       },
     });
 

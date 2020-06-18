@@ -149,7 +149,7 @@ And you can attach exception list items like so:
     "malware",
     "os:linux"
   ],
-  "comment": [],
+  "comments": [],
   "created_at": "2020-05-28T19:17:21.099Z",
   "created_by": "yo",
   "description": "This is a sample endpoint type exception",

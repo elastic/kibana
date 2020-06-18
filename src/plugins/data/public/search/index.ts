@@ -44,6 +44,7 @@ export {
   SearchRequest,
   SearchResponse,
   getSearchErrorType,
+  getSearchParamsFromRequest,
 } from './fetch';
 
 export {

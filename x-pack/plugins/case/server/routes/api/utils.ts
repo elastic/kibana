@@ -132,8 +132,8 @@ export const flattenCaseSavedObject = ({
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
-  connector_id: savedObject.attributes.connector_id ?? caseConfigureConnectorId,
   ...savedObject.attributes,
+  connector_id: savedObject.attributes.connector_id ?? caseConfigureConnectorId,
 });
 
 export const transformComments = (

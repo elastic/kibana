@@ -11,22 +11,6 @@ const PIPELINE = {
   name: 'test_pipeline',
   description: 'My pipeline description.',
   version: 1,
-  processors: JSON.stringify([
-    {
-      set: {
-        field: 'foo',
-        value: 'new',
-      },
-    },
-  ]),
-  onFailureProcessors: JSON.stringify([
-    {
-      set: {
-        field: '_index',
-        value: 'failed-{{ _index }}',
-      },
-    },
-  ]),
 };
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

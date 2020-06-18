@@ -4,96 +4,315 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
+import { EuiOverlayMask, EuiModal, EuiModalBody, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import uuid from 'uuid';
+
+import * as i18n from '../translations';
+import { useStateToaster } from '../../toasters';
+import { useKibana } from '../../../../common/lib/kibana';
+import { Panel } from '../../../../common/components/panel';
+import { Loader } from '../../../../common/components/loader';
+import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiCommentProps,
-  EuiCommentList,
-  EuiAccordion,
-  EuiFlexItem,
-} from '@elastic/eui';
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import styled from 'styled-components';
+  ExceptionListType,
+  ExceptionListItemSchema,
+  ApiProps,
+  Filter,
+  SetExceptionsProps,
+} from '../types';
+import { allExceptionItemsReducer, State } from './reducer';
+import {
+  useExceptionList,
+  ExceptionIdentifiers,
+  useApi,
+} from '../../../../../public/lists_plugin_deps';
+import { ExceptionsViewerPagination } from './exceptions_pagination';
+import { ExceptionsViewerUtility } from './exceptions_utility';
+import { ExceptionsViewerItems } from './exceptions_viewer_items';
 
-import { ExceptionDetails } from './exception_details';
-import { ExceptionEntries } from './exception_entries';
-import { getFormattedEntries, getFormattedComments } from '../helpers';
-import { FormattedEntry, ExceptionListItemSchema } from '../types';
+const initialState: State = {
+  filterOptions: { filter: '', showEndpointList: false, showDetectionsList: false, tags: [] },
+  pagination: {
+    pageIndex: 0,
+    pageSize: 20,
+    totalItemCount: 0,
+    pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+  },
+  endpointList: null,
+  detectionsList: null,
+  allExceptions: [],
+  exceptions: [],
+  exceptionToEdit: null,
+  loadingLists: [],
+  loadingItemIds: [],
+  isInitLoading: true,
+  isModalOpen: false,
+};
 
-const MyFlexItem = styled(EuiFlexItem)`
-    &.comments--show {
-      padding: ${({ theme }) => theme.eui.euiSize};
-      border-top: ${({ theme }) => `${theme.eui.euiBorderThin}`}
-
-`;
-
-interface ExceptionItemProps {
-  exceptionItem: ExceptionListItemSchema;
-  commentsAccordionId: string;
-  handleDelete: ({ id }: { id: string }) => void;
-  handleEdit: (item: ExceptionListItemSchema) => void;
+enum ModalAction {
+  CREATE = 'CREATE',
+  EDIT = 'EDIT',
 }
 
-const ExceptionItemComponent = ({
-  exceptionItem,
+interface ExceptionsViewerProps {
+  ruleId: string;
+  exceptionListsMeta: ExceptionIdentifiers[];
+  availableListTypes: ExceptionListType[];
+  commentsAccordionId: string;
+  onAssociateList?: (listId: string) => void;
+}
+
+const ExceptionsViewerComponent = ({
+  ruleId,
+  exceptionListsMeta,
+  availableListTypes,
+  onAssociateList,
   commentsAccordionId,
-  handleDelete,
-  handleEdit,
-}: ExceptionItemProps): JSX.Element => {
-  const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
-  const [showComments, setShowComments] = useState(false);
+}: ExceptionsViewerProps): JSX.Element => {
+  const { services } = useKibana();
+  const [, dispatchToaster] = useStateToaster();
+  const onDispatchToaster = useCallback(
+    ({ title, color, iconType }) => (): void => {
+      dispatchToaster({
+        type: 'addToaster',
+        toast: {
+          id: uuid.v4(),
+          title,
+          color,
+          iconType,
+        },
+      });
+    },
+    [dispatchToaster]
+  );
+  const [
+    {
+      endpointList,
+      detectionsList,
+      exceptions,
+      filterOptions,
+      pagination,
+      loadingLists,
+      loadingItemIds,
+      isInitLoading,
+      isModalOpen,
+    },
+    dispatch,
+  ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
+  const { deleteExceptionItem } = useApi(services.http);
 
+  const setExceptions = useCallback(
+    ({
+      lists: newLists,
+      exceptions: newExceptions,
+      pagination: newPagination,
+    }: SetExceptionsProps) => {
+      dispatch({
+        type: 'setExceptions',
+        lists: newLists,
+        exceptions: (newExceptions as unknown) as ExceptionListItemSchema[],
+        pagination: newPagination,
+      });
+    },
+    [dispatch]
+  );
+  const [loadingList, , , , fetchList] = useExceptionList({
+    http: services.http,
+    lists: loadingLists,
+    filterOptions,
+    pagination: {
+      page: pagination.pageIndex + 1,
+      perPage: pagination.pageSize,
+      total: pagination.totalItemCount,
+    },
+    onSuccess: setExceptions,
+    onError: onDispatchToaster({
+      color: 'danger',
+      title: i18n.FETCH_LIST_ERROR,
+      iconType: 'alert',
+    }),
+  });
+
+  const setIsModalOpen = useCallback(
+    (isOpen: boolean): void => {
+      dispatch({
+        type: 'updateModalOpen',
+        isOpen,
+      });
+    },
+    [dispatch]
+  );
+
+  const handleFetchList = useCallback((): void => {
+    if (fetchList != null) {
+      fetchList();
+    }
+  }, [fetchList]);
+
+  const handleFilterChange = useCallback(
+    ({ filter, pagination: pag }: Filter): void => {
+      dispatch({
+        type: 'updateFilterOptions',
+        filterOptions: filter,
+        pagination: pag,
+        allLists: exceptionListsMeta,
+      });
+    },
+    [dispatch, exceptionListsMeta]
+  );
+
+  const handleAddException = useCallback(
+    (type: ExceptionListType): void => {
+      setIsModalOpen(true);
+    },
+    [setIsModalOpen]
+  );
+
+  const handleEditException = useCallback(
+    (exception: ExceptionListItemSchema): void => {
+      // TODO: Added this just for testing. Update
+      // modal state logic as needed once ready
+      dispatch({
+        type: 'updateExceptionToEdit',
+        exception,
+      });
+
+      setIsModalOpen(true);
+    },
+    [setIsModalOpen]
+  );
+
+  const onCloseExceptionModal = useCallback(
+    ({ actionType, listId }): void => {
+      setIsModalOpen(false);
+
+      // TODO: This callback along with fetchList can probably get
+      // passed to the modal for it to call itself maybe
+      if (actionType === ModalAction.CREATE && listId != null && onAssociateList != null) {
+        onAssociateList(listId);
+      }
+
+      handleFetchList();
+    },
+    [setIsModalOpen, handleFetchList, onAssociateList]
+  );
+
+  const setLoadingItemIds = useCallback(
+    (items: ApiProps[]): void => {
+      dispatch({
+        type: 'updateLoadingItemIds',
+        items,
+      });
+    },
+    [dispatch]
+  );
+
+  const handleDeleteException = useCallback(
+    ({ id, namespaceType }: ApiProps) => {
+      setLoadingItemIds([{ id, namespaceType }]);
+
+      deleteExceptionItem({
+        id,
+        namespaceType,
+        onSuccess: () => {
+          setLoadingItemIds(loadingItemIds.filter((t) => t.id !== id));
+          handleFetchList();
+        },
+        onError: () => {
+          const dispatchToasterError = onDispatchToaster({
+            color: 'danger',
+            title: i18n.DELETE_EXCEPTION_ERROR,
+            iconType: 'alert',
+          });
+
+          dispatchToasterError();
+          setLoadingItemIds(loadingItemIds.filter((t) => t.id !== id));
+        },
+      });
+    },
+    [setLoadingItemIds, deleteExceptionItem, loadingItemIds, handleFetchList, onDispatchToaster]
+  );
+
+  // Logic for initial render
   useEffect((): void => {
-    const formattedEntries = getFormattedEntries(exceptionItem.entries);
-    setEntryItems(formattedEntries);
-  }, [exceptionItem.entries]);
+    if (isInitLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
+      dispatch({
+        type: 'updateIsInitLoading',
+        loading: false,
+      });
+    }
+  }, [isInitLoading, exceptions, loadingList, dispatch]);
 
-  const onDelete = useCallback((): void => {
-    handleDelete({ id: exceptionItem.id });
-  }, [handleDelete, exceptionItem]);
+  // Used in utility bar info text
+  const ruleSettingsUrl = useMemo((): string => {
+    return services.application.getUrlForApp(
+      `security#/detections/rules/id/${encodeURI(ruleId)}/edit`
+    );
+  }, [ruleId, services.application]);
 
-  const onEdit = useCallback((): void => {
-    handleEdit(exceptionItem);
-  }, [handleEdit, exceptionItem]);
-
-  const onCommentsClick = useCallback((): void => {
-    setShowComments(!showComments);
-  }, [setShowComments, showComments]);
-
-  const formattedComments = useMemo((): EuiCommentProps[] => {
-    return getFormattedComments(exceptionItem.comments);
-  }, [exceptionItem]);
+  const showEmpty = useMemo((): boolean => {
+    return !isInitLoading && !loadingList && exceptions.length === 0;
+  }, [isInitLoading, exceptions.length, loadingList]);
 
   return (
-    <EuiPanel paddingSize="none">
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>
-          <EuiFlexGroup direction="row">
-            <ExceptionDetails
-              showComments={showComments}
-              exceptionItem={exceptionItem}
-              onCommentsClick={onCommentsClick}
-            />
-            <ExceptionEntries entries={entryItems} handleDelete={onDelete} handleEdit={onEdit} />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <MyFlexItem className={showComments ? 'comments--show' : ''}>
-          <EuiAccordion
-            id={commentsAccordionId}
-            arrowDisplay="none"
-            forceState={showComments ? 'open' : 'closed'}
-            data-test-subj="exceptionsViewerCommentAccordion"
-          >
-            <EuiCommentList comments={formattedComments} />
-          </EuiAccordion>
-        </MyFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <>
+      {isModalOpen && (
+        <EuiOverlayMask>
+          <EuiModal onClose={onCloseExceptionModal}>
+            <EuiModalBody>
+              <EuiCodeBlock language="json" fontSize="m" paddingSize="m" overflowHeight={300}>
+                {`Modal goes here`}
+              </EuiCodeBlock>
+            </EuiModalBody>
+          </EuiModal>
+        </EuiOverlayMask>
+      )}
+
+      <Panel loading={isInitLoading || loadingList}>
+        {(isInitLoading || loadingList) && (
+          <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+        )}
+
+        <ExceptionsViewerHeader
+          isInitLoading={isInitLoading}
+          supportedListTypes={availableListTypes}
+          detectionsListItems={detectionsList != null ? detectionsList.totalItems : 0}
+          endpointListItems={endpointList != null ? endpointList.totalItems : 0}
+          onFilterChange={handleFilterChange}
+          onAddExceptionClick={handleAddException}
+        />
+
+        <EuiSpacer size="l" />
+
+        <ExceptionsViewerUtility
+          pagination={pagination}
+          filterOptions={filterOptions}
+          onRefreshClick={handleFetchList}
+          ruleSettingsUrl={ruleSettingsUrl}
+        />
+
+        <ExceptionsViewerItems
+          showEmpty={showEmpty}
+          isInitLoading={isInitLoading}
+          exceptions={exceptions}
+          loadingItemIds={loadingItemIds}
+          commentsAccordionId={commentsAccordionId}
+          onDeleteException={handleDeleteException}
+          onEditExceptionItem={handleEditException}
+        />
+
+        <ExceptionsViewerPagination
+          onPaginationChange={handleFilterChange}
+          pagination={pagination}
+        />
+      </Panel>
+    </>
   );
 };
 
-ExceptionItemComponent.displayName = 'ExceptionItemComponent';
+ExceptionsViewerComponent.displayName = 'ExceptionsViewerComponent';
 
-export const ExceptionItem = React.memo(ExceptionItemComponent);
+export const ExceptionsViewer = React.memo(ExceptionsViewerComponent);
 
-ExceptionItem.displayName = 'ExceptionItem';
+ExceptionsViewer.displayName = 'ExceptionsViewer';

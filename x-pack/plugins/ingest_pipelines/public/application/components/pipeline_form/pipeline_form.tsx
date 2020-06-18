@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -16,6 +16,11 @@ import { PipelineTestFlyout } from './pipeline_test_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
+import {
+  OnUpdateHandlerArg,
+  OnUpdateHandler,
+  SerializeResult,
+} from '../pipeline_processors_editor';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;
@@ -30,8 +35,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   defaultValue = {
     name: '',
     description: '',
-    processors: '',
-    on_failure: '',
+    processors: [],
+    on_failure: [],
     version: '',
   },
   onSave,
@@ -44,10 +49,25 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
 
+  const processorStateRef = useRef<OnUpdateHandlerArg>();
+
   const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
-    if (isValid) {
-      onSave(formData as Pipeline);
+    let override: SerializeResult | undefined;
+
+    if (!isValid) {
+      return;
     }
+
+    if (processorStateRef.current) {
+      const processorsState = processorStateRef.current;
+      if (await processorsState.validate()) {
+        override = processorsState.getData();
+      } else {
+        return;
+      }
+    }
+
+    onSave({ ...formData, ...(override || {}) } as Pipeline);
   };
 
   const handleTestPipelineClick = () => {
@@ -59,6 +79,10 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     defaultValue,
     onSubmit: handleSave,
   });
+
+  const onEditorFlyoutOpen = useCallback(() => {
+    setIsRequestVisible(false);
+  }, [setIsRequestVisible]);
 
   const saveButtonLabel = isSaving ? (
     <FormattedMessage
@@ -77,6 +101,11 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     />
   );
 
+  const onProcessorsChangeHandler = useCallback<OnUpdateHandler>(
+    (arg) => (processorStateRef.current = arg),
+    []
+  );
+
   return (
     <>
       <Form
@@ -90,10 +119,13 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
         {/* All form fields */}
         <PipelineFormFields
+          onEditorFlyoutOpen={onEditorFlyoutOpen}
+          initialProcessors={defaultValue.processors}
+          initialOnFailureProcessors={defaultValue.on_failure}
+          onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
           isTestButtonDisabled={isTestingPipeline || form.isValid === false}
           onTestPipelineClick={handleTestPipelineClick}
-          hasOnFailure={Boolean(defaultValue.on_failure)}
           isEditing={isEditing}
         />
 
@@ -147,6 +179,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* ES request flyout */}
         {isRequestVisible ? (
           <PipelineRequestFlyout
+            readProcessors={() =>
+              processorStateRef.current?.getData() || { processors: [], on_failure: [] }
+            }
             closeFlyout={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
           />
         ) : null}
@@ -154,6 +189,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* Test pipeline flyout */}
         {isTestingPipeline ? (
           <PipelineTestFlyout
+            readProcessors={() =>
+              processorStateRef.current?.getData() || { processors: [], on_failure: [] }
+            }
             closeFlyout={() => {
               setIsTestingPipeline((prevIsTestingPipeline) => !prevIsTestingPipeline);
             }}

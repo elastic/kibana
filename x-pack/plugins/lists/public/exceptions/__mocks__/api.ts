@@ -54,3 +54,18 @@ export const fetchExceptionListItemById = async ({
   signal,
 }: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
   Promise.resolve(getExceptionListItemSchemaMock());
+
+export const deleteExceptionListById = async ({
+  http,
+  id,
+  namespaceType,
+  signal,
+}: ApiCallByIdProps): Promise<ExceptionListSchema> => Promise.resolve(getExceptionListSchemaMock());
+
+export const deleteExceptionListItemById = async ({
+  http,
+  id,
+  namespaceType,
+  signal,
+}: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
+  Promise.resolve(getExceptionListItemSchemaMock());

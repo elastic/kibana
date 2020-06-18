@@ -47,7 +47,7 @@ export const exactCheck = <T>(
   return pipe(decoded, fold(onLeft, onRight));
 };
 
-export const findDifferencesRecursive = <T>(original: T, decodedValue: T): string[] => {
+export const findDifferencesRecursive = <T>(original: unknown, decodedValue: T): string[] => {
   if (decodedValue === null && original === null) {
     // both the decodedValue and the original are null which indicates that they are equal
     // so do not report differences

@@ -34,8 +34,14 @@ test('should render', async () => {
   expect(component).toMatchSnapshot();
 });
 
-test('should not render clusters option when clustering is not supported', async () => {
-  const component = shallow(<ScalingForm {...defaultProps} supportsClustering={false} />);
+test('should disable clusters option when clustering is not supported', async () => {
+  const component = shallow(
+    <ScalingForm
+      {...defaultProps}
+      supportsClustering={false}
+      clusteringDisabledReason="Simulated clustering disabled"
+    />
+  );
 
   expect(component).toMatchSnapshot();
 });

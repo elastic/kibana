@@ -5,8 +5,9 @@
  */
 
 import { pickBy } from 'lodash/fp';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, OutputRuleAlertRest } from '../types';
+import { RuleTypeParams } from '../types';
 
 interface BuildRuleParams {
   ruleParams: RuleTypeParams;
@@ -36,10 +37,10 @@ export const buildRule = ({
   interval,
   tags,
   throttle,
-}: BuildRuleParams): Partial<OutputRuleAlertRest> => {
-  return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+}: BuildRuleParams): Partial<RulesSchema> => {
+  return pickBy<RulesSchema>((value: unknown) => value != null, {
     id,
-    rule_id: ruleParams.ruleId,
+    rule_id: ruleParams.ruleId ?? '(unknown rule_id)',
     actions,
     false_positives: ruleParams.falsePositives,
     saved_id: ruleParams.savedId,
@@ -67,12 +68,12 @@ export const buildRule = ({
     filters: ruleParams.filters,
     created_by: createdBy,
     updated_by: updatedBy,
-    threat: ruleParams.threat,
+    threat: ruleParams.threat ?? [],
     throttle,
     version: ruleParams.version,
     created_at: createdAt,
     updated_at: updatedAt,
-    exceptions_list: ruleParams.exceptionsList,
+    exceptions_list: ruleParams.exceptionsList ?? [],
     machine_learning_job_id: ruleParams.machineLearningJobId,
     anomaly_threshold: ruleParams.anomalyThreshold,
   });

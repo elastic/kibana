@@ -31,14 +31,12 @@ import {
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
 } from '../../../common/constants';
-
+import { TemplateDeserialized, TemplateListItem, DataStream } from '../../../common';
+import { IndexMgmtMetricsType } from '../../types';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
-
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import { TemplateDeserialized, TemplateListItem } from '../../../common';
-import { IndexMgmtMetricsType } from '../../types';
 
 // Temporary hack to provide the uiMetricService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
@@ -47,6 +45,21 @@ export const setUiMetricService = (_uiMetricService: UiMetricService<IndexMgmtMe
   uiMetricService = _uiMetricService;
 };
 // End hack
+
+export function useLoadDataStreams() {
+  return useRequest<DataStream[]>({
+    path: `${API_BASE_PATH}/data_streams`,
+    method: 'get',
+  });
+}
+
+// TODO: Implement this API endpoint once we have content to surface in the detail panel.
+export function useLoadDataStream(name: string) {
+  return useRequest<DataStream[]>({
+    path: `${API_BASE_PATH}/data_stream/${encodeURIComponent(name)}`,
+    method: 'get',
+  });
+}
 
 export async function loadIndices() {
   const response = await httpService.httpClient.get(`${API_BASE_PATH}/indices`);
