@@ -71,6 +71,7 @@ export function NoDataPopover({
       footerAction={
         <EuiButtonEmpty
           size="s"
+          data-test-subj="noDataPopoverDismissButton"
           onClick={() => {
             storage.set(NO_DATA_POPOVER_STORAGE_KEY, true);
             setNoDataPopoverDismissed(true);

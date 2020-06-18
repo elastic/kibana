@@ -232,10 +232,12 @@ export function QueryBarTopRow(props: Props) {
     }
 
     return (
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        {renderDatePicker()}
-        <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-      </EuiFlexGroup>
+      <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          {renderDatePicker()}
+          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+        </EuiFlexGroup>
+      </NoDataPopover>
     );
   }
 
@@ -268,22 +270,20 @@ export function QueryBarTopRow(props: Props) {
 
     return (
       <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
-        <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
-          <EuiSuperDatePicker
-            start={props.dateRangeFrom}
-            end={props.dateRangeTo}
-            isPaused={props.isRefreshPaused}
-            refreshInterval={props.refreshInterval}
-            onTimeChange={onTimeChange}
-            onRefresh={onRefresh}
-            onRefreshChange={props.onRefreshChange}
-            showUpdateButton={false}
-            recentlyUsedRanges={recentlyUsedRanges}
-            commonlyUsedRanges={commonlyUsedRanges}
-            dateFormat={uiSettings!.get('dateFormat')}
-            isAutoRefreshOnly={props.showAutoRefreshOnly}
-          />
-        </NoDataPopover>
+        <EuiSuperDatePicker
+          start={props.dateRangeFrom}
+          end={props.dateRangeTo}
+          isPaused={props.isRefreshPaused}
+          refreshInterval={props.refreshInterval}
+          onTimeChange={onTimeChange}
+          onRefresh={onRefresh}
+          onRefreshChange={props.onRefreshChange}
+          showUpdateButton={false}
+          recentlyUsedRanges={recentlyUsedRanges}
+          commonlyUsedRanges={commonlyUsedRanges}
+          dateFormat={uiSettings!.get('dateFormat')}
+          isAutoRefreshOnly={props.showAutoRefreshOnly}
+        />
       </EuiFlexItem>
     );
   }

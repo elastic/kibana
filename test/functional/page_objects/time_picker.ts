@@ -52,6 +52,13 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
     }
 
+    async ensureHiddenNoDataPopover() {
+      const isVisible = await testSubjects.exists('noDataPopoverDismissButton');
+      if (isVisible) {
+        await testSubjects.click('noDataPopoverDismissButton');
+      }
+    }
+
     /**
      * the provides a quicker way to set the timepicker to the default range, saves a few seconds
      */
