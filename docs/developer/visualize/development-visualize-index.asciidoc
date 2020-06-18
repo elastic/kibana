@@ -18,4 +18,12 @@ However, these docs will be kept up-to-date to reflect the current implementatio
 
 include::development-embedding-visualizations.asciidoc[]
 
+<<<<<<< HEAD
 include::development-create-visualization.asciidoc[]
+=======
+* The <<breaking-changes,breaking changes>> documentation, where we try to capture any changes to the APIs as they occur across minors.
+* link:https://github.com/elastic/kibana/issues/44121[Meta issue] which is tracking the move of the plugin to the new Kibana platform
+* Our link:https://www.elastic.co/blog/join-our-elastic-stack-workspace-on-slack[Elastic Stack workspace on Slack].
+* The {kib-repo}blob/{branch}/src/plugins/visualizations[source code], which will continue to be
+the most accurate source of information.
+>>>>>>> d26cbef389... [DOCS] Adds kibana-pull attribute for release docs (#69554)

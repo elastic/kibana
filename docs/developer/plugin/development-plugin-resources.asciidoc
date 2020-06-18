@@ -9,6 +9,7 @@ Many Kibana developers hang out on `irc.freenode.net` in the `#kibana` channel. 
 
 [float]
 ==== Some light reading
+<<<<<<< HEAD
 - Our {repo}blob/master/CONTRIBUTING.md[contributing guide] can help you get a development environment going
 - Tim Roes' excellent blog series https://www.timroes.de/2016/02/21/writing-kibana-plugins-custom-applications/[Writing Kibana Plugins]
 
@@ -16,11 +17,18 @@ Many Kibana developers hang out on `irc.freenode.net` in the `#kibana` channel. 
 ==== Videos
 - https://www.elastic.co/elasticon/2015/sf/contributors-guide-to-the-kibana-galaxy[Contributors Guide to the Kibana Galaxy]
 - https://www.elastic.co/elasticon/conf/2016/sf/how-to-build-your-own-kibana-plugins[Kibana Plugin Dev - Elasticon 2016]
+=======
+Our {kib-repo}blob/master/CONTRIBUTING.md[contributing guide] can help you get a development environment going.
+>>>>>>> d26cbef389... [DOCS] Adds kibana-pull attribute for release docs (#69554)
 
 [float]
 ==== Plugin Generator
 
+<<<<<<< HEAD
 It is recommended that you kick-start your plugin by generating it with the {repo}tree/{branch}/packages/kbn-plugin-generator[Kibana Plugin Generator]. Run the following within the Kibana repo and you will be asked a couple questions, see some progress bars, and have a freshly generated plugin ready for you to play within Kibana's sibling `kibana-extra` folder.
+=======
+We recommend that you kick-start your plugin by generating it with the {kib-repo}tree/{branch}/packages/kbn-plugin-generator[Kibana Plugin Generator]. Run the following in the Kibana repo, and you will be asked a couple questions, see some progress bars, and have a freshly generated plugin ready for you to play with in Kibana's `plugins` folder.
+>>>>>>> d26cbef389... [DOCS] Adds kibana-pull attribute for release docs (#69554)
 
 ["source","shell"]
 -----------
@@ -43,7 +51,11 @@ The Kibana directory must be named `kibana`, and your plugin directory must be l
 
 [float]
 ==== References in the code
+<<<<<<< HEAD
  - {repo}blob/{branch}/src/server/plugins/lib/plugin.js[Plugin class]: What options does the `kibana.Plugin` class accept?
+=======
+ - {kib-repo}blob/{branch}/src/legacy/server/plugins/lib/plugin.js[Plugin class]: What options does the `kibana.Plugin` class accept?
+>>>>>>> d26cbef389... [DOCS] Adds kibana-pull attribute for release docs (#69554)
  - <<development-uiexports>>: What type of exports are available?
 
 [float]
@@ -71,4 +83,15 @@ Plugin code can be written in http://www.typescriptlang.org/[TypeScript] if desi
 }
 -----------
 
+<<<<<<< HEAD
 TypeScript code is automatically converted into JavaScript during development, but not in the distributable version of Kibana. If you use the {repo}blob/{branch}/packages/kbn-plugin-helpers[@kbn/plugin-helpers] to build your plugin then your `.ts` and `.tsx` files will be permanently transpiled before your plugin is archived. If you have your own build process, make sure to run the TypeScript compiler on your source files and ship the compilation output so that your plugin will work with the distributable version of Kibana.
+=======
+TypeScript code is automatically converted into JavaScript during development,
+but not in the distributable version of Kibana. If you use the
+{kib-repo}blob/{branch}/packages/kbn-plugin-helpers[@kbn/plugin-helpers] to build your plugin, then your `.ts` and `.tsx` files will be permanently transpiled before your plugin is archived. If you have your own build process, make sure to run the TypeScript compiler on your source files and ship the compilation output so that your plugin will work with the distributable version of Kibana.
+
+==== {kib} platform migration guide
+
+{kib-repo}blob/{branch}/src/core/MIGRATION.md#migrating-legacy-plugins-to-the-new-platform[This guide]
+provides an action plan for moving a legacy plugin to the new platform. 
+>>>>>>> d26cbef389... [DOCS] Adds kibana-pull attribute for release docs (#69554)
