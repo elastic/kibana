@@ -28,8 +28,14 @@ import { DatePicker, TimePickerTime } from '../../components/shared/data_picker'
 import { useQueryParams } from '../../hooks/use_query_params';
 import { getParsedDate } from '../../utils/date';
 import { useKibanaUISettings, UI_SETTINGS } from '../../hooks/use_kibana_ui_settings';
+import { RouteParams } from '../../routes';
 
-export const Overview = () => {
+interface Props {
+  routeParams?: RouteParams<'/overview'>;
+}
+
+export const Overview = ({ routeParams }: Props) => {
+  console.log('### caue: Overview -> routeParams', routeParams?.params?.query);
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
 

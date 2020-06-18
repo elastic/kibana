@@ -9,38 +9,38 @@ import { Home } from '../pages/home';
 import { Overview } from '../pages/overview';
 import { jsonRt } from './json_rt';
 
-// "/services/{serviceName}/errors": {
-//   params: {
-//     path: t.type({
-//       serviceName: t.string
-//     }),
-// query: t.partial({
-//   rangeFrom: t.string,
-//   rangeTo: t.string
-// })
-//   },
-//   handler: async ({ query, path }) => {
-//     return <ErrorGroupDetails routeParams={{ query, path }} />;
-//   }
-// }
+export interface RouteParams<T extends keyof typeof routes> {
+  params: DecodeParams<typeof routes[T]['params']>;
+}
 
-export interface Route {
-  handler: React.ReactNode;
-  params?: {
-    path?: any;
-    query?: any;
+type DecodeParams<TParams extends Params | undefined> = {
+  [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
+};
+
+type OverviewRouteParams = DecodeParams<typeof routes['/overview']['params']>;
+const overviewRouteParams: OverviewRouteParams = { query: {} };
+console.log('### caue:', overviewRouteParams);
+
+export interface Params {
+  query?: t.Any;
+  path?: t.Any;
+}
+interface Routes {
+  [pathName: string]: {
+    handler: React.ReactNode;
+    params: Params;
   };
 }
 
-export const routes: Record<string, Route> = {
+export const routes = {
   '/': {
     handler: () => {
       return <Home />;
     },
+    params: {},
   },
   '/overview': {
     handler: ({ query, path }: { query: any; path: any }) => {
-      console.log('### caue:', { query, path });
       return <Overview />;
     },
     params: {
@@ -52,7 +52,6 @@ export const routes: Record<string, Route> = {
   },
   '/overview/:id': {
     handler: ({ query, path }: { query: any; path: any }) => {
-      console.log('### caue: with ID query', { query, path });
       return <Overview />;
     },
     params: {
