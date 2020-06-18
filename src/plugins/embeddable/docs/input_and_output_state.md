@@ -20,7 +20,7 @@ Non-real examples to showcase the difference:
 
 ### Types of input state
 
-**Inherited input state**
+#### Inherited input state
 
 The only reason we have different types of input state is to support embeddable containers, and children embeddables _inheriting_ state from the container. 
 For example, when the dashboard time range changes, so does
@@ -46,9 +46,9 @@ For example, imagine a container with this input:
       // `embeddableFactories.get(type).create(childInput)`.
       explicitInput: {
 
-        // All explicitInput is required to have an id. I'm not actually sure it's neccessary. I believe it was intended as a way for the
-        // embeddable to know where it exists in the panels array if it's living in a container. This could possibly be tech debt and
-        // removed. Note though, this is NOT THE SAVED OBJECT ID! Even though it's sometimes used to store the saved object id. 
+        // All explicitInput is required to have an id. This is used as a way for the
+        // embeddable to know where it exists in the panels array if it's living in a container.
+        // Note, this is NOT THE SAVED OBJECT ID! Even though it's sometimes used to store the saved object id. 
         id: '1',
       }
     }
@@ -69,7 +69,7 @@ Notice that `gridData` is not passed down, but `timeRange` is. What ends up as _
 implementation of a container and
 determined by the abstract function `Container.getInheritedInput()`
 
-**Overridding inherited input**
+#### Overridding inherited input
 
 We wanted to support _overriding_ this inherited state, to support the "Per panel time range" feature. The _inherited_ `timeRange` input can be
 overridden by the _explicit_ `timeRange` input.
@@ -115,7 +115,51 @@ This override wouldn't affect other children, so the second child would receive:
 }
 ```
 
-**A container can pass down any information to the children**
+#### EmbeddableInput.id and some technical debt
+
+Above I said:
+
+> From the viewpoint of the child Embeddable,
+> time range is just input state. It doesn't care where it gets this data from.  
+
+and this is mostly true, however, the primary reason EmbeddableInput.id exists is to support the
+case where the custom time range badge action needs to look up a child's explicit input on the
+parent. It does this to determine whether or not to show the badge.  The logic is something like:
+
+```ts
+  // If there is no explicit input defined on the parent then this embeddable inherits the
+  // time range from whatever the time range of the parent is.
+  return parent.getInput().panels[embeddable.id].explicitInput.timeRange === undefined;
+```
+
+It doesn't just compare the timeRange input on the parent (`embeddable.parent?.getInput().timeRange` )because even if they happen to match,
+we still want the badge showing to indicate the time range is "locked" on this particular panel. 
+
+Note that `parent` can be retrieved from either `embeddabble.parent` or `embeddable.getRoot()`.  The
+`getRoot` variety will walk up to find the root parent, even though we have no tested or used
+nested containers, it is theoretically possible.
+
+This EmbeddableInput.id parameter is marked as required on the `EmbeddableInput` interface, even though it's only used
+when an embeddable is inside a parent. There is also no
+typescript safety to ensure the id matches the panel id in the parents json:
+
+```js
+    ['2']: {
+      type: 'clock',
+      explicitInput: {
+        id: '3', // No! Should be 2!
+      }
+    },
+```
+
+It should probably be something that the parent passes down to the child specifically, based on the panel mapping key,
+and renamed to something like `panelKeyInParent`.
+
+Note that this has nothing to do with a saved object id, even though in dashboard app, the saved object happens to be
+used as the dashboard container id.  Another reason this should probably not be required for embeddables not 
+inside containers.
+
+#### A container can pass down any information to the children
 
 It doesn't have to be part of it's own input. It's possible for a container input like:
 
@@ -147,7 +191,7 @@ to pass down this input:
 I don't have a realistic use case for this, just noting it's possible in any containers implementation of `getInheritedInput`. Note this is still considered
 inherited input because it's coming from the container.
 
-**Explicit input stored on behalf of the container**
+#### Explicit input stored on behalf of the container
 
 It's possible for a container to store explicit input state on behalf of an embeddable, without knowing what that state is. For example, a container could
 have input state like:
@@ -184,7 +228,7 @@ There are two ways for this kind of state to end up in `panels[id].explicitInput
 2. `ClockEmbeddableFactory.getDefaultInput` returns it. (This function is largely unused. We may be able to get rid of it.)
 3. Someone called `embeddable.updateInput({ display: 'analog' })`, when the embeddable is a child in a container. 
 
-**Containers can pass down too much information**
+#### Containers can pass down too much information
 
 Lets say our container state is:
 
@@ -216,7 +260,8 @@ different types of actions. For example, it'd be great if "Customize time range"
 with the `timeRange`. You can't check at runtime whether `input.timeRange === undefined` to do so though, because it will be passed in by the container
 regardless.
 
-**Tech debt warning**
+
+#### Tech debt warnings
 
 `EmbeddableFactory.getExplicitInput` was intended as a way for an embeddable to retrieve input state it needs, that will not  
 be provided by a container. However, an embeddable won't know where it will be rendered, so how will the factory know which 
