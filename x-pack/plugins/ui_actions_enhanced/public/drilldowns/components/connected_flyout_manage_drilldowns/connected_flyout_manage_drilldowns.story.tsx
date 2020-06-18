@@ -12,28 +12,23 @@ import {
   dashboardFactory,
   urlFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../ui_actions_enhanced/public/components/action_wizard/test_data';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { StubBrowserStorage } from '../../../../../../src/test_utils/public/stub_browser_storage';
+} from '../../../components/action_wizard/test_data';
+import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
 import { mockDynamicActionManager } from './test_data';
+import { ActionFactory } from '../../../dynamic_actions';
 
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
-  uiActionsEnhanced: {
-    getActionFactories() {
-      return [dashboardFactory, urlFactory];
+  actionFactories: [dashboardFactory as ActionFactory, urlFactory as ActionFactory],
+  storage: new Storage(new StubBrowserStorage()),
+  toastService: {
+    addError: (...args: any[]) => {
+      alert(JSON.stringify(args));
+    },
+    addSuccess: (...args: any[]) => {
+      alert(JSON.stringify(args));
     },
   } as any,
-  storage: new Storage(new StubBrowserStorage()),
-  notifications: {
-    toasts: {
-      addError: (...args: any[]) => {
-        alert(JSON.stringify(args));
-      },
-      addSuccess: (...args: any[]) => {
-        alert(JSON.stringify(args));
-      },
-    } as any,
-  },
 });
 
 storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (

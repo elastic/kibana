@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const toastDrilldownCreated = {
   title: (drilldownName: string) =>
     i18n.translate(
-      'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownCreatedTitle',
+      'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.toast.drilldownCreatedTitle',
       {
         defaultMessage: 'Drilldown "{drilldownName}" created',
         values: {
@@ -18,7 +18,7 @@ export const toastDrilldownCreated = {
       }
     ),
   text: i18n.translate(
-    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownCreatedText',
+    'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.toast.drilldownCreatedText',
     {
       // TODO: remove `Save your dashboard before testing.` part
       // when drilldowns are used not only in dashboard
@@ -30,14 +30,17 @@ export const toastDrilldownCreated = {
 
 export const toastDrilldownEdited = {
   title: (drilldownName: string) =>
-    i18n.translate('xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownEditedTitle', {
-      defaultMessage: 'Drilldown "{drilldownName}" updated',
-      values: {
-        drilldownName,
-      },
-    }),
+    i18n.translate(
+      'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.toast.drilldownEditedTitle',
+      {
+        defaultMessage: 'Drilldown "{drilldownName}" updated',
+        values: {
+          drilldownName,
+        },
+      }
+    ),
   text: i18n.translate(
-    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownEditedText',
+    'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.toast.drilldownEditedText',
     {
       defaultMessage: 'Save your dashboard before testing.',
     }
@@ -46,13 +49,13 @@ export const toastDrilldownEdited = {
 
 export const toastDrilldownDeleted = {
   title: i18n.translate(
-    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownDeletedTitle',
+    'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.toast.drilldownDeletedTitle',
     {
       defaultMessage: 'Drilldown deleted',
     }
   ),
   text: i18n.translate(
-    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownDeletedText',
+    'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.toast.drilldownDeletedText',
     {
       defaultMessage: 'Save your dashboard before testing.',
     }
@@ -62,14 +65,14 @@ export const toastDrilldownDeleted = {
 export const toastDrilldownsDeleted = {
   title: (n: number) =>
     i18n.translate(
-      'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsDeletedTitle',
+      'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsDeletedTitle',
       {
         defaultMessage: '{n} drilldowns deleted',
         values: { n },
       }
     ),
   text: i18n.translate(
-    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsDeletedText',
+    'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsDeletedText',
     {
       defaultMessage: 'Save your dashboard before testing.',
     }
@@ -77,7 +80,7 @@ export const toastDrilldownsDeleted = {
 };
 
 export const toastDrilldownsCRUDError = i18n.translate(
-  'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsCRUDErrorTitle',
+  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsCRUDErrorTitle',
   {
     defaultMessage: 'Error saving drilldown',
     description: 'Title for generic error toast when persisting drilldown updates failed',

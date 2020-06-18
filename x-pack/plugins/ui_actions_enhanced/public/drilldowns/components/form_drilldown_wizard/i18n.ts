@@ -7,21 +7,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtNameOfDrilldown = i18n.translate(
-  'xpack.drilldowns.components.FormCreateDrilldown.nameOfDrilldown',
+  'xpack.uiActionsEnhanced.drilldowns.components.FormCreateDrilldown.nameOfDrilldown',
   {
     defaultMessage: 'Name',
   }
 );
 
 export const txtUntitledDrilldown = i18n.translate(
-  'xpack.drilldowns.components.FormCreateDrilldown.untitledDrilldown',
+  'xpack.uiActionsEnhanced.drilldowns.components.FormCreateDrilldown.untitledDrilldown',
   {
     defaultMessage: 'Untitled drilldown',
   }
 );
 
 export const txtDrilldownAction = i18n.translate(
-  'xpack.drilldowns.components.FormCreateDrilldown.drilldownAction',
+  'xpack.uiActionsEnhanced.drilldowns.components.FormCreateDrilldown.drilldownAction',
   {
     defaultMessage: 'Action',
   }
