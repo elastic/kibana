@@ -30,7 +30,7 @@ time range is just input state. It doesn't care where it gets this data from.
 
 For example, imagine a container with this input:
 
-```json
+```js
 {
   gridData: {...},
   timeRange: 'now-15m to now',
@@ -58,7 +58,7 @@ For example, imagine a container with this input:
 
 That could result in the following input being passed to a child:
 
-```json
+```js
 {
   timeRange: 'now-15m to now',
   id: '1',
@@ -76,7 +76,7 @@ overridden by the _explicit_ `timeRange` input.
 
 Take this example dashboard container input:
 
-```json
+```js
 {
   gridData: {...},
   timeRange: 'now-15m to now',
@@ -99,7 +99,7 @@ Take this example dashboard container input:
 
 The first child embeddable will get passed input state:
 
-```json
+```js
 {
   timeRange: 'now-30m to now',
   id: '1',
@@ -108,7 +108,7 @@ The first child embeddable will get passed input state:
 
 This override wouldn't affect other children, so the second child would receive:
 
-```json
+```js
 {
   timeRange: 'now-15m to now',
   id: '2',
@@ -120,7 +120,7 @@ This override wouldn't affect other children, so the second child would receive:
 It doesn't have to be part of it's own input. It's possible for a container input like:
 
 
-```json
+```js
 {
   timeRange: 'now-15m to now',
   panels: {
@@ -136,7 +136,7 @@ It doesn't have to be part of it's own input. It's possible for a container inpu
 
 to pass down this input:
 
-```json
+```js
 {
   timeRange: 'now-30m to now',
   id: '1',
@@ -152,7 +152,7 @@ inherited input because it's coming from the container.
 It's possible for a container to store explicit input state on behalf of an embeddable, without knowing what that state is. For example, a container could
 have input state like:
 
-```json
+```js
 {
   timeRange: 'now-15m to now',
   panels: {
@@ -168,7 +168,7 @@ have input state like:
 
 And what gets passed to the child is:
 
-```json
+```js
 {
   timeRange: 'now-15m to now',
   id: '1',
@@ -188,7 +188,7 @@ There are two ways for this kind of state to end up in `panels[id].explicitInput
 
 Lets say our container state is:
 
-```json
+```js
 {
   timeRange: 'now-15m to now',
   panels: {
@@ -203,7 +203,7 @@ Lets say our container state is:
 
 What gets passed to the child is:
 
-```json
+```js
 {
   timeRange: 'now-15m to now',
   id: '1',
