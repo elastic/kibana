@@ -97,10 +97,10 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
   }
 
   public render(node: HTMLElement) {
-    this.node = node;
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
+    this.node = node;
     ReactDOM.render(<BookEmbeddableComponent embeddable={this} />, node);
   }
 
