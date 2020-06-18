@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SettingsFormFlyout, OnSubmitHandler } from './settings_form_flyout';
-
-export { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from './processor_settings_form';
+export {
+  ProcessorSettingsForm,
+  ProcessorSettingsFromOnSubmitArg,
+  OnSubmitHandler,
+} from './processor_settings_form';
 
 export { ProcessorsTree, ProcessorInfo, OnActionHandler } from './processors_tree';
 
