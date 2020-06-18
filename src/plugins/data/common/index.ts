@@ -28,4 +28,3 @@ export * from './search/aggs';
 export * from './types';
 export * from './utils';
 export * from './field_mapping';
-export { IndexPatternSpec } from './index_patterns/index_patterns/types';

@@ -28,10 +28,8 @@ import {
   FieldFormat,
   shortenDottedString,
 } from '../../../common';
-import { OnNotification } from '../types';
+import { OnNotification, FieldSpec } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
-
-export type FieldSpec = Record<string, any>;
 
 interface FieldDependencies {
   fieldFormats: FieldFormatsStartCommon;
@@ -95,7 +93,7 @@ export class Field implements IFieldType {
 
     if (!type) type = getKbnFieldType('unknown');
 
-    let format = spec.format;
+    let format: any = spec.format;
 
     if (!FieldFormat.isInstanceOfFieldFormat(format)) {
       format =
@@ -149,5 +147,9 @@ export class Field implements IFieldType {
     obj.fact('subType');
 
     return obj.create();
+  }
+
+  toSpec() {
+    return { field: 'will go here' };
   }
 }

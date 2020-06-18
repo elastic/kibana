@@ -32,13 +32,8 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
-import {
-  getIndexPatternFieldListCreator,
-  CreateIndexPatternFieldList,
-  Field,
-  FieldSpec,
-} from '../fields';
-import { IndexPatternSpec } from './types';
+import { getIndexPatternFieldListCreator, CreateIndexPatternFieldList, Field } from '../fields';
+import { IndexPatternSpec, FieldSpec } from '../types';
 import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 

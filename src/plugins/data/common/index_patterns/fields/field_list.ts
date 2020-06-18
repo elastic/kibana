@@ -20,8 +20,8 @@
 import { findIndex } from 'lodash';
 import { IIndexPattern } from '../../types';
 import { IFieldType } from '../../../common';
-import { Field, FieldSpec } from './field';
-import { OnNotification } from '../types';
+import { Field } from './field';
+import { OnNotification, FieldSpec } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 
 type FieldMap = Map<Field['name'], Field>;
@@ -37,6 +37,7 @@ export interface IIndexPatternFieldList extends Array<Field> {
   add(field: FieldSpec): void;
   remove(field: IFieldType): void;
   update(field: FieldSpec): void;
+  toSpec(): FieldSpec;
 }
 
 export type CreateIndexPatternFieldList = (
@@ -104,7 +105,7 @@ export const getIndexPatternFieldListCreator = ({
     };
 
     toSpec = () => {
-      return [...this.map((field) => field.$$spec)];
+      return [...this.map((field) => field.toSpec())];
     };
   }
 

@@ -19,6 +19,7 @@
 
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 import { IFieldType } from './fields';
+import { IFieldFormatMetaParams } from '../field_formats/types';
 
 export interface IIndexPattern {
   [key: string]: any;
@@ -51,3 +52,46 @@ export interface IndexPatternAttributes {
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
 export type OnError = (error: Error, toastInputFields: ErrorToastOptions) => void;
+
+export interface FieldFormatSpec {
+  id: string;
+  params: IFieldFormatMetaParams;
+}
+
+export type AggregationRestrictions = Record<
+  string,
+  {
+    agg?: string;
+    interval?: number;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    delay?: string;
+    time_zone?: string;
+  }
+>;
+
+export interface TypeMeta {
+  aggs?: Record<string, AggregationRestrictions>;
+  [key: string]: any;
+}
+
+export interface FieldSpec {
+  [key: string]: any;
+  format?: FieldFormatSpec;
+}
+
+export interface IndexPatternSpec {
+  id?: string;
+  version?: string;
+
+  title?: string;
+  timeFieldName?: string;
+  sourceFilters?: SourceFilter[];
+  fields?: FieldSpec[];
+  // fieldFormatMap?: Record<string, FieldFormatSpec>;
+  typeMeta?: TypeMeta;
+}
+
+export interface SourceFilter {
+  value: string;
+}

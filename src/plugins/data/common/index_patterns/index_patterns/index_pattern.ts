@@ -36,12 +36,11 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from '.';
-import { TypeMeta } from '.';
 import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
-import { IndexPatternSpec } from './types';
+import { IndexPatternSpec, TypeMeta, FieldSpec, FieldFormatSpec } from '../types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -87,42 +86,16 @@ export class IndexPattern implements IIndexPattern {
     title: ES_FIELD_TYPES.TEXT,
     timeFieldName: ES_FIELD_TYPES.KEYWORD,
     intervalName: ES_FIELD_TYPES.KEYWORD,
-    fields: {
-      type: ES_FIELD_TYPES.TEXT,
-      _serialize(v) {
-        // saved object import saves without running initFields, hence conditional call of toSpec
-        if (v) return JSON.stringify(v.toSpec ? v.toSpec() : v);
-      },
-      _deserialize(v) {
-        if (_.isArray(v)) {
-          return v;
-        } else if (_.isString(v)) {
-          return JSON.parse(v);
-        }
-      },
-    },
-    sourceFilters: {
-      type: ES_FIELD_TYPES.TEXT,
-      _serialize(v) {
-        if (v) return JSON.stringify(v);
-      },
-      _deserialize(v) {
-        if (_.isArray(v)) {
-          return v;
-        } else if (_.isString(v)) {
-          return JSON.parse(v);
-        }
-      },
-    },
+    fields: 'json',
+    sourceFilters: 'json',
     fieldFormatMap: {
       type: ES_FIELD_TYPES.TEXT,
       _serialize: (map = {}) => {
         const serialized = _.transform(map, this.serializeFieldFormatMap);
         return _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
       },
-      _deserialize: (map: string | Record<string, any> = '{}') => {
-        const mapAsObj = typeof map === 'string' ? JSON.parse(map) : map;
-        return _.mapValues(mapAsObj, (mapping) => {
+      _deserialize: (map = '{}') => {
+        return _.mapValues(JSON.parse(map), (mapping) => {
           return this.deserializeFieldFormatMap(mapping);
         });
       },
@@ -223,11 +196,41 @@ export class IndexPattern implements IIndexPattern {
   }
 
   public initFromSpec(spec: IndexPatternSpec) {
-    this.updateFromPlainObject(spec);
+    // create fieldFormatMap from field list
+    const fieldFormatMap: Record<string, FieldFormatSpec> = {};
+    if (_.isArray(spec.fields)) {
+      spec.fields.forEach((field: FieldSpec) => {
+        if (field.format) {
+          fieldFormatMap[field.name as string] = { ...field.format };
+        }
+      });
+    }
+
+    // this.updateFromPlainObject({ fieldFormatMap, ...spec });
     this.initFields();
   }
 
+  /*
   private updateFromPlainObject(response: any) {
+    const localFormatMap = response.fieldFormatMap;
+    const parsedFormatMap = localFormatMap ? JSON.parse(localFormatMap) : {};
+
+    // add format attirbute to fields if found on fieldFormatMap
+    if (parsedFormatMap && response.fields) {
+      response.fields.forEach((field: FieldSpec) => {
+        if (parsedFormatMap[field.name]) {
+          field.format = parsedFormatMap[field.name];
+        }
+      });
+    }
+  }
+  */
+
+  private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
+    if (!response.found) {
+      throw new SavedObjectNotFound(type, this.id, 'kibana#/management/kibana/indexPatterns');
+    }
+
     _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {
       if (!fieldMapping._deserialize || !name) {
         return;
@@ -243,14 +246,6 @@ export class IndexPattern implements IIndexPattern {
       this.title = this.id;
     }
     this.version = response.version;
-  }
-
-  private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
-    if (!response.found) {
-      throw new SavedObjectNotFound(type, this.id, 'kibana#/management/kibana/indexPatterns');
-    }
-
-    this.updateFromPlainObject(response);
 
     return this.indexFields(forceFieldRefresh);
   }
@@ -321,7 +316,14 @@ export class IndexPattern implements IIndexPattern {
     return {
       id: this.id,
       version: this.version,
-      ...this.prepBody(),
+      // should no longer rely on this
+      // ...this.prepBody(),
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      sourceFilters: this.sourceFilters,
+      fields: this.fields.toSpec(),
+      // fieldFormatMap?: Record<string, FieldFormatSpec>;
+      typeMeta: this.typeMeta,
     } as IndexPatternSpec;
   }
 
