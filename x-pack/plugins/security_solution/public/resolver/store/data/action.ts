@@ -12,8 +12,10 @@ import {
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
-  readonly events: ResolverEvent[];
-  readonly stats: Map<string, ResolverNodeStats>;
+  readonly payload: {
+    readonly events: ResolverEvent[];
+    readonly stats: Map<string, ResolverNodeStats>;
+  }
 }
 
 interface ServerFailedToReturnResolverData {

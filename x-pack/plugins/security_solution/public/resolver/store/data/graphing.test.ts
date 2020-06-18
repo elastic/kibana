@@ -114,7 +114,7 @@ describe('resolver graph layout', () => {
   describe('when rendering no nodes', () => {
     beforeEach(() => {
       const events: ResolverEvent[] = [];
-      const action: DataAction = { type: 'serverReturnedResolverData', events, stats: new Map() };
+      const action: DataAction = { type: 'serverReturnedResolverData', payload: {events, stats: new Map()} };
       store.dispatch(action);
     });
     it('the graphableProcesses list should only include nothing', () => {
@@ -128,7 +128,7 @@ describe('resolver graph layout', () => {
   describe('when rendering one node', () => {
     beforeEach(() => {
       const events = [processA];
-      const action: DataAction = { type: 'serverReturnedResolverData', events, stats: new Map() };
+      const action: DataAction = { type: 'serverReturnedResolverData', payload: {events, stats: new Map()} };
       store.dispatch(action);
     });
     it('the graphableProcesses list should only include nothing', () => {
@@ -142,7 +142,7 @@ describe('resolver graph layout', () => {
   describe('when rendering two nodes, one being the parent of the other', () => {
     beforeEach(() => {
       const events = [processA, processB];
-      const action: DataAction = { type: 'serverReturnedResolverData', events, stats: new Map() };
+      const action: DataAction = { type: 'serverReturnedResolverData', payload: {events, stats: new Map()} };
       store.dispatch(action);
     });
     it('the graphableProcesses list should only include nothing', () => {
@@ -166,7 +166,7 @@ describe('resolver graph layout', () => {
         processH,
         processI,
       ];
-      const action: DataAction = { type: 'serverReturnedResolverData', events, stats: new Map() };
+      const action: DataAction = { type: 'serverReturnedResolverData', payload: {events, stats: new Map()} };
       store.dispatch(action);
     });
     it("the graphableProcesses list should only include events with 'processCreated' an 'processRan' eventType", () => {

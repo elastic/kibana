@@ -84,8 +84,10 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
           ];
           api.dispatch({
             type: 'serverReturnedResolverData',
-            events,
-            stats: nodeStats,
+            payload: {
+              events,
+              stats: nodeStats,
+            }
           });
         } catch (error) {
           api.dispatch({

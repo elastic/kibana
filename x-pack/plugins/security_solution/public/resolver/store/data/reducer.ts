@@ -22,8 +22,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
   if (action.type === 'serverReturnedResolverData') {
     return {
       ...state,
-      results: action.events,
-      relatedEventsStats: action.stats,
+      results: action.payload.events,
+      relatedEventsStats: action.payload.stats,
       isLoading: false,
       hasError: false,
     };
