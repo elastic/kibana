@@ -12,7 +12,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
-  const globalNav = getService('globalNav');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects([
     'header',
@@ -165,7 +164,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     getTitle() {
-      return globalNav.getLastBreadcrumb();
+      return testSubjects.getVisibleText('lns_ChartTitle');
     },
   });
 }
