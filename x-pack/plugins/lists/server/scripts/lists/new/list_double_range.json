@@ -1,0 +1,6 @@
+{
+  "id": "list-double-range",
+  "name": "Simple list with double ranges",
+  "description": "This list has double ranges",
+  "type": "double_range"
+}

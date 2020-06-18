@@ -1,0 +1,6 @@
+{
+  "id": "list-geo-point",
+  "name": "Simple list with geo points",
+  "description": "This list hsa geo points",
+  "type": "geo_point"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "list-date",
+  "name": "Simple list with dates",
+  "description": "This list has dates",
+  "type": "date"
+}

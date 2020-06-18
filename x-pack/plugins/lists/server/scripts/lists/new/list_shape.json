@@ -1,0 +1,6 @@
+{
+  "id": "list-shape",
+  "name": "Simple list with shapes",
+  "description": "This list has shapes",
+  "type": "shape"
+}

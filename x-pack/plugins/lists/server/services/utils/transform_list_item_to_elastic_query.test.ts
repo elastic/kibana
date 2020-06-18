@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsDataTypeUnion, Type } from '../../../common/schemas';
+import { EsDataTypeUnion } from '../../../common/schemas';
 
 import { transformListItemToElasticQuery } from './transform_list_item_to_elastic_query';
 
@@ -33,15 +33,5 @@ describe('transform_elastic_to_elastic_query', () => {
     });
     const expected: EsDataTypeUnion = { keyword: 'host-name' };
     expect(elasticQuery).toEqual(expected);
-  });
-
-  test('it throws if the type is not known', () => {
-    const type: Type = 'made-up' as Type;
-    expect(() =>
-      transformListItemToElasticQuery({
-        type,
-        value: 'some-value',
-      })
-    ).toThrow('Unknown type: "made-up" in transformListItemToElasticQuery');
   });
 });

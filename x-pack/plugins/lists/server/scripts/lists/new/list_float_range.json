@@ -1,0 +1,6 @@
+{
+  "id": "list-float-range",
+  "name": "Simple list with float ranges",
+  "description": "This list has float ranges",
+  "type": "float_range"
+}

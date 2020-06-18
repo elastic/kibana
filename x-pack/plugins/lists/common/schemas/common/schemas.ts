@@ -38,11 +38,80 @@ export type Id = t.TypeOf<typeof id>;
 export const idOrUndefined = t.union([id, t.undefined]);
 export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 
+export const binary = t.string;
+export const binaryOrUndefined = t.union([binary, t.undefined]);
+
+export const boolean = t.string;
+export const booleanOrUndefined = t.union([boolean, t.undefined]);
+
+export const byte = t.string;
+export const byteOrUndefined = t.union([byte, t.undefined]);
+
+export const date = t.string;
+export const dateOrUndefined = t.union([date, t.undefined]);
+
+export const date_nanos = t.string;
+export const dateNanosOrUndefined = t.union([date_nanos, t.undefined]);
+
+export const double = t.string;
+export const doubleOrUndefined = t.union([double, t.undefined]);
+
+export const double_range = t.string;
+export const doubleRangeOrUndefined = t.union([double, t.undefined]);
+
+export const date_range = t.string;
+export const dateRangeOrUndefined = t.union([date_range, t.undefined]);
+
+export const flattened = t.string;
+export const flattenedOrUndefined = t.union([flattened, t.undefined]);
+
+export const float = t.string;
+export const floatOrUndefined = t.union([float, t.undefined]);
+
+export const float_range = t.string;
+export const floatRangeOrUndefined = t.union([float_range, t.undefined]);
+
+export const geo_point = t.string;
+export const geoPointOrUndefined = t.union([geo_point, t.undefined]);
+
+export const geo_shape = t.string;
+export const geoShapeOrUndefined = t.union([geo_shape, t.undefined]);
+
+export const half_float = t.string;
+export const halfFloatOrUndefined = t.union([half_float, t.undefined]);
+
+export const histogram = t.string;
+export const histogramOrUndefined = t.union([histogram, t.undefined]);
+
+export const integer = t.string;
+export const integerOrUndefined = t.union([integer, t.undefined]);
+
+export const integer_range = t.string;
+export const integerRangeOrUndefined = t.union([integer_range, t.undefined]);
+
 export const ip = t.string;
 export const ipOrUndefined = t.union([ip, t.undefined]);
 
+export const ip_range = t.string;
+export const ipRangeOrUndefined = t.union([ip_range, t.undefined]);
+
 export const keyword = t.string;
 export const keywordOrUndefined = t.union([keyword, t.undefined]);
+
+export const text = t.string;
+export const textOrUndefined = t.union([text, t.undefined]);
+
+export const long = t.string;
+export const longOrUndefined = t.union([long, t.undefined]);
+
+export const long_range = t.string;
+export const longRangeOrUndefined = t.union([long_range, t.undefined]);
+
+export const shape = t.string;
+export const shapeOrUndefined = t.union([shape, t.undefined]);
+
+export const short = t.string;
+export const shortOrUndefined = t.union([short, t.undefined]);
 
 export const value = t.string;
 export const valueOrUndefined = t.union([value, t.undefined]);
@@ -50,7 +119,33 @@ export const valueOrUndefined = t.union([value, t.undefined]);
 export const tie_breaker_id = t.string; // TODO: Use UUID for this instead of a string for validation
 export const _index = t.string;
 
-export const type = t.keyof({ ip: null, keyword: null }); // TODO: Add the other data types here
+export const type = t.keyof({
+  binary: null,
+  boolean: null,
+  byte: null,
+  date: null,
+  date_nanos: null,
+  date_range: null,
+  double: null,
+  double_range: null,
+  flattened: null,
+  float: null,
+  float_range: null,
+  geo_point: null,
+  geo_shape: null,
+  half_float: null,
+  histogram: null,
+  integer: null,
+  integer_range: null,
+  ip: null,
+  ip_range: null,
+  keyword: null,
+  long: null,
+  long_range: null,
+  shape: null,
+  short: null,
+  text: null,
+});
 
 export const typeOrUndefined = t.union([type, t.undefined]);
 export type Type = t.TypeOf<typeof type>;
@@ -60,7 +155,34 @@ export type Meta = t.TypeOf<typeof meta>;
 export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 
-export const esDataTypeUnion = t.union([t.type({ ip }), t.type({ keyword })]);
+export const esDataTypeUnion = t.union([
+  t.type({ binary }),
+  t.type({ boolean }),
+  t.type({ byte }),
+  t.type({ date }),
+  t.type({ date_nanos }),
+  t.type({ date_range }),
+  t.type({ double }),
+  t.type({ double_range }),
+  t.type({ flattened }),
+  t.type({ float }),
+  t.type({ float_range }),
+  t.type({ geo_point }),
+  t.type({ geo_shape }),
+  t.type({ half_float }),
+  t.type({ histogram }),
+  t.type({ integer }),
+  t.type({ integer_range }),
+  t.type({ ip }),
+  t.type({ ip_range }),
+  t.type({ keyword }),
+  t.type({ long }),
+  t.type({ long_range }),
+  t.type({ shape }),
+  t.type({ short }),
+  t.type({ text }),
+]);
+
 export type EsDataTypeUnion = t.TypeOf<typeof esDataTypeUnion>;
 
 export const tags = DefaultStringArray;

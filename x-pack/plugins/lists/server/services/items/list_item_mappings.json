@@ -7,12 +7,6 @@
     "list_id": {
       "type": "keyword"
     },
-    "ip": {
-      "type": "ip"
-    },
-    "keyword": {
-      "type": "keyword"
-    },
     "meta": {
       "enabled": "false",
       "type": "object"
@@ -28,6 +22,81 @@
     },
     "updated_by": {
       "type": "keyword"
+    },
+    "ip": {
+      "type": "ip"
+    },
+    "long": {
+      "type": "long"
+    },
+    "integer": {
+      "type": "integer"
+    },
+    "short": {
+      "type": "short"
+    },
+    "byte": {
+      "type": "byte"
+    },
+    "double": {
+      "type": "double"
+    },
+    "float": {
+      "type": "float"
+    },
+    "half_float": {
+      "type": "half_float"
+    },
+    "date": {
+      "type": "date"
+    },
+    "date_nanos": {
+      "type": "date_nanos"
+    },
+    "boolean": {
+      "type": "boolean"
+    },
+    "binary": {
+      "type": "binary"
+    },
+    "integer_range": {
+      "type": "integer_range"
+    },
+    "float_range": {
+      "type": "float_range"
+    },
+    "long_range": {
+      "type": "long_range"
+    },
+    "double_range": {
+      "type": "double_range"
+    },
+    "date_range": {
+      "type": "date_range"
+    },
+    "ip_range": {
+      "type": "ip_range"
+    },
+    "geo_point": {
+      "type": "geo_point"
+    },
+    "geo_shape": {
+      "type": "geo_shape"
+    },
+    "keyword": {
+      "type": "keyword"
+    },
+    "text": {
+      "type": "text"
+    },
+    "shape": {
+      "type": "shape"
+    },
+    "histogram": {
+      "type": "histogram"
+    },
+    "flattened": {
+      "type": "flattened"
     }
   }
 }
