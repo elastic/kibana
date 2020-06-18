@@ -9,7 +9,7 @@
         "access_api_key_id": "api-key-2",
         "active": true,
         "shared_id": "agent1_filebeat",
-        "config_id": "1",
+        "config_id": "config1",
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}

@@ -38,7 +38,7 @@ Quickly build several types of basic visualizations by simply dragging and dropp
 data sets.
 
 <<visualize-maps, Maps>>::
-* *<<maps,Elastic Maps>>* &mdash; Displays geospatial data in {kib}.
+* *<<maps,Maps>>* &mdash; Displays geospatial data in {kib}.
 
 * <<heat-map,Heat map>>:: Display shaded cells within a matrix.
 
