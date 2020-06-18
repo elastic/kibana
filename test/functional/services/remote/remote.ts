@@ -18,7 +18,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { initWebDriver } from './webdriver';
+import { initWebDriver, BrowserConfig } from './webdriver';
 import { Browsers } from './browsers';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
@@ -38,12 +38,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     }
   };
 
-  const { driver, consoleLog$ } = await initWebDriver(
-    log,
-    browserType,
-    lifecycle,
-    config.get('browser.logPollingMs')
-  );
+  const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
+
   const isW3CEnabled = (driver as any).executor_.w3c;
 
   const caps = await driver.getCapabilities();
