@@ -75,8 +75,8 @@ export class IngestManagerPlugin
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
-    let successPromise = Promise.resolve(false);
     try {
+      let successPromise = Promise.resolve(false);
       const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
         appRoutesService.getCheckPermissionsPath()
       );
