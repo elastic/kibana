@@ -395,7 +395,7 @@ describe('SavedObjectsTable', () => {
       component.instance().showImportFlyout();
       component.update();
 
-      expect(component.find(Flyout)).toMatchSnapshot();
+      expect(component.find(Flyout).length).toBe(1);
     });
 
     it('should hide the flyout', async () => {
@@ -450,7 +450,7 @@ describe('SavedObjectsTable', () => {
       } as SavedObjectWithMetadata);
       component.update();
 
-      expect(component.find(Relationships)).toMatchSnapshot();
+      expect(component.find(Relationships).length).toBe(1);
       expect(component.state('relationshipObject')).toEqual({
         id: '2',
         type: 'search',

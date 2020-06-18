@@ -7,8 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { ReportingConfig } from '../../';
-import { LevelLogger } from '../../lib';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
+import { LevelLogger } from '../../lib';
 import { validateBrowser } from './validate_browser';
 import { validateMaxContentLength } from './validate_max_content_length';
 
@@ -16,8 +16,9 @@ export async function runValidations(
   config: ReportingConfig,
   elasticsearch: ElasticsearchServiceSetup,
   browserFactory: HeadlessChromiumDriverFactory,
-  logger: LevelLogger
+  parentLogger: LevelLogger
 ) {
+  const logger = parentLogger.clone(['validations']);
   try {
     await Promise.all([
       validateBrowser(browserFactory, logger),

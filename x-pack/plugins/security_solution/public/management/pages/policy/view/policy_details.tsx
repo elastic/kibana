@@ -68,11 +68,13 @@ export const PolicyDetails = React.memo(() => {
             }
           ),
           body: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
-              defaultMessage="Policy {name} has been updated."
-              values={{ name: policyName }}
-            />
+            <span data-test-subj="policyDetailsSuccessMessage">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
+                defaultMessage="Policy {name} has been updated."
+                values={{ name: policyName }}
+              />
+            </span>
           ),
         });
       } else {
@@ -116,7 +118,7 @@ export const PolicyDetails = React.memo(() => {
           <EuiLoadingSpinner size="xl" />
         ) : policyApiError ? (
           <EuiCallOut color="danger" title={policyApiError?.error}>
-            {policyApiError?.message}
+            <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
         ) : null}
         <SpyRoute />

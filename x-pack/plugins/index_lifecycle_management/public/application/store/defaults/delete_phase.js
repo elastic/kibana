@@ -9,6 +9,7 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_ROLLOVER_ALIAS,
+  PHASE_WAIT_FOR_SNAPSHOT_POLICY,
 } from '../../constants';
 
 export const defaultDeletePhase = {
@@ -17,5 +18,6 @@ export const defaultDeletePhase = {
   [PHASE_ROLLOVER_ALIAS]: '',
   [PHASE_ROLLOVER_MINIMUM_AGE]: 0,
   [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: 'd',
+  [PHASE_WAIT_FOR_SNAPSHOT_POLICY]: '',
 };
 export const defaultEmptyDeletePhase = defaultDeletePhase;

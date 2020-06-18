@@ -6,70 +6,8 @@
 
 import { Readable } from 'stream';
 
-import { OutputRuleAlertRest } from '../../types';
 import { HapiReadableStream } from '../../rules/types';
-
-/**
- * This is a typical simple rule for testing that is easy for most basic testing
- * @param ruleId
- */
-export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
-  name: 'Simple Rule Query',
-  description: 'Simple Rule Query',
-  risk_score: 1,
-  rule_id: ruleId,
-  severity: 'high',
-  type: 'query',
-  query: 'user.name: root or user.name: admin',
-});
-
-/**
- * This is a typical ML rule for testing
- * @param ruleId
- */
-export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
-  name: 'Simple Rule Query',
-  description: 'Simple Rule Query',
-  risk_score: 1,
-  rule_id: ruleId,
-  severity: 'high',
-  type: 'machine_learning',
-  anomaly_threshold: 44,
-  machine_learning_job_id: 'some_job_id',
-});
-
-/**
- * This is a typical simple rule for testing that is easy for most basic testing
- * @param ruleId
- */
-export const getSimpleRuleWithId = (id = 'rule-1'): Partial<OutputRuleAlertRest> => ({
-  name: 'Simple Rule Query',
-  description: 'Simple Rule Query',
-  risk_score: 1,
-  id,
-  severity: 'high',
-  type: 'query',
-  query: 'user.name: root or user.name: admin',
-});
-
-/**
- * Given an array of rules, builds an NDJSON string of rules
- * as we might import/export
- * @param rules Array of rule objects with which to generate rule JSON
- */
-export const rulesToNdJsonString = (rules: Array<Partial<OutputRuleAlertRest>>) => {
-  return rules.map((rule) => JSON.stringify(rule)).join('\r\n');
-};
-
-/**
- * Given an array of rule IDs, builds an NDJSON string of rules
- * as we might import/export
- * @param ruleIds Array of ruleIds with which to generate rule JSON
- */
-export const ruleIdsToNdJsonString = (ruleIds: string[]) => {
-  const rules = ruleIds.map((ruleId) => getSimpleRule(ruleId));
-  return rulesToNdJsonString(rules);
-};
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 
 /**
  * Given a string, builds a hapi stream as our
@@ -94,7 +32,7 @@ export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiR
 };
 
 export const getOutputRuleAlertForRest = (): Omit<
-  OutputRuleAlertRest,
+  RulesSchema,
   'machine_learning_job_id' | 'anomaly_threshold'
 > => ({
   actions: [],

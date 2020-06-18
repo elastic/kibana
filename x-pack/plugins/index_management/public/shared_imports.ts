@@ -10,6 +10,7 @@ export {
   UseRequestConfig,
   sendRequest,
   useRequest,
+  Forms,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
 export {
@@ -31,3 +32,5 @@ export {
 export { getFormRow, Field } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export { isJSON } from '../../../../src/plugins/es_ui_shared/static/validators/string';
+
+export { reactRouterNavigate } from '../../../../src/plugins/kibana_react/public';

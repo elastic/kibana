@@ -7,7 +7,7 @@
 import { IScopedClusterClient } from 'kibana/server';
 import { MSearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
  * Contract for queries to be compatible with ES multi search api

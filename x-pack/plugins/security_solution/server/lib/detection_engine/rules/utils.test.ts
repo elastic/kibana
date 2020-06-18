@@ -5,7 +5,6 @@
  */
 
 import { calculateInterval, calculateVersion, calculateName } from './utils';
-import { PatchRuleParams } from './types';
 
 describe('utils', () => {
   describe('#calculateInterval', () => {
@@ -27,24 +26,104 @@ describe('utils', () => {
 
   describe('#calculateVersion', () => {
     test('returning the same version number if given an immutable but no updated version number', () => {
-      expect(calculateVersion(true, 1, { description: 'some description change' })).toEqual(1);
+      expect(
+        calculateVersion(true, 1, {
+          description: 'some description change',
+          falsePositives: undefined,
+          query: undefined,
+          language: undefined,
+          outputIndex: undefined,
+          savedId: undefined,
+          timelineId: undefined,
+          timelineTitle: undefined,
+          meta: undefined,
+          filters: [],
+          from: undefined,
+          index: undefined,
+          interval: undefined,
+          maxSignals: undefined,
+          riskScore: undefined,
+          name: undefined,
+          severity: undefined,
+          tags: undefined,
+          threat: undefined,
+          to: undefined,
+          type: undefined,
+          references: undefined,
+          version: undefined,
+          note: undefined,
+          anomalyThreshold: undefined,
+          machineLearningJobId: undefined,
+          exceptionsList: [],
+        })
+      ).toEqual(1);
     });
 
     test('returning an updated version number if given an immutable and an updated version number', () => {
-      expect(calculateVersion(true, 2, { description: 'some description change' })).toEqual(2);
+      expect(
+        calculateVersion(true, 2, {
+          description: 'some description change',
+          falsePositives: undefined,
+          query: undefined,
+          language: undefined,
+          outputIndex: undefined,
+          savedId: undefined,
+          timelineId: undefined,
+          timelineTitle: undefined,
+          meta: undefined,
+          filters: [],
+          from: undefined,
+          index: undefined,
+          interval: undefined,
+          maxSignals: undefined,
+          riskScore: undefined,
+          name: undefined,
+          severity: undefined,
+          tags: undefined,
+          threat: undefined,
+          to: undefined,
+          type: undefined,
+          references: undefined,
+          version: undefined,
+          note: undefined,
+          anomalyThreshold: undefined,
+          machineLearningJobId: undefined,
+          exceptionsList: [],
+        })
+      ).toEqual(2);
     });
 
     test('returning an updated version number if not given an immutable but but an updated description', () => {
-      expect(calculateVersion(false, 1, { description: 'some description change' })).toEqual(2);
-    });
-
-    test('returning the same version number but a undefined description', () => {
-      expect(calculateVersion(false, 1, { description: undefined })).toEqual(1);
-    });
-
-    test('returning an updated version number if not given an immutable but an updated falsy value', () => {
       expect(
-        calculateVersion(false, 1, ({ description: false } as unknown) as PatchRuleParams)
+        calculateVersion(false, 1, {
+          description: 'some description change',
+          falsePositives: undefined,
+          query: undefined,
+          language: undefined,
+          outputIndex: undefined,
+          savedId: undefined,
+          timelineId: undefined,
+          timelineTitle: undefined,
+          meta: undefined,
+          filters: [],
+          from: undefined,
+          index: undefined,
+          interval: undefined,
+          maxSignals: undefined,
+          riskScore: undefined,
+          name: undefined,
+          severity: undefined,
+          tags: undefined,
+          threat: undefined,
+          to: undefined,
+          type: undefined,
+          references: undefined,
+          version: undefined,
+          note: undefined,
+          anomalyThreshold: undefined,
+          machineLearningJobId: undefined,
+          exceptionsList: [],
+        })
       ).toEqual(2);
     });
   });

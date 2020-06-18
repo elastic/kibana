@@ -76,7 +76,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
             .innerRadius(width * 0.28)
             .outerRadius(Math.min(width, height) / 2 - 10)
         )
-        .attr('fill', (d: any) => color(d.data.key));
+        .attr('fill', (d: any) => color(d.data.key) as any);
     }
   }, [danger, down, gray, height, upCount, width]);
 

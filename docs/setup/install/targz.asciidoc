@@ -1,12 +1,15 @@
 [[targz]]
 === Install {kib} from archive on Linux or macOS
+++++
+<titleabbrev>Install from archive on Linux or macOS</titleabbrev>
+++++
 
 Kibana is provided for Linux and Darwin as a `.tar.gz` package. These packages
 are the easiest formats to use when trying out Kibana.
 
 These packages are free to use under the Elastic license. They contain open
 source and free commercial features and access to paid commercial features.
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the
+<<managing-licenses,Start a 30-day trial>> to try out all of the
 paid commercial features. See the
 https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.

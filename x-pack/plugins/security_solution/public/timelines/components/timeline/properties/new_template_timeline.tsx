@@ -25,7 +25,7 @@ export const NewTemplateTimelineComponent: React.FC<OwnProps> = ({
   timelineId = 'timeline-1',
 }) => {
   const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.securitySolution.crud;
+  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
 
   const { getButton } = useCreateTimelineButton({
     timelineId,

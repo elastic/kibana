@@ -5,7 +5,7 @@
  */
 import { RouteDependencies } from '../../types';
 import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
-import { Privileges } from '../../../../../../src/plugins/es_ui_shared/public';
+import { Privileges } from '../../../../../../src/plugins/es_ui_shared/common';
 
 const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
   Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {

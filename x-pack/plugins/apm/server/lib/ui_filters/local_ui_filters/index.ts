@@ -44,11 +44,12 @@ export async function getLocalUIFilters({
       const response = await client.search(query);
 
       const filter = localUIFilters[name];
+      const buckets = response?.aggregations?.by_terms?.buckets ?? [];
 
       return {
         ...filter,
         options: sortByOrder(
-          response.aggregations?.by_terms.buckets.map((bucket) => {
+          buckets.map((bucket) => {
             return {
               name: bucket.key as string,
               count:
@@ -56,7 +57,7 @@ export async function getLocalUIFilters({
                   ? bucket.bucket_count.value
                   : bucket.doc_count,
             };
-          }) || [],
+          }),
           'count',
           'desc'
         ),

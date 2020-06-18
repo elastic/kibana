@@ -73,9 +73,9 @@ export class KibanaPrivileges {
           }
         );
 
-        return [assignedBasePrivileges, assignedFeaturePrivileges].flat<KibanaPrivilege>(2);
+        return [assignedBasePrivileges, assignedFeaturePrivileges].flat(2);
       })
-      .flat<KibanaPrivilege>();
+      .flat();
 
     return new PrivilegeCollection(privileges);
   }
