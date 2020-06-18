@@ -13,6 +13,7 @@ import {
   errorDistributionRoute,
   errorGroupsRoute,
   errorsRoute,
+  errorRateRoute,
 } from './errors';
 import {
   serviceAgentNameRoute,
@@ -87,6 +88,7 @@ const createApmApi = () => {
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
     .add(errorsRoute)
+    .add(errorRateRoute)
 
     // Services
     .add(serviceAgentNameRoute)
