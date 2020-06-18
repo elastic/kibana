@@ -38,6 +38,11 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     }
   };
 
+  const browserConfig: BrowserConfig = {
+    logPollingMs: config.get('browser.logPollingMs'),
+    acceptInsecureCerts: config.get('browser.acceptInsecureCerts'),
+  };
+
   const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
 
   const isW3CEnabled = (driver as any).executor_.w3c;
