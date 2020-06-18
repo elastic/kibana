@@ -15,8 +15,8 @@ import { language } from '../common/schemas';
 export const DefaultLanguageString = new t.Type<string, string, unknown>(
   'DefaultLanguageString',
   t.string.is,
-  (input): Either<t.Errors, string> =>
-    input == null ? t.success('kuery') : language.decode(input),
+  (input, context): Either<t.Errors, string> =>
+    input == null ? t.success('kuery') : language.validate(input, context),
   t.identity
 );
 
