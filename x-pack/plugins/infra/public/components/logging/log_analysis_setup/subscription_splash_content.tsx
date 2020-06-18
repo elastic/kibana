@@ -112,7 +112,7 @@ export const SubscriptionSplashContent: React.FC = () => {
                 <p>{description}</p>
               </EuiText>
               <EuiSpacer />
-              {cta}
+              <div>{cta}</div>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiImage
