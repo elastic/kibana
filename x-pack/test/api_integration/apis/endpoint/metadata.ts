@@ -160,13 +160,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(0);
       });
 
-      it('metadata api should return page based on host.os.variant filter.', async () => {
+      it('metadata api should return page based on host.os.Ext.variant filter.', async () => {
         const variantValue = 'Windows Pro';
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `host.os.variant:${variantValue}`,
+            filter: `host.os.Ext.variant:${variantValue}`,
           })
           .expect(200);
         expect(body.total).to.eql(2);
