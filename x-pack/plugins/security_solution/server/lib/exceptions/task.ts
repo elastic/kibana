@@ -185,17 +185,15 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         return {
           run: async () => {
+
             const state = Object.assign({}, ...taskInstance.state);
             await run(taskInstance.id, state);
-
-            // eslint-disable-next-line require-atomic-updates
-            taskInstance.state = state;
 
             const nextRun = new Date();
             nextRun.setSeconds(nextRun.getSeconds() + context.config.packagerTaskInterval);
 
             return {
-              state: taskInstance.state,
+              state,
               runAt: nextRun,
             };
           },
