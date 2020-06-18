@@ -49,6 +49,7 @@ const createMockResponse = () => ({
   timeFieldName: '@timestamp',
   notExpandable: true,
   references: [],
+  score: 0,
 });
 
 const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
