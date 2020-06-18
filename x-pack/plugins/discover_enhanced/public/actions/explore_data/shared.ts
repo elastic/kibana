@@ -25,8 +25,9 @@ export const isVisualizeEmbeddable = (
 /**
  * @returns Returns empty string if no index pattern ID found.
  */
-export const getIndexPattern = (embeddable: VisualizeEmbeddableContract): string => {
-  const output = embeddable!.getOutput();
+export const getIndexPattern = (embeddable?: IEmbeddable): string => {
+  if (!embeddable) return '';
+  const output = embeddable.getOutput();
 
   if (isOutputWithIndexPatterns(output) && output.indexPatterns.length > 0) {
     return output.indexPatterns[0].id;

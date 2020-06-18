@@ -9,7 +9,8 @@ import {
   ValueClickTriggerContext,
   RangeSelectTriggerContext,
 } from '../../../../../../src/plugins/embeddable/public';
-import { VisualizeEmbeddableContract } from '../../../../../../src/plugins/visualizations/public';
+import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
+import { isTimeRange, isQuery, isFilters } from '../../../../../../src/plugins/data/public';
 import { KibanaURL } from './kibana_url';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
@@ -31,7 +32,7 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
   public readonly order = 200;
 
   protected readonly getUrl = async (
-    embeddable: VisualizeEmbeddableContract
+    context: ExploreDataChartActionContext
   ): Promise<KibanaURL> => {
     const { plugins } = this.params.start();
     const { urlGenerator } = plugins.discover;
@@ -40,15 +41,24 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
       throw new Error('Discover URL generator not available.');
     }
 
-    const { timeRange, query, filters } = embeddable.getInput();
-    const indexPatternId = shared.getIndexPattern(embeddable);
-
-    const path = await urlGenerator.createUrl({
-      indexPatternId,
+    const { embeddable } = context;
+    const { filters, timeRange } = await plugins.embeddable.filtersAndTimeRangeFromContext(context);
+    const state: DiscoverUrlGeneratorState = {
       filters,
-      query,
       timeRange,
-    });
+    };
+
+    if (embeddable) {
+      state.indexPatternId = shared.getIndexPattern(embeddable) || undefined;
+
+      const input = embeddable.getInput();
+
+      if (isTimeRange(input.timeRange) && !state.timeRange) state.timeRange = input.timeRange;
+      if (isQuery(input.query)) state.query = input.query;
+      if (isFilters(input.filters)) state.filters = [...input.filters, ...(state.filters || [])];
+    }
+
+    const path = await urlGenerator.createUrl(state);
 
     return new KibanaURL(path);
   };

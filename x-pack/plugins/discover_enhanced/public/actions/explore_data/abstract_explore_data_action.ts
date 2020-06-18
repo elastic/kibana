@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { DiscoverStart } from '../../../../../../src/plugins/discover/public';
+import { EmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
 import { ViewMode, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
-import { VisualizeEmbeddableContract } from '../../../../../../src/plugins/visualizations/public';
 import { KibanaURL } from './kibana_url';
 import * as shared from './shared';
 
@@ -17,6 +17,7 @@ export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
 export interface PluginDeps {
   discover: Pick<DiscoverStart, 'urlGenerator'>;
+  embeddable: Pick<EmbeddableStart, 'filtersAndTimeRangeFromContext'>;
 }
 
 export interface CoreDeps {
@@ -37,7 +38,7 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
 
   constructor(protected readonly params: Params) {}
 
-  protected abstract async getUrl(embeddable: VisualizeEmbeddableContract): Promise<KibanaURL>;
+  protected abstract async getUrl(context: Context): Promise<KibanaURL>;
 
   public async isCompatible({ embeddable }: Context): Promise<boolean> {
     if (!embeddable) return false;
@@ -48,11 +49,11 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
     return true;
   }
 
-  public async execute({ embeddable }: Context): Promise<void> {
-    if (!shared.isVisualizeEmbeddable(embeddable)) return;
+  public async execute(context: Context): Promise<void> {
+    if (!shared.isVisualizeEmbeddable(context.embeddable)) return;
 
     const { core } = this.params.start();
-    const { appName, appPath } = await this.getUrl(embeddable);
+    const { appName, appPath } = await this.getUrl(context);
 
     await core.application.navigateToApp(appName, {
       path: appPath,
@@ -66,7 +67,7 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
       throw new Error(`Embeddable not supported for "${this.getDisplayName(context)}" action.`);
     }
 
-    const { path } = await this.getUrl(embeddable);
+    const { path } = await this.getUrl(context);
 
     return path;
   }
