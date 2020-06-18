@@ -99,7 +99,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2 id="dataStreamDetailPanelTitle" data-test-subj="title">
+          <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
             {dataStreamName}
           </h2>
         </EuiTitle>

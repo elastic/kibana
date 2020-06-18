@@ -5,6 +5,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 
 import {
   registerTestBed,
@@ -33,8 +34,15 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
     clickReloadButton: () => void;
+    clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
+    clickDeletActionAt: (index: number) => void;
+    clickConfirmDelete: () => void;
   };
+  findDeleteActionAt: (index: number) => ReactWrapper;
+  findDeleteConfirmationModal: () => ReactWrapper;
+  findDetailPanel: () => ReactWrapper;
+  findDetailPanelTitle: () => string;
 }
 
 export const setup = async (): Promise<DataStreamsTabTestBed> => {
@@ -65,10 +73,15 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
     find('reloadButton').simulate('click');
   };
 
-  const clickIndicesAt = async (index: number) => {
-    const { component, table, router } = testBed;
+  const findTestSubjectAt = (testSubject: string, index: number) => {
+    const { table } = testBed;
     const { rows } = table.getMetaData('dataStreamTable');
-    const indicesLink = findTestSubject(rows[index].reactWrapper, 'indicesLink');
+    return findTestSubject(rows[index].reactWrapper, testSubject);
+  };
+
+  const clickIndicesAt = async (index: number) => {
+    const { component, router } = testBed;
+    const indicesLink = findTestSubjectAt('indicesLink', index);
 
     await act(async () => {
       router.navigateTo(indicesLink.props().href!);
@@ -77,14 +90,64 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
     component.update();
   };
 
+  const clickNameAt = async (index: number) => {
+    const { component, router } = testBed;
+    const nameLink = findTestSubjectAt('nameLink', index);
+
+    await act(async () => {
+      router.navigateTo(nameLink.props().href!);
+    });
+
+    component.update();
+  };
+
+  const findDeleteActionAt = findTestSubjectAt.bind(null, 'deleteDataStream');
+
+  const clickDeletActionAt = (index: number) => {
+    findDeleteActionAt(index).simulate('click');
+  };
+
+  const findDeleteConfirmationModal = () => {
+    const { find } = testBed;
+    return find('deleteDataStreamsConfirmation');
+  };
+
+  const clickConfirmDelete = async () => {
+    const modal = document.body.querySelector('[data-test-subj="deleteDataStreamsConfirmation"]');
+    const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+      '[data-test-subj="confirmModalConfirmButton"]'
+    );
+
+    await act(async () => {
+      confirmButton!.click();
+    });
+  };
+
+  const findDetailPanel = () => {
+    const { find } = testBed;
+    return find('dataStreamDetailPanel');
+  };
+
+  const findDetailPanelTitle = () => {
+    const { find } = testBed;
+    return find('dataStreamDetailPanelTitle').text();
+  };
+
   return {
     ...testBed,
     actions: {
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
       clickReloadButton,
+      clickNameAt,
       clickIndicesAt,
+      clickDeletActionAt,
+      clickConfirmDelete,
     },
+    findDeleteActionAt,
+    findDeleteConfirmationModal,
+    findDetailPanel,
+    findDetailPanelTitle,
   };
 };
 

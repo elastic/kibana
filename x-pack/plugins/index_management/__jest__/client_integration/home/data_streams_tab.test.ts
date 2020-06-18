@@ -90,12 +90,11 @@ describe('Data Streams tab', () => {
 
     test('lists them in the table', async () => {
       const { table } = testBed;
-
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', '1', '@timestamp', '1'],
-        ['', 'dataStream2', '1', '@timestamp', '1'],
+        ['', 'dataStream1', '1', ''],
+        ['', 'dataStream2', '1', ''],
       ]);
     });
 
@@ -113,14 +112,63 @@ describe('Data Streams tab', () => {
       expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/data_streams`);
     });
 
+    test('clicking the name opens the detail panel', async () => {
+      const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
+      await actions.clickNameAt(0);
+      expect(findDetailPanel().length).toBe(1);
+      expect(findDetailPanelTitle()).toBe('dataStream1');
+    });
+
     test('clicking the indices count navigates to the backing indices', async () => {
       const { table, actions } = testBed;
-
       await actions.clickIndicesAt(0);
-
       expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
         ['', '', '', '', '', '', '', 'dataStream1'],
       ]);
+    });
+
+    describe('row actions', () => {
+      test('can delete', () => {
+        const { findDeleteActionAt } = testBed;
+        const deleteAction = findDeleteActionAt(0);
+        expect(deleteAction.length).toBe(1);
+      });
+    });
+
+    describe('deleting a data stream', () => {
+      test('shows a confirmation modal', async () => {
+        const {
+          actions: { clickDeletActionAt },
+          findDeleteConfirmationModal,
+        } = testBed;
+        clickDeletActionAt(0);
+        const confirmationModal = findDeleteConfirmationModal();
+        expect(confirmationModal).toBeDefined();
+      });
+
+      test('sends a request to the Delete API', async () => {
+        const {
+          actions: { clickDeletActionAt, clickConfirmDelete },
+        } = testBed;
+        clickDeletActionAt(0);
+
+        httpRequestsMockHelpers.setDeleteDataStreamResponse({
+          results: {
+            dataStreamsDeleted: ['dataStream1'],
+            errors: [],
+          },
+        });
+
+        await clickConfirmDelete();
+
+        const { method, url, requestBody } = server.requests[server.requests.length - 1];
+
+        expect(method).toBe('POST');
+        expect(url).toBe(`${API_BASE_PATH}/delete_data_streams`);
+        expect(JSON.parse(JSON.parse(requestBody).body)).toEqual({
+          dataStreams: ['dataStream1'],
+        });
+      });
     });
   });
 });

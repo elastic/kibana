@@ -44,10 +44,10 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         return (
           /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
+            data-test-subj="nameLink"
             {...reactRouterNavigate(history, {
               pathname: `/${Section.DataStreams}/${encodePathForReactRouter(name)}`,
             })}
-            data-test-subj="dataStreamDetailsLink"
           >
             {name}
           </EuiLink>
@@ -94,6 +94,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             setDataStreamsToDelete([name]);
           },
           isPrimary: true,
+          'data-test-subj': 'deleteDataStream',
         },
       ],
     },
