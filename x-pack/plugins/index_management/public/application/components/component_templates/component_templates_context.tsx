@@ -14,7 +14,6 @@ const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
 interface Props {
   httpClient: HttpSetup;
   apiBasePath: string;
-  appBasePath: string;
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
   docLinks: DocLinksSetup;
   toasts: NotificationsSetup['toasts'];
@@ -27,7 +26,6 @@ interface Context {
   documentation: ReturnType<typeof getDocumentation>;
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
-  appBasePath: string;
 }
 
 export const ComponentTemplatesProvider = ({
@@ -37,7 +35,7 @@ export const ComponentTemplatesProvider = ({
   value: Props;
   children: React.ReactNode;
 }) => {
-  const { httpClient, apiBasePath, trackMetric, docLinks, toasts, appBasePath } = value;
+  const { httpClient, apiBasePath, trackMetric, docLinks, toasts } = value;
 
   const useRequest = getUseRequest(httpClient);
   const sendRequest = getSendRequest(httpClient);
@@ -47,7 +45,7 @@ export const ComponentTemplatesProvider = ({
 
   return (
     <ComponentTemplatesContext.Provider
-      value={{ api, documentation, trackMetric, toasts, appBasePath, httpClient, apiBasePath }}
+      value={{ api, documentation, trackMetric, toasts, httpClient, apiBasePath }}
     >
       {children}
     </ComponentTemplatesContext.Provider>
