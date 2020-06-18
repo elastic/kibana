@@ -6,4 +6,5 @@
 
 import { isEmpty } from 'lodash/fp';
 
-export const appendSearch = (search?: string) => (isEmpty(search) ? '' : `?${search}`);
+export const appendSearch = (search?: string) =>
+  isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;

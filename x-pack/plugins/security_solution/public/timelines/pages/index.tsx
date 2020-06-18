@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 
@@ -11,12 +12,15 @@ import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 
 import { TimelineType } from '../../../common/types/timeline';
 import { TAB_TIMELINES, TAB_TEMPLATES } from '../components/open_timeline/translations';
-import { getTimelinesUrl } from '../../common/components/link_to';
 import { TimelineRouteSpyState } from '../../common/utils/route/types';
 
 import { TimelinesPage } from './timelines_page';
 import { PAGE_TITLE } from './translations';
 import { appendSearch } from '../../common/components/link_to/helpers';
+import { GetUrlForApp } from '../../common/components/navigation/types';
+import { APP_ID } from '../../../common/constants';
+import { SecurityPageName } from '../../app/types';
+
 const timelinesPagePath = `/:tabName(${TimelineType.default}|${TimelineType.template})`;
 const timelinesDefaultPath = `/${TimelineType.default}`;
 
@@ -27,12 +31,16 @@ const TabNameMappedToI18nKey: Record<string, string> = {
 
 export const getBreadcrumbs = (
   params: TimelineRouteSpyState,
-  search: string[]
+  search: string[],
+  getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
       text: PAGE_TITLE,
-      href: `${getTimelinesUrl(appendSearch(search[1]))}`,
+      href: getUrlForApp(`${APP_ID}:${SecurityPageName.timelines}`, {
+        path: !isEmpty(search[0]) ? search[0] : '',
+        absolute: true,
+      }),
     },
   ];
 

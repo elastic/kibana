@@ -27,7 +27,7 @@ const TabNavigationItemComponent = ({
   urlSearch,
 }: TabNavigationItemProps) => {
   const history = useHistory();
-  const { navigateToApp } = useKibana().services.application;
+  const { navigateToApp, getUrlForApp } = useKibana().services.application;
   const { formatUrl } = useFormatUrl(((pageId ?? id) as unknown) as SecurityPageName);
   const handleClick = useCallback(
     (ev) => {
@@ -41,7 +41,13 @@ const TabNavigationItemComponent = ({
     },
     [history, hrefWithSearch, id, navigateToApp, pageId, urlSearch]
   );
-  const appHref = formatUrl(pageId != null ? href : '');
+  const appHref =
+    pageId != null
+      ? formatUrl(href)
+      : getUrlForApp(`${APP_ID}:${id}`, {
+          path: urlSearch,
+          absolute: true,
+        });
   return (
     <EuiTab
       data-href={appHref}

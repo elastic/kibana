@@ -19,7 +19,7 @@ import * as i18n from './translations';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { useKibana } from '../../lib/kibana';
-import { APP_ID, ADD_DATA_PATH } from '../../../../common/constants';
+import { APP_ID, ADD_DATA_PATH, APP_ALERTS_PATH } from '../../../../common/constants';
 import { LinkAnchor } from '../links';
 
 const Wrapper = styled.header`
@@ -88,7 +88,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
               <FlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
                   {indicesExistOrDataTemporarilyUnavailable(indicesExist) &&
-                    window.location.pathname.includes(`/${SecurityPageName.alerts}`) && (
+                    window.location.pathname.includes(APP_ALERTS_PATH) && (
                       <FlexItem grow={false}>
                         <MlPopover />
                       </FlexItem>

@@ -26,13 +26,14 @@ import { getAppOverviewUrl } from '../../link_to';
 
 import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
-import { SearchNavTab } from '../types';
+import { GetUrlForApp, SearchNavTab } from '../types';
 
 export const setBreadcrumbs = (
   spyState: RouteSpyState & TabNavigationProps,
-  chrome: StartServices['chrome']
+  chrome: StartServices['chrome'],
+  getUrlForApp: GetUrlForApp
 ) => {
-  const breadcrumbs = getBreadcrumbsForRoute(spyState);
+  const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp);
   if (breadcrumbs) {
     chrome.setBreadcrumbs(breadcrumbs);
   }
@@ -61,7 +62,8 @@ const isAlertsRoutes = (spyState: RouteSpyState) =>
   spyState != null && spyState.pageName === SecurityPageName.alerts;
 
 export const getBreadcrumbsForRoute = (
-  object: RouteSpyState & TabNavigationProps
+  object: RouteSpyState & TabNavigationProps,
+  getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
   if (isHostsRoutes(spyState) && object.navTabs) {
@@ -77,7 +79,8 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }
@@ -94,7 +97,8 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }
@@ -112,7 +116,8 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }
@@ -130,7 +135,8 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }
@@ -148,7 +154,8 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }

@@ -31,7 +31,10 @@ export const SiemNavigationComponent: React.FC<
   flowTarget,
   state,
 }) => {
-  const { chrome } = useKibana().services;
+  const {
+    chrome,
+    application: { getUrlForApp },
+  } = useKibana().services;
 
   useEffect(() => {
     if (pathName || pageName) {
@@ -51,7 +54,8 @@ export const SiemNavigationComponent: React.FC<
           timeline: urlState.timeline,
           state,
         },
-        chrome
+        chrome,
+        getUrlForApp
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

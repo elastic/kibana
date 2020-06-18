@@ -8,12 +8,15 @@ import { appendSearch } from './helpers';
 
 export const getDetectionEngineUrl = (search?: string) => `${appendSearch(search)}`;
 
-export const getDetectionEngineTabUrl = (tabPath: string) => `/${tabPath}`;
+export const getDetectionEngineTabUrl = (tabPath: string, search?: string) =>
+  `/${tabPath}${appendSearch(search)}`;
 
-export const getRulesUrl = () => '/rules';
+export const getRulesUrl = (search?: string) => `/rules${appendSearch(search)}`;
 
-export const getCreateRuleUrl = () => `/rules/create`;
+export const getCreateRuleUrl = (search?: string) => `/rules/create${appendSearch(search)}`;
 
-export const getRuleDetailsUrl = (detailName: string) => `/rules/id/${detailName}`;
+export const getRuleDetailsUrl = (detailName: string, search?: string) =>
+  `/rules/id/${detailName}${appendSearch(search)}`;
 
-export const getEditRuleUrl = (detailName: string) => `/rules/id/${detailName}/edit`;
+export const getEditRuleUrl = (detailName: string, search?: string) =>
+  `/rules/id/${detailName}/edit${appendSearch(search)}`;

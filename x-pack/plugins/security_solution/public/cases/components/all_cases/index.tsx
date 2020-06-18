@@ -354,7 +354,7 @@ export const AllCases = React.memo<AllCasesProps>(
                   isDisabled={!userCanCrud}
                   fill
                   onClick={goToCreateCase}
-                  href={formatUrl(getCreateCaseUrl(urlSearch))}
+                  href={formatUrl(getCreateCaseUrl())}
                   iconType="plusInCircle"
                   data-test-subj="createNewCaseBtn"
                 >
@@ -432,7 +432,7 @@ export const AllCases = React.memo<AllCasesProps>(
                         fill
                         size="s"
                         onClick={goToCreateCase}
-                        href={formatUrl(getCreateCaseUrl(urlSearch))}
+                        href={formatUrl(getCreateCaseUrl())}
                         iconType="plusInCircle"
                       >
                         {i18n.ADD_NEW_CASE}

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { SecurityPageName } from '../../../app/types';
@@ -30,7 +31,9 @@ export const useFormatUrl = (page: SecurityPageName) => {
       const pathArr = path.split('?');
       return history.createHref({
         pathname: pathArr[0],
-        search,
+        search: isEmpty(pathArr[1])
+          ? search
+          : `${pathArr[1]}${isEmpty(search) ? '' : `&${search}`}`,
       });
     },
     [history, search]

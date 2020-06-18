@@ -51,3 +51,8 @@ export type SiemNavTabKey =
   | SecurityPageName.management;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
+
+export type GetUrlForApp = (
+  appId: string,
+  options?: { path?: string; absolute?: boolean }
+) => string;
