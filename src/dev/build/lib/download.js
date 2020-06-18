@@ -24,7 +24,7 @@ import chalk from 'chalk';
 import { createHash } from 'crypto';
 import Axios from 'axios';
 
-import { mkdirp } from '../../lib';
+import { mkdirp } from './fs';
 
 function tryUnlink(path) {
   try {
