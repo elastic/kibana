@@ -53,7 +53,7 @@ export const ProcessDetails = memo(function ProcessDetails({
 
     const createdEntry = {
       title: i18n.translate(
-        'xpack.securitySolution.enpoint.resolver.panel.processDescList.created',
+        'xpack.securitySolution.endpoint.resolver.panel.processDescList.created',
         {
           defaultMessage: 'Created',
         }
@@ -62,21 +62,21 @@ export const ProcessDetails = memo(function ProcessDetails({
     };
 
     const pathEntry = {
-      title: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.path', {
+      title: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.processDescList.path', {
         defaultMessage: 'Path',
       }),
       description: processPath(processEvent),
     };
 
     const pidEntry = {
-      title: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.pid', {
+      title: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.processDescList.pid', {
         defaultMessage: 'PID',
       }),
       description: processPid(processEvent),
     };
 
     const userEntry = {
-      title: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.user', {
+      title: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.processDescList.user', {
         defaultMessage: 'User',
       }),
       description: (userInfoForProcess(processEvent) as { name: string }).name,
@@ -84,7 +84,7 @@ export const ProcessDetails = memo(function ProcessDetails({
 
     const domainEntry = {
       title: i18n.translate(
-        'xpack.securitySolution.enpoint.resolver.panel.processDescList.domain',
+        'xpack.securitySolution.endpoint.resolver.panel.processDescList.domain',
         {
           defaultMessage: 'Domain',
         }
@@ -94,7 +94,7 @@ export const ProcessDetails = memo(function ProcessDetails({
 
     const parentPidEntry = {
       title: i18n.translate(
-        'xpack.securitySolution.enpoint.resolver.panel.processDescList.parentPid',
+        'xpack.securitySolution.endpoint.resolver.panel.processDescList.parentPid',
         {
           defaultMessage: 'Parent PID',
         }
@@ -104,7 +104,7 @@ export const ProcessDetails = memo(function ProcessDetails({
 
     const md5Entry = {
       title: i18n.translate(
-        'xpack.securitySolution.enpoint.resolver.panel.processDescList.md5hash',
+        'xpack.securitySolution.endpoint.resolver.panel.processDescList.md5hash',
         {
           defaultMessage: 'MD5',
         }
@@ -114,7 +114,7 @@ export const ProcessDetails = memo(function ProcessDetails({
 
     const commandLineEntry = {
       title: i18n.translate(
-        'xpack.securitySolution.enpoint.resolver.panel.processDescList.commandLine',
+        'xpack.securitySolution.endpoint.resolver.panel.processDescList.commandLine',
         {
           defaultMessage: 'Command Line',
         }
@@ -150,7 +150,7 @@ export const ProcessDetails = memo(function ProcessDetails({
     return [
       {
         text: i18n.translate(
-          'xpack.securitySolution.enpoint.resolver.panel.processDescList.events',
+          'xpack.securitySolution.endpoint.resolver.panel.processDescList.events',
           {
             defaultMessage: 'Events',
           }
@@ -163,7 +163,7 @@ export const ProcessDetails = memo(function ProcessDetails({
         text: (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.numberOfEvents"
+              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.numberOfEvents"
               values={{ processName }}
               defaultMessage="Details for: {processName}"
             />

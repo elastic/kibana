@@ -58,7 +58,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
       {
         field: 'name',
         name: i18n.translate(
-          'xpack.securitySolution.enpoint.resolver.panel.table.row.processNameTitle',
+          'xpack.securitySolution.endpoint.resolver.panel.table.row.processNameTitle',
           {
             defaultMessage: 'Process Name',
           }
@@ -69,7 +69,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
           return name === '' ? (
             <EuiBadge color="warning">
               {i18n.translate(
-                'xpack.securitySolution.enpoint.resolver.panel.table.row.valueMissingDescription',
+                'xpack.securitySolution.endpoint.resolver.panel.table.row.valueMissingDescription',
                 {
                   defaultMessage: 'Value is missing',
                 }
@@ -91,7 +91,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
       {
         field: 'timestamp',
         name: i18n.translate(
-          'xpack.securitySolution.enpoint.resolver.panel.table.row.timestampTitle',
+          'xpack.securitySolution.endpoint.resolver.panel.table.row.timestampTitle',
           {
             defaultMessage: 'Timestamp',
           }
@@ -104,7 +104,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
           ) : (
             <EuiBadge color="warning">
               {i18n.translate(
-                'xpack.securitySolution.enpoint.resolver.panel.table.row.timestampInvalidLabel',
+                'xpack.securitySolution.endpoint.resolver.panel.table.row.timestampInvalidLabel',
                 {
                   defaultMessage: 'invalid',
                 }
@@ -143,7 +143,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     return [
       {
         text: i18n.translate(
-          'xpack.securitySolution.enpoint.resolver.panel.processListWithCounts.events',
+          'xpack.securitySolution.endpoint.resolver.panel.processListWithCounts.events',
           {
             defaultMessage: 'All Process Events',
           }

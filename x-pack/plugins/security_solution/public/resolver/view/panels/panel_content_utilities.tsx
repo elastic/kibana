@@ -70,6 +70,12 @@ export const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   second: '2-digit',
 });
 
+const invalidDateText = i18n.translate(
+  'xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate',
+  {
+    defaultMessage: 'Invalid Date',
+  }
+);
 /**
  * @param {ConstructorParameters<typeof Date>[0]} timestamp To be passed through Date->Intl.DateTimeFormat
  * @returns {string} A nicely formatted string for a date
@@ -79,6 +85,6 @@ export function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {
   if (isFinite(date.getTime())) {
     return formatter.format(date);
   } else {
-    return 'Invalid Date';
+    return invalidDateText;
   }
 }

@@ -103,13 +103,13 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
   const processEntityId = parentEvent && event.entityId(parentEvent);
   const totalCount = countForParent || 0;
   const eventsString = i18n.translate(
-    'xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.events',
+    'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.events',
     {
       defaultMessage: 'Events',
     }
   );
   const naString = i18n.translate(
-    'xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.NA',
+    'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.NA',
     {
       defaultMessage: 'N/A',
     }
@@ -216,7 +216,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         text: (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.numberOfEvents"
+              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.numberOfEvents"
               values={{ totalCount }}
               defaultMessage="{totalCount} Events"
             />
@@ -230,7 +230,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         text: (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.countByCategory"
+              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.countByCategory"
               values={{ count: countBySameCategory, category: relatedEventCategory }}
               defaultMessage="{count} {category}"
             />
@@ -246,7 +246,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       {
         text: relatedEventToShowDetailsFor ? (
           <FormattedMessage
-            id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.eventDescriptiveName"
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.eventDescriptiveName"
             values={{ subject, descriptor }}
             defaultMessage="{descriptor} {subject}"
           />
@@ -275,7 +275,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
    */
   if (!relatedsReady) {
     const waitingString = i18n.translate(
-      'xpack.securitySolution.enpoint.resolver.panel.relatedDetail.wait',
+      'xpack.securitySolution.endpoint.resolver.panel.relatedDetail.wait',
       {
         defaultMessage: 'Waiting For Events...',
       }
@@ -296,7 +296,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
    */
   if (!relatedEventToShowDetailsFor) {
     const errString = i18n.translate(
-      'xpack.securitySolution.enpoint.resolver.panel.relatedDetail.missing',
+      'xpack.securitySolution.endpoint.resolver.panel.relatedDetail.missing',
       {
         defaultMessage: 'Related event not found.',
       }
@@ -313,7 +313,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       <EuiText size="s">
         <BoldCode>
           <FormattedMessage
-            id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.categoryAndType"
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.categoryAndType"
             values={{
               category: relatedEventCategory,
               eventType: String(event.ecsEventType(relatedEventToShowDetailsFor)),
@@ -322,7 +322,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
           />
         </BoldCode>
         <FormattedMessage
-          id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.atTime"
+          id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
           values={{ date: formattedDate }}
           defaultMessage="@ {date}"
         />
@@ -330,7 +330,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       <EuiSpacer size="m" />
       <EuiText>
         <FormattedMessage
-          id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.eventDescriptiveNameInTitle"
+          id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.eventDescriptiveNameInTitle"
           values={{ subject, descriptor }}
           defaultMessage="{descriptor} {subject}"
         />

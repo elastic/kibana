@@ -53,7 +53,7 @@ const DisplayList = memo(function DisplayList({
               <EuiText>
                 <BoldCode>
                   <FormattedMessage
-                    id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.categoryAndType"
+                    id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.categoryAndType"
                     values={{
                       category: eventView.eventCategory,
                       eventType: eventView.eventType,
@@ -62,7 +62,7 @@ const DisplayList = memo(function DisplayList({
                   />
                 </BoldCode>
                 <FormattedMessage
-                  id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.atTime"
+                  id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
                   values={{ date: eventView.formattedDate }}
                   defaultMessage="@ {date}"
                 />
@@ -70,7 +70,7 @@ const DisplayList = memo(function DisplayList({
               <EuiSpacer size="xs" />
               <EuiButtonEmpty onClick={eventView.setQueryParams}>
                 <FormattedMessage
-                  id="xpack.securitySolution.enpoint.resolver.panel.processEventListByType.eventDescriptiveName"
+                  id="xpack.securitySolution.endpoint.resolver.panel.processEventListByType.eventDescriptiveName"
                   values={{ subject, descriptor }}
                   defaultMessage="{descriptor} {subject}"
                 />
@@ -102,13 +102,13 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
     0
   );
   const eventsString = i18n.translate(
-    'xpack.securitySolution.enpoint.resolver.panel.processEventListByType.events',
+    'xpack.securitySolution.endpoint.resolver.panel.processEventListByType.events',
     {
       defaultMessage: 'Events',
     }
   );
   const waitingString = i18n.translate(
-    'xpack.securitySolution.enpoint.resolver.panel.processEventListByType.wait',
+    'xpack.securitySolution.endpoint.resolver.panel.processEventListByType.wait',
     {
       defaultMessage: 'Waiting For Events...',
     }
@@ -194,7 +194,7 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
         text: (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventList.numberOfEvents"
+              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.numberOfEvents"
               values={{ totalCount }}
               defaultMessage="{totalCount} Events"
             />
@@ -208,7 +208,7 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
         text: (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventList.countByCategory"
+              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.countByCategory"
               values={{ count: matchingEventEntries.length, category: eventType }}
               defaultMessage="{count} {category}"
             />
