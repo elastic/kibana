@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-import { EntriesArray, entries } from './entries';
+import { EntriesArray, entriesArray } from './entries';
 
 export type DefaultEntriesArrayC = t.Type<EntriesArray, EntriesArray, unknown>;
 
@@ -21,8 +21,8 @@ export const DefaultEntryArray: DefaultEntriesArrayC = new t.Type<
   unknown
 >(
   'DefaultEntryArray',
-  t.array(entries).is,
-  (input, context): Either<t.Errors, EntriesArray> =>
-    input == null ? t.success([]) : t.array(entries).validate(input, context),
+  entriesArray.is,
+  (input): Either<t.Errors, EntriesArray> =>
+    input == null ? t.success([]) : entriesArray.decode(input),
   t.identity
 );
