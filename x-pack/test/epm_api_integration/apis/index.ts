@@ -10,16 +10,13 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const dockerServers = getService('dockerServers');
   const log = getService('log');
 
-  let maybeSkipped: typeof global.describe | typeof global.describe.skip = describe;
-
-  if (!dockerServers.isEnabled('registry')) {
-    log.warning('skipping EPM Endpoints tests because registry docker server is disabled');
-    maybeSkipped = describe.skip.bind(describe);
-    return;
-  }
-
-  maybeSkipped('EPM Endpoints', function () {
+  describe('EPM Endpoints', function () {
     this.tags('ciGroup1');
+
+    if (!dockerServers.isEnabled('registry')) {
+      log.warning('skipping EPM Endpoints tests because registry docker server is disabled');
+      this.pending = true;
+    }
 
     loadTestFile(require.resolve('./list'));
     // loadTestFile(require.resolve('./file'));
