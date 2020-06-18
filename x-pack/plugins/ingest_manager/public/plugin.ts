@@ -28,7 +28,7 @@ export type IngestManagerSetup = void;
  */
 export interface IngestManagerStart {
   registerDatasource: typeof registerDatasource;
-  success: Promise<boolean>;
+  success: Promise<true>;
 }
 
 export interface IngestManagerSetupDeps {
@@ -75,30 +75,31 @@ export class IngestManagerPlugin
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
+    let successPromise: IngestManagerStart['success'];
     try {
-      let successPromise = Promise.resolve(false);
       const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
         appRoutesService.getCheckPermissionsPath()
       );
 
-      if (permissionsResponse.success) {
+      if (permissionsResponse?.success) {
         successPromise = core.http
           .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
-          .then(({ isInitialized }: { isInitialized: boolean }) => Promise.resolve(isInitialized));
+          .then(({ isInitialized }) =>
+            isInitialized ? Promise.resolve(true) : Promise.reject(new Error('Unknown setup error'))
+          );
       } else {
-        successPromise = Promise.reject(new Error(permissionsResponse.error));
+        successPromise = Promise.reject(
+          new Error(permissionsResponse?.error || 'Unknown permissions error')
+        );
       }
-
-      return {
-        success: successPromise,
-        registerDatasource,
-      };
     } catch (error) {
-      return {
-        success: Promise.reject(error),
-        registerDatasource,
-      };
+      successPromise = Promise.reject(error);
     }
+
+    return {
+      success: successPromise,
+      registerDatasource,
+    };
   }
 
   public stop() {}
