@@ -11,7 +11,9 @@ import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
+import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternSelectComponent } from '../../../kibana_services';
+import { getGeoFields, getSourceFields } from '../../../index_pattern_util';
 
 export enum BOUNDARIES_SOURCE {
   ELASTICSEARCH = 'ELASTICSEARCH',
@@ -37,29 +39,27 @@ const IndexPatternSelect = getIndexPatternSelectComponent();
 
 interface State {
   leftSource: BOUNDARIES_SOURCE;
+  leftEmsFileId: string | null;
   leftIndexPattern: IndexPattern | null;
   leftGeoFields: IFieldType[];
-  leftTermsFields: IFieldType[];
-  leftGeofieldName: string | null;
-  leftEsJoinField: string | null;
-  leftEmsFileId: string | null;
-  leftEmsJoinField: string | null;
+  leftJoinFields: IFieldType[];
+  leftGeoField: string | null;
+  leftJoinField: string | null;
   rightIndexPatternId: string | null;
-  rightKey: string | null;
+  rightJoinField: string | null;
 }
 
 export class LayerTemplate extends Component<RenderWizardArguments, State> {
   state = {
     leftSource: BOUNDARIES_SOURCE.ELASTICSEARCH,
+    leftEmsFileId: null,
     leftIndexPattern: null,
     leftGeoFields: [],
-    leftTermsFields: [],
-    leftGeofieldName: null,
-    leftEsJoinField: null,
-    leftEmsFileId: null,
-    leftEmsJoinField: null,
+    leftJoinFields: [],
+    leftGeoField: null,
+    leftJoinField: null,
     rightIndexPatternId: null,
-    rightKey: null,
+    rightJoinField: null,
   };
 
   _onLeftSourceChange = (optionId: string) => {
@@ -67,7 +67,29 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   };
 
   _onLeftIndexPatternChange = (indexPattern: IndexPattern) => {
-    this.setState({ leftIndexPattern: indexPattern }, this._previewLayer);
+    this.setState(
+      {
+        leftIndexPattern: indexPattern,
+        leftGeoFields: getGeoFields(indexPattern.fields),
+        leftJoinFields: getSourceFields(indexPattern.fields),
+        leftGeoField: null,
+        leftJoinField: null,
+      },
+      () => {
+        // make default geo field selection
+        if (this.state.leftGeoFields.length) {
+          this._onLeftGeoFieldSelect(this.state.leftGeoFields[0].name);
+        }
+      }
+    );
+  };
+
+  _onLeftGeoFieldSelect = (geoField: string) => {
+    this.setState({ leftGeoField: geoField }, this._previewLayer);
+  };
+
+  _onLeftJoinFieldSelect = (joinField: string) => {
+    this.setState({ leftJoinField: joinField }, this._previewLayer);
   };
 
   _onEmsFileChange = (emFileId: string) => {
@@ -77,17 +99,15 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   _isLeftConfigComplete() {
     if (this.state.leftSource === BOUNDARIES_SOURCE.ELASTICSEARCH) {
       return (
-        !!this.state.leftIndexPattern &&
-        !!this.state.leftGeofieldName &&
-        !!this.state.leftEsJoinField
+        !!this.state.leftIndexPattern && !!this.state.leftGeoField && !!this.state.leftJoinField
       );
     } else {
-      return !!this.state.leftEmsFileId && !!this.state.leftEmsFileId;
+      return !!this.state.leftEmsFileId && !!this.state.leftJoinField;
     }
   }
 
   _isRightConfigComplete() {
-    return !!this.state.rightIndexPatternId && !!this.state.rightKey;
+    return !!this.state.rightIndexPatternId && !!this.state.rightJoinField;
   }
 
   _previewLayer() {
@@ -105,11 +125,55 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
   _renderLeftSource() {
     if (this.state.leftSource === BOUNDARIES_SOURCE.ELASTICSEARCH) {
+      let geoFieldSelect;
+      if (this.state.leftGeoFields.length) {
+        geoFieldSelect = (
+          <EuiFormRow
+            label={i18n.translate('xpack.maps.choropleth.geofieldLabel', {
+              defaultMessage: 'Geospatial field',
+            })}
+          >
+            <SingleFieldSelect
+              placeholder={i18n.translate('xpack.maps.choropleth.geofieldPlaceholder', {
+                defaultMessage: 'Select geo field',
+              })}
+              value={this.state.leftGeoField}
+              onChange={this._onLeftGeoFieldSelect}
+              fields={this.state.leftGeoFields}
+              isClearable={false}
+            />
+          </EuiFormRow>
+        );
+      }
+      let joinFieldSelect;
+      if (this.state.leftJoinFields.length) {
+        joinFieldSelect = (
+          <EuiFormRow
+            label={i18n.translate('xpack.maps.choropleth.joinFieldLabel', {
+              defaultMessage: 'Boundaries join field',
+            })}
+          >
+            <SingleFieldSelect
+              placeholder={i18n.translate('xpack.maps.choropleth.joinFieldPlaceholder', {
+                defaultMessage: 'Select field',
+              })}
+              value={this.state.leftJoinField}
+              onChange={this._onLeftJoinFieldSelect}
+              fields={this.state.leftJoinFields}
+              isClearable={false}
+            />
+          </EuiFormRow>
+        );
+      }
       return (
-        <GeoIndexPatternSelect
-          value={this.state.leftIndexPattern ? this.state.leftIndexPattern.id : ''}
-          onChange={this._onLeftIndexPatternChange}
-        />
+        <>
+          <GeoIndexPatternSelect
+            value={this.state.leftIndexPattern ? this.state.leftIndexPattern.id : ''}
+            onChange={this._onLeftIndexPatternChange}
+          />
+          {geoFieldSelect}
+          {joinFieldSelect}
+        </>
       );
     } else {
       return <EMSFileSelect value={this.state.leftEmsFileId} onChange={this._onEmsFileChange} />;
