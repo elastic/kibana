@@ -17,6 +17,10 @@
  * under the License.
  */
 
-export * from './filter_manager';
-export * from './types';
-export * from './is_query';
+import { TimeRange } from './types';
+
+export const isTimeRange = (x: unknown): x is TimeRange =>
+  !!x &&
+  typeof x === 'object' &&
+  typeof (x as TimeRange).from === 'string' &&
+  typeof (x as TimeRange).to === 'string';

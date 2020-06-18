@@ -443,6 +443,8 @@ export {
   getKbnTypeNames,
 } from '../common';
 
+export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+
 export * from '../common/field_mapping';
 
 /*
