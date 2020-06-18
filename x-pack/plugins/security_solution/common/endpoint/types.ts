@@ -173,12 +173,19 @@ export interface HostResultList {
 }
 
 /**
- * Operating System metadata for a host.
+ * Operating System metadata.
  */
-export interface HostOS {
+export interface OSFields {
   full: string;
   name: string;
   version: string;
+  Ext: OSFieldsExt;
+}
+
+/**
+ * Extended Operating System metadata.
+ */
+export interface OSFieldsExt {
   variant: string;
 }
 
@@ -190,7 +197,7 @@ export interface Host {
   hostname: string;
   ip: string[];
   mac: string[];
-  os: HostOS;
+  os: OSFields;
 }
 
 /**
@@ -220,27 +227,30 @@ interface MalwareClassification {
 
 interface ThreadFields {
   id: number;
-  service_name: string;
-  start: number;
-  start_address: number;
-  start_address_module: string;
+  Ext: {
+    service_name: string;
+    start: number;
+    start_address: number;
+    start_address_module: string;
+  };
 }
 
 interface DllFields {
+  hash: Hashes;
+  path: string;
   pe: {
     architecture: string;
-    imphash: string;
   };
   code_signature: {
     subject_name: string;
     trusted: boolean;
   };
-  compile_time: number;
-  hash: Hashes;
-  malware_classification: MalwareClassification;
-  mapped_address: number;
-  mapped_size: number;
-  path: string;
+  Ext: {
+    compile_time: number;
+    malware_classification: MalwareClassification;
+    mapped_address: number;
+    mapped_size: number;
+  };
 }
 
 /**
@@ -265,7 +275,7 @@ export interface AlertEvent {
     module: string;
     type: string;
   };
-  endpoint: {
+  Endpoint: {
     policy: {
       applied: {
         id: string;
@@ -275,12 +285,7 @@ export interface AlertEvent {
     };
   };
   process: {
-    code_signature: {
-      subject_name: string;
-      trusted: boolean;
-    };
     command_line?: string;
-    domain?: string;
     pid: number;
     ppid?: number;
     entity_id: string;
@@ -290,29 +295,31 @@ export interface AlertEvent {
     };
     name: string;
     hash: Hashes;
-    pe?: {
-      imphash: string;
-    };
     executable: string;
-    sid?: string;
     start: number;
-    malware_classification?: MalwareClassification;
-    token: {
-      domain: string;
-      type: string;
-      user: string;
-      sid: string;
-      integrity_level: number;
-      integrity_level_name: string;
-      privileges?: Array<{
-        description: string;
-        name: string;
-        enabled: boolean;
-      }>;
-    };
     thread?: ThreadFields[];
     uptime: number;
-    user: string;
+    Ext: {
+      code_signature: Array<{
+        subject_name: string;
+        trusted: boolean;
+      }>;
+      malware_classification?: MalwareClassification;
+      token: {
+        domain: string;
+        type: string;
+        user: string;
+        sid: string;
+        integrity_level: number;
+        integrity_level_name: string;
+        privileges?: Array<{
+          description: string;
+          name: string;
+          enabled: boolean;
+        }>;
+      };
+      user: string;
+    };
   };
   file: {
     owner: string;
@@ -323,15 +330,14 @@ export interface AlertEvent {
     created: number;
     size: number;
     hash: Hashes;
-    pe?: {
-      imphash: string;
+    Ext: {
+      malware_classification: MalwareClassification;
+      temp_file_path: string;
+      code_signature: Array<{
+        trusted: boolean;
+        subject_name: string;
+      }>;
     };
-    code_signature: {
-      trusted: boolean;
-      subject_name: string;
-    };
-    malware_classification: MalwareClassification;
-    temp_file_path: string;
   };
   host: Host;
   dll?: DllFields[];
@@ -373,7 +379,7 @@ export type HostMetadata = Immutable<{
       id: string;
     };
   };
-  endpoint: {
+  Endpoint: {
     policy: {
       applied: {
         id: string;
@@ -438,14 +444,38 @@ export interface EndpointEvent {
     kind: string;
   };
   host: Host;
+  network?: {
+    direction: unknown;
+    forwarded_ip: unknown;
+  };
+  dns?: {
+    question: { name: unknown };
+  };
   process: {
     entity_id: string;
     name: string;
+    executable?: string;
+    args?: string;
+    code_signature?: {
+      status?: string;
+      subject_name: string;
+    };
+    pid?: number;
+    hash?: {
+      md5: string;
+    };
     parent?: {
       entity_id: string;
       name?: string;
+      pid?: number;
     };
   };
+  user?: {
+    domain?: string;
+    name: string;
+  };
+  file?: { path: unknown };
+  registry?: { path: unknown; key: unknown };
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
@@ -666,7 +696,7 @@ export interface HostPolicyResponseAppliedAction {
   message: string;
 }
 
-export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['policy']['applied']['response']['configurations'];
+export type HostPolicyResponseConfiguration = HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
@@ -711,7 +741,7 @@ export interface HostPolicyResponse {
     version: string;
     id: string;
   };
-  endpoint: {
+  Endpoint: {
     policy: {
       applied: {
         version: string;
