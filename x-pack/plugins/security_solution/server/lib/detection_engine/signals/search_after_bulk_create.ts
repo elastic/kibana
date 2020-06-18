@@ -19,6 +19,7 @@ import { singleBulkCreate } from './single_bulk_create';
 import { SignalSearchResponse } from './types';
 import { filterEventsAgainstList } from './filter_events_with_list';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
+import { getSignalTimeTuples } from './utils';
 
 interface SearchAfterAndBulkCreateParams {
   gap: moment.Duration | null;
@@ -121,158 +122,30 @@ export const searchAfterAndBulkCreate = async ({
     we only want 500. So maxResults will help us control how
     many times we perform a search_after
   */
-  let maxResults = ruleParams.maxSignals;
+  // const maxResults = ruleParams.maxSignals;
 
-  type unitType = 's' | 'm' | 'h';
-  const isValidUnit = (unit: string): unit is unitType => ['s', 'm', 'h'].includes(unit);
-  // add a 'gap' parameter that would add the
-  // 'from' with the 'gap' - need to figure out
-  // how to do datemath with moment.
-  let calculatedFrom = ruleParams.from;
-  const totalToFromTuples = [];
-  if (gap != null && previousStartedAt != null) {
-    const fromUnit = ruleParams.from[ruleParams.from.length - 1];
-    if (isValidUnit(fromUnit)) {
-      const unit = fromUnit; // only seconds (s), minutes (m) or hours (h)
-      const shorthandMap = {
-        s: {
-          momentString: 'seconds',
-          asFn: (duration: moment.Duration) => duration.asSeconds(),
-        },
-        m: {
-          momentString: 'minutes',
-          asFn: (duration: moment.Duration) => duration.asMinutes(),
-        },
-        h: {
-          momentString: 'hours',
-          asFn: (duration: moment.Duration) => duration.asHours(),
-        },
-      };
-      const tempNow = moment();
-      // cosnt newFrom = moment.duration(300, 's');
-      const newFrom = moment.duration(tempNow.diff(previousStartedAt));
-      logger.debug(`newFrom: ${newFrom.asSeconds()}`);
-      const parsed = parseInt(shorthandMap[unit].asFn(newFrom).toString(), 10);
-
-      calculatedFrom = `now-${parsed + unit}`;
-      logger.debug(`calculatedFrom: ${calculatedFrom}`);
-      const intervalMoment = moment.duration(parseInt(interval, 10), unit);
-      const calculatedFromAsMoment = dateMath.parse(calculatedFrom);
-      const calculatedNowAsMoment = dateMath.parse('now');
-      if (
-        calculatedFromAsMoment != null &&
-        calculatedNowAsMoment != null &&
-        intervalMoment != null
-      ) {
-        // calculate new max signals so that we keep constant max signals per time interval
-        // essentially if the rule is supposed to run every 5 minutes,
-        //  but there is a gap of one minute, then the number of rule executions missed
-        // due to the gap are (6 minutes - 5 minutes) / 5 minutes = 0.2 * MAX_SIGNALS = 20 signals allowed.
-        // this is to keep our ratio of MAX_SIGNALS : rule intervals equivalent.
-        const dateMathRuleParamsFrom = dateMath.parse(ruleParams.from);
-        const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
-        logger.debug(
-          `calculatedFromAsMoment: ${calculatedFromAsMoment.toISOString()}, calculatedNowAsMoment: ${calculatedNowAsMoment.toISOString()}`
-        );
-        const gapDiffInUnits = calculatedFromAsMoment.diff(dateMathRuleParamsFrom, momentUnit);
-        // I think we can replace this with the interval?
-        const normalDiffInUnits = calculatedNowAsMoment.diff(dateMathRuleParamsFrom, momentUnit);
-
-        logger.debug(`gapDiffInUnits: ${gapDiffInUnits}, normalDiffInUnits: ${normalDiffInUnits}`);
-        // make an array that represents the number of intervals of (to, from) tuples
-        const ratio = Math.abs(gapDiffInUnits / normalDiffInUnits);
-        // maxCatchup is to ensure we are not trying to catch up too far back.
-        // This allows for a maximum of 4 consecutive rule execution misses
-        // to be included in the number of signals generated.
-        const maxCatchup = ratio < 4 ? ratio : 4;
-
-        // take the `xunit` from the `now-xunit` datemath string and append another interval
-        // to the `x`
-        /*
-        basic algorithm will be a recurrence relation such that
-        the end point for one range becomes the start point for
-        the next range. subtract the intervalMoment from the `to` field
-        to get the next `from`, then on the next iteration, set the `to` field
-        to be the `from` field, then subtract intervalMoment from the `to` field to get
-        the next `from` field, then on the next iteration, set the `to` field
-        to be the `from` field, then subtract the intervalMoment from the `to field to get
-        the next `from` field.
-        */
-        // let tempFrom = dateMath.parse(ruleParams.from);
-        let tempFrom;
-        let tempTo = calculatedFromAsMoment;
-        // totalToFromTuples.push({ to: tempTo, from: tempFrom });
-        // consider re-writing as a reduce function?
-        // maybe in a separate utils file?
-        // this way it is easier to test?
-        // but then again I'll be testing timestamps which is ANNOYING
-        // UGH
-        // I guess the way I would test this is ensure the returned
-        // length of totalToFromTuples is greater than 0
-        // and all the `to` and `from` values in each tuple
-        // are differentiated by the given `intervalMoment`.
-        // this way I am not strictly checking for timestamps
-        // but the difference between the two.
-        // subtracting 1 from the length because we start out with the
-        // normal interval tuple, so don't include as part of the
-        // maxCatchup.
-        logger.debug(`maxCatchup: ${maxCatchup}`);
-        while (totalToFromTuples.length < maxCatchup) {
-          // if maxCatchup is less than 1, we calculate the 'from' differently
-          // and maxSignals becomes some less amount of maxSignals
-          // in order to maintain maxSignals per full rule interval.
-          if (maxCatchup > 0 && maxCatchup < 1) {
-            totalToFromTuples.push({
-              to: moment(tempTo),
-              from: moment(tempTo?.add(gapDiffInUnits, momentUnit)),
-              maxSignals: ruleParams.maxSignals * maxCatchup,
-            });
-            break;
-          }
-          logger.debug(`tempTo: ${tempTo?.toISOString()}`);
-          const beforeMutatedTo = moment(tempTo); // make a new moment
-          const beforeMutatedFrom = moment(tempTo?.subtract(intervalMoment, momentUnit));
-          const tuple = {
-            to: beforeMutatedTo,
-            from: beforeMutatedFrom,
-            maxSignals: ruleParams.maxSignals,
-          };
-          logger.debug(`tuple: ${JSON.stringify(tuple, null, 4)}`);
-          totalToFromTuples.push(tuple);
-          tempTo = beforeMutatedFrom;
-        }
-        totalToFromTuples.push({
-          to: dateMath.parse(ruleParams.to),
-          from: dateMath.parse(ruleParams.from),
-          maxSignals: ruleParams.maxSignals,
-        });
-
-        // create a new max results which in the above example equates to
-        // 20 signals as the MAX_SIGNALS for the gap duration + our normal MAX_SIGNALS defaulted to 100
-        // which comes out to 120 total max signals.
-        maxResults = Math.round(maxCatchup * ruleParams.maxSignals) + ruleParams.maxSignals;
-        logger.debug(`new maxResults: ${maxResults}`);
-      }
-    }
-  } else {
-    totalToFromTuples.push({
-      to: moment(ruleParams.to),
-      from: moment(ruleParams.from),
-      maxSignals: ruleParams.maxSignals,
-    });
-  }
+  const totalToFromTuples = getSignalTimeTuples({
+    logger,
+    ruleParams,
+    gap,
+    previousStartedAt,
+    interval,
+    // maxResults,
+  });
 
   // I think we can remove this maxResults thing and just iterate over the tuples
   // which will clean things up nicely.
   // while (searchResultSize < maxResults) {
   logger.debug(`totalToFromTuples.length: ${totalToFromTuples.length}`);
   // totalToFromTuples.reverse();
-  logger.debug(`${JSON.stringify(totalToFromTuples, null, 4)}`);
+  logger.debug(
+    `${JSON.stringify(totalToFromTuples, (_, value) => (value === 'undefined' ? null : value), 4)}`
+  );
   const useSortIds = totalToFromTuples.length <= 1;
   while (totalToFromTuples.length > 0) {
     // await totalToFromTuples.forEach(async (tuple) => {
     const tuple = totalToFromTuples.pop();
-    if (tuple == null) {
+    if (tuple == null || tuple.to == null || tuple.from == null) {
       logger.error(`[-] malformed date tuple`);
       toReturn.success = false;
       return toReturn;
@@ -280,7 +153,6 @@ export const searchAfterAndBulkCreate = async ({
     searchResultSize = 0;
     while (searchResultSize < tuple.maxSignals) {
       try {
-        // @ts-ignore
         logger.debug(`sortIds: ${sortId}`);
         const {
           // @ts-ignore https://github.com/microsoft/TypeScript/issues/35546
@@ -291,10 +163,8 @@ export const searchAfterAndBulkCreate = async ({
             // @ts-ignore we are using sortId before being assigned but that's ok.
             searchAfterSortId: useSortIds ? sortId : undefined,
             index: inputIndexPattern,
-            // from: calculatedFrom,
-            from: tuple!.from!.toISOString(), // TODO: bang
-            // to: ruleParams.to,
-            to: tuple!.to!.toISOString(), // TODO: bang
+            from: tuple.from.toISOString(),
+            to: tuple.to.toISOString(),
             services,
             logger,
             filter,
@@ -318,7 +188,7 @@ export const searchAfterAndBulkCreate = async ({
         // re-calculate maxResults to ensure if our search results
         // are less than max signals, we are not attempting to
         // create more signals than there are total search results.
-        maxResults = Math.min(totalHits, ruleParams.maxSignals);
+        // maxResults = Math.min(totalHits, ruleParams.maxSignals);
         searchResultSize += searchResult.hits.hits.length;
         // if (searchResult.hits.hits.length === 0) {
         //   toReturn.success = true;
@@ -344,14 +214,6 @@ export const searchAfterAndBulkCreate = async ({
           // return toReturn;
         }
 
-        // cap max signals created to be no more than maxSignals
-        // if (toReturn.createdSignalsCount + filteredEvents.hits.hits.length > ruleParams.maxSignals) {
-        //   const tempSignalsToIndex = filteredEvents.hits.hits.slice(
-        //     0,
-        //     ruleParams.maxSignals - toReturn.createdSignalsCount
-        //   );
-        //   filteredEvents.hits.hits = tempSignalsToIndex;
-        // }
         logger.debug('next bulk index');
         const {
           bulkCreateDuration: bulkDuration,
