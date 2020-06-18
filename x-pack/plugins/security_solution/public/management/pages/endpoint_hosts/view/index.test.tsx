@@ -160,8 +160,10 @@ describe('when on the hosts page', () => {
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
     ) => {
       const policyResponse = docGenerator.generatePolicyResponse();
+      const malwareResponseConfigurations =
+        policyResponse.Endpoint.policy.applied.response.configurations.malware;
       policyResponse.Endpoint.policy.applied.status = overallStatus;
-      policyResponse.Endpoint.policy.applied.response.configurations.malware.status = overallStatus;
+      malwareResponseConfigurations.status = overallStatus;
       let downloadModelAction = policyResponse.Endpoint.policy.applied.actions.find(
         (action) => action.name === 'download_model'
       );
@@ -174,17 +176,28 @@ describe('when on the hosts page', () => {
         };
         policyResponse.Endpoint.policy.applied.actions.push(downloadModelAction);
       }
+
       if (
         overallStatus === HostPolicyResponseActionStatus.failure ||
         overallStatus === HostPolicyResponseActionStatus.warning
       ) {
         downloadModelAction.message = 'no action taken';
       }
-      store.dispatch({
-        type: 'serverReturnedHostPolicyResponse',
-        payload: {
-          policy_response: policyResponse,
-        },
+
+      // Make sure that at least one configuration has the above action, else
+      // we get into an out-of-sync condition
+      if (
+        malwareResponseConfigurations.concerned_actions.indexOf(downloadModelAction.name) === -1
+      ) {
+        malwareResponseConfigurations.concerned_actions.push(downloadModelAction.name);
+      }
+      reactTestingLibrary.act(() => {
+        store.dispatch({
+          type: 'serverReturnedHostPolicyResponse',
+          payload: {
+            policy_response: policyResponse,
+          },
+        });
       });
     };
 
@@ -361,6 +374,12 @@ describe('when on the hosts page', () => {
     describe('when showing host Policy Response panel', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
+        coreStart.http.post.mockImplementation(async (requestOptions) => {
+          if (requestOptions.path === '/api/endpoint/metadata') {
+            return mockHostResultList({ total: 0 });
+          }
+          throw new Error(`POST to '${requestOptions.path}' does not have a mock response!`);
+        });
         renderResult = render();
         const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
@@ -372,6 +391,8 @@ describe('when on the hosts page', () => {
           dispatchServerReturnedHostPolicyResponse();
         });
       });
+
+      afterEach(reactTestingLibrary.cleanup);
 
       it('should hide the host details panel', async () => {
         const hostDetailsFlyout = await renderResult.queryByTestId('hostDetailsFlyoutBody');
@@ -433,21 +454,29 @@ describe('when on the hosts page', () => {
           });
       });
 
-      it('should show a numbered badge if at least one action failed', () => {
+      it('should show a numbered badge if at least one action failed', async () => {
+        const policyResponseActionDispatched = middlewareSpy.waitForAction(
+          'serverReturnedHostPolicyResponse'
+        );
         reactTestingLibrary.act(() => {
           dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
         });
-        const attentionBadge = renderResult.findAllByTestId(
+        await policyResponseActionDispatched;
+        const attentionBadge = await renderResult.findAllByTestId(
           'hostDetailsPolicyResponseAttentionBadge'
         );
         expect(attentionBadge).not.toBeNull();
       });
 
-      it('should show a numbered badge if at least one action has a warning', () => {
+      it('should show a numbered badge if at least one action has a warning', async () => {
+        const policyResponseActionDispatched = middlewareSpy.waitForAction(
+          'serverReturnedHostPolicyResponse'
+        );
         reactTestingLibrary.act(() => {
           dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
         });
-        const attentionBadge = renderResult.findAllByTestId(
+        await policyResponseActionDispatched;
+        const attentionBadge = await renderResult.findAllByTestId(
           'hostDetailsPolicyResponseAttentionBadge'
         );
         expect(attentionBadge).not.toBeNull();

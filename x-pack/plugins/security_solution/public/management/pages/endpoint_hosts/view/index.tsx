@@ -154,7 +154,7 @@ export const HostList = () => {
         },
       },
       {
-        field: 'metadata.endpoint.policy.applied',
+        field: 'metadata.Endpoint.policy.applied',
         name: i18n.translate('xpack.securitySolution.endpointList.policy', {
           defaultMessage: 'Policy',
         }),
@@ -181,7 +181,7 @@ export const HostList = () => {
         },
       },
       {
-        field: 'metadata.endpoint.policy.applied',
+        field: 'metadata.Endpoint.policy.applied',
         name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
           defaultMessage: 'Policy Status',
         }),
