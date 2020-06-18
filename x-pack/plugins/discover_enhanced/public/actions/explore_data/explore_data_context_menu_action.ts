@@ -6,7 +6,8 @@
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import { EmbeddableContext } from '../../../../../../src/plugins/embeddable/public';
-import { VisualizeEmbeddableContract } from '../../../../../../src/plugins/visualizations/public';
+import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
+import { isTimeRange, isQuery, isFilters } from '../../../../../../src/plugins/data/public';
 import { KibanaURL } from './kibana_url';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
@@ -25,7 +26,7 @@ export class ExploreDataContextMenuAction extends AbstractExploreDataAction<Embe
 
   public readonly order = 200;
 
-  protected async getUrl(embeddable: VisualizeEmbeddableContract): Promise<KibanaURL> {
+  protected readonly getUrl = async (context: EmbeddableContext): Promise<KibanaURL> => {
     const { plugins } = this.params.start();
     const { urlGenerator } = plugins.discover;
 
@@ -33,16 +34,21 @@ export class ExploreDataContextMenuAction extends AbstractExploreDataAction<Embe
       throw new Error('Discover URL generator not available.');
     }
 
-    const { timeRange, query, filters } = embeddable.getInput();
-    const indexPatternId = shared.getIndexPattern(embeddable);
+    const { embeddable } = context;
+    const state: DiscoverUrlGeneratorState = {};
 
-    const path = await urlGenerator.createUrl({
-      indexPatternId,
-      filters,
-      query,
-      timeRange,
-    });
+    if (embeddable) {
+      state.indexPatternId = shared.getIndexPattern(embeddable) || undefined;
+
+      const input = embeddable.getInput();
+
+      if (isTimeRange(input.timeRange) && !state.timeRange) state.timeRange = input.timeRange;
+      if (isQuery(input.query)) state.query = input.query;
+      if (isFilters(input.filters)) state.filters = [...input.filters, ...(state.filters || [])];
+    }
+
+    const path = await urlGenerator.createUrl(state);
 
     return new KibanaURL(path);
-  }
+  };
 }
