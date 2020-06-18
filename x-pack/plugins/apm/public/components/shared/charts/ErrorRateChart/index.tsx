@@ -90,7 +90,9 @@ export const ErrorRateChart = () => {
         ]}
         onHover={combinedOnHover}
         tickFormatY={tickFormatY}
-        formatTooltipValue={({ y }: { y: number }) => tickFormatY(y)}
+        formatTooltipValue={({ y }: { y?: number }) =>
+          Number.isFinite(y) ? tickFormatY(y) : 'N/A'
+        }
         height={unit * 10}
       />
     </>

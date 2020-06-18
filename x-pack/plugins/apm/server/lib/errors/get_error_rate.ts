@@ -98,8 +98,7 @@ export async function getErrorRate({
 
   const errorRates = errorResponseTimeBuckets?.map((bucket) => {
     const { key, doc_count: errorCount } = bucket;
-    const transactionCount = transactionCountByTimestamp[key] || 1;
-    const relativeRate = errorCount / transactionCount;
+    const relativeRate = errorCount / transactionCountByTimestamp[key];
     return { x: key, y: relativeRate };
   });
 
