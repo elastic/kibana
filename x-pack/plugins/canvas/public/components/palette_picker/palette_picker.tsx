@@ -81,7 +81,7 @@ export const PalettePicker: FC<Props> = (props) => {
 };
 
 PalettePicker.propTypes = {
-  palette: PropTypes.object.isRequired,
+  palette: PropTypes.object,
   onChange: PropTypes.func,
   clearable: PropTypes.bool,
 };

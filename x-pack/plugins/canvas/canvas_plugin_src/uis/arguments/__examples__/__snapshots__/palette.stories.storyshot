@@ -10,9 +10,7 @@ exports[`Storyshots arguments/Palette default 1`] = `
   }
 >
   <div
-    className="euiPopover euiPopover--anchorDownCenter canvasPalettePicker__swatchesPopover"
-    container={null}
-    id="palette-picker-popover"
+    className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
     onKeyDown={[Function]}
     onMouseDown={[Function]}
     onMouseUp={[Function]}
@@ -20,142 +18,68 @@ exports[`Storyshots arguments/Palette default 1`] = `
     onTouchStart={[Function]}
   >
     <div
-      className="euiPopover__anchor canvasPalettePicker__swatchesPopoverAnchor"
+      className="euiPopover__anchor"
     >
-      <button
-        aria-label="Color palette"
-        onClick={[Function]}
-        style={
-          Object {
-            "height": 16,
-            "width": "100%",
-          }
-        }
+      <input
+        type="hidden"
+        value="paul_tor_14"
+      />
+      <div
+        className="euiFormControlLayout euiFormControlLayout--compressed"
       >
         <div
-          className="canvasPaletteSwatch"
+          className="euiFormControlLayout__childrenWrapper"
         >
-          <div
-            className="canvasPaletteSwatch__background canvasCheckered"
-          />
-          <div
-            className="canvasPaletteSwatch__foreground"
+          <span
+            className="euiScreenReaderOnly"
+            id="generated-id"
+          >
+            Select an option: 
+            <div
+              className="euiColorPalettePicker__itemGradient"
+              style={
+                Object {
+                  "background": "linear-gradient(to right, #882E72 0%, #882E72 7%, #B178A6 7%, #B178A6 14%, #D6C1DE 14%, #D6C1DE 21%, #1965B0 21%, #1965B0 28%, #5289C7 28%, #5289C7 35%, #7BAFDE 35%, #7BAFDE 42%, #4EB265 42%, #4EB265 50%, #90C987 50%, #90C987 57%, #CAE0AB 57%, #CAE0AB 64%, #F7EE55 64%, #F7EE55 71%, #F6C141 71%, #F6C141 78%, #F1932D 78%, #F1932D 85%, #E8601C 85%, #E8601C 92%, #DC050C 92%, #DC050C 100%)",
+                }
+              }
+            />
+            , is selected
+          </span>
+          <button
+            aria-haspopup="true"
+            aria-labelledby="undefined generated-id"
+            aria-selected={true}
+            className="euiSuperSelectControl euiSuperSelectControl--compressed"
+            onClick={[Function]}
+            onKeyDown={[Function]}
+            readOnly={false}
+            role="option"
+            type="button"
           >
             <div
-              className="canvasPaletteSwatch__box"
+              className="euiColorPalettePicker__itemGradient"
               style={
                 Object {
-                  "backgroundColor": "#882E72",
+                  "background": "linear-gradient(to right, #882E72 0%, #882E72 7%, #B178A6 7%, #B178A6 14%, #D6C1DE 14%, #D6C1DE 21%, #1965B0 21%, #1965B0 28%, #5289C7 28%, #5289C7 35%, #7BAFDE 35%, #7BAFDE 42%, #4EB265 42%, #4EB265 50%, #90C987 50%, #90C987 57%, #CAE0AB 57%, #CAE0AB 64%, #F7EE55 64%, #F7EE55 71%, #F6C141 71%, #F6C141 78%, #F1932D 78%, #F1932D 85%, #E8601C 85%, #E8601C 92%, #DC050C 92%, #DC050C 100%)",
                 }
               }
             />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#B178A6",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#D6C1DE",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#1965B0",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#5289C7",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#7BAFDE",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#4EB265",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#90C987",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#CAE0AB",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#F7EE55",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#F6C141",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#F1932D",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#E8601C",
-                }
-              }
-            />
-            <div
-              className="canvasPaletteSwatch__box"
-              style={
-                Object {
-                  "backgroundColor": "#DC050C",
-                }
-              }
-            />
+          </button>
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              className="euiFormControlLayoutCustomIcon"
+            >
+              <div
+                aria-hidden="true"
+                className="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
+              />
+            </span>
           </div>
         </div>
-      </button>
+      </div>
     </div>
   </div>
 </div>
