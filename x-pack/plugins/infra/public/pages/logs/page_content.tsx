@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -31,6 +31,8 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const logAnalysisCapabilities = useLogAnalysisCapabilitiesContext();
 
   const { initialize } = useLogSourceContext();
+
+  const kibana = useKibana();
 
   useMount(() => {
     initialize();
@@ -88,6 +90,16 @@ export const LogsPageContent: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>
             <AlertDropdown />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={kibana.services?.application?.getUrlForApp('/home#/tutorial_directory/logging')}
+              size="s"
+              color="primary"
+              iconType="plusInCircle"
+            >
+              {ADD_DATA_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </AppNavigation>
       <Switch>
@@ -123,3 +135,7 @@ const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle
 });
 
 const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';
+
+const ADD_DATA_LABEL = i18n.translate('xpack.infra.logsHeaderAddDataButtonLabel', {
+  defaultMessage: 'Add data',
+});

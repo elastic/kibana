@@ -11,7 +11,7 @@ import {
   mockRouteContext,
 } from '../__fixtures__';
 import { initGetSpaceApi } from './get';
-import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
 import {
   loggingServiceMock,
   httpServiceMock,
@@ -30,7 +30,7 @@ describe('GET space', () => {
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
     const coreStart = coreMock.createStart();
 
