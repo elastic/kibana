@@ -45,7 +45,7 @@ describe('LegacyInternals', () => {
     beforeEach(async () => {
       uiExports = findLegacyPluginSpecsMock().uiExports;
       config = configMock.create() as any;
-      server = httpServiceMock.createSetupContract().server;
+      server = httpServiceMock.createInternalSetupContract().server;
       legacyInternals = new LegacyInternals(uiExports, config, server);
     });
 
@@ -107,7 +107,7 @@ describe('LegacyInternals', () => {
     beforeEach(async () => {
       uiExports = findLegacyPluginSpecsMock().uiExports;
       config = configMock.create() as any;
-      server = httpServiceMock.createSetupContract().server;
+      server = httpServiceMock.createInternalSetupContract().server;
       legacyInternals = new LegacyInternals(uiExports, config, server);
     });
 
