@@ -9,21 +9,21 @@ import { left } from 'fp-ts/lib/Either';
 
 import { foldLeftRight, getPaths } from '../../siem_common_deps';
 
-import { getCommentsUpdateArrayMock } from './comments_update.mock';
+import { getUpdateCommentsArrayMock } from './update_comments.mock';
 import {
-  CommentsUpdateArray,
-  CommentsUpdateArrayOrUndefined,
-  commentsUpdateArray,
-  commentsUpdateArrayOrUndefined,
-} from './comments_update';
+  UpdateCommentsArray,
+  UpdateCommentsArrayOrUndefined,
+  updateCommentsArray,
+  updateCommentsArrayOrUndefined,
+} from './update_comments';
 import { getCommentsMock } from './comments.mock';
-import { getCommentsNewMock } from './comments_new.mock';
+import { getCreateCommentsMock } from './create_comments.mock';
 
 describe('CommentsUpdate', () => {
-  describe('commentsUpdateArray', () => {
+  describe('updateCommentsArray', () => {
     test('it should validate an array of comments', () => {
-      const payload = getCommentsUpdateArrayMock();
-      const decoded = commentsUpdateArray.decode(payload);
+      const payload = getUpdateCommentsArrayMock();
+      const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -32,7 +32,7 @@ describe('CommentsUpdate', () => {
 
     test('it a', () => {
       const payload = [getCommentsMock()];
-      const decoded = commentsUpdateArray.decode(payload);
+      const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -40,8 +40,8 @@ describe('CommentsUpdate', () => {
     });
 
     test('it b', () => {
-      const payload = [getCommentsNewMock()];
-      const decoded = commentsUpdateArray.decode(payload);
+      const payload = [getCreateCommentsMock()];
+      const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -50,7 +50,7 @@ describe('CommentsUpdate', () => {
 
     test('it should not validate when undefined', () => {
       const payload = undefined;
-      const decoded = commentsUpdateArray.decode(payload);
+      const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to ""']);
@@ -58,8 +58,8 @@ describe('CommentsUpdate', () => {
     });
 
     test('it should not validate when array includes non comments types', () => {
-      const payload = ([1] as unknown) as CommentsUpdateArray;
-      const decoded = commentsUpdateArray.decode(payload);
+      const payload = ([1] as unknown) as UpdateCommentsArray;
+      const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
@@ -71,10 +71,10 @@ describe('CommentsUpdate', () => {
     });
   });
 
-  describe('commentsUpdateArrayOrUndefined', () => {
+  describe('updateCommentsArrayOrUndefined', () => {
     test('it should validate an array of comments', () => {
-      const payload = getCommentsUpdateArrayMock();
-      const decoded = commentsUpdateArrayOrUndefined.decode(payload);
+      const payload = getUpdateCommentsArrayMock();
+      const decoded = updateCommentsArrayOrUndefined.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -83,7 +83,7 @@ describe('CommentsUpdate', () => {
 
     test('it should validate when undefined', () => {
       const payload = undefined;
-      const decoded = commentsUpdateArrayOrUndefined.decode(payload);
+      const decoded = updateCommentsArrayOrUndefined.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -91,8 +91,8 @@ describe('CommentsUpdate', () => {
     });
 
     test('it should not validate when array includes non comments types', () => {
-      const payload = ([1] as unknown) as CommentsUpdateArrayOrUndefined;
-      const decoded = commentsUpdateArray.decode(payload);
+      const payload = ([1] as unknown) as UpdateCommentsArrayOrUndefined;
+      const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([

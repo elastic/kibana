@@ -5,10 +5,10 @@
  */
 
 import { getCommentsMock } from './comments.mock';
-import { getCommentsNewMock } from './comments_new.mock';
-import { CommentsUpdateArray } from './comments_update';
+import { getCreateCommentsMock } from './create_comments.mock';
+import { UpdateCommentsArray } from './update_comments';
 
-export const getCommentsUpdateArrayMock = (): CommentsUpdateArray => [
+export const getUpdateCommentsArrayMock = (): UpdateCommentsArray => [
   getCommentsMock(),
-  getCommentsNewMock(),
+  getCreateCommentsMock(),
 ];

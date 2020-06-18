@@ -7,22 +7,22 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-import { CommentsUpdateArray, commentsUpdateArray } from './comments_update';
+import { UpdateCommentsArray, updateCommentsArray } from './update_comments';
 
-export type DefaultCommentsUpdateArrayC = t.Type<CommentsUpdateArray, CommentsUpdateArray, unknown>;
+export type DefaultUpdateCommentsArrayC = t.Type<UpdateCommentsArray, UpdateCommentsArray, unknown>;
 
 /**
  * Types the DefaultCommentsUpdate as:
  *   - If null or undefined, then a default array of type entry will be set
  */
-export const DefaultCommentsUpdateArray: DefaultCommentsUpdateArrayC = new t.Type<
-  CommentsUpdateArray,
-  CommentsUpdateArray,
+export const DefaultUpdateCommentsArray: DefaultUpdateCommentsArrayC = new t.Type<
+  UpdateCommentsArray,
+  UpdateCommentsArray,
   unknown
 >(
   'DefaultCreateComments',
-  commentsUpdateArray.is,
-  (input): Either<t.Errors, CommentsUpdateArray> =>
-    input == null ? t.success([]) : commentsUpdateArray.decode(input),
+  updateCommentsArray.is,
+  (input): Either<t.Errors, UpdateCommentsArray> =>
+    input == null ? t.success([]) : updateCommentsArray.decode(input),
   t.identity
 );

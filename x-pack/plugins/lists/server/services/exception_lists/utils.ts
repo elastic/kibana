@@ -9,17 +9,17 @@ import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } fro
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import {
   Comments,
+  CommentsArray,
   CommentsArrayOrUndefined,
-  CommentsNew,
-  CommentsNewArrayOrUndefined,
-  CommentsUpdateArrayOrUndefined,
+  CreateComments,
+  CreateCommentsArrayOrUndefined,
   ExceptionListItemSchema,
   ExceptionListSchema,
   ExceptionListSoSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   NamespaceType,
-  commentsNew,
+  UpdateCommentsArrayOrUndefined,
   comments as commentsSchema,
 } from '../../../common/schemas';
 import {
@@ -261,70 +261,79 @@ export const transformSavedObjectsToFoundExceptionList = ({
  * Determines whether two comments are equal, this is a very
  * naive implementation, not meant to be used for deep equality of complex objects
  */
-export const isCommentEqual = (
-  commentA: Comments | CommentsNew,
-  commentB: Comments | CommentsNew
-): boolean => {
+export const isCommentEqual = (commentA: Comments, commentB: Comments): boolean => {
   const a = Object.values(commentA).sort().join();
   const b = Object.values(commentB).sort().join();
 
   return a === b;
 };
 
-export const transformCommentsUpdate = ({
-  newComments,
+export const transformUpdateCommentsToComments = ({
+  comments,
   existingComments,
   user,
 }: {
-  newComments: CommentsUpdateArrayOrUndefined;
-  existingComments: CommentsArrayOrUndefined;
+  comments: UpdateCommentsArrayOrUndefined;
+  existingComments: CommentsArray;
   user: string;
-}): CommentsArrayOrUndefined => {
-  if (
-    newComments != null &&
-    newComments.length === 0 &&
-    existingComments != null &&
-    existingComments.length > 0
-  ) {
+}): CommentsArray => {
+  const newComments = comments ?? [];
+
+  if (newComments.length < existingComments.length) {
     throw new ErrorWithStatusCode(
-      'Comments cannot be deleted, only new comments may be appended',
+      'Comments cannot be deleted, only new comments may be added',
       403
     );
-  } else if (newComments != null) {
-    const existing = existingComments ?? [];
+  } else {
     return newComments.flatMap((c, index) => {
-      const existingComment = existing[index];
+      const existingComment = existingComments[index];
 
-      // no comments exist, and user tries to add comment of type `comment`
-      if (commentsSchema.is(c) && existing.length === 0) {
-        throw new ErrorWithStatusCode('Only new comments may be appended', 403);
-      } else if (index <= existing.length - 1 && !isCommentEqual(c, existingComment)) {
-        throw new ErrorWithStatusCode(
-          'Existing comments cannot be edited, only new comments may be appended',
-          403
-        );
-      } else if (index > existing.length - 1 && commentsNew.is(c)) {
-        const newComment = transformNewComments({ newComments: [c], user });
-        return newComment ?? [];
+      if (commentsSchema.is(c) && existingComment == null) {
+        throw new ErrorWithStatusCode('Only new comments may be added', 403);
+      } else if (
+        commentsSchema.is(c) &&
+        existingComment != null &&
+        !isCommentEqual(c, existingComment)
+      ) {
+        return transformUpdateComments({ comment: c, user });
       } else {
-        return commentsSchema.is(c) ? c : [];
+        return transformCreateCommentsToComments({ comments: [c], user }) ?? [];
       }
     });
-  } else {
-    return existingComments;
   }
 };
 
-export const transformNewComments = ({
-  newComments,
+export const transformUpdateComments = ({
+  comment,
   user,
 }: {
-  newComments: CommentsNewArrayOrUndefined;
+  comment: Comments;
+  user: string;
+}): Comments => {
+  if (comment.created_by === user) {
+    const dateNow = new Date().toISOString();
+
+    return {
+      ...comment,
+      updated_at: dateNow,
+      updated_by: user,
+    };
+  } else {
+    // existing comment is being edited, can only be edited by author
+    throw new ErrorWithStatusCode("Not authorized to edit other's comments", 403);
+  }
+};
+
+export const transformCreateCommentsToComments = ({
+  comments,
+  user,
+}: {
+  comments: CreateCommentsArrayOrUndefined;
   user: string;
 }): CommentsArrayOrUndefined => {
   const dateNow = new Date().toISOString();
-  if (newComments != null) {
-    return newComments.map((c: CommentsNew) => {
+  if (comments != null) {
+    return comments.map((c: CreateComments) => {
       return {
         comment: c.comment,
         created_at: dateNow,
@@ -332,6 +341,6 @@ export const transformNewComments = ({
       };
     });
   } else {
-    return newComments;
+    return comments;
   }
 };

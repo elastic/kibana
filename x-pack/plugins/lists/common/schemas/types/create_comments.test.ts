@@ -9,21 +9,21 @@ import { left } from 'fp-ts/lib/Either';
 
 import { foldLeftRight, getPaths } from '../../siem_common_deps';
 
-import { getCommentsNewArrayMock, getCommentsNewMock } from './comments_new.mock';
+import { getCreateCommentsArrayMock, getCreateCommentsMock } from './create_comments.mock';
 import {
-  CommentsNew,
-  CommentsNewArray,
-  CommentsNewArrayOrUndefined,
-  commentsNew,
-  commentsNewArray,
-  commentsNewArrayOrUndefined,
-} from './comments_new';
+  CreateComments,
+  CreateCommentsArray,
+  CreateCommentsArrayOrUndefined,
+  createComments,
+  createCommentsArray,
+  createCommentsArrayOrUndefined,
+} from './create_comments';
 
-describe('CommentsNew', () => {
-  describe('commentsNew', () => {
+describe('CreateComments', () => {
+  describe('createComments', () => {
     test('it should validate a comments', () => {
-      const payload = getCommentsNewMock();
-      const decoded = commentsNew.decode(payload);
+      const payload = getCreateCommentsMock();
+      const decoded = createComments.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -32,7 +32,7 @@ describe('CommentsNew', () => {
 
     test('it should not validate when undefined', () => {
       const payload = undefined;
-      const decoded = commentsNew.decode(payload);
+      const decoded = createComments.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to ""']);
@@ -40,11 +40,11 @@ describe('CommentsNew', () => {
     });
 
     test('it should not validate when "comment" is not a string', () => {
-      const payload: Omit<CommentsNew, 'comment'> & { comment: string[] } = {
-        ...getCommentsNewMock(),
+      const payload: Omit<CreateComments, 'comment'> & { comment: string[] } = {
+        ...getCreateCommentsMock(),
         comment: ['some value'],
       };
-      const decoded = commentsNew.decode(payload);
+      const decoded = createComments.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
@@ -54,22 +54,22 @@ describe('CommentsNew', () => {
     });
 
     test('it should strip out extra keys', () => {
-      const payload: CommentsNew & {
+      const payload: CreateComments & {
         extraKey?: string;
-      } = getCommentsNewMock();
+      } = getCreateCommentsMock();
       payload.extraKey = 'some value';
-      const decoded = commentsNew.decode(payload);
+      const decoded = createComments.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(getCommentsNewMock());
+      expect(message.schema).toEqual(getCreateCommentsMock());
     });
   });
 
-  describe('commentsNewArray', () => {
+  describe('createCommentsArray', () => {
     test('it should validate an array of comments', () => {
-      const payload = getCommentsNewArrayMock();
-      const decoded = commentsNewArray.decode(payload);
+      const payload = getCreateCommentsArrayMock();
+      const decoded = createCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -78,7 +78,7 @@ describe('CommentsNew', () => {
 
     test('it should not validate when undefined', () => {
       const payload = undefined;
-      const decoded = commentsNewArray.decode(payload);
+      const decoded = createCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to ""']);
@@ -86,8 +86,8 @@ describe('CommentsNew', () => {
     });
 
     test('it should not validate when array includes non comments types', () => {
-      const payload = ([1] as unknown) as CommentsNewArray;
-      const decoded = commentsNewArray.decode(payload);
+      const payload = ([1] as unknown) as CreateCommentsArray;
+      const decoded = createCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual(['Invalid value "1" supplied to ""']);
@@ -95,10 +95,10 @@ describe('CommentsNew', () => {
     });
   });
 
-  describe('commentsNewArrayOrUndefined', () => {
+  describe('createCommentsArrayOrUndefined', () => {
     test('it should validate an array of comments', () => {
-      const payload = getCommentsNewArrayMock();
-      const decoded = commentsNewArrayOrUndefined.decode(payload);
+      const payload = getCreateCommentsArrayMock();
+      const decoded = createCommentsArrayOrUndefined.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -107,7 +107,7 @@ describe('CommentsNew', () => {
 
     test('it should validate when undefined', () => {
       const payload = undefined;
-      const decoded = commentsNewArrayOrUndefined.decode(payload);
+      const decoded = createCommentsArrayOrUndefined.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -115,8 +115,8 @@ describe('CommentsNew', () => {
     });
 
     test('it should not validate when array includes non comments types', () => {
-      const payload = ([1] as unknown) as CommentsNewArrayOrUndefined;
-      const decoded = commentsNewArray.decode(payload);
+      const payload = ([1] as unknown) as CreateCommentsArrayOrUndefined;
+      const decoded = createCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual(['Invalid value "1" supplied to ""']);

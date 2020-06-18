@@ -9,14 +9,14 @@ import { left } from 'fp-ts/lib/Either';
 
 import { foldLeftRight, getPaths } from '../../siem_common_deps';
 
-import { DefaultCommentsNewArray } from './default_comments_new_array';
-import { CommentsNewArray } from './comments_new';
-import { getCommentsNewArrayMock } from './comments_new.mock';
+import { DefaultCreateCommentsArray } from './default_create_comments_array';
+import { CreateCommentsArray } from './create_comments';
+import { getCreateCommentsArrayMock } from './create_comments.mock';
 
-describe('default_comments_new_array', () => {
+describe('default_create_comments_array', () => {
   test('it should validate an empty array', () => {
-    const payload: CommentsNewArray = [];
-    const decoded = DefaultCommentsNewArray.decode(payload);
+    const payload: CreateCommentsArray = [];
+    const decoded = DefaultCreateCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -24,8 +24,8 @@ describe('default_comments_new_array', () => {
   });
 
   test('it should validate an array of comments', () => {
-    const payload: CommentsNewArray = getCommentsNewArrayMock();
-    const decoded = DefaultCommentsNewArray.decode(payload);
+    const payload: CreateCommentsArray = getCreateCommentsArrayMock();
+    const decoded = DefaultCreateCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -34,7 +34,7 @@ describe('default_comments_new_array', () => {
 
   test('it should NOT validate an array of numbers', () => {
     const payload = [1];
-    const decoded = DefaultCommentsNewArray.decode(payload);
+    const decoded = DefaultCreateCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     // TODO: Known weird error formatting that is on our list to address
@@ -44,7 +44,7 @@ describe('default_comments_new_array', () => {
 
   test('it should NOT validate an array of strings', () => {
     const payload = ['some string'];
-    const decoded = DefaultCommentsNewArray.decode(payload);
+    const decoded = DefaultCreateCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "some string" supplied to ""']);
@@ -53,7 +53,7 @@ describe('default_comments_new_array', () => {
 
   test('it should return a default array entry', () => {
     const payload = null;
-    const decoded = DefaultCommentsNewArray.decode(payload);
+    const decoded = DefaultCreateCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
