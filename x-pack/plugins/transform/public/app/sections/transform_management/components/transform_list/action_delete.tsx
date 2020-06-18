@@ -103,7 +103,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
         {shouldForceDelete ? (
           <FormattedMessage
             id="xpack.transform.transformList.bulkForceDeleteModalBody"
-            defaultMessage="Are you sure you want to force delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}? The {count, plural, one {transform} other {transforms}} will be deleted regardless of its current state."
+            defaultMessage="Are you sure you want to force delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}? The {count, plural, one {transform} other {transforms}} will be deleted regardless of {count, plural, one {its} other {their}} current state."
             values={{ count: items.length }}
           />
         ) : (
