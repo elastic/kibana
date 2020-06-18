@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
       includes: [],
       excludes: [],
     },
-    model_memory_limit: '350mb',
+    model_memory_limit: '60mb',
   };
 
   const testJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>> = [
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         after(async () => {
-          await ml.testResources.deleteIndexPattern(destinationIndex);
+          await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
         });
 
         it('should delete job and index pattern by id', async () => {
@@ -194,7 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         after(async () => {
           await ml.api.deleteIndices(destinationIndex);
-          await ml.testResources.deleteIndexPattern(destinationIndex);
+          await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
         });
 
         it('should delete job, target index, and index pattern by id', async () => {

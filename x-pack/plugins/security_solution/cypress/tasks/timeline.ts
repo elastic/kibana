@@ -21,6 +21,8 @@ import {
   TIMELINE_TITLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
+  REMOVE_COLUMN,
+  RESET_FIELDS,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
@@ -100,4 +102,13 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
   cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then((headersDropArea) =>
     drop(headersDropArea)
   );
+};
+
+export const removeColumn = (column: number) => {
+  cy.get(REMOVE_COLUMN).first().should('exist');
+  cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
+};
+
+export const resetFields = () => {
+  cy.get(RESET_FIELDS).click({ force: true });
 };
