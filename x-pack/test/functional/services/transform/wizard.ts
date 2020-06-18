@@ -76,7 +76,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail(selector);
     },
 
-    async assertPivotPreviewChartHistogramButtonExists() {
+    async assertPivotPreviewChartHistogramButtonMissing() {
       // the button should not exist because histogram charts
       // for the pivot preview are not supported yet
       await testSubjects.missingOrFail('transformPivotPreviewHistogramButton');
@@ -201,13 +201,13 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
           const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
           expect(actualLegend).to.eql(
             expected.legend,
-            `Query input text should be '${expected.legend}' (got ${actualLegend})`
+            `Legend text for column '${index}' should be '${expected.legend}' (got '${actualLegend}')`
           );
 
           const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
           expect(actualId).to.eql(
             expected.id,
-            `Query input text should be '${expected.id}' (got ${actualId})`
+            `Id text for column '${index}' should be '${expected.id}' (got '${actualId}')`
           );
         }
       });

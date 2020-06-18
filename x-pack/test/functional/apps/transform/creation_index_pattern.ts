@@ -350,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('shows the pivot preview', async () => {
-          await transform.wizard.assertPivotPreviewChartHistogramButtonExists();
+          await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           await transform.wizard.assertPivotPreviewColumnValues(
             testData.expected.pivotPreview.column,
             testData.expected.pivotPreview.values
