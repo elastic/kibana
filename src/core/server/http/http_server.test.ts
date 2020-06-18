@@ -1046,17 +1046,6 @@ describe('setup contract', () => {
     });
   });
 
-  describe('#isTlsEnabled', () => {
-    it('returns "true" if TLS enabled', async () => {
-      const { isTlsEnabled } = await server.setup(configWithSSL);
-      expect(isTlsEnabled).toBe(true);
-    });
-    it('returns "false" if TLS not enabled', async () => {
-      const { isTlsEnabled } = await server.setup(config);
-      expect(isTlsEnabled).toBe(false);
-    });
-  });
-
   describe('#getServerInfo', () => {
     it('returns correct information', async () => {
       let { getServerInfo } = await server.setup(config);
