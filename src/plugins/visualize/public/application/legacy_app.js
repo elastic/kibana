@@ -244,16 +244,17 @@ export function initVisualizeApp(app, deps) {
         },
       })
       .otherwise({
-        redirectTo: function () {
+        resolveRedirectTo: function ($rootScope) {
           const path = window.location.hash.substr(1);
           deps.restorePreviousUrl();
-          setTimeout(() => {
+          $rootScope.$applyAsync(() => {
             const { navigated } = deps.kibanaLegacy.navigateToLegacyKibanaUrl(path);
             if (!navigated) {
               deps.kibanaLegacy.navigateToDefaultApp();
             }
-          }, 0);
-          return '/';
+          });
+          // prevent angular from completing the navigation
+          return new Promise(() => {});
         },
       });
   });

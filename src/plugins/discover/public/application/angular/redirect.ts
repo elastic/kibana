@@ -20,17 +20,18 @@ import { getAngularModule, getServices, getUrlTracker } from '../../kibana_servi
 
 getAngularModule().config(($routeProvider: any) => {
   $routeProvider.otherwise({
-    redirectTo: () => {
+    resolveRedirectTo: ($rootScope: any) => {
       const path = window.location.hash.substr(1);
       getUrlTracker().restorePreviousUrl();
-      setTimeout(() => {
+      $rootScope.$applyAsync(() => {
         const { kibanaLegacy } = getServices();
         const { navigated } = kibanaLegacy.navigateToLegacyKibanaUrl(path);
         if (!navigated) {
           kibanaLegacy.navigateToDefaultApp();
         }
-      }, 0);
-      return '/';
+      });
+      // prevent angular from completing the navigation
+      return new Promise(() => {});
     },
   });
 });

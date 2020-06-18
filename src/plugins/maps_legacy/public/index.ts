@@ -44,7 +44,7 @@ import {
 // @ts-ignore
 import { mapTooltipProvider } from './tooltip_provider';
 
-import './map/map.scss';
+import './map/index.scss';
 
 export interface MapsLegacyConfigType {
   regionmap: any;
