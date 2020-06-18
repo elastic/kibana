@@ -100,7 +100,7 @@ export class Welcome extends React.Component<Props> {
             id="home.dataManagementDisableCollection"
             defaultMessage=" To stop collection, "
           />
-          <EuiLink href={this.services.addBasePath('app/management/kibana/settings')}>
+          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
             <FormattedMessage
               id="home.dataManagementDisableCollectionLink"
               defaultMessage="disable usage data here."
@@ -115,7 +115,7 @@ export class Welcome extends React.Component<Props> {
             id="home.dataManagementEnableCollection"
             defaultMessage=" To start collection, "
           />
-          <EuiLink href={this.services.addBasePath('app/management/kibana/settings')}>
+          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
             <FormattedMessage
               id="home.dataManagementEnableCollectionLink"
               defaultMessage="enable usage data here."

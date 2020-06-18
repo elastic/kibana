@@ -121,7 +121,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
               href={policyDetailsRouteUrl}
               onClick={policyDetailsClickHandler}
             >
-              {details.endpoint.policy.applied.name}
+              {details.Endpoint.policy.applied.name}
             </EuiLink>
           </>
         ),
