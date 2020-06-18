@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function plugin(initializerContext: PluginInitializerContext): DataPublicPlugin;
+export declare function plugin(initializerContext: PluginInitializerContext<ConfigSchema>): DataPublicPlugin;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  initializerContext | <code>PluginInitializerContext</code> |  |
+|  initializerContext | <code>PluginInitializerContext&lt;ConfigSchema&gt;</code> |  |
 
 <b>Returns:</b>
 

@@ -12,11 +12,9 @@ import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
-  getLayerById,
   getDataFilters,
   getWaitingForMapReadyLayerListRaw,
   getQuery,
-  getFittableLayers,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -182,76 +180,6 @@ export function clearMouseCoordinates() {
 
 export function disableScrollZoom() {
   return { type: SET_SCROLL_ZOOM, scrollZoom: false };
-}
-
-export function fitToLayerExtent(layerId: string) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const targetLayer = getLayerById(layerId, getState());
-
-    if (targetLayer) {
-      const dataFilters = getDataFilters(getState());
-      const bounds = await targetLayer.getBounds(dataFilters);
-      if (bounds) {
-        await dispatch(setGotoWithBounds(bounds));
-      }
-    }
-  };
-}
-
-export function fitToDataBounds() {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const layerList = getFittableLayers(getState());
-
-    if (!layerList.length) {
-      return;
-    }
-
-    const dataFilters = getDataFilters(getState());
-    const boundsPromises = layerList.map(async (layer) => {
-      return layer.getBounds(dataFilters);
-    });
-
-    const bounds = await Promise.all(boundsPromises);
-    const corners = [];
-    for (let i = 0; i < bounds.length; i++) {
-      const b = bounds[i];
-
-      // filter out undefined bounds (uses Infinity due to turf responses)
-      if (
-        b === null ||
-        b.minLon === Infinity ||
-        b.maxLon === Infinity ||
-        b.minLat === -Infinity ||
-        b.maxLat === -Infinity
-      ) {
-        continue;
-      }
-
-      corners.push([b.minLon, b.minLat]);
-      corners.push([b.maxLon, b.maxLat]);
-    }
-
-    if (!corners.length) {
-      return;
-    }
-
-    const turfUnionBbox = turf.bbox(turf.multiPoint(corners));
-    const dataBounds = {
-      minLon: turfUnionBbox[0],
-      minLat: turfUnionBbox[1],
-      maxLon: turfUnionBbox[2],
-      maxLat: turfUnionBbox[3],
-    };
-
-    dispatch(setGotoWithBounds(dataBounds));
-  };
-}
-
-export function setGotoWithBounds(bounds: MapExtent) {
-  return {
-    type: SET_GOTO,
-    bounds,
-  };
 }
 
 export function setGotoWithCenter({ lat, lon, zoom }: MapCenterAndZoom) {

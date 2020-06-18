@@ -109,10 +109,12 @@ export const TransactionDistribution: FunctionComponent<Props> = (
     bucketIndex,
   } = props;
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatYShort = useCallback(getFormatYShort(transactionType), [
     transactionType,
   ]);
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatYLong = useCallback(getFormatYLong(transactionType), [
     transactionType,
   ]);

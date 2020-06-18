@@ -51,7 +51,7 @@ describe('doesIlmPolicyExist', () => {
     await clusterClientAdapter.doesIlmPolicyExist('foo');
     expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
       method: 'GET',
-      path: '_ilm/policy/foo',
+      path: '/_ilm/policy/foo',
     });
   });
 
@@ -78,7 +78,7 @@ describe('createIlmPolicy', () => {
     await clusterClientAdapter.createIlmPolicy('foo', { args: true });
     expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
       method: 'PUT',
-      path: '_ilm/policy/foo',
+      path: '/_ilm/policy/foo',
       body: { args: true },
     });
   });

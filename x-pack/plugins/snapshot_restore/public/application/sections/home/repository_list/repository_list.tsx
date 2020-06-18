@@ -20,6 +20,8 @@ import { linkToAddRepository, linkToRepository } from '../../../services/navigat
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
 
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+
 interface MatchParams {
   repositoryName?: Repository['name'];
 }
@@ -113,7 +115,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         }
         actions={
           <EuiButton
-            href={linkToAddRepository()}
+            {...reactRouterNavigate(history, linkToAddRepository())}
             fill
             iconType="plusInCircle"
             data-test-subj="registerRepositoryButton"

@@ -19,12 +19,12 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { AlertingPlugin } from '../../../../alerting/server';
+import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
 
 interface RegisterAlertParams {
-  alerting: AlertingPlugin['setup'];
+  alerts: AlertingPlugin['setup'];
   config$: Observable<APMConfig>;
 }
 
@@ -39,10 +39,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorRate];
 
 export function registerErrorRateAlertType({
-  alerting,
+  alerts,
   config$,
 }: RegisterAlertParams) {
-  alerting.registerType({
+  alerts.registerType({
     id: AlertType.ErrorRate,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,

@@ -54,14 +54,14 @@ const getHeaders = () => {
 };
 
 export class Summary extends React.PureComponent {
-  getAdditionalContent(extensionsService) {
+  getAdditionalContent(extensionsService, getUrlForApp) {
     const { index } = this.props;
     const extensions = extensionsService.summaries;
     return extensions.map((summaryExtension, i) => {
       return (
         <Fragment key={`summaryExtension-${i}`}>
           <EuiHorizontalRule />
-          {summaryExtension(index)}
+          {summaryExtension(index, getUrlForApp)}
         </Fragment>
       );
     });
@@ -103,9 +103,12 @@ export class Summary extends React.PureComponent {
   render() {
     return (
       <AppContextConsumer>
-        {({ services }) => {
+        {({ services, core }) => {
           const { left, right } = this.buildRows();
-          const additionalContent = this.getAdditionalContent(services.extensionsService);
+          const additionalContent = this.getAdditionalContent(
+            services.extensionsService,
+            core.getUrlForApp
+          );
 
           return (
             <Fragment>

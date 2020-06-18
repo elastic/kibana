@@ -28,8 +28,10 @@ export interface KibanaUsageStats {
   };
   kibana_stats: {
     os: {
-      platform: string;
-      platformRelease: string;
+      // These should be provided
+      platform: string | undefined;
+      platformRelease: string | undefined;
+      // The ones below are really optional
       distro?: string;
       distroRelease?: string;
     };

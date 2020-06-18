@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
         jobParams: 0,
       })) as supertest.Response;
 
-      expect(resText).to.match(/\\\"jobParams\\\" must be a string/);
+      expect(resText).to.match(/expected value of type \[string\] but got \[number\]/);
       expect(resStatus).to.eql(400);
     });
 

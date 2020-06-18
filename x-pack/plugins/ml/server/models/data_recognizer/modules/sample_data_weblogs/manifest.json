@@ -7,7 +7,7 @@
   "defaultIndexPattern": "kibana_sample_data_logs",
   "query": {
     "bool": {
-      "filter": [{ "term": { "_index": "kibana_sample_data_logs" } }]
+      "filter": [{ "term": { "event.dataset": "sample_web_logs" } }]
     }
   },
   "jobs": [

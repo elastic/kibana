@@ -21,6 +21,7 @@ import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import chartTableSVG from '../../..assets/chart_datatable.svg';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 
 jest.mock('./suggestion_helpers');
 
@@ -85,6 +86,7 @@ describe('suggestion_panel', () => {
       dispatch: dispatchMock,
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
+      plugins: { data: dataPluginMock.createStartContract() },
     };
   });
 

@@ -7,12 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  transformError,
-  validate,
-} from '../siem_server_deps';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/siem_common_deps';
 import {
   UpdateExceptionListItemSchemaDecoded,
   exceptionListItemSchema,
@@ -45,22 +41,23 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           meta,
           type,
           _tags,
-          comment,
+          comments,
           entries,
           item_id: itemId,
+          namespace_type: namespaceType,
           tags,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
         const exceptionListItem = await exceptionLists.updateExceptionListItem({
           _tags,
-          comment,
+          comments,
           description,
           entries,
           id,
           itemId,
           meta,
           name,
-          namespaceType: 'single', // TODO: Bubble this up
+          namespaceType,
           tags,
           type,
         });

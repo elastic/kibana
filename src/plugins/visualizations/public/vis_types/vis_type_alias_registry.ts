@@ -25,6 +25,7 @@ export interface VisualizationListItem {
   stage: 'experimental' | 'beta' | 'production';
   savedObjectType: string;
   title: string;
+  description?: string;
   typeTitle: string;
 }
 

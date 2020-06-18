@@ -64,10 +64,13 @@ describe('APIKeysGridPage', () => {
     });
   });
 
+  const coreStart = coreMock.createStart();
+
   const getViewProperties = () => {
-    const { docLinks, notifications } = coreMock.createStart();
+    const { docLinks, notifications, application } = coreStart;
     return {
       docLinks: new DocumentationLinksService(docLinks),
+      navigateToApp: application.navigateToApp,
       notifications,
       apiKeysAPIClient: apiClientMock,
     };

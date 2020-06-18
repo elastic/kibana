@@ -48,7 +48,7 @@ export class ContextMenu extends PureComponent {
   };
 
   editFollowerIndex = (id) => {
-    const uri = routing.getFollowerIndexPath(id, '/edit', false);
+    const uri = routing.getFollowerIndexPath(id);
     routing.navigate(uri);
   };
 

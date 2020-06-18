@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DESCRIPTION, LIST_ID, META, NAME, TYPE } from '../../constants.mock';
+import { DESCRIPTION, LIST_ID, META, NAME, NAMESPACE_TYPE, TYPE } from '../../constants.mock';
 
 import { CreateExceptionListSchema } from './create_exception_list_schema';
 
@@ -14,6 +14,7 @@ export const getCreateExceptionListSchemaMock = (): CreateExceptionListSchema =>
   list_id: LIST_ID,
   meta: META,
   name: NAME,
+  namespace_type: NAMESPACE_TYPE,
   tags: [],
   type: TYPE,
 });

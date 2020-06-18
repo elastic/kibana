@@ -37,7 +37,7 @@ describe('UPDATE remote clusters', () => {
     }: TestOptions
   ) => {
     test(description, async () => {
-      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
+      const elasticsearchMock = elasticsearchServiceMock.createClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),

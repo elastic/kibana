@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
-  CommentOrUndefined,
+  CommentsPartialArray,
   DescriptionOrUndefined,
   EntriesArrayOrUndefined,
   ExceptionListItemSchema,
@@ -17,17 +17,21 @@ import {
   ItemIdOrUndefined,
   MetaOrUndefined,
   NameOrUndefined,
+  NamespaceType,
   TagsOrUndefined,
   _TagsOrUndefined,
 } from '../../../common/schemas';
 
-import { getSavedObjectType, transformSavedObjectUpdateToExceptionListItem } from './utils';
-import { NamespaceType } from './types';
+import {
+  getSavedObjectType,
+  transformComments,
+  transformSavedObjectUpdateToExceptionListItem,
+} from './utils';
 import { getExceptionListItem } from './get_exception_list_item';
 
 interface UpdateExceptionListItemOptions {
   id: IdOrUndefined;
-  comment: CommentOrUndefined;
+  comments: CommentsPartialArray;
   _tags: _TagsOrUndefined;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
@@ -44,7 +48,7 @@ interface UpdateExceptionListItemOptions {
 
 export const updateExceptionListItem = async ({
   _tags,
-  comment,
+  comments,
   entries,
   id,
   savedObjectsClient,
@@ -72,7 +76,7 @@ export const updateExceptionListItem = async ({
       exceptionListItem.id,
       {
         _tags,
-        comment,
+        comments: transformComments({ comments, user }),
         description,
         entries,
         meta,
@@ -82,6 +86,10 @@ export const updateExceptionListItem = async ({
         updated_by: user,
       }
     );
-    return transformSavedObjectUpdateToExceptionListItem({ exceptionListItem, savedObject });
+    return transformSavedObjectUpdateToExceptionListItem({
+      exceptionListItem,
+      namespaceType,
+      savedObject,
+    });
   }
 };

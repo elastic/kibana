@@ -78,7 +78,7 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
-export function FieldItem(props: FieldItemProps) {
+export const FieldItem = React.memo(function FieldItem(props: FieldItemProps) {
   const {
     core,
     field,
@@ -170,6 +170,10 @@ export function FieldItem(props: FieldItemProps) {
     }
   }
 
+  const value = React.useMemo(() => ({ field, indexPatternId: indexPattern.id } as DraggedField), [
+    field,
+    indexPattern.id,
+  ]);
   return (
     <EuiPopover
       id="lnsFieldListPanel__field"
@@ -179,7 +183,7 @@ export function FieldItem(props: FieldItemProps) {
       button={
         <DragDrop
           label={field.name}
-          value={{ field, indexPatternId: indexPattern.id } as DraggedField}
+          value={value}
           data-test-subj="lnsFieldListPanelField"
           draggable
           className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
@@ -235,7 +239,7 @@ export function FieldItem(props: FieldItemProps) {
       <FieldItemPopoverContents {...state} {...props} />
     </EuiPopover>
   );
-}
+});
 
 function FieldItemPopoverContents(props: State & FieldItemProps) {
   const {

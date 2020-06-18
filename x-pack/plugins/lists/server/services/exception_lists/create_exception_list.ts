@@ -15,12 +15,12 @@ import {
   ListId,
   MetaOrUndefined,
   Name,
+  NamespaceType,
   Tags,
   _Tags,
 } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
-import { NamespaceType } from './types';
 
 interface CreateExceptionListOptions {
   _tags: _Tags;
@@ -53,7 +53,7 @@ export const createExceptionList = async ({
   const dateNow = new Date().toISOString();
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
     _tags,
-    comment: undefined,
+    comments: undefined,
     created_at: dateNow,
     created_by: user,
     description,
@@ -68,5 +68,5 @@ export const createExceptionList = async ({
     type,
     updated_by: user,
   });
-  return transformSavedObjectToExceptionList({ savedObject });
+  return transformSavedObjectToExceptionList({ namespaceType, savedObject });
 };

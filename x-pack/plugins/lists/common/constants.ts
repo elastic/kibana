@@ -16,3 +16,9 @@ export const LIST_ITEM_URL = `${LIST_URL}/items`;
  */
 export const EXCEPTION_LIST_URL = '/api/exception_lists';
 export const EXCEPTION_LIST_ITEM_URL = '/api/exception_lists/items';
+
+/**
+ * Exception list spaces
+ */
+export const EXCEPTION_LIST_NAMESPACE_AGNOSTIC = 'exception-list-agnostic';
+export const EXCEPTION_LIST_NAMESPACE = 'exception-list';

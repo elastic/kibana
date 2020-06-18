@@ -19,7 +19,11 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { DEFAULT_RESULTS_FIELD, FEATURE_IMPORTANCE } from '../../../../common/constants';
+import {
+  DEFAULT_RESULTS_FIELD,
+  FEATURE_IMPORTANCE,
+  TOP_CLASSES,
+} from '../../../../common/constants';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 
 export const useExplorationResults = (
@@ -47,8 +51,9 @@ export const useExplorationResults = (
     25,
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
-    // by default, hide feature-importance columns and the doc id copy
-    (d) => !d.includes(`.${FEATURE_IMPORTANCE}.`) && d !== ML__ID_COPY
+    // by default, hide feature-importance and top-classes columns and the doc id copy
+    (d) =>
+      !d.includes(`.${FEATURE_IMPORTANCE}.`) && !d.includes(`.${TOP_CLASSES}.`) && d !== ML__ID_COPY
   );
 
   useEffect(() => {

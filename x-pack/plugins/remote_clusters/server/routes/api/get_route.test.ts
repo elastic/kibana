@@ -29,7 +29,7 @@ describe('GET remote clusters', () => {
     { licenseCheckResult = { valid: true }, apiResponses = [], asserts }: TestOptions
   ) => {
     test(description, async () => {
-      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
+      const elasticsearchMock = elasticsearchServiceMock.createClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),

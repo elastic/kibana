@@ -17,5 +17,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./install'));
     loadTestFile(require.resolve('./agents/actions'));
     loadTestFile(require.resolve('./setup'));
+    loadTestFile(require.resolve('./agent_flow'));
   });
 }

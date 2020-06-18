@@ -11,6 +11,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import {
+  APM_ML_JOB_GROUP_NAME,
   getMlJobId,
   getMlPrefix,
   encodeForMlApi,
@@ -36,7 +37,7 @@ interface StartedMLJobApiResponse {
   jobs: MlResponseItem[];
 }
 
-async function getTransactionIndices(http: HttpSetup) {
+async function getTransactionIndices() {
   const indices = await callApmApi({
     method: 'GET',
     pathname: `/api/apm/settings/apm-indices`,
@@ -53,9 +54,9 @@ export async function startMLJob({
   transactionType: string;
   http: HttpSetup;
 }) {
-  const transactionIndices = await getTransactionIndices(http);
+  const transactionIndices = await getTransactionIndices();
   const groups = [
-    'apm',
+    APM_ML_JOB_GROUP_NAME,
     encodeForMlApi(serviceName),
     encodeForMlApi(transactionType),
   ];

@@ -29,7 +29,12 @@ import {
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy';
-import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
+import {
+  APICaller,
+  ElasticsearchServiceStart,
+  IClusterClient,
+  InternalElasticsearchServiceSetup,
+} from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import {
@@ -278,8 +283,8 @@ interface WrappedClientFactoryWrapper {
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsStartDeps {
+  elasticsearch: ElasticsearchServiceStart;
   pluginsInitialized?: boolean;
 }
 
@@ -365,7 +370,7 @@ export class SavedObjectsService
   }
 
   public async start(
-    { pluginsInitialized = true }: SavedObjectsStartDeps,
+    { elasticsearch, pluginsInitialized = true }: SavedObjectsStartDeps,
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
@@ -378,8 +383,14 @@ export class SavedObjectsService
       .atPath<KibanaConfigType>('kibana')
       .pipe(first())
       .toPromise();
-    const adminClient = this.setupDeps!.elasticsearch.adminClient;
-    const migrator = this.createMigrator(kibanaConfig, this.config.migration, migrationsRetryDelay);
+    const client = elasticsearch.legacy.client;
+
+    const migrator = this.createMigrator(
+      kibanaConfig,
+      this.config.migration,
+      client,
+      migrationsRetryDelay
+    );
 
     this.migrator$.next(migrator);
 
@@ -435,9 +446,9 @@ export class SavedObjectsService
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
       createInternalRepository: (includedHiddenTypes?: string[]) =>
-        createRepository(adminClient.callAsInternalUser, includedHiddenTypes),
+        createRepository(client.callAsInternalUser, includedHiddenTypes),
       createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
-        createRepository(adminClient.asScoped(req).callAsCurrentUser, includedHiddenTypes),
+        createRepository(client.asScoped(req).callAsCurrentUser, includedHiddenTypes),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
@@ -473,10 +484,9 @@ export class SavedObjectsService
   private createMigrator(
     kibanaConfig: KibanaConfigType,
     savedObjectsConfig: SavedObjectsMigrationConfigType,
+    esClient: IClusterClient,
     migrationsRetryDelay?: number
   ): KibanaMigrator {
-    const adminClient = this.setupDeps!.elasticsearch.adminClient;
-
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
@@ -485,7 +495,7 @@ export class SavedObjectsService
       savedObjectValidations: this.validations,
       kibanaConfig,
       callCluster: migrationsRetryCallCluster(
-        adminClient.callAsInternalUser,
+        esClient.callAsInternalUser,
         this.logger,
         migrationsRetryDelay
       ),

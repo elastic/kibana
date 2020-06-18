@@ -14,10 +14,19 @@ import {
   ResolverChildren,
   ResolverTree,
   LegacyEndpointEvent,
-} from '../../../../plugins/siem/common/endpoint/types';
-import { parentEntityId } from '../../../../plugins/siem/common/endpoint/models/event';
+  ResolverNodeStats,
+  ResolverRelatedAlerts,
+} from '../../../../plugins/security_solution/common/endpoint/types';
+import { parentEntityId } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { Event, Tree, TreeNode } from '../../../../plugins/siem/common/endpoint/generate_data';
+import {
+  Event,
+  Tree,
+  TreeNode,
+  RelatedEventCategory,
+  RelatedEventInfo,
+  categoryMapping,
+} from '../../../../plugins/security_solution/common/endpoint/generate_data';
 import { Options, GeneratedTrees } from '../../services/resolver';
 
 /**
@@ -137,16 +146,61 @@ const compareArrays = (
   });
 };
 
+/**
+ * Verifies that the stats received from ES for a node reflect the categories of events that the generator created.
+ *
+ * @param relatedEvents the related events received for a particular node
+ * @param categories the related event info used when generating the resolver tree
+ */
+const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEventInfo[]) => {
+  expect(stats).to.not.be(undefined);
+  let totalExpEvents = 0;
+  for (const cat of categories) {
+    const ecsCategories = categoryMapping[cat.category];
+    if (Array.isArray(ecsCategories)) {
+      // if there are multiple ecs categories used to define a related event, the count for all of them should be the same
+      // and they should equal what is defined in the categories used to generate the related events
+      for (const ecsCat of ecsCategories) {
+        expect(stats?.events.byCategory[ecsCat]).to.be(cat.count);
+      }
+    } else {
+      expect(stats?.events.byCategory[ecsCategories]).to.be(cat.count);
+    }
+
+    totalExpEvents += cat.count;
+  }
+  expect(stats?.events.total).to.be(totalExpEvents);
+};
+
+/**
+ * A helper function for verifying the stats information an array of nodes.
+ *
+ * @param nodes an array of lifecycle nodes that should have a stats field defined
+ * @param categories the related event info used when generating the resolver tree
+ */
+const verifyLifecycleStats = (nodes: LifecycleNode[], categories: RelatedEventInfo[]) => {
+  for (const node of nodes) {
+    verifyStats(node.stats, categories);
+  }
+};
+
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const resolver = getService('resolverGenerator');
 
+  const relatedEventsToGen = [
+    { category: RelatedEventCategory.Driver, count: 2 },
+    { category: RelatedEventCategory.File, count: 1 },
+    { category: RelatedEventCategory.Registry, count: 1 },
+  ];
+
   let resolverTrees: GeneratedTrees;
   let tree: Tree;
   const treeOptions: Options = {
     ancestors: 5,
-    relatedEvents: 4,
+    relatedEvents: relatedEventsToGen,
+    relatedAlerts: 4,
     children: 3,
     generations: 2,
     percentTerminated: 100,
@@ -164,7 +218,64 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     });
     after(async () => {
       await resolver.deleteTrees(resolverTrees);
+      // this unload is for an endgame-* index so it does not use data streams
       await esArchiver.unload('endpoint/resolver/api_feature');
+    });
+
+    describe('related alerts route', () => {
+      describe('endpoint events', () => {
+        it('should not find any alerts', async () => {
+          const { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/5555/alerts`)
+            .expect(200);
+          expect(body.nextAlert).to.eql(null);
+          expect(body.alerts).to.be.empty();
+        });
+
+        it('should return details for the root node', async () => {
+          const { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
+            .expect(200);
+          expect(body.alerts.length).to.eql(4);
+          compareArrays(tree.origin.relatedAlerts, body.alerts, true);
+          expect(body.nextAlert).to.eql(null);
+        });
+
+        it('should return paginated results for the root node', async () => {
+          let { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2`)
+            .expect(200);
+          expect(body.alerts.length).to.eql(2);
+          compareArrays(tree.origin.relatedAlerts, body.alerts);
+          expect(body.nextAlert).not.to.eql(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2&afterAlert=${body.nextAlert}`
+            )
+            .expect(200));
+          expect(body.alerts.length).to.eql(2);
+          compareArrays(tree.origin.relatedAlerts, body.alerts);
+          expect(body.nextAlert).to.not.eql(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2&afterAlert=${body.nextAlert}`
+            )
+            .expect(200));
+          expect(body.alerts).to.be.empty();
+          expect(body.nextAlert).to.eql(null);
+        });
+
+        it('should return the first page of information when the cursor is invalid', async () => {
+          const { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/alerts?afterAlert=blah`)
+            .expect(200);
+          expect(body.alerts.length).to.eql(4);
+          compareArrays(tree.origin.relatedAlerts, body.alerts, true);
+          expect(body.nextAlert).to.eql(null);
+        });
+      });
     });
 
     describe('related events route', () => {
@@ -552,21 +663,27 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         it('returns a tree', async () => {
           const { body }: { body: ResolverTree } = await supertest
             .get(
-              `/api/endpoint/resolver/${tree.origin.id}?children=100&generations=3&ancestors=5&events=4`
+              `/api/endpoint/resolver/${tree.origin.id}?children=100&generations=3&ancestors=5&events=4&alerts=4`
             )
             .expect(200);
 
           expect(body.children.nextChild).to.equal(null);
           expect(body.children.childNodes.length).to.equal(12);
           verifyChildren(body.children.childNodes, tree, 4, 3);
+          verifyLifecycleStats(body.children.childNodes, relatedEventsToGen);
 
           expect(body.ancestry.nextAncestor).to.equal(null);
           verifyAncestry(body.ancestry.ancestors, tree, true);
+          verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen);
 
           expect(body.relatedEvents.nextEvent).to.equal(null);
           compareArrays(tree.origin.relatedEvents, body.relatedEvents.events, true);
 
+          expect(body.relatedAlerts.nextAlert).to.equal(null);
+          compareArrays(tree.origin.relatedAlerts, body.relatedAlerts.alerts, true);
+
           compareArrays(tree.origin.lifecycle, body.lifecycle, true);
+          verifyStats(body.stats, relatedEventsToGen);
         });
       });
     });

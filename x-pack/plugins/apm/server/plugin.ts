@@ -14,10 +14,10 @@ import {
 import { Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { ObservabilityPluginSetup } from '../../observability/server';
-import { SecurityPluginSetup } from '../../security/public';
+import { SecurityPluginSetup } from '../../security/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
-import { AlertingPlugin } from '../../alerting/server';
+import { AlertingPlugin } from '../../alerts/server';
 import { ActionsPlugin } from '../../actions/server';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
@@ -28,13 +28,22 @@ import { APMConfig, mergeConfigs, APMXPackConfig } from '.';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { CloudSetup } from '../../cloud/server';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
-import { LicensingPluginSetup } from '../../licensing/public';
+import {
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from '../../licensing/server';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
-import { APM_FEATURE } from './feature';
+
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import {
+  APM_FEATURE,
+  APM_SERVICE_MAPS_FEATURE_NAME,
+  APM_SERVICE_MAPS_LICENSE_TYPE,
+} from './feature';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
+import { MlPluginSetup } from '../../ml/server';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -57,11 +66,12 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       cloud?: CloudSetup;
       usageCollection?: UsageCollectionSetup;
       taskManager?: TaskManagerSetupContract;
-      alerting?: AlertingPlugin['setup'];
+      alerts?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
       observability?: ObservabilityPluginSetup;
       features: FeaturesPluginSetup;
       security?: SecurityPluginSetup;
+      ml?: MlPluginSetup;
     }
   ) {
     this.logger = this.initContext.logger.get();
@@ -73,9 +83,9 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
 
-    if (plugins.actions && plugins.alerting) {
+    if (plugins.actions && plugins.alerts) {
       registerApmAlerts({
-        alerting: plugins.alerting,
+        alerts: plugins.alerts,
         actions: plugins.actions,
         config$: mergedConfig$,
       });
@@ -118,15 +128,25 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         elasticCloud: createElasticCloudInstructions(plugins.cloud),
       };
     });
-    plugins.features.registerFeature(APM_FEATURE);
 
-    createApmApi().init(core, {
-      config$: mergedConfig$,
-      logger: this.logger!,
-      plugins: {
-        observability: plugins.observability,
-        security: plugins.security,
-      },
+    plugins.features.registerFeature(APM_FEATURE);
+    plugins.licensing.featureUsage.register(
+      APM_SERVICE_MAPS_FEATURE_NAME,
+      APM_SERVICE_MAPS_LICENSE_TYPE
+    );
+
+    core.getStartServices().then(([_coreStart, pluginsStart]) => {
+      createApmApi().init(core, {
+        config$: mergedConfig$,
+        logger: this.logger!,
+        plugins: {
+          licensing: (pluginsStart as { licensing: LicensingPluginStart })
+            .licensing,
+          observability: plugins.observability,
+          security: plugins.security,
+          ml: plugins.ml,
+        },
+      });
     });
 
     return {

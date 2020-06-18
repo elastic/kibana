@@ -16,9 +16,6 @@ describe('EncryptedSavedObjects Plugin', () => {
       await expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
         .resolves.toMatchInlineSnapshot(`
               Object {
-                "__legacyCompat": Object {
-                  "registerLegacyAPI": [Function],
-                },
                 "registerType": [Function],
                 "usingEphemeralEncryptionKey": true,
               }

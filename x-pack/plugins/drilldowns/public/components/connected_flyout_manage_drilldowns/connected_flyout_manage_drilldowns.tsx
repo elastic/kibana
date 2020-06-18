@@ -7,12 +7,12 @@
 import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import {
-  AdvancedUiActionsActionFactory as ActionFactory,
+  UiActionsEnhancedActionFactory as ActionFactory,
   AdvancedUiActionsStart,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedSerializedAction,
   UiActionsEnhancedSerializedEvent,
-} from '../../../../advanced_ui_actions/public';
+} from '../../../../ui_actions_enhanced/public';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
@@ -48,17 +48,19 @@ enum Routes {
 }
 
 export function createFlyoutManageDrilldowns({
-  advancedUiActions,
+  uiActionsEnhanced,
   storage,
   notifications,
+  docsLink,
 }: {
-  advancedUiActions: AdvancedUiActionsStart;
+  uiActionsEnhanced: AdvancedUiActionsStart;
   storage: IStorageWrapper;
   notifications: NotificationsStart;
+  docsLink?: string;
 }) {
   // fine to assume this is static,
   // because all action factories should be registered in setup phase
-  const allActionFactories = advancedUiActions.getActionFactories();
+  const allActionFactories = uiActionsEnhanced.getActionFactories();
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
     return acc;
@@ -145,6 +147,7 @@ export function createFlyoutManageDrilldowns({
       case Routes.Edit:
         return (
           <FlyoutDrilldownWizard
+            docsLink={docsLink}
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldownActionFactories={actionFactories}
@@ -197,6 +200,7 @@ export function createFlyoutManageDrilldowns({
       default:
         return (
           <FlyoutListManageDrilldowns
+            docsLink={docsLink}
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}

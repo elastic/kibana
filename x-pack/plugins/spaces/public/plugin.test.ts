@@ -33,17 +33,11 @@ describe('Spaces plugin', () => {
     it('should register the management and feature catalogue sections when the management and home plugins are both available', () => {
       const coreSetup = coreMock.createSetup();
 
-      const kibanaSection = new ManagementSection(
-        {
-          id: ManagementSectionId.Kibana,
-          title: 'Mock Kibana Section',
-          order: 1,
-        },
-        jest.fn(),
-        jest.fn(),
-        jest.fn(),
-        coreSetup.getStartServices
-      );
+      const kibanaSection = new ManagementSection({
+        id: ManagementSectionId.Kibana,
+        title: 'Mock Kibana Section',
+        order: 1,
+      });
 
       const registerAppSpy = jest.spyOn(kibanaSection, 'registerApp');
 

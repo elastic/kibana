@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile }: FtrProviderContext) {
-  describe('Alerting', () => {
+  describe('Alerts', () => {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./disable'));

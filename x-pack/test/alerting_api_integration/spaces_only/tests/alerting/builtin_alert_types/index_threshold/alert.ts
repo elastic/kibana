@@ -342,7 +342,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       };
 
       const { status, body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: params.name,
@@ -372,7 +372,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
 
       const alertId = createdAlert.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', undefined);
+      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       return alertId;
     }

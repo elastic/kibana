@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
+  ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
@@ -59,7 +60,7 @@ export class ExceptionListClient {
     itemId,
     id,
     namespaceType,
-  }: GetExceptionListItemOptions): Promise<ExceptionListSchema | null> => {
+  }: GetExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
     return getExceptionListItem({ id, itemId, namespaceType, savedObjectsClient });
   };
@@ -132,7 +133,7 @@ export class ExceptionListClient {
 
   public createExceptionListItem = async ({
     _tags,
-    comment,
+    comments,
     description,
     entries,
     itemId,
@@ -142,11 +143,11 @@ export class ExceptionListClient {
     namespaceType,
     tags,
     type,
-  }: CreateExceptionListItemOptions): Promise<ExceptionListSchema> => {
+  }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
     return createExceptionListItem({
       _tags,
-      comment,
+      comments,
       description,
       entries,
       itemId,
@@ -163,7 +164,7 @@ export class ExceptionListClient {
 
   public updateExceptionListItem = async ({
     _tags,
-    comment,
+    comments,
     description,
     entries,
     id,
@@ -173,11 +174,11 @@ export class ExceptionListClient {
     namespaceType,
     tags,
     type,
-  }: UpdateExceptionListItemOptions): Promise<ExceptionListSchema | null> => {
+  }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
     return updateExceptionListItem({
       _tags,
-      comment,
+      comments,
       description,
       entries,
       id,
@@ -196,7 +197,7 @@ export class ExceptionListClient {
     id,
     itemId,
     namespaceType,
-  }: DeleteExceptionListItemOptions): Promise<ExceptionListSchema | null> => {
+  }: DeleteExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
     return deleteExceptionListItem({
       id,

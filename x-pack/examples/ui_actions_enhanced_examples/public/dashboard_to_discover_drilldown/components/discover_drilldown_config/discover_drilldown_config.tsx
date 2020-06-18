@@ -31,9 +31,7 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
   onIndexPatternSelect,
   customIndexPattern,
   onCustomIndexPatternToggle,
-  carryFiltersAndQuery,
   onCarryFiltersAndQueryToggle,
-  carryTimeRange,
   onCarryTimeRangeToggle,
 }) => {
   return (
@@ -82,9 +80,10 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
       {!!onCarryFiltersAndQueryToggle && (
         <EuiFormRow hasChildLabel={false}>
           <EuiSwitch
+            disabled
             name="carryFiltersAndQuery"
             label="Carry over filters and query"
-            checked={!!carryFiltersAndQuery}
+            checked={false}
             onChange={onCarryFiltersAndQueryToggle}
           />
         </EuiFormRow>
@@ -92,9 +91,10 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
       {!!onCarryTimeRangeToggle && (
         <EuiFormRow hasChildLabel={false}>
           <EuiSwitch
+            disabled
             name="carryTimeRange"
             label="Carry over time range"
-            checked={!!carryTimeRange}
+            checked={false}
             onChange={onCarryTimeRangeToggle}
           />
         </EuiFormRow>

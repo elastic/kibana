@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ['geo.src', 'IN'],
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/62497
-  describe.skip('Discover', () => {
+  describe('Discover', () => {
     before(async () => {
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -133,9 +132,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Context view test
     it('should open context view on a doc', async () => {
-      await docTable.clickRowToggle();
-      // click the open action
       await retry.try(async () => {
+        await docTable.clickRowToggle();
+        // click the open action
         const rowActions = await docTable.getRowActions();
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');

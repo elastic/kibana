@@ -62,7 +62,7 @@ export const getSections = ({
 
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),
-    hash: `/?${fromQuery(
+    search: `?${fromQuery(
       pick(
         {
           dateRangeStart: urlParams.rangeFrom,

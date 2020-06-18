@@ -39,6 +39,7 @@ import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 import { EmptyPlaceholder } from '../shared_components';
+import { desanitizeFilterContext } from '../utils';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -354,7 +355,7 @@ export function XYChart({
             })),
             timeFieldName,
           };
-          onClickValue(context);
+          onClickValue(desanitizeFilterContext(context));
         }}
       />
 

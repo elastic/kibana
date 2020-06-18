@@ -10,7 +10,6 @@ import * as t from 'io-ts';
 
 import {
   _tags,
-  commentOrUndefined,
   created_at,
   created_by,
   description,
@@ -20,18 +19,19 @@ import {
   list_id,
   metaOrUndefined,
   name,
+  namespace_type,
   tags,
   tie_breaker_id,
   updated_at,
   updated_by,
 } from '../common/schemas';
-import { entriesArray } from '../types';
+import { commentsArray, entriesArray } from '../types';
 
 // TODO: Should we use a partial here to reflect that this can JSON serialize meta, comment as non existent?
 export const exceptionListItemSchema = t.exact(
   t.type({
     _tags,
-    comment: commentOrUndefined,
+    comments: commentsArray,
     created_at,
     created_by,
     description,
@@ -41,6 +41,7 @@ export const exceptionListItemSchema = t.exact(
     list_id,
     meta: metaOrUndefined,
     name,
+    namespace_type,
     tags,
     tie_breaker_id,
     type: exceptionListItemType,

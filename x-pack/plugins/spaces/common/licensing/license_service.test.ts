@@ -5,7 +5,7 @@
  */
 
 import { of } from 'rxjs';
-import { licensingMock } from '../../../licensing/public/mocks';
+import { licenseMock } from '../../../licensing/common/licensing.mock';
 import { SpacesLicenseService } from './license_service';
 import { LICENSE_TYPE, LicenseType } from '../../../licensing/common/types';
 
@@ -18,7 +18,7 @@ describe('license#isEnabled', function () {
   });
 
   it('should indicate that Spaces is disabled when xpack is unavailable', () => {
-    const rawLicenseMock = licensingMock.createLicenseMock();
+    const rawLicenseMock = licenseMock.createLicenseMock();
     rawLicenseMock.isAvailable = false;
     const serviceSetup = new SpacesLicenseService().setup({
       license$: of(rawLicenseMock),
@@ -29,7 +29,7 @@ describe('license#isEnabled', function () {
   for (const level in LICENSE_TYPE) {
     if (isNaN(level as any)) {
       it(`should indicate that Spaces is enabled with a ${level} license`, () => {
-        const rawLicense = licensingMock.createLicense({
+        const rawLicense = licenseMock.createLicense({
           license: {
             status: 'active',
             type: level as LicenseType,

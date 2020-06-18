@@ -66,6 +66,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
         { key: 'transaction.name', value: transaction?.transaction.name },
         { key: 'transaction.type', value: transaction?.transaction.type },
       ].filter((filter): filter is Filter => typeof filter.value === 'string'),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [transaction]
   );
 
@@ -105,10 +106,11 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
 
             if (app === 'uptime' || app === 'metrics' || app === 'logs') {
               event.preventDefault();
+              const search = parsed.search || '';
+
+              const path = `${rest.join('/')}${search}`;
               core.application.navigateToApp(app, {
-                path: `${rest.join('/')}${
-                  parsed.search ? `&${parsed.search}` : ''
-                }`,
+                path,
               });
             }
           },

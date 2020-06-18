@@ -14,6 +14,7 @@ import { VectorStyle } from '../../styles/vector/vector_style';
 import {
   FIELD_ORIGIN,
   COUNT_PROP_NAME,
+  LAYER_WIZARD_CATEGORY,
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
@@ -24,14 +25,15 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.pewPewDescription', {
     defaultMessage: 'Aggregated data paths between the source and destination',
   }),
   icon: 'logoElasticsearch',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {
-        previewLayer(null);
+        previewLayers([]);
         return;
       }
 
@@ -64,7 +66,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
           },
         }),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
 
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;

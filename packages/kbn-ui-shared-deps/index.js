@@ -42,15 +42,17 @@ exports.externals = {
   'react-intl': '__kbnSharedDeps__.ReactIntl',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
-  '@kbn/ui-shared-deps/monaco': '__kbnSharedDeps__.Monaco',
+  '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
-  'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBare',
+  'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
 
   /**
    * big deps which are locked to a single version
    */
   rxjs: '__kbnSharedDeps__.Rxjs',
   'rxjs/operators': '__kbnSharedDeps__.RxjsOperators',
+  numeral: '__kbnSharedDeps__.ElasticNumeral',
+  '@elastic/numeral': '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/charts': '__kbnSharedDeps__.ElasticCharts',
   '@elastic/eui': '__kbnSharedDeps__.ElasticEui',
   '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',

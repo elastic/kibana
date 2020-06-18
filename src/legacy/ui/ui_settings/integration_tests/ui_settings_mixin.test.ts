@@ -59,6 +59,15 @@ describe('uiSettingsMixin()', () => {
       decorate: sinon.spy((type: keyof Decorators, name: string, value: any) => {
         decorations[type][name] = value;
       }),
+      newPlatform: {
+        setup: {
+          core: {
+            uiSettings: {
+              register: sinon.stub(),
+            },
+          },
+        },
+      },
     };
 
     // "promise" returned from kbnServer.ready()
@@ -70,13 +79,6 @@ describe('uiSettingsMixin()', () => {
       server,
       uiExports: { uiSettingDefaults },
       ready: sinon.stub().returns(readyPromise),
-      newPlatform: {
-        __internals: {
-          uiSettings: {
-            register: sinon.stub(),
-          },
-        },
-      },
     };
 
     uiSettingsMixin(kbnServer, server);
@@ -92,10 +94,10 @@ describe('uiSettingsMixin()', () => {
   afterEach(() => sandbox.restore());
 
   it('passes uiSettingsDefaults to the new platform', () => {
-    const { kbnServer } = setup();
-    sinon.assert.calledOnce(kbnServer.newPlatform.__internals.uiSettings.register);
+    const { server } = setup();
+    sinon.assert.calledOnce(server.newPlatform.setup.core.uiSettings.register);
     sinon.assert.calledWithExactly(
-      kbnServer.newPlatform.__internals.uiSettings.register,
+      server.newPlatform.setup.core.uiSettings.register,
       uiSettingDefaults
     );
   });

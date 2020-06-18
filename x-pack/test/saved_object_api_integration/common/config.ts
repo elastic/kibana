@@ -24,7 +24,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
       },
       xpack: {
-        api: await readConfigFile(require.resolve('../../api_integration/config.js')),
+        api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
       },
     };
 

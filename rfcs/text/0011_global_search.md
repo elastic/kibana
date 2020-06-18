@@ -194,7 +194,7 @@ Notes:
 
 ### Plugin API
 
-#### server API
+#### Common types
 
 ```ts
 /**
@@ -208,6 +208,21 @@ type GlobalSearchResult = Omit<GlobalSearchProviderResult, 'url'> & {
   url: string;
 };
 
+
+/**
+ * Response returned from the {@link GlobalSearchServiceStart | global search service}'s `find` API
+ */
+type GlobalSearchBatchedResults = {
+  /**
+   * Results for this batch
+   */
+  results: GlobalSearchResult[];
+};
+```
+
+#### server API
+
+```ts
 /**
  * Options for the server-side {@link GlobalSearchServiceStart.find | find API}
  */
@@ -225,16 +240,6 @@ interface GlobalSearchFindOptions {
    */
   aborted$?: Observable<void>;
 }
-
-/**
- * Response returned from the server-side {@link GlobalSearchServiceStart | global search service}'s `find` API
- */
-type GlobalSearchBatchedResults = {
-  /**
-   * Results for this batch
-   */
-  results: GlobalSearchResult[];
-};
 
 /** @public */
 interface GlobalSearchPluginSetup {
@@ -265,28 +270,6 @@ interface GlobalSearchFindOptions {
   aborted$?: Observable<void>;
 }
 
-/**
- * Enhanced {@link GlobalSearchResult | result type} for the client-side,
- * to allow navigating to a given result.
- */
-interface NavigableGlobalSearchResult extends GlobalSearchResult {
-  /**
-   * Navigate to this result's associated url. If the result is on this kibana instance, user will be redirected to it
-   * in a SPA friendly way using `application.navigateToApp`, else, a full page refresh will be performed.
-   */
-  navigate: () => Promise<void>;
-}
-
-/**
- * Response returned from the client-side {@link GlobalSearchServiceStart | global search service}'s `find` API
- */
-type GlobalSearchBatchedResults = {
-  /**
-   * Results for this batch
-   */
-  results: NavigableGlobalSearchResult[];
-};
-
 /** @public */
 interface GlobalSearchPluginSetup {
   registerResultProvider(provider: GlobalSearchResultProvider);
@@ -304,9 +287,6 @@ Notes:
   - The `registerResultProvider` setup APIs share the same signature, however the input `GlobalSearchResultProvider`
     types are different on the client and server.
   - The `find` start API signature got a `KibanaRequest` for `server`, when this parameter is not present for `public`.
-- The `find` API returns a observable of `NavigableGlobalSearchResult` instead of plain `GlobalSearchResult`. This type
-  is here to enhance results with a `navigate` method to let the `GlobalSearch` plugin handle the navigation logic, which is
-  non-trivial. See the [Redirecting to a result](#redirecting-to-a-result) section for more info.
 
 #### http API
 
@@ -395,14 +375,11 @@ In current specification, the only conversion step is to transform the `result.u
 
 #### redirecting to a result
 
-Parsing a relative or absolute result url to perform SPA navigation can be non trivial, and should remains the responsibility
-of the GlobalSearch plugin API.
+Parsing a relative or absolute result url to perform SPA navigation can be non trivial. This is why `ApplicationService.navigateToUrl` has been introduced on the client-side core API
 
-This is why `NavigableGlobalSearchResult.navigate` has been introduced on the client-side version of the `find` API
+When using `navigateToUrl` with the url of a result instance, the following logic will be executed:
 
-When using `navigate` from a result instance, the following logic will be executed:
-
-If all these criteria are true for `result.url`:
+If all these criteria are true for `url`:
 
 - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location
 - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space)

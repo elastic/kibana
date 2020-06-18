@@ -51,7 +51,7 @@ export default function ({ getService }) {
     describe('update', () => {
       it('should add a policy to a template', async () => {
         // Create policy
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('template-test-policy');
         const { name: policyName } = policy;
         await createPolicy(policy);
 

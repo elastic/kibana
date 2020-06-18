@@ -25,6 +25,7 @@ describe('LensStore', () => {
       const { client, store } = testStore('FOO');
       const doc = await store.save({
         title: 'Hello',
+        description: 'My doc',
         visualizationType: 'bar',
         expression: '',
         state: {
@@ -43,6 +44,7 @@ describe('LensStore', () => {
       expect(doc).toEqual({
         id: 'FOO',
         title: 'Hello',
+        description: 'My doc',
         visualizationType: 'bar',
         expression: '',
         state: {
@@ -61,6 +63,7 @@ describe('LensStore', () => {
       expect(client.create).toHaveBeenCalledTimes(1);
       expect(client.create).toHaveBeenCalledWith('lens', {
         title: 'Hello',
+        description: 'My doc',
         visualizationType: 'bar',
         expression: '',
         state: {

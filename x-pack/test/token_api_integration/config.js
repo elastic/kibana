@@ -5,7 +5,7 @@
  */
 
 export default async function ({ readConfigFile }) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
     testFiles: [require.resolve('./auth')],

@@ -9,6 +9,7 @@ import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../../../src/dev/constants'
 export default {
   rootDir: '../../',
   roots: [
+    '<rootDir>/plugins',
     '<rootDir>/legacy/plugins',
     '<rootDir>/legacy/server',
     '<rootDir>/legacy/common',
@@ -28,7 +29,7 @@ export default {
   ],
   coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
   coverageReporters: ['html'],
-  moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+  moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
   testMatch: ['**/*.test.{js,ts,tsx}'],
   testPathIgnorePatterns: [

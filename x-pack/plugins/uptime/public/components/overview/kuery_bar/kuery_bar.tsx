@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
-import { useUrlParams } from '../../../hooks';
+import { useSearchText, useUrlParams } from '../../../hooks';
 import {
   esKuery,
   IIndexPattern,
@@ -36,25 +36,47 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 interface Props {
   'aria-label': string;
   autocomplete: DataPublicPluginSetup['autocomplete'];
+  defaultKuery?: string;
   'data-test-subj': string;
+  shouldUpdateUrl?: boolean;
+  updateDefaultKuery?: (value: string) => void;
 }
 
 export function KueryBar({
   'aria-label': ariaLabel,
   autocomplete: autocompleteService,
+  defaultKuery,
   'data-test-subj': dataTestSubj,
+  shouldUpdateUrl,
+  updateDefaultKuery,
 }: Props) {
   const { loading, index_pattern: indexPattern } = useIndexPattern();
+  const { updateSearchText } = useSearchText();
 
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingIndexPattern: true,
   });
+  const [suggestionLimit, setSuggestionLimit] = useState(15);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
   const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { search: kuery } = getUrlParams();
+  const { search: kuery, dateRangeStart, dateRangeEnd } = getUrlParams();
+
+  useEffect(() => {
+    updateSearchText(kuery);
+  }, [kuery, updateSearchText]);
+
+  useEffect(() => {
+    if (updateDefaultKuery && kuery) {
+      updateDefaultKuery(kuery);
+    } else if (defaultKuery && updateDefaultKuery) {
+      updateDefaultKuery(defaultKuery);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const indexPatternMissing = loading && !indexPattern;
 
@@ -65,6 +87,7 @@ export function KueryBar({
 
     setIsLoadingSuggestions(true);
     setState({ ...state, suggestions: [] });
+    setSuggestionLimit(15);
 
     const currentRequest = uniqueId();
     currentRequestCheck = currentRequest;
@@ -77,10 +100,18 @@ export function KueryBar({
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,
+          boolFilter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: dateRangeStart,
+                  lte: dateRangeEnd,
+                },
+              },
+            },
+          ],
         })) || []
-      )
-        .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
-        .slice(0, 15);
+      ).filter((suggestion) => !startsWith(suggestion.text, 'span.'));
 
       if (currentRequest !== currentRequestCheck) {
         return;
@@ -105,11 +136,21 @@ export function KueryBar({
         return;
       }
 
-      updateUrlParams({ search: inputValue.trim() });
+      if (shouldUpdateUrl !== false) {
+        updateUrlParams({ search: inputValue.trim() });
+      }
+      updateSearchText(inputValue);
+      if (updateDefaultKuery) {
+        updateDefaultKuery(inputValue);
+      }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
   }
+
+  const increaseLimit = () => {
+    setSuggestionLimit(suggestionLimit + 15);
+  };
 
   return (
     <Container>
@@ -118,10 +159,11 @@ export function KueryBar({
         data-test-subj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions || loading}
-        initialValue={kuery}
+        initialValue={defaultKuery || kuery}
         onChange={onChange}
         onSubmit={onSubmit}
-        suggestions={state.suggestions}
+        suggestions={state.suggestions.slice(0, suggestionLimit)}
+        loadMore={increaseLimit}
         queryExample=""
       />
 

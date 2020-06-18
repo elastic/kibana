@@ -67,34 +67,6 @@ describe('uiSettings', () => {
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledWith(uiSettingsType);
     });
 
-    describe('#asScopedToClient', () => {
-      it('passes saved object type "config" to UiSettingsClient', async () => {
-        const setup = await service.setup(setupDeps);
-        setup.asScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
-        expect(MockUiSettingsClientConstructor.mock.calls[0][0].type).toBe('config');
-      });
-
-      it('passes overrides to UiSettingsClient', async () => {
-        const setup = await service.setup(setupDeps);
-        setup.asScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
-        expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toBe(overrides);
-        expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toEqual(overrides);
-      });
-
-      it('passes a copy of set defaults to UiSettingsClient', async () => {
-        const setup = await service.setup(setupDeps);
-
-        setup.register(defaults);
-        setup.asScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
-
-        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
-        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
-      });
-    });
-
     describe('#register', () => {
       it('throws if registers the same key twice', async () => {
         const setup = await service.setup(setupDeps);

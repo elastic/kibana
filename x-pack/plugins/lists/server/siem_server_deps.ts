@@ -17,5 +17,4 @@ export {
   createBootstrapIndex,
   getIndexExists,
   buildRouteValidation,
-  validate,
-} from '../../siem/server';
+} from '../../security_solution/server';

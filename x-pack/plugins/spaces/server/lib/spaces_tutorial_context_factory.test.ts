@@ -41,7 +41,7 @@ describe('createSpacesTutorialContextFactory', () => {
       http: coreMock.createSetup().http,
       getStartServices: async () => [coreMock.createStart(), {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);

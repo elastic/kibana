@@ -11,7 +11,7 @@ import {
   CallWithRequestParams,
 } from '../../adapters/framework/adapter_types';
 import { Comparator, AlertStates, InventoryMetricConditions } from './types';
-import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertServices, AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraSnapshot } from '../../snapshot';
 import { parseFilterQuery } from '../../../utils/serialized_query';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';

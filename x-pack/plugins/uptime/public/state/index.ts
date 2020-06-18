@@ -9,12 +9,12 @@ import createSagaMiddleware from 'redux-saga';
 import { rootEffect } from './effects';
 import { rootReducer } from './reducers';
 
+export type AppState = ReturnType<typeof rootReducer>;
+
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const sagaMW = createSagaMiddleware();
 
 export const store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMW)));
-
-export type AppState = ReturnType<typeof rootReducer>;
 
 sagaMW.run(rootEffect);

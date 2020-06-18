@@ -27,6 +27,7 @@ import {
   Query,
   esQuery,
   esKuery,
+  UI_SETTINGS,
 } from '../../../../../../../src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
@@ -254,7 +255,7 @@ export const Page: FC = () => {
       qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
     } else {
       qry = esQuery.luceneStringToDsl(qryString);
-      esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+      esQuery.decorateQuery(qry, kibanaConfig.get(UI_SETTINGS.QUERY_STRING_OPTIONS));
     }
 
     return {

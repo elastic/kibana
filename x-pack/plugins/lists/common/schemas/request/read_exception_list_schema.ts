@@ -8,13 +8,28 @@
 
 import * as t from 'io-ts';
 
-import { id, list_id } from '../common/schemas';
+import { NamespaceType, id, list_id, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const readExceptionListSchema = t.partial({
   id,
   list_id,
+  namespace_type, // defaults to 'single' if not set during decode
 });
 
 export type ReadExceptionListSchemaPartial = t.TypeOf<typeof readExceptionListSchema>;
+
+// This type is used after a decode since some things are defaults after a decode.
+export type ReadExceptionListSchemaPartialDecoded = Omit<
+  ReadExceptionListSchemaPartial,
+  'namespace_type'
+> & {
+  namespace_type: NamespaceType;
+};
+
+// This type is used after a decode since some things are defaults after a decode.
+export type ReadExceptionListSchemaDecoded = RequiredKeepUndefined<
+  ReadExceptionListSchemaPartialDecoded
+>;
+
 export type ReadExceptionListSchema = RequiredKeepUndefined<ReadExceptionListSchemaPartial>;

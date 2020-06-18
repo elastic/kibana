@@ -19,7 +19,6 @@ import {
 } from '../../../../../selectors/ui_selectors';
 import {
   setSelectedLayer,
-  removeTransientLayer,
   updateFlyout,
   hideTOCDetails,
   showTOCDetails,
@@ -41,7 +40,6 @@ function mapStateToProps(state = {}, ownProps) {
 function mapDispatchToProps(dispatch) {
   return {
     openLayerPanel: async (layerId) => {
-      await dispatch(removeTransientLayer());
       await dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },

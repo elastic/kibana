@@ -68,6 +68,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
         title: loadDataErrorTitle,
       });
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [services.notifications]
   );
 

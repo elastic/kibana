@@ -299,8 +299,10 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                 ),
                 children: (
                   <StepConfigureDatasource
+                    from={'edit'}
                     packageInfo={packageInfo}
                     datasource={datasource}
+                    datasourceId={datasourceId}
                     updateDatasource={updateDatasource}
                     validationResults={validationResults!}
                     submitAttempted={formState === 'INVALID'}

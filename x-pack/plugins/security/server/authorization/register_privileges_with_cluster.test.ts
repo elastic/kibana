@@ -49,7 +49,7 @@ const registerPrivilegesWithClusterTest = (
       });
       for (const deletedPrivilege of deletedPrivileges) {
         expect(mockLogger.debug).toHaveBeenCalledWith(
-          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticearch for ${application}`
+          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticsearch for ${application}`
         );
         expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
           'shield.deletePrivilege',
@@ -82,7 +82,7 @@ const registerPrivilegesWithClusterTest = (
         `Registering Kibana Privileges with Elasticsearch for ${application}`
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        `Kibana Privileges already registered with Elasticearch for ${application}`
+        `Kibana Privileges already registered with Elasticsearch for ${application}`
       );
     };
   };

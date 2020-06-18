@@ -40,7 +40,7 @@ function useUiFilters(params: IUrlParams): UIFilters {
   return useDeepObjectIdentity({ kuery, environment, ...localUiFilters });
 }
 
-const defaultRefresh = (time: TimeRange) => {};
+const defaultRefresh = (_time: TimeRange) => {};
 
 const UrlParamsContext = createContext({
   urlParams: {} as IUrlParams,

@@ -8,7 +8,8 @@
 
 import * as t from 'io-ts';
 
-import { DefaultStringArray, NonEmptyString } from '../types';
+import { DefaultNamespace } from '../types/default_namespace';
+import { DefaultStringArray, NonEmptyString } from '../../siem_common_deps';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
@@ -85,20 +86,44 @@ export type ExceptionListItemType = t.TypeOf<typeof exceptionListItemType>;
 export const list_type = t.keyof({ item: null, list: null });
 export type ListType = t.TypeOf<typeof list_type>;
 
-// TODO: Investigate what the deep structure of a comment is really going to be and then change this to use that deep structure with a default array
-export const comment = DefaultStringArray;
-export type Comment = t.TypeOf<typeof comment>;
-export const commentOrUndefined = t.union([comment, t.undefined]);
-export type CommentOrUndefined = t.TypeOf<typeof commentOrUndefined>;
-
 export const item_id = NonEmptyString;
 export type ItemId = t.TypeOf<typeof item_id>;
 export const itemIdOrUndefined = t.union([item_id, t.undefined]);
 export type ItemIdOrUndefined = t.TypeOf<typeof itemIdOrUndefined>;
 
 export const per_page = t.number; // TODO: Change this out for PositiveNumber from siem
+export type PerPage = t.TypeOf<typeof per_page>;
+
+export const perPageOrUndefined = t.union([per_page, t.undefined]);
+export type PerPageOrUndefined = t.TypeOf<typeof perPageOrUndefined>;
+
 export const total = t.number; // TODO: Change this out for PositiveNumber from siem
+export const totalUndefined = t.union([total, t.undefined]);
+export type TotalOrUndefined = t.TypeOf<typeof totalUndefined>;
+
 export const page = t.number; // TODO: Change this out for PositiveNumber from siem
+export type Page = t.TypeOf<typeof page>;
+
+export const pageOrUndefined = t.union([page, t.undefined]);
+export type PageOrUndefined = t.TypeOf<typeof pageOrUndefined>;
+
 export const sort_field = t.string;
+export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
+export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
+
 export const sort_order = t.keyof({ asc: null, desc: null });
+export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
+export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;
+
 export const filter = t.string;
+export type Filter = t.TypeOf<typeof filter>;
+export const filterOrUndefined = t.union([filter, t.undefined]);
+export type FilterOrUndefined = t.TypeOf<typeof filterOrUndefined>;
+
+export const cursor = t.string;
+export type Cursor = t.TypeOf<typeof cursor>;
+export const cursorOrUndefined = t.union([cursor, t.undefined]);
+export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
+
+export const namespace_type = DefaultNamespace;
+export type NamespaceType = t.TypeOf<typeof namespace_type>;

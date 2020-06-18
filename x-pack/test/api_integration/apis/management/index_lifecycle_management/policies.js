@@ -32,9 +32,7 @@ export default function ({ getService }) {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
-      // Disabled as the underline ES API has changed. Need to investigate
-      // Opened issue: https://github.com/elastic/kibana/issues/62778
-      it.skip('should have a default policy to manage the Watcher history indices', async () => {
+      it('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
         const policy = body.find((policy) => policy.name === DEFAULT_POLICY_NAME);
 
@@ -50,7 +48,9 @@ export default function ({ getService }) {
               delete: {
                 min_age: '7d',
                 actions: {
-                  delete: {},
+                  delete: {
+                    delete_searchable_snapshot: true,
+                  },
                 },
               },
             },
@@ -61,7 +61,7 @@ export default function ({ getService }) {
 
       it('should add the indices linked to the policies', async () => {
         // Create a policy
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('link-test-policy');
         const { name: policyName } = policy;
         await createPolicy(policy);
 
@@ -78,7 +78,7 @@ export default function ({ getService }) {
 
     describe('create', () => {
       it('should create a lifecycle policy', async () => {
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('create-test-policy');
         const { name } = policy;
 
         // Load current policies
@@ -96,7 +96,7 @@ export default function ({ getService }) {
 
     describe('delete', () => {
       it('should delete the policy created', async () => {
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('delete-test-policy');
         const { name } = policy;
 
         // Create new policy

@@ -41,7 +41,7 @@ export class RemoteClustersUIPlugin
           defaultMessage: 'Remote Clusters',
         }),
         order: 7,
-        mount: async ({ element, setBreadcrumbs }) => {
+        mount: async ({ element, setBreadcrumbs, history }) => {
           const [core] = await getStartServices();
           const {
             i18n: { Context: i18nContext },
@@ -59,7 +59,7 @@ export class RemoteClustersUIPlugin
           const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
           const { renderApp } = await import('./application');
-          return renderApp(element, i18nContext, { isCloudEnabled });
+          return renderApp(element, i18nContext, { isCloudEnabled }, history);
         },
       });
     }

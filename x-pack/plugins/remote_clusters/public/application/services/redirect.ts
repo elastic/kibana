@@ -13,5 +13,5 @@ export function init(_navigateToApp: CoreStart['application']['navigateToApp']) 
 }
 
 export function redirect(path: string) {
-  navigateToApp('kibana', { path: `#${path}` });
+  navigateToApp('management', { path });
 }

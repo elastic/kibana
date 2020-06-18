@@ -85,7 +85,7 @@ describe('alert_form', () => {
       const initialAlert = ({
         name: 'test',
         params: {},
-        consumer: 'alerting',
+        consumer: 'alerts',
         schedule: {
           interval: '1m',
         },
@@ -302,7 +302,7 @@ describe('alert_form', () => {
         name: 'test',
         alertTypeId: alertType.id,
         params: {},
-        consumer: 'alerting',
+        consumer: 'alerts',
         schedule: {
           interval: '1m',
         },

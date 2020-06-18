@@ -402,7 +402,14 @@ class RuleEditorFlyoutUI extends Component {
               }
             )
           );
-          this.closeFlyout();
+          const updatedJob = mlJobService.getJob(anomaly.jobId);
+          const updatedDetector = updatedJob.analysis_config.detectors[detectorIndex];
+          const updatedRules = updatedDetector.custom_rules;
+          if (!updatedRules) {
+            this.closeFlyout();
+          } else {
+            this.setState({ job: { ...updatedJob } });
+          }
         } else {
           toasts.addDanger(
             i18n.translate(

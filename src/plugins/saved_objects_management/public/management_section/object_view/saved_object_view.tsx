@@ -26,6 +26,7 @@ import {
   OverlayStart,
   NotificationsStart,
   SimpleSavedObject,
+  ScopedHistory,
 } from '../../../../../core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
@@ -41,6 +42,7 @@ interface SavedObjectEditionProps {
   notifications: NotificationsStart;
   notFoundType?: string;
   savedObjectsClient: SavedObjectsClientContract;
+  history: ScopedHistory;
 }
 
 interface SavedObjectEditionState {
@@ -171,6 +173,6 @@ export class SavedObjectEdition extends Component<
   };
 
   redirectToListing() {
-    window.location.hash = '/management/kibana/objects';
+    this.props.history.push('/');
   }
 }

@@ -7,12 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_URL } from '../../common/constants';
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  transformError,
-  validate,
-} from '../siem_server_deps';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/siem_common_deps';
 import {
   CreateExceptionListSchemaDecoded,
   createExceptionListSchema,
@@ -38,13 +34,21 @@ export const createExceptionListRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, _tags, tags, meta, description, list_id: listId, type } = request.body;
+        const {
+          name,
+          _tags,
+          tags,
+          meta,
+          namespace_type: namespaceType,
+          description,
+          list_id: listId,
+          type,
+        } = request.body;
         const exceptionLists = getExceptionListClient(context);
         const exceptionList = await exceptionLists.getExceptionList({
           id: undefined,
           listId,
-          // TODO: Expose the name space type
-          namespaceType: 'single',
+          namespaceType,
         });
         if (exceptionList != null) {
           return siemResponse.error({
@@ -58,8 +62,7 @@ export const createExceptionListRoute = (router: IRouter): void => {
             listId,
             meta,
             name,
-            // TODO: Expose the name space type
-            namespaceType: 'single',
+            namespaceType,
             tags,
             type,
           });

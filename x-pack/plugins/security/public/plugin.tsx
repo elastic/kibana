@@ -122,7 +122,7 @@ export class SecurityPlugin
             'Protect your data and easily manage who has access to what with users and roles.',
         }),
         icon: 'securityApp',
-        path: '/app/kibana#/management/security/users',
+        path: '/app/management/security/users',
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
       });

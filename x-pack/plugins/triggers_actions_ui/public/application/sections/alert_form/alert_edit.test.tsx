@@ -84,7 +84,7 @@ describe('alert_edit', () => {
         window: '1s',
         comparator: 'between',
       },
-      consumer: 'alerting',
+      consumer: 'alerts',
       alertTypeId: 'my-alert-type',
       enabled: false,
       schedule: { interval: '1m' },
