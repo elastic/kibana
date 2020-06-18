@@ -140,4 +140,127 @@ export class LogEntryRateAnalysis {
       }
     }, []);
   }
+
+  public async getLogEntryRateExamples(
+    requestContext: RequestHandlerContext,
+    request: KibanaRequest,
+    sourceId: string,
+    startTime: number,
+    endTime: number,
+    dataset: string,
+    exampleCount: number
+  ) {
+    const finalizeLogEntryRateExamplesSpan = startTracingSpan(
+      'get log entry rate example log entries'
+    );
+
+    const { logEntryRate: jobId } = this.getJobIds(request, sourceId);
+
+    const {
+      mlJob,
+      timing: { spans: fetchMlJobSpans },
+    } = await this.fetchMlJob(requestContext, jobId);
+
+    const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
+    const indices = customSettings?.logs_source_config?.indexPattern;
+    const timestampField = customSettings?.logs_source_config?.timestampField;
+
+    if (indices == null || timestampField == null) {
+      throw new InsufficientLogAnalysisMlJobConfigurationError(
+        `Failed to find index configuration for ml job ${jobId}`
+      );
+    }
+
+    const {
+      examples,
+      timing: { spans: fetchLogEntryRateExamplesSpans },
+    } = await this.fetchLogEntryCategoryExamples(
+      requestContext,
+      indices,
+      timestampField,
+      startTime,
+      endTime,
+      category._source.terms,
+      exampleCount
+    );
+
+    const logEntryRateExamplesSpan = finalizeLogEntryRateExamplesSpan();
+
+    return {
+      data: examples,
+      timing: {
+        spans: [logEntryRateExamplesSpan, ...fetchMlJobSpans, ...fetchLogEntryRateExamplesSpans],
+      },
+    };
+  }
+
+  private async fetchLogEntryRateExamples(
+    requestContext: RequestHandlerContext,
+    indices: string,
+    timestampField: string,
+    startTime: number,
+    endTime: number,
+    dataset: string,
+    exampleCount: number
+  ) {
+    const finalizeEsSearchSpan = startTracingSpan('Fetch log rate examples from ES');
+
+    const {
+      hits: { hits },
+    } = decodeOrThrow(logEntryRateExamplesResponseRT)(
+      await this.libs.framework.callWithRequest(
+        requestContext,
+        'search',
+        createLogEntryRateExamplesQuery(
+          indices,
+          timestampField,
+          startTime,
+          endTime,
+          dataset,
+          exampleCount
+        )
+      )
+    );
+
+    const esSearchSpan = finalizeEsSearchSpan();
+
+    return {
+      examples: hits.map((hit) => ({
+        dataset: hit._source.event?.dataset ?? '',
+        message: hit._source.message ?? '',
+        timestamp: hit.sort[0],
+      })),
+      timing: {
+        spans: [esSearchSpan],
+      },
+    };
+  }
+
+  // TODO: Move this elsewhere and have categories and log rate share this method
+  private async fetchMlJob(requestContext: RequestHandlerContext, jobId: string) {
+    const finalizeMlGetJobSpan = startTracingSpan('Fetch ML job from ES');
+
+    const {
+      jobs: [mlJob],
+    } = decodeOrThrow(mlJobsResponseRT)(
+      await this.libs.framework.callWithRequest(
+        requestContext,
+        'transport.request',
+        createMlJobsQuery([logEntryCategoriesCountJobId])
+      )
+    );
+
+    const mlGetJobSpan = finalizeMlGetJobSpan();
+
+    if (mlJob == null) {
+      throw new NoLogAnalysisMlJobError(`Failed to find ml job ${jobId}.`);
+    }
+
+    return {
+      mlJob,
+      timing: {
+        spans: [mlGetJobSpan],
+      },
+    };
+  }
 }
