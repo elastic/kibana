@@ -16,6 +16,12 @@ export const encoding = t.keyof({
   xz: null,
 });
 
+export const manifestVersion = t.string;
+
+export const manifestSchemaVersion = t.keyof({
+  '1.0.0': null,
+});
+
 export const schemaVersion = t.keyof({
   '1.0.0': null,
 });
@@ -23,3 +29,5 @@ export const schemaVersion = t.keyof({
 export const sha256 = t.string;
 
 export const size = t.number;
+
+export const url = t.string;
