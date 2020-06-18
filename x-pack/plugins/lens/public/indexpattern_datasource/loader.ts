@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { SavedObjectsClientContract, SavedObjectAttributes, HttpSetup } from 'kibana/public';
 import { SimpleSavedObject } from 'kibana/public';
 import { StateSetter } from '../types';
@@ -24,6 +25,7 @@ import {
   IFieldType,
   IndexPatternTypeMeta,
 } from '../../../../../src/plugins/data/public';
+import { readFromStorage, writeToStorage } from '../../settings_storage';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -68,22 +70,38 @@ export async function loadIndexPatterns({
   );
 }
 
+const getLastUsedIndexPatternId = (
+  storage: IStorageWrapper,
+  indexPatternRefs: IndexPatternRef[]
+) => {
+  const indexPattern = readFromStorage(storage, 'indexPattern');
+  return indexPattern && indexPatternRefs.find((i) => i.id === indexPattern)?.id;
+};
+
+const setLastUsedIndexPatternId = (storage: IStorageWrapper, value: string) => {
+  writeToStorage(storage, 'indexPattern', value);
+};
+
 export async function loadInitialState({
   state,
   savedObjectsClient,
   defaultIndexPatternId,
+  storage,
 }: {
   state?: IndexPatternPersistedState;
   savedObjectsClient: SavedObjectsClient;
   defaultIndexPatternId?: string;
+  storage: IStorageWrapper;
 }): Promise<IndexPatternPrivateState> {
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
+  const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+
   const requiredPatterns = _.unique(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
           .concat(state.currentIndexPatternId)
-      : [defaultIndexPatternId || indexPatternRefs[0].id]
+      : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0].id]
   );
 
   const currentIndexPatternId = requiredPatterns[0];
@@ -120,12 +138,14 @@ export async function changeIndexPattern({
   state,
   setState,
   onError,
+  storage,
 }: {
   id: string;
   savedObjectsClient: SavedObjectsClient;
   state: IndexPatternPrivateState;
   setState: SetState;
   onError: ErrorHandler;
+  storage: IStorageWrapper;
 }) {
   try {
     const indexPatterns = await loadIndexPatterns({
@@ -145,6 +165,7 @@ export async function changeIndexPattern({
       },
       currentIndexPatternId: id,
     }));
+    setLastUsedIndexPatternId(storage, id);
   } catch (err) {
     onError(err);
   }
@@ -158,6 +179,7 @@ export async function changeLayerIndexPattern({
   setState,
   onError,
   replaceIfPossible,
+  storage,
 }: {
   indexPatternId: string;
   layerId: string;
@@ -166,6 +188,7 @@ export async function changeLayerIndexPattern({
   setState: SetState;
   onError: ErrorHandler;
   replaceIfPossible?: boolean;
+  storage: IStorageWrapper;
 }) {
   try {
     const indexPatterns = await loadIndexPatterns({
@@ -186,6 +209,7 @@ export async function changeLayerIndexPattern({
       },
       currentIndexPatternId: replaceIfPossible ? indexPatternId : s.currentIndexPatternId,
     }));
+    setLastUsedIndexPatternId(storage, indexPatternId);
   } catch (err) {
     onError(err);
   }
