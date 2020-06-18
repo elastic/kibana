@@ -37,9 +37,9 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
 
   const handleCreation = async () => {
     await createAnalyticsJob();
-    setShowProgress(true);
 
     if (checked) {
+      setShowProgress(true);
       startAnalyticsJob();
     }
   };
