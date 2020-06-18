@@ -79,7 +79,7 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
         text: (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.numberOfEvents"
+              id="xpack.securitySolution.endpoint.resolver.panel.processEventCounts.numberOfEvents"
               values={{ totalCount }}
               defaultMessage="{totalCount} Events"
             />
