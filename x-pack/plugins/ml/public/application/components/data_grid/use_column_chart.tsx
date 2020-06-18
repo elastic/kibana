@@ -98,20 +98,15 @@ const getAggIntervals = async (
     return aggs;
   }, {} as Record<string, object>);
 
-  let respStats: any;
-  try {
-    respStats = await esSearch({
-      index: indexPatternTitle,
+  const respStats = await esSearch({
+    index: indexPatternTitle,
+    size: 0,
+    body: {
+      query,
+      aggs: minMaxAggs,
       size: 0,
-      body: {
-        query,
-        aggs: minMaxAggs,
-        size: 0,
-      },
-    });
-  } catch (e) {
-    throw new Error(e);
-  }
+    },
+  });
 
   return Object.keys(respStats.aggregations).reduce((p, aggName) => {
     const stats = [respStats.aggregations[aggName].min, respStats.aggregations[aggName].max];
@@ -199,20 +194,15 @@ export const fetchChartsData = async (
     return [];
   }
 
-  let respChartsData: any;
-  try {
-    respChartsData = await esSearch({
-      index: indexPatternTitle,
+  const respChartsData = await esSearch({
+    index: indexPatternTitle,
+    size: 0,
+    body: {
+      query,
+      aggs: chartDataAggs,
       size: 0,
-      body: {
-        query,
-        aggs: chartDataAggs,
-        size: 0,
-      },
-    });
-  } catch (e) {
-    throw new Error(e);
-  }
+    },
+  });
 
   const chartsData: ChartData[] = columnTypes.map(
     (c): ChartData => {
