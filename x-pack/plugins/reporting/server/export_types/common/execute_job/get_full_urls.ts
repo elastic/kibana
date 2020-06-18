@@ -24,7 +24,7 @@ function isPngJob(
 function isPdfJob(
   job: ScheduledTaskParamsPNG | ScheduledTaskParamsPDF
 ): job is ScheduledTaskParamsPDF {
-  return (job as ScheduledTaskParamsPDF).relativeUrls !== undefined;
+  return (job as ScheduledTaskParamsPDF).objects !== undefined;
 }
 
 export function getFullUrls<ScheduledTaskParamsType>({

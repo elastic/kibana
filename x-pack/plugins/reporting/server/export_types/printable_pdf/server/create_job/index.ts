@@ -21,7 +21,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
   const compatibilityShim = compatibilityShimFactory(logger);
 
   return compatibilityShim(async function createJobFn(
-    { title, relativeUrls, browserTimezone, layout, objectType }: ScheduledTaskParamsPDF,
+    { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,
     context: RequestHandlerContext,
     req: KibanaRequest
   ) {
