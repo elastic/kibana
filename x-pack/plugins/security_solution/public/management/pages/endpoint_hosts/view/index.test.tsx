@@ -175,6 +175,9 @@ describe('when on the hosts page', () => {
           status: overallStatus,
         };
         policyResponse.Endpoint.policy.applied.actions.push(downloadModelAction);
+      } else {
+        // Else, make sure the status of the generated action matches what was passed in
+        downloadModelAction.status = overallStatus;
       }
 
       if (
