@@ -11,10 +11,12 @@ export interface Props {
   placeholder: string;
   ariaLabel: string;
   onChange: (value: string) => void;
+  disabled: boolean;
   text?: string;
 }
 
 export const InlineTextInput: FunctionComponent<Props> = ({
+  disabled,
   placeholder,
   text,
   ariaLabel,
@@ -24,27 +26,28 @@ export const InlineTextInput: FunctionComponent<Props> = ({
   const [textValue, setTextValue] = useState<string>(text ?? '');
 
   const containerClasses = classNames({
-    'pipelineProcessorsEditor__item__textContainer--notEditing': !isShowingTextInput,
+    'pipelineProcessorsEditor__item__textContainer--notEditing': !isShowingTextInput && !disabled,
   });
 
-  const content = isShowingTextInput ? (
-    <EuiFieldText
-      controlOnly
-      fullWidth
-      compressed
-      value={textValue}
-      aria-label={ariaLabel}
-      className="pipelineProcessorsEditor__item__textInput"
-      inputRef={(el) => el?.focus()}
-      onChange={(event) => setTextValue(event.target.value)}
-    />
-  ) : (
-    <EuiText size="s" color="subdued">
-      <div className="pipelineProcessorsEditor__item__description">
-        {text || <em>{placeholder}</em>}
-      </div>
-    </EuiText>
-  );
+  const content =
+    isShowingTextInput && !disabled ? (
+      <EuiFieldText
+        controlOnly
+        fullWidth
+        compressed
+        value={textValue}
+        aria-label={ariaLabel}
+        className="pipelineProcessorsEditor__item__textInput"
+        inputRef={(el) => el?.focus()}
+        onChange={(event) => setTextValue(event.target.value)}
+      />
+    ) : (
+      <EuiText size="s" color="subdued">
+        <div className="pipelineProcessorsEditor__item__description">
+          {text || <em>{placeholder}</em>}
+        </div>
+      </EuiText>
+    );
 
   const submitChange = useCallback(() => {
     setIsShowingTextInput(false);

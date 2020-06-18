@@ -1,10 +1,20 @@
 .pipelineProcessorsEditor__item {
+  transition: border-color 1s;
+  min-height: 50px;
+  &--selected {
+    border: 1px solid $euiColorPrimary;
+  }
+
+  &--dimmed {
+    background-color: $euiColorLightestShade;
+  }
+
   &__textContainer {
     padding: 4px;
     border-radius: 2px;
 
     transition: border-color 0.3s;
-    border: 2px solid #fff;
+    border: 2px solid transparent;
 
     &--notEditing {
       &:hover {

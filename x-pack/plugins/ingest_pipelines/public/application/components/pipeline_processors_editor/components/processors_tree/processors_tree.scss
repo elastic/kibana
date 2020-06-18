@@ -52,12 +52,4 @@
       overflow: visible;
     }
   }
-
-  &__item {
-    transition: border-color 1s;
-    min-height: 50px;
-    &--selected {
-      border: 1px solid $euiColorPrimary;
-    }
-  }
 }

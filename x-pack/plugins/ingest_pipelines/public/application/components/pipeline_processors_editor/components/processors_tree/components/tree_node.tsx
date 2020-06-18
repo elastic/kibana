@@ -5,9 +5,8 @@
  */
 
 import React, { FunctionComponent, useMemo } from 'react';
-import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
 import { ProcessorInternal } from '../../../types';
 
@@ -47,12 +46,6 @@ export const TreeNode: FunctionComponent<Props> = ({
     };
   }, [onAction, stringSelector, processor]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const selected = movingProcessor?.id === processor.id;
-
-  const panelClasses = classNames({
-    'pipelineProcessorsEditor__tree__item--selected': selected,
-  });
-
   const renderOnFailureHandlersTree = () => {
     if (!processor.onFailure?.length) {
       return;
@@ -88,15 +81,15 @@ export const TreeNode: FunctionComponent<Props> = ({
   };
 
   return (
-    <EuiPanel className={`pipelineProcessorsEditor__tree__item ${panelClasses}`} paddingSize="s">
+    <>
       <PipelineProcessorsEditorItem
+        movingProcessor={movingProcessor}
         selector={processorInfo.selector}
         processor={processor}
         handlers={handlers}
         description={processor.options.description}
-        selected={Boolean(movingProcessor?.id === processor.id)}
       />
       {renderOnFailureHandlersTree()}
-    </EuiPanel>
+    </>
   );
 };
