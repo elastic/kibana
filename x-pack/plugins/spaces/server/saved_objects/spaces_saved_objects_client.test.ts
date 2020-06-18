@@ -131,7 +131,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       test(`passes options.type to baseClient if valid singular type specified`, async () => {
         const { client, baseClient } = await createSpacesSavedObjectsClient();
         const expectedReturnValue = {
-          saved_objects: [createMockResponse()],
+          saved_objects: [createMockResponse()].map((obj) => ({ ...obj, score: 1 })),
           total: 1,
           per_page: 0,
           page: 0,
@@ -151,7 +151,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       test(`supplements options with the current namespace`, async () => {
         const { client, baseClient } = await createSpacesSavedObjectsClient();
         const expectedReturnValue = {
-          saved_objects: [createMockResponse()],
+          saved_objects: [createMockResponse()].map((obj) => ({ ...obj, score: 1 })),
           total: 1,
           per_page: 0,
           page: 0,

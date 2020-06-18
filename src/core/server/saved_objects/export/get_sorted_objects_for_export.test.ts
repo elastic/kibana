@@ -47,6 +47,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '2',
           type: 'search',
           attributes: {},
+          score: 1,
           references: [
             {
               name: 'name',
@@ -59,6 +60,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '1',
           type: 'index-pattern',
           attributes: {},
+          score: 1,
           references: [],
         },
       ],
@@ -221,6 +223,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '2',
           type: 'search',
           attributes: {},
+          score: 1,
           references: [
             {
               name: 'name',
@@ -233,6 +236,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '1',
           type: 'index-pattern',
           attributes: {},
+          score: 1,
           references: [],
         },
       ],
@@ -280,6 +284,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '2',
           type: 'search',
           attributes: {},
+          score: 1,
           references: [
             {
               name: 'name',
@@ -292,6 +297,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '1',
           type: 'index-pattern',
           attributes: {},
+          score: 1,
           references: [],
         },
       ],
@@ -367,6 +373,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '2',
           type: 'search',
           attributes: {},
+          score: 1,
           references: [
             {
               name: 'name',
@@ -379,6 +386,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '1',
           type: 'index-pattern',
           attributes: {},
+          score: 1,
           references: [],
         },
       ],
@@ -456,6 +464,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '2',
           type: 'search',
           attributes: {},
+          score: 1,
           references: [
             {
               type: 'index-pattern',
@@ -468,6 +477,7 @@ describe('getSortedObjectsForExport()', () => {
           id: '1',
           type: 'index-pattern',
           attributes: {},
+          score: 1,
           references: [],
         },
       ],
@@ -495,6 +505,7 @@ describe('getSortedObjectsForExport()', () => {
           attributes: {
             name: 'baz',
           },
+          score: 1,
           references: [],
         },
         {
@@ -503,6 +514,7 @@ describe('getSortedObjectsForExport()', () => {
           attributes: {
             name: 'foo',
           },
+          score: 1,
           references: [],
         },
         {
@@ -511,6 +523,7 @@ describe('getSortedObjectsForExport()', () => {
           attributes: {
             name: 'bar',
           },
+          score: 1,
           references: [],
         },
       ],

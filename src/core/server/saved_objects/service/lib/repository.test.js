@@ -1955,7 +1955,7 @@ describe('SavedObjectsRepository', () => {
             {
               _index: '.kibana',
               _id: `${namespace ? `${namespace}:` : ''}config:6.0.0-alpha1`,
-              _score: 1,
+              _score: 2,
               ...mockVersionProps,
               _source: {
                 namespace,
@@ -1970,7 +1970,7 @@ describe('SavedObjectsRepository', () => {
             {
               _index: '.kibana',
               _id: `${namespace ? `${namespace}:` : ''}index-pattern:stocks-*`,
-              _score: 1,
+              _score: 3,
               ...mockVersionProps,
               _source: {
                 namespace,
@@ -1986,7 +1986,7 @@ describe('SavedObjectsRepository', () => {
             {
               _index: '.kibana',
               _id: `${NAMESPACE_AGNOSTIC_TYPE}:something`,
-              _score: 1,
+              _score: 4,
               ...mockVersionProps,
               _source: {
                 type: NAMESPACE_AGNOSTIC_TYPE,
@@ -2147,6 +2147,7 @@ describe('SavedObjectsRepository', () => {
             type: doc._source.type,
             ...mockTimestampFields,
             version: mockVersion,
+            score: doc._score,
             attributes: doc._source[doc._source.type],
             references: [],
             namespaces: doc._source.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : ['default'],
@@ -2170,6 +2171,7 @@ describe('SavedObjectsRepository', () => {
             type: doc._source.type,
             ...mockTimestampFields,
             version: mockVersion,
+            score: doc._score,
             attributes: doc._source[doc._source.type],
             references: [],
             namespaces: doc._source.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],

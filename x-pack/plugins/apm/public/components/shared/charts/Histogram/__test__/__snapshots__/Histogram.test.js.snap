@@ -114,7 +114,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -125,9 +125,9 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
-                  0.0 ms
+                  0 ms
                 </text>
               </g>
               <g
@@ -149,7 +149,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -160,9 +160,9 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
-                  500.0 ms
+                  500 ms
                 </text>
               </g>
               <g
@@ -184,7 +184,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -195,9 +195,9 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
-                  1,000.0 ms
+                  1,000 ms
                 </text>
               </g>
               <g
@@ -219,7 +219,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -230,9 +230,9 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
-                  1,500.0 ms
+                  1,500 ms
                 </text>
               </g>
               <g
@@ -254,7 +254,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -265,9 +265,9 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
-                  2,000.0 ms
+                  2,000 ms
                 </text>
               </g>
               <g
@@ -289,7 +289,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -300,9 +300,9 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
-                  2,500.0 ms
+                  2,500 ms
                 </text>
               </g>
               <g
@@ -324,7 +324,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -335,9 +335,9 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
-                  3,000.0 ms
+                  3,000 ms
                 </text>
               </g>
             </g>
@@ -371,7 +371,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
-                  0.0 occ.
+                  0 occ.
                 </text>
               </g>
               <g
@@ -394,7 +394,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
-                  27.5 occ.
+                  28 occ.
                 </text>
               </g>
               <g
@@ -417,7 +417,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
-                  55.0 occ.
+                  55 occ.
                 </text>
               </g>
             </g>
@@ -1477,7 +1477,7 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
         <div
           className="c1"
         >
-          811.1 - 926.9 ms
+          811 - 927 ms
         </div>
       </styled.div>
       <styled.div>
@@ -1488,7 +1488,7 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
             <div
               className="c3"
             >
-              49.0 occurrences
+              49 occurrences
             </div>
           </styled.div>
         </div>
