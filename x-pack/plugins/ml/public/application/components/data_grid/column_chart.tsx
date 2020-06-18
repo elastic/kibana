@@ -17,15 +17,16 @@ import { isUnsupportedChartData, useColumnChart, ChartData } from './use_column_
 interface Props {
   chartData: ChartData;
   columnType: EuiDataGridColumn;
+  dataTestSubj: string;
 }
 
-export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
+export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj }) => {
   const { data, legendText, xScaleType } = useColumnChart(chartData, columnType);
 
   return (
-    <>
+    <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
-        <div className="mlDataGridChart__histogram">
+        <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
             <Settings
               theme={{
@@ -62,10 +63,11 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
         className={classNames('mlDataGridChart__legend', {
           'mlDataGridChart__legend--numeric': columnType.schema === 'number',
         })}
+        data-test-subj={`${dataTestSubj}-legend`}
       >
         {legendText}
       </div>
-      {columnType.id}
-    </>
+      <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>
+    </div>
   );
 };

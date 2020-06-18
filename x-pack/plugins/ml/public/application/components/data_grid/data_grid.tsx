@@ -194,9 +194,11 @@ export const DataGrid: FC<Props> = memo(
                 ? {
                     additionalControls: (
                       <EuiButtonEmpty
+                        aria-checked={chartsVisible}
                         className={`euiDataGrid__controlBtn${
                           chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
                         }`}
+                        data-test-subj={`${dataTestSubj}HistogramButton`}
                         size="xs"
                         iconType="visBarVertical"
                         color="text"

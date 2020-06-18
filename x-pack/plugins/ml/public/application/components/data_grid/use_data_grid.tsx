@@ -97,14 +97,18 @@ export const useDataGrid = (
   return {
     chartsVisible,
     chartsButtonVisible: true,
-    columnsWithCharts: columns.map((c) => {
+    columnsWithCharts: columns.map((c, index) => {
       const chartData = columnCharts.find((cd) => cd.id === c.id);
 
       return {
         ...c,
         display:
           chartData !== undefined && chartsVisible === true ? (
-            <ColumnChart chartData={chartData} columnType={c} />
+            <ColumnChart
+              chartData={chartData}
+              columnType={c}
+              dataTestSubj={`mlDataGridChart-${index}`}
+            />
           ) : undefined,
       };
     }),
