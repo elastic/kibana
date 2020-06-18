@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce, pick } from 'lodash';
+import { debounce, pick, omit } from 'lodash';
 import * as rt from 'io-ts';
 import { HttpSetup } from 'src/core/public';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
@@ -71,6 +71,7 @@ const defaultExpression = {
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
+export { defaultExpression };
 
 async function getAlertPreview({
   fetch,
@@ -481,7 +482,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 id="selectPreviewLookbackInterval"
                 value={previewLookbackInterval}
                 onChange={onSelectPreviewLookbackInterval}
-                options={previewOptions}
+                options={previewDOMOptions}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -642,6 +643,7 @@ const previewOptions = [
     }),
   },
 ];
+const previewDOMOptions = previewOptions.map((o) => omit(o, 'shortText'));
 
 const firedTimeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTime', {
   defaultMessage: 'time',
