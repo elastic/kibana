@@ -1,26 +1,203 @@
 [[whats-new]]
-== What's new in {minor-version}
+== What's new in {kib} {minor-version}
+++++
+<titleabbrev>What's new in {minor-version}</titleabbrev>
+++++
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release, check out the
+{kibana-ref-all}/7.8/release-notes-7.8.0.html[release notes]
+and {kibana-ref-all}/7.8/breaking-changes-7.8.html[breaking changes].
 
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
+Other versions: {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
+{kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
+| {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
-For the full list of changes in {minor-version}, see <<release-notes>> and
-<<breaking-changes>>. 
 
-coming[7.8.0]
+
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
 
+[float]
+[[navigation-7-8]]
+=== Side navigation organized by use cases
+
+{kib} has a cleaner, more organized side navigation
+for getting you where you need to go. For example, when you're
+ready to work with your logs, metrics, APM, or Uptime data,
+you'll find the apps you need under *Observability*.
+The side navigation also includes
+*Recently viewed* to easily
+access previously opened apps.
+
+Hidden by default, the sidebar is accessible
+with a single click on the hamburger menu.  Use the *Dock Navigation* link
+at the bottom of the sidebar to keep the navigation visible.
+
+[role="screenshot"]
+image:images/whats-new/7-8-navigation.png[Kibana side navigation organized by category]
+
+[float]
+[[dashboard-first-7-8]]
+=== Dashboard-first experience
+
+In 7.7, {kibana-ref}/dashboard-create-new-dashboard.html[dashboards] became a starting point for
+creating visualizations.
+Building on that experience, this release introduces a simplified workflow
+for editing a dashboard.
+You can now open the visualization editor directly from the dashboard, and then
+automatically return to the dashboard when you save the changes.
+This workflow keeps you focused on analyzing the data.
+
+[role="screenshot"]
+image:images/whats-new/7-8-dashboard-first.png[Edit visualization from dashboard]
+
+[float]
+[[dashboard-to-dashboard-7-8]]
+=== Dashboard-to-dashboard drilldowns
+
+With 7.8, {kib} delivers {kibana-ref}/drilldowns.html[drilldowns], which enable you to create
+custom navigation paths between dashboards. Drilldowns
+work well when you have multiple dashboards that support different audiences
+or provide different levels of analysis. For example, you might
+have a dashboard that shows the overall status of multiple data centers,
+and then create a drilldown that navigates to a dashboard for a single data center.
+Drilldown paths are available to all users who view the dashboard.
+
+[role="screenshot"]
+image::drilldowns/images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
+
+[float]
+[[dashboard-clone-7-8]]
+=== Cloning of dashboard elements
+{kib} now lets you {kibana-ref}/dashboard-create-new-dashboard.html#cloning-a-panel[create an identical copy] of
+any panel on the dashboard.
+You can modify the visualization in the new panel as needed, and then save your changes.
+Cloning enables you to quickly view your data from a
+new perspective.
+
+[role="screenshot"]
+image:images/clone_panel.gif[clone panel]
+
+
+[float]
+[[lens-7-8]]
+=== New visualizations for Lens
+
+{kibana-ref}/lens.html[Lens] introduces three new visualization types: pie chart, donut chart, and treemap.  New
+to {kib}, treemaps provide a hierarchical view of your data and are good for visualizing part-to-whole relationships.
+
+[role="screenshot"]
+image:images/whats-new/7-8-treemap.png[Treemap visualization]
+
+
+[float]
+[[canvas-7-8]]
+=== Menu updates for Canvas
+
+{kibana-ref}/lens.html[Canvas] has a new top-level menu that makes it easier for
+you to find the options to create, customize, and share your workpads.
+
+[role="screenshot"]
+image:images/whats-new/7-8-canvas.png[Top-level menu in Canvas]
+
+[float]
+[[maps-7-8]]
+=== Dedicated solution layer for Maps
+
+{kibana-ref}/maps.html[Maps] has a new Observability layer that supports real user monitoring (RUM) data.
+You're presented with the Observability option if you have APM indices
+in the {ecs-ref}/ecs-reference.html[Elastic Common Schema].
+You can then select either
+APM RUM Performance or APM RUM Traffic, and Maps
+overlays that layer on your geoanalysis.
+
+[role="screenshot"]
+image:images/whats-new/7-8-maps.png[Observability layer for Maps]
+
+
+[float]
+[[ingest-node-pipeline-7-8]]
+=== Ingest Node Pipelines builder
+
+Ingesting data into the Elastic Stack
+is easier with the new {kibana-ref}/ingest-node-pipelines.html[Ingest Node Pipelines builder].
+This UI shows all your
+data piplelines in a single view and enables you to drill down into details.
+You can create a pipeline and define the tasks it performs, such
+as renaming an existing field or setting a new field.
+You can also test how a pipeline and its processors
+transform data before putting it into production.
+
+[role="screenshot"]
+image:management/ingest-pipelines/images/ingest-pipeline-processor.png["Processors for Ingest Node Pipelines"]
+
+[float]
+[[alerting-7-8]]
+=== Preconfigured connectors for alerting
+
+In 7.7, {kib} introduced a new system for handing alerts, and this release adds support for
+{kibana-ref}/pre-configured-action-types-and-connectors.html[preconfigured connectors], which
+automatically start up with {kib}.
+This capability enables you to pre-plumb alert connections
+directly into Slack channels and designated email services.
+Preconfigured connectors are available in every {kib} space, and require no additional
+configuration after initialization.
+
+
+[role="screenshot"]
+image::user/alerting/images/pre-configured-connectors-managing.png[Connectors managing tab with pre-cofigured]
+
+[float]
+[[embed-swim-lanes-7-8]]
+=== Embeddable machine learning swim lanes
+
+In 7.8, you can view anomalies alongside your source data in a {kib} dashboard
+with embedded swim lanes. From the *Add panel* menu, you can select the jobs of
+interest, decide whether to view an overall score or split by job or influencer,
+and choose the number of lanes to display.
+
+[role="screenshot"]
+image:images/whats-new/7-8-swim-lane.png[Embed swim lanes in dashboards]
+
+[float]
+[[file-upload-7-8]]
+=== Increased limit for file upload
+
+The upload limit for the File Data Visualizer increased from 100 MB to 1 GB,
+so you can now upload larger CSV, JSON, and log files.
+To configure this value, go to
+{kibana-ref}/advanced-options.html#kibana-ml-settings[Advanced Settings].
+
+[role="screenshot"]
+image::images/add-data-fv.png[File Data Visualizer]
+
+[float]
+[[logon-7-8]]
+=== Customization of login experience
+
+Kibana now offers two ways to customize the login experience.
+Before starting {kib}, you can show a screen specific to your requirements,
+for example, if users must agree to
+certain terms and conditions.
+You can also modify the login screen:
+edit the text for password hints, customize the icons for SSO options,
+and add messages and prompts.
+
+[role="screenshot"]
+image::images/whats-new/7-8-login.png[Customized login screen]
+
+
 // end::notable-highlights[]
+
+[float]
+=== Give {minor-version} a try
+
+Try {minor-version} now by deploying {es} and {kib} on
+https://www.elastic.co/cloud/elasticsearch-service/signup[Elastic Cloud] or
+by https://www.elastic.co/start[downloading them].
+Let us know what you think on Twitter https://twitter.com/elastic[(@elastic)]
+or in our https://discuss.elastic.co/c/elasticsearch[forum].
