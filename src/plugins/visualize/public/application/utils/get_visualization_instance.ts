@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { VisSavedObject, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
 import { SearchSourceFields } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
@@ -32,6 +33,7 @@ export const getVisualizationInstance = async (
     createVisEmbeddableFromObject,
     savedObjects,
     savedVisualizations,
+    toastNotifications,
   }: VisualizeServices,
   /**
    * opts can be either a saved visualization id passed as string,
@@ -61,6 +63,16 @@ export const getVisualizationInstance = async (
     filters: data.query.filterManager.getFilters(),
     id: '',
   })) as VisualizeEmbeddableContract;
+
+  embeddableHandler.getOutput$().subscribe((output) => {
+    if (output.error) {
+      toastNotifications.addError(output.error, {
+        title: i18n.translate('visualize.error.title', {
+          defaultMessage: 'Visualization error',
+        }),
+      });
+    }
+  });
 
   let savedSearch: SavedObject | undefined;
 
