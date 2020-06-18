@@ -20,7 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 import { ConfigSchema } from '../config';
 import { IndexPatternsService } from './index_patterns';
-import { ISearchSetup } from './search';
+import { ISearchSetup, ISearchStart } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
@@ -36,6 +36,7 @@ export interface DataPluginSetup {
 }
 
 export interface DataPluginStart {
+  search: ISearchStart;
   fieldFormats: FieldFormatsStart;
 }
 
@@ -59,7 +60,10 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
-  public setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<object, DataPluginStart>,
+    { usageCollection }: DataPluginSetupDependencies
+  ) {
     this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
     this.queryService.setup(core);
@@ -69,13 +73,14 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     core.uiSettings.register(getUiSettings());
 
     return {
-      fieldFormats: this.fieldFormats.setup(),
       search: this.searchService.setup(core),
+      fieldFormats: this.fieldFormats.setup(),
     };
   }
 
   public start(core: CoreStart) {
     return {
+      search: this.searchService.start(),
       fieldFormats: this.fieldFormats.start(),
     };
   }

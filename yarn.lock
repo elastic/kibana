@@ -2100,11 +2100,13 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.3.0"
 
-"@elastic/charts@19.2.0":
-  version "19.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-19.2.0.tgz#45db8c80e4699e5088a1771f190171c1144c5242"
-  integrity sha512-uhk73OQPaxg7l54gfr+kv+c6jiEngewwH408OySzJbnH23z/5sIpLSziZhV33I6bs/LKDXQSqamC9Jh6Xcwk1A==
+"@elastic/charts@19.5.2":
+  version "19.5.2"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-19.5.2.tgz#6117f7b3acce6deef0a4f272ae491d99d2e3b1e0"
+  integrity sha512-6GdqwVrDwQu+h5GUXpwy9a8dQ66oTNl3SO+ih1sljWvni+f/wcsrRcCTJUP99vtUcPQ8BT9Pn79QknBk1ZOH5Q==
   dependencies:
+    "@popperjs/core" "^2.4.0"
+    chroma-js "^2.1.0"
     classnames "^2.2.6"
     d3-array "^1.2.4"
     d3-collection "^1.0.7"
@@ -3347,6 +3349,11 @@
     retry-axios "^1.0.1"
     which "^2.0.1"
     winston "^3.0.0"
+
+"@popperjs/core@^2.4.0":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.4.2.tgz#7c6dc4ecef16149fd7a736710baa1b811017fdca"
+  integrity sha512-JlGTGRYHC2QK+DDbePyXdBdooxFq2+noLfWpRqJtkxcb/oYWzOF0kcbfvvbWrwevCC1l6hLUg1wHYT+ona5BWQ==
 
 "@reach/router@^1.2.1":
   version "1.2.1"
@@ -4795,6 +4802,11 @@
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/delete-empty/-/delete-empty-2.0.0.tgz#1647ae9e68f708a6ba778531af667ec55bc61964"
   integrity sha512-sq+kwx8zA9BSugT9N+Jr8/uWjbHMZ+N/meJEzRyT3gmLq/WMtx/iSIpvdpmBUi/cvXl6Kzpvve8G2ESkabFwmg==
+
+"@types/dragselect@^1.13.1":
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/@types/dragselect/-/dragselect-1.13.1.tgz#f19b7b41063a7c9d5963194c83c3c364e84d46ee"
+  integrity sha512-3m0fvSM0cSs0DXvprytV/ZY92hNX3jJuEb/vkdqU+4QMzV2jxYKgBFTuaT2fflqbmfzUqHHIkGP55WIuigElQw==
 
 "@types/elasticsearch@^5.0.33":
   version "5.0.33"
@@ -6395,6 +6407,13 @@ abort-controller@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/abort-controller/-/abort-controller-2.0.3.tgz#b174827a732efadff81227ed4b8d1cc569baf20a"
   integrity sha512-EPSq5wr2aFyAZ1PejJB32IX9Qd4Nwus+adnp7STYFM5/23nLPBazqZ1oor6ZqbH+4otaaGXTlC8RN5hq3C8w9Q==
+  dependencies:
+    event-target-shim "^5.0.0"
+
+abort-controller@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/abort-controller/-/abort-controller-3.0.0.tgz#eaf54d53b62bae4138e809ca225c8439a6efb392"
+  integrity sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==
   dependencies:
     event-target-shim "^5.0.0"
 
@@ -9780,7 +9799,7 @@ chroma-js@^1.4.1:
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-1.4.1.tgz#eb2d9c4d1ff24616be84b35119f4d26f8205f134"
   integrity sha512-jTwQiT859RTFN/vIf7s+Vl/Z2LcMrvMv3WUFmd/4u76AdlFC0NTNgqEEFPcRiHmAswPsMiQEDZLM8vX8qXpZNQ==
 
-chroma-js@^2.0.4:
+chroma-js@^2.0.4, chroma-js@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.1.0.tgz#c0be48a21fe797ef8965608c1c4f911ef2da49d5"
   integrity sha512-uiRdh4ZZy+UTPSrAdp8hqEdVb1EllLtTHOt5TMaOjJUvi+O54/83Fc5K2ld1P+TJX+dw5B+8/sCgzI6eaur/lg==
@@ -25625,14 +25644,6 @@ react-textarea-autosize@^7.1.0:
     "@babel/runtime" "^7.1.2"
     prop-types "^15.6.0"
 
-react-textarea-autosize@^7.1.2:
-  version "7.1.2"
-  resolved "https://registry.yarnpkg.com/react-textarea-autosize/-/react-textarea-autosize-7.1.2.tgz#70fdb333ef86bcca72717e25e623e90c336e2cda"
-  integrity sha512-uH3ORCsCa3C6LHxExExhF4jHoXYCQwE5oECmrRsunlspaDAbS4mGKNlWZqjLfInWtFQcf0o1n1jC/NGXFdUBCg==
-  dependencies:
-    "@babel/runtime" "^7.1.2"
-    prop-types "^15.6.0"
-
 react-tiny-virtual-list@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/react-tiny-virtual-list/-/react-tiny-virtual-list-2.2.0.tgz#eafb6fcf764e4ed41150ff9752cdaad8b35edf4a"
@@ -27880,30 +27891,10 @@ simplebar-react@^1.0.0-alpha.6:
     prop-types "^15.6.1"
     simplebar "^4.2.0"
 
-simplebar-react@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/simplebar-react/-/simplebar-react-2.1.0.tgz#57d524f4253579d81ac30db00acf7886b17bf826"
-  integrity sha512-UIMFPNkn6o57v058vPOiYbnbpc1CUZwPKLmQaDMvEJdgm+btZ2umFA6meXfiqFEQUjDE6Vq4ePnL7Fr6nzJd8w==
-  dependencies:
-    prop-types "^15.6.1"
-    simplebar "^5.1.0"
-
 simplebar@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/simplebar/-/simplebar-4.2.0.tgz#97e5c1c85d05cc04f8c92939e4da71dd087e325c"
   integrity sha512-FqPl3FtO0ODIKHMJy2WsunqA+I0/hvw/dnHgackaXGwSP9FO7Y5APH1miPGVCsoGNFCK+v0MXL38f8Epe3qeBw==
-  dependencies:
-    can-use-dom "^0.1.0"
-    core-js "^3.0.1"
-    lodash.debounce "^4.0.8"
-    lodash.memoize "^4.1.2"
-    lodash.throttle "^4.1.1"
-    resize-observer-polyfill "^1.5.1"
-
-simplebar@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/simplebar/-/simplebar-5.1.0.tgz#15437ace314ec888accd7d8f24ada672e9bb2717"
-  integrity sha512-bdi1SleK1YOSnfeUjo5UQXt/79zNjsCJVEfzrm6photmGi2aU6x0l7rX4KAGcrtj5AwsWPBVXgDyYAqbbpnuRg==
   dependencies:
     can-use-dom "^0.1.0"
     core-js "^3.0.1"
