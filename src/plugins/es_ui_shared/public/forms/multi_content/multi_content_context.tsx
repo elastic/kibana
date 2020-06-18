@@ -50,7 +50,7 @@ export function useMultiContentContext<T extends object = { [key: string]: any }
 }
 
 /**
- * Hook to declare a new content and get its defaultValud and a handler to update its content
+ * Hook to declare a new content and get its defaultValue and a handler to update its content
  *
  * @param contentId The content id to be added to the "contents" map
  */
