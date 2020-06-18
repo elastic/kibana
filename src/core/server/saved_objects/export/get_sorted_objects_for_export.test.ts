@@ -125,6 +125,94 @@ describe('getSortedObjectsForExport()', () => {
     `);
   });
 
+  test('omits the `namespaces` property from the export', async () => {
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          attributes: {},
+          namespaces: ['foo', 'bar'],
+          references: [
+            {
+              name: 'name',
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {},
+          namespaces: ['foo', 'bar'],
+          references: [],
+        },
+      ],
+      per_page: 1,
+      page: 0,
+    });
+    const exportStream = await exportSavedObjectsToStream({
+      savedObjectsClient,
+      exportSizeLimit: 500,
+      types: ['index-pattern', 'search'],
+    });
+
+    const response = await readStreamToCompletion(exportStream);
+
+    expect(response).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "name",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "search",
+        },
+        Object {
+          "exportedCount": 2,
+          "missingRefCount": 0,
+          "missingReferences": Array [],
+        },
+      ]
+    `);
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "namespaces": undefined,
+              "perPage": 500,
+              "search": undefined,
+              "type": Array [
+                "index-pattern",
+                "search",
+              ],
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
+  });
+
   test('exclude export details if option is specified', async () => {
     savedObjectsClient.find.mockResolvedValueOnce({
       total: 2,

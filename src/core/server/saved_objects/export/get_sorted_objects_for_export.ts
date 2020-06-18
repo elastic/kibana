@@ -159,10 +159,15 @@ export async function exportSavedObjectsToStream({
     exportedObjects = sortObjects(rootObjects);
   }
 
+  // redact attributes that should not be exported
+  const redactedObjects = exportedObjects.map<SavedObject<unknown>>(
+    ({ namespaces, ...object }) => object
+  );
+
   const exportDetails: SavedObjectsExportResultDetails = {
     exportedCount: exportedObjects.length,
     missingRefCount: missingReferences.length,
     missingReferences,
   };
-  return createListStream([...exportedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
+  return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
 }
