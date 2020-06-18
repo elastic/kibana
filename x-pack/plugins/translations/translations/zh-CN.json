@@ -16029,7 +16029,6 @@
     "xpack.transform.transformList.transformDetails.messagesPane.timeLabel": "时间",
     "xpack.transform.transformList.transformDetails.tabs.transformMessagesLabel": "消息",
     "xpack.transform.transformList.transformDetails.tabs.transformPreviewLabel": "预览",
-    "xpack.transform.transformList.transformDetails.tabs.transformSettingsLabel": "作业详情",
     "xpack.transform.transformList.transformDocsLinkText": "转换文档",
     "xpack.transform.transformList.transformTitle": "数据帧作业",
     "xpack.transform.transformsDescription": "使用转换将现有 Elasticsearch 索引透视成摘要式或以实体为中心的索引。",

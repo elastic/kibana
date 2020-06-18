@@ -16024,7 +16024,6 @@
     "xpack.transform.transformList.transformDetails.messagesPane.timeLabel": "時間",
     "xpack.transform.transformList.transformDetails.tabs.transformMessagesLabel": "メッセージ",
     "xpack.transform.transformList.transformDetails.tabs.transformPreviewLabel": "プレビュー",
-    "xpack.transform.transformList.transformDetails.tabs.transformSettingsLabel": "ジョブの詳細",
     "xpack.transform.transformList.transformDocsLinkText": "変換ドキュメント",
     "xpack.transform.transformList.transformTitle": "データフレームジョブ",
     "xpack.transform.transformsDescription": "変換を使用して、集約されたインデックスまたはエンティティ中心のインデックスに、既存のElasticsearchインデックスをインデックスします。",
