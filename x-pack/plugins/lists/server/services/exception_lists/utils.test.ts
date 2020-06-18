@@ -54,12 +54,12 @@ describe('utils', () => {
       expect(comments).toEqual([
         {
           comment: 'Im an old comment',
-          created_at: '2020-06-17T20:34:51.337Z',
+          created_at: anchor,
           created_by: 'lily',
         },
         {
           comment: 'Im a new comment',
-          created_at: '2020-06-17T20:34:51.337Z',
+          created_at: anchor,
           created_by: 'lily',
         },
       ]);
@@ -81,17 +81,17 @@ describe('utils', () => {
       expect(comments).toEqual([
         {
           comment: 'Im an old comment',
-          created_at: '2020-06-17T20:34:51.337Z',
+          created_at: anchor,
           created_by: 'lily',
         },
         {
           comment: 'Im a new comment',
-          created_at: '2020-06-17T20:34:51.337Z',
+          created_at: anchor,
           created_by: 'lily',
         },
         {
           comment: 'Im another new comment',
-          created_at: '2020-06-17T20:34:51.337Z',
+          created_at: anchor,
           created_by: 'lily',
         },
       ]);
@@ -109,7 +109,7 @@ describe('utils', () => {
       expect(comments).toEqual([
         {
           comment: 'Im an old comment',
-          created_at: '2020-06-17T20:34:51.337Z',
+          created_at: anchor,
           created_by: 'lily',
         },
       ]);
@@ -135,10 +135,28 @@ describe('utils', () => {
           comment: 'Im an old comment that is trying to be updated',
           created_at: DATE_NOW,
           created_by: 'lily',
-          updated_at: '2020-06-17T20:34:51.337Z',
+          updated_at: anchor,
           updated_by: 'lily',
         },
       ]);
+    });
+
+    test('it throws an error if user tries to update their comment, without passing in the "created_at" and "created_by" properties', () => {
+      expect(() =>
+        transformUpdateCommentsToComments({
+          comments: [
+            {
+              comment: 'Im an old comment that is trying to be updated',
+            },
+          ],
+          existingComments: [
+            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+          ],
+          user: 'lily',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"When trying to update a comment, \\"created_at\\" and \\"created_by\\" must be present"`
+      );
     });
 
     test('it throws an error if user tries to delete comments', () => {
@@ -209,7 +227,9 @@ describe('utils', () => {
           ],
           user: 'lily',
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Only new comments may be added"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"When trying to update a comment, \\"created_at\\" and \\"created_by\\" must be present"`
+      );
     });
 
     test('it throws an error if user tries to add comment formatted as existing comment when none yet exist', () => {
@@ -245,12 +265,12 @@ describe('utils', () => {
       expect(comments).toEqual([
         {
           comment: 'Im a new comment',
-          created_at: '2020-06-17T20:34:51.337Z',
+          created_at: anchor,
           created_by: 'lily',
         },
         {
           comment: 'Im another new comment',
-          created_at: '2020-06-17T20:34:51.337Z',
+          created_at: anchor,
           created_by: 'lily',
         },
       ]);
@@ -272,7 +292,7 @@ describe('utils', () => {
         comment: 'Im an old comment that is trying to be updated',
         created_at: '2020-04-20T15:25:31.830Z',
         created_by: 'lily',
-        updated_at: '2020-06-17T20:34:51.337Z',
+        updated_at: anchor,
         updated_by: 'lily',
       });
     });

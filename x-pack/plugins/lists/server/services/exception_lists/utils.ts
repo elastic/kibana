@@ -288,7 +288,12 @@ export const transformUpdateCommentsToComments = ({
     return newComments.flatMap((c, index) => {
       const existingComment = existingComments[index];
 
-      if (commentsSchema.is(c) && existingComment == null) {
+      if (commentsSchema.is(existingComment) && !commentsSchema.is(c)) {
+        throw new ErrorWithStatusCode(
+          'When trying to update a comment, "created_at" and "created_by" must be present',
+          403
+        );
+      } else if (commentsSchema.is(c) && existingComment == null) {
         throw new ErrorWithStatusCode('Only new comments may be added', 403);
       } else if (
         commentsSchema.is(c) &&
