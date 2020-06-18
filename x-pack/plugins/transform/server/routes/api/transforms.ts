@@ -297,7 +297,7 @@ async function deleteTransforms(
   transformsInfo: TransformEndpointRequest[],
   deleteDestIndex: boolean | undefined,
   deleteDestIndexPattern: boolean | undefined,
-  shouldForceDelete: boolean | undefined,
+  shouldForceDelete: boolean = false,
   ctx: RequestHandlerContext,
   license: RouteDependencies['license'],
   response: KibanaResponseFactory
