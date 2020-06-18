@@ -93,22 +93,6 @@ export const searchAfterAndBulkCreate = async ({
   let searchResultSize = 0;
 
   /*
-
-  from: 'now'
-  to: 'now-6m'
-  gap: 3m
-  from: 'now'
-  to: 'now-9m'
-
-
-  gap 3m
-  from: 'now'
-  to: 'now-6m'
-
-  from'now-6m'
-  to: '6m-9m'
-
-
     The purpose of `maxResults` is to ensure we do not perform
     extra search_after's. This will be reset on each
     iteration, although it really only matters for the first
@@ -122,28 +106,22 @@ export const searchAfterAndBulkCreate = async ({
     we only want 500. So maxResults will help us control how
     many times we perform a search_after
   */
-  // const maxResults = ruleParams.maxSignals;
 
   const totalToFromTuples = getSignalTimeTuples({
     logger,
-    ruleParams,
+    ruleParamsFrom: ruleParams.from,
+    ruleParamsTo: ruleParams.to,
+    ruleParamsMaxSignals: ruleParams.maxSignals,
     gap,
     previousStartedAt,
     interval,
-    // maxResults,
   });
 
-  // I think we can remove this maxResults thing and just iterate over the tuples
-  // which will clean things up nicely.
-  // while (searchResultSize < maxResults) {
-  logger.debug(`totalToFromTuples.length: ${totalToFromTuples.length}`);
-  // totalToFromTuples.reverse();
   logger.debug(
     `${JSON.stringify(totalToFromTuples, (_, value) => (value === 'undefined' ? null : value), 4)}`
   );
   const useSortIds = totalToFromTuples.length <= 1;
   while (totalToFromTuples.length > 0) {
-    // await totalToFromTuples.forEach(async (tuple) => {
     const tuple = totalToFromTuples.pop();
     if (tuple == null || tuple.to == null || tuple.from == null) {
       logger.error(`[-] malformed date tuple`);
@@ -185,15 +163,7 @@ export const searchAfterAndBulkCreate = async ({
         logger.debug(`totalHits: ${totalHits}`);
         logger.debug(`searchResult.hit.hits.length: ${searchResult.hits.hits.length}`);
 
-        // re-calculate maxResults to ensure if our search results
-        // are less than max signals, we are not attempting to
-        // create more signals than there are total search results.
-        // maxResults = Math.min(totalHits, ruleParams.maxSignals);
         searchResultSize += searchResult.hits.hits.length;
-        // if (searchResult.hits.hits.length === 0) {
-        //   toReturn.success = true;
-        //   return toReturn;
-        // }
 
         // filter out the search results that match with the values found in the list.
         // the resulting set are valid signals that are not on the allowlist.
@@ -211,7 +181,6 @@ export const searchAfterAndBulkCreate = async ({
           // everything in the events were allowed, so no need to generate signals
           toReturn.success = true;
           break;
-          // return toReturn;
         }
 
         logger.debug('next bulk index');
@@ -249,7 +218,6 @@ export const searchAfterAndBulkCreate = async ({
           logger.debug('sortIds was empty on search');
           toReturn.success = true;
           break;
-          // return toReturn; // no more search results
         } else if (
           useSortIds &&
           filteredEvents.hits.hits !== null &&
@@ -263,7 +231,6 @@ export const searchAfterAndBulkCreate = async ({
         logger.error(`[-] search_after and bulk threw an error ${exc}`);
         toReturn.success = false;
         break;
-        // return toReturn;
       }
     }
   }
