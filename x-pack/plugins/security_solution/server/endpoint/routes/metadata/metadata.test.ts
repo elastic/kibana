@@ -27,11 +27,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './index';
-import {
-  createMockAgentService,
-  createMockMetadataIndexPatternRetriever,
-  createRouteHandlerContext,
-} from '../../mocks';
+import { createMockAgentService, createRouteHandlerContext } from '../../mocks';
 import { AgentService } from '../../../../../ingest_manager/server';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -63,7 +59,6 @@ describe('test endpoint route', () => {
     mockAgentService = createMockAgentService();
     endpointAppContextService = new EndpointAppContextService();
     endpointAppContextService.start({
-      indexPatternRetriever: createMockMetadataIndexPatternRetriever(),
       agentService: mockAgentService,
     });
 
@@ -242,7 +237,7 @@ describe('test endpoint route', () => {
       expect(routeConfig.options).toEqual({ authRequired: true });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
-      expect(result).toHaveProperty('metadata.endpoint');
+      expect(result).toHaveProperty('metadata.Endpoint');
       expect(result.host_status).toEqual(HostStatus.ONLINE);
     });
 

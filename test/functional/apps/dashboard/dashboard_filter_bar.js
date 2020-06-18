@@ -170,6 +170,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('saved search filtering', function () {
+      // https://github.com/elastic/kibana/issues/47286#issuecomment-644687577
+      this.tags('skipCoverage');
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();

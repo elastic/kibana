@@ -46,7 +46,7 @@ import {
   ElasticsearchServiceStart,
 } from './elasticsearch';
 
-import { HttpServiceSetup } from './http';
+import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -122,6 +122,7 @@ export {
   CustomHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,
+  HttpAuth,
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerInfo,
@@ -228,6 +229,7 @@ export {
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportError,
@@ -433,6 +435,8 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
+  /** {@link HttpServiceStart} */
+  http: HttpServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */

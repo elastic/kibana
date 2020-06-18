@@ -39,7 +39,7 @@ const delay = async (durationMs: number) =>
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
 const deps = {
-  http: httpServiceMock.createSetupContract(),
+  http: httpServiceMock.createInternalSetupContract(),
 };
 configService.atPath.mockReturnValue(
   new BehaviorSubject({

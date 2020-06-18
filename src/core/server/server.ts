@@ -211,10 +211,12 @@ export class Server {
     });
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
+    const httpStart = this.http.getStartContract();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
       elasticsearch: elasticsearchStart,
+      http: httpStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
     };
@@ -230,6 +232,7 @@ export class Server {
     });
 
     await this.http.start();
+
     await this.rendering.start({
       legacy: this.legacy,
     });

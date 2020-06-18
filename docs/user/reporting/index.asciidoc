@@ -1,6 +1,6 @@
 [role="xpack"]
 [[reporting-getting-started]]
-= Reporting from Kibana
+= Reporting
 
 [partintro]
 

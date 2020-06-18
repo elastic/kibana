@@ -247,3 +247,22 @@ export const savedSearches = {
     },
   },
 };
+
+export const dashboards = {
+  mlTestDashboard: {
+    requestBody: {
+      attributes: {
+        title: 'ML Test',
+        hits: 0,
+        description: '',
+        panelsJSON: '[]',
+        optionsJSON: '{"hidePanelTitles":false,"useMargins":true}',
+        version: 1,
+        timeRestore: false,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
+        },
+      },
+    },
+  },
+};

@@ -247,7 +247,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       after(async () => {
         await transform.api.deleteIndices(destinationIndex);
-        await transform.testResources.deleteIndexPattern(destinationIndex);
+        await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
       });
 
       it('should delete transform and destination index pattern', async () => {
@@ -287,7 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       after(async () => {
         await transform.api.deleteIndices(destinationIndex);
-        await transform.testResources.deleteIndexPattern(destinationIndex);
+        await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
       });
 
       it('should delete transform, destination index, & destination index pattern', async () => {

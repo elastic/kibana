@@ -28,7 +28,7 @@ This page has moved. Please see the new section in the {heartbeat-ref}/securing-
 [role="exclude",id="infra-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see <<infra-configure-source>>.
+This page has moved. Please see the new section in the {metrics-guide}/configure-metrics-source.html[Metrics Monitoring Guide].
 
 [role="exclude",id="logs-read-only-access"]
 == Configure source read-only access
@@ -80,28 +80,3 @@ This page was deleted. See <<development-visualize-index>>.
 == Developing Visualizations
 
 This page was deleted. See <<development-visualize-index>>.
-
-[role="exclude",id="xpack-logs-getting-started"]
-== Getting started with logs monitoring
-
-This page has moved. Please see the new section in the {logs-guide}/install-logs-monitoring.html[Logs Monitoring Guide].
-
-[role="exclude",id="xpack-logs-using"]
-== Using the Logs app
-
-This page has moved. Please see the new section in the {logs-guide}/logs-app-overview.html[Logs Monitoring Guide].
-
-[role="exclude",id="xpack-logs-configuring"]
-== Configuring the Logs data
-
-This page has moved. Please see the new section in the {logs-guide}/configure-logs-source.html[Logs Monitoring Guide].
-
-[role="exclude",id="xpack-logs-analysis"]
-== Detecting and inspecting log anomalies
-
-This page has moved. Please see the new section in the {logs-guide}/detect-log-anomalies.html[Logs Monitoring Guide]
-
-[role="exclude",id="xpack-logs-alerting"]
-== Logs alerting
-
-This page has moved. Please see the new section in the {logs-guide}/create-log-alert.html[Logs Monitoring Guide]

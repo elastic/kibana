@@ -27,5 +27,4 @@ export { getPolicyExists } from './lib/detection_engine/index/get_policy_exists'
 export { createBootstrapIndex } from './lib/detection_engine/index/create_bootstrap_index';
 export { getIndexExists } from './lib/detection_engine/index/get_index_exists';
 export { buildRouteValidation } from './utils/build_validation/route_validation';
-export { validate } from './lib/detection_engine/routes/rules/validate';
 export { transformError, buildSiemResponse } from './lib/detection_engine/routes/utils';

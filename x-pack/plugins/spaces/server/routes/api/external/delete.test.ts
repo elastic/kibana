@@ -13,7 +13,6 @@ import {
 } from '../__fixtures__';
 import {
   CoreSetup,
-  IRouter,
   kibanaResponseFactory,
   RouteValidatorConfig,
   SavedObjectsErrorHelpers,
@@ -37,7 +36,7 @@ describe('Spaces Public API', () => {
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
