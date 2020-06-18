@@ -9,3 +9,5 @@ export { DefaultUuid } from '../../security_solution/common/detection_engine/sch
 export { DefaultStringArray } from '../../security_solution/common/detection_engine/schemas/types/default_string_array';
 export { exactCheck } from '../../security_solution/common/exact_check';
 export { getPaths, foldLeftRight } from '../../security_solution/common/test_utils';
+export { validate } from '../../security_solution/common/validate';
+export { formatErrors } from '../../security_solution/common/format_errors';
