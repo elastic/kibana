@@ -27,6 +27,7 @@ import {
   EuiIcon,
   EuiScreenReaderOnly,
   htmlIdGenerator,
+  EuiDataGridStyle,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -75,35 +76,9 @@ const gridStyle = {
   border: 'horizontal',
   fontSize: 's',
   cellPadding: 's',
-};
+} as EuiDataGridStyle;
 const pageSizeArr = [25, 50, 100, 500];
 const defaultPageSize = 50;
-
-/**
- * TODO remove this component just used for debugging
- */
-class EuiDataGridWrapper extends React.Component<Props<P>> {
-  /**
-  componentWillReceiveProps(nextProps: Props<P>) {
-    Object.keys(nextProps)
-      .filter((key) => nextProps[key] !== this.props[key])
-      .map((key) => {
-        console.log('changed property:', key, 'from', this.props[key], 'to', nextProps[key]);
-      });
-  }*/
-  shouldComponentUpdate(
-    nextProps: Readonly<Props<P>>,
-    nextState: Readonly<{}>,
-    nextContext: any
-  ): boolean {
-    return Object.keys(nextProps).filter((key) => nextProps[key] !== this.props[key]).length !== 0;
-  }
-
-  render() {
-    // @ts-ignore
-    return <EuiDataGrid {...this.props} />;
-  }
-}
 
 export const DiscoverGrid = React.memo(
   ({
@@ -138,10 +113,10 @@ export const DiscoverGrid = React.memo(
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
 
     const paginationObj = useMemo(() => {
-      const onChangeItemsPerPage = (pageSize) =>
+      const onChangeItemsPerPage = (pageSize: number) =>
         setPagination((paginationData) => ({ ...paginationData, pageSize }));
 
-      const onChangePage = (pageIndex) =>
+      const onChangePage = (pageIndex: number) =>
         setPagination((paginationData) => ({ ...paginationData, pageIndex }));
 
       return {
@@ -226,7 +201,7 @@ export const DiscoverGrid = React.memo(
     const colummsVisibility = useMemo(
       () => ({
         visibleColumns: getVisibleColumns(columns, indexPattern, showTimeCol) as string[],
-        setVisibleColumns: (newColumns) => {
+        setVisibleColumns: (newColumns: string[]) => {
           onSetColumns(newColumns);
         },
       }),
@@ -256,9 +231,12 @@ export const DiscoverGrid = React.memo(
               aria-label={i18n.translate('discover.grid.viewDoc', {
                 defaultMessage: 'Toggle dialog with details',
               })}
-              onClick={() =>
-                flyoutRow === rowIndex ? setFlyoutRow(undefined) : setFlyoutRow(rowIndex)
-              }
+              onClick={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                const newIndex = flyoutRow === rowIndex ? undefined : rowIndex;
+                setFlyoutRow(newIndex);
+              }}
               className="dscTable__buttonToggle"
             >
               <EuiIcon size="s" type={flyoutRow === rowIndex ? 'eyeClosed' : 'eye'} />
@@ -275,7 +253,7 @@ export const DiscoverGrid = React.memo(
 
     return (
       <>
-        <EuiDataGridWrapper
+        <EuiDataGrid
           aria-labelledby={ariaLabelledBy}
           aria-describedby={randomId}
           sorting={sorting}
