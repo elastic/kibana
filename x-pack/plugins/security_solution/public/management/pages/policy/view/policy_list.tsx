@@ -24,6 +24,7 @@ import {
   EuiButton,
   EuiSteps,
   EuiTitle,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -474,54 +475,54 @@ const EmptyPolicyTable = React.memo<{
   actionDisabled: boolean;
   dataTestSubj: string;
 }>(({ loading, onActionClick, actionDisabled, dataTestSubj }) => {
-  const policySteps = [
-    {
-      title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepOneTitle', {
-        defaultMessage: 'Head over to Ingest Manager.',
-      }),
-      children: (
-        <EuiText color="subdued" size="xs">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyList.stepOne"
-            defaultMessage="Here, you’ll add the Elastic Endpoint Security Integration to your Agent Configuration."
-          />
-        </EuiText>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepTwoTitle', {
-        defaultMessage: 'We’ll create a recommended security policy for you.',
-      }),
-      children: (
-        <EuiText color="subdued" size="xs">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyList.stepTwo"
-            defaultMessage="You can edit this policy in the “Policies” tab after you’ve added the Elastic Endpoint integration."
-          />
-        </EuiText>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepThreeTitle', {
-        defaultMessage: 'Enroll your agents through Fleet.',
-      }),
-      children: (
-        <EuiText color="subdued" size="xs">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyList.stepThree"
-            defaultMessage="If you haven’t already, enroll your agents through Fleet using the same agent configuration."
-          />
-        </EuiText>
-      ),
-    },
-  ];
+  const policySteps = useMemo(
+    () => [
+      {
+        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepOneTitle', {
+          defaultMessage: 'Head over to Ingest Manager.',
+        }),
+        children: (
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyList.stepOne"
+              defaultMessage="Here, you’ll add the Elastic Endpoint Security Integration to your Agent Configuration."
+            />
+          </EuiText>
+        ),
+      },
+      {
+        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepTwoTitle', {
+          defaultMessage: 'We’ll create a recommended security policy for you.',
+        }),
+        children: (
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyList.stepTwo"
+              defaultMessage="You can edit this policy in the “Policies” tab after you’ve added the Elastic Endpoint integration."
+            />
+          </EuiText>
+        ),
+      },
+      {
+        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepThreeTitle', {
+          defaultMessage: 'Enroll your agents through Fleet.',
+        }),
+        children: (
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyList.stepThree"
+              defaultMessage="If you haven’t already, enroll your agents through Fleet using the same agent configuration."
+            />
+          </EuiText>
+        ),
+      },
+    ],
+    []
+  );
   return (
     <div data-test-subj={dataTestSubj}>
       {loading ? (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policyList.loading"
-          defaultMessage="Loading..."
-        />
+        <EuiProgress size="xs" color="accent" className="essentialAnimation" />
       ) : (
         <>
           <EuiSpacer size="xxl" />

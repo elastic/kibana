@@ -101,18 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.launchAndFindDeleteModal();
         await testSubjects.existOrFail('policyListDeleteModal');
         await pageObjects.common.clickConfirmOnModal();
-        let emptyPolicyTable;
-        await retry.waitForWithTimeout(
-          'table to not have data and empty state returns',
-          2000,
-          async () => {
-            emptyPolicyTable = await testSubjects.find('emptyPolicyTable');
-            if (emptyPolicyTable) {
-              return true;
-            }
-            return false;
-          }
-        );
+        const emptyPolicyTable = await testSubjects.find('emptyPolicyTable');
         expect(emptyPolicyTable).not.to.be(null);
       });
     });
@@ -157,7 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('and user clicks on page header create button', () => {
       it('should direct users to the ingest management integrations add datasource', async () => {
         await pageObjects.policy.navigateToPolicyList();
-        await (await pageObjects.policy.findEmptyStateButton()).click();
+        await (await pageObjects.policy.findOnboardingStartButton()).click();
         await pageObjects.ingestManagerCreateDatasource.ensureOnCreatePageOrFail();
       });
     });

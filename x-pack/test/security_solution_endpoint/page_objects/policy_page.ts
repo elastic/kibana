@@ -105,7 +105,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     /**
      * Finds and returns the onboarding button displayed in empty List pages
      */
-    async findEmptyStateButton() {
+    async findOnboardingStartButton() {
       await testSubjects.waitForEnabled('onboardingStartButton');
       return await testSubjects.find('onboardingStartButton');
     },
