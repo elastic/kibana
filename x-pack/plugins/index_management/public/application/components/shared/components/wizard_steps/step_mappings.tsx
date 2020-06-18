@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 
 import { Forms } from '../../../../../shared_imports';
-import { documentationService } from '../../../../services/documentation';
 import {
   MappingsEditor,
   OnUpdateHandler,

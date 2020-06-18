@@ -30,7 +30,6 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
 } from '../../../../../../../common/constants';
-import { TemplateDeserialized } from '../../../../../../../common';
 import {
   TemplateDeleteModal,
   SectionLoading,
