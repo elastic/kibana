@@ -42,7 +42,7 @@ export const ProcessorsTitleAndTestButton: FunctionComponent<Props> = ({
             defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={links.learnMoreAboutProcessorsUrl} target="_blank">
+                <EuiLink href={links.esDocsBasePath + '/ingest-processors.html'} target="_blank">
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
                     {

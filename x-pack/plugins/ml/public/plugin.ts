@@ -5,7 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreStart, CoreSetup, AppMountParameters } from 'kibana/public';
+import {
+  Plugin,
+  CoreStart,
+  CoreSetup,
+  AppMountParameters,
+  PluginInitializerContext,
+} from 'kibana/public';
 import { ManagementSetup } from 'src/plugins/management/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -40,9 +46,13 @@ export interface MlSetupDependencies {
   home: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
+  kibanaVersion: string;
+  share: SharePluginStart;
 }
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
   setup(core: CoreSetup<MlStartDependencies, MlPluginStart>, pluginsSetup: MlSetupDependencies) {
     core.application.register({
       id: PLUGIN_ID,
@@ -55,6 +65,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        const kibanaVersion = this.initializerContext.env.packageInfo.version;
         const { renderApp } = await import('./application/app');
         return renderApp(
           coreStart,
@@ -70,6 +81,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             home: pluginsSetup.home,
             embeddable: pluginsSetup.embeddable,
             uiActions: pluginsSetup.uiActions,
+            kibanaVersion,
           },
           {
             element: params.element,
