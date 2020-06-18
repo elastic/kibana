@@ -22,9 +22,16 @@ import moment from 'moment';
 import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
 import { deserializeAggConfig } from '../../search/expressions/utils';
-import { RangeSelectTriggerContext } from '../../../../embeddable/public';
+import {
+  RangeSelectTriggerContext,
+  isRangeSelectTriggerContextTimeRangeFilterEvent,
+} from '../../../../embeddable/public';
 
 export async function createFiltersFromRangeSelectAction(event: RangeSelectTriggerContext['data']) {
+  if (isRangeSelectTriggerContextTimeRangeFilterEvent(event)) {
+    return esFilters.mapAndFlattenFilters([event.timeRangeFilter]);
+  }
+
   const column: Record<string, any> = event.table.columns[event.column];
 
   if (!column || !column.meta) {

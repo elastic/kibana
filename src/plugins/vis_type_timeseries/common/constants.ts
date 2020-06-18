@@ -18,3 +18,5 @@
  */
 
 export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
+
+export const DEFAULT_TIME_FIELD = '@timestamp';

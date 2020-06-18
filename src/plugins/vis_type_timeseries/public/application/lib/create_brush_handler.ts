@@ -19,12 +19,29 @@
 
 import moment from 'moment';
 
-const TIME_MODE = 'absolute';
+import { IIndexPattern, esFilters, IFieldType } from '../../../../data/public';
+import { ExprVis } from '../../../../visualizations/public';
 
-export const createBrushHandler = (timefilter) => (from, to) => {
-  timefilter.setTime({
-    from: moment(from).toISOString(),
-    to: moment(to).toISOString(),
-    mode: TIME_MODE,
-  });
+import { DEFAULT_TIME_FIELD } from '../../../common/constants';
+
+export const createBrushHandler = (vis: ExprVis) => (from: string, to: string) => {
+  const timeFieldName = vis.params.time_field || DEFAULT_TIME_FIELD;
+  const field = {
+    name: timeFieldName,
+  } as IFieldType;
+
+  const indexPattern = {
+    id: vis.params.index_pattern,
+  } as IIndexPattern;
+
+  const timeRangeFilter = esFilters.buildRangeFilter(
+    field,
+    {
+      gte: moment(from).toISOString(),
+      lte: moment(to).toISOString(),
+    },
+    indexPattern
+  );
+
+  vis.API.events.brush({ timeRangeFilter, timeFieldName });
 };

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { RangeFilter } from 'src/plugins/data/public';
 import { KibanaDatatable } from '../../../../expressions';
 import { Trigger } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
@@ -43,19 +44,41 @@ export const isValueClickTriggerContext = (
   context: ValueClickTriggerContext | RangeSelectTriggerContext
 ): context is ValueClickTriggerContext => context.data && 'data' in context.data;
 
+export interface RangeSelectTriggerContextTableDataEvent {
+  table: KibanaDatatable;
+  column: number;
+  range: number[];
+  timeFieldName?: string;
+}
+
+export function isRangeSelectTriggerContextTableDataEvent(
+  event: any
+): event is RangeSelectTriggerContextTableDataEvent {
+  return event && 'range' in event && 'table' in event && 'column' in event;
+}
+
+export interface RangeSelectTriggerContextTimeRangeFilterEvent {
+  timeFieldName: string;
+  timeRangeFilter: RangeFilter;
+}
+
+export function isRangeSelectTriggerContextTimeRangeFilterEvent(
+  event: any
+): event is RangeSelectTriggerContextTimeRangeFilterEvent {
+  return event && 'timeFieldName' in event && 'timeRangeFilter' in event;
+}
+
 export interface RangeSelectTriggerContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
-  data: {
-    table: KibanaDatatable;
-    column: number;
-    range: number[];
-    timeFieldName?: string;
-  };
+  data: RangeSelectTriggerContextTableDataEvent | RangeSelectTriggerContextTimeRangeFilterEvent;
 }
 
 export const isRangeSelectTriggerContext = (
   context: ValueClickTriggerContext | RangeSelectTriggerContext
-): context is RangeSelectTriggerContext => context.data && 'range' in context.data;
+): context is RangeSelectTriggerContext =>
+  context.data &&
+  (isRangeSelectTriggerContextTableDataEvent(context.data) ||
+    isRangeSelectTriggerContextTimeRangeFilterEvent(context.data));
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {

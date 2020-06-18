@@ -42,7 +42,10 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
     if (!supportedTriggers || !supportedTriggers.length) return false;
     if (context.embeddable.getRoot().type !== 'dashboard') return false;
 
-    return supportedTriggers.indexOf('VALUE_CLICK_TRIGGER') > -1;
+    return (
+      supportedTriggers.includes('VALUE_CLICK_TRIGGER') ||
+      supportedTriggers.includes('SELECT_RANGE_TRIGGER')
+    );
   }
 
   public async isCompatible(context: EmbeddableContext) {

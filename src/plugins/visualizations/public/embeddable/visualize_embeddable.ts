@@ -388,12 +388,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       case 'table':
       case 'tagcloud':
         return [VIS_EVENT_TO_TRIGGER.filter];
+      case 'metrics':
+        return [VIS_EVENT_TO_TRIGGER.brush];
       case 'gauge':
       case 'goal':
       case 'input_control_vis':
       case 'markdown':
       case 'metric':
-      case 'metrics':
       case 'region_map':
       case 'tile_map':
       case 'timelion':

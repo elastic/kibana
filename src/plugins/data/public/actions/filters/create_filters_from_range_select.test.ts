@@ -25,12 +25,12 @@ import { IndexPatternsContract, RangeFilter } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns } from '../../../public/services';
 import { mockDataServices } from '../../../public/search/aggs/test_helpers';
-import { TriggerContextMapping } from '../../../../ui_actions/public';
+import { RangeSelectTriggerContextTableDataEvent } from '../../../../embeddable/public/lib/triggers/triggers';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
-  let baseEvent: TriggerContextMapping['SELECT_RANGE_TRIGGER']['data'];
+  let baseEvent: RangeSelectTriggerContextTableDataEvent;
 
   const indexPattern = {
     id: 'indexPatternId',
