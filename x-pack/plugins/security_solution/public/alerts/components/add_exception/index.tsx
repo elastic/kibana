@@ -28,6 +28,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui/lib/services';
+import { Comment } from '../../../../../lists/common/schemas';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../graphql/types';
 import { TimelineDetailsQuery } from '../../../timelines/containers/details';
@@ -129,7 +130,7 @@ const getMappedNonEcsValue = ({
   data: TimelineNonEcsData[];
   fieldName: string;
 }): string[] | undefined => {
-  const item = data.find(d => d.field === fieldName);
+  const item = data.find((d) => d.field === fieldName);
   if (item != null && item.value != null) {
     return item.value;
   }
@@ -172,7 +173,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   // Fetch list
   const listId = '0958f9f0-a6bc-11ea-bb46-f15995be8e61';
-  const [exceptionListLoading, exceptionListAndItems] = useExceptionList({ http, id: listId, namespaceType: 'agnostic'});
+  const [exceptionListLoading, exceptionListAndItems] = useExceptionList({
+    http,
+    id: listId,
+    namespaceType: 'agnostic',
+  });
 
   // TODO: file hash is not present in data from generator
   // TODO: hash is an array
@@ -195,12 +200,20 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             {
               field: 'file.code_signature.signer',
               operator: 'included',
-              match: getMappedNonEcsValue({ data: eventData, fieldName: 'file.code_signature.signer' }) ?? '',
+              match:
+                getMappedNonEcsValue({
+                  data: eventData,
+                  fieldName: 'file.code_signature.signer',
+                }) ?? '',
             },
             {
               field: 'file.code_signature.trusted',
               operator: 'included',
-              match: getMappedNonEcsValue({ data: eventData, fieldName: 'file.code_signature.trusted' }) ?? '',
+              match:
+                getMappedNonEcsValue({
+                  data: eventData,
+                  fieldName: 'file.code_signature.trusted',
+                }) ?? '',
             },
           ],
         },
@@ -210,6 +223,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               field: 'file.hash.sha1',
               operator: 'included',
               match: getMappedNonEcsValue({ data: eventData, fieldName: 'file.hash.sha1' }) ?? '',
+            },
+          ],
+        },
+        {
+          entries: [
+            {
+              field: 'event.category',
+              operator: 'included',
+              match_any:
+                getMappedNonEcsValue({ data: eventData, fieldName: 'event.category' }) ?? [],
             },
           ],
         },
@@ -237,10 +260,50 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return generateExceptionItem(comment);
   }, [comment]);
 
+  const enrichWithComments = useCallback(
+    (exceptions: []) => {
+      const newComment: Comment = {
+        comment,
+        created_by: currentUser,
+        created_at: new Date(),
+      };
+      for (const exception of exceptions) {
+        exception.comments = [newComment];
+      }
+    },
+    [comment]
+  );
+
+  const enrichWithOS = useCallback(
+    (exceptions) => {
+      const name = 'windows';
+      // TODO: get this working and use the helper
+      // const {
+      //   value: [name],
+      // } = eventData.find((data) => data.field === 'host.os.family');
+      const osField = `os:${name}`;
+      for (const exception of exceptions) {
+        if (exception._tags.includes(osField) === false) {
+          exception._tags.push(osField);
+        }
+      }
+    },
+    [eventData]
+  );
+
+  const enrichExceptionItems = useCallback(() => {
+    enrichWithComments(exceptionItemsToAdd);
+    if (modalType === 'endpoint') {
+      enrichWithOS(exceptionItemsToAdd);
+    }
+  }, [exceptionItemsToAdd]);
+
   const onAddExceptionConfirm = useCallback(() => {
+    enrichExceptionItems();
+    console.log(exceptionItemsToAdd);
     // TODO: Create API hook for persisting and closing
     // TODO: insert OS tag into entries before persisting for endpoint exceptions
-    //setExceptionItem(exceptionItemToAdd);
+    // setExceptionItem(exceptionItemToAdd);
   }, [exceptionItemToAdd]);
 
   const ruleName = useMemo(() => {
@@ -258,7 +321,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         </ModalHeader>
 
         <ModalBodySection className="builder-section">
-          {/*<EuiCodeBlock language="json">{JSON.stringify(exceptionItemToAdd, null, 2)}</EuiCodeBlock>*/}
+          {/* <EuiCodeBlock language="json">{JSON.stringify(exceptionItemToAdd, null, 2)}</EuiCodeBlock>*/}
           <ExceptionBuilder
             exceptionItems={endpointExceptionItems()}
             listId="endpoint_list"

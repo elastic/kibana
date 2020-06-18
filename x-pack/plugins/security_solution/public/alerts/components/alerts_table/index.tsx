@@ -70,7 +70,7 @@ const addExceptionModalInitialState = {
   modalType: 'detection',
   ecsData: null,
   data: null,
-}
+};
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   timelineId,
@@ -101,7 +101,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [shouldShowAddExceptionModal, setShouldShowAddExceptionModal] = useState(false);
-  const [addExceptionModalState, setAddExceptionModalState] = useState(addExceptionModalInitialState);
+  const [addExceptionModalState, setAddExceptionModalState] = useState(
+    addExceptionModalInitialState
+  );
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
     signalsIndex !== '' ? [signalsIndex] : []
   );
