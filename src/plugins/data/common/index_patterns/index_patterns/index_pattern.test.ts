@@ -295,7 +295,7 @@ describe('IndexPattern', () => {
 
     test('can restore from spec', async () => {
       const spec = indexPattern.toSpec();
-      const restoredPattern = await create(spec.id);
+      const restoredPattern = await create(spec.id as string);
       restoredPattern.initFromSpec(spec);
       expect(restoredPattern.id).toEqual(indexPattern.id);
       expect(restoredPattern.title).toEqual(indexPattern.title);

@@ -38,14 +38,15 @@ export interface TypeMeta {
 }
 
 export interface IndexPatternSpec {
-  id: string;
-  version: string;
+  id?: string;
+  version?: string;
 
-  title: string;
-  timeFieldName: string;
-  sourceFilters: SourceFilter[];
-  fields: FieldSpec;
-  fieldFormatMap: Record<string, FieldFormatSpec>;
+  title?: string;
+  timeFieldName?: string;
+  sourceFilters?: SourceFilter[];
+  fields?: FieldSpec;
+  fieldFormatMap?: Record<string, FieldFormatSpec>;
+  typeMeta?: TypeMeta;
 }
 
 export interface SourceFilter {
