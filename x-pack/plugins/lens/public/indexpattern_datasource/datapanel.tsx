@@ -325,7 +325,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     }
   };
 
-  // to test
   const [paginatedAvailableFields, paginatedEmptyFields]: [
     IndexPatternField[],
     IndexPatternField[]
@@ -626,42 +625,30 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               >
                 <EuiSpacer size="s" />
-
-                {hasSyncedExistingFields ? (
-                  !!filteredFieldGroups.emptyFields.length ? (
-                    <div className="lnsInnerIndexPatternDataPanel__fieldItems">
-                      {paginatedEmptyFields.map((field: IndexPatternField) => {
-                        return (
-                          <FieldItem
-                            core={core}
-                            data={data}
-                            indexPattern={currentIndexPattern}
-                            key={field.name}
-                            field={field}
-                            highlight={hilight}
-                            exists={false}
-                            dateRange={dateRange}
-                            query={query}
-                            filters={filters}
-                          />
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <NoFieldsCallout
-                      isAffectedByFieldFilter={hasFieldFilter}
-                      existFieldsInIndex={!!fieldGroups.emptyFields.length}
-                    />
-                  )
+                {!!filteredFieldGroups.emptyFields.length ? (
+                  <div className="lnsInnerIndexPatternDataPanel__fieldItems">
+                    {paginatedEmptyFields.map((field: IndexPatternField) => {
+                      return (
+                        <FieldItem
+                          core={core}
+                          data={data}
+                          indexPattern={currentIndexPattern}
+                          key={field.name}
+                          field={field}
+                          highlight={hilight}
+                          exists={false}
+                          dateRange={dateRange}
+                          query={query}
+                          filters={filters}
+                        />
+                      );
+                    })}
+                  </div>
                 ) : (
-                  <>
-                    <EuiSpacer size="m" />
-                    <EuiFlexGroup justifyContent="spaceAround">
-                      <EuiFlexItem grow={false}>
-                        <EuiLoadingSpinner size="m" />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
+                  <NoFieldsCallout
+                    isAffectedByFieldFilter={hasFieldFilter}
+                    existFieldsInIndex={!!fieldGroups.emptyFields.length}
+                  />
                 )}
               </EuiAccordion>
               <EuiSpacer size="m" />

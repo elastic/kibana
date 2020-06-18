@@ -15,7 +15,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
 
 const initialState: IndexPatternPrivateState = {
@@ -567,8 +567,10 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should display NoFieldsCallout when all fields are empty', async () => {
-      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
-      expect(wrapper.find(NoFieldsCallout).first().prop('isAffectedByTimerange')).toEqual(true);
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel {...defaultProps} existingFields={{ idx1: {} }} />
+      );
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
       expect(
         wrapper
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
@@ -586,6 +588,16 @@ describe('IndexPattern Data Panel', () => {
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['bytes', 'client', 'memory', 'source', 'timestamp']);
+    });
+
+    it('should display spinner for available fields accordion if existing fields are not loaded yet', async () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
+      expect(
+        wrapper.find('[data-test-subj="lnsIndexPatternAvailableFields"]').find(EuiLoadingSpinner)
+          .length
+      ).toEqual(1);
+      wrapper.setProps({ existingFields: { idx1: {} } });
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
     });
 
     it('should filter down by name', () => {
