@@ -42,7 +42,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
+                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
               condition: true,
             },
           ],
@@ -113,7 +113,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
+                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
               condition: true,
             },
           ],
@@ -183,7 +183,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
+                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
               condition: true,
             },
           ],
