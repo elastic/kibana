@@ -38,7 +38,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices } from '../kibana_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
-import { PRIVACY_STATEMENT_URL } from '../../../../telemetry/common/constants';
 
 import { SampleDataCard } from './sample_data';
 interface Props {
@@ -162,7 +161,11 @@ export class Welcome extends React.Component<Props> {
                         id="home.dataManagementDisclaimerPrivacy"
                         defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
                       />
-                      <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" rel="noopener">
+                      <EuiLink
+                        href={telemetry.telemetryConstants.getPrivacyStatementUrl()}
+                        target="_blank"
+                        rel="noopener"
+                      >
                         <FormattedMessage
                           id="home.dataManagementDisclaimerPrivacyLink"
                           defaultMessage="Privacy Statement."
