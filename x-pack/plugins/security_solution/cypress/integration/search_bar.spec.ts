@@ -10,10 +10,12 @@ import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../screens/search_bar';
 import { hostIpFilter } from '../objects/filter';
 
 import { HOSTS_PAGE } from '../urls/navigation';
+import { waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 
 describe('SearchBar', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_PAGE);
+    waitForAllHostsToBeLoaded();
   });
 
   it('adds correctly a filter to the global search bar', () => {
