@@ -23,7 +23,7 @@ export const formatBigValue = (val?: number | null, fixed?: number): string => {
 };
 
 const ClFlexGroup = styled(EuiFlexGroup)`
-  flex-direction: column;
+  flex-direction: row;
   @media only screen and (max-width: 768px) {
     flex-direction: row;
     justify-content: space-between;
@@ -49,9 +49,11 @@ export const ClientMetrics = () => {
     [start, end, uiFilters]
   );
 
+  const STAT_STYLE = { width: '240px' };
+
   return (
     <ClFlexGroup responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
           title={(data?.backEnd?.value?.toFixed(2) ?? '-') + ' sec'}
@@ -59,7 +61,7 @@ export const ClientMetrics = () => {
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
           title={(data?.frontEnd?.value?.toFixed(2) ?? '-') + ' sec'}
@@ -67,7 +69,7 @@ export const ClientMetrics = () => {
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
           title={formatBigValue(data?.pageViews?.value, 2) ?? '-'}

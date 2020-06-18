@@ -52,8 +52,6 @@ export const PageViewsTrend = () => {
 
   return (
     <div>
-      <EuiSpacer size="l" />
-
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">

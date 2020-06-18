@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
@@ -32,9 +32,7 @@ export function RumOverview() {
           <LocalUIFilters {...localUIFiltersConfig} showCount={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiPanel>
-            <RumDashboard />
-          </EuiPanel>
+          <RumDashboard />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
