@@ -28,7 +28,6 @@ export default function () {
          * tests won't start until a line containing this string, or matching
          * this expression is found.
          */
-        waitForLogLine: 'hello',
         waitForLogLine: /hello/,
         /**
          * OPTIONAL: function that is called when server is started, when defined
