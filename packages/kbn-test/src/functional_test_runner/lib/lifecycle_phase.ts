@@ -55,7 +55,7 @@ export class LifecyclePhase<Args extends readonly any[]> {
   }
 
   public async trigger(...args: Args) {
-    if (this.triggered) {
+    if (this.options.singular && this.triggered) {
       throw new Error(`singular lifecycle event can only be triggered once`);
     }
 
