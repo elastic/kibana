@@ -50,14 +50,14 @@ export const SubscriptionSplashContent: React.FC = () => {
     title = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.startTrialTitle"
-        defaultMessage="Start a free 14 day Platinum Subscription trial"
+        defaultMessage="Start a free 14 day Platinum subscription trial"
       />
     );
 
     description = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.startTrialDescription"
-        defaultMessage="Run Machine Learning jobs to view detected anomalies in your logs with our anomaly detection feature—part of the Platinum Elastic Stack Subscription."
+        defaultMessage="Run Machine Learning jobs to view detected anomalies in your logs with our anomaly detection feature—part of the Platinum Elastic Stack subscription."
       />
     );
 
@@ -77,14 +77,14 @@ export const SubscriptionSplashContent: React.FC = () => {
     title = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionTitle"
-        defaultMessage="Update to a Platinum Subscription"
+        defaultMessage="Update to a Platinum subscription"
       />
     );
 
     description = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionDescription"
-        defaultMessage="Run Machine Learning jobs to view detected anomalies in your logs with our anomaly detection feature—part of the Platinum Elastic Stack Subscription."
+        defaultMessage="Run Machine Learning jobs to view detected anomalies in your logs with our anomaly detection feature—part of the Platinum Elastic Stack subscription."
       />
     );
 
