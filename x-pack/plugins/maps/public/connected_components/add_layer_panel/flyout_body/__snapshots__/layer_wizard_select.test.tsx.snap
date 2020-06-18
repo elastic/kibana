@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LayerWizardSelect Should render layer select after layer wizards are loaded 1`] = `
+<Fragment>
+  <EuiFacetGroup
+    layout="horizontal"
+  >
+    <EuiFacetButton
+      isSelected={true}
+      key="all"
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="All"
+        id="xpack.maps.layerWizardSelect.allCategories"
+        values={Object {}}
+      />
+    </EuiFacetButton>
+    <EuiFacetButton
+      isSelected={false}
+      key="ELASTICSEARCH"
+      onClick={[Function]}
+    >
+      Elasticsearch
+    </EuiFacetButton>
+    <EuiFacetButton
+      isSelected={false}
+      key="SOLUTIONS"
+      onClick={[Function]}
+    >
+      Solutions
+    </EuiFacetButton>
+  </EuiFacetGroup>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGrid
+    columns={2}
+    gutterSize="m"
+  >
+    <EuiFlexItem
+      key="wizard 1"
+    >
+      <EuiCard
+        data-test-subj="wizard1"
+        description="mock wizard without icon"
+        onClick={[Function]}
+        title="wizard 1"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="wizard 2"
+    >
+      <EuiCard
+        data-test-subj="wizard2"
+        description="mock wizard with icon"
+        icon={
+          <EuiIcon
+            size="l"
+            type="logoObservability"
+          />
+        }
+        onClick={[Function]}
+        title="wizard 2"
+      />
+    </EuiFlexItem>
+  </EuiFlexGrid>
+</Fragment>
+`;
+
+exports[`LayerWizardSelect Should render loading screen before layer wizards are loaded 1`] = `
+<div>
+  <EuiCard
+    description={
+      <EuiLoadingContent
+        lines={2}
+      />
+    }
+    layout="horizontal"
+    title=""
+  />
+</div>
+`;
