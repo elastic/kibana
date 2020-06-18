@@ -21,7 +21,7 @@ xpack.security.authc.providers:
                   By logging in, you acknowledge that (shortened ...)"
 --------------------------------------------------------------------------------
 
-As a result users that authenticated using `basic.basic1` authentication provider will see the following agreement that they have to acknowledge before they can access anything else in {kib}:
+When you authenticate using `basic.basic1`, you'll see the following agreement that you must acknowledge before you can access {kib}:
 
 [role="screenshot"]
 image::user/security/images/access-agreement.png["Access Agreement UI"]

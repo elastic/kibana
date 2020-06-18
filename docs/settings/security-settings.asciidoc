@@ -72,28 +72,22 @@ The valid settings in `xpack.security.authc.providers` namespace vary depending 
 
 [cols="2*<"]
 |===
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.enabled`
+| `xpack.security.authc.providers.<provider-type>.<provider-name>.enabled`
 | Determines if the authentication provider should be enabled. By default, {kib} enables the provider as soon as you configure any of its properties.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.order`
+| `xpack.security.authc.providers.<provider-type>.<provider-name>.order`
 | Order of the provider in the authentication chain and on the Login Selector UI.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.description`
+| `xpack.security.authc.providers.<provider-type>.<provider-name>.description`
 | Custom description of the provider entry displayed on the Login Selector UI.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.hint`
+| `xpack.security.authc.providers.<provider-type>.<provider-name>.hint`
 | Custom hint for the provider entry displayed on the Login Selector UI.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.icon`
+| `xpack.security.authc.providers.<provider-type>.<provider-name>.icon`
 | Custom icon for the provider entry displayed on the Login Selector UI.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.showInSelector`
+| `xpack.security.authc.providers.<provider-type>.<provider-name>.showInSelector`
 | Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
 
 |===
@@ -106,8 +100,7 @@ You are unable to set this setting to `false` for `basic` and `token` authentica
 [cols="2*<"]
 |===
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.accessAgreement.message`
+| `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message`
 | Access agreement text in Markdown format. For more information, refer to <<xpack-security-access-agreement>>.
 
 |===
@@ -120,12 +113,10 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 
 [cols="2*<"]
 |===
-| `xpack.security.authc.providers.`
-`saml.<provider-name>.realm`
+| `xpack.security.authc.providers.saml.<provider-name>.realm`
 | SAML realm in {es} that provider should use.
 
-| `xpack.security.authc.providers.`
-`saml.<provider-name>.maxRedirectURLSize`
+| `xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize`
 | The maximum size of the URL that {kib} is allowed to store during the authentication SAML handshake. For more information, refer to <<security-saml-and-long-urls>>.
 
 |===
@@ -138,8 +129,7 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 
 [cols="2*<"]
 |===
-| `xpack.security.authc.providers.`
-`oidc.<provider-name>.realm`
+| `xpack.security.authc.providers.oidc.<provider-name>.realm`
 | OpenID Connect realm in {es} that the provider should use.
 
 |===

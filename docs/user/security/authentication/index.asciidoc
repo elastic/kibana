@@ -19,7 +19,7 @@ Enable multiple authentication mechanisms at the same time specifying a prioriti
 
 When two or more providers are configured, you can choose the provider you want to use on the Login Selector UI. The order the providers appear is determined by the `order` setting. The appearance of the specific provider entry can be customized with the `description`, `hint`, and `icon` settings.
 
-TIP: You can also provide users with a more generic guidance on the login process using `xpack.security.loginHelp` setting that supports Markdown format. When you specify the `xpack.security.loginHelp` setting, the Login Selector UI displays a `Need help?` link that lets users access login help information.
+TIP: To provide login instructions to users, use the `xpack.security.loginHelp` setting, which support Markdown format. When you specify the `xpack.security.loginHelp` setting, the Login Selector UI displays a `Need help?` link that lets users access login help information.
 
 If you don't want a specific provider to show up at the Login Selector UI (e.g. to only support third-party initiated login) you can hide it with `showInSelector` setting set to `false`. However, in this case, the provider is presented in the provider chain and may be consulted during authentication based on its `order`. To disable the provider, use the `enabled` setting.
 
