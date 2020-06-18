@@ -32,55 +32,7 @@ interface PickFieldsConfig {
   summaryCountField?: string;
 }
 
-// type guards
-// Detector
-const isDetectorWithField = (arg: any): arg is Required<Pick<Detector, 'field'>> => {
-  return arg.hasOwnProperty('field');
-};
-const isDetectorWithByField = (arg: any): arg is Required<Pick<Detector, 'byField'>> => {
-  return arg.hasOwnProperty('byField');
-};
-const isDetectorWithOverField = (arg: any): arg is Required<Pick<Detector, 'overField'>> => {
-  return arg.hasOwnProperty('overField');
-};
-const isDetectorWithPartitionField = (
-  arg: any
-): arg is Required<Pick<Detector, 'partitionField'>> => {
-  return arg.hasOwnProperty('partitionField');
-};
-const isDetectorWithExcludeFrequent = (
-  arg: any
-): arg is Required<Pick<Detector, 'excludeFrequent'>> => {
-  return arg.hasOwnProperty('excludeFrequent');
-};
-const isDetectorWithDescription = (arg: any): arg is Required<Pick<Detector, 'description'>> => {
-  return arg.hasOwnProperty('description');
-};
-
-// DatafeedConfig
-const isDatafeedConfigWithQueryDelay = (
-  arg: any
-): arg is Required<Pick<DatafeedConfig, 'queryDelay'>> => {
-  return arg.hasOwnProperty('queryDelay');
-};
-const isDatafeedConfigWithFrequency = (
-  arg: any
-): arg is Required<Pick<DatafeedConfig, 'frequency'>> => {
-  return arg.hasOwnProperty('frequency');
-};
-const isDatafeedConfigWithScrollSize = (
-  arg: any
-): arg is Required<Pick<DatafeedConfig, 'scrollSize'>> => {
-  return arg.hasOwnProperty('scrollSize');
-};
-
-// PickFieldsConfig
-const isPickFieldsConfigWithSummaryCountField = (
-  arg: any
-): arg is Required<Pick<PickFieldsConfig, 'summaryCountField'>> => {
-  return arg.hasOwnProperty('summaryCountField');
-};
-
+// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
@@ -212,24 +164,24 @@ export default function ({ getService }: FtrProviderContext) {
         it('job creation inputs the query delay', async () => {
           await ml.jobWizardAdvanced.assertQueryDelayInputExists();
           await ml.jobWizardAdvanced.assertQueryDelayValue(defaultValues.queryDelay);
-          if (isDatafeedConfigWithQueryDelay(testData.datafeedConfig)) {
-            await ml.jobWizardAdvanced.setQueryDelay(testData.datafeedConfig.queryDelay);
+          if (testData.datafeedConfig.hasOwnProperty('queryDelay')) {
+            await ml.jobWizardAdvanced.setQueryDelay(testData.datafeedConfig.queryDelay!);
           }
         });
 
         it('job creation inputs the frequency', async () => {
           await ml.jobWizardAdvanced.assertFrequencyInputExists();
           await ml.jobWizardAdvanced.assertFrequencyValue(defaultValues.frequency);
-          if (isDatafeedConfigWithFrequency(testData.datafeedConfig)) {
-            await ml.jobWizardAdvanced.setFrequency(testData.datafeedConfig.frequency);
+          if (testData.datafeedConfig.hasOwnProperty('frequency')) {
+            await ml.jobWizardAdvanced.setFrequency(testData.datafeedConfig.frequency!);
           }
         });
 
         it('job creation inputs the scroll size', async () => {
           await ml.jobWizardAdvanced.assertScrollSizeInputExists();
           await ml.jobWizardAdvanced.assertScrollSizeValue(defaultValues.scrollSize);
-          if (isDatafeedConfigWithScrollSize(testData.datafeedConfig)) {
-            await ml.jobWizardAdvanced.setScrollSize(testData.datafeedConfig.scrollSize);
+          if (testData.datafeedConfig.hasOwnProperty('scrollSize')) {
+            await ml.jobWizardAdvanced.setScrollSize(testData.datafeedConfig.scrollSize!);
           }
         });
 
@@ -244,9 +196,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('job creation selects the summary count field', async () => {
           await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
-          if (isPickFieldsConfigWithSummaryCountField(testData.pickFieldsConfig)) {
+          if (testData.pickFieldsConfig.hasOwnProperty('summaryCountField')) {
             await ml.jobWizardAdvanced.selectSummaryCountField(
-              testData.pickFieldsConfig.summaryCountField
+              testData.pickFieldsConfig.summaryCountField!
             );
           } else {
             await ml.jobWizardAdvanced.assertSummaryCountFieldSelection([]);
@@ -272,23 +224,23 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
 
             await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
-            if (isDetectorWithField(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorField(detector.field);
+            if (detector.hasOwnProperty('field')) {
+              await ml.jobWizardAdvanced.selectDetectorField(detector.field!);
             }
-            if (isDetectorWithByField(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorByField(detector.byField);
+            if (detector.hasOwnProperty('byField')) {
+              await ml.jobWizardAdvanced.selectDetectorByField(detector.byField!);
             }
-            if (isDetectorWithOverField(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField);
+            if (detector.hasOwnProperty('overField')) {
+              await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField!);
             }
-            if (isDetectorWithPartitionField(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField);
+            if (detector.hasOwnProperty('partitionField')) {
+              await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField!);
             }
-            if (isDetectorWithExcludeFrequent(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent);
+            if (detector.hasOwnProperty('excludeFrequent')) {
+              await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent!);
             }
-            if (isDetectorWithDescription(detector)) {
-              await ml.jobWizardAdvanced.setDetectorDescription(detector.description);
+            if (detector.hasOwnProperty('description')) {
+              await ml.jobWizardAdvanced.setDetectorDescription(detector.description!);
             }
 
             await ml.jobWizardAdvanced.confirmAddDetectorModal();
@@ -300,7 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobWizardAdvanced.assertDetectorEntryExists(
               index,
               detector.identifier,
-              isDetectorWithDescription(detector) ? detector.description : undefined
+              detector.hasOwnProperty('description') ? detector.description! : undefined
             );
           }
         });
