@@ -83,7 +83,7 @@ export function useMultiContent<T extends object>({
   }, []);
 
   /**
-   * Read the mulit content data.
+   * Read the multi content data.
    */
   const getData = useCallback((): T => {
     /**
