@@ -451,7 +451,7 @@ export interface EndpointEvent {
     executable?: string;
     args?: string;
     code_signature?: {
-      status: string;
+      status?: string;
       subject_name: string;
     };
     pid?: number;
