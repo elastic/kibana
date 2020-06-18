@@ -6,8 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { canStartTrial } from '../../../license_management/public/application/lib/es';
+import { API_BASE_PATH as LICENSE_MANAGEMENT_API_BASE_PATH } from '../../../license_management/common/constants';
 
 export enum TrialStatusLoadState {
   Loading = 'loading',
@@ -29,7 +28,7 @@ export function useTrialStatus(): UseTrialStatusState {
   useEffect(() => {
     async function fetchTrial() {
       try {
-        const response = await canStartTrial(services.http);
+        const response = await services.http.get(`${LICENSE_MANAGEMENT_API_BASE_PATH}/start_trial`);
         setIsTrialAvailable(response);
         setLoadState(TrialStatusLoadState.Ok);
       } catch {
