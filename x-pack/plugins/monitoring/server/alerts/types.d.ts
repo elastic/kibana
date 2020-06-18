@@ -7,6 +7,11 @@ import { UiSettingsServiceStart, ICustomClusterClient, Logger } from 'kibana/ser
 import { AlertClusterHealthType, AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { MonitoringConfig } from '../config';
 
+export interface AlertEnableAction {
+  id: string;
+  config: { [key: string]: any };
+}
+
 export interface AlertLicense {
   status: string;
   type: string;

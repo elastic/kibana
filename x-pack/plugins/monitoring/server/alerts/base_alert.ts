@@ -20,7 +20,14 @@ import {
 } from '../../../alerts/server';
 import { Alert, RawAlertInstance } from '../../../alerts/common';
 import { ActionsClient } from '../../../actions/server';
-import { AlertState, AlertCluster, AlertMessage, AlertData, AlertInstanceState } from './types';
+import {
+  AlertState,
+  AlertCluster,
+  AlertMessage,
+  AlertData,
+  AlertInstanceState,
+  AlertEnableAction,
+} from './types';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -31,10 +38,7 @@ import {
 } from '../../common/constants';
 import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
-import { ActionResult } from '../../../actions/common';
 import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
-
-const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
 export class BaseAlert {
   public type!: string;
@@ -118,7 +122,7 @@ export class BaseAlert {
   public async createIfDoesNotExist(
     alertsClient: AlertsClient,
     actionsClient: ActionsClient,
-    actionIds: string[]
+    actions: AlertEnableAction[]
   ): Promise<Alert> {
     const existingAlert = await alertsClient.find({
       options: {
@@ -133,35 +137,21 @@ export class BaseAlert {
       await alertsClient.delete(existingAlert.data[0]);
     }
 
-    if (actionIds.length === 0) {
-      let serverLogAction;
-      const allActions = await actionsClient.getAll();
-      for (const action of allActions) {
-        if (action.name === DEFAULT_SERVER_LOG_NAME) {
-          serverLogAction = action as ActionResult;
-          break;
-        }
+    const alertActions = [];
+    for (const actionData of actions) {
+      const action = await actionsClient.get({ id: actionData.id });
+      if (!action) {
+        continue;
       }
-      if (!serverLogAction) {
-        serverLogAction = await actionsClient.create({
-          action: {
-            name: DEFAULT_SERVER_LOG_NAME,
-            actionTypeId: ALERT_ACTION_TYPE_LOG,
-            config: {},
-            secrets: {},
-          },
-        });
-      }
-      actionIds.push(serverLogAction.id);
-    }
-
-    const actions = actionIds.map((actionId) => {
-      return {
+      alertActions.push({
         group: 'default',
-        id: actionId,
-        params: this.getDefaultActionParams(ALERT_ACTION_TYPE_LOG),
-      };
-    });
+        id: actionData.id,
+        params: {
+          ...this.getDefaultActionParams(action.actionTypeId),
+          ...actionData.config,
+        },
+      });
+    }
 
     return await alertsClient.create({
       data: {
@@ -173,7 +163,7 @@ export class BaseAlert {
         alertTypeId: this.type,
         throttle: this.defaultThrottle,
         schedule: { interval: this.defaultInterval },
-        actions,
+        actions: alertActions,
       },
     });
   }
