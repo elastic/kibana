@@ -56,6 +56,9 @@ Metrics::
 [[known-issues-7.8.0]]
 === Known issues
 
+APM::
+* Services maps fail to load when there are no machine learning jobs for APM.
+As a workaround, enable a machine learning job on at least one service in APM. {issue}69238[#69238]
 SIEM::
 * After upgrading from 7.7.x to 7.8.0, rules that have been overwritten in any
 of the 7.7.x releases fail to run without warning (see issue for workaround)
@@ -150,7 +153,7 @@ Reporting::
 * Adds a new config flag to encode with BOM for our CSVs {pull}63006[#63006]
 * Adds config flag to escape formula CSV values {pull}63645[#63645]
 Security::
-* Every provider can now be configured with the access agreement message (markdown syntax) that will be presented to the 
+* Every provider can now be configured with the access agreement message (markdown syntax) that will be presented to the
 users after login. Users won't be able to use Kibana until they acknowledge this agreement {pull}63563[#63563]
 * Login Selector UI was refined and can now offer much more customization options {pull}64142[#64142]
 SIEM::
@@ -291,7 +294,7 @@ Platform::
 * New Kibana app link order {pull}67991[#67991]
 Security::
 * Fix authentication loop when upgrading Kibana from 6.8 to 7.7+ {pull}67687[#67687]
-* Previously, users couldn't log in with SAML Identity Provider Initiated flow (e.g. from Okta Dashboard) if they already had 
+* Previously, users couldn't log in with SAML Identity Provider Initiated flow (e.g. from Okta Dashboard) if they already had
 an existing, but expired session. Now it should be possible {pull}59686[#59686]
 * Fixes EncryptedSavedObjectsClientWrapper fails on stripEncryptedAttributes for saved object with errors {pull}61385[#61385]
 * Adds username/password validation to login form {pull}60681[#60681]
@@ -321,8 +324,8 @@ See <<breaking-changes-7.7,breaking changes in 7.7>>.
 [float]
 [[security-update-7.1.1]]
 === Security update
-In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can 
-edit and create TSVB visualizations can obtain sensitive information, or perform 
+In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can
+edit and create TSVB visualizations can obtain sensitive information, or perform
 destructive actions, on behalf of the {kib} users who edit the TSVB visualization, CVE-2020-7015.
 
 You must upgrade to 7.7.1. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
@@ -354,7 +357,7 @@ Lens and visualizations::
 * Don't lose dashboard/visualize/discover state when navigating to other applications {pull}66766[#66766]
 * Fixes redirect on reload {pull}66491[#66491]
 * Shows missing values on chart setting {pull}66375[#66375]
-* Usage of custom plugins using the @plugin statement and inline JavaScript in less code used in the TSVB Markdown 
+* Usage of custom plugins using the @plugin statement and inline JavaScript in less code used in the TSVB Markdown
 visualization is not allowed anymore. Using it will simply not apply the styles {pull}65467[#65467]
 * Fixes std deviation band mode {pull}64413[#64413]
 * Reloads on ui state change and fix ui state for tsvb {pull}63699[#63699]
@@ -364,8 +367,8 @@ Machine Learning:
 * Fixes optional plugin dependency types {pull}64450[#64450]
 * Ensures both keyword/text types are excluded for selected excluded field {pull}62712[#62712]
 Management::
-* Fixes an integration issue with the security plugin in Ingest Pipelines and Snapshot and Restore that would incorrectly 
-report requiring security to be enabled when the plugins should work normally without security. 
+* Fixes an integration issue with the security plugin in Ingest Pipelines and Snapshot and Restore that would incorrectly
+report requiring security to be enabled when the plugins should work normally without security.
 This affects the default docker distribution {pull}67308[#67308]
 * Preserves saved object references when saving the object {pull}66584[#66584]
 * Fixes detail panel for indices with % in the name {pull}66435[#66435]
@@ -405,16 +408,16 @@ See <<breaking-changes-7.7,breaking changes in 7.7>>.
 [float]
 [[security-update-7.7.0]]
 === Security updates
-* In 7.7.0 to 7.6.2, the Upgrade Assistant contains a prototype pollution flaw. An authenticated attacker with 
-privileges to write to the {kib} index can insert data that could cause {kib} to execute arbitrary code. This 
+* In 7.7.0 to 7.6.2, the Upgrade Assistant contains a prototype pollution flaw. An authenticated attacker with
+privileges to write to the {kib} index can insert data that could cause {kib} to execute arbitrary code. This
 could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7012.
 +
 By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
 +
 For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `xpack.upgrade_assistant_enabled:false` in your kibana.yml file to disable the Upgrade Assistant.
 
-* In 7.7.0 and earlier, TSVB contains a prototype pollution flaw. Authenticated attackers with privileges to create 
-TSVB visualizations can insert data that could cause {kib} to execute arbitrary code. This 
+* In 7.7.0 and earlier, TSVB contains a prototype pollution flaw. Authenticated attackers with privileges to create
+TSVB visualizations can insert data that could cause {kib} to execute arbitrary code. This
 could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7013.
 +
 By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
