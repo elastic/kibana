@@ -424,6 +424,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             )
             .expect(200);
           expect(body.ancestors[0].lifecycle.length).to.eql(2);
+          expect(body.ancestors.length).to.eql(2);
           expect(body.nextAncestor).to.eql(null);
         });
 

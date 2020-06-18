@@ -63,7 +63,7 @@ export class Fetcher {
       await this.doAncestors(
         // limit the ancestors we're looking for to the number of levels
         // the array could be up to length 20 but that could change
-        ancestryArray(originNode.lifecycle[0]).slice(0, limit),
+        Fetcher.getAncestryAsArray(originNode.lifecycle[0]).slice(0, limit),
         limit,
         ancestryInfo
       );
@@ -149,6 +149,20 @@ export class Fetcher {
     return createLifecycle(entityID, results);
   }
 
+  private static getAncestryAsArray(event: ResolverEvent): string[] {
+    const ancestors = ancestryArray(event);
+    if (ancestors) {
+      return ancestors;
+    }
+
+    const parentID = parentEntityId(event);
+    if (parentID) {
+      return [parentID];
+    }
+
+    return [];
+  }
+
   private async doAncestors(
     ancestors: string[],
     levels: number,
@@ -188,7 +202,7 @@ export class Fetcher {
     const levelsLeft = levels - ancestryNodes.size;
     // the results come back in ascending order on timestamp so the first entry in the
     // results should be the further ancestor (most distant grandparent)
-    const next = ancestryArray(results[0]).slice(0, levelsLeft);
+    const next = Fetcher.getAncestryAsArray(results[0]).slice(0, levelsLeft);
     // the ancestry array currently only holds up to 20 values but we can't rely on that so keep recursing
     await this.doAncestors(next, levelsLeft, ancestorInfo);
   }
