@@ -75,19 +75,27 @@ export class IngestManagerPlugin
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
-    const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
-      appRoutesService.getCheckPermissionsPath()
-    );
-    if (permissionsResponse.success) {
-      const successPromise = core.http
-        .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
-        .then(({ isInitialized }: { isInitialized: boolean }) => Promise.resolve(isInitialized))
-        .catch(Promise.reject);
+    let successPromise = Promise.resolve(false);
+    try {
+      const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
+        appRoutesService.getCheckPermissionsPath()
+      );
 
-      return { success: successPromise, registerDatasource };
-    } else {
+      if (permissionsResponse.success) {
+        successPromise = core.http
+          .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
+          .then(({ isInitialized }: { isInitialized: boolean }) => Promise.resolve(isInitialized));
+      } else {
+        successPromise = Promise.reject(new Error(permissionsResponse.error));
+      }
+
       return {
-        success: Promise.reject(new Error(permissionsResponse.error)),
+        success: successPromise,
+        registerDatasource,
+      };
+    } catch (error) {
+      return {
+        success: Promise.reject(error),
         registerDatasource,
       };
     }

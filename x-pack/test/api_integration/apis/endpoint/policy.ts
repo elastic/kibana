@@ -13,7 +13,11 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('Endpoint policy api', () => {
     describe('GET /api/endpoint/policy_response', () => {
-      before(async () => await esArchiver.load('endpoint/policy', { useCreate: true }));
+      before(async () => {
+        const ingestManager = getService('ingestManager');
+        await ingestManager.setup();
+        await esArchiver.load('endpoint/policy', { useCreate: true });
+      });
 
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
