@@ -39,6 +39,8 @@ export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object =
   onWelcomeHideClick?: () => void;
 
   actionFactoryContext?: object;
+
+  docsLink?: string;
 }
 
 function useWizardConfigState(
@@ -118,6 +120,7 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
   onWelcomeHideClick,
   drilldownActionFactories,
   actionFactoryContext,
+  docsLink,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
   const [wizardConfig, { setActionFactory, setActionConfig, setName }] = useWizardConfigState(
     initialDrilldownWizardConfig
@@ -154,7 +157,11 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
       footer={footer}
       onClose={onClose}
       onBack={onBack}
-      banner={showWelcomeMessage && <DrilldownHelloBar onHideClick={onWelcomeHideClick} />}
+      banner={
+        showWelcomeMessage && (
+          <DrilldownHelloBar docsLink={docsLink} onHideClick={onWelcomeHideClick} />
+        )
+      }
     >
       <FormDrilldownWizard
         name={wizardConfig.name}

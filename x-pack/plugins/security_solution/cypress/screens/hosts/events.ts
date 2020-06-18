@@ -36,7 +36,4 @@ export const LOCAL_EVENTS_COUNT =
 export const LOAD_MORE =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="TimelineMoreButton"';
 
-export const RESET_FIELDS =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="reset-fields"]';
-
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
