@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { AlertPrefillProvider } from '../../../../alerting/use_alert_prefill';
 import {
   useMetricsExplorerOptions,
   MetricsExplorerOptions,
@@ -15,11 +13,18 @@ import {
   DEFAULT_TIMERANGE,
 } from './use_metrics_explorer_options';
 
-const renderUseMetricsExplorerOptionsHook = () =>
-  renderHook(() => useMetricsExplorerOptions(), {
-    initialProps: {},
-    wrapper: ({ children }) => <AlertPrefillProvider>{children}</AlertPrefillProvider>,
-  });
+let PREFILL: Record<string, any> = {};
+jest.mock('../../../../alerting/use_alert_prefill', () => ({
+  useAlertPrefillContext: () => ({
+    metricThresholdPrefill: {
+      setPrefillOptions(opts: Record<string, any>) {
+        PREFILL = opts;
+      },
+    },
+  }),
+}));
+
+const renderUseMetricsExplorerOptionsHook = () => renderHook(() => useMetricsExplorerOptions());
 
 interface LocalStore {
   [key: string]: string;
@@ -42,19 +47,6 @@ const localStorageMock: LocalStorage = {
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
-});
-
-let PREFILL: Record<string, any> = {};
-const alertPrefillMock = {
-  metricThresholdPrefill: {
-    setPrefillOptions(opts: Record<string, any>) {
-      PREFILL = opts;
-    },
-  },
-};
-
-Object.defineProperty(window, '__jestAlertPrefillMock', {
-  value: alertPrefillMock,
 });
 
 describe('useMetricExplorerOptions', () => {
@@ -124,9 +116,8 @@ describe('useMetricExplorerOptions', () => {
       result.current.setOptions(newOptions);
     });
     rerender();
-    const currentOptions = result.current.options;
-    expect(currentOptions.metrics).toEqual(PREFILL.metrics);
-    expect(currentOptions.groupBy).toEqual(PREFILL.groupBy);
-    expect(currentOptions.filterQuery).toEqual(PREFILL.filterQuery);
+    expect(PREFILL.metrics).toEqual(newOptions.metrics);
+    expect(PREFILL.groupBy).toEqual(newOptions.groupBy);
+    expect(PREFILL.filterQuery).toEqual(newOptions.filterQuery);
   });
 });

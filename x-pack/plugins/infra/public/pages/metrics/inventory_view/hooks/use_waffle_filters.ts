@@ -70,7 +70,8 @@ export const useWaffleFilters = () => {
   ]);
 
   const { inventoryPrefill } = useAlertPrefillContext();
-  useEffect(() => inventoryPrefill.setFilterQuery(state.expression), [inventoryPrefill, state]);
+  const prefillContext = useMemo(() => inventoryPrefill, [inventoryPrefill]); // For Jest compatibility
+  useEffect(() => prefillContext.setFilterQuery(state.expression), [prefillContext, state]);
 
   return {
     filterQuery: urlState,

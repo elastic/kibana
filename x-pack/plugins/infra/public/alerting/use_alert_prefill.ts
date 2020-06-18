@@ -15,9 +15,4 @@ const useAlertPrefill = () => {
   return { metricThresholdPrefill, inventoryPrefill };
 };
 
-const [AlertPrefillProvider, useAlertPrefillContext] = createContainer(useAlertPrefill);
-export { AlertPrefillProvider };
-
-const useTestableAlertPrefillContext = () =>
-  (window as any).__jestAlertPrefillMock ?? useAlertPrefillContext();
-export { useTestableAlertPrefillContext as useAlertPrefillContext };
+export const [AlertPrefillProvider, useAlertPrefillContext] = createContainer(useAlertPrefill);
