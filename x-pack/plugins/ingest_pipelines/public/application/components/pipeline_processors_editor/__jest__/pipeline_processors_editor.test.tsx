@@ -67,7 +67,7 @@ describe('Pipeline Editor', () => {
   describe('processors', () => {
     it('adds a new processor', async () => {
       const { actions } = testBed;
-      await actions.addProcessor('addProcessor-processors', 'test', { if: '1 == 1' });
+      await actions.addProcessor('processors', 'test', { if: '1 == 1' });
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
       expect(processors.length).toBe(3);
@@ -79,6 +79,7 @@ describe('Pipeline Editor', () => {
 
     it('removes a processor', () => {
       const { actions } = testBed;
+      // processor>0 denotes the first processor in the top-level processors array.
       actions.removeProcessor('processors>0');
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
@@ -97,12 +98,18 @@ describe('Pipeline Editor', () => {
       actions.moveProcessor('processors>0', 'dropButtonBelow-processors>1');
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
-      expect(testProcessors.processors.slice(0).reverse()).toEqual(processors);
+      expect(processors).toEqual(testProcessors.processors.slice(0).reverse());
     });
 
     it('adds an on-failure processor to a processor', async () => {
-      const { actions } = testBed;
-      await actions.addOnFailureProcessor('processors>1', 'test', { if: '1 == 2' });
+      const { actions, find, exists } = testBed;
+      const processorSelector = 'processors>1';
+      await actions.addOnFailureProcessor(processorSelector, 'test', { if: '1 == 2' });
+      // Assert that the add on failure button has been removed
+      find(`${processorSelector}.moreMenu.button`).simulate('click');
+      expect(!exists(`${processorSelector}.moreMenu.addOnFailureButton`));
+      // Assert that the add processor button is now visible
+      expect(exists(`${processorSelector}.addProcessor`));
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
       expect(processors.length).toBe(2);
@@ -149,8 +156,11 @@ describe('Pipeline Editor', () => {
     });
 
     it('can cancel a move', () => {
-      const { actions } = testBed;
-      actions.startAndCancelMove('processors>0');
+      const { actions, exists } = testBed;
+      const processorSelector = 'processors>0';
+      actions.startAndCancelMove(processorSelector);
+      // Assert that we have exited move mode for this processor
+      expect(exists(`moveItemButton-${processorSelector}`));
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
       // Assert that nothing has changed
@@ -160,7 +170,7 @@ describe('Pipeline Editor', () => {
     it('moves to and from the global on-failure tree', async () => {
       const { actions } = testBed;
       actions.toggleOnFailure();
-      await actions.addProcessor('addProcessor-onFailure', 'test', { if: '1 == 5' });
+      await actions.addProcessor('onFailure', 'test', { if: '1 == 5' });
       actions.moveProcessor('processors>0', 'dropButtonBelow-onFailure>0');
       const [onUpdateResult1] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const data1 = onUpdateResult1.getData();

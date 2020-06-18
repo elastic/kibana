@@ -44,124 +44,104 @@ const testBedSetup = registerTestBed<TestSubject>(PipelineProcessorsEditor, {
   doMountAsync: false,
 });
 
-interface Actions {
-  addProcessor: (selector: string, type: string, options: Record<any, any>) => Promise<void>;
-  removeProcessor: (processorSelector: string) => void;
-  moveProcessor: (processorSelector: string, dropZoneSelector: string) => void;
-  addOnFailureProcessor: (
-    processorSelector: string,
-    type: string,
-    options: Record<any, any>
-  ) => Promise<void>;
-  duplicateProcessor: (processorSelector: string) => void;
-  startAndCancelMove: (processorSelector: string) => void;
-  toggleOnFailure: () => void;
+export interface SetupResult extends TestBed<TestSubject> {
+  actions: ReturnType<typeof createActions>;
 }
 
-export interface SetupResult extends TestBed<TestSubject> {
-  actions: Actions;
-}
+/**
+ * We make heavy use of "processorSelector" in these actions. They are a way to uniquely identify
+ * a processor and are a stringified version of {@link ProcessorSelector}.
+ *
+ * @remark
+ * See also {@link selectorToDataTestSubject}.
+ */
+const createActions = (testBed: TestBed<TestSubject>) => {
+  const { find, component } = testBed;
+
+  return {
+    async addProcessor(processorsSelector: string, type: string, options: Record<string, any>) {
+      find(`${processorsSelector}.addProcessorButton`).simulate('click');
+      await act(async () => {
+        find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
+      });
+      component.update();
+      await act(async () => {
+        find('processorOptionsEditor').simulate('change', {
+          jsonContent: JSON.stringify(options),
+        });
+      });
+      await act(async () => {
+        find('processorSettingsForm.submitButton').simulate('click');
+      });
+    },
+
+    removeProcessor(processorSelector: string) {
+      find(`${processorSelector}.moreMenu.button`).simulate('click');
+      find(`${processorSelector}.moreMenu.deleteButton`).simulate('click');
+      act(() => {
+        find('removeProcessorConfirmationModal.confirmModalConfirmButton').simulate('click');
+      });
+    },
+
+    moveProcessor(processorSelector: string, dropZoneSelector: string) {
+      act(() => {
+        find(`${processorSelector}.moveItemButton`).simulate('click');
+      });
+      act(() => {
+        find(dropZoneSelector).last().simulate('click');
+      });
+      component.update();
+    },
+
+    async addOnFailureProcessor(
+      processorSelector: string,
+      type: string,
+      options: Record<string, any>
+    ) {
+      find(`${processorSelector}.moreMenu.button`).simulate('click');
+      find(`${processorSelector}.moreMenu.addOnFailureButton`).simulate('click');
+      await act(async () => {
+        find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
+      });
+      component.update();
+      await act(async () => {
+        find('processorOptionsEditor').simulate('change', {
+          jsonContent: JSON.stringify(options),
+        });
+      });
+      await act(async () => {
+        find('processorSettingsForm.submitButton').simulate('click');
+      });
+    },
+
+    duplicateProcessor(processorSelector: string) {
+      find(`${processorSelector}.moreMenu.button`).simulate('click');
+      act(() => {
+        find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
+      });
+    },
+
+    startAndCancelMove(processorSelector: string) {
+      act(() => {
+        find(`${processorSelector}.moveItemButton`).simulate('click');
+      });
+      component.update();
+      act(() => {
+        find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
+      });
+    },
+
+    toggleOnFailure() {
+      find('pipelineEditorOnFailureToggle').simulate('click');
+    },
+  };
+};
 
 export const setup = async (props: Props): Promise<SetupResult> => {
   const testBed = await testBedSetup(props);
-  const { find, exists, component } = testBed;
-
-  const addProcessor: Actions['addProcessor'] = async (selector, type, options) => {
-    find(selector).simulate('click');
-    expect(exists('processorSettingsFormFlyout', 1));
-    await act(async () => {
-      find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
-    });
-    component.update();
-    await act(async () => {
-      find('processorOptionsEditor').simulate('change', {
-        jsonContent: JSON.stringify(options),
-      });
-    });
-    await act(async () => {
-      find('processorSettingsForm.submitButton').simulate('click');
-    });
-  };
-
-  const removeProcessor: Actions['removeProcessor'] = (processorSelector) => {
-    find('moreMenu-' + processorSelector + '.button').simulate('click');
-    find('moreMenu-' + processorSelector + '.deleteButton').simulate('click');
-    act(() => {
-      find('removeProcessorConfirmationModal.confirmModalConfirmButton').simulate('click');
-    });
-  };
-
-  const moveProcessor: Actions['moveProcessor'] = (processorSelector, dropZoneSelector) => {
-    act(() => {
-      find('moveItemButton-' + processorSelector).simulate('click');
-    });
-    act(() => {
-      find(dropZoneSelector).last().simulate('click');
-    });
-    component.update();
-  };
-
-  const addOnFailureProcessor: Actions['addOnFailureProcessor'] = async (
-    processorSelector,
-    type,
-    options
-  ) => {
-    find('moreMenu-' + processorSelector + '.button').simulate('click');
-    find('moreMenu-' + processorSelector + '.addOnFailureButton').simulate('click');
-    expect(exists('processorSettingsFormFlyout', 1));
-    await act(async () => {
-      find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
-    });
-    component.update();
-    await act(async () => {
-      find('processorOptionsEditor').simulate('change', {
-        jsonContent: JSON.stringify(options),
-      });
-    });
-    await act(async () => {
-      find('processorSettingsForm.submitButton').simulate('click');
-    });
-    // Assert that the add on failure button has been removed
-    find('moreMenu-' + processorSelector + '.button').simulate('click');
-    expect(!exists('moreMenu-' + processorSelector + '.addOnFailureButton'));
-    // Assert that the add processor button is now visible
-    expect(exists('addProcessor-' + processorSelector));
-  };
-
-  const duplicateProcessor: Actions['duplicateProcessor'] = (selector) => {
-    find('moreMenu-' + selector).simulate('click');
-    act(() => {
-      find('moreMenu-' + selector + '.duplicateButton').simulate('click');
-    });
-  };
-
-  const startAndCancelMove: Actions['startAndCancelMove'] = (processorSelector) => {
-    act(() => {
-      find('moveItemButton-' + processorSelector).simulate('click');
-    });
-    component.update();
-    act(() => {
-      find('cancelMoveItemButton-' + processorSelector).simulate('click');
-    });
-    // Assert that we have exited move mode for this processor
-    expect(exists('moveItemButton-' + processorSelector));
-  };
-
-  const toggleOnFailure = () => {
-    find('pipelineEditorOnFailureToggle').simulate('click');
-  };
-
   return {
     ...testBed,
-    actions: {
-      toggleOnFailure,
-      addProcessor,
-      removeProcessor,
-      moveProcessor,
-      addOnFailureProcessor,
-      duplicateProcessor,
-      startAndCancelMove,
-    },
+    actions: createActions(testBed),
   };
 };
 

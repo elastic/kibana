@@ -11,7 +11,6 @@ import { usePipelineProcessorsContext } from '../context';
 
 export interface Props {
   onClick: () => void;
-  'data-test-subj'?: string;
 }
 
 export const AddProcessorButton: FunctionComponent<Props> = (props) => {
@@ -21,7 +20,7 @@ export const AddProcessorButton: FunctionComponent<Props> = (props) => {
   } = usePipelineProcessorsContext();
   return (
     <EuiButtonEmpty
-      data-test-subj={props['data-test-subj']}
+      data-test-subj="addProcessorButton"
       disabled={editor.mode.id !== 'idle'}
       iconSide="left"
       iconType="plusInCircle"

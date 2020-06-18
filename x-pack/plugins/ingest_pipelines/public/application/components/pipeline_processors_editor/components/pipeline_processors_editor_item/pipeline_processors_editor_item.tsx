@@ -37,7 +37,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       state: { editor, processorsDispatch },
     } = usePipelineProcessorsContext();
 
-    const stringifiedSelector = selectorToDataTestSubject(selector);
     const disabled = editor.mode.id !== 'idle';
     const isDarkBold =
       editor.mode.id !== 'editingProcessor' || processor.id === editor.mode.arg.processor.id;
@@ -48,6 +47,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         responsive={false}
         alignItems="center"
         justifyContent="spaceBetween"
+        data-test-subj={selectorToDataTestSubject(selector)}
       >
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
@@ -87,7 +87,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                data-test-subj={`editItemButton-${stringifiedSelector}`}
+                data-test-subj="editItemButton"
                 disabled={disabled}
                 aria-label={editorItemMessages.editorButtonLabel}
                 iconType="pencil"
@@ -103,7 +103,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             <EuiFlexItem grow={false}>
               {selected ? (
                 <EuiButtonIcon
-                  data-test-subj={`cancelMoveItemButton-${stringifiedSelector}`}
+                  data-test-subj="cancelMoveItemButton"
                   aria-label={editorItemMessages.cancelMoveButtonLabel}
                   size="s"
                   onClick={onCancelMove}
@@ -112,7 +112,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               ) : (
                 <EuiToolTip content={editorItemMessages.moveButtonLabel}>
                   <EuiButtonIcon
-                    data-test-subj={`moveItemButton-${stringifiedSelector}`}
+                    data-test-subj="moveItemButton"
                     disabled={disabled}
                     aria-label={editorItemMessages.moveButtonLabel}
                     size="s"
@@ -126,7 +126,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ContextMenu
-            data-test-subj={`moreMenu-${stringifiedSelector}`}
+            data-test-subj="moreMenu"
             disabled={disabled}
             showAddOnFailure={!processor.onFailure?.length}
             onAddOnFailure={() => {
