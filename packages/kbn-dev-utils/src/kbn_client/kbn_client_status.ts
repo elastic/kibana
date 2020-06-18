@@ -52,10 +52,11 @@ export class KbnClientStatus {
    * Get the full server status
    */
   async get() {
-    return await this.requester.request<ApiResponseStatus>({
+    const { data } = await this.requester.request<ApiResponseStatus>({
       method: 'GET',
       path: 'api/status',
     });
+    return data;
   }
 
   /**
