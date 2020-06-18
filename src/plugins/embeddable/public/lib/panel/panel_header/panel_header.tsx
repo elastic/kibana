@@ -42,6 +42,7 @@ export interface PanelHeaderProps {
   notifications: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
+  placeholderTitle?: string;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -127,6 +128,7 @@ export function PanelHeader({
   notifications,
   embeddable,
   headerId,
+  placeholderTitle,
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
   const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
@@ -148,6 +150,42 @@ export function PanelHeader({
     );
   }
 
+  const getPlaceholderTitle = () => {
+    return (
+      <span className="embPanel__titleInner">
+        <span className="embPanel__placeholderTitleText" aria-hidden="true">
+          {placeholderTitle}
+        </span>
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('embeddableApi.panel.enhancedDashboardPanelPlaceholderText', {
+              defaultMessage: 'Panel with no title',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+        {renderTooltip(viewDescription)}
+      </span>
+    );
+  };
+
+  const getTitle = () => {
+    return (
+      <span className="embPanel__titleInner">
+        <span className="embPanel__titleText" aria-hidden="true">
+          {title}
+        </span>
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
+              defaultMessage: 'Dashboard panel: {title}',
+              values: { title },
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+        {renderTooltip(viewDescription)}
+      </span>
+    );
+  };
   return (
     <figcaption
       className={classes}
@@ -159,20 +197,11 @@ export function PanelHeader({
         className="embPanel__title embPanel__dragger"
       >
         {showTitle ? (
-          <span className="embPanel__titleInner">
-            <span className="embPanel__titleText" aria-hidden="true">
-              {title}
-            </span>
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
-                  defaultMessage: 'Dashboard panel: {title}',
-                  values: { title },
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            {renderTooltip(viewDescription)}
-          </span>
+          placeholderTitle ? (
+            getPlaceholderTitle()
+          ) : (
+            getTitle()
+          )
         ) : (
           <EuiScreenReaderOnly>
             <span>

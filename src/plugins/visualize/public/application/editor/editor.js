@@ -262,6 +262,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                     if (currentDashboard) {
                       const input = {
                         savedVis: { ...vis.serialize() },
+                        placeholderTitle: '[No Title]',
                       };
                       currentDashboard.addNewEmbeddable('visualization', input).then(() => {
                         const dashInput = currentDashboard.getInput();

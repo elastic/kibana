@@ -66,6 +66,7 @@ export interface VisualizeInput extends EmbeddableInput {
     colors?: { [key: string]: string };
   };
   table?: unknown;
+  placeholderTitle?: string;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -96,6 +97,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
+  private readonly placeholderTitle?: string;
 
   constructor(
     timefilter: TimefilterContract,
@@ -119,6 +121,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.deps = deps;
     this.timefilter = timefilter;
     this.vis = vis;
+    this.placeholderTitle = initialInput.placeholderTitle;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
 
@@ -252,6 +255,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.updateOutput({ loading: false, error });
   };
 
+  getPlaceholderTitle = () => {
+    return this.placeholderTitle;
+  };
+
   /**
    *
    * @param {Element} domNode
@@ -307,6 +314,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     );
 
     div.setAttribute('data-title', this.output.title || '');
+    if (this.placeholderTitle) {
+      div.setAttribute('data-placeholder-title', this.placeholderTitle);
+    }
 
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);
