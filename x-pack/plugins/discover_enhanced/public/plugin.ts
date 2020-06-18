@@ -48,8 +48,9 @@ export class DiscoverEnhancedPlugin
     { uiActions, share }: DiscoverEnhancedSetupDependencies
   ) {
     const start = createStartServicesGetter(core.getStartServices);
+    const isSharePluginInstalled = !!share;
 
-    if (!!share) {
+    if (isSharePluginInstalled) {
       const exploreDataAction = new ExploreDataContextMenuAction({ start });
       uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, exploreDataAction);
     }
