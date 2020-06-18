@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { eq, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
+import { isEqual, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
 import { mix, parseToRgb, toColorString } from 'polished';
 import {
   InfraWaffleMapBounds,
@@ -18,7 +18,7 @@ import {
 } from '../../../../lib/lib';
 
 const OPERATOR_TO_FN = {
-  [InfraWaffleMapRuleOperator.eq]: eq,
+  [InfraWaffleMapRuleOperator.eq]: isEqual,
   [InfraWaffleMapRuleOperator.lt]: lt,
   [InfraWaffleMapRuleOperator.lte]: lte,
   [InfraWaffleMapRuleOperator.gte]: gte,
