@@ -13,7 +13,7 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer } from '../../layers/blended_vector_layer/blended_vector_layer';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
-import { SCALING_TYPES } from '../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, SCALING_TYPES } from '../../../../common/constants';
 
 export function createDefaultLayerDescriptor(sourceConfig: unknown, mapColors: string[]) {
   const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
@@ -24,6 +24,7 @@ export function createDefaultLayerDescriptor(sourceConfig: unknown, mapColors: s
 }
 
 export const esDocumentsLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esSearchDescription', {
     defaultMessage: 'Vector data from a Kibana index pattern',
   }),
