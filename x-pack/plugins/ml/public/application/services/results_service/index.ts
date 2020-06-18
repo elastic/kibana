@@ -4,47 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getMetricData,
-  getModelPlotOutput,
-  getRecordsForCriteria,
-  getScheduledEventsByBucket,
-  fetchPartitionFieldsValues,
-} from './result_service_rx';
-import {
-  getEventDistributionData,
-  getEventRateData,
-  getInfluencerValueMaxScoreByTime,
-  getOverallBucketScores,
-  getRecordInfluencers,
-  getRecordMaxScoreByTime,
-  getRecords,
-  getRecordsForDetector,
-  getRecordsForInfluencer,
-  getScoresByBucket,
-  getTopInfluencers,
-  getTopInfluencerValues,
-} from './results_service';
-
-export const mlResultsService = {
-  getScoresByBucket,
-  getScheduledEventsByBucket,
-  getTopInfluencers,
-  getTopInfluencerValues,
-  getOverallBucketScores,
-  getInfluencerValueMaxScoreByTime,
-  getRecordInfluencers,
-  getRecordsForInfluencer,
-  getRecordsForDetector,
-  getRecords,
-  getRecordsForCriteria,
-  getMetricData,
-  getEventRateData,
-  getEventDistributionData,
-  getModelPlotOutput,
-  getRecordMaxScoreByTime,
-  fetchPartitionFieldsValues,
-};
+import { resultsServiceRxProvider } from './result_service_rx';
+import { resultsServiceProvider } from './results_service';
+import { ml, MlApiServices } from '../ml_api_service';
 
 export type MlResultsService = typeof mlResultsService;
 
@@ -56,4 +18,13 @@ export interface ModelPlotOutputResults {
 export interface CriteriaField {
   fieldName: string;
   fieldValue: any;
+}
+
+export const mlResultsService = mlResultsServiceProvider(ml);
+
+export function mlResultsServiceProvider(mlApiServices: MlApiServices) {
+  return {
+    ...resultsServiceProvider(mlApiServices),
+    ...resultsServiceRxProvider(mlApiServices),
+  };
 }

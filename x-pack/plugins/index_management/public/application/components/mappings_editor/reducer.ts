@@ -11,7 +11,6 @@ import {
   shouldDeleteChildFieldsAfterTypeChange,
   getAllChildFields,
   getMaxNestedDepth,
-  isStateValid,
   normalize,
   updateFieldsPathAfterFieldNameChange,
   searchFields,
@@ -106,7 +105,8 @@ export type Action =
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
   | { type: 'documentField.changeEditor'; value: FieldsEditor }
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
-  | { type: 'search:update'; value: string };
+  | { type: 'search:update'; value: string }
+  | { type: 'validity:update'; value: boolean };
 
 export type Dispatch = (action: Action) => void;
 
@@ -164,7 +164,7 @@ export const addFieldToState = (field: Field, state: State): State => {
 
   return {
     ...state,
-    isValid: isStateValid(state),
+    isValid: true,
     fields: updatedFields,
   };
 };
@@ -293,8 +293,7 @@ export const reducer = (state: State, action: Action): State => {
         configuration: { ...state.configuration, ...action.value },
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
       return nextState;
     }
     case 'configuration.save': {
@@ -317,8 +316,7 @@ export const reducer = (state: State, action: Action): State => {
         templates: { ...state.templates, ...action.value },
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -342,8 +340,7 @@ export const reducer = (state: State, action: Action): State => {
         fieldForm: action.value,
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -529,7 +526,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        isValid: isStateValid(state),
+        isValid: true,
         fieldForm: undefined,
         fields: updatedFields,
         documentFields: {
@@ -577,7 +574,7 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
 
-      nextState.isValid = isStateValid(nextState);
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -588,6 +585,12 @@ export const reducer = (state: State, action: Action): State => {
           term: action.value,
           result: searchFields(action.value, state.fields.byId),
         },
+      };
+    }
+    case 'validity:update': {
+      return {
+        ...state,
+        isValid: action.value,
       };
     }
     default:

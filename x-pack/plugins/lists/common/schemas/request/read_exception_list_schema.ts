@@ -11,11 +11,13 @@ import * as t from 'io-ts';
 import { NamespaceType, id, list_id, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
-export const readExceptionListSchema = t.partial({
-  id,
-  list_id,
-  namespace_type, // defaults to 'single' if not set during decode
-});
+export const readExceptionListSchema = t.exact(
+  t.partial({
+    id,
+    list_id,
+    namespace_type, // defaults to 'single' if not set during decode
+  })
+);
 
 export type ReadExceptionListSchemaPartial = t.TypeOf<typeof readExceptionListSchema>;
 
