@@ -9,7 +9,7 @@ import { SavedObjectsServiceStart, HttpServiceSetup, Logger } from 'src/core/ser
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
-import { ExternalCallbacks, ExternalCallbacksStorage, IngestManagerAppContext } from '../plugin';
+import { ExternalCallback, ExternalCallbacksStorage, IngestManagerAppContext } from '../plugin';
 import { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
@@ -104,7 +104,7 @@ class AppContextService {
     return this.kibanaVersion;
   }
 
-  public getExternalCallbacks(type: ExternalCallbacks[0]) {
+  public getExternalCallbacks(type: ExternalCallback[0]) {
     if (this.externalCallbacks) {
       return this.externalCallbacks.get(type);
     }

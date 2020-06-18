@@ -11,7 +11,7 @@ export {
   IngestManagerSetupContract,
   IngestManagerSetupDeps,
   IngestManagerStartContract,
-  ExternalCallbacks,
+  ExternalCallback,
 } from './plugin';
 
 export const config = {

@@ -95,12 +95,12 @@ const allSavedObjectTypes = [
 /**
  * Callbacks supported by the Ingest plugin
  */
-export type ExternalCallbacks = [
+export type ExternalCallback = [
   'datasourceCreate',
   (newDatasource: NewDatasource) => Promise<NewDatasource>
 ];
 
-export type ExternalCallbacksStorage = Map<ExternalCallbacks[0], Set<ExternalCallbacks[1]>>;
+export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
 
 /**
  * Describes public IngestManager plugin contract returned at the `startup` stage.
@@ -116,7 +116,7 @@ export interface IngestManagerStartContract {
    * Register callbacks for inclusion in ingest API processing
    * @param args
    */
-  register: (...args: ExternalCallbacks) => void;
+  registerExternalCallback: (...args: ExternalCallback) => void;
 }
 
 export class IngestManagerPlugin
@@ -245,7 +245,7 @@ export class IngestManagerPlugin
         getAgentStatusById,
       },
       datasourceService,
-      register: (...args: ExternalCallbacks) => {
+      registerExternalCallback: (...args: ExternalCallback) => {
         return this.registerCallback(...args);
       },
     };
@@ -257,7 +257,7 @@ export class IngestManagerPlugin
     this.externalCallbacks.clear();
   }
 
-  private registerCallback(type: ExternalCallbacks[0], callback: ExternalCallbacks[1]) {
+  private registerCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
     if (!this.externalCallbacks.has(type)) {
       this.externalCallbacks.set(type, new Set());
     }
