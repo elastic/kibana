@@ -39,7 +39,7 @@ const ROOT_CONTEXT_NAME = 'root';
  */
 const DEFAULT_APPENDER_NAME = 'default';
 
-const createLevelSchema = schema.oneOf(
+const levelSchema = schema.oneOf(
   [
     schema.literal('all'),
     schema.literal('fatal'),
@@ -55,21 +55,21 @@ const createLevelSchema = schema.oneOf(
   }
 );
 
-const createLoggerSchema = schema.object({
+const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
   context: schema.string(),
-  level: createLevelSchema,
+  level: levelSchema,
 });
 
 /** @public */
-export type LoggerConfigType = TypeOf<typeof createLoggerSchema>;
+export type LoggerConfigType = TypeOf<typeof loggerSchema>;
 export const config = {
   path: 'logging',
   schema: schema.object({
     appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
       defaultValue: new Map<string, AppenderConfigType>(),
     }),
-    loggers: schema.arrayOf(createLoggerSchema, {
+    loggers: schema.arrayOf(loggerSchema, {
       defaultValue: [],
     }),
     root: schema.object(
@@ -78,7 +78,7 @@ export const config = {
           defaultValue: [DEFAULT_APPENDER_NAME],
           minSize: 1,
         }),
-        level: createLevelSchema,
+        level: levelSchema,
       },
       {
         validate(rawConfig) {
@@ -98,7 +98,7 @@ export const loggerContextConfigSchema = schema.object({
     defaultValue: new Map<string, AppenderConfigType>(),
   }),
 
-  loggers: schema.arrayOf(createLoggerSchema, { defaultValue: [] }),
+  loggers: schema.arrayOf(loggerSchema, { defaultValue: [] }),
 });
 
 /** @public */
@@ -178,11 +178,15 @@ export class LoggingConfig {
    * @param contextConfig
    */
   public extend(contextConfig: LoggerContextConfigType) {
+    // Use a Map to de-dupe any loggers for the same context. contextConfig overrides existing config.
+    const mergedLoggers = new Map<string, LoggerConfigType>([
+      ...this.configType.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
+      ...contextConfig.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
+    ]);
+
     const mergedConfig: LoggingConfigType = {
       appenders: new Map([...this.configType.appenders, ...contextConfig.appenders]),
-      // Could include duplicate contexts, however the logic in `fillLoggersConfig` should
-      // ensure the latest value wins (from the new config)
-      loggers: [...this.configType.loggers, ...contextConfig.loggers],
+      loggers: [...mergedLoggers.values()],
       root: this.configType.root,
     };
 

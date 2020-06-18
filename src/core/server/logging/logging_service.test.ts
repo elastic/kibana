@@ -48,8 +48,16 @@ describe('LoggingService', () => {
       };
 
       setup.configure(['test', 'context'], of(config1, config2));
-      expect(loggingSystem.setContextConfig).toHaveBeenCalledWith(['test', 'context'], config1);
-      expect(loggingSystem.setContextConfig).toHaveBeenCalledWith(['test', 'context'], config2);
+      expect(loggingSystem.setContextConfig).toHaveBeenNthCalledWith(
+        1,
+        ['test', 'context'],
+        config1
+      );
+      expect(loggingSystem.setContextConfig).toHaveBeenNthCalledWith(
+        2,
+        ['test', 'context'],
+        config2
+      );
     });
 
     it('stops forwarding first observable when called a second time', () => {
@@ -66,7 +74,11 @@ describe('LoggingService', () => {
       setup.configure(['test', 'context'], updates$);
       setup.configure(['test', 'context'], of(config1));
       updates$.next(config2);
-      expect(loggingSystem.setContextConfig).toHaveBeenCalledWith(['test', 'context'], config1);
+      expect(loggingSystem.setContextConfig).toHaveBeenNthCalledWith(
+        1,
+        ['test', 'context'],
+        config1
+      );
       expect(loggingSystem.setContextConfig).not.toHaveBeenCalledWith(['test', 'context'], config2);
     });
   });

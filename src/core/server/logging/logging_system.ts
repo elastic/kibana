@@ -68,7 +68,7 @@ export class LoggingSystem implements LoggerFactory {
    */
   public upgrade(rawConfig: LoggingConfigType) {
     const config = new LoggingConfig(rawConfig)!;
-    this.applyConfig(config);
+    this.applyBaseConfig(config);
   }
 
   /**
@@ -107,7 +107,7 @@ export class LoggingSystem implements LoggerFactory {
     // If we already have a base config, apply the config. If not, custom context configs
     // will be picked up on next call to `upgrade`.
     if (this.baseConfig) {
-      this.applyConfig(this.baseConfig);
+      this.applyBaseConfig(this.baseConfig);
     }
   }
 
@@ -117,9 +117,7 @@ export class LoggingSystem implements LoggerFactory {
    * @returns Promise that is resolved once all loggers are successfully disposed.
    */
   public async stop() {
-    for (const appender of this.appenders.values()) {
-      await appender.dispose();
-    }
+    await Promise.all([...this.appenders.values()].map((a) => a.dispose()));
 
     await this.bufferAppender.dispose();
 
@@ -153,12 +151,7 @@ export class LoggingSystem implements LoggerFactory {
     return this.getLoggerConfigByContext(config, LoggingConfig.getParentLoggerContext(context));
   }
 
-  private applyConfig(newBaseConfig: LoggingConfig) {
-    // Config update is asynchronous and may require some time to complete, so we should invalidate
-    // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
-    this.baseConfig = undefined;
-    this.computedConfig = undefined;
-
+  private applyBaseConfig(newBaseConfig: LoggingConfig) {
     const computedConfig = [...this.contextConfigs.values()].reduce(
       (baseConfig, contextConfig) => baseConfig.extend(contextConfig),
       newBaseConfig

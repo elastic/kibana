@@ -34,7 +34,7 @@ export interface LoggingServiceSetup {
    *
    * @remarks
    * Assumes that that the `context` property of the individual `logger` items emitted by `config$`
-   * are relative to the `baseContextParts`.
+   * are relative to the plugin's logging context (defaults to `plugins.<plugin_id>`).
    *
    * @example
    * Customize the configuration for the plugins.data.search context.
