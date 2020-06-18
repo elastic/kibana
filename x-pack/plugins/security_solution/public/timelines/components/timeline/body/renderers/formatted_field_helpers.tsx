@@ -36,6 +36,7 @@ interface RenderRuleNameProps {
   truncate?: boolean;
   value: string | number | null | undefined;
 }
+
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   contextId,
   eventId,
@@ -46,15 +47,19 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
 }) => {
   const ruleName = `${value}`;
   const ruleId = linkValue;
-  const { formatUrl } = useFormatUrl(SecurityPageName.alerts);
-  const { navigateToApp } = useKibana().services.application;
+  const { search } = useFormatUrl(SecurityPageName.alerts);
+  const { navigateToApp, getUrlForApp } = useKibana().services.application;
   const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
 
-  const goToRuleDetails = useCallback(() => {
-    navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
-      path: getRuleDetailsUrl(ruleId ?? ''),
-    });
-  }, [navigateToApp, ruleId]);
+  const goToRuleDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+        path: getRuleDetailsUrl(ruleId ?? '', search),
+      });
+    },
+    [navigateToApp, ruleId, search]
+  );
 
   return isString(value) && ruleName.length > 0 && ruleId != null ? (
     <DefaultDraggable
@@ -63,7 +68,13 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       tooltipContent={value}
       value={value}
     >
-      <LinkAnchor onClick={goToRuleDetails} href={formatUrl(getRuleDetailsUrl(ruleId))}>
+      <LinkAnchor
+        onClick={goToRuleDetails}
+        href={getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+          path: getRuleDetailsUrl(ruleId, search),
+          absolute: true,
+        })}
+      >
         {content}
       </LinkAnchor>
     </DefaultDraggable>
