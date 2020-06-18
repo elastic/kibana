@@ -12,10 +12,11 @@ import {
   FIELD_TYPES,
   fieldValidators,
   UseField,
-  JsonEditorField,
 } from '../../../../../../shared_imports';
 
 const { emptyField, isJsonField } = fieldValidators;
+
+import { XJsonEditor } from '../field_components';
 
 const customConfig: FieldConfig = {
   type: FIELD_TYPES.TEXT,
@@ -71,12 +72,12 @@ export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
   return (
     <UseField
       path="customOptions"
-      component={JsonEditorField}
+      component={XJsonEditor}
       config={customConfig}
       defaultValue={defaultOptions}
       componentProps={{
-        euiCodeEditorProps: {
-          height: '300px',
+        editorProps: {
+          height: 300,
           'aria-label': i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldAriaLabel',
             {
