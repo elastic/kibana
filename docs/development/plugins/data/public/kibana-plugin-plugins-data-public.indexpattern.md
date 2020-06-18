@@ -30,7 +30,6 @@ export declare class IndexPattern implements IIndexPattern
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
-|  [type](./kibana-plugin-plugins-data-public.indexpattern.type.md) |  | <code>string</code> |  |
 |  [typeMeta](./kibana-plugin-plugins-data-public.indexpattern.typemeta.md) |  | <code>TypeMeta</code> |  |
 
 ## Methods

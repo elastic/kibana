@@ -222,7 +222,6 @@ export class IndexPattern implements IIndexPattern {
   }
 
   public initFromSpec(spec: IndexPatternSpec) {
-    // todo - sourceFilters, fields, and fieldFormatMap will be plain objects
     this.updateFromPlainObject(spec);
     this.initFields();
   }

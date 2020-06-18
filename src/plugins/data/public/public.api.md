@@ -1073,8 +1073,6 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     toString(): string;
     // (undocumented)
-    type?: string;
-    // (undocumented)
     typeMeta?: IndexPatternTypeMeta;
     }
 
