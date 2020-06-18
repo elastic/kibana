@@ -1,0 +1,74 @@
+@import '@elastic/eui/src/global_styling/variables/size';
+
+.pipelineProcessorsEditor__tree {
+
+  &__container {
+    background-color: $euiColorLightestShade;
+    padding: $euiSizeS;
+  }
+
+  &__dropZoneContainer {
+    margin: 2px;
+    visibility: hidden;
+    border: 2px dashed $euiColorLightShade;
+    height: 12px;
+    border-radius: 2px;
+
+    transition: border .5s;
+
+    &--active {
+      &:hover {
+        border: 2px dashed $euiColorPrimary;
+      }
+      visibility: visible;
+    }
+  }
+
+  &__dropZoneButton {
+    height: 8px;
+    opacity: 0;
+    text-decoration: none !important;
+
+    &--active {
+      &:hover {
+        transform: none !important;
+      }
+    }
+
+    &:disabled {
+      cursor: default !important;
+      & > * {
+        cursor: default !important;
+      }
+    }
+  }
+
+  &__onFailureHandlerLabelContainer {
+    position: relative;
+    height: 14px;
+  }
+  &__onFailureHandlerLabel {
+    position: absolute;
+    bottom: -16px;
+    &--withDropZone {
+      bottom: -4px;
+    }
+  }
+
+
+  &__onFailureHandlerContainer {
+    margin-top: $euiSizeS;
+    margin-bottom: $euiSizeS;
+    & > * {
+      overflow: visible;
+    }
+  }
+
+  &__item {
+    transition: border-color 1s;
+    min-height: 50px;
+    &--selected {
+      border: 1px solid $euiColorPrimary;
+    }
+  }
+}
