@@ -41,7 +41,6 @@ import {
 import {
   usePersistExceptionList,
   usePersistExceptionItem,
-  useExceptionList,
 } from '../../../../../lists/public';
 import { ExceptionBuilder } from '../../../common/components/exception_builder';
 
@@ -170,14 +169,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     { isLoading: exceptionItemPersistIsLoading, isSaved: exceptionItemPersistIsSaved },
     setExceptionItem,
   ] = usePersistExceptionItem({ onError, onSuccess, http });
-
-  // Fetch list
-  const listId = '0958f9f0-a6bc-11ea-bb46-f15995be8e61';
-  const [exceptionListLoading, exceptionListAndItems] = useExceptionList({
-    http,
-    id: listId,
-    namespaceType: 'agnostic',
-  });
 
   // TODO: file hash is not present in data from generator
   // TODO: hash is an array
