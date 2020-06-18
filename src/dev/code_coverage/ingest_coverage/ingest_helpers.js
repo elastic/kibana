@@ -45,6 +45,9 @@ ${orig}
 
 ### Troubleshooting Hint:
 ${red('Perhaps the coverage data was not merged properly?\n')}
+
+### Error.meta (stringified):
+${pretty(e.meta)}
 `;
 }
 

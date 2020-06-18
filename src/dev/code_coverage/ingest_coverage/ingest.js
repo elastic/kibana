@@ -19,8 +19,8 @@
 
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
-import { RESEARCH_CI_JOB_NAME } from './constants';
-import { errMsg, redact, maybeTeamAssign, whichIndex } from './ingest_helpers';
+import { RESEARCH_CI_JOB_NAME, TEAM_ASSIGNMENT_PIPELINE_NAME } from './constants';
+import { errMsg, redact, whichIndex } from './ingest_helpers';
 import { pretty, green } from './utils';
 import { right, left } from './either';
 
@@ -28,37 +28,38 @@ const node = process.env.ES_HOST || 'http://localhost:9200';
 
 const client = new Client({ node });
 const redactedEsHostUrl = redact(node);
+const parse = JSON.parse.bind(null);
+const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? true : false;
 
 export const ingest = (log) => async (body) => {
   const isTotal = !!body.isTotal;
-  const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? true : false;
   const index = whichIndex(isResearchJob)(isTotal);
   const isACoverageIndex = isTotal ? false : true;
 
-  const payload = maybeTeamAssign(isACoverageIndex, body);
+  const stringified = pretty(body);
+  const pipeline = TEAM_ASSIGNMENT_PIPELINE_NAME;
 
-  const stringified = pretty(payload);
-  const payloadWithIndex = { index, body: stringified };
+  const finalPayload = isACoverageIndex
+    ? { index, body: stringified, pipeline }
+    : { index, body: stringified };
 
   const justLog = dontSendButLog(log);
   const doSendToIndex = doSend(index);
   const doSendRedacted = doSendToIndex(redactedEsHostUrl)(log)(client);
 
-  eitherSendOrNot(payloadWithIndex).fold(justLog, doSendRedacted);
+  eitherSendOrNot(finalPayload).fold(justLog, doSendRedacted);
 };
 
 function doSend(index) {
   return (redactedEsHostUrl) => (log) => (client) => async (payload) => {
-    const logF = logSend(true)(redactedEsHostUrl)(index)(log);
+    const logF = logSend(true)(redactedEsHostUrl)(log);
     await send(logF, index, redactedEsHostUrl, client, payload);
   };
 }
 
 function dontSendButLog(log) {
   return (payload) => {
-    console.log(`\n### log: \n\t${log}`);
-    console.log(`\n### payload: \n\t${payload}`);
-    // logSend(false)(?)(log)(payload);
+    logSend(false)(null)(log)(payload);
   };
 }
 
@@ -74,19 +75,20 @@ async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
 }
 
 function logSend(actuallySent) {
-  return (redactedEsHostUrl) => (idx) => (log) => (payload) =>
+  return (redactedEsHostUrl) => (log) => (payload) => {
+    const { index, body } = payload;
     log.verbose(
       `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
-\t### ES Host: ${redactedEsHostUrl}
-\t### Index: ${green(idx)}
-\t### payload: ${pretty(payload)}`
+${redactedEsHostUrl ? `\t### ES Host: ${redactedEsHostUrl}` : ''}
+\t### Index: ${green(index)}
+\t### payload.body: ${pretty(body)}`
     );
+  };
 }
-
 function eitherSendOrNot(payload) {
   return process.env.NODE_ENV === 'integration_test' ? left(payload) : right(payload);
 }
 
-function parse(body) {
-  return JSON.parse(body);
-}
+// function parse(body) {
+//   return JSON.parse(body);
+// }
