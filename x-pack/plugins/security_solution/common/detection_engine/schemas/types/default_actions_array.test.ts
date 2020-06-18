@@ -40,7 +40,7 @@ describe('default_actions_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "Array<{| group: string, id: string, action_type_id: string, params: object |}>"',
+      'Invalid value "5" supplied to "DefaultActionsArray"',
     ]);
     expect(message.schema).toEqual({});
   });

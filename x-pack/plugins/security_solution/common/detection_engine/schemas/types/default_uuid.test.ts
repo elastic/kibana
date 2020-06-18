@@ -24,9 +24,7 @@ describe('default_uuid', () => {
     const decoded = DefaultUuid.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "NonEmptyString"',
-    ]);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "DefaultUuid"']);
     expect(message.schema).toEqual({});
   });
 

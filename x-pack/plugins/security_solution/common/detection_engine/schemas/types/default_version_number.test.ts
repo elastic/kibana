@@ -25,7 +25,7 @@ describe('default_version_number', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to "PositiveIntegerGreaterThanZero"',
+      'Invalid value "0" supplied to "DefaultVersionNumber"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -36,7 +36,7 @@ describe('default_version_number', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "PositiveIntegerGreaterThanZero"',
+      'Invalid value "-1" supplied to "DefaultVersionNumber"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -47,7 +47,7 @@ describe('default_version_number', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "PositiveIntegerGreaterThanZero"',
+      'Invalid value "5" supplied to "DefaultVersionNumber"',
     ]);
     expect(message.schema).toEqual({});
   });

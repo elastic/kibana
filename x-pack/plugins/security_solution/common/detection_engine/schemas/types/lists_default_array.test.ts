@@ -173,8 +173,8 @@ describe('lists_default_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "Array<(Exact<({ field: string, values_operator: "included" | "excluded", values_type: "match" | "match_all" | "list" | "exists" } & Partial<{ values: Array<Exact<({ name: string } & Partial<{ id: string, description: string, created_at: IsoDateString }>)>> }>)> & Partial<{ and: Array<Exact<({ field: string, values_operator: "included" | "excluded", values_type: "match" | "match_all" | "list" | "exists" } & Partial<{ values: Array<Exact<({ name: string } & Partial<{ id: string, description: string, created_at: IsoDateString }>)>> }>)>> }>)>"',
-      'Invalid value "5" supplied to "Array<(Exact<({ field: string, values_operator: "included" | "excluded", values_type: "match" | "match_all" | "list" | "exists" } & Partial<{ values: Array<Exact<({ name: string } & Partial<{ id: string, description: string, created_at: IsoDateString }>)>> }>)> & Partial<{ and: Array<Exact<({ field: string, values_operator: "included" | "excluded", values_type: "match" | "match_all" | "list" | "exists" } & Partial<{ values: Array<Exact<({ name: string } & Partial<{ id: string, description: string, created_at: IsoDateString }>)>> }>)>> }>)>"',
+      'Invalid value "5" supplied to "listsWithDefaultArray"',
+      'Invalid value "5" supplied to "listsWithDefaultArray"',
     ]);
     expect(message.schema).toEqual({});
   });

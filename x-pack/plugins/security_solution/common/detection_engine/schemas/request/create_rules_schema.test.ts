@@ -614,9 +614,7 @@ describe('create rules schema', () => {
     const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "Array<string>"',
-    ]);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "references"']);
     expect(message.schema).toEqual({});
   });
 
@@ -724,7 +722,7 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "PositiveIntegerGreaterThanZero"',
+      'Invalid value "-1" supplied to "max_signals"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -738,9 +736,7 @@ describe('create rules schema', () => {
     const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to "PositiveIntegerGreaterThanZero"',
-    ]);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to "max_signals"']);
     expect(message.schema).toEqual({});
   });
 
@@ -788,9 +784,9 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to "Array<string>"',
-      'Invalid value "1" supplied to "Array<string>"',
-      'Invalid value "2" supplied to "Array<string>"',
+      'Invalid value "0" supplied to "tags"',
+      'Invalid value "1" supplied to "tags"',
+      'Invalid value "2" supplied to "tags"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -822,7 +818,7 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "framework"',
+      'Invalid value "undefined" supplied to "threat,framework"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -850,7 +846,7 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "tactic"',
+      'Invalid value "undefined" supplied to "threat,tactic"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -876,7 +872,7 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "technique"',
+      'Invalid value "undefined" supplied to "threat,technique"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -908,8 +904,8 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "Array<string>"',
-      'Invalid value "4" supplied to "Array<string>"',
+      'Invalid value "5" supplied to "false_positives"',
+      'Invalid value "4" supplied to "false_positives"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1087,7 +1083,7 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "group"',
+      'Invalid value "undefined" supplied to "actions,group"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1101,7 +1097,9 @@ describe('create rules schema', () => {
     const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to "id"']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,id"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -1115,7 +1113,7 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "action_type_id"',
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1130,7 +1128,7 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "params"',
+      'Invalid value "undefined" supplied to "actions,params"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1152,7 +1150,7 @@ describe('create rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "action_type_id"',
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
     ]);
     expect(message.schema).toEqual({});
   });

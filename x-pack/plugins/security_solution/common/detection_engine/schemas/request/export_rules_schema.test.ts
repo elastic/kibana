@@ -118,7 +118,9 @@ describe('create rules schema', () => {
       const decoded = exportRulesQuerySchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "10" supplied to "string"']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "10" supplied to "file_name"',
+      ]);
       expect(message.schema).toEqual({});
     });
 
@@ -149,7 +151,7 @@ describe('create rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "invalid string" supplied to "boolean"',
+        'Invalid value "invalid string" supplied to "exclude_export_details"',
       ]);
       expect(message.schema).toEqual({});
     });

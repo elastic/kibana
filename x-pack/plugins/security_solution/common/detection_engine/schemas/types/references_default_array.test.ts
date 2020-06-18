@@ -34,7 +34,7 @@ describe('default_string_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "Array<string>"',
+      'Invalid value "5" supplied to "DefaultStringArray"',
     ]);
     expect(message.schema).toEqual({});
   });

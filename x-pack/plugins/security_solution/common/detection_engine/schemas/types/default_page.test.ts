@@ -34,7 +34,7 @@ describe('default_page', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "NaN" supplied to "PositiveIntegerGreaterThanZero"',
+      'Invalid value "NaN" supplied to "DefaultPerPage"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -45,7 +45,7 @@ describe('default_page', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "NaN" supplied to "PositiveIntegerGreaterThanZero"',
+      'Invalid value "NaN" supplied to "DefaultPerPage"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -56,7 +56,7 @@ describe('default_page', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to "PositiveIntegerGreaterThanZero"',
+      'Invalid value "0" supplied to "DefaultPerPage"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -67,7 +67,7 @@ describe('default_page', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "PositiveIntegerGreaterThanZero"',
+      'Invalid value "-1" supplied to "DefaultPerPage"',
     ]);
     expect(message.schema).toEqual({});
   });
