@@ -46,7 +46,6 @@ export class MapsAppView extends React.Component {
     this.state = {
       indexPatterns: [],
       prevIndexPatternIds: [],
-      filters: [],
       initialized: false,
       isVisible: true,
       savedQuery: null,
@@ -240,7 +239,6 @@ export class MapsAppView extends React.Component {
     if (filters) {
       filterManager.setFilters(filters); // Maps and merges filters
       newFilters = filterManager.getFilters();
-      newState.filters = newFilters;
     }
     if (query) {
       newState.query = query;
@@ -252,7 +250,7 @@ export class MapsAppView extends React.Component {
       this._syncAppAndGlobalState();
       dispatchSetQuery(
         refresh,
-        newFilters || this.state.filters,
+        newFilters || this.props.filters,
         query || this.state.query,
         time || this.state.time
       );
@@ -456,10 +454,10 @@ export class MapsAppView extends React.Component {
   }
 
   render() {
-    const { filters, initialized } = this.state;
+    const { filters, isFullScreen } = this.props;
 
-    return initialized ? (
-      <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
+    return this.state.initialized ? (
+      <div id="maps-plugin" className={isFullScreen ? 'mapFullScreen' : ''}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">

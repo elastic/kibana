@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { MapsAppView } from './maps_app_view';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
 import {
+  getFilters,
   getQueryableUniqueIndexPatternIds,
   getRefreshConfig,
 } from '../../../selectors/map_selectors';
@@ -32,6 +33,7 @@ function mapStateToProps(state = {}) {
     nextIndexPatternIds: getQueryableUniqueIndexPatternIds(state),
     flyoutDisplay: getFlyoutDisplay(state),
     refreshConfig: getRefreshConfig(state),
+    filters: getFilters(state),
   };
 }
 
