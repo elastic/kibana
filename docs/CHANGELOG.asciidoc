@@ -54,7 +54,7 @@ Metrics::
 
 [float]
 [[known-issues-7.8.0]]
-=== Known issue
+=== Known issues
 
 SIEM::
 * After upgrading from 7.7.x to 7.8.0, rules that have been overwritten in any
