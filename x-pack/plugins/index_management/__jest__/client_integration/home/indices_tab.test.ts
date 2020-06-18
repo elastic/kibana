@@ -91,7 +91,7 @@ describe('<IndexManagementHome />', () => {
       await actions.clickDataStreamAt(0);
 
       expect(table.getMetaData('dataStreamTable').tableCellsValues).toEqual([
-        ['dataStream1', '1', '@timestamp', '1'],
+        ['', 'dataStream1', '1', '@timestamp', '1'],
       ]);
     });
   });

@@ -33,7 +33,7 @@ export const services = {
 services.uiMetricService.setup({ reportUiStats() {} } as any);
 setExtensionsService(services.extensionsService);
 setUiMetricService(services.uiMetricService);
-const appDependencies = { services, core: {}, plugins: {} } as any;
+const appDependencies = { services, core: { getUrlForApp: () => {} }, plugins: {} } as any;
 
 export const setupEnvironment = () => {
   // Mock initialization of services

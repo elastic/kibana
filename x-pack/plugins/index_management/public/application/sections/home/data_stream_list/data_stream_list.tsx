@@ -12,6 +12,7 @@ import { EuiTitle, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLink } from '@elastic/
 import { ScopedHistory } from 'kibana/public';
 
 import { reactRouterNavigate } from '../../../../shared_imports';
+import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
 import { DataStreamTable } from './data_stream_table';
@@ -26,6 +27,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   },
   history,
 }) => {
+  const {
+    core: { getUrlForApp },
+  } = useAppContext();
   const { error, isLoading, data: dataStreams, sendRequest: reload } = useLoadDataStreams();
 
   let content;
@@ -67,17 +71,15 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           <p>
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsDescription"
-              defaultMessage="Data streams represent the latest data in a rollover series. Get started with data streams by creating a {link}."
+              defaultMessage="Data streams represent collections of time series indices. Get started with data streams in {link}."
               values={{
                 link: (
                   <EuiLink
                     data-test-subj="dataStreamsEmptyPromptTemplateLink"
-                    {...reactRouterNavigate(history, {
-                      pathname: '/templates',
-                    })}
+                    href={getUrlForApp('ingestManager')}
                   >
                     {i18n.translate('xpack.idxMgmt.dataStreamList.emptyPrompt.getStartedLink', {
-                      defaultMessage: 'composable index template',
+                      defaultMessage: 'Ingest Manager',
                     })}
                   </EuiLink>
                 ),

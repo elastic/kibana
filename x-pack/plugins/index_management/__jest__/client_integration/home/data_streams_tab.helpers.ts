@@ -21,7 +21,7 @@ const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
     initialEntries: [`/indices`],
-    componentRoutePath: `/:section(indices|data_streams|templates)`,
+    componentRoutePath: `/:section(indices|data_streams)`,
   },
   doMountAsync: true,
 };
