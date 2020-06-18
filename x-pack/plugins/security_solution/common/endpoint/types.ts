@@ -450,12 +450,30 @@ export interface EndpointEvent {
     kind: string;
   };
   host: Host;
+  network?: {
+    direction: unknown;
+    forwarded_ip: unknown;
+  };
+  dns?: {
+    question: { name: unknown };
+  };
   process: {
     entity_id: string;
     name: string;
+    executable?: string;
+    args?: string;
+    code_signature?: {
+      status?: string;
+      subject_name: string;
+    };
+    pid?: number;
+    hash?: {
+      md5: string;
+    };
     parent?: {
       entity_id: string;
       name?: string;
+      pid?: number;
     };
     /*
      * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
@@ -466,6 +484,12 @@ export interface EndpointEvent {
       ancestry: string[];
     };
   };
+  user?: {
+    domain?: string;
+    name: string;
+  };
+  file?: { path: unknown };
+  registry?: { path: unknown; key: unknown };
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
