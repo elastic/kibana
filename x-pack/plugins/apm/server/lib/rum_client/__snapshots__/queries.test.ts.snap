@@ -45,6 +45,11 @@ Object {
             },
           },
           Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
+            },
+          },
+          Object {
             "term": Object {
               "my.custom.ui.filter": "foo-bar",
             },
@@ -111,6 +116,11 @@ Object {
             },
           },
           Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
+            },
+          },
+          Object {
             "term": Object {
               "my.custom.ui.filter": "foo-bar",
             },
@@ -162,6 +172,11 @@ Object {
           Object {
             "term": Object {
               "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
             },
           },
           Object {
