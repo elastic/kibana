@@ -8,6 +8,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { CommentsArray } from '../types';
 
 import {
   CreateExceptionListItemSchema,
@@ -99,6 +100,20 @@ describe('create_exception_list_schema', () => {
     outputPayload.item_id = (message.schema as CreateExceptionListItemSchema).item_id;
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(outputPayload);
+  });
+
+  test('it should NOT accept "comments" with "created_at" or "created_by" values', () => {
+    const inputPayload: Omit<CreateExceptionListItemSchema, 'comments'> & {
+      comments?: CommentsArray;
+    } = {
+      ...getCreateExceptionListItemSchemaMock(),
+      comments: [{ comment: 'some comment', created_at: 'some time', created_by: 'someone' }],
+    };
+    const decoded = createExceptionListItemSchema.decode(inputPayload);
+    const checked = exactCheck(inputPayload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "created_at,created_by"']);
+    expect(message.schema).toEqual({});
   });
 
   test('it should accept an undefined for "entries" but return an array', () => {

@@ -23,8 +23,8 @@ import {
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
 import {
-  CommentsPartialArray,
-  DefaultCommentsPartialArray,
+  CommentsUpdateArray,
+  DefaultCommentsUpdateArray,
   DefaultEntryArray,
   EntriesArray,
 } from '../types';
@@ -40,7 +40,7 @@ export const updateExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       _tags, // defaults to empty array if not set during decode
-      comments: DefaultCommentsPartialArray, // defaults to empty array if not set during decode
+      comments: DefaultCommentsUpdateArray, // defaults to empty array if not set during decode
       entries: DefaultEntryArray, // defaults to empty array if not set during decode
       id, // defaults to undefined if not set during decode
       item_id: t.union([t.string, t.undefined]),
@@ -65,7 +65,7 @@ export type UpdateExceptionListItemSchemaDecoded = Identity<
     '_tags' | 'tags' | 'entries' | 'namespace_type' | 'comments'
   > & {
     _tags: _Tags;
-    comments: CommentsPartialArray;
+    comments: CommentsUpdateArray;
     tags: Tags;
     entries: EntriesArray;
     namespace_type: NamespaceType;

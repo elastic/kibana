@@ -6,15 +6,21 @@
 
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
+import { ErrorWithStatusCode } from '../../error_with_status_code';
 import {
+  Comments,
   CommentsArrayOrUndefined,
-  CommentsPartialArrayOrUndefined,
+  CommentsNew,
+  CommentsNewArrayOrUndefined,
+  CommentsUpdateArrayOrUndefined,
   ExceptionListItemSchema,
   ExceptionListSchema,
   ExceptionListSoSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   NamespaceType,
+  commentsNew,
+  comments as commentsSchema,
 } from '../../../common/schemas';
 import {
   SavedObjectType,
@@ -251,23 +257,81 @@ export const transformSavedObjectsToFoundExceptionList = ({
   };
 };
 
-export const transformComments = ({
-  comments,
+/*
+ * Determines whether two comments are equal, this is a very
+ * naive implementation, not meant to be used for deep equality of complex objects
+ */
+export const isCommentEqual = (
+  commentA: Comments | CommentsNew,
+  commentB: Comments | CommentsNew
+): boolean => {
+  const a = Object.values(commentA).sort().join();
+  const b = Object.values(commentB).sort().join();
+
+  return a === b;
+};
+
+export const transformCommentsUpdate = ({
+  newComments,
+  existingComments,
   user,
 }: {
-  comments: CommentsPartialArrayOrUndefined;
+  newComments: CommentsUpdateArrayOrUndefined;
+  existingComments: CommentsArrayOrUndefined;
+  user: string;
+}): CommentsArrayOrUndefined => {
+  if (
+    newComments != null &&
+    newComments.length === 0 &&
+    existingComments != null &&
+    existingComments.length > 0
+  ) {
+    throw new ErrorWithStatusCode(
+      'Comments cannot be deleted, only new comments may be appended',
+      403
+    );
+  } else if (newComments != null) {
+    const existing = existingComments ?? [];
+    return newComments.flatMap((c, index) => {
+      const existingComment = existing[index];
+
+      // no comments exist, and user tries to add comment of type `comment`
+      if (commentsSchema.is(c) && existing.length === 0) {
+        throw new ErrorWithStatusCode('Only new comments may be appended', 403);
+      } else if (index <= existing.length - 1 && !isCommentEqual(c, existingComment)) {
+        throw new ErrorWithStatusCode(
+          'Existing comments cannot be edited, only new comments may be appended',
+          403
+        );
+      } else if (index > existing.length - 1 && commentsNew.is(c)) {
+        const newComment = transformNewComments({ newComments: [c], user });
+        return newComment ?? [];
+      } else {
+        return commentsSchema.is(c) ? c : [];
+      }
+    });
+  } else {
+    return existingComments;
+  }
+};
+
+export const transformNewComments = ({
+  newComments,
+  user,
+}: {
+  newComments: CommentsNewArrayOrUndefined;
   user: string;
 }): CommentsArrayOrUndefined => {
   const dateNow = new Date().toISOString();
-  if (comments != null) {
-    return comments.map((comment) => {
+  if (newComments != null) {
+    return newComments.map((c: CommentsNew) => {
       return {
-        comment: comment.comment,
-        created_at: comment.created_at ?? dateNow,
-        created_by: comment.created_by ?? user,
+        comment: c.comment,
+        created_at: dateNow,
+        created_by: user,
       };
     });
   } else {
-    return comments;
+    return newComments;
   }
 };
