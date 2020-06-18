@@ -6,7 +6,10 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SavedObjectsServiceStart, HttpServiceSetup, Logger, KibanaRequest } from 'src/core/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
+import {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsPluginSetup,
+} from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
 import { IngestManagerAppContext } from '../plugin';
@@ -14,6 +17,7 @@ import { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
+  private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private security: SecurityPluginSetup | undefined;
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
@@ -25,7 +29,8 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
 
   public async start(appContext: IngestManagerAppContext) {
-    this.encryptedSavedObjects = appContext.encryptedSavedObjects?.getClient();
+    this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
+    this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
     this.security = appContext.security;
     this.savedObjects = appContext.savedObjects;
     this.isProductionMode = appContext.isProductionMode;
@@ -100,6 +105,14 @@ class AppContextService {
       throw new Error('HttpServiceSetup not set.');
     }
     return this.httpSetup;
+  }
+
+  public getEncryptedSavedObjectsSetup() {
+    if (!this.encryptedSavedObjectsSetup) {
+      throw new Error('encryptedSavedObjectsSetup is not set');
+    }
+
+    return this.encryptedSavedObjectsSetup;
   }
 
   public getKibanaVersion() {
