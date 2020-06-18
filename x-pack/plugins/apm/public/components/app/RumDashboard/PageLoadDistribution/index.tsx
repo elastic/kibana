@@ -94,10 +94,9 @@ export const PageLoadDistribution = () => {
 
   return (
     <div>
-      <EuiSpacer size="m" />
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3>{PageLoadDistLabel}</h3>
           </EuiTitle>
         </EuiFlexItem>
