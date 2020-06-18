@@ -7,7 +7,11 @@ import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { AlertData } from '../../../../../plugins/security_solution/common/endpoint_alerts/types';
 import { eventsIndexPattern } from '../../../../../plugins/security_solution/common/endpoint/constants';
-import { deleteEventsStream, deleteMetadataStream } from '../data_stream_helper';
+import {
+  deleteEventsStream,
+  deleteMetadataStream,
+  deletePolicyStream,
+} from '../data_stream_helper';
 import { indexHostsAndAlerts } from '../../../../../plugins/security_solution/common/endpoint/index_data';
 
 /**
@@ -96,7 +100,11 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
         // to do it manually
-        await Promise.all([deleteEventsStream(getService), deleteMetadataStream(getService)]);
+        await Promise.all([
+          deleteEventsStream(getService),
+          deleteMetadataStream(getService),
+          deletePolicyStream(getService),
+        ]);
       });
 
       it('should not support POST requests', async () => {
