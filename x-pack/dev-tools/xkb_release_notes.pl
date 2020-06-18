@@ -111,7 +111,7 @@ ASCIIDOC
                 }
                 my $number = $issue->{number};
 
-#                print encode_utf8("* $title {pull}${number}[#${number}]");
+#                print encode_utf8("* $title {kibana-pull}${number}[#${number}]");
                  print encode_utf8("* $title");
                  print "\n";
                  print encode_utf8("// https://github.com/${User_Repo}pull/${number}[#${number}]");
