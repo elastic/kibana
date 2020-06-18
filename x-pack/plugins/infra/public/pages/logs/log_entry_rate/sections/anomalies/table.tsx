@@ -63,6 +63,24 @@ const datasetColumnName = i18n.translate(
   }
 );
 
+const moreThanExpectedAnomalyMessage = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableLessMoreExpectedAnomalyMessage',
+  {
+    defaultMessage: 'More log messages in this dataset than expected',
+  }
+);
+
+const lessThanExpectedAnomalyMessage = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableLessThanExpectedAnomalyMessage',
+  {
+    defaultMessage: 'Less log messages in this dataset than expected',
+  }
+);
+
+const getAnomalyMessage = (actualRate: number, typicalRate: number): string => {
+  return actualRate < typicalRate ? lessThanExpectedAnomalyMessage : moreThanExpectedAnomalyMessage;
+};
+
 export const AnomaliesTable: React.FunctionComponent<{
   results: LogEntryRateResults;
   setTimeRange: (timeRange: TimeRange) => void;
@@ -78,7 +96,7 @@ export const AnomaliesTable: React.FunctionComponent<{
         // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
         datasetName: getFriendlyNameForPartitionId(anomaly.partitionId),
         anomalyScore: formatAnomalyScore(anomaly.anomalyScore),
-        anomalyMessage: 'Less than expected', // TODO: Make these real
+        anomalyMessage: getAnomalyMessage(anomaly.actualLogEntryRate, anomaly.typicalLogEntryRate),
       };
     });
   }, [results]);
