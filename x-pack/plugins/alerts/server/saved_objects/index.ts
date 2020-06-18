@@ -6,14 +6,14 @@
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
+import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
-  // Encrypted attributes
-  encryptedSavedObjects.registerType({
+  const encryptedType = {
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
     attributesToExcludeFromAAD: new Set([
@@ -22,12 +22,16 @@ export function setupSavedObjects(
       'mutedInstanceIds',
       'updatedBy',
     ]),
-  });
+  };
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType(encryptedType);
 
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
     namespaceType: 'single',
+    migrations: getMigrations(encryptedSavedObjects, encryptedType),
     mappings: mappings.alert,
   });
 }
