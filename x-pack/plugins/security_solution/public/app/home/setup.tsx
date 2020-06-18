@@ -32,16 +32,7 @@ export const Setup: React.FunctionComponent<{
       });
     };
 
-    const displayToast = () => {
-      notifications.toasts.addDanger({
-        title,
-        text: defaultText,
-      });
-    };
-
-    ingestManager.success
-      .then(displayToast)
-      .catch((error: Error) => displayToastWithModal(error.message));
+    ingestManager.success.catch((error: Error) => displayToastWithModal(error.message));
   }, [ingestManager, notifications.toasts]);
 
   return null;
