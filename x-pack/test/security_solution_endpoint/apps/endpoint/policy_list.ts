@@ -8,7 +8,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'endpoint', 'policy', 'endpointPageUtils']);
+  const pageObjects = getPageObjects([
+    'common',
+    'endpoint',
+    'policy',
+    'endpointPageUtils',
+    'ingestManagerCreateDatasource',
+  ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
   const RELATIVE_DATE_FORMAT = /\d (?:seconds|minutes) ago/i;
@@ -25,6 +31,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('displays page title', async () => {
       const policyTitle = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
       expect(policyTitle).to.equal('Policies');
+    });
+    it('shows header create policy button', async () => {
+      const createButtonTitle = await testSubjects.getVisibleText('headerCreateNewPolicyButton');
+      expect(createButtonTitle).to.equal('Create new policy');
     });
     it('shows policy count total', async () => {
       const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
@@ -99,6 +109,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.endpoint.waitForTableToNotHaveData('policyTable');
         const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
         expect(policyTotal).to.equal('0 Policies');
+      });
+    });
+
+    describe('and user clicks on page header create button', () => {
+      beforeEach(async () => {
+        await pageObjects.policy.navigateToPolicyList();
+        await (await pageObjects.policy.findHeaderCreateNewButton()).click();
+      });
+
+      it('should redirect to ingest management integrations add datasource', async () => {
+        await pageObjects.ingestManagerCreateDatasource.ensureOnCreatePageOrFail();
+      });
+
+      it('should redirect user back to Policy List if Cancel button is clicked', async () => {
+        await (await pageObjects.ingestManagerCreateDatasource.findCancelButton()).click();
+        await pageObjects.policy.ensureIsOnPolicyPage();
+      });
+
+      it('should redirect user back to Policy List if Back link is clicked', async () => {
+        await (await pageObjects.ingestManagerCreateDatasource.findBackLink()).click();
+        await pageObjects.policy.ensureIsOnPolicyPage();
+      });
+
+      it('should display custom endpoint configuration message', async () => {
+        await pageObjects.ingestManagerCreateDatasource.selectAgentConfig();
+        const endpointConfig = await pageObjects.policy.findDatasourceEndpointCustomConfiguration();
+        expect(endpointConfig).not.to.be(undefined);
+      });
+
+      it('should redirect user back to Policy List after a successful save', async () => {
+        const newPolicyName = `endpoint policy ${Date.now()}`;
+        await pageObjects.ingestManagerCreateDatasource.selectAgentConfig();
+        await pageObjects.ingestManagerCreateDatasource.setDatasourceName(newPolicyName);
+        await (await pageObjects.ingestManagerCreateDatasource.findDSaveButton()).click();
+        await pageObjects.ingestManagerCreateDatasource.waitForSaveSuccessNotification();
+        await pageObjects.policy.ensureIsOnPolicyPage();
+        await policyTestResources.deletePolicyByName(newPolicyName);
       });
     });
   });

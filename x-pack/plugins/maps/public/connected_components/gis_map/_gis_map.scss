@@ -9,11 +9,11 @@
   overflow: hidden;
 
   > * {
-    width: $euiSizeXXL * 11;
+    width: $euiSizeXXL * 12;
   }
 
   &-isVisible {
-    width: $euiSizeXXL * 11;
+    width: $euiSizeXXL * 12;
     transition: width $euiAnimSpeedNormal $euiAnimSlightResistance;
   }
 }
