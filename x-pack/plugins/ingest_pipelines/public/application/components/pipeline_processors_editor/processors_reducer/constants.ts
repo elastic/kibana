@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID = 'alerts-rules-details-page';
-export const ALERTS_TIMELINE_ID = 'alerts-page';
+export const PROCESSOR_STATE_SCOPE = 'processors';
+export const ON_FAILURE_STATE_SCOPE = 'onFailure';
