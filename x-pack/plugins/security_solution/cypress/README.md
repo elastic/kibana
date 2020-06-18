@@ -135,6 +135,17 @@ Note that with this type of execution you don't need to have running a kibana an
 As in this case we want to mimic a CI execution we want to execute the tests with the same set of data, this is why 
 in this case does not make sense to override Cypress environment variables. 
 
+Note: To `run-as-ci` with the Cypress UI, update [x-pack/test/security_solution_cypress/runner.ts](https://github.com/elastic/kibana/blob/master/x-pack/test/security_solution_cypress/runner.ts#L25) from 
+``` ts
+args: ['cypress:run'],
+```
+to 
+``` ts
+args: ['cypress:open'],
+```
+This is helpful for debugging specific failed tests from CI without having to run the entire suite.
+
+Note: Please don't commit this change.
 ### Test data
 
 As mentioned above, when running the tests as Jenkins the tests are populated with data ("archives") found in: `x-pack/test/security_solution_cypress/es_archives`.

@@ -11,6 +11,7 @@ import { PluginStatement as PluginStatementModel } from '../models/pipeline/plug
 import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../models/list/if_element';
 import { PluginStatement } from './plugin_statement';
+import './statement.scss';
 
 function renderStatementName(name, onVertexSelected) {
   return (

@@ -20,9 +20,9 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [get](./kibana-plugin-core-server.basepath.get.md) |  | <code>(request: LegacyRequest &#124; KibanaRequest&lt;unknown, unknown, unknown, any&gt;) =&gt; string</code> | returns <code>basePath</code> value, specific for an incoming request. |
+|  [get](./kibana-plugin-core-server.basepath.get.md) |  | <code>(request: KibanaRequest &#124; LegacyRequest) =&gt; string</code> | returns <code>basePath</code> value, specific for an incoming request. |
 |  [prepend](./kibana-plugin-core-server.basepath.prepend.md) |  | <code>(path: string) =&gt; string</code> | Prepends <code>path</code> with the basePath. |
 |  [remove](./kibana-plugin-core-server.basepath.remove.md) |  | <code>(path: string) =&gt; string</code> | Removes the prepended basePath from the <code>path</code>. |
 |  [serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md) |  | <code>string</code> | returns the server's basePath<!-- -->See [BasePath.get](./kibana-plugin-core-server.basepath.get.md) for getting the basePath value for a specific request |
-|  [set](./kibana-plugin-core-server.basepath.set.md) |  | <code>(request: LegacyRequest &#124; KibanaRequest&lt;unknown, unknown, unknown, any&gt;, requestSpecificBasePath: string) =&gt; void</code> | sets <code>basePath</code> value, specific for an incoming request. |
+|  [set](./kibana-plugin-core-server.basepath.set.md) |  | <code>(request: KibanaRequest &#124; LegacyRequest, requestSpecificBasePath: string) =&gt; void</code> | sets <code>basePath</code> value, specific for an incoming request. |
 

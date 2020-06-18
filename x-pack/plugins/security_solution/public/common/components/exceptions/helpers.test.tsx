@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import {
   getOperatorType,
   getExceptionOperatorSelect,
-  determineIfIsNested,
+  isEntryNested,
   getFormattedEntries,
   formatEntry,
   getOperatingSystems,
@@ -159,21 +159,21 @@ describe('Exception helpers', () => {
     });
   });
 
-  describe('#determineIfIsNested', () => {
+  describe('#isEntryNested', () => {
     test('it returns true if type NestedExceptionEntry', () => {
       const payload: NestedExceptionEntry = {
         field: 'actingProcess.file.signer',
         type: 'nested',
         entries: [],
       };
-      const result = determineIfIsNested(payload);
+      const result = isEntryNested(payload);
 
       expect(result).toBeTruthy();
     });
 
     test('it returns false if NOT type NestedExceptionEntry', () => {
       const payload = getExceptionItemEntryMock();
-      const result = determineIfIsNested(payload);
+      const result = isEntryNested(payload);
 
       expect(result).toBeFalsy();
     });

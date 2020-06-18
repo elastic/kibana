@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KQL_INPUT } from '../screens/siem_header';
+import { KQL_INPUT } from '../screens/security_header';
 
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 

@@ -55,6 +55,7 @@ import {
   NotificationsStart,
   ApplicationStart,
 } from 'src/core/public';
+import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
@@ -734,27 +735,29 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           filteredCount={filteredItemCount}
         />
         <EuiSpacer size="xs" />
-        <Table
-          basePath={http.basePath}
-          itemId={'id'}
-          actionRegistry={this.props.actionRegistry}
-          selectionConfig={selectionConfig}
-          selectedSavedObjects={selectedSavedObjects}
-          onQueryChange={this.onQueryChange}
-          onTableChange={this.onTableChange}
-          filterOptions={filterOptions}
-          onExport={this.onExport}
-          canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
-          onDelete={this.onDelete}
-          goInspectObject={this.props.goInspectObject}
-          pageIndex={page}
-          pageSize={perPage}
-          items={savedObjects}
-          totalItemCount={filteredItemCount}
-          isSearching={isSearching}
-          onShowRelationships={this.onShowRelationships}
-          canGoInApp={this.props.canGoInApp}
-        />
+        <RedirectAppLinks application={applications}>
+          <Table
+            basePath={http.basePath}
+            itemId={'id'}
+            actionRegistry={this.props.actionRegistry}
+            selectionConfig={selectionConfig}
+            selectedSavedObjects={selectedSavedObjects}
+            onQueryChange={this.onQueryChange}
+            onTableChange={this.onTableChange}
+            filterOptions={filterOptions}
+            onExport={this.onExport}
+            canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
+            onDelete={this.onDelete}
+            goInspectObject={this.props.goInspectObject}
+            pageIndex={page}
+            pageSize={perPage}
+            items={savedObjects}
+            totalItemCount={filteredItemCount}
+            isSearching={isSearching}
+            onShowRelationships={this.onShowRelationships}
+            canGoInApp={this.props.canGoInApp}
+          />
+        </RedirectAppLinks>
       </EuiPageContent>
     );
   }

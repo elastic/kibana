@@ -7,6 +7,7 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { EditMenu } from '../edit_menu';
+import { PositionedElement } from '../../../../../types';
 
 const handlers = {
   cutNodes: action('cutNodes'),
@@ -41,11 +42,16 @@ storiesOf('components/WorkpadHeader/EditMenu', module)
     <EditMenu selectedNodes={[]} groupIsSelected={false} hasPasteData={true} {...handlers} />
   ))
   .add('single element selected', () => (
-    <EditMenu selectedNodes={['foo']} groupIsSelected={false} hasPasteData={false} {...handlers} />
+    <EditMenu
+      selectedNodes={[{ id: 'foo' }] as PositionedElement[]}
+      groupIsSelected={false}
+      hasPasteData={false}
+      {...handlers}
+    />
   ))
   .add('single grouped element selected', () => (
     <EditMenu
-      selectedNodes={['foo', 'bar']}
+      selectedNodes={[{ id: 'foo' }, { id: 'bar' }] as PositionedElement[]}
       groupIsSelected={true}
       hasPasteData={false}
       {...handlers}
@@ -53,7 +59,7 @@ storiesOf('components/WorkpadHeader/EditMenu', module)
   ))
   .add('2 elements selected', () => (
     <EditMenu
-      selectedNodes={['foo', 'bar']}
+      selectedNodes={[{ id: 'foo' }, { id: 'bar' }] as PositionedElement[]}
       groupIsSelected={false}
       hasPasteData={false}
       {...handlers}
@@ -61,7 +67,7 @@ storiesOf('components/WorkpadHeader/EditMenu', module)
   ))
   .add('3+ elements selected', () => (
     <EditMenu
-      selectedNodes={['foo', 'bar', 'fizz']}
+      selectedNodes={[{ id: 'foo' }, { id: 'bar' }, { id: 'fizz' }] as PositionedElement[]}
       groupIsSelected={false}
       hasPasteData={false}
       {...handlers}

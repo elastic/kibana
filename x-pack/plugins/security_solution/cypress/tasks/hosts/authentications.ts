@@ -5,7 +5,7 @@
  */
 
 import { AUTHENTICATIONS_TABLE } from '../../screens/hosts/authentications';
-import { REFRESH_BUTTON } from '../../screens/siem_header';
+import { REFRESH_BUTTON } from '../../screens/security_header';
 
 export const waitForAuthenticationsToBeLoaded = () => {
   cy.get(AUTHENTICATIONS_TABLE).should('exist');

@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
+import { Messages } from '../shared';
 import { ANALYTICS_STEPS } from '../../page';
 import { BackToListPanel } from '../back_to_list_panel';
 
@@ -26,14 +26,7 @@ interface Props extends CreateAnalyticsFormProps {
 
 export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   const { createAnalyticsJob, startAnalyticsJob } = actions;
-  const {
-    isAdvancedEditorValidJson,
-    isJobCreated,
-    isJobStarted,
-    isModalButtonDisabled,
-    isValid,
-    requestMessages,
-  } = state;
+  const { isAdvancedEditorValidJson, isJobCreated, isJobStarted, isValid, requestMessages } = state;
 
   const [checked, setChecked] = useState<boolean>(true);
 
@@ -75,7 +68,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
           <EuiFlexItem grow={false}>
             <EuiButton
               className="mlAnalyticsCreateWizard__footerButton"
-              disabled={!isValid || !isAdvancedEditorValidJson || isModalButtonDisabled}
+              disabled={!isValid || !isAdvancedEditorValidJson}
               onClick={handleCreation}
               fill
               data-test-subj="mlAnalyticsCreateJobWizardCreateButton"

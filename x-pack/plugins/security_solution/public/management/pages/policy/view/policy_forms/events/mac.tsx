@@ -73,6 +73,7 @@ export const MacEvents = React.memo(() => {
             <EventsCheckbox
               name={item.name}
               key={index}
+              data-test-subj={`policyMacEvent_${item.protectionField}`}
               setter={(config, checked) =>
                 setIn(config)(item.os)('events')(item.protectionField)(checked)
               }

@@ -16,7 +16,7 @@ const bodySchema = templateSchema;
 
 export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/index-templates'), validate: { body: bodySchema } },
+    { path: addBasePath('/index_templates'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const template = req.body as TemplateDeserialized;

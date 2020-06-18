@@ -44,6 +44,7 @@ import {
   LegacyApp,
   LegacyAppMounter,
   Mounter,
+  NavigateToAppOptions,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
@@ -105,7 +106,7 @@ export class ApplicationService {
   private registrationClosed = false;
   private history?: History<any>;
   private mountContext?: IContextContainer<AppMountDeprecated>;
-  private navigate?: (url: string, state: any) => void;
+  private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private redirectTo?: (url: string) => void;
 
   public setup({
@@ -125,10 +126,16 @@ export class ApplicationService {
       this.history = history || createBrowserHistory({ basename });
     }
 
-    // If we do not have history available, use redirectTo to do a full page refresh.
-    this.navigate = (url, state) =>
-      // basePath not needed here because `history` is configured with basename
-      this.history ? this.history.push(url, state) : redirectTo(basePath.prepend(url));
+    this.navigate = (url, state, replace) => {
+      if (this.history) {
+        // basePath not needed here because `history` is configured with basename
+        return replace ? this.history.replace(url, state) : this.history.push(url, state);
+      } else {
+        // If we do not have history available (legacy mode), use redirectTo to do a full page refresh.
+        return redirectTo(basePath.prepend(url));
+      }
+    };
+
     this.redirectTo = redirectTo;
     this.mountContext = context.createContextContainer();
 
@@ -278,14 +285,14 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { path, state }: { path?: string; state?: any } = {}
+      { path, state, replace = false }: NavigateToAppOptions = {}
     ) => {
       if (await this.shouldNavigate(overlays)) {
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
         this.appLeaveHandlers.delete(this.currentAppId$.value!);
-        this.navigate!(getAppUrl(availableMounters, appId, path), state);
+        this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
         this.currentAppId$.next(appId);
       }
     };

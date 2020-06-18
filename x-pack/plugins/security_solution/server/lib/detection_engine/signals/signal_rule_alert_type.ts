@@ -8,7 +8,11 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
-import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
+import {
+  SIGNALS_ID,
+  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+  SERVER_APP_ID,
+} from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
 import { SetupPlugins } from '../../../plugin';
 
@@ -55,7 +59,7 @@ export const signalRulesAlertType = ({
     validate: {
       params: signalParamsSchema(),
     },
-    producer: 'siem',
+    producer: SERVER_APP_ID,
     async executor({
       previousStartedAt,
       alertId,
@@ -275,7 +279,7 @@ export const signalRulesAlertType = ({
               from: fromInMs,
               to: toInMs,
               id: savedObject.id,
-              kibanaSiemAppUrl: meta?.kibana_siem_app_url,
+              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string }).kibana_siem_app_url,
             });
 
             logger.info(

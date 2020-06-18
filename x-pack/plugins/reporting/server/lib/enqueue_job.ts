@@ -52,7 +52,7 @@ export function enqueueJobFactory(
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<Job> {
-    type CreateJobFn = ESQueueCreateJobFn<JobParamsType>;
+    type ScheduleTaskFnType = ESQueueCreateJobFn<JobParamsType>;
     const username = user ? user.username : false;
     const esqueue = await reporting.getEsqueue();
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
@@ -61,8 +61,8 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const createJob = exportType.createJobFactory(reporting, logger) as CreateJobFn;
-    const payload = await createJob(jobParams, context, request);
+    const scheduleTask = exportType.scheduleTaskFnFactory(reporting, logger) as ScheduleTaskFnType;
+    const payload = await scheduleTask(jobParams, context, request);
 
     const options = {
       timeout: queueTimeout,

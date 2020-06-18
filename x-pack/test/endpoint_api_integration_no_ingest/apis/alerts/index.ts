@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('endpoint/alerts/host_api_feature');
     });
 
-    it('should return a 500', async () => {
+    it('should not return data', async () => {
       await supertest.get('/api/endpoint/alerts').expect(500);
     });
   });

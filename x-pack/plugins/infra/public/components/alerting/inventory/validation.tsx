@@ -6,8 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { isNumber } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricExpressionParams } from '../../../../server/lib/alerting/metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
@@ -95,3 +93,5 @@ export function validateMetricThreshold({
 
   return validationResult;
 }
+
+const isNumber = (value: unknown): value is number => typeof value === 'number';

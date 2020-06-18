@@ -12,7 +12,6 @@ import { addTags } from './add_tags';
 import { calculateVersion } from './utils';
 import { hasListsFeature } from '../feature_flags';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
-import { Meta } from '../types';
 
 export const updateRules = async ({
   alertsClient,
@@ -63,7 +62,7 @@ export const updateRules = async ({
     savedId,
     timelineId,
     timelineTitle,
-    meta: meta as Meta, // TODO: Remove this cast once we fix the types for calculate version and patch
+    meta,
     filters,
     from,
     index,
@@ -81,6 +80,7 @@ export const updateRules = async ({
     note,
     anomalyThreshold,
     machineLearningJobId,
+    exceptionsList,
   });
 
   // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
