@@ -36,6 +36,9 @@ export function downloadEndpointExceptionListRoute(router: IRouter, cache: Excep
     async (context, req, res) => {
       const soClient = context.core.savedObjects.client;
 
+      // TODO: authenticate api key
+      // https://github.com/elastic/kibana/issues/69329
+
       const validateResponse = (resp: object): KibanaResponse => {
         const [validated, errors] = validate(resp, downloadArtifactResponseSchema);
         if (errors != null) {
@@ -73,6 +76,9 @@ export function downloadEndpointExceptionListRoute(router: IRouter, cache: Excep
                 body: `No artifact matching sha256: ${req.params.sha256} for type ${req.params.artifactName}`,
               });
             }
+
+            // Hashes match... populate cache
+            cache.set(cacheKey, artifact.attributes.body);
 
             const downloadResponse = {
               body: outBuffer,

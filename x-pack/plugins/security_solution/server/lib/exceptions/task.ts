@@ -56,25 +56,49 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
     return `${PackagerTaskConstants.TYPE}:${PackagerTaskConstants.VERSION}`;
   };
 
-  const run = async (taskId: string) => {
+  const run = async (taskId: int, state: Record<string, string>) => {
+    // Check that this task is current
     if (taskId !== getTaskId()) {
       // old task, return
       context.logger.debug(`Outdated task running: ${taskId}`);
       return;
     }
 
-    context.logger.debug('Running exception list packager task');
-
+    // Get clients
     const [{ savedObjects }] = await context.core.getStartServices();
     const savedObjectsRepository = savedObjects.createInternalRepository();
     const soClient = new SavedObjectsClient(savedObjectsRepository);
     const exceptionListClient = context.lists.getExceptionListClient(soClient, 'kibana');
 
+    // Main loop
+    let updated = false;
+
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
       for (const schemaVersion of ArtifactConstants.SUPPORTED_SCHEMA_VERSIONS) {
         const artifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`;
 
+        // Initialize state and prime cache
+        if (state[artifactName] === undefined) {
+          try {
+            const soGetResponse = await soClient.get<ArtifactSoSchema>(
+              ArtifactConstants.SAVED_OBJECT_TYPE,
+              artifactName
+            );
+
+            const cacheKey = `${artifactName}-${soGetResponse.attributes.sha256}`;
+            context.cache.set(cacheKey, soGetResponse.attributes.body);
+
+            // eslint-disable-next-line require-atomic-updates
+            state[artifactName] = soGetResponse.attributes.sha256;
+
+            updated = true;
+          } catch (err) {
+            context.logger.debug(`No artifact found ${artifactName} -- cache not primed`);
+          }
+        }
+
         try {
+          // Retrieve exceptions, compute hash
           const exceptions = await GetFullEndpointExceptionList(
             exceptionListClient,
             os,
@@ -96,27 +120,40 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
             size: Buffer.from(JSON.stringify(exceptions)).byteLength,
           };
 
-          // Create the new artifact
+          // Create/update the artifact
           const soResponse = await soClient.create<ArtifactSoSchema>(
             ArtifactConstants.SAVED_OBJECT_TYPE,
             exceptionSO,
             { id: `${artifactName}`, overwrite: true }
           );
 
-          const cacheKey = `${artifactName}-${sha256Hash}`;
-          context.cache.set(cacheKey, compressedExceptions.toString('binary'));
+          // If new, update state
+          if (state[artifactName] !== soResponse.attributes.sha256) {
+            context.logger.info(
+              `Change to artifact[${artifactName}] detected hash[${soResponse.attributes.sha256}]`
+            );
 
-          context.logger.debug(`Current artifact ${artifactName} with hash ${sha256Hash}`);
-        } catch (error) {
-          if (error.statusCode === 409) {
-            context.logger.debug(`No update to Endpoint Exceptions (${artifactName}), skipping.`);
-          } else {
-            context.logger.error(error);
+            // eslint-disable-next-line require-atomic-updates
+            state[artifactName] = soResponse.attributes.sha256;
+
+            updated = true;
           }
+
+          // Update the cache
+          const cacheKey = `${artifactName}-${sha256Hash}`;
+          // TODO: does this reset the ttl?
+          context.cache.set(cacheKey, compressedExceptions.toString('binary'));
+        } catch (error) {
+          context.logger.error(error);
         }
       }
     }
-    return true;
+
+    // Update manifest if there are changes
+    if (updated) {
+      context.logger.debug('One or more changes detected. Updating manifest...');
+      // TODO: update manifest
+    }
   };
 
   const getTaskRunner = (runnerContext: PackagerTaskRunnerContext): PackagerTaskRunner => {
@@ -148,13 +185,17 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         return {
           run: async () => {
-            await run(taskInstance.id);
+            const state = Object.assign({}, ...taskInstance.state);
+            await run(taskInstance.id, state);
+
+            // eslint-disable-next-line require-atomic-updates
+            taskInstance.state = state;
 
             const nextRun = new Date();
             nextRun.setSeconds(nextRun.getSeconds() + context.config.packagerTaskInterval);
 
             return {
-              state: {},
+              state: taskInstance.state,
               runAt: nextRun,
             };
           },
