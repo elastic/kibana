@@ -276,7 +276,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async onLandingPage() {
       log.debug(`VisualizePage.onLandingPage`);
-      return await testSubjects.exists('visualizeLandingPage');
+      return await testSubjects.exists('visualizationLandingPage');
     }
 
     public async gotoLandingPage() {
