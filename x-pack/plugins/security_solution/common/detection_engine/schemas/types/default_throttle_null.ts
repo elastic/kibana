@@ -15,8 +15,8 @@ import { ThrottleOrNull, throttle } from '../common/schemas';
 export const DefaultThrottleNull = new t.Type<ThrottleOrNull, ThrottleOrNull, unknown>(
   'DefaultThreatNull',
   throttle.is,
-  (input): Either<t.Errors, ThrottleOrNull> =>
-    input == null ? t.success(null) : throttle.decode(input),
+  (input, context): Either<t.Errors, ThrottleOrNull> =>
+    input == null ? t.success(null) : throttle.validate(input, context),
   t.identity
 );
 

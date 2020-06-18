@@ -21,6 +21,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiSpacer,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -40,6 +41,9 @@ import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { getManagementUrl } from '../../../common/routing';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
+import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
+import { useEndpointPackageInfo } from './ingest_hooks';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -121,6 +125,7 @@ export const PolicyList = React.memo(() => {
   const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
+  const [packageInfo, isFetchingPackageInfo] = useEndpointPackageInfo();
   const {
     selectPolicyItems: policyItems,
     selectPageIndex: pageIndex,
@@ -132,6 +137,28 @@ export const PolicyList = React.memo(() => {
     selectDeleteStatus: deleteStatus,
     selectAgentStatusSummary: agentStatusSummary,
   } = usePolicyListSelector(selector);
+
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
+    'ingestManager',
+    {
+      // We redirect to Ingest's Integaration page if we can't get the package version, and
+      // to the Integration Endpoint Package Add Datasource if we have package information.
+      // Also,
+      // We pass along soem state information so that the Ingest page can change the behaviour
+      // of the cancel and submit buttons and redirect the user back to endpoint policy
+      path: `#/integrations${packageInfo ? `/endpoint-${packageInfo.version}/add-datasource` : ''}`,
+      state: {
+        onCancelNavigateTo: [
+          'securitySolution',
+          { path: getManagementUrl({ name: 'policyList' }) },
+        ],
+        onCancelUrl: services.application?.getUrlForApp('securitySolution', {
+          path: getManagementUrl({ name: 'policyList' }),
+        }),
+        onSaveNavigateTo: ['securitySolution', { path: getManagementUrl({ name: 'policyList' }) }],
+      },
+    }
+  );
 
   useEffect(() => {
     if (apiError) {
@@ -369,6 +396,19 @@ export const PolicyList = React.memo(() => {
         headerLeft={i18n.translate('xpack.securitySolution.endpoint.policyList.viewTitle', {
           defaultMessage: 'Policies',
         })}
+        headerRight={
+          <EuiButton
+            iconType="plusInCircle"
+            onClick={handleCreatePolicyClick}
+            isDisabled={isFetchingPackageInfo}
+            data-test-subj="headerCreateNewPolicyButton"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyList.createNewButton"
+              defaultMessage="Create new policy"
+            />
+          </EuiButton>
+        }
         bodyHeader={
           <EuiText color="subdued" data-test-subj="policyTotalCount">
             <FormattedMessage
