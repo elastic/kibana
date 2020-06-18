@@ -163,7 +163,7 @@ export const ProcessDetails = memo(function ProcessDetails({
         text: (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.numberOfEvents"
+              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.detailsForProcessName"
               values={{ processName }}
               defaultMessage="Details for: {processName}"
             />
