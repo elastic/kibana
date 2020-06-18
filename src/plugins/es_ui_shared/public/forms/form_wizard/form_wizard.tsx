@@ -69,7 +69,7 @@ export function FormWizard<T extends object = { [key: string]: any }>({
             if (stepIndex > activeStepIndex + 1) {
               /**
                * Rule explained:
-               * - all the previsous steps are always enabled (we can go back anytime)
+               * - all the previous steps are always enabled (we can go back anytime)
                * - the next step is also always enabled (it acts as the "Next" button)
                * - for the rest, the step is disabled if any of the previous step (_greater_ than the current
                * active step), is marked as isRequired **AND** has not been completed.
