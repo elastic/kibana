@@ -17,29 +17,19 @@
  * under the License.
  */
 
-import Joi from 'joi';
-import { importDashboards } from '../../../lib/import/import_dashboards';
+import { SavedObjectsClientContract } from 'src/core/server';
+import { collectReferencesDeep } from './collect_references_deep';
 
-export function importApi(server) {
-  server.route({
-    path: '/api/kibana/dashboards/import',
-    method: ['POST'],
-    config: {
-      validate: {
-        payload: Joi.object().keys({
-          objects: Joi.array(),
-          version: Joi.string(),
-        }),
-        query: Joi.object().keys({
-          force: Joi.boolean().default(false),
-          exclude: [Joi.string(), Joi.array().items(Joi.string())],
-        }),
-      },
-      tags: ['api'],
-    },
+export async function exportDashboards(
+  ids: string[],
+  savedObjectsClient: SavedObjectsClientContract,
+  kibanaVersion: string
+) {
+  const objectsToExport = ids.map((id) => ({ id, type: 'dashboard' }));
 
-    handler: async (req) => {
-      return await importDashboards(req);
-    },
-  });
+  const objects = await collectReferencesDeep(savedObjectsClient, objectsToExport);
+  return {
+    version: kibanaVersion,
+    objects,
+  };
 }

@@ -17,19 +17,26 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { collectReferencesDeep } from './collect_references_deep';
+import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
+import { registerRoutes } from './routes';
 
-export async function exportDashboards(req) {
-  const ids = _.flatten([req.query.dashboard]);
-  const config = req.server.config();
+export class LegacyExportPlugin implements Plugin<{}, {}> {
+  private readonly kibanaVersion: string;
 
-  const savedObjectsClient = req.getSavedObjectsClient();
-  const objectsToExport = ids.map((id) => ({ id, type: 'dashboard' }));
+  constructor(context: PluginInitializerContext) {
+    this.kibanaVersion = context.env.packageInfo.version;
+  }
 
-  const objects = await collectReferencesDeep(savedObjectsClient, objectsToExport);
-  return {
-    version: config.get('pkg.version'),
-    objects,
-  };
+  public setup({ http }: CoreSetup) {
+    const router = http.createRouter();
+    registerRoutes(router, this.kibanaVersion);
+
+    return {};
+  }
+
+  public start() {
+    return {};
+  }
+
+  public stop() {}
 }
