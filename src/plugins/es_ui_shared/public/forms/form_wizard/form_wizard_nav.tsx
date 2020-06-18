@@ -73,7 +73,12 @@ export const FormWizardNav = ({
           {/* Back button */}
           {activeStepIndex > 0 ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="arrowLeft" onClick={onBack} data-test-subj="backButton">
+              <EuiButtonEmpty
+                iconType="arrowLeft"
+                onClick={onBack}
+                data-test-subj="backButton"
+                disabled={isStepValid === false}
+              >
                 {labels.back}
               </EuiButtonEmpty>
             </EuiFlexItem>
