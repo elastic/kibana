@@ -7,7 +7,11 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../../legacy/plugins/maps/public';
+import {
+  MapEmbeddable,
+  MapEmbeddableInput,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../maps/public/embeddable';
 import * as i18n from './translations';
 import { Location } from '../../../../../common/runtime_types';
 import { getLayerList } from './map_config';
@@ -16,8 +20,8 @@ import {
   isErrorEmbeddable,
   ViewMode,
   ErrorEmbeddable,
-} from '../../../../../../../../src/plugins/embeddable/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/public';
+} from '../../../../../../../../../src/plugins/embeddable/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../maps/public';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];
