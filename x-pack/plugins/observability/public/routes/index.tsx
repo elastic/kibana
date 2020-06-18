@@ -32,7 +32,7 @@ interface Routes {
   };
 }
 
-export const routes = {
+export const routes: Routes = {
   '/': {
     handler: () => {
       return <Home />;
