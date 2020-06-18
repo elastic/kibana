@@ -57,6 +57,7 @@ export class BaseAlert {
   public get paramDetails() {
     return {};
   }
+  protected actionVariables: Array<{ name: string; description: string }> = [];
   protected alertType!: AlertType;
 
   constructor(rawAlert: Alert | undefined = undefined) {
@@ -108,6 +109,9 @@ export class BaseAlert {
       defaultActionGroupId: 'default',
       executor: (options: AlertExecutorOptions): Promise<any> => this.execute(options),
       producer: 'monitoring',
+      actionVariables: {
+        context: this.actionVariables,
+      },
     };
   }
 

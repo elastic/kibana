@@ -73,6 +73,14 @@ export class CpuUsageAlert extends BaseAlert {
     duration: DEFAULT_DURATION,
   };
 
+  protected actionVariables = [
+    { name: 'state', description: 'The current state of the alert.' },
+    { name: 'nodes', description: 'The list of nodes that are reporting high cpu usage.' },
+    { name: 'count', description: 'The number of nodes that are reporting high cpu usage.' },
+    { name: 'clusterName', description: 'The name of the cluster to which the nodes belong.' },
+    { name: 'action', description: 'The recommended action to take based on this alert firing.' },
+  ];
+
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,

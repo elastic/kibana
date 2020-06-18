@@ -9,7 +9,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../triggers_actions_ui/public/types';
 
-export function validate({ criteria }: { criteria: any[] }): ValidationResult {
+export function validate(opts: any): ValidationResult {
   const validationResult = { errors: {} };
   return validationResult;
 }
