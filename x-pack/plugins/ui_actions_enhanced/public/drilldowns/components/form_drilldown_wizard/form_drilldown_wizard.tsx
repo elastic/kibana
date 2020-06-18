@@ -7,10 +7,8 @@
 import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
-import {
-  UiActionsEnhancedActionFactory as ActionFactory,
-  ActionWizard,
-} from '../../../../ui_actions_enhanced/public';
+import { ActionFactory } from '../../../dynamic_actions';
+import { ActionWizard } from '../../../components/action_wizard';
 
 const noopFn = () => {};
 

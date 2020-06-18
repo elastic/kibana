@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { DrilldownHelloBar } from '.';
+import { DrilldownHelloBar } from './index';
 
 const Demo = () => {
   const [show, setShow] = React.useState(true);
