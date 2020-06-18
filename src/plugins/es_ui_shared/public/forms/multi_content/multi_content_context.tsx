@@ -19,11 +19,11 @@
 
 import React, { useEffect, useCallback, createContext, useContext } from 'react';
 
-import { useMultiContent, HookProp, Content, MultiContent } from './use_multi_content';
+import { useMultiContent, HookProps, Content, MultiContent } from './use_multi_content';
 
 const multiContentContext = createContext<MultiContent<any>>({} as MultiContent<any>);
 
-interface Props<T extends object> extends HookProp<T> {
+interface Props<T extends object> extends HookProps<T> {
   children: JSX.Element | JSX.Element[];
 }
 

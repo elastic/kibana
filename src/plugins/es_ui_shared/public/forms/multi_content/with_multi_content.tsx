@@ -16,14 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 
-export {
-  MultiContentProvider,
-  MultiContentConsumer,
-  useMultiContentContext,
-  useContent,
-} from './multi_content_context';
+import { MultiContentProvider } from './multi_content_context';
+import { HookProps } from './use_multi_content';
 
-export { useMultiContent, HookProps, Content, MultiContent } from './use_multi_content';
-
-export { WithMultiContent } from './with_multi_content';
+/**
+ * HOC to wrap a component with the MultiContentProvider
+ *
+ * @param Component The component to wrap with the MultiContentProvider
+ */
+export function WithMultiContent<
+  P extends object = { [key: string]: any } // The Props for the wrapped component
+>(Component: React.FunctionComponent<P & HookProps<any>>) {
+  return function <T extends object = { [key: string]: any }>(props: P & HookProps<T>) {
+    const { defaultValue, onChange, ...rest } = props;
+    return (
+      <MultiContentProvider<T> defaultValue={defaultValue} onChange={onChange}>
+        <Component {...(rest as P)} />
+      </MultiContentProvider>
+    );
+  };
+}

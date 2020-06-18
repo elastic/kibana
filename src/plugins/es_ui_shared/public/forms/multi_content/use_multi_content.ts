@@ -36,7 +36,7 @@ interface Validation<T extends object> {
   };
 }
 
-export interface HookProp<T extends object> {
+export interface HookProps<T extends object> {
   defaultValue?: T;
   onChange?: (output: Content<T>) => void;
 }
@@ -52,7 +52,7 @@ export interface MultiContent<T extends object> {
 export function useMultiContent<T extends object>({
   defaultValue,
   onChange,
-}: HookProp<T>): MultiContent<T> {
+}: HookProps<T>): MultiContent<T> {
   /**
    * Each content validity is kept in this state. When updating a content with "updateContentAt()", we
    * update the state validity and trigger a re-render.

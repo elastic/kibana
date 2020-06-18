@@ -19,15 +19,15 @@
 
 import React, { useState, createContext, useContext, useCallback } from 'react';
 
-import { MultiContentProvider, MultiContentConsumer, Content } from '../multi_content';
+import { WithMultiContent, useMultiContentContext, HookProps } from '../multi_content';
 
 export interface Props<T extends object> {
   onSave: (data: T) => void | Promise<void>;
   children: JSX.Element | JSX.Element[];
   isEditing?: boolean;
   defaultActiveStep?: number;
-  defaultValue?: T;
-  onChange?: (content: Content<T>) => void;
+  defaultValue?: HookProps<T>['defaultValue'];
+  onChange?: HookProps<T>['onChange'];
 }
 
 interface State {
@@ -57,14 +57,11 @@ export interface Context<Id extends string = any> extends State {
 
 const formWizardContext = createContext<Context>({} as Context);
 
-export function FormWizardProvider<T extends object = { [key: string]: any }>({
-  children,
-  defaultValue,
-  defaultActiveStep = 0,
-  isEditing,
-  onSave,
-  onChange,
-}: Props<T>) {
+export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWizardProvider<
+  T extends object = { [key: string]: any }
+>({ children, defaultActiveStep = 0, isEditing, onSave }: Props<T>) {
+  const { getData, validate, validation } = useMultiContentContext<T>();
+
   const [state, setState] = useState<State>({
     activeStepIndex: defaultActiveStep,
     steps: {},
@@ -72,6 +69,7 @@ export function FormWizardProvider<T extends object = { [key: string]: any }>({
 
   const activeStepId = state.steps[state.activeStepIndex]?.id;
   const lastStep = Object.keys(state.steps).length - 1;
+  const isCurrentStepValid = validation.contents[activeStepId as keyof T];
 
   const addStep = useCallback(
     (id: string, label: string, isRequired = false) => {
@@ -111,65 +109,58 @@ export function FormWizardProvider<T extends object = { [key: string]: any }>({
     [state.steps]
   );
 
-  return (
-    <MultiContentProvider<T> defaultValue={defaultValue} onChange={onChange}>
-      <MultiContentConsumer>
-        {({ getData, validate, validation }) => {
-          const isCurrentStepValid = validation.contents[activeStepId];
+  const navigateToStep = useCallback(
+    async (stepId: number | string) => {
+      // Before navigating away we validate the active content in the DOM
+      const isValid = await validate();
 
-          const navigateToStep = async (stepId: number | string) => {
-            // Before navigating away we validate the active content in the DOM
-            const isValid = await validate();
+      // If step is not valid do go any further
+      if (!isValid) {
+        return;
+      }
 
-            // If step is not valid do go any further
-            if (!isValid) {
-              return;
-            }
+      const nextStepIndex = getStepIndex(stepId);
 
-            const nextStepIndex = getStepIndex(stepId);
+      if (nextStepIndex > lastStep) {
+        // We are on the last step, save the data and don't go any further
+        onSave(getData() as T);
+        return;
+      }
 
-            if (nextStepIndex > lastStep) {
-              // We are on the last step, save the data and don't go any further
-              onSave(getData() as T);
-              return;
-            }
+      // Update the active step
+      setState((prev) => {
+        const currentStep = prev.steps[prev.activeStepIndex];
 
-            // Update the active step
-            setState((prev) => {
-              const nextState = {
-                ...prev,
-                activeStepIndex: nextStepIndex,
-              };
+        const nextState = {
+          ...prev,
+          activeStepIndex: nextStepIndex,
+        };
 
-              const currentStep = prev.steps[prev.activeStepIndex];
-
-              if (nextStepIndex > prev.activeStepIndex && !currentStep.isComplete) {
-                // Mark the current step as completed
-                nextState.steps[prev.activeStepIndex] = {
-                  ...currentStep,
-                  isComplete: true,
-                };
-              }
-
-              return nextState;
-            });
+        if (nextStepIndex > prev.activeStepIndex && !currentStep.isComplete) {
+          // Mark the current step as completed
+          nextState.steps[prev.activeStepIndex] = {
+            ...currentStep,
+            isComplete: true,
           };
+        }
 
-          const value: Context = {
-            ...state,
-            activeStepId,
-            lastStep,
-            isCurrentStepValid,
-            addStep,
-            navigateToStep,
-          };
-
-          return <formWizardContext.Provider value={value}>{children}</formWizardContext.Provider>;
-        }}
-      </MultiContentConsumer>
-    </MultiContentProvider>
+        return nextState;
+      });
+    },
+    [getStepIndex, validate, onSave, getData]
   );
-}
+
+  const value: Context = {
+    ...state,
+    activeStepId,
+    lastStep,
+    isCurrentStepValid,
+    addStep,
+    navigateToStep,
+  };
+
+  return <formWizardContext.Provider value={value}>{children}</formWizardContext.Provider>;
+});
 
 export const FormWizardConsumer = formWizardContext.Consumer;
 
