@@ -29,7 +29,7 @@ describe('extractErrors()', () => {
   });
 
   test('extracts errors from saved objects', () => {
-    const savedObjects: Array<SavedObject & { newId?: string }> = [
+    const savedObjects: Array<SavedObject & { destinationId?: string }> = [
       {
         id: '1',
         type: 'dashboard',
@@ -64,7 +64,7 @@ describe('extractErrors()', () => {
         },
         references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '4').output.payload,
-        newId: 'foo',
+        destinationId: 'foo',
       },
     ];
     const result = extractErrors(savedObjects, savedObjects);

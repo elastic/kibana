@@ -213,7 +213,7 @@ describe('#createSavedObjects', () => {
       const resultSavedObjects = (await bulkCreate.mock.results[0].value).saved_objects;
       const [r1, r2, r3, r4, r6, r7, r8, r10, r11, r12, r13] = resultSavedObjects;
       // these three results are transformed before being returned, because the bulkCreate attempt used different IDs for them
-      const [x3, x4, x8] = [r3, r4, r8].map((x: SavedObject) => ({ ...x, newId: x.id }));
+      const [x3, x4, x8] = [r3, r4, r8].map((x: SavedObject) => ({ ...x, destinationId: x.id }));
       const transformedResults = [r1, r2, x3, x4, r6, r7, x8, r10, r11, r12, r13];
       const expectedResults = getExpectedResults(transformedResults, objs);
       expect(results).toEqual(expectedResults);
@@ -311,7 +311,7 @@ describe('#createSavedObjects', () => {
       // these five results are transformed before being returned, because the bulkCreate attempt used different IDs for them
       const [x3, x4, x5, x8, x9] = [r3, r4, r5, r8, r9].map((x: SavedObject) => ({
         ...x,
-        newId: x.id,
+        destinationId: x.id,
       }));
       const transformedResults = [r1, r2, x3, x4, x5, r6, r7, x8, x9, r10, r11, r12, r13];
       const expectedResults = getExpectedResults(transformedResults, objs);

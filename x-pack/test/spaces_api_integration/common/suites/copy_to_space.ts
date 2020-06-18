@@ -374,9 +374,9 @@ export function copyToSpaceTestSuiteFactory(
             const { success, successCount, successResults, errors } = getResult(response);
             expect(success).to.eql(true);
             expect(successCount).to.eql(1);
-            const newId = successResults![0].newId;
-            expect(newId).to.match(v4);
-            expect(successResults).to.eql([{ type, id: noConflictId, newId }]);
+            const destinationId = successResults![0].destinationId;
+            expect(destinationId).to.match(v4);
+            expect(successResults).to.eql([{ type, id: noConflictId, destinationId }]);
             expect(errors).to.be(undefined);
           } else if (outcome === 'noAccess') {
             expectNotFoundResponse(response);
@@ -426,11 +426,11 @@ export function copyToSpaceTestSuiteFactory(
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
             const { success, successCount, successResults, errors } = getResult(response);
-            const newId = 'conflict_1_space_2';
+            const destinationId = 'conflict_1_space_2';
             if (overwrite) {
               expect(success).to.eql(true);
               expect(successCount).to.eql(1);
-              expect(successResults).to.eql([{ type, id: inexactMatchId, newId }]);
+              expect(successResults).to.eql([{ type, id: inexactMatchId, destinationId }]);
               expect(errors).to.be(undefined);
             } else {
               expect(success).to.eql(false);
@@ -438,7 +438,7 @@ export function copyToSpaceTestSuiteFactory(
               expect(successResults).to.be(undefined);
               expect(errors).to.eql([
                 {
-                  error: { type: 'conflict', destinationId: newId },
+                  error: { type: 'conflict', destinationId },
                   type,
                   id: inexactMatchId,
                   title: 'A shared saved-object in one space',

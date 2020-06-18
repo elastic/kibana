@@ -75,8 +75,8 @@ export async function importSavedObjectsFromStream({
   );
   errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
 
-  const successResults = createdObjects.map(({ type, id, newId }) => {
-    return { type, id, ...(newId && { newId }) };
+  const successResults = createdObjects.map(({ type, id, destinationId }) => {
+    return { type, id, ...(destinationId && { destinationId }) };
   });
 
   return {

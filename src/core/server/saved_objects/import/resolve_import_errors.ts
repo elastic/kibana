@@ -99,7 +99,7 @@ export async function resolveSavedObjectsImportErrors({
   const importIdMap = getImportIdMapForRetries(filteredObjects, { typeRegistry, retries });
 
   // Bulk create in two batches, overwrites and non-overwrites
-  let successResults: Array<{ type: string; id: string; newId?: string }> = [];
+  let successResults: Array<{ type: string; id: string; destinationId?: string }> = [];
   const bulkCreateObjects = async (objects: Array<SavedObject<unknown>>, overwrite?: boolean) => {
     const options = { savedObjectsClient, importIdMap, namespace, overwrite };
     const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(objects, options);
@@ -107,7 +107,11 @@ export async function resolveSavedObjectsImportErrors({
     successCount += createdObjects.length;
     successResults = [
       ...successResults,
-      ...createdObjects.map(({ type, id, newId }) => ({ type, id, ...(newId && { newId }) })),
+      ...createdObjects.map(({ type, id, destinationId }) => ({
+        type,
+        id,
+        ...(destinationId && { destinationId }),
+      })),
     ];
   };
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(filteredObjects, retries);

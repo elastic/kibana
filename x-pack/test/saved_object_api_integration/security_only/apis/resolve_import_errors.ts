@@ -14,7 +14,8 @@ import {
 } from '../../common/suites/resolve_import_errors';
 
 const { fail400, fail409 } = testCaseFailures;
-const newId = (condition?: boolean) => (condition !== false ? { successParam: 'newId' } : {});
+const destinationId = (condition?: boolean) =>
+  condition !== false ? { successParam: 'destinationId' } : {};
 
 const createTestCases = (overwrite: boolean) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
@@ -30,12 +31,12 @@ const createTestCases = (overwrite: boolean) => {
     // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
     // if we call _resolve_import_errors and don't specify overwrite or duplicate, each of these will not result in a conflict because they
     // will skip the preflight search results; so the objects will be created instead.
-    { ...CASES.CONFLICT_1A_OBJ, ...newId(overwrite) }, // "ambiguous source" conflict; if overwrite=true, will overwrite 'conflict_1'
+    { ...CASES.CONFLICT_1A_OBJ, ...destinationId(overwrite) }, // "ambiguous source" conflict; if overwrite=true, will overwrite 'conflict_1'
     CASES.CONFLICT_1B_OBJ, // "ambiguous source" conflict; if overwrite=true, will create a new object (since 'conflict_1a' is overwriting 'conflict_1')
-    { ...CASES.CONFLICT_2C_OBJ, ...newId(overwrite) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
-    { ...CASES.CONFLICT_2D_OBJ, ...newId(overwrite) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2b'
-    { ...CASES.CONFLICT_3A_OBJ, ...newId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
-    { ...CASES.CONFLICT_4_OBJ, ...newId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
+    { ...CASES.CONFLICT_2C_OBJ, ...destinationId(overwrite) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
+    { ...CASES.CONFLICT_2D_OBJ, ...destinationId(overwrite) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2b'
+    { ...CASES.CONFLICT_3A_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
+    { ...CASES.CONFLICT_4_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
   ];
   return { group1Importable, group1NonImportable, group1All, group2 };
 };

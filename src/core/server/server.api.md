@@ -2159,9 +2159,9 @@ export interface SavedObjectsImportRetry {
 
 // @public
 export interface SavedObjectsImportSuccess {
+    destinationId?: string;
     // (undocumented)
     id: string;
-    newId?: string;
     // (undocumented)
     type: string;
 }

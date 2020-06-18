@@ -153,14 +153,14 @@ describe('#importSavedObjectsFromStream', () => {
       const options = setupOptions();
       const errors = [createError()];
       const obj1 = createObject();
-      const obj2 = { ...createObject(), newId: 'some-newId' };
+      const obj2 = { ...createObject(), destinationId: 'some-destinationId' };
       getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects: [obj1, obj2] });
 
       const result = await importSavedObjectsFromStream(options);
-      // successResults only includes the imported object's type, id, and newId (if a new one was generated)
+      // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
       const successResults = [
         { type: obj1.type, id: obj1.id },
-        { type: obj2.type, id: obj2.id, newId: 'some-newId' },
+        { type: obj2.type, id: obj2.id, destinationId: 'some-destinationId' },
       ];
       expect(result).toEqual({ success: false, successCount: 2, successResults, errors });
     });

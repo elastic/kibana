@@ -15,7 +15,8 @@ const {
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 const { fail400, fail409 } = testCaseFailures;
-const newId = (condition?: boolean) => (condition !== false ? { successParam: 'newId' } : {});
+const destinationId = (condition?: boolean) =>
+  condition !== false ? { successParam: 'destinationId' } : {};
 const ambiguousConflict = (suffix: string) => ({
   failure: 409 as 409,
   fail409Param: `ambiguous_conflict_${suffix}`,
@@ -34,25 +35,25 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail409(!overwrite && (spaceId === DEFAULT_SPACE_ID || spaceId === SPACE_1_ID)),
-      ...newId(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
+      ...destinationId(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
     },
     {
       ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1,
       ...fail409(!overwrite && spaceId === SPACE_1_ID),
-      ...newId(spaceId !== SPACE_1_ID),
+      ...destinationId(spaceId !== SPACE_1_ID),
     },
     {
       ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2,
       ...fail409(!overwrite && spaceId === SPACE_2_ID),
-      ...newId(spaceId !== SPACE_2_ID),
+      ...destinationId(spaceId !== SPACE_2_ID),
     },
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
     { ...CASES.HIDDEN, ...fail400() },
     { ...CASES.CONFLICT_1A_OBJ, ...ambiguousConflict('1a1b') }, // "ambiguous source" conflict
     { ...CASES.CONFLICT_1B_OBJ, ...ambiguousConflict('1a1b') }, // "ambiguous source" conflict
     { ...CASES.CONFLICT_2C_OBJ, ...ambiguousConflict('2c') }, // "ambiguous destination" conflict
-    { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...newId() }, // "inexact match" conflict
-    { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...newId() }, // "inexact match" conflict
+    { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
+    { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
     CASES.NEW_SINGLE_NAMESPACE_OBJ,
     CASES.NEW_MULTI_NAMESPACE_OBJ,
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,

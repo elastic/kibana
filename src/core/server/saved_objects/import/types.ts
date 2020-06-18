@@ -117,9 +117,9 @@ export interface SavedObjectsImportSuccess {
   id: string;
   type: string;
   /**
-   * If `newId` is specified, the new object has a new ID that is different from the import ID.
+   * If `destinationId` is specified, the new object has a new ID that is different from the import ID.
    */
-  newId?: string;
+  destinationId?: string;
 }
 
 /**

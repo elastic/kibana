@@ -106,21 +106,26 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           (x) => x.type === type && x.id === id
         );
         expect(object).not.to.be(undefined);
-        const newId = object!.newId as string;
-        if (successParam === 'newId') {
+        const destinationId = object!.destinationId as string;
+        if (successParam === 'destinationId') {
           // Kibana created the object with a different ID than what was specified in the import
           // This can happen due to an unresolvable conflict (so the new ID will be random), or due to an inexact match (so the new ID will
           // be equal to the ID or originID of the existing object that it inexactly matched)
           if (expectedNewId) {
-            expect(newId).to.be(expectedNewId);
+            expect(destinationId).to.be(expectedNewId);
           } else {
             // the new ID was randomly generated
-            expect(newId).to.match(/^[0-9a-f-]{36}$/);
+            expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
           }
         } else {
-          expect(newId).to.be(undefined);
+          expect(destinationId).to.be(undefined);
         }
-        const { _source } = await expectResponses.successCreated(es, spaceId, type, newId ?? id);
+        const { _source } = await expectResponses.successCreated(
+          es,
+          spaceId,
+          type,
+          destinationId ?? id
+        );
         expect(_source[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
       }
       for (let i = 0; i < expectedFailures.length; i++) {

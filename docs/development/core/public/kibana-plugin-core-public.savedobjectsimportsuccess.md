@@ -16,7 +16,7 @@ export interface SavedObjectsImportSuccess
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [destinationId](./kibana-plugin-core-public.savedobjectsimportsuccess.destinationid.md) | <code>string</code> | If <code>destinationId</code> is specified, the new object has a new ID that is different from the import ID. |
 |  [id](./kibana-plugin-core-public.savedobjectsimportsuccess.id.md) | <code>string</code> |  |
-|  [newId](./kibana-plugin-core-public.savedobjectsimportsuccess.newid.md) | <code>string</code> | If <code>newId</code> is specified, the new object has a new ID that is different from the import ID. |
 |  [type](./kibana-plugin-core-public.savedobjectsimportsuccess.type.md) | <code>string</code> |  |
 

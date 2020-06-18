@@ -28,7 +28,7 @@ interface CreateSavedObjectsOptions {
   overwrite?: boolean;
 }
 interface CreateSavedObjectsResult<T> {
-  createdObjects: Array<SavedObject<T> & { newId?: string }>;
+  createdObjects: Array<SavedObject<T> & { destinationId?: string }>;
   errors: SavedObjectsImportError[];
 }
 
@@ -125,10 +125,10 @@ export const createSavedObjects = async <T>(
 
   // remap results to reflect the object IDs that were submitted for import
   // this ensures that consumers understand the results
-  const remappedResults = results.map<SavedObject<T> & { newId?: string }>((result) => {
+  const remappedResults = results.map<SavedObject<T> & { destinationId?: string }>((result) => {
     const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
-    // also, include a `newId` field if the object create attempt was made with a different ID
-    return { ...result, id, ...(id !== result.id && { newId: result.id }) };
+    // also, include a `destinationId` field if the object create attempt was made with a different ID
+    return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
   });
 
   return {

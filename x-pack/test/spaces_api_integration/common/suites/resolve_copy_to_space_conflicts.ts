@@ -299,12 +299,12 @@ export function resolveCopyToSpaceConflictsSuite(
         },
       });
     };
-    const expectSuccessResponse = (response: TestResponse, id: string, newId?: string) => {
+    const expectSuccessResponse = (response: TestResponse, id: string, destinationId?: string) => {
       const { success, successCount, successResults, errors } = getResult(response);
       expect(success).to.eql(true);
       expect(successCount).to.eql(1);
       expect(errors).to.be(undefined);
-      expect(successResults).to.eql([{ type, id, ...(newId && { newId }) }]);
+      expect(successResults).to.eql([{ type, id, ...(destinationId && { destinationId }) }]);
     };
 
     return [
