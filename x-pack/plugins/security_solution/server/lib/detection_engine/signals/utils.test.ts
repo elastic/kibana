@@ -22,6 +22,7 @@ import {
   errorAggregator,
   getListsClient,
   hasLargeValueList,
+  getSignalTimeTuples,
 } from './utils';
 import { BulkResponseErrorAggregation } from './types';
 import {
@@ -29,7 +30,11 @@ import {
   sampleEmptyBulkResponse,
   sampleBulkError,
   sampleBulkErrorItem,
+  mockLogger,
 } from './__mocks__/es_results';
+
+// @ts-ignore
+const replacer = (_, value) => (value === 'undefined' ? null : value);
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -636,6 +641,54 @@ describe('utils', () => {
       const hasLists = hasLargeValueList(entries);
 
       expect(hasLists).toBeFalsy();
+    });
+  });
+  describe('getSignalTimeTuples', () => {
+    test('should return a single tuple if no gap', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: null,
+        previousStartedAt: new Date(),
+        interval: '30s',
+        ruleParamsFrom: 'now-30s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+      });
+      const someTuple = someTuples[0];
+      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
+    });
+
+    test('should return two tuples if gap and previouslyStartedAt', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: moment.duration(10, 's'),
+        previousStartedAt: new Date(),
+        interval: '50s',
+        ruleParamsFrom: 'now-55s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+      });
+      const someTuple = someTuples[1];
+      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(50);
+    });
+
+    test('should return five tuples when give long gap', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: moment.duration(65, 's'), // 64 is 5 times the interval + lookback, which will trigger max lookback
+        previousStartedAt: moment().subtract(65, 's').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+      });
+      expect(someTuples.length).toEqual(5);
+      someTuples.forEach((item, index) => {
+        if (index === 0) {
+          return;
+        }
+        expect(moment(item.to).diff(moment(item.from), 's')).toEqual(10);
+      });
     });
   });
 });

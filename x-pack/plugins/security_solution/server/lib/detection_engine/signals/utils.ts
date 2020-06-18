@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createHash } from 'crypto';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
 import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
@@ -15,7 +15,7 @@ import { ListArrayOrUndefined } from '../../../../common/detection_engine/schema
 import { hasListsFeature } from '../feature_flags';
 import { BulkResponse, BulkResponseErrorAggregation } from './types';
 import { Logger } from '../../../../../../../src/core/server';
-import { RuleTypeParams, RefreshTypes } from '../types';
+import { RuleTypeParams } from '../types';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -251,20 +251,33 @@ export const errorAggregator = (
   }, Object.create(null));
 };
 
+/**
+ * Determines the number of time intervals to search if gap is present
+ * along with new maxSignals per time interval.
+ * @param logger Logger
+ * @param ruleParamsFrom string representing the rules 'from' property
+ * @param ruleParamsTo string representing the rules 'to' property
+ * @param ruleParamsMaxSignals int representing the maxSignals property on the rule (usually unmodified at 100)
+ * @param gap moment.Duration representing a gap in since the last time the rule ran
+ * @param previousStartedAt Date at which the rule last ran
+ * @param interval string the interval which the rule runs
+ */
 export const getSignalTimeTuples = ({
   logger,
-  ruleParams,
+  ruleParamsFrom,
+  ruleParamsTo,
+  ruleParamsMaxSignals,
   gap,
   previousStartedAt,
   interval,
-}: // maxResults,
-{
+}: {
   logger: Logger;
-  ruleParams: RuleTypeParams;
+  ruleParamsFrom: string;
+  ruleParamsTo: string;
+  ruleParamsMaxSignals: number;
   gap: moment.Duration | null;
   previousStartedAt: Date | null | undefined;
   interval: string;
-  // maxResults: number;
 }): Array<{
   to: moment.Moment | undefined;
   from: moment.Moment | undefined;
@@ -272,17 +285,13 @@ export const getSignalTimeTuples = ({
 }> => {
   type unitType = 's' | 'm' | 'h';
   const isValidUnit = (unit: string): unit is unitType => ['s', 'm', 'h'].includes(unit);
-  // add a 'gap' parameter that would add the
-  // 'from' with the 'gap' - need to figure out
-  // how to do datemath with moment.
-  let calculatedFrom = ruleParams.from;
   let totalToFromTuples: Array<{
     to: moment.Moment | undefined;
     from: moment.Moment | undefined;
     maxSignals: number;
   }> = [];
   if (gap != null && previousStartedAt != null) {
-    const fromUnit = ruleParams.from[ruleParams.from.length - 1];
+    const fromUnit = ruleParamsFrom[ruleParamsFrom.length - 1];
     if (isValidUnit(fromUnit)) {
       const unit = fromUnit; // only seconds (s), minutes (m) or hours (h)
       const shorthandMap = {
@@ -300,14 +309,19 @@ export const getSignalTimeTuples = ({
         },
       };
       const tempNow = moment();
+
+      // for quick testing uncomment line below and
+      // create a rule that runs every 20 seconds with
+      // a 2 second lookback (should trigger the gap)
       // const newFrom = moment.duration(300, 's');
       const newFrom = moment.duration(tempNow.diff(previousStartedAt));
-      logger.debug(`newFrom: ${newFrom.asSeconds()}`);
       const parsed = parseInt(shorthandMap[unit].asFn(newFrom).toString(), 10);
 
-      calculatedFrom = `now-${parsed + unit}`;
+      const calculatedFrom = `now-${parsed + unit}`;
       logger.debug(`calculatedFrom: ${calculatedFrom}`);
+
       const intervalMoment = moment.duration(parseInt(interval, 10), unit);
+      logger.debug(`intervalMoment: ${shorthandMap[unit].asFn(intervalMoment)}`);
       const calculatedFromAsMoment = dateMath.parse(calculatedFrom);
       const calculatedNowAsMoment = dateMath.parse('now');
       if (
@@ -318,59 +332,30 @@ export const getSignalTimeTuples = ({
         // calculate new max signals so that we keep constant max signals per time interval
         // essentially if the rule is supposed to run every 5 minutes,
         //  but there is a gap of one minute, then the number of rule executions missed
-        // due to the gap are (6 minutes - 5 minutes) / 5 minutes = 0.2 * MAX_SIGNALS = 20 signals allowed.
+        // due to the gap are (6 minutes - 5 minutes) / 5 minutes = 0.2 * MAX_SIGNALS = 20 signals
+        // allowed for the gapped interval.
         // this is to keep our ratio of MAX_SIGNALS : rule intervals equivalent.
-        const dateMathRuleParamsFrom = dateMath.parse(ruleParams.from);
+        const dateMathRuleParamsFrom = dateMath.parse(ruleParamsFrom);
         const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
         logger.debug(
           `calculatedFromAsMoment: ${calculatedFromAsMoment.toISOString()}, calculatedNowAsMoment: ${calculatedNowAsMoment.toISOString()}`
         );
         const gapDiffInUnits = calculatedFromAsMoment.diff(dateMathRuleParamsFrom, momentUnit);
-        // I think we can replace this with the interval?
-        const normalDiffInUnits = calculatedNowAsMoment.diff(dateMathRuleParamsFrom, momentUnit);
 
-        logger.debug(`gapDiffInUnits: ${gapDiffInUnits}, normalDiffInUnits: ${normalDiffInUnits}`);
         // make an array that represents the number of intervals of (to, from) tuples
-        const ratio = Math.abs(gapDiffInUnits / normalDiffInUnits);
+        const ratio = Math.abs(gapDiffInUnits / shorthandMap[unit].asFn(intervalMoment));
+
         // maxCatchup is to ensure we are not trying to catch up too far back.
         // This allows for a maximum of 4 consecutive rule execution misses
         // to be included in the number of signals generated.
         const maxCatchup = ratio < 4 ? ratio : 4;
 
-        // take the `xunit` from the `now-xunit` datemath string and append another interval
-        // to the `x`
-        /*
-        basic algorithm will be a recurrence relation such that
-        the end point for one range becomes the start point for
-        the next range. subtract the intervalMoment from the `to` field
-        to get the next `from`, then on the next iteration, set the `to` field
-        to be the `from` field, then subtract intervalMoment from the `to` field to get
-        the next `from` field, then on the next iteration, set the `to` field
-        to be the `from` field, then subtract the intervalMoment from the `to field to get
-        the next `from` field.
-        */
-        // let tempFrom = dateMath.parse(ruleParams.from);
-        // let tempFrom;
-        let tempTo = dateMath.parse(ruleParams.from);
+        let tempTo = dateMath.parse(ruleParamsFrom);
         if (tempTo == null) {
           // return an error
           throw new Error('dateMath parse failed');
         }
-        // totalToFromTuples.push({ to: tempTo, from: tempFrom });
-        // consider re-writing as a reduce function?
-        // maybe in a separate utils file?
-        // this way it is easier to test?
-        // but then again I'll be testing timestamps which is ANNOYING
-        // UGH
-        // I guess the way I would test this is ensure the returned
-        // length of totalToFromTuples is greater than 0
-        // and all the `to` and `from` values in each tuple
-        // are differentiated by the given `intervalMoment`.
-        // this way I am not strictly checking for timestamps
-        // but the difference between the two.
-        // subtracting 1 from the length because we start out with the
-        // normal interval tuple, so don't include as part of the
-        // maxCatchup.
+
         logger.debug(`maxCatchup: ${maxCatchup}`);
         let beforeMutatedFrom: moment.Moment | undefined;
         while (totalToFromTuples.length < maxCatchup) {
@@ -379,61 +364,42 @@ export const getSignalTimeTuples = ({
           // in order to maintain maxSignals per full rule interval.
           if (maxCatchup > 0 && maxCatchup < 1) {
             totalToFromTuples.push({
-              to: moment(tempTo),
-              from: moment(tempTo.subtract(Math.abs(gapDiffInUnits), momentUnit)),
-              maxSignals: ruleParams.maxSignals * maxCatchup,
+              to: tempTo.clone(),
+              from: tempTo.clone().subtract(Math.abs(gapDiffInUnits), momentUnit),
+              maxSignals: ruleParamsMaxSignals * maxCatchup,
             });
             break;
           }
-          logger.debug(`tempTo: ${tempTo.toISOString()}`);
-          const beforeMutatedTo = tempTo.clone(); // make a new moment
-          const tempToClone = tempTo.clone();
-          logger.debug(`intervalMoment: ${intervalMoment.asSeconds()}`);
-          beforeMutatedFrom = moment(tempToClone.subtract(intervalMoment, momentUnit));
+          const beforeMutatedTo = tempTo.clone();
+
+          // moment.subtract mutates the moment so we need to clone again..
+          beforeMutatedFrom = tempTo.clone().subtract(intervalMoment, momentUnit);
           const tuple = {
             to: beforeMutatedTo,
             from: beforeMutatedFrom,
-            maxSignals: ruleParams.maxSignals,
+            maxSignals: ruleParamsMaxSignals,
           };
-          logger.debug(
-            `tuple: ${JSON.stringify(
-              tuple,
-              (_, value) => (typeof value === 'undefined' ? null : value),
-              4
-            )}`
-          );
           totalToFromTuples = [...totalToFromTuples, tuple];
-          logger.debug(
-            `totalToFromTuples: ${JSON.stringify(
-              totalToFromTuples,
-              (_, value) => (typeof value === 'undefined' ? null : value),
-              4
-            )}`
-          );
           tempTo = beforeMutatedFrom;
         }
         totalToFromTuples = [
           {
-            to: dateMath.parse(ruleParams.to),
-            from: dateMath.parse(ruleParams.from),
-            maxSignals: ruleParams.maxSignals,
+            to: dateMath.parse(ruleParamsTo),
+            from: dateMath.parse(ruleParamsFrom),
+            maxSignals: ruleParamsMaxSignals,
           },
           ...totalToFromTuples,
         ];
-
-        // create a new max results which in the above example equates to
-        // 20 signals as the MAX_SIGNALS for the gap duration + our normal MAX_SIGNALS defaulted to 100
-        // which comes out to 120 total max signals.
-        // maxResults = Math.round(maxCatchup * ruleParams.maxSignals) + ruleParams.maxSignals;
-        // logger.debug(`new maxResults: ${maxResults}`);
       }
     }
   } else {
-    totalToFromTuples.push({
-      to: moment(ruleParams.to),
-      from: moment(ruleParams.from),
-      maxSignals: ruleParams.maxSignals,
-    });
+    totalToFromTuples = [
+      {
+        to: dateMath.parse(ruleParamsTo),
+        from: dateMath.parse(ruleParamsFrom),
+        maxSignals: ruleParamsMaxSignals,
+      },
+    ];
   }
   return totalToFromTuples;
 };
