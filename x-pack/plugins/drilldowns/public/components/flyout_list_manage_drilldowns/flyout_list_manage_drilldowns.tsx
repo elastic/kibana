@@ -11,6 +11,7 @@ import { txtManageDrilldowns } from './i18n';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
 
 export interface FlyoutListManageDrilldownsProps {
+  docsLink?: string;
   drilldowns: DrilldownListItem[];
   onClose?: () => void;
   onCreate?: () => void;
@@ -21,6 +22,7 @@ export interface FlyoutListManageDrilldownsProps {
 }
 
 export function FlyoutListManageDrilldowns({
+  docsLink,
   drilldowns,
   onClose = () => {},
   onCreate,
@@ -33,7 +35,11 @@ export function FlyoutListManageDrilldowns({
     <FlyoutFrame
       title={txtManageDrilldowns}
       onClose={onClose}
-      banner={showWelcomeMessage && <DrilldownHelloBar onHideClick={onWelcomeHideClick} />}
+      banner={
+        showWelcomeMessage && (
+          <DrilldownHelloBar docsLink={docsLink} onHideClick={onWelcomeHideClick} />
+        )
+      }
     >
       <ListManageDrilldowns
         drilldowns={drilldowns}
