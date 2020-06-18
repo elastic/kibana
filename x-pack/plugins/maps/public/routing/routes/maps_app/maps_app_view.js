@@ -46,6 +46,7 @@ export class MapsAppView extends React.Component {
     this.state = {
       indexPatterns: [],
       prevIndexPatternIds: [],
+      filters: [],
       initialized: false,
       isVisible: true,
       savedQuery: null,
@@ -205,8 +206,7 @@ export class MapsAppView extends React.Component {
   };
 
   _syncAppAndGlobalState = () => {
-    const { query, time, initialized } = this.state;
-    const { refreshConfig } = this.props;
+    const { query, time, refreshConfig, initialized } = this.state;
     const { filterManager } = getData().query;
 
     // appState
@@ -235,6 +235,12 @@ export class MapsAppView extends React.Component {
     const { filterManager } = getData().query;
     const { dispatchSetQuery } = this.props;
     const newState = {};
+    let newFilters;
+    if (filters) {
+      filterManager.setFilters(filters); // Maps and merges filters
+      newFilters = filterManager.getFilters();
+      newState.filters = newFilters;
+    }
     if (query) {
       newState.query = query;
     }
@@ -245,7 +251,7 @@ export class MapsAppView extends React.Component {
       this._syncAppAndGlobalState();
       dispatchSetQuery(
         refresh,
-        filters || this.props.filters,
+        newFilters || this.state.filters,
         query || this.state.query,
         time || this.state.time
       );
@@ -276,7 +282,7 @@ export class MapsAppView extends React.Component {
         globalState,
       }),
     };
-    this.setState({ query: newState.query, time: newState.time });
+    this.setState(newState);
     updateGlobalState(
       {
         time: newState.time,
@@ -316,7 +322,7 @@ export class MapsAppView extends React.Component {
   };
 
   _onRefreshChange = ({ isPaused, refreshInterval }) => {
-    const { refreshConfig } = this.props;
+    const { refreshConfig } = this.state;
     const newRefreshConfig = {
       isPaused,
       interval: isNaN(refreshInterval) ? refreshConfig.interval : refreshInterval,
@@ -405,13 +411,14 @@ export class MapsAppView extends React.Component {
     const {
       query,
       time,
+      refreshConfig,
       savedQuery,
       initialLayerListConfig,
       isVisible,
       indexPatterns,
       currentPath,
     } = this.state;
-    const { savedMap, refreshConfig } = this.props;
+    const { savedMap } = this.props;
 
     return isVisible ? (
       <MapsTopNavMenu
@@ -449,7 +456,7 @@ export class MapsAppView extends React.Component {
   }
 
   render() {
-    const { initialized } = this.state;
+    const { filters, initialized } = this.state;
 
     return initialized ? (
       <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
@@ -461,7 +468,7 @@ export class MapsAppView extends React.Component {
               newFilters.forEach((filter) => {
                 filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
               });
-              this._updateFiltersAndDispatch([...this.props.filters, ...newFilters]);
+              this._updateFiltersAndDispatch([...filters, ...newFilters]);
             }}
           />
         </div>
