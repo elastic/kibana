@@ -54,9 +54,12 @@ Metrics::
 
 [float]
 [[known-issues-7.8.0]]
-=== Known issue
+=== Known issues
 
 SIEM::
+* After upgrading from 7.7.x to 7.8.0, rules that have been overwritten in any
+of the 7.7.x releases fail to run without warning (see issue for workaround)
+{issue}69463[#69463]
 * When you duplicate a rule with a deleted action connector, the duplication fails {issue}69142[#69142]
 
 [float]
