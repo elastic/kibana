@@ -218,10 +218,14 @@ export const searchAfterAndBulkCreate = async ({
         // maxCatchup.
         logger.debug(`maxCatchup: ${maxCatchup}`);
         while (totalToFromTuples.length < maxCatchup) {
+          // if maxCatchup is less than 1, we calculate the 'from' differently
+          // and maxSignals becomes some less amount of maxSignals
+          // in order to maintain maxSignals per full rule interval.
           if (maxCatchup > 0 && maxCatchup < 1) {
             totalToFromTuples.push({
               to: moment(tempTo),
               from: moment(tempTo?.add(gapDiffInUnits, momentUnit)),
+              maxSignals: ruleParams.maxSignals * maxCatchup,
             });
             break;
           }
@@ -231,6 +235,7 @@ export const searchAfterAndBulkCreate = async ({
           const tuple = {
             to: beforeMutatedTo,
             from: beforeMutatedFrom,
+            maxSignals: ruleParams.maxSignals,
           };
           logger.debug(`tuple: ${JSON.stringify(tuple, null, 4)}`);
           totalToFromTuples.push(tuple);
@@ -239,6 +244,7 @@ export const searchAfterAndBulkCreate = async ({
         totalToFromTuples.push({
           to: dateMath.parse(ruleParams.to),
           from: dateMath.parse(ruleParams.from),
+          maxSignals: ruleParams.maxSignals,
         });
 
         // create a new max results which in the above example equates to
@@ -252,6 +258,7 @@ export const searchAfterAndBulkCreate = async ({
     totalToFromTuples.push({
       to: moment(ruleParams.to),
       from: moment(ruleParams.from),
+      maxSignals: ruleParams.maxSignals,
     });
   }
 
@@ -265,122 +272,137 @@ export const searchAfterAndBulkCreate = async ({
   while (totalToFromTuples.length > 0) {
     // await totalToFromTuples.forEach(async (tuple) => {
     const tuple = totalToFromTuples.pop();
-    try {
-      // @ts-ignore
-      logger.debug(`sortIds: ${sortId}`);
-      const {
-        // @ts-ignore https://github.com/microsoft/TypeScript/issues/35546
-        searchResult,
-        searchDuration,
-      }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter({
-        // @ts-ignore we are using sortId before being assigned but that's ok.
-        searchAfterSortId: useSortIds ? sortId : undefined,
-        index: inputIndexPattern,
-        // from: calculatedFrom,
-        from: tuple!.from!.toISOString(), // TODO: bang
-        // to: ruleParams.to,
-        to: tuple!.to!.toISOString(), // TODO: bang
-        services,
-        logger,
-        filter,
-        pageSize, // maximum number of docs to receive per search result.
-      });
-      toReturn.searchAfterTimes.push(searchDuration);
-      toReturn.lastLookBackDate =
-        searchResult.hits.hits.length > 0
-          ? new Date(
-              searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp']
-            )
-          : null;
-      const totalHits =
-        typeof searchResult.hits.total === 'number'
-          ? searchResult.hits.total
-          : searchResult.hits.total.value;
-      logger.debug(`totalHits: ${totalHits}`);
-      logger.debug(`searchResult.hit.hits.length: ${searchResult.hits.hits.length}`);
-
-      // re-calculate maxResults to ensure if our search results
-      // are less than max signals, we are not attempting to
-      // create more signals than there are total search results.
-      maxResults = Math.min(totalHits, ruleParams.maxSignals);
-      searchResultSize += searchResult.hits.hits.length;
-      // if (searchResult.hits.hits.length === 0) {
-      //   toReturn.success = true;
-      //   return toReturn;
-      // }
-
-      // filter out the search results that match with the values found in the list.
-      // the resulting set are valid signals that are not on the allowlist.
-      const filteredEvents: SignalSearchResponse =
-        listClient != null
-          ? await filterEventsAgainstList({
-              listClient,
-              exceptionsList,
-              logger,
-              eventSearchResult: searchResult,
-            })
-          : searchResult;
-
-      if (filteredEvents.hits.total === 0 || filteredEvents.hits.hits.length === 0) {
-        // everything in the events were allowed, so no need to generate signals
-        toReturn.success = true;
-        return toReturn;
-      }
-
-      // cap max signals created to be no more than maxSignals
-      // if (toReturn.createdSignalsCount + filteredEvents.hits.hits.length > ruleParams.maxSignals) {
-      //   const tempSignalsToIndex = filteredEvents.hits.hits.slice(
-      //     0,
-      //     ruleParams.maxSignals - toReturn.createdSignalsCount
-      //   );
-      //   filteredEvents.hits.hits = tempSignalsToIndex;
-      // }
-      logger.debug('next bulk index');
-      const {
-        bulkCreateDuration: bulkDuration,
-        createdItemsCount: createdCount,
-      } = await singleBulkCreate({
-        filteredEvents,
-        ruleParams,
-        services,
-        logger,
-        id,
-        signalsIndex,
-        actions,
-        name,
-        createdAt,
-        createdBy,
-        updatedAt,
-        updatedBy,
-        interval,
-        enabled,
-        refresh,
-        tags,
-        throttle,
-      });
-      logger.debug('finished next bulk index');
-      logger.debug(`created ${createdCount} signals`);
-      toReturn.createdSignalsCount += createdCount;
-      if (bulkDuration) {
-        toReturn.bulkCreateTimes.push(bulkDuration);
-      }
-
-      logger.debug(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`);
-      if (useSortIds && filteredEvents.hits.hits[0].sort == null) {
-        logger.debug('sortIds was empty on search');
-        toReturn.success = true;
-        return toReturn; // no more search results
-      } else if (
-        useSortIds &&
-        filteredEvents.hits.hits !== null &&
-        filteredEvents.hits.hits[0].sort !== null
-      ) {
-        sortId = filteredEvents.hits.hits[0].sort ? filteredEvents.hits.hits[0].sort[0] : undefined;
-      }
-    } catch (exc) {
-      logger.error(`[-] search_after and bulk threw an error ${exc}`);
+    if (tuple == null) {
+      logger.error(`[-] malformed date tuple`);
       toReturn.success = false;
       return toReturn;
+    }
+    searchResultSize = 0;
+    while (searchResultSize < tuple.maxSignals) {
+      try {
+        // @ts-ignore
+        logger.debug(`sortIds: ${sortId}`);
+        const {
+          // @ts-ignore https://github.com/microsoft/TypeScript/issues/35546
+          searchResult,
+          searchDuration,
+        }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter(
+          {
+            // @ts-ignore we are using sortId before being assigned but that's ok.
+            searchAfterSortId: useSortIds ? sortId : undefined,
+            index: inputIndexPattern,
+            // from: calculatedFrom,
+            from: tuple!.from!.toISOString(), // TODO: bang
+            // to: ruleParams.to,
+            to: tuple!.to!.toISOString(), // TODO: bang
+            services,
+            logger,
+            filter,
+            pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
+          }
+        );
+        toReturn.searchAfterTimes.push(searchDuration);
+        toReturn.lastLookBackDate =
+          searchResult.hits.hits.length > 0
+            ? new Date(
+                searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp']
+              )
+            : null;
+        const totalHits =
+          typeof searchResult.hits.total === 'number'
+            ? searchResult.hits.total
+            : searchResult.hits.total.value;
+        logger.debug(`totalHits: ${totalHits}`);
+        logger.debug(`searchResult.hit.hits.length: ${searchResult.hits.hits.length}`);
+
+        // re-calculate maxResults to ensure if our search results
+        // are less than max signals, we are not attempting to
+        // create more signals than there are total search results.
+        maxResults = Math.min(totalHits, ruleParams.maxSignals);
+        searchResultSize += searchResult.hits.hits.length;
+        // if (searchResult.hits.hits.length === 0) {
+        //   toReturn.success = true;
+        //   return toReturn;
+        // }
+
+        // filter out the search results that match with the values found in the list.
+        // the resulting set are valid signals that are not on the allowlist.
+        const filteredEvents: SignalSearchResponse =
+          listClient != null
+            ? await filterEventsAgainstList({
+                listClient,
+                exceptionsList,
+                logger,
+                eventSearchResult: searchResult,
+              })
+            : searchResult;
+
+        if (filteredEvents.hits.total === 0 || filteredEvents.hits.hits.length === 0) {
+          // everything in the events were allowed, so no need to generate signals
+          toReturn.success = true;
+          break;
+          // return toReturn;
+        }
+
+        // cap max signals created to be no more than maxSignals
+        // if (toReturn.createdSignalsCount + filteredEvents.hits.hits.length > ruleParams.maxSignals) {
+        //   const tempSignalsToIndex = filteredEvents.hits.hits.slice(
+        //     0,
+        //     ruleParams.maxSignals - toReturn.createdSignalsCount
+        //   );
+        //   filteredEvents.hits.hits = tempSignalsToIndex;
+        // }
+        logger.debug('next bulk index');
+        const {
+          bulkCreateDuration: bulkDuration,
+          createdItemsCount: createdCount,
+        } = await singleBulkCreate({
+          filteredEvents,
+          ruleParams,
+          services,
+          logger,
+          id,
+          signalsIndex,
+          actions,
+          name,
+          createdAt,
+          createdBy,
+          updatedAt,
+          updatedBy,
+          interval,
+          enabled,
+          refresh,
+          tags,
+          throttle,
+        });
+        logger.debug('finished next bulk index');
+        logger.debug(`created ${createdCount} signals`);
+        toReturn.createdSignalsCount += createdCount;
+        if (bulkDuration) {
+          toReturn.bulkCreateTimes.push(bulkDuration);
+        }
+
+        logger.debug(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`);
+        if (useSortIds && filteredEvents.hits.hits[0].sort == null) {
+          logger.debug('sortIds was empty on search');
+          toReturn.success = true;
+          break;
+          // return toReturn; // no more search results
+        } else if (
+          useSortIds &&
+          filteredEvents.hits.hits !== null &&
+          filteredEvents.hits.hits[0].sort !== null
+        ) {
+          sortId = filteredEvents.hits.hits[0].sort
+            ? filteredEvents.hits.hits[0].sort[0]
+            : undefined;
+        }
+      } catch (exc) {
+        logger.error(`[-] search_after and bulk threw an error ${exc}`);
+        toReturn.success = false;
+        break;
+        // return toReturn;
+      }
     }
   }
   logger.debug(`[+] completed bulk index of ${toReturn.createdSignalsCount}`);
