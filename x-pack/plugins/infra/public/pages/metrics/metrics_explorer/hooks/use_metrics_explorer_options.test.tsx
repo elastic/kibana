@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { AlertPrefillProvider } from '../../../../alerting/use_alert_prefill';
 import {
   useMetricsExplorerOptions,
-  MetricsExplorerOptionsContainer,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
   DEFAULT_OPTIONS,
@@ -18,11 +18,7 @@ import {
 const renderUseMetricsExplorerOptionsHook = () =>
   renderHook(() => useMetricsExplorerOptions(), {
     initialProps: {},
-    wrapper: ({ children }) => (
-      <MetricsExplorerOptionsContainer.Provider>
-        {children}
-      </MetricsExplorerOptionsContainer.Provider>
-    ),
+    wrapper: ({ children }) => <AlertPrefillProvider>{children}</AlertPrefillProvider>,
   });
 
 interface LocalStore {
@@ -48,10 +44,24 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
+let PREFILL: Record<string, any> = {};
+const alertPrefillMock = {
+  metricThresholdPrefill: {
+    setPrefillOptions(opts: Record<string, any>) {
+      PREFILL = opts;
+    },
+  },
+};
+
+Object.defineProperty(window, '__jestAlertPrefillMock', {
+  value: alertPrefillMock,
+});
+
 describe('useMetricExplorerOptions', () => {
   beforeEach(() => {
     delete STORE.MetricsExplorerOptions;
     delete STORE.MetricsExplorerTimeRange;
+    PREFILL = {};
   });
 
   it('should just work', () => {
@@ -99,5 +109,24 @@ describe('useMetricExplorerOptions', () => {
     STORE.MetricsExplorerOptions = JSON.stringify(newOptions);
     const { result } = renderUseMetricsExplorerOptionsHook();
     expect(result.current.options).toEqual(newOptions);
+  });
+
+  it('should sync the options to the threshold alert preview context', () => {
+    const { result, rerender } = renderUseMetricsExplorerOptionsHook();
+
+    const newOptions: MetricsExplorerOptions = {
+      ...DEFAULT_OPTIONS,
+      metrics: [{ aggregation: 'count' }],
+      filterQuery: 'foo',
+      groupBy: 'host.hostname',
+    };
+    act(() => {
+      result.current.setOptions(newOptions);
+    });
+    rerender();
+    const currentOptions = result.current.options;
+    expect(currentOptions.metrics).toEqual(PREFILL.metrics);
+    expect(currentOptions.groupBy).toEqual(PREFILL.groupBy);
+    expect(currentOptions.filterQuery).toEqual(PREFILL.filterQuery);
   });
 });
