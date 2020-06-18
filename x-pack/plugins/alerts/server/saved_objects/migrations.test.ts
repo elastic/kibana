@@ -40,7 +40,6 @@ describe('7.9.0', () => {
     expect(encryptedSavedObjectsSetup.createMigration).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      encryptedType,
       encryptedType
     );
   });
@@ -55,20 +54,6 @@ describe('7.9.0', () => {
       attributes: {
         ...alert.attributes,
         consumer: 'alerts',
-      },
-    });
-  });
-
-  test('migrates the consumer for metrics', () => {
-    const migration790 = getMigrations(encryptedSavedObjectsSetup, encryptedType)['7.9.0'];
-    const alert = getMockData({
-      consumer: 'metrics',
-    });
-    expect(migration790(alert, { log })).toMatchObject({
-      ...alert,
-      attributes: {
-        ...alert.attributes,
-        consumer: 'infrastructure',
       },
     });
   });
