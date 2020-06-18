@@ -60,7 +60,7 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
 
   cls.addEndpointDescription = function (endpoint, description) {
     const copiedDescription = {};
-    _.extend(copiedDescription, description || {});
+    _.assignIn(copiedDescription, description || {});
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],
