@@ -13,3 +13,4 @@ export * from './components/load_mappings';
 export { OnUpdateHandler, Types } from './mappings_state';
 
 export { doMappingsHaveType } from './lib';
+export { IndexSettings } from './types';
