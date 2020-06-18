@@ -16,13 +16,13 @@ export default function () {
       // unique names are used in logging and to get the details of this server in the tests
       helloWorld: {
         /** disable this docker server unless the user sets some flag/env var */
-        enabled: !!process.env.SOME_APP_PORT,
+        enabled: !!process.env.HELLO_WORLD_PORT,
         /** the docker image to pull and run */
-        image: 'hello-world',
+        image: 'vad1mo/hello-world-rest',
         /** The port that this application will be accessible via locally */
-        port: process.env.SOME_APP_PORT,
+        port: process.env.HELLO_WORLD_PORT,
         /** The port that the container binds to in the container */
-        portInContainer: 8080,
+        portInContainer: 5050,
         /**
          * OPTIONAL: string/regex to look for in the log, when specified the
          * tests won't start until a line containing this string, or matching
@@ -47,6 +47,34 @@ export default function () {
       }
     })
   }
+}
+```
+
+To consume the test server, use can use something like supertest to send request. Just make sure that you disable your test suite if the user doesn't choose to enable your docker server:
+
+```ts
+import makeSupertest from 'supertest-as-promised';
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export default function ({ getService }: FtrProviderContext) {
+  const dockerServers = getService('dockerServers');
+  const log = getService('log');
+
+  const server = dockerServers.get('helloWorld');
+  const supertest = makeSupertest(server.url);
+
+  describe('test suite name', function () {
+    if (!server.enabled) {
+      log.warning(
+        'disabling tests because server is not enabled, set HELLO_WORLD_PORT to run them'
+      );
+      this.pending = true;
+    }
+
+    it('test name', async () => {
+      await supertest.get('/foo/bar').expect(200);
+    });
+  });
 }
 ```
 
