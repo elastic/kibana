@@ -21,7 +21,11 @@
  * This file provides logic for migrating raw documents.
  */
 
-import { SavedObjectsRawDoc, SavedObjectsSerializer } from '../../serialization';
+import {
+  SavedObjectsRawDoc,
+  SavedObjectsSerializer,
+  SavedObjectUnsanitizedDoc,
+} from '../../serialization';
 import { TransformFn } from './document_migrator';
 import { SavedObjectsMigrationLogger } from '.';
 
@@ -38,7 +42,7 @@ export async function migrateRawDocs(
   migrateDoc: TransformFn,
   rawDocs: SavedObjectsRawDoc[],
   log: SavedObjectsMigrationLogger
-): SavedObjectsRawDoc[] {
+): Promise<SavedObjectsRawDoc[]> {
   const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
   const processesDocs = [];
   for (const raw of rawDocs) {
@@ -62,13 +66,15 @@ export async function migrateRawDocs(
   return processesDocs;
 }
 
-function transformNonBlocking(transform: TransformFn): Promise<ReturnType<TransformFn>> {
+function transformNonBlocking(
+  transform: TransformFn
+): (doc: SavedObjectUnsanitizedDoc) => Promise<SavedObjectUnsanitizedDoc> {
   // promises aren't enough to unblock the event loop
-  return (...args) =>
+  return (doc: SavedObjectUnsanitizedDoc) =>
     new Promise((resolve) => {
       // set immediate is though
       setImmediate(() => {
-        resolve(transform(...args));
+        resolve(transform(doc));
       });
     });
 }
