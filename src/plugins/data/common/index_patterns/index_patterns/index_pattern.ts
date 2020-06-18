@@ -90,7 +90,8 @@ export class IndexPattern implements IIndexPattern {
     fields: {
       type: ES_FIELD_TYPES.TEXT,
       _serialize(v) {
-        if (v) return JSON.stringify(v.toSpec());
+        // saved object import saves without running initFields, hence conditional call of toSpec
+        if (v) return JSON.stringify(v.toSpec ? v.toSpec() : v);
       },
       _deserialize(v) {
         if (_.isArray(v)) {
