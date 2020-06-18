@@ -11,6 +11,7 @@ import { AutoSizer, List, WindowScroller } from 'react-virtualized';
 import { DropSpecialLocations } from '../../../constants';
 import { ProcessorInternal, ProcessorSelector } from '../../../types';
 import { isChildPath } from '../../../processors_reducer';
+import { selectorToDataTestSubject } from '../../../utils';
 
 import { DropZoneButton } from '.';
 import { TreeNode } from '.';
@@ -73,10 +74,12 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
     info: ProcessorInfo;
     processor: ProcessorInternal;
   }) => {
+    const stringifiedSelector = selectorToDataTestSubject(info.selector);
     return (
       <>
         {idx === 0 ? (
           <DropZoneButton
+            data-test-subj={`dropButtonAbove-${stringifiedSelector}`}
             onClick={(event) => {
               event.preventDefault();
               onAction({
@@ -102,6 +105,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
           />
         </EuiFlexItem>
         <DropZoneButton
+          data-test-subj={`dropButtonBelow-${stringifiedSelector}`}
           isDisabled={Boolean(!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor!))}
           onClick={(event) => {
             event.preventDefault();

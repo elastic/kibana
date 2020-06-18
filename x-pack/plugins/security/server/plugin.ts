@@ -118,7 +118,7 @@ export class Plugin {
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
         map((rawConfig) =>
           createConfig(rawConfig, this.initializerContext.logger.get('config'), {
-            isTLSEnabled: core.http.isTlsEnabled,
+            isTLSEnabled: core.http.getServerInfo().protocol === 'https',
           })
         )
       ),

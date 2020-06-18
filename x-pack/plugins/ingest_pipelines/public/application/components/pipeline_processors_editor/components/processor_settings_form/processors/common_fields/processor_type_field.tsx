@@ -54,6 +54,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
       component={ComboBoxField}
       componentProps={{
         euiFieldProps: {
+          'data-test-subj': 'processorTypeSelector',
           fullWidth: true,
           options: types.map((type) => ({ label: type, value: type })),
           noSuggestions: false,
