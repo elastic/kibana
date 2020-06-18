@@ -1,0 +1,14 @@
+{
+  "name": "iframe_embedded",
+  "version": "0.0.0",
+  "kibana": {
+    "version": "kibana"
+  },
+  "scripts": {
+    "kbn": "node ../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "typescript": "3.9.5"
+  }
+}
