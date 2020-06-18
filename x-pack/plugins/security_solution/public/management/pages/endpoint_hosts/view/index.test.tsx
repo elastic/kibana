@@ -358,7 +358,7 @@ describe('when on the hosts page', () => {
       });
     });
 
-    describe('when showing host Policy Response panel', () => {
+    describe.skip('when showing host Policy Response panel', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
         renderResult = render();
