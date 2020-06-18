@@ -120,7 +120,7 @@ ASCIIDOC
                     print keys %uniq > 1
                         ? " (issues: "
                         : " (issue: ";
-#                   print join ", ", map {"{issue}${_}[#${_}]"}
+#                   print join ", ", map {"{kib-issue}${_}[#${_}]"}
 #                   print join ", ", map {"#${_}"}
                     print join ", ", map {"https://github.com/${User_Repo}issues/${_}[#${_}]"}
                         sort keys %uniq;
