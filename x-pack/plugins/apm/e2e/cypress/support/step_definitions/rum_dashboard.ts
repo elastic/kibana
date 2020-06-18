@@ -10,9 +10,11 @@ import { loginAndWaitForPage } from '../../integration/helpers';
 /** The default time in ms to wait for a Cypress command to complete */
 export const DEFAULT_TIMEOUT = 60 * 1000;
 
-Given(`a user browses the APM UI application`, () => {
+Given(`a user browses the APM UI application for RUM Data`, () => {
   // open service overview page
-  loginAndWaitForPage(`/app/apm#/services`);
+  const RANGE_FROM = 'now-24h';
+  const RANGE_TO = 'now';
+  loginAndWaitForPage(`/app/apm#/services`, { from: RANGE_FROM, to: RANGE_TO });
 });
 
 When(`the user inspects the real user monitoring tab`, () => {
