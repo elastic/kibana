@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { IFieldFormatMetaParams } from '../../field_formats/types';
+import { FieldSpec } from '../fields';
+
 export type AggregationRestrictions = Record<
   string,
   {
@@ -36,12 +39,20 @@ export interface TypeMeta {
 
 export interface IndexPatternSpec {
   id: string;
-  type: string;
   version: string;
 
   title: string;
   timeFieldName: string;
-  sourceFilters: string;
-  fields: string;
-  fieldFormatMap: string;
+  sourceFilters: SourceFilter[];
+  fields: FieldSpec;
+  fieldFormatMap: Record<string, FieldFormatSpec>;
+}
+
+export interface SourceFilter {
+  value: string;
+}
+
+export interface FieldFormatSpec {
+  id: string;
+  params: IFieldFormatMetaParams;
 }

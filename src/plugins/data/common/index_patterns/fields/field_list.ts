@@ -102,6 +102,10 @@ export const getIndexPatternFieldListCreator = ({
       this.removeByGroup(newField);
       this.setByGroup(newField);
     };
+
+    toSpec = () => {
+      return [...this.map((field) => field.$$spec)];
+    };
   }
 
   return new FieldList(...fieldListParams);

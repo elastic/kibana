@@ -61,7 +61,6 @@ export class IndexPattern implements IIndexPattern {
 
   public id?: string;
   public title: string = '';
-  public type?: string;
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList;
@@ -88,16 +87,41 @@ export class IndexPattern implements IIndexPattern {
     title: ES_FIELD_TYPES.TEXT,
     timeFieldName: ES_FIELD_TYPES.KEYWORD,
     intervalName: ES_FIELD_TYPES.KEYWORD,
-    fields: 'json',
-    sourceFilters: 'json',
+    fields: {
+      type: ES_FIELD_TYPES.TEXT,
+      _serialize(v) {
+        if (v) return JSON.stringify(v.toSpec());
+      },
+      _deserialize(v) {
+        if (_.isArray(v)) {
+          return v;
+        } else if (_.isString(v)) {
+          return JSON.parse(v);
+        }
+      },
+    },
+    sourceFilters: {
+      type: ES_FIELD_TYPES.TEXT,
+      _serialize(v) {
+        if (v) return JSON.stringify(v);
+      },
+      _deserialize(v) {
+        if (_.isArray(v)) {
+          return v;
+        } else if (_.isString(v)) {
+          return JSON.parse(v);
+        }
+      },
+    },
     fieldFormatMap: {
       type: ES_FIELD_TYPES.TEXT,
       _serialize: (map = {}) => {
         const serialized = _.transform(map, this.serializeFieldFormatMap);
         return _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
       },
-      _deserialize: (map = '{}') => {
-        return _.mapValues(JSON.parse(map), (mapping) => {
+      _deserialize: (map: string | Record<string, any> = '{}') => {
+        const mapAsObj = typeof map === 'string' ? JSON.parse(map) : map;
+        return _.mapValues(mapAsObj, (mapping) => {
           return this.deserializeFieldFormatMap(mapping);
         });
       },
@@ -198,6 +222,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   public initFromSpec(spec: IndexPatternSpec) {
+    // todo - sourceFilters, fields, and fieldFormatMap will be plain objects
     this.updateFromPlainObject(spec);
     this.initFields();
   }
@@ -295,8 +320,6 @@ export class IndexPattern implements IIndexPattern {
   public toSpec() {
     return {
       id: this.id,
-      // type: this.type,
-      // source: this.prepBody(),
       version: this.version,
       ...this.prepBody(),
     } as IndexPatternSpec;
@@ -419,7 +442,6 @@ export class IndexPattern implements IIndexPattern {
     // serialize json fields
     _.forOwn(this.mapping, (fieldMapping, fieldName) => {
       if (!fieldName || this[fieldName] == null) return;
-
       body[fieldName] = fieldMapping._serialize
         ? fieldMapping._serialize(this[fieldName])
         : this[fieldName];

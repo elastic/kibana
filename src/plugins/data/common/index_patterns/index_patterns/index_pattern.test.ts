@@ -30,22 +30,6 @@ import { Field } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
 
-jest.mock('../../field_mapping', () => {
-  const originalModule = jest.requireActual('../../field_mapping');
-
-  return {
-    ...originalModule,
-    expandShorthand: jest.fn(() => ({
-      title: 'text',
-      timeFieldName: 'keyword',
-      fields: 'json',
-      fieldFormatMap: {
-        _deserialize: jest.fn().mockImplementation(() => []),
-      },
-    })),
-  };
-});
-
 let mockFieldsFetcherResponse: any[] = [];
 
 jest.mock('./_fields_fetcher', () => ({
