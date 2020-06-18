@@ -8,11 +8,16 @@ import React, { Component } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getIndexPatternSelectComponent, getHttp } from '../kibana_services';
+import { IndexPattern } from 'src/plugins/data/public';
+import {
+  getIndexPatternSelectComponent,
+  getIndexPatternService,
+  getHttp,
+} from '../kibana_services';
 import { ES_GEO_FIELD_TYPES } from '../../common/constants';
 
 interface Props {
-  onChange: (indexPatternId: string) => void;
+  onChange: (indexPattern: IndexPattern) => void;
   value: string | null;
 }
 
@@ -21,8 +26,37 @@ interface State {
 }
 
 export class GeoIndexPatternSelect extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
   state = {
     noGeoIndexPatternsExist: false,
+  };
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  _onIndexPatternSelect = async (indexPatternId: string) => {
+    if (!indexPatternId || indexPatternId.length === 0) {
+      return;
+    }
+
+    let indexPattern;
+    try {
+      indexPattern = await getIndexPatternService().get(indexPatternId);
+    } catch (err) {
+      return;
+    }
+
+    // method may be called again before get returns
+    // ignore response when fetched index pattern does not match active index pattern
+    if (this._isMounted && indexPattern.id === indexPatternId) {
+      this.props.onChange(indexPattern);
+    }
   };
 
   _onNoIndexPatterns = () => {
@@ -90,7 +124,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
           <IndexPatternSelect
             isDisabled={this.state.noGeoIndexPatternsExist}
             indexPatternId={this.props.value}
-            onChange={this.props.onChange}
+            onChange={this._onIndexPatternSelect}
             placeholder={i18n.translate('xpack.maps.indexPatternSelectPlaceholder', {
               defaultMessage: 'Select index pattern',
             })}

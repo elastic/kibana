@@ -7,6 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
@@ -36,7 +37,9 @@ const IndexPatternSelect = getIndexPatternSelectComponent();
 
 interface State {
   leftSource: BOUNDARIES_SOURCE;
-  leftIndexPatternId: string | null;
+  leftIndexPattern: IndexPattern | null;
+  leftGeoFields: IFieldType[];
+  leftTermsFields: IFieldType[];
   leftGeofieldName: string | null;
   leftEsJoinField: string | null;
   leftEmsFileId: string | null;
@@ -48,7 +51,9 @@ interface State {
 export class LayerTemplate extends Component<RenderWizardArguments, State> {
   state = {
     leftSource: BOUNDARIES_SOURCE.ELASTICSEARCH,
-    leftIndexPatternId: null,
+    leftIndexPattern: null,
+    leftGeoFields: [],
+    leftTermsFields: [],
     leftGeofieldName: null,
     leftEsJoinField: null,
     leftEmsFileId: null,
@@ -61,8 +66,8 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     this.setState({ leftSource: optionId }, this._previewLayer);
   };
 
-  _onLeftIndexPatternChange = (indexPatternId: string) => {
-    this.setState({ leftIndexPatternId: indexPatternId }, this._previewLayer);
+  _onLeftIndexPatternChange = (indexPattern: IndexPattern) => {
+    this.setState({ leftIndexPattern: indexPattern }, this._previewLayer);
   };
 
   _onEmsFileChange = (emFileId: string) => {
@@ -72,7 +77,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   _isLeftConfigComplete() {
     if (this.state.leftSource === BOUNDARIES_SOURCE.ELASTICSEARCH) {
       return (
-        !!this.state.leftIndexPatternId &&
+        !!this.state.leftIndexPattern &&
         !!this.state.leftGeofieldName &&
         !!this.state.leftEsJoinField
       );
@@ -102,7 +107,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     if (this.state.leftSource === BOUNDARIES_SOURCE.ELASTICSEARCH) {
       return (
         <GeoIndexPatternSelect
-          value={this.state.leftIndexPatternId}
+          value={this.state.leftIndexPattern ? this.state.leftIndexPattern.id : ''}
           onChange={this._onLeftIndexPatternChange}
         />
       );

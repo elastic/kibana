@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { getIndexPatternService } from '../../../kibana_services';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { i18n } from '@kbn/i18n';
 
@@ -32,74 +30,25 @@ export class CreateSourceEditor extends Component {
   };
 
   state = {
-    isLoadingIndexPattern: false,
-    indexPatternId: '',
+    indexPattern: null,
     geoField: '',
     requestType: this.props.requestType,
   };
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  componentDidMount() {
-    this._isMounted = true;
-  }
-
-  onIndexPatternSelect = (indexPatternId) => {
+  onIndexPatternSelect = (indexPattern) => {
     this.setState(
       {
-        indexPatternId,
+        indexPattern,
       },
-      this.loadIndexPattern.bind(null, indexPatternId)
+      () => {
+        //make default selection
+        const geoFieldsWithGeoTileAgg = getFieldsWithGeoTileAgg(indexPattern.fields);
+        if (geoFieldsWithGeoTileAgg[0]) {
+          this._onGeoFieldSelect(geoFieldsWithGeoTileAgg[0].name);
+        }
+      }
     );
   };
-
-  loadIndexPattern = (indexPatternId) => {
-    this.setState(
-      {
-        isLoadingIndexPattern: true,
-        indexPattern: undefined,
-        geoField: undefined,
-      },
-      this.debouncedLoad.bind(null, indexPatternId)
-    );
-  };
-
-  debouncedLoad = _.debounce(async (indexPatternId) => {
-    if (!indexPatternId || indexPatternId.length === 0) {
-      return;
-    }
-
-    let indexPattern;
-    try {
-      indexPattern = await getIndexPatternService().get(indexPatternId);
-    } catch (err) {
-      // index pattern no longer exists
-      return;
-    }
-
-    if (!this._isMounted) {
-      return;
-    }
-
-    // props.indexPatternId may be updated before getIndexPattern returns
-    // ignore response when fetched index pattern does not match active index pattern
-    if (indexPattern.id !== indexPatternId) {
-      return;
-    }
-
-    this.setState({
-      isLoadingIndexPattern: false,
-      indexPattern: indexPattern,
-    });
-
-    //make default selection
-    const geoFieldsWithGeoTileAgg = getFieldsWithGeoTileAgg(indexPattern.fields);
-    if (geoFieldsWithGeoTileAgg[0]) {
-      this._onGeoFieldSelect(geoFieldsWithGeoTileAgg[0].name);
-    }
-  }, 300);
 
   _onGeoFieldSelect = (geoField) => {
     this.setState(
@@ -120,10 +69,10 @@ export class CreateSourceEditor extends Component {
   };
 
   previewLayer = () => {
-    const { indexPatternId, geoField, requestType } = this.state;
+    const { indexPattern, geoField, requestType } = this.state;
 
     const sourceConfig =
-      indexPatternId && geoField ? { indexPatternId, geoField, requestType } : null;
+      indexPattern && geoField ? { indexPatternId: indexPattern.id, geoField, requestType } : null;
     this.props.onSourceConfigChange(sourceConfig);
   };
 
@@ -168,7 +117,7 @@ export class CreateSourceEditor extends Component {
     return (
       <Fragment>
         <GeoIndexPatternSelect
-          value={this.state.indexPatternId}
+          value={this.state.indexPattern ? this.state.indexPattern.id : ''}
           onChange={this.onIndexPatternSelect}
         />
         {this._renderGeoSelect()}
