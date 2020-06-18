@@ -52,7 +52,7 @@ export const DynamicMappingSection = () => (
     }
   >
     <FormDataProvider pathsToWatch={['dynamicMapping.enabled', 'dynamicMapping.date_detection']}>
-      {formData => {
+      {(formData) => {
         const {
           'dynamicMapping.enabled': enabled,
           'dynamicMapping.date_detection': dateDetection,

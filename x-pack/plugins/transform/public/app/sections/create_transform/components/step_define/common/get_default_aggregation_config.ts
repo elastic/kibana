@@ -7,31 +7,38 @@
 import {
   EsFieldName,
   PERCENTILES_AGG_DEFAULT_PERCENTS,
-  PivotAggsConfigWithUiSupport,
   PIVOT_SUPPORTED_AGGS,
+  PivotAggsConfigWithUiSupport,
 } from '../../../../../common';
+import { PivotSupportedAggs } from '../../../../../common/pivot_aggs';
+import { getFilterAggConfig } from './filter_agg/config';
 
+/**
+ * Provides a configuration based on the aggregation type.
+ */
 export function getDefaultAggregationConfig(
   aggName: string,
   dropDownName: string,
   fieldName: EsFieldName,
-  agg: PIVOT_SUPPORTED_AGGS
+  agg: PivotSupportedAggs
 ): PivotAggsConfigWithUiSupport {
+  const commonConfig = {
+    agg,
+    aggName,
+    dropDownName,
+    field: fieldName,
+  };
+
   switch (agg) {
     case PIVOT_SUPPORTED_AGGS.PERCENTILES:
       return {
+        ...commonConfig,
         agg,
-        aggName,
-        dropDownName,
-        field: fieldName,
         percents: PERCENTILES_AGG_DEFAULT_PERCENTS,
       };
+    case PIVOT_SUPPORTED_AGGS.FILTER:
+      return getFilterAggConfig(commonConfig);
     default:
-      return {
-        agg,
-        aggName,
-        dropDownName,
-        field: fieldName,
-      };
+      return commonConfig;
   }
 }

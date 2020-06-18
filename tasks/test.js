@@ -21,11 +21,11 @@ import _, { keys } from 'lodash';
 
 import { run } from '../utilities/visual_regression';
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   grunt.registerTask(
     'test:visualRegression:buildGallery',
     'Compare screenshots and generate diff images.',
-    function() {
+    function () {
       const done = this.async();
       run(done);
     }
@@ -40,8 +40,8 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test:karma-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
-      .filter(key => key.startsWith('ciShard-'))
-      .map(key => `karma:${key}`);
+      .filter((key) => key.startsWith('ciShard-'))
+      .map((key) => `karma:${key}`);
 
     grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
     grunt.task.run(['run:browserSCSS']);
@@ -64,7 +64,7 @@ module.exports = function(grunt) {
   grunt.registerTask('test:karmaDebug', ['checkPlugins', 'run:karmaTestDebugServer', 'karma:dev']);
   grunt.registerTask('test:mochaCoverage', ['run:mochaCoverage']);
 
-  grunt.registerTask('test', subTask => {
+  grunt.registerTask('test', (subTask) => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
 
     grunt.task.run(
@@ -84,7 +84,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
 
-  grunt.registerTask('test:projects', function() {
+  grunt.registerTask('test:projects', function () {
     const done = this.async();
     runProjectsTests().then(done, done);
   });

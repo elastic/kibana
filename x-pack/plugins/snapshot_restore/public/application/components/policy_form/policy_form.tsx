@@ -66,9 +66,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
       ...(originalPolicy.config || {}),
     },
     retention: {
-      ...(originalPolicy.retention || {
-        expireAfterUnit: TIME_UNITS.DAY,
-      }),
+      ...originalPolicy.retention,
+      expireAfterUnit: originalPolicy.retention?.expireAfterUnit ?? TIME_UNITS.DAY,
     },
   });
 

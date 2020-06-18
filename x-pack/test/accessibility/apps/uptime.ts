@@ -10,7 +10,7 @@ import { makeChecks } from '../../api_integration/apis/uptime/rest/helper/make_c
 
 const A11Y_TEST_MONITOR_ID = 'a11yTestMonitor';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { uptime } = getPageObjects(['common', 'uptime']);
   const a11y = getService('a11y');
   const uptimeService = getService('uptime');
@@ -22,12 +22,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load('uptime/blank');
       await makeChecks(es, A11Y_TEST_MONITOR_ID, 150, 1, 1000, {
         tls: {
-          certificate_not_valid_after: moment()
-            .add(30, 'days')
-            .toISOString(),
-          certificate_not_valid_before: moment()
-            .subtract(90, 'days')
-            .toISOString(),
+          certificate_not_valid_after: moment().add(30, 'days').toISOString(),
+          certificate_not_valid_before: moment().subtract(90, 'days').toISOString(),
           server: {
             x509: {
               subject: {
@@ -69,7 +65,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('detail page', async () => {
       await uptimeService.navigation.goToMonitor(A11Y_TEST_MONITOR_ID);
-      await uptimeService.monitor.locationMapIsRendered();
+      await uptimeService.monitor.displayOverallAvailability('0.00 %');
       await a11y.testAppSnapshot();
     });
 

@@ -44,7 +44,7 @@ export function propFilter<P extends string>(prop: P) {
     filters: string[] | string | FilterFunc<P, T> = []
   ): T[] {
     if (isFunction(filters)) {
-      return list.filter(item => (filters as FilterFunc<P, T>)(item[prop]));
+      return list.filter((item) => (filters as FilterFunc<P, T>)(item[prop]));
     }
 
     if (!Array.isArray(filters)) {
@@ -75,7 +75,7 @@ export function propFilter<P extends string>(prop: P) {
       return acc;
     }, {} as { [type: string]: string[] });
 
-    return list.filter(item => {
+    return list.filter((item) => {
       const value = item[prop];
 
       const excluded = options.exclude && options.exclude.includes(value);

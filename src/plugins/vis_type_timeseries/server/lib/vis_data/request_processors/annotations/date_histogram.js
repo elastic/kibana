@@ -31,7 +31,7 @@ export function dateHistogram(
   indexPatternObject,
   capabilities
 ) {
-  return next => doc => {
+  return (next) => (doc) => {
     const timeField = annotation.time_field;
     const { bucketSize, intervalString } = getBucketSize(req, 'auto', capabilities);
     const { from, to } = getTimerange(req);

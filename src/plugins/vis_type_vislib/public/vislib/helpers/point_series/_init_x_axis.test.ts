@@ -30,11 +30,11 @@ import {
 } from './point_series';
 import { Table, Column } from '../../types';
 
-describe('initXAxis', function() {
+describe('initXAxis', function () {
   let chart: Chart;
   let table: Table;
 
-  beforeEach(function() {
+  beforeEach(function () {
     chart = {
       aspects: {
         x: [
@@ -53,13 +53,13 @@ describe('initXAxis', function() {
     };
   });
 
-  it('sets the xAxisFormatter if the agg is not ordered', function() {
+  it('sets the xAxisFormatter if the agg is not ordered', function () {
     initXAxis(chart, table);
     expect(chart).toHaveProperty('xAxisLabel', 'label');
     expect(chart).toHaveProperty('xAxisFormat', chart.aspects.x[0].format);
   });
 
-  it('makes the chart ordered if the agg is ordered', function() {
+  it('makes the chart ordered if the agg is ordered', function () {
     (chart.aspects.x[0].params as HistogramParams).interval = 10;
 
     initXAxis(chart, table);
@@ -68,18 +68,18 @@ describe('initXAxis', function() {
     expect(chart).toHaveProperty('ordered');
   });
 
-  describe('xAxisOrderedValues', function() {
-    it('sets the xAxisOrderedValues property', function() {
+  describe('xAxisOrderedValues', function () {
+    it('sets the xAxisOrderedValues property', function () {
       initXAxis(chart, table);
       expect(chart).toHaveProperty('xAxisOrderedValues');
     });
 
-    it('returns a list of values, preserving the table order', function() {
+    it('returns a list of values, preserving the table order', function () {
       initXAxis(chart, table);
       expect(chart.xAxisOrderedValues).toEqual(['hello', 'world', 'foo', 'bar', 'baz']);
     });
 
-    it('only returns unique values', function() {
+    it('only returns unique values', function () {
       table = {
         columns: [{ id: '0' } as Column],
         rows: [
@@ -97,7 +97,7 @@ describe('initXAxis', function() {
       expect(chart.xAxisOrderedValues).toEqual(['hello', 'world', 'foo', 'bar', 'baz']);
     });
 
-    it('returns the defaultValue if using fake x aspect', function() {
+    it('returns the defaultValue if using fake x aspect', function () {
       chart = {
         aspects: {
           x: [makeFakeXAspect()],
@@ -108,7 +108,7 @@ describe('initXAxis', function() {
     });
   });
 
-  it('reads the date interval param from the x agg', function() {
+  it('reads the date interval param from the x agg', function () {
     const dateHistogramParams = chart.aspects.x[0].params as DateHistogramParams;
     dateHistogramParams.interval = 'P1D';
     dateHistogramParams.intervalESValue = 1;
@@ -127,7 +127,7 @@ describe('initXAxis', function() {
     expect(intervalESUnit).toBe('d');
   });
 
-  it('reads the numeric interval param from the x agg', function() {
+  it('reads the numeric interval param from the x agg', function () {
     (chart.aspects.x[0].params as HistogramParams).interval = 0.5;
     initXAxis(chart, table);
     expect(chart).toHaveProperty('xAxisLabel', 'label');

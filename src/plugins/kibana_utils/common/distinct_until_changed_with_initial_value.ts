@@ -24,7 +24,7 @@ export function distinctUntilChangedWithInitialValue<T>(
   initialValue: T | Promise<T>,
   compare?: (x: T, y: T) => boolean
 ): MonoTypeOperatorFunction<T> {
-  return input$ =>
+  return (input$) =>
     scheduled(
       [isPromise(initialValue) ? from(initialValue) : [initialValue], input$],
       queueScheduler

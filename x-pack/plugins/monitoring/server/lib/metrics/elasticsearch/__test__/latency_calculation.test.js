@@ -7,7 +7,7 @@
 import { LatencyMetric } from '../classes';
 
 describe('LatencyMetric for Query/Index Metric derivatives', () => {
-  const getLatencyMetric = metricType => {
+  const getLatencyMetric = (metricType) => {
     return new LatencyMetric({
       metric: metricType,
       field: metricType,

@@ -56,7 +56,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   const { columns, errorMessage, status, tableItems } = outlierData;
 
   // if it's a searchBar syntax error leave the table visible so they can try again
-  if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
+  if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
     return (
       <EuiPanel grow={false}>
         <ExplorationTitle title={explorationTitle} />
@@ -73,6 +73,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     );
   }
 
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,
     COLOR_RANGE_SCALE.INFLUENCER,

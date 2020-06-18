@@ -52,7 +52,7 @@ function isWithHeader(arg: any): arg is PropsWithHeader {
 type Props = PropsWithHeader | PropsWithoutHeader;
 
 export const DataGrid: FC<Props> = memo(
-  props => {
+  (props) => {
     const {
       columns,
       dataTestSubj,
@@ -75,7 +75,7 @@ export const DataGrid: FC<Props> = memo(
 
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {
-        invalidSortingColumnns.forEach(columnId => {
+        invalidSortingColumnns.forEach((columnId) => {
           toastNotifications.addDanger(
             i18n.translate('xpack.ml.dataGrid.invalidSortingColumnError', {
               defaultMessage: `The column '{columnId}' cannot be used for sorting.`,

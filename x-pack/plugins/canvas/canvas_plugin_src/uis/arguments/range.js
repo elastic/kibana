@@ -14,7 +14,7 @@ const { Range: strings } = ArgumentStrings;
 
 const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
   const { min, max, step } = typeInstance.options;
-  const handleChange = ev => {
+  const handleChange = (ev) => {
     return onValueChange(Number(ev.target.value));
   };
 

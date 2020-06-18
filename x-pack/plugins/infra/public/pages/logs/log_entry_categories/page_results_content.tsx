@@ -68,6 +68,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
         title: loadDataErrorTitle,
       });
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [services.notifications]
   );
 
@@ -89,7 +90,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
-      setCategoryQueryTimeRange(previousQueryParameters => ({
+      setCategoryQueryTimeRange((previousQueryParameters) => ({
         ...previousQueryParameters,
         timeRange: stringToNumericTimeRange({ startTime, endTime }),
         lastChangedTime: Date.now(),

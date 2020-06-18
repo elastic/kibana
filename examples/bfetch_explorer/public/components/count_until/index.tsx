@@ -82,7 +82,7 @@ export const CountUntil: React.FC<Props> = ({ fetchStreaming }) => {
         <EuiFieldNumber
           placeholder="Some integer"
           value={data}
-          onChange={e => setData(Number(e.target.value))}
+          onChange={(e) => setData(Number(e.target.value))}
         />
       </EuiFormRow>
       <EuiButton type="submit" fill onClick={handleSubmit}>

@@ -20,7 +20,14 @@
 import { services as commonServiceProviders } from '../../common/services';
 
 import { AppsMenuProvider } from './apps_menu';
-import { BrowserProvider } from './browser';
+import {
+  BrowserProvider,
+  FailureDebuggingProvider,
+  FindProvider,
+  ScreenshotsProvider,
+  SnapshotsProvider,
+  TestSubjectsProvider,
+} from './common';
 import { ComboBoxProvider } from './combo_box';
 import {
   DashboardAddPanelProvider,
@@ -28,27 +35,19 @@ import {
   DashboardExpectProvider,
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
-  // @ts-ignore not TS yet
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
-import { ElasticChartProvider } from './elastic_chart';
 import { EmbeddingProvider } from './embedding';
-import { FailureDebuggingProvider } from './failure_debugging';
 import { FilterBarProvider } from './filter_bar';
-import { FindProvider } from './find';
 import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
-import { ScreenshotsProvider } from './screenshots';
-import { SnapshotsProvider } from './snapshots';
 import { TableProvider } from './table';
-import { TestSubjectsProvider } from './test_subjects';
 import { ToastsProvider } from './toasts';
-// @ts-ignore not TS yet
-import { PieChartProvider } from './visualizations';
+import { PieChartProvider, ElasticChartProvider } from './visualizations';
 import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';

@@ -11,6 +11,7 @@ import { TimeseriesContainer } from './timeseries_container';
 import { HorizontalLegend } from './horizontal_legend';
 import { getValuesForSeriesIndex, getValuesByX } from './get_values_for_legend';
 import { DEBOUNCE_SLOW_MS } from '../../../common/constants';
+import './timeseries_visualization.scss';
 
 export class TimeseriesVisualization extends React.Component {
   constructor(props) {
@@ -67,7 +68,7 @@ export class TimeseriesVisualization extends React.Component {
     props = props || this.props;
     const values = {};
 
-    props.series.forEach(row => {
+    props.series.forEach((row) => {
       // we need a valid identifier
       if (!row.id) {
         row.id = row.label;

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const grokDebugger = getService('grokDebugger');
   const esArchiver = getService('esArchiver');
 
   const PageObjects = getPageObjects(['grokDebugger']);
 
-  describe('grok debugger app', function() {
+  describe('grok debugger app', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('empty_kibana');

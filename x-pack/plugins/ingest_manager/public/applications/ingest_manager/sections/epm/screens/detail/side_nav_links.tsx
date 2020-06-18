@@ -38,7 +38,7 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
         const Link = styled(EuiButtonEmpty).attrs<EuiButtonEmptyProps>({
           href: getHref('integration_details', { pkgkey: `${name}-${version}`, panel }),
         })`
-          font-weight: ${p =>
+          font-weight: ${(p) =>
             active === panel
               ? p.theme.eui.euiFontWeightSemiBold
               : p.theme.eui.euiFontWeightRegular};

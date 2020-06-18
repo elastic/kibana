@@ -33,7 +33,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getPropertyName();
   }
 
-  getRawValue(): string | undefined {
+  getRawValue(): string | string[] | undefined {
     return this._tooltipProperty.getRawValue();
   }
 
@@ -48,7 +48,12 @@ export class ESTooltipProperty implements ITooltipProperty {
 
     const indexPatternField = this._getIndexPatternField();
     if (!indexPatternField || !this._field.canValueBeFormatted()) {
-      return _.escape(this.getRawValue());
+      const rawValue = this.getRawValue();
+      if (Array.isArray(rawValue)) {
+        return _.escape(rawValue.join());
+      } else {
+        return _.escape(rawValue);
+      }
     }
 
     const htmlConverter = indexPatternField.format.getConverterFor('html');

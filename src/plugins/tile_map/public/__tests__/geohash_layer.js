@@ -27,7 +27,7 @@ import GeoHashSampleData from './dummy_es_response.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaMap } from '../../../maps_legacy/public/map/kibana_map';
 
-describe('geohash_layer', function() {
+describe('geohash_layer', function () {
   let domNode;
   let expectCanvas;
   let kibanaMap;
@@ -53,8 +53,8 @@ describe('geohash_layer', function() {
     document.body.removeChild(expectCanvas);
   }
 
-  describe('GeohashGridLayer', function() {
-    beforeEach(async function() {
+  describe('GeohashGridLayer', function () {
+    beforeEach(async function () {
       setupDOM();
       imageComparator = new ImageComparator();
       kibanaMap = new KibanaMap(domNode, {
@@ -68,7 +68,7 @@ describe('geohash_layer', function() {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       // return;
       kibanaMap.destroy();
       teardownDOM();
@@ -95,8 +95,8 @@ describe('geohash_layer', function() {
       //   },
       //   expected: heatmapPng
       // }
-    ].forEach(function(test) {
-      it(`${test.options.mapType} (may fail in dev env)`, async function() {
+    ].forEach(function (test) {
+      it(`${test.options.mapType} (may fail in dev env)`, async function () {
         const geohashGridOptions = test.options;
         const geohashLayer = new GeohashLayer(
           GeoHashSampleData.featureCollection,
@@ -116,7 +116,7 @@ describe('geohash_layer', function() {
       });
     });
 
-    it('should not throw when fitting on empty-data layer', function() {
+    it('should not throw when fitting on empty-data layer', function () {
       const geohashLayer = new GeohashLayer(
         {
           type: 'FeatureCollection',
@@ -134,7 +134,7 @@ describe('geohash_layer', function() {
       }).to.not.throwException();
     });
 
-    it('should not throw when resizing to 0 on heatmap', function() {
+    it('should not throw when resizing to 0 on heatmap', function () {
       const geohashGridOptions = {
         mapType: 'Heatmap',
         heatmap: {

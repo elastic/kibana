@@ -178,7 +178,7 @@ export function isModelPlotEnabled(
 
       if (detectorHasPartitionField) {
         const partitionEntity = entityFields.find(
-          entityField => entityField.fieldName === detector.partition_field_name
+          (entityField) => entityField.fieldName === detector.partition_field_name
         );
         isEnabled =
           partitionEntity?.fieldValue !== undefined &&
@@ -187,7 +187,7 @@ export function isModelPlotEnabled(
 
       if (isEnabled === true && detectorHasByField === true) {
         const byEntity = entityFields.find(
-          entityField => entityField.fieldName === detector.by_field_name
+          (entityField) => entityField.fieldName === detector.by_field_name
         );
         isEnabled =
           byEntity?.fieldValue !== undefined && terms.indexOf(String(byEntity.fieldValue)) !== -1;
@@ -349,7 +349,7 @@ export function basicJobValidation(
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
       let v = true;
-      _.each(job.analysis_config.categorization_filters, d => {
+      _.each(job.analysis_config.categorization_filters, (d) => {
         try {
           new RegExp(d);
         } catch (e) {
@@ -381,7 +381,7 @@ export function basicJobValidation(
       valid = false;
     } else {
       let v = true;
-      _.each(job.analysis_config.detectors, d => {
+      _.each(job.analysis_config.detectors, (d) => {
         if (_.isEmpty(d.function)) {
           v = false;
         }
@@ -398,7 +398,7 @@ export function basicJobValidation(
     if (job.analysis_config.detectors.length >= 2) {
       // create an array of objects with a subset of the attributes
       // where we want to make sure they are not be the same across detectors
-      const compareSubSet = job.analysis_config.detectors.map(d =>
+      const compareSubSet = job.analysis_config.detectors.map((d) =>
         _.pick(d, [
           'function',
           'field_name',
@@ -479,8 +479,8 @@ export function basicJobValidation(
   return {
     messages,
     valid,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -507,8 +507,8 @@ export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
   return {
     messages,
     valid,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -540,8 +540,8 @@ export function validateModelMemoryLimit(job: Job, limits: MlServerLimits): Vali
   return {
     valid,
     messages,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -567,16 +567,16 @@ export function validateModelMemoryLimitUnits(
   return {
     valid,
     messages,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
 export function validateGroupNames(job: Job): ValidationResults {
   const { groups = [] } = job;
   const errorMessages: ValidationResults['messages'] = [
-    ...(groups.some(group => !isJobIdValid(group)) ? [{ id: 'job_group_id_invalid' }] : []),
-    ...(groups.some(group => maxLengthValidator(JOB_ID_MAX_LENGTH)(group))
+    ...(groups.some((group) => !isJobIdValid(group)) ? [{ id: 'job_group_id_invalid' }] : []),
+    ...(groups.some((group) => maxLengthValidator(JOB_ID_MAX_LENGTH)(group))
       ? [{ id: 'job_group_id_invalid_max_length' }]
       : []),
   ];
@@ -586,8 +586,8 @@ export function validateGroupNames(job: Job): ValidationResults {
   return {
     valid,
     messages,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -626,6 +626,6 @@ export function processCreatedBy(customSettings: CustomSettings) {
 
 export function splitIndexPatternNames(indexPatternName: string): string[] {
   return indexPatternName.includes(',')
-    ? indexPatternName.split(',').map(i => i.trim())
+    ? indexPatternName.split(',').map((i) => i.trim())
     : [indexPatternName];
 }

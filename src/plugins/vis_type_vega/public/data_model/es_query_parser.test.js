@@ -28,8 +28,12 @@ const day = 24 * hour;
 
 const rangeStart = 10 * day;
 const rangeEnd = 12 * day;
-const ctxArr = { bool: { must: [{ match_all: { c: 3 } }], must_not: [{ d: 4 }] } };
-const ctxObj = { bool: { must: { match_all: { a: 1 } }, must_not: { b: 2 } } };
+const ctxArr = {
+  bool: { must: [{ match_all: { c: 3 } }], must_not: [{ d: 4 }], filter: [{ f: 6 }] },
+};
+const ctxObj = {
+  bool: { must: { match_all: { a: 1 } }, must_not: { b: 2 }, filter: { e: 6 } },
+};
 
 function create(min, max, dashboardCtx) {
   const inst = new EsQueryParser(
@@ -94,28 +98,36 @@ describe(`EsQueryParser time`, () => {
 });
 
 describe('EsQueryParser.populateData', () => {
-  let searchStub;
+  let searchApiStub;
+  let data;
   let parser;
 
   beforeEach(() => {
-    searchStub = jest.fn(() => Promise.resolve([{}, {}]));
-    parser = new EsQueryParser({}, { search: searchStub }, undefined, undefined);
+    searchApiStub = {
+      search: jest.fn(() => ({
+        toPromise: jest.fn(() => Promise.resolve(data)),
+      })),
+    };
+    parser = new EsQueryParser({}, searchApiStub, undefined, undefined);
   });
 
   test('should set the timeout for each request', async () => {
+    data = [
+      { id: 0, rawResponse: {} },
+      { id: 1, rawResponse: {} },
+    ];
     await parser.populateData([
       { url: { body: {} }, dataObject: {} },
       { url: { body: {} }, dataObject: {} },
     ]);
-    expect(searchStub.mock.calls[0][0][0].body.timeout).toBe.defined;
+
+    expect(searchApiStub.search.mock.calls[0][0][0].body).toBeDefined();
   });
 
   test('should remove possible timeout parameters on a request', async () => {
-    await parser.populateData([
-      { url: { timeout: '500h', body: { timeout: '500h' } }, dataObject: {} },
-    ]);
-    expect(searchStub.mock.calls[0][0][0].body.timeout).toBe.defined;
-    expect(searchStub.mock.calls[0][0][0].timeout).toBe(undefined);
+    data = [{ id: 0, rawResponse: {} }];
+    await parser.populateData([{ url: { body: { timeout: '500h' } }, dataObject: {} }]);
+    expect(searchApiStub.search.mock.calls[0][0][0].body.timeout).toBeDefined();
   });
 });
 
@@ -144,16 +156,34 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
   test(
     `mixed clause arr`,
     check(
-      { arr: [1, '%dashboard_context-must_clause%', 2, '%dashboard_context-must_not_clause%'] },
-      { arr: [1, ...ctxArr.bool.must, 2, ...ctxArr.bool.must_not] },
+      {
+        arr: [
+          1,
+          '%dashboard_context-must_clause%',
+          2,
+          '%dashboard_context-must_not_clause%',
+          3,
+          '%dashboard_context-filter_clause%',
+        ],
+      },
+      { arr: [1, ...ctxArr.bool.must, 2, ...ctxArr.bool.must_not, 3, ...ctxArr.bool.filter] },
       ctxArr
     )
   );
   test(
     `mixed clause obj`,
     check(
-      { arr: ['%dashboard_context-must_clause%', 1, '%dashboard_context-must_not_clause%', 2] },
-      { arr: [ctxObj.bool.must, 1, ctxObj.bool.must_not, 2] },
+      {
+        arr: [
+          '%dashboard_context-must_clause%',
+          1,
+          '%dashboard_context-must_not_clause%',
+          2,
+          '%dashboard_context-filter_clause%',
+          3,
+        ],
+      },
+      { arr: [ctxObj.bool.must, 1, ctxObj.bool.must_not, 2, ctxObj.bool.filter, 3] },
       ctxObj
     )
   );
@@ -221,6 +251,7 @@ describe(`EsQueryParser.parseEsRequest`, () => {
             },
           ],
           must_not: [{ d: 4 }],
+          filter: [{ f: 6 }],
         },
       },
     },

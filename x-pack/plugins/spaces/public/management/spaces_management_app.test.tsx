@@ -17,16 +17,17 @@ jest.mock('./edit_space', () => ({
   },
 }));
 
+import { ScopedHistory } from 'src/core/public';
 import { spacesManagementApp } from './spaces_management_app';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
 import { securityMock } from '../../../security/public/mocks';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { SecurityLicenseFeatures } from '../../../security/public';
 import { featuresPluginMock } from '../../../features/public/mocks';
 import { PluginsStart } from '../plugin';
 
-async function mountApp(basePath: string, spaceId?: string) {
+async function mountApp(basePath: string, pathname: string, spaceId?: string) {
   const container = document.createElement('div');
   const setBreadcrumbs = jest.fn();
 
@@ -53,7 +54,12 @@ async function mountApp(basePath: string, spaceId?: string) {
       securityLicense,
       getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
     })
-    .mount({ basePath, element: container, setBreadcrumbs });
+    .mount({
+      basePath,
+      element: container,
+      setBreadcrumbs,
+      history: (scopedHistoryMock.create({ pathname }) as unknown) as ScopedHistory,
+    });
 
   return { unmount, container, setBreadcrumbs };
 }
@@ -70,23 +76,20 @@ describe('spacesManagementApp', () => {
       Object {
         "id": "spaces",
         "mount": [Function],
-        "order": 10,
+        "order": 2,
         "title": "Spaces",
       }
     `);
   });
 
   it('mount() works for the `grid` page', async () => {
-    const basePath = '/some-base-path/spaces';
-    window.location.hash = basePath;
-
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `#${basePath}`, text: 'Spaces' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Spaces' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
+        Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"securityEnabled":true}
       </div>
     `);
 
@@ -96,19 +99,16 @@ describe('spacesManagementApp', () => {
   });
 
   it('mount() works for the `create space` page', async () => {
-    const basePath = '/some-base-path/spaces';
-    window.location.hash = `${basePath}/create`;
-
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/create');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `#${basePath}`, text: 'Spaces' },
+      { href: `/`, text: 'Spaces' },
       { text: 'Create' },
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
+        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"securityEnabled":true}
       </div>
     `);
 
@@ -118,20 +118,18 @@ describe('spacesManagementApp', () => {
   });
 
   it('mount() works for the `edit space` page', async () => {
-    const basePath = '/some-base-path/spaces';
     const spaceId = 'some-space';
-    window.location.hash = `${basePath}/edit/${spaceId}`;
 
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath, spaceId);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', `/edit/${spaceId}`, spaceId);
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `#${basePath}`, text: 'Spaces' },
-      { href: `#/some-base-path/spaces/edit/${spaceId}`, text: `space with id some-space` },
+      { href: `/`, text: 'Spaces' },
+      { href: `/edit/${spaceId}`, text: `space with id some-space` },
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","securityEnabled":true}
+        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"securityEnabled":true}
       </div>
     `);
 

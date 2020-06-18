@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import path from 'path';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
 
@@ -28,17 +28,17 @@ export default function({ getService, getPageObjects }) {
   //that referenced the saved search was not imported.( https://github.com/elastic/kibana/issues/22238)
 
   describe('mgmt saved objects', function describeIndexTests() {
-    beforeEach(async function() {
+    beforeEach(async function () {
       await esArchiver.load('discover');
       await PageObjects.settings.navigateTo();
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await esArchiver.unload('discover');
       await esArchiver.load('empty_kibana');
     });
 
-    it('should import saved objects mgmt', async function() {
+    it('should import saved objects mgmt', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(
         path.join(__dirname, 'exports', 'mgmt_import_objects.json')

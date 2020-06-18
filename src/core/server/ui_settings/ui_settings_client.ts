@@ -122,7 +122,7 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   async removeMany(keys: string[]) {
     const changes: Record<string, null> = {};
-    keys.forEach(key => {
+    keys.forEach((key) => {
       changes[key] = null;
     });
     await this.setMany(changes);

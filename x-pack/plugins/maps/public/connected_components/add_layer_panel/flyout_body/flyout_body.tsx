@@ -24,7 +24,7 @@ export const FlyoutBody = (props: Props) => {
     }
 
     const renderWizardArgs = {
-      previewLayer: props.previewLayer,
+      previewLayers: props.previewLayers,
       mapColors: props.mapColors,
       isIndexingTriggered: props.isIndexingTriggered,
       onRemove: props.onRemove,

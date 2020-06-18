@@ -27,7 +27,7 @@ const uiSettingsClient = {
 };
 
 const chrome = {
-  addBasePath: path => (path ? path : 'test/base/path'),
+  addBasePath: (path) => (path ? path : 'test/base/path'),
   breadcrumbs: {
     set: () => ({}),
   },
@@ -58,8 +58,8 @@ const internals = _.defaults(_.cloneDeep(metadata), {
   applicationClasses: [],
 });
 
-const waitForBootstrap = new Promise(resolve => {
-  chrome.bootstrap = function(targetDomElement) {
+const waitForBootstrap = new Promise((resolve) => {
+  chrome.bootstrap = function (targetDomElement) {
     // import chrome nav controls and hacks now so that they are executed after
     // everything else, can safely import the chrome, and interact with services
     // and such setup by all other modules
@@ -79,7 +79,7 @@ const waitForBootstrap = new Promise(resolve => {
 });
 
 chrome.dangerouslyGetActiveInjector = () => {
-  return waitForBootstrap.then(targetDomElement => {
+  return waitForBootstrap.then((targetDomElement) => {
     const $injector = angular.element(targetDomElement).injector();
     if (!$injector) {
       return Promise.reject('targetDomElement had no angular context after bootstrapping');

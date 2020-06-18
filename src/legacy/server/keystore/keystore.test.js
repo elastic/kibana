@@ -28,7 +28,7 @@ const mockUnprotectedKeystoreData =
   'I4lzJ9MRy21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 jest.mock('fs', () => ({
-  readFileSync: jest.fn().mockImplementation(path => {
+  readFileSync: jest.fn().mockImplementation((path) => {
     if (path.includes('data/unprotected')) {
       return JSON.stringify(mockUnprotectedKeystoreData);
     }
@@ -43,7 +43,7 @@ jest.mock('fs', () => ({
 
     throw { code: 'EACCES' };
   }),
-  existsSync: jest.fn().mockImplementation(path => {
+  existsSync: jest.fn().mockImplementation((path) => {
     return (
       path.includes('data/unprotected') ||
       path.includes('data/protected') ||

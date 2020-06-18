@@ -22,7 +22,7 @@ export function UrlTemplateList({
   const getListKey = useListKeys(urlTemplates);
 
   function removeUncommittedForm(id: string) {
-    setUncommittedForms(uncommittedForms.filter(formId => formId !== id));
+    setUncommittedForms(uncommittedForms.filter((formId) => formId !== id));
   }
 
   return (
@@ -39,7 +39,7 @@ export function UrlTemplateList({
           key={getListKey(template)}
           id={getListKey(template)}
           initialTemplate={template}
-          onSubmit={newTemplate => {
+          onSubmit={(newTemplate) => {
             saveTemplate({ index, template: newTemplate });
           }}
           onRemove={() => {
@@ -48,11 +48,11 @@ export function UrlTemplateList({
         />
       ))}
 
-      {uncommittedForms.map(id => (
+      {uncommittedForms.map((id) => (
         <UrlTemplateForm
           id={`accordion-new-${id}`}
           key={id}
-          onSubmit={newTemplate => {
+          onSubmit={(newTemplate) => {
             saveTemplate({ index: -1, template: newTemplate });
             removeUncommittedForm(id);
           }}

@@ -10,7 +10,7 @@ import {
   getNodeText,
   getByTestId,
   act,
-  wait
+  wait,
 } from '@testing-library/react';
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 
@@ -18,7 +18,7 @@ describe('LinkPreview', () => {
   let callApmApiSpy: jasmine.Spy;
   beforeAll(() => {
     callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({
-      transaction: { id: 'foo' }
+      transaction: { id: 'foo' },
     });
   });
   afterAll(() => {

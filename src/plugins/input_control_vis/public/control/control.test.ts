@@ -101,7 +101,7 @@ describe('ancestors', () => {
   });
 
   describe('hasUnsetAncestor', () => {
-    test('should be true if parent is not set', function() {
+    test('should be true if parent is not set', function () {
       grandParentControl.set('myGrandParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
@@ -110,7 +110,7 @@ describe('ancestors', () => {
       expect(childControl.hasUnsetAncestor()).to.be(true);
     });
 
-    test('should be true if grand parent is not set', function() {
+    test('should be true if grand parent is not set', function () {
       parentControl.set('myParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
@@ -119,7 +119,7 @@ describe('ancestors', () => {
       expect(childControl.hasUnsetAncestor()).to.be(true);
     });
 
-    test('should be false if all ancestors are set', function() {
+    test('should be false if all ancestors are set', function () {
       grandParentControl.set('myGrandParentValue');
       parentControl.set('myParentValue');
 
@@ -139,25 +139,25 @@ describe('ancestors', () => {
       lastAncestorValues = childControl.getAncestorValues();
     });
 
-    test('should be the same when ancestor values have not changed', function() {
+    test('should be the same when ancestor values have not changed', function () {
       const newAncestorValues = childControl.getAncestorValues();
       expect(newAncestorValues).to.eql(lastAncestorValues);
     });
 
-    test('should be different when grand parent value changes', function() {
+    test('should be different when grand parent value changes', function () {
       grandParentControl.set('new myGrandParentValue');
       const newAncestorValues = childControl.getAncestorValues();
       expect(newAncestorValues).to.not.eql(lastAncestorValues);
     });
 
-    test('should be different when parent value changes', function() {
+    test('should be different when parent value changes', function () {
       parentControl.set('new myParentValue');
       const newAncestorValues = childControl.getAncestorValues();
       expect(newAncestorValues).to.not.eql(lastAncestorValues);
     });
   });
 
-  test('should build filters from ancestors', function() {
+  test('should build filters from ancestors', function () {
     grandParentControl.set('myGrandParentValue');
     parentControl.set('myParentValue');
 

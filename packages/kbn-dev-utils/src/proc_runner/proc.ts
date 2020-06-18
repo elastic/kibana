@@ -118,7 +118,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     // observe first error event
     Rx.fromEvent(childProcess, 'error').pipe(
       take(1),
-      mergeMap(err => Rx.throwError(err))
+      mergeMap((err) => Rx.throwError(err))
     )
   ).pipe(share());
 
@@ -126,7 +126,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     observeLines(childProcess.stdout),
     observeLines(childProcess.stderr)
   ).pipe(
-    tap(line => log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`)),
+    tap((line) => log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`)),
     share()
   );
 

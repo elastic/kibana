@@ -26,7 +26,7 @@ export function filterDocvalueFields(
   docvalueFields: Array<string | DocvalueField>,
   fields: string[]
 ) {
-  return docvalueFields.filter(docValue => {
+  return docvalueFields.filter((docValue) => {
     const docvalueFieldName = typeof docValue === 'string' ? docValue : docValue.field;
     return fields.includes(docvalueFieldName);
   });

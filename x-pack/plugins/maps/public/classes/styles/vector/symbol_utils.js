@@ -16,7 +16,7 @@ export const SMALL_MAKI_ICON_SIZE = 11;
 export const HALF_LARGE_MAKI_ICON_SIZE = Math.ceil(LARGE_MAKI_ICON_SIZE);
 
 export const SYMBOLS = {};
-maki.svgArray.forEach(svgString => {
+maki.svgArray.forEach((svgString) => {
   const ID_FRAG = 'id="';
   const index = svgString.indexOf(ID_FRAG);
   if (index !== -1) {
@@ -32,7 +32,7 @@ maki.svgArray.forEach(svgString => {
   }
 });
 
-export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map(symbolId => {
+export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map((symbolId) => {
   return {
     value: symbolId,
     label: symbolId,
@@ -103,8 +103,8 @@ const ICON_PALETTES = [
 
 // PREFERRED_ICONS is used to provide less random default icon values for forms that need default icon values
 export const PREFERRED_ICONS = [];
-ICON_PALETTES.forEach(iconPalette => {
-  iconPalette.icons.forEach(iconId => {
+ICON_PALETTES.forEach((iconPalette) => {
+  iconPalette.icons.forEach((iconId) => {
     if (!PREFERRED_ICONS.includes(iconId)) {
       PREFERRED_ICONS.push(iconId);
     }
@@ -113,7 +113,7 @@ ICON_PALETTES.forEach(iconPalette => {
 
 export function getIconPaletteOptions(isDarkMode) {
   return ICON_PALETTES.map(({ id, icons }) => {
-    const iconsDisplay = icons.map(iconId => {
+    const iconsDisplay = icons.map((iconId) => {
       const style = {
         width: '10%',
         position: 'relative',

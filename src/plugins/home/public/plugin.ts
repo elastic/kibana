@@ -128,7 +128,7 @@ export class HomePublicPlugin
       window.location.hash === ''
     ) {
       // ...wait for the app to mount initially and then...
-      currentAppId$.pipe(first()).subscribe(appId => {
+      currentAppId$.pipe(first()).subscribe((appId) => {
         if (appId === 'home') {
           // ...navigate to default app set by `kibana.defaultAppId`.
           // This doesn't do anything as along as the default settings are kept.

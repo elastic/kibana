@@ -18,17 +18,17 @@ describe('DiscoverLinks', () => {
   it('produces the correct URL for a transaction', async () => {
     const transaction = {
       transaction: {
-        id: '8b60bd32ecc6e150'
+        id: '8b60bd32ecc6e150',
       },
       trace: {
-        id: '8b60bd32ecc6e1506735a8b6cfcf175c'
-      }
+        id: '8b60bd32ecc6e1506735a8b6cfcf175c',
+      },
     } as Transaction;
 
     const href = await getRenderedHref(
       () => <DiscoverTransactionLink transaction={transaction} />,
       {
-        search: '?rangeFrom=now/w&rangeTo=now'
+        search: '?rangeFrom=now/w&rangeTo=now',
       } as Location
     );
 
@@ -40,12 +40,12 @@ describe('DiscoverLinks', () => {
   it('produces the correct URL for a span', async () => {
     const span = {
       span: {
-        id: 'test-span-id'
-      }
+        id: 'test-span-id',
+      },
     } as Span;
 
     const href = await getRenderedHref(() => <DiscoverSpanLink span={span} />, {
-      search: '?rangeFrom=now/w&rangeTo=now'
+      search: '?rangeFrom=now/w&rangeTo=now',
     } as Location);
 
     expect(href).toEqual(
@@ -56,16 +56,16 @@ describe('DiscoverLinks', () => {
   test('DiscoverErrorLink should produce the correct URL', async () => {
     const error = {
       service: {
-        name: 'service-name'
+        name: 'service-name',
       },
       error: {
-        grouping_key: 'grouping-key'
-      }
+        grouping_key: 'grouping-key',
+      },
     } as APMError;
     const href = await getRenderedHref(
       () => <DiscoverErrorLink error={error} />,
       {
-        search: '?rangeFrom=now/w&rangeTo=now'
+        search: '?rangeFrom=now/w&rangeTo=now',
       } as Location
     );
 
@@ -77,17 +77,17 @@ describe('DiscoverLinks', () => {
   test('DiscoverErrorLink should include optional kuery string in URL', async () => {
     const error = {
       service: {
-        name: 'service-name'
+        name: 'service-name',
       },
       error: {
-        grouping_key: 'grouping-key'
-      }
+        grouping_key: 'grouping-key',
+      },
     } as APMError;
 
     const href = await getRenderedHref(
       () => <DiscoverErrorLink error={error} kuery="some:kuery-string" />,
       {
-        search: '?rangeFrom=now/w&rangeTo=now'
+        search: '?rangeFrom=now/w&rangeTo=now',
       } as Location
     );
 

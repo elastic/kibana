@@ -110,7 +110,7 @@ describe('Kuery field suggestions', () => {
       mockKueryNode({ prefix, suffix })
     );
     expect(suggestions.length).toBeGreaterThan(0);
-    suggestions.forEach(suggestion => {
+    suggestions.forEach((suggestion) => {
       expect(suggestion).toHaveProperty('description');
     });
   });

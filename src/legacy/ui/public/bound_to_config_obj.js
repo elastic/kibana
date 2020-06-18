@@ -37,7 +37,7 @@ export function BoundToConfigObjProvider(config) {
   function BoundToConfigObj(input) {
     const self = this;
 
-    _.forOwn(input, function(value, prop) {
+    _.forOwn(input, function (value, prop) {
       if (!_.isString(value) || value.charAt(0) !== '=') {
         self[prop] = value;
         return;

@@ -35,7 +35,7 @@ experimental[] Retrieve multiple {kib} saved objects by ID.
 ==== Response body
 
 `saved_objects`::
-  (array) Top-level property the contains objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
+  (array) Top-level property containing objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
 Saved objects that are unable to persist are replaced with an error object.
 

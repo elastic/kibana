@@ -66,7 +66,7 @@ export class CreateWatch extends Component {
     }
 
     // load elasticsearch settings to see if email has been configured
-    ml.getNotificationSettings().then(resp => {
+    ml.getNotificationSettings().then((resp) => {
       if (has(resp, 'defaults.xpack.notification.email')) {
         this.setState({ emailEnabled: true });
       }
@@ -82,27 +82,27 @@ export class CreateWatch extends Component {
       });
   }
 
-  onThresholdChange = threshold => {
+  onThresholdChange = (threshold) => {
     this.setState({ threshold }, () => {
       this.config.threshold = threshold;
     });
   };
 
-  onIntervalChange = e => {
+  onIntervalChange = (e) => {
     const interval = e.target.value;
     this.setState({ interval }, () => {
       this.config.interval = interval;
     });
   };
 
-  onIncludeEmailChanged = e => {
+  onIncludeEmailChanged = (e) => {
     const includeEmail = e.target.checked;
     this.setState({ includeEmail }, () => {
       this.config.includeEmail = includeEmail;
     });
   };
 
-  onEmailChange = e => {
+  onEmailChange = (e) => {
     const email = e.target.value;
     this.setState({ email }, () => {
       this.config.email = email;

@@ -10,6 +10,7 @@ import { CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
 import { navLinkServiceFactory } from './nav_link';
+import { expressionsServiceFactory } from './expressions';
 
 export type CanvasServiceFactory<Service> = (
   coreSetup: CoreSetup,
@@ -17,7 +18,7 @@ export type CanvasServiceFactory<Service> = (
   canvasSetupPlugins: CanvasSetupDeps,
   canvasStartPlugins: CanvasStartDeps,
   appUpdater: BehaviorSubject<AppUpdater>
-) => Service;
+) => Service | Promise<Service>;
 
 class CanvasServiceProvider<Service> {
   private factory: CanvasServiceFactory<Service>;
@@ -27,14 +28,14 @@ class CanvasServiceProvider<Service> {
     this.factory = factory;
   }
 
-  start(
+  async start(
     coreSetup: CoreSetup,
     coreStart: CoreStart,
     canvasSetupPlugins: CanvasSetupDeps,
     canvasStartPlugins: CanvasStartDeps,
     appUpdater: BehaviorSubject<AppUpdater>
   ) {
-    this.service = this.factory(
+    this.service = await this.factory(
       coreSetup,
       coreStart,
       canvasSetupPlugins,
@@ -59,27 +60,31 @@ class CanvasServiceProvider<Service> {
 export type ServiceFromProvider<P> = P extends CanvasServiceProvider<infer T> ? T : never;
 
 export const services = {
+  expressions: new CanvasServiceProvider(expressionsServiceFactory),
   notify: new CanvasServiceProvider(notifyServiceFactory),
   platform: new CanvasServiceProvider(platformServiceFactory),
   navLink: new CanvasServiceProvider(navLinkServiceFactory),
 };
 
 export interface CanvasServices {
+  expressions: ServiceFromProvider<typeof services.expressions>;
   notify: ServiceFromProvider<typeof services.notify>;
   platform: ServiceFromProvider<typeof services.platform>;
   navLink: ServiceFromProvider<typeof services.navLink>;
 }
 
-export const startServices = (
+export const startServices = async (
   coreSetup: CoreSetup,
   coreStart: CoreStart,
   canvasSetupPlugins: CanvasSetupDeps,
   canvasStartPlugins: CanvasStartDeps,
   appUpdater: BehaviorSubject<AppUpdater>
 ) => {
-  Object.entries(services).forEach(([key, provider]) =>
+  const startPromises = Object.values(services).map((provider) =>
     provider.start(coreSetup, coreStart, canvasSetupPlugins, canvasStartPlugins, appUpdater)
   );
+
+  await Promise.all(startPromises);
 };
 
 export const stopServices = () => {
@@ -90,4 +95,5 @@ export const {
   notify: notifyService,
   platform: platformService,
   navLink: navLinkService,
+  expressions: expressionsService,
 } = services;

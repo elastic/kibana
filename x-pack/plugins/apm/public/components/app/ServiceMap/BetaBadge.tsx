@@ -22,13 +22,13 @@ export function BetaBadge() {
     <BetaBadgeContainer>
       <EuiBetaBadge
         label={i18n.translate('xpack.apm.serviceMap.betaBadge', {
-          defaultMessage: 'Beta'
+          defaultMessage: 'Beta',
         })}
         tooltipContent={i18n.translate(
           'xpack.apm.serviceMap.betaTooltipMessage',
           {
             defaultMessage:
-              'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.'
+              'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
           }
         )}
       />

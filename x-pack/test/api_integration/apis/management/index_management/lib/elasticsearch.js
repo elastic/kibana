@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { getRandomString } from './random';
 
 /**
@@ -10,16 +11,17 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchHelpers = es => {
+export const initElasticsearchHelpers = (es) => {
   let indicesCreated = [];
+  let componentTemplatesCreated = [];
 
   const createIndex = (index = getRandomString(), body) => {
     indicesCreated.push(index);
     return es.indices.create({ index, body }).then(() => index);
   };
 
-  const deleteIndex = index => {
-    indicesCreated = indicesCreated.filter(i => i !== index);
+  const deleteIndex = (index) => {
+    indicesCreated = indicesCreated.filter((i) => i !== index);
     return es.indices.delete({ index, ignoreUnavailable: true });
   };
 
@@ -32,7 +34,29 @@ export const initElasticsearchHelpers = es => {
 
   const cleanUp = () => deleteAllIndices();
 
-  const catTemplate = name => es.cat.templates({ name, format: 'json' });
+  const catTemplate = (name) => es.cat.templates({ name, format: 'json' });
+
+  const createComponentTemplate = (componentTemplate, shouldCacheTemplate) => {
+    if (shouldCacheTemplate) {
+      componentTemplatesCreated.push(componentTemplate.name);
+    }
+
+    return es.dataManagement.saveComponentTemplate(componentTemplate);
+  };
+
+  const deleteComponentTemplate = (componentTemplateName) => {
+    return es.dataManagement.deleteComponentTemplate({ name: componentTemplateName });
+  };
+
+  const cleanUpComponentTemplates = () =>
+    Promise.all(componentTemplatesCreated.map(deleteComponentTemplate))
+      .then(() => {
+        componentTemplatesCreated = [];
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+      });
 
   return {
     createIndex,
@@ -42,5 +66,8 @@ export const initElasticsearchHelpers = es => {
     indexStats,
     cleanUp,
     catTemplate,
+    createComponentTemplate,
+    deleteComponentTemplate,
+    cleanUpComponentTemplates,
   };
 };

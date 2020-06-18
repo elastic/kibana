@@ -64,7 +64,7 @@ describe('createFilterStream()', () => {
   test('send the filtered values on the output stream', async () => {
     const result = await createPromiseFromStreams([
       createListStream([1, 2, 3]),
-      createFilterStream<number>(n => n % 2 === 0),
+      createFilterStream<number>((n) => n % 2 === 0),
       createConcatStream([]),
     ]);
 

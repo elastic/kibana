@@ -26,7 +26,7 @@ type MonitorStatusPayload = QueryParams & Ping;
 
 export const monitorStatusReducer = handleActions<MonitorStatusState, MonitorStatusPayload>(
   {
-    [String(getMonitorStatusAction)]: state => ({
+    [String(getMonitorStatusAction)]: (state) => ({
       ...state,
       loading: true,
     }),
@@ -43,7 +43,7 @@ export const monitorStatusReducer = handleActions<MonitorStatusState, MonitorSta
       };
     },
 
-    [String(getMonitorStatusActionFail)]: state => ({
+    [String(getMonitorStatusActionFail)]: (state) => ({
       ...state,
       loading: false,
     }),

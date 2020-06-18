@@ -61,14 +61,14 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
         sort: [{ forecast_create_timestamp: { order: 'desc' } }],
       },
     })
-      .then(resp => {
+      .then((resp) => {
         if (resp.hits.total !== 0) {
-          obj.forecasts = resp.hits.hits.map(hit => hit._source);
+          obj.forecasts = resp.hits.hits.map((hit) => hit._source);
         }
 
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -129,7 +129,7 @@ function getForecastDateRange(job, forecastId) {
         },
       },
     })
-      .then(resp => {
+      .then((resp) => {
         obj.earliest = _.get(resp, 'aggregations.earliest.value', null);
         obj.latest = _.get(resp, 'aggregations.latest.value', null);
         if (obj.earliest === null || obj.latest === null) {
@@ -138,7 +138,7 @@ function getForecastDateRange(job, forecastId) {
           resolve(obj);
         }
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -223,7 +223,7 @@ function getForecastData(
   ];
 
   // Add in term queries for each of the specified criteria.
-  _.each(criteriaFields, criteria => {
+  _.each(criteriaFields, (criteria) => {
     filterCriteria.push({
       term: {
         [criteria.fieldName]: criteria.fieldValue,
@@ -282,9 +282,9 @@ function getForecastData(
       },
     })
     .pipe(
-      map(resp => {
+      map((resp) => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, dataForTime => {
+        _.each(aggregationsByTime, (dataForTime) => {
           const time = dataForTime.key;
           obj.results[time] = {
             prediction: _.get(dataForTime, ['prediction', 'value']),
@@ -306,10 +306,10 @@ function runForecast(jobId, duration) {
       jobId,
       duration,
     })
-      .then(resp => {
+      .then((resp) => {
         resolve(resp);
       })
-      .catch(err => {
+      .catch((err) => {
         reject(err);
       });
   });
@@ -355,13 +355,13 @@ function getForecastRequestStats(job, forecastId) {
         },
       },
     })
-      .then(resp => {
+      .then((resp) => {
         if (resp.hits.total !== 0) {
           obj.stats = _.first(resp.hits.hits)._source;
         }
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });

@@ -46,7 +46,7 @@ export class Aggs extends PureComponent {
             customDragHandle={true}
             draggableId={`${DROPPABLE_ID}:${model.id}:${row.id}`}
           >
-            {provided => (
+            {(provided) => (
               <Agg
                 key={row.id}
                 disableDelete={list.length < 2}

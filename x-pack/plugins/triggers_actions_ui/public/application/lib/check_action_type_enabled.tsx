@@ -110,7 +110,7 @@ export function checkActionFormActionTypeEnabled(
     actionType?.enabledInConfig === false &&
     // do not disable action type if it contains preconfigured connectors (is preconfigured)
     !preconfiguredConnectors.find(
-      preconfiguredConnector => preconfiguredConnector.actionTypeId === actionType.id
+      (preconfiguredConnector) => preconfiguredConnector.actionTypeId === actionType.id
     )
   ) {
     return configurationCheckResult;

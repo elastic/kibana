@@ -34,6 +34,9 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     savedSearchLoader: {} as any,
+    urlGenerator: {
+      createUrl: jest.fn(),
+    } as any,
   };
   return startContract;
 };

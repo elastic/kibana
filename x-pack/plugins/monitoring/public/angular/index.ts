@@ -12,7 +12,7 @@ import { localAppModule, appModuleName } from './app_modules';
 
 import { MonitoringPluginDependencies } from '../types';
 
-const APP_WRAPPER_CLASS = 'monitoringApplicationWrapper';
+const APP_WRAPPER_CLASS = 'monApplicationWrapper';
 export class AngularApp {
   private injector?: angular.auto.IInjectorService;
 

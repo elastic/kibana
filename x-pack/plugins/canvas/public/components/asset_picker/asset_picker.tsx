@@ -46,7 +46,7 @@ export class AssetPicker extends PureComponent<Props> {
 
     return (
       <EuiFlexGrid id="canvasAssetPicker" className="canvasAssetPicker" gutterSize="s" columns={4}>
-        {assets.map(asset => (
+        {assets.map((asset) => (
           <EuiFlexItem
             key={asset.id}
             id={asset.id === selected ? 'canvasAssetPicker__selectedAsset' : ''}

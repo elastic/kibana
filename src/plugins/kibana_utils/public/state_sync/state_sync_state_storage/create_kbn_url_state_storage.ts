@@ -61,17 +61,17 @@ export const createKbnUrlStateStorage = (
     ) => {
       // syncState() utils doesn't wait for this promise
       return url.updateAsync(
-        currentUrl => setStateToKbnUrl(key, state, { useHash }, currentUrl),
+        (currentUrl) => setStateToKbnUrl(key, state, { useHash }, currentUrl),
         replace
       );
     },
-    get: key => {
+    get: (key) => {
       // if there is a pending url update, then state will be extracted from that pending url,
       // otherwise current url will be used to retrieve state from
       return getStateFromKbnUrl(key, url.getPendingUrl());
     },
     change$: <State>(key: string) =>
-      new Observable(observer => {
+      new Observable((observer) => {
         const unlisten = url.listen(() => {
           observer.next();
         });

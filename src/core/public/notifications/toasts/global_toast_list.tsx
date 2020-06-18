@@ -47,7 +47,7 @@ export class GlobalToastList extends React.Component<Props, State> {
   private subscription?: Rx.Subscription;
 
   public componentDidMount() {
-    this.subscription = this.props.toasts$.subscribe(toasts => {
+    this.subscription = this.props.toasts$.subscribe((toasts) => {
       this.setState({ toasts });
     });
   }

@@ -19,7 +19,7 @@ export enum FETCH_STATUS {
   LOADING = 'loading',
   SUCCESS = 'success',
   FAILURE = 'failure',
-  PENDING = 'pending'
+  PENDING = 'pending',
 }
 
 export interface FetcherResult<Data> {
@@ -53,7 +53,7 @@ export function useFetcher<TReturn>(
     FetcherResult<InferResponseType<TReturn>>
   >({
     data: undefined,
-    status: FETCH_STATUS.PENDING
+    status: FETCH_STATUS.PENDING,
   });
   const [counter, setCounter] = useState(0);
 
@@ -71,10 +71,10 @@ export function useFetcher<TReturn>(
 
       setIsLoading(true);
 
-      setResult(prevResult => ({
+      setResult((prevResult) => ({
         data: preservePreviousData ? prevResult.data : undefined, // preserve data from previous state while loading next state
         status: FETCH_STATUS.LOADING,
-        error: undefined
+        error: undefined,
       }));
 
       try {
@@ -84,7 +84,7 @@ export function useFetcher<TReturn>(
           setResult({
             data,
             status: FETCH_STATUS.SUCCESS,
-            error: undefined
+            error: undefined,
           } as FetcherResult<InferResponseType<TReturn>>);
         }
       } catch (e) {
@@ -97,7 +97,7 @@ export function useFetcher<TReturn>(
                 {err.response?.statusText} ({err.response?.status})
                 <h5>
                   {i18n.translate('xpack.apm.fetcher.error.url', {
-                    defaultMessage: `URL`
+                    defaultMessage: `URL`,
                   })}
                 </h5>
                 {err.response?.url}
@@ -109,26 +109,26 @@ export function useFetcher<TReturn>(
           if (showToastOnError) {
             notifications.toasts.addWarning({
               title: i18n.translate('xpack.apm.fetcher.error.title', {
-                defaultMessage: `Error while fetching resource`
+                defaultMessage: `Error while fetching resource`,
               }),
               text: toMountPoint(
                 <div>
                   <h5>
                     {i18n.translate('xpack.apm.fetcher.error.status', {
-                      defaultMessage: `Error`
+                      defaultMessage: `Error`,
                     })}
                   </h5>
 
                   {errorDetails}
                 </div>
-              )
+              ),
             });
           }
           setIsLoading(false);
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
-            error: e
+            error: e,
           });
         }
       }
@@ -147,7 +147,7 @@ export function useFetcher<TReturn>(
     showToastOnError,
     dispatchStatus,
     setIsLoading,
-    ...fnDeps
+    ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
@@ -156,8 +156,8 @@ export function useFetcher<TReturn>(
       ...result,
       refetch: () => {
         // this will invalidate the deps to `useEffect` and will result in a new request
-        setCounter(count => count + 1);
-      }
+        setCounter((count) => count + 1);
+      },
     };
   }, [result]);
 }

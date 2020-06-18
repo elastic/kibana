@@ -15,7 +15,7 @@ export class FeaturePrivilegeCatalogueBuilder extends BaseFeaturePrivilegeBuilde
       return [];
     }
 
-    return catalogueEntries.map(catalogueEntryId =>
+    return catalogueEntries.map((catalogueEntryId) =>
       this.actions.ui.get('catalogue', catalogueEntryId)
     );
   }

@@ -6,7 +6,7 @@
 import { ESSearchHit } from '../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT
+  SERVICE_ENVIRONMENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
@@ -14,7 +14,7 @@ import { convertConfigSettingsToString } from './convert_settings_to_string';
 
 export async function searchConfigurations({
   service,
-  setup
+  setup,
 }: {
   service: AgentConfiguration['service'];
   setup: Setup;
@@ -29,9 +29,9 @@ export async function searchConfigurations({
         {
           constant_score: {
             filter: { term: { [SERVICE_NAME]: service.name } },
-            boost: 2
-          }
-        }
+            boost: 2,
+          },
+        },
       ]
     : [];
 
@@ -40,9 +40,9 @@ export async function searchConfigurations({
         {
           constant_score: {
             filter: { term: { [SERVICE_ENVIRONMENT]: service.environment } },
-            boost: 1
-          }
-        }
+            boost: 1,
+          },
+        },
       ]
     : [];
 
@@ -56,11 +56,13 @@ export async function searchConfigurations({
             ...serviceNameFilter,
             ...environmentFilter,
             { bool: { must_not: [{ exists: { field: SERVICE_NAME } }] } },
-            { bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] } }
-          ]
-        }
-      }
-    }
+            {
+              bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] },
+            },
+          ],
+        },
+      },
+    },
   };
 
   const resp = await internalClient.search<AgentConfiguration, typeof params>(

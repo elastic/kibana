@@ -58,7 +58,7 @@ const setupMock = (
       aggregations: {
         monitors: {
           after_key,
-          buckets: bucketCriteria.map(item => genBucketItem(item)),
+          buckets: bucketCriteria.map((item) => genBucketItem(item)),
         },
       },
     };

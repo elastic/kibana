@@ -31,7 +31,7 @@ import { dateHistogramInterval, TimeRange } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../common';
+import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
 import { TimefilterContract } from '../../../query';
 import { QuerySetup } from '../../../query/query_service';
 import { GetInternalStartServicesFn } from '../../../types';
@@ -125,8 +125,8 @@ export const getDateHistogramBucketAgg = ({
 
               const { timefilter } = query.timefilter;
               buckets = new TimeBuckets({
-                'histogram:maxBars': uiSettings.get('histogram:maxBars'),
-                'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+                'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+                'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
                 dateFormat: uiSettings.get('dateFormat'),
                 'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
               });
@@ -225,7 +225,7 @@ export const getDateHistogramBucketAgg = ({
             const scaleMetrics =
               scaleMetricValues && interval.scaled && interval.scale && interval.scale < 1;
             if (scaleMetrics && aggs) {
-              const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
+              const metrics = aggs.aggs.filter((a) => isMetricAggType(a.type));
               const all = every(metrics, (a: IBucketAggConfig) => {
                 const { type } = a;
 
@@ -275,7 +275,7 @@ export const getDateHistogramBucketAgg = ({
           name: 'drop_partials',
           default: false,
           write: noop,
-          shouldShow: agg => {
+          shouldShow: (agg) => {
             const field = agg.params.field;
             return field && field.name && field.name === agg.getIndexPattern().timeFieldName;
           },

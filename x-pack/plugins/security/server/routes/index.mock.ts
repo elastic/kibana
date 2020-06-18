@@ -29,5 +29,7 @@ export const routeDefinitionParamsMock = {
     authz: authorizationMock.create(),
     license: licenseMock.create(),
     httpResources: httpResourcesMock.createRegistrar(),
+    getFeatures: jest.fn(),
+    getFeatureUsageService: jest.fn(),
   }),
 };

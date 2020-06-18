@@ -10,5 +10,5 @@ export function sortNodes(nodes, sort) {
     return nodes;
   }
 
-  return sortByOrder(nodes, node => node[sort.field], sort.direction);
+  return sortByOrder(nodes, (node) => node[sort.field], sort.direction);
 }

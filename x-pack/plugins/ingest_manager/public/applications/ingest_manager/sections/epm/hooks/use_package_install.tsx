@@ -181,8 +181,8 @@ export const [
   useUninstallPackage,
 ] = createContainer(
   usePackageInstall,
-  value => value.installPackage,
-  value => value.setPackageInstallStatus,
-  value => value.getPackageInstallStatus,
-  value => value.uninstallPackage
+  (value) => value.installPackage,
+  (value) => value.setPackageInstallStatus,
+  (value) => value.getPackageInstallStatus,
+  (value) => value.uninstallPackage
 );

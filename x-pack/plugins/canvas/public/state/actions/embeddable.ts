@@ -6,8 +6,7 @@
 
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
-// @ts-ignore Untyped
-import { createThunk } from 'redux-thunks';
+import { createThunk } from '../../lib/create_thunk';
 // @ts-ignore Untyped Local
 import { fetchRenderable } from './elements';
 import { State } from '../../../types';
@@ -24,12 +23,12 @@ export const updateEmbeddableExpression = createAction<UpdateEmbeddableExpressio
 export const fetchEmbeddableRenderable = createThunk(
   'fetchEmbeddableRenderable',
   ({ dispatch, getState }: { dispatch: Dispatch; getState: () => State }, elementId: string) => {
-    const pageWithElement = getState().persistent.workpad.pages.find(page => {
-      return page.elements.find(element => element.id === elementId) !== undefined;
+    const pageWithElement = getState().persistent.workpad.pages.find((page) => {
+      return page.elements.find((element) => element.id === elementId) !== undefined;
     });
 
     if (pageWithElement) {
-      const element = pageWithElement.elements.find(el => el.id === elementId);
+      const element = pageWithElement.elements.find((el) => el.id === elementId);
       dispatch(fetchRenderable(element));
     }
   }

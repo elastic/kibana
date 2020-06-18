@@ -30,7 +30,7 @@ export interface AppCategory {
   id: string;
 
   /**
-   * Label used for cateogry name.
+   * Label used for category name.
    * Also used as aria-label if one isn't set.
    */
   label: string;

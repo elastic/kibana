@@ -58,15 +58,15 @@ const calculateSingleSpaceAuthZ = (
   spaceId: string
 ) => {
   const targetsOtherSpace = testCases.filter(
-    x => !x.namespaces.includes(spaceId) || x.namespaces.length > 1
+    (x) => !x.namespaces.includes(spaceId) || x.namespaces.length > 1
   );
-  const tmp = testCases.filter(x => !targetsOtherSpace.includes(x)); // doesn't target other space
-  const doesntExistInThisSpace = tmp.filter(x => !x.existingNamespaces.includes(spaceId));
-  const existsInThisSpace = tmp.filter(x => x.existingNamespaces.includes(spaceId));
+  const tmp = testCases.filter((x) => !targetsOtherSpace.includes(x)); // doesn't target other space
+  const doesntExistInThisSpace = tmp.filter((x) => !x.existingNamespaces.includes(spaceId));
+  const existsInThisSpace = tmp.filter((x) => x.existingNamespaces.includes(spaceId));
   return { targetsOtherSpace, doesntExistInThisSpace, existsInThisSpace };
 };
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+export default function ({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
@@ -111,12 +111,12 @@ export default function({ getService }: TestInvoker) {
         users.dualRead,
         users.readGlobally,
         users.readAtSpace,
-      ].forEach(user => {
+      ].forEach((user) => {
         _addTests(user, unauthorized);
       });
       _addTests(users.allAtSpace, authorizedInSpace);
       _addTests(users.allAtOtherSpace, authorizedInOtherSpace);
-      [users.dualAll, users.allGlobally, users.superuser].forEach(user => {
+      [users.dualAll, users.allGlobally, users.superuser].forEach((user) => {
         _addTests(user, authorized);
       });
     });

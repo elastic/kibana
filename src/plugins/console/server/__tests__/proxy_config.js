@@ -34,17 +34,17 @@ const matchGoogle = {
 const parsedGoogle = parseUrl('https://google.com/search');
 const parsedLocalEs = parseUrl('https://localhost:5601/search');
 
-describe('ProxyConfig', function() {
-  describe('constructor', function() {
-    beforeEach(function() {
+describe('ProxyConfig', function () {
+  describe('constructor', function () {
+    beforeEach(function () {
       sinon.stub(https, 'Agent');
     });
 
-    afterEach(function() {
+    afterEach(function () {
       https.Agent.restore();
     });
 
-    it('uses ca to create sslAgent', function() {
+    it('uses ca to create sslAgent', function () {
       const config = new ProxyConfig({
         ssl: {
           ca: ['content-of-some-path'],
@@ -62,7 +62,7 @@ describe('ProxyConfig', function() {
       });
     });
 
-    it('uses cert, and key to create sslAgent', function() {
+    it('uses cert, and key to create sslAgent', function () {
       const config = new ProxyConfig({
         ssl: {
           cert: 'content-of-some-path',
@@ -81,7 +81,7 @@ describe('ProxyConfig', function() {
       });
     });
 
-    it('uses ca, cert, and key to create sslAgent', function() {
+    it('uses ca, cert, and key to create sslAgent', function () {
       const config = new ProxyConfig({
         ssl: {
           ca: ['content-of-some-path'],
@@ -103,9 +103,9 @@ describe('ProxyConfig', function() {
     });
   });
 
-  describe('#getForParsedUri', function() {
-    describe('parsed url does not match', function() {
-      it('returns {}', function() {
+  describe('#getForParsedUri', function () {
+    describe('parsed url does not match', function () {
+      it('returns {}', function () {
         const config = new ProxyConfig({
           match: matchGoogle,
           timeout: 100,
@@ -115,8 +115,8 @@ describe('ProxyConfig', function() {
       });
     });
 
-    describe('parsed url does match', function() {
-      it('assigns timeout value', function() {
+    describe('parsed url does match', function () {
+      it('assigns timeout value', function () {
         const football = {};
         const config = new ProxyConfig({
           match: matchGoogle,
@@ -126,7 +126,7 @@ describe('ProxyConfig', function() {
         expect(config.getForParsedUri(parsedGoogle).timeout).to.be(football);
       });
 
-      it('assigns ssl.verify to rejectUnauthorized', function() {
+      it('assigns ssl.verify to rejectUnauthorized', function () {
         const football = {};
         const config = new ProxyConfig({
           match: matchGoogle,
@@ -138,9 +138,9 @@ describe('ProxyConfig', function() {
         expect(config.getForParsedUri(parsedGoogle).rejectUnauthorized).to.be(football);
       });
 
-      describe('uri us http', function() {
-        describe('ca is set', function() {
-          it('creates but does not output the agent', function() {
+      describe('uri us http', function () {
+        describe('ca is set', function () {
+          it('creates but does not output the agent', function () {
             const config = new ProxyConfig({
               ssl: {
                 ca: ['path/to/ca'],
@@ -151,8 +151,8 @@ describe('ProxyConfig', function() {
             expect(config.getForParsedUri({ protocol: 'http:' }).agent).to.be(undefined);
           });
         });
-        describe('cert is set', function() {
-          it('creates but does not output the agent', function() {
+        describe('cert is set', function () {
+          it('creates but does not output the agent', function () {
             const config = new ProxyConfig({
               ssl: {
                 cert: 'path/to/cert',
@@ -163,8 +163,8 @@ describe('ProxyConfig', function() {
             expect(config.getForParsedUri({ protocol: 'http:' }).agent).to.be(undefined);
           });
         });
-        describe('key is set', function() {
-          it('creates but does not output the agent', function() {
+        describe('key is set', function () {
+          it('creates but does not output the agent', function () {
             const config = new ProxyConfig({
               ssl: {
                 key: 'path/to/key',
@@ -175,8 +175,8 @@ describe('ProxyConfig', function() {
             expect(config.getForParsedUri({ protocol: 'http:' }).agent).to.be(undefined);
           });
         });
-        describe('cert + key are set', function() {
-          it('creates but does not output the agent', function() {
+        describe('cert + key are set', function () {
+          it('creates but does not output the agent', function () {
             const config = new ProxyConfig({
               ssl: {
                 cert: 'path/to/cert',
@@ -190,9 +190,9 @@ describe('ProxyConfig', function() {
         });
       });
 
-      describe('uri us https', function() {
-        describe('ca is set', function() {
-          it('creates and outputs the agent', function() {
+      describe('uri us https', function () {
+        describe('ca is set', function () {
+          it('creates and outputs the agent', function () {
             const config = new ProxyConfig({
               ssl: {
                 ca: ['path/to/ca'],
@@ -203,8 +203,8 @@ describe('ProxyConfig', function() {
             expect(config.getForParsedUri({ protocol: 'https:' }).agent).to.be(config.sslAgent);
           });
         });
-        describe('cert is set', function() {
-          it('creates and outputs the agent', function() {
+        describe('cert is set', function () {
+          it('creates and outputs the agent', function () {
             const config = new ProxyConfig({
               ssl: {
                 cert: 'path/to/cert',
@@ -215,8 +215,8 @@ describe('ProxyConfig', function() {
             expect(config.getForParsedUri({ protocol: 'https:' }).agent).to.be(config.sslAgent);
           });
         });
-        describe('key is set', function() {
-          it('creates and outputs the agent', function() {
+        describe('key is set', function () {
+          it('creates and outputs the agent', function () {
             const config = new ProxyConfig({
               ssl: {
                 key: 'path/to/key',
@@ -227,8 +227,8 @@ describe('ProxyConfig', function() {
             expect(config.getForParsedUri({ protocol: 'https:' }).agent).to.be(config.sslAgent);
           });
         });
-        describe('cert + key are set', function() {
-          it('creates and outputs the agent', function() {
+        describe('cert + key are set', function () {
+          it('creates and outputs the agent', function () {
             const config = new ProxyConfig({
               ssl: {
                 cert: 'path/to/cert',

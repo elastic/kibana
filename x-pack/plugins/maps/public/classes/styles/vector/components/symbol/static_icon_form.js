@@ -15,7 +15,7 @@ export function StaticIconForm({
   styleProperty,
   symbolOptions,
 }) {
-  const onChange = selectedIconId => {
+  const onChange = (selectedIconId) => {
     onStaticStyleChange(styleProperty.getStyleName(), { value: selectedIconId });
   };
 

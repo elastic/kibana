@@ -10,7 +10,7 @@ export function renderTemplate(str: string, data?: Record<string, string>): stri
   const matches = str.match(/{{(.*?)}}/g);
 
   if (Array.isArray(matches) && data !== undefined) {
-    matches.forEach(v => {
+    matches.forEach((v) => {
       str = str.replace(v, data[v.replace(/{{|}}/g, '')]);
     });
   }
@@ -19,6 +19,6 @@ export function renderTemplate(str: string, data?: Record<string, string>): stri
 }
 
 export function getMedianStringLength(strings: string[]) {
-  const sortedStringLengths = strings.map(s => s.length).sort((a, b) => a - b);
+  const sortedStringLengths = strings.map((s) => s.length).sort((a, b) => a - b);
   return sortedStringLengths[Math.floor(sortedStringLengths.length / 2)] || 0;
 }

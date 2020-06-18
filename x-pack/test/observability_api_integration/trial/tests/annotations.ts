@@ -23,16 +23,10 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         return supertest.get(url).set('kbn-xsrf', 'foo');
 
       case 'post':
-        return supertest
-          .post(url)
-          .send(data)
-          .set('kbn-xsrf', 'foo');
+        return supertest.post(url).send(data).set('kbn-xsrf', 'foo');
 
       case 'delete':
-        return supertest
-          .delete(url)
-          .send(data)
-          .set('kbn-xsrf', 'foo');
+        return supertest.delete(url).send(data).set('kbn-xsrf', 'foo');
 
       default:
         throw new Error(`Unsupported methoed ${method}`);

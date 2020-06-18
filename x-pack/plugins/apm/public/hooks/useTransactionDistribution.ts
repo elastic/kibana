@@ -13,7 +13,7 @@ import { TransactionDistributionAPIResponse } from '../../server/lib/transaction
 const INITIAL_DATA = {
   buckets: [] as TransactionDistributionAPIResponse['buckets'],
   noHits: true,
-  bucketSize: 0
+  bucketSize: 0,
 };
 
 export function useTransactionDistribution(urlParams: IUrlParams) {
@@ -24,19 +24,19 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
     transactionType,
     transactionId,
     traceId,
-    transactionName
+    transactionName,
   } = urlParams;
   const uiFilters = useUiFilters(urlParams);
 
   const { data = INITIAL_DATA, status, error } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
         return callApmApi({
           pathname:
             '/api/apm/services/{serviceName}/transaction_groups/distribution',
           params: {
             path: {
-              serviceName
+              serviceName,
             },
             query: {
               start,
@@ -45,9 +45,9 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
               transactionName,
               transactionId,
               traceId,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },

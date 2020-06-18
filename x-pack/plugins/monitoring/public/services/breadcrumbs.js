@@ -196,7 +196,7 @@ export function breadcrumbsProvider() {
     }
 
     Legacy.shims.breadcrumbs.set(
-      breadcrumbs.map(b => ({
+      breadcrumbs.map((b) => ({
         text: b.label,
         href: b.url,
         'data-test-subj': b.testSubj,

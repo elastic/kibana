@@ -12,13 +12,13 @@ import { getWaterfall } from '../components/app/TransactionDetails/WaterfallWith
 const INITIAL_DATA = {
   root: undefined,
   trace: { items: [], exceedsMax: false, errorDocs: [] },
-  errorsPerTransaction: {}
+  errorsPerTransaction: {},
 };
 
 export function useWaterfall(urlParams: IUrlParams) {
   const { traceId, start, end, transactionId } = urlParams;
   const { data = INITIAL_DATA, status, error } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (traceId && start && end) {
         return callApmApi({
           pathname: '/api/apm/traces/{traceId}',
@@ -26,9 +26,9 @@ export function useWaterfall(urlParams: IUrlParams) {
             path: { traceId },
             query: {
               start,
-              end
-            }
-          }
+              end,
+            },
+          },
         });
       }
     },
@@ -37,7 +37,7 @@ export function useWaterfall(urlParams: IUrlParams) {
 
   const waterfall = useMemo(() => getWaterfall(data, transactionId), [
     data,
-    transactionId
+    transactionId,
   ]);
 
   return { waterfall, status, error, exceedsMax: data.trace.exceedsMax };

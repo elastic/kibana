@@ -27,7 +27,7 @@ export const getActions = (): FindActionResult[] => [
     referencedByCount: 0,
   },
   {
-    id: 'd611af27-3532-4da9-8034-271fee81d634',
+    id: '123',
     actionTypeId: '.servicenow',
     name: 'ServiceNow',
     config: {

@@ -21,7 +21,7 @@ const FullWidthNavRow = styled(EuiPage)`
 `;
 
 const Text = styled.span`
-  margin-right: ${props => props.theme.eui.euiSizeM};
+  margin-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 type HeaderProps = PackageInfo & { iconType?: IconType };
@@ -74,7 +74,10 @@ export function Header(props: HeaderProps) {
               >
                 <FormattedMessage
                   id="xpack.ingestManager.epm.addDatasourceButtonText"
-                  defaultMessage="Create data source"
+                  defaultMessage="Add {packageName}"
+                  values={{
+                    packageName: title,
+                  }}
                 />
               </EuiButton>
             </EuiFlexItem>

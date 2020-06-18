@@ -6,10 +6,9 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { HashRouter, Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { Router, Switch, Route, Redirect, withRouter } from 'react-router-dom';
 
 import { UIM_APP_LOAD } from '../../common';
-import { CRUD_APP_BASE_PATH } from './constants';
 import { registerRouter, setUserHasLeftApp, METRIC_TYPE } from './services';
 import { trackUiMetric } from '../kibana_services';
 import { JobList, JobCreate } from './sections';
@@ -53,15 +52,15 @@ export class App extends Component {
 
   render() {
     return (
-      <HashRouter>
+      <Router history={this.props.history}>
         <ShareRouter>
           <Switch>
-            <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/job_list`} />
-            <Route exact path={`${CRUD_APP_BASE_PATH}/job_list`} component={JobList} />
-            <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
+            <Redirect exact from="/" to="/job_list" />
+            <Route exact path="/job_list" component={JobList} />
+            <Route exact path="/create" component={JobCreate} />
           </Switch>
         </ShareRouter>
-      </HashRouter>
+      </Router>
     );
   }
 }

@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
 
-  describe('Connectors', function() {
+  describe('Connectors', function () {
     before(async () => {
       await alerting.actions.createAction({
         name: `slack-${Date.now()}`,

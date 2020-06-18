@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
@@ -25,10 +25,7 @@ export default function({ getService }) {
         },
       };
 
-      await esSupertest
-        .put('/_cluster/settings')
-        .send(disableCollection)
-        .expect(200);
+      await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
       await esSupertest.delete('/.monitoring-*').expect(200);
     });
 

@@ -23,7 +23,7 @@ const timeRanges = [
 ];
 
 storiesOf('renderers/TimeFilter', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div
       style={{
         width: '600px',

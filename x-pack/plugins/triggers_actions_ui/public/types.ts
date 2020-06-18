@@ -5,7 +5,7 @@
  */
 import { HttpSetup, DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
-import { ActionGroup } from '../../alerting/common';
+import { ActionGroup } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
@@ -14,7 +14,7 @@ import {
   AlertTaskState,
   RawAlertInstance,
   AlertingFrameworkHealth,
-} from '../../../plugins/alerting/common';
+} from '../../alerts/common';
 export { Alert, AlertAction, AlertTaskState, RawAlertInstance, AlertingFrameworkHealth };
 export { ActionType };
 

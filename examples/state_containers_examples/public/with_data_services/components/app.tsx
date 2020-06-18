@@ -78,14 +78,7 @@ const {
   useContainer: useAppStateContainer,
 } = createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
 
-const App = ({
-  notifications,
-  http,
-  navigation,
-  data,
-  history,
-  kbnUrlStateStorage,
-}: StateDemoAppDeps) => {
+const App = ({ navigation, data, history, kbnUrlStateStorage }: StateDemoAppDeps) => {
   const appStateContainer = useAppStateContainer();
   const appState = useAppState();
 
@@ -135,7 +128,7 @@ const App = ({
                 <EuiFieldText
                   placeholder="Additional application state: My name is..."
                   value={appState.name}
-                  onChange={e => appStateContainer.set({ ...appState, name: e.target.value })}
+                  onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}
                   aria-label="My name"
                 />
               </EuiPageContent>
@@ -217,7 +210,7 @@ function useAppStateSyncing<AppState extends QueryState>(
       stateContainer: {
         ...appStateContainer,
         // stateSync utils requires explicit handling of default state ("null")
-        set: state => state && appStateContainer.set(state),
+        set: (state) => state && appStateContainer.set(state),
       },
     });
 

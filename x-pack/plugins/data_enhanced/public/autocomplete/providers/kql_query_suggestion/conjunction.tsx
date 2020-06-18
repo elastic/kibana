@@ -59,7 +59,7 @@ const conjunctions: Record<string, JSX.Element> = {
   ),
 };
 
-export const setupGetConjunctionSuggestions: KqlQuerySuggestionProvider = core => {
+export const setupGetConjunctionSuggestions: KqlQuerySuggestionProvider = (core) => {
   return (querySuggestionsArgs, { text, end }) => {
     let suggestions: QuerySuggestion[] | [] = [];
 

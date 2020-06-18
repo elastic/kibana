@@ -89,7 +89,7 @@ export class FunctionalTestRunner {
       // promise-like objects which never resolve, essentially disabling them
       // allowing us to load the test files and populate the mocha suites
       const readStubbedProviderSpec = (type: string, providers: any) =>
-        readProviderSpec(type, providers).map(p => ({
+        readProviderSpec(type, providers).map((p) => ({
           ...p,
           fn: () => ({
             then: () => {},

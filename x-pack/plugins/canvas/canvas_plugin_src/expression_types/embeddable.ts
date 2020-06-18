@@ -12,9 +12,23 @@ export const EmbeddableExpressionType = 'embeddable';
 export { EmbeddableTypes, EmbeddableInput };
 
 export interface EmbeddableExpression<Input extends EmbeddableInput> {
+  /**
+   * The type of the expression result
+   */
   type: typeof EmbeddableExpressionType;
+  /**
+   * The input to be passed to the embeddable
+   */
   input: Input;
+  /**
+   * The type of embeddable
+   */
   embeddableType: string;
+  /**
+   * Timestamp. Needed to get a different result after each time the expression is evaluated
+   * to force a reload of the embeddables internal data
+   */
+  generatedAt: number;
 }
 
 export const embeddableType = (): ExpressionTypeDefinition<

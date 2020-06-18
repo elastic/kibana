@@ -27,7 +27,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     it('should return 403 when creating a webhook action', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'test')
         .send({
           name: 'A generic Webhook action',

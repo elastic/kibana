@@ -20,8 +20,8 @@ export function getPageData($injector, api) {
         max: timeBounds.max.toISOString(),
       },
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);

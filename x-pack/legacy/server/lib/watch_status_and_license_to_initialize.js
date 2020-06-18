@@ -9,7 +9,7 @@ import { catchError, mergeMap, map, switchMap, tap } from 'rxjs/operators';
 export const RETRY_SCALE_DURATION = 100;
 export const RETRY_DURATION_MAX = 10000;
 
-const calculateDuration = i => {
+const calculateDuration = (i) => {
   const duration = i * RETRY_SCALE_DURATION;
   if (duration > RETRY_DURATION_MAX) {
     return RETRY_DURATION_MAX;

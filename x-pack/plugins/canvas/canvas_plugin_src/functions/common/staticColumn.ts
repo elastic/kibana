@@ -45,7 +45,7 @@ export function staticColumn(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const rows = input.rows.map(row => ({ ...row, [args.name]: args.value }));
+      const rows = input.rows.map((row) => ({ ...row, [args.name]: args.value }));
       const type = getType(args.value) as DatatableColumnType;
       const columns = [...input.columns];
       const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);

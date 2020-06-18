@@ -12,7 +12,7 @@ export class AbstractTMSSource extends AbstractSource {
   }
 
   convertMarkdownLinkToObjectArr(markdown) {
-    return markdown.split('|').map(attribution => {
+    return markdown.split('|').map((attribution) => {
       attribution = attribution.trim();
       //this assumes attribution is plain markdown link
       const extractLink = /\[(.*)\]\((.*)\)/;

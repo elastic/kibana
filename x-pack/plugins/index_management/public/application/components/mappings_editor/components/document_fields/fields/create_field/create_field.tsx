@@ -51,12 +51,12 @@ export const CreateField = React.memo(function CreateFieldComponent({
   });
 
   useEffect(() => {
-    const subscription = form.subscribe(updatedFieldForm => {
+    const subscription = form.subscribe((updatedFieldForm) => {
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
     });
 
     return subscription.unsubscribe;
-  }, [form, dispatch]);
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cancel = () => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });

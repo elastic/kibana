@@ -37,7 +37,7 @@ function interpolateLinearly(x: number, values: RawColorSchema['value']) {
   const rValues: number[] = [];
   const gValues: number[] = [];
   const bValues: number[] = [];
-  values.forEach(value => {
+  values.forEach((value) => {
     xValues.push(value[0]);
     rValues.push(value[1][0]);
     gValues.push(value[1][1]);

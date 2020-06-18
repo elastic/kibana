@@ -38,8 +38,8 @@ function addMessageToMap(targetMap, key, value, reporter) {
 }
 
 function filterEntries(entries, exclude) {
-  return entries.filter(entry =>
-    exclude.every(excludedPath => !normalizePath(entry).startsWith(excludedPath))
+  return entries.filter((entry) =>
+    exclude.every((excludedPath) => !normalizePath(entry).startsWith(excludedPath))
   );
 }
 
@@ -47,7 +47,7 @@ export function validateMessageNamespace(id, filePath, allowedPaths, reporter) {
   const normalizedPath = normalizePath(filePath);
 
   const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPaths]) =>
-    pluginPaths.some(pluginPath => normalizedPath.startsWith(`${pluginPath}/`))
+    pluginPaths.some((pluginPath) => normalizedPath.startsWith(`${pluginPath}/`))
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
@@ -107,7 +107,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
   return Promise.all(
     categorizedEntries.map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        filterEntries(entries, config.exclude).map(async entry => {
+        filterEntries(entries, config.exclude).map(async (entry) => {
           return {
             name: entry,
             content: await readFileAsync(entry),

@@ -39,10 +39,10 @@ const Container = styled.div<IContainerStyleProps>`
   user-select: none;
   padding-top: ${px(units.half)};
   padding-bottom: ${px(units.plus)};
-  margin-right: ${props => px(props.timelineMargins.right)};
-  margin-left: ${props => px(props.timelineMargins.left)};
+  margin-right: ${(props) => px(props.timelineMargins.right)};
+  margin-left: ${(props) => px(props.timelineMargins.left)};
   border-top: 1px solid ${theme.euiColorLightShade};
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.isSelected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
 
@@ -56,7 +56,7 @@ const ItemBar = styled.div<IBarStyleProps>`
   position: relative;
   height: ${px(unit)};
   min-width: 2px;
-  background-color: ${props => props.color};
+  background-color: ${(props) => props.color};
 `;
 
 const ItemText = styled.span`
@@ -115,7 +115,7 @@ interface SpanActionToolTipProps {
 
 const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
   item,
-  children
+  children,
 }) => {
   if (item?.docType === 'span') {
     return (
@@ -171,7 +171,7 @@ export function WaterfallItem({
   color,
   isSelected,
   errorCount,
-  onClick
+  onClick,
 }: IWaterfallItemProps) {
   if (!totalDuration) {
     return null;
@@ -185,7 +185,7 @@ export function WaterfallItem({
     {
       values: { errorCount },
       defaultMessage:
-        '{errorCount, plural, one {View 1 related error} other {View # related errors}}'
+        '{errorCount, plural, one {View 1 related error} other {View # related errors}}',
     }
   );
 
@@ -215,7 +215,7 @@ export function WaterfallItem({
             query={{
               kuery: encodeURIComponent(
                 `${TRACE_ID} : "${item.doc.trace.id}" and transaction.id : "${item.doc.transaction.id}"`
-              )
+              ),
             }}
             color="danger"
             style={{ textDecoration: 'none' }}

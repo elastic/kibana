@@ -90,7 +90,7 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
       ).not.toContain('chromelessApp');
@@ -102,16 +102,16 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
       ).toEqual(['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3']);
     });
 
     it('emits multiple values', async () => {
-      const navLinkIds$ = start.getNavLinks$().pipe(map(links => links.map(l => l.id)));
+      const navLinkIds$ = start.getNavLinks$().pipe(map((links) => links.map((l) => l.id)));
       const emittedLinks: string[][] = [];
-      navLinkIds$.subscribe(r => emittedLinks.push(r));
+      navLinkIds$.subscribe((r) => emittedLinks.push(r));
       start.update('legacyApp1', { active: true });
 
       service.stop();
@@ -122,10 +122,7 @@ describe('NavLinksService', () => {
     });
 
     it('completes when service is stopped', async () => {
-      const last$ = start
-        .getNavLinks$()
-        .pipe(takeLast(1))
-        .toPromise();
+      const last$ = start.getNavLinks$().pipe(takeLast(1)).toPromise();
       service.stop();
       await expect(last$).resolves.toBeInstanceOf(Array);
     });
@@ -143,7 +140,7 @@ describe('NavLinksService', () => {
 
   describe('#getAll()', () => {
     it('returns a sorted array of navlinks', () => {
-      expect(start.getAll().map(l => l.id)).toEqual([
+      expect(start.getAll().map((l) => l.id)).toEqual([
         'app2',
         'legacyApp2',
         'app1',
@@ -171,7 +168,7 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
       ).toEqual(['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3']);
@@ -184,7 +181,7 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
       ).toEqual(['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3']);
@@ -197,7 +194,7 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
       ).toEqual(['legacyApp1']);
@@ -211,7 +208,7 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
       ).toEqual(['legacyApp2']);
@@ -236,7 +233,7 @@ describe('NavLinksService', () => {
         .getNavLinks$()
         .pipe(
           take(1),
-          map(links => links.filter(l => l.hidden).map(l => l.id))
+          map((links) => links.filter((l) => l.hidden).map((l) => l.id))
         )
         .toPromise();
       expect(hiddenLinkIds).toEqual(['legacyApp1']);
@@ -253,7 +250,7 @@ describe('NavLinksService', () => {
         .getNavLinks$()
         .pipe(
           take(1),
-          map(links => links.filter(l => l.hidden).map(l => l.id))
+          map((links) => links.filter((l) => l.hidden).map((l) => l.id))
         )
         .toPromise();
       expect(hiddenLinkIds).toEqual(['legacyApp1']);
@@ -262,21 +259,15 @@ describe('NavLinksService', () => {
 
   describe('#enableForcedAppSwitcherNavigation()', () => {
     it('flips #getForceAppSwitcherNavigation$()', async () => {
-      await expect(
-        start
-          .getForceAppSwitcherNavigation$()
-          .pipe(take(1))
-          .toPromise()
-      ).resolves.toBe(false);
+      await expect(start.getForceAppSwitcherNavigation$().pipe(take(1)).toPromise()).resolves.toBe(
+        false
+      );
 
       start.enableForcedAppSwitcherNavigation();
 
-      await expect(
-        start
-          .getForceAppSwitcherNavigation$()
-          .pipe(take(1))
-          .toPromise()
-      ).resolves.toBe(true);
+      await expect(start.getForceAppSwitcherNavigation$().pipe(take(1)).toPromise()).resolves.toBe(
+        true
+      );
     });
   });
 });

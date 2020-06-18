@@ -30,7 +30,7 @@ export const featurePrivilegeBuilderFactory = (actions: Actions): FeaturePrivile
 
   return {
     getActions(privilege: FeatureKibanaPrivileges, feature: Feature) {
-      return flatten(builders.map(builder => builder.getActions(privilege, feature)));
+      return flatten(builders.map((builder) => builder.getActions(privilege, feature)));
     },
   };
 };

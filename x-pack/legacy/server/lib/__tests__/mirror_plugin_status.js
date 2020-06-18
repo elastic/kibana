@@ -61,7 +61,7 @@ describe('mirror_plugin_status', () => {
     }, 100);
   });
 
-  it('should mirror all downstream plugin statuses to upstream plugin statuses', done => {
+  it('should mirror all downstream plugin statuses to upstream plugin statuses', (done) => {
     mirrorPluginStatus(upstreamPlugin, downstreamPlugin);
     downstreamPlugin.status.on('change', () => {
       clearTimeout(eventNotEmittedTimeout);
@@ -77,7 +77,7 @@ describe('mirror_plugin_status', () => {
       mirrorPluginStatus(upstreamPlugin, downstreamPlugin, 'yellow', 'red');
     });
 
-    it('yellow', done => {
+    it('yellow', (done) => {
       downstreamPlugin.status.on('change', () => {
         clearTimeout(eventNotEmittedTimeout);
         expect(downstreamPlugin.status.state).to.be('yellow');
@@ -87,7 +87,7 @@ describe('mirror_plugin_status', () => {
       upstreamPlugin.status.yellow('test yellow message');
     });
 
-    it('red', done => {
+    it('red', (done) => {
       downstreamPlugin.status.on('change', () => {
         clearTimeout(eventNotEmittedTimeout);
         expect(downstreamPlugin.status.state).to.be('red');

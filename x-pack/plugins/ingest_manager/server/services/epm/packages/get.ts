@@ -26,8 +26,8 @@ export async function getPackages(
   } & Registry.SearchParams
 ) {
   const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList({ category: options.category }).then(items => {
-    return items.map(item =>
+  const registryItems = await Registry.fetchList({ category: options.category }).then((items) => {
+    return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
     );
   });
@@ -35,9 +35,11 @@ export async function getPackages(
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
 
   // filter out any internal packages
-  const savedObjectsVisible = packageSavedObjects.saved_objects.filter(o => !o.attributes.internal);
+  const savedObjectsVisible = packageSavedObjects.saved_objects.filter(
+    (o) => !o.attributes.internal
+  );
   const packageList = registryItems
-    .map(item =>
+    .map((item) =>
       createInstallableFrom(
         item,
         savedObjectsVisible.find(({ id }) => id === item.name)
@@ -99,7 +101,7 @@ export async function getInstallationObject(options: {
   const { savedObjectsClient, pkgName } = options;
   return savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-    .catch(e => undefined);
+    .catch((e) => undefined);
 }
 
 export async function getInstallation(options: {

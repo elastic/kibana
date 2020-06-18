@@ -12,7 +12,7 @@ import {
   EuiButtonEmpty,
   EuiHealth,
   EuiToolTip,
-  EuiButtonIcon
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -26,7 +26,7 @@ import { px, units } from '../../../../../style/variables';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import {
   createAgentConfigurationHref,
-  editAgentConfigurationHref
+  editAgentConfigurationHref,
 } from '../../../../shared/Links/apm/agentConfigurationLinks';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
@@ -35,7 +35,7 @@ type Config = AgentConfigurationListAPIResponse[0];
 export function AgentConfigurationList({
   status,
   data,
-  refetch
+  refetch,
 }: {
   status: FETCH_STATUS;
   data: Config[];
@@ -63,7 +63,7 @@ export function AgentConfigurationList({
               'xpack.apm.agentConfig.configTable.emptyPromptText',
               {
                 defaultMessage:
-                  "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration."
+                  "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration.",
               }
             )}
           </p>
@@ -90,7 +90,7 @@ export function AgentConfigurationList({
               'xpack.apm.agentConfig.configTable.configTable.failurePromptText',
               {
                 defaultMessage:
-                  'The list of agent configurations could not be fetched. Your user may not have the sufficient permissions.'
+                  'The list of agent configurations could not be fetched. Your user may not have the sufficient permissions.',
               }
             )}
           </p>
@@ -130,7 +130,7 @@ export function AgentConfigurationList({
         >
           <EuiHealth color={isApplied ? 'success' : theme.euiColorLightShade} />
         </EuiToolTip>
-      )
+      ),
     },
     {
       field: 'service.name',
@@ -148,7 +148,7 @@ export function AgentConfigurationList({
         >
           {getOptionLabel(config.service.name)}
         </EuiButtonEmpty>
-      )
+      ),
     },
     {
       field: 'service.environment',
@@ -157,7 +157,7 @@ export function AgentConfigurationList({
         { defaultMessage: 'Service environment' }
       ),
       sortable: true,
-      render: (environment: string) => getOptionLabel(environment)
+      render: (environment: string) => getOptionLabel(environment),
     },
     {
       align: 'right',
@@ -169,7 +169,7 @@ export function AgentConfigurationList({
       sortable: true,
       render: (value: number) => (
         <TimestampTooltip time={value} timeUnit="minutes" />
-      )
+      ),
     },
     {
       width: px(units.double),
@@ -180,7 +180,7 @@ export function AgentConfigurationList({
           iconType="pencil"
           href={editAgentConfigurationHref(config.service)}
         />
-      )
+      ),
     },
     {
       width: px(units.double),
@@ -191,8 +191,8 @@ export function AgentConfigurationList({
           iconType="trash"
           onClick={() => setConfigToBeDeleted(config)}
         />
-      )
-    }
+      ),
+    },
   ];
 
   return (

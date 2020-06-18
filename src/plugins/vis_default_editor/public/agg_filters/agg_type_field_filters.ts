@@ -41,8 +41,8 @@ const filters: AggTypeFieldFilter[] = [
 ];
 
 export function filterAggTypeFields(fields: IndexPatternField[], aggConfig: IAggConfig) {
-  const allowedAggTypeFields = fields.filter(field => {
-    const isAggTypeFieldAllowed = filters.every(filter => filter(field, aggConfig));
+  const allowedAggTypeFields = fields.filter((field) => {
+    const isAggTypeFieldAllowed = filters.every((filter) => filter(field, aggConfig));
     return isAggTypeFieldAllowed;
   });
   return allowedAggTypeFields;

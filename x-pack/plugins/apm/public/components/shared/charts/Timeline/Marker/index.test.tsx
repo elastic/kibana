@@ -16,7 +16,7 @@ describe('Marker', () => {
       id: 'agent',
       offset: 1000,
       type: 'agentMark',
-      verticalLine: true
+      verticalLine: true,
     } as AgentMark;
     const component = shallow(<Marker mark={mark} x={10} />);
     expect(component).toMatchSnapshot();
@@ -32,9 +32,9 @@ describe('Marker', () => {
         trace: { id: '123' },
         transaction: { id: '456' },
         error: { grouping_key: '123' },
-        service: { name: 'bar' }
+        service: { name: 'bar' },
       },
-      serviceColor: '#fff'
+      serviceColor: '#fff',
     } as ErrorMark;
     const component = shallow(<Marker mark={mark} x={10} />);
     expect(component).toMatchSnapshot();

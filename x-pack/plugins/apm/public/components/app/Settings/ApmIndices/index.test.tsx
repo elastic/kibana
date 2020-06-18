@@ -14,7 +14,7 @@ describe('ApmIndices', () => {
   it('should not get stuck in infinite loop', () => {
     const spy = spyOn(hooks, 'useFetcher').and.returnValue({
       data: undefined,
-      status: 'loading'
+      status: 'loading',
     });
     const { getByText } = render(
       <MockApmPluginContextWrapper>

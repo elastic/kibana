@@ -8,16 +8,17 @@ import { EuiPopover } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, {
   CSSProperties,
+  MouseEvent,
   useCallback,
   useContext,
   useEffect,
   useRef,
-  useState
+  useState,
 } from 'react';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
-import { Contents } from './Contents';
 import { animationOptions } from '../cytoscapeOptions';
+import { Contents } from './Contents';
 
 interface PopoverProps {
   focusedServiceName?: string;
@@ -43,7 +44,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     background: 'transparent',
     height: renderedHeight,
     position: 'absolute',
-    width: renderedWidth
+    width: renderedWidth,
   };
   const trigger = <div style={triggerStyle} />;
   const zoom = cy?.zoom() ?? 1;
@@ -51,7 +52,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const translateY = y - ((zoom + 1) * height) / 4;
   const popoverStyle: CSSProperties = {
     position: 'absolute',
-    transform: `translate(${x}px, ${translateY}px)`
+    transform: `translate(${x}px, ${translateY}px)`,
   };
   const selectedNodeData = selectedNode?.data() ?? {};
   const selectedNodeServiceName = selectedNodeData.id;
@@ -60,7 +61,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
 
   // Set up Cytoscape event handlers
   useEffect(() => {
-    const selectHandler: cytoscape.EventHandler = event => {
+    const selectHandler: cytoscape.EventHandler = (event) => {
       setSelectedNode(event.target);
     };
 
@@ -87,14 +88,18 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     }
   }, [popoverRef, x, y]);
 
-  const centerSelectedNode = useCallback(() => {
-    if (cy) {
-      cy.animate({
-        ...animationOptions,
-        center: { eles: cy.getElementById(selectedNodeServiceName) }
-      });
-    }
-  }, [cy, selectedNodeServiceName]);
+  const centerSelectedNode = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      if (cy) {
+        cy.animate({
+          ...animationOptions,
+          center: { eles: cy.getElementById(selectedNodeServiceName) },
+        });
+      }
+    },
+    [cy, selectedNodeServiceName]
+  );
 
   const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;
 
@@ -110,7 +115,9 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       <Contents
         isService={isService}
         label={label}
-        onFocusClick={isAlreadyFocused ? centerSelectedNode : deselect}
+        onFocusClick={
+          isAlreadyFocused ? centerSelectedNode : (_event) => deselect()
+        }
         selectedNodeData={selectedNodeData}
         selectedNodeServiceName={selectedNodeServiceName}
       />

@@ -49,7 +49,7 @@ export const getBucketSumMetricAgg = ({
     {
       name: METRIC_TYPES.SUM_BUCKET,
       title: sumBucketTitle,
-      makeLabel: agg => makeNestedLabel(agg, overallSumLabel),
+      makeLabel: (agg) => makeNestedLabel(agg, overallSumLabel),
       subtype: siblingPipelineAggHelper.subtype,
       params: [...siblingPipelineAggHelper.params()],
       getFormat: siblingPipelineAggHelper.getFormat,

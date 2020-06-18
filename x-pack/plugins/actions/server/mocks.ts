@@ -23,7 +23,6 @@ const createSetupMock = () => {
 
 const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
-    execute: jest.fn(),
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
@@ -33,9 +32,11 @@ const createStartMock = () => {
 };
 
 const createServicesMock = () => {
-  const mock: jest.Mocked<Services & {
-    savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  }> = {
+  const mock: jest.Mocked<
+    Services & {
+      savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+    }
+  > = {
     callCluster: elasticsearchServiceMock.createScopedClusterClient().callAsCurrentUser,
     getScopedCallCluster: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),

@@ -75,11 +75,11 @@ export const NodeTypeExpression = ({
           data-test-subj="forExpressionSelect"
           value={value}
           fullWidth
-          onChange={e => {
+          onChange={(e) => {
             onChange(e.target.value as InventoryItemType);
             setAggTypePopoverOpen(false);
           }}
-          options={Object.values(options).map(o => o)}
+          options={Object.values(options).map((o) => o)}
         />
       </div>
     </EuiPopover>

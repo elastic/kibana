@@ -38,8 +38,8 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
   useEffect(() => {
     http
       .get<{ accessAgreement: string }>('/internal/security/access_agreement/state')
-      .then(response => setAccessAgreement(response.accessAgreement))
-      .catch(err => fatalErrors.add(err));
+      .then((response) => setAccessAgreement(response.accessAgreement))
+      .catch((err) => fatalErrors.add(err));
   }, [http, fatalErrors]);
 
   const onAcknowledge = useCallback(

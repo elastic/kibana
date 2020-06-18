@@ -165,7 +165,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const variables = await testTableVariables.findAllByCssSelector(variablesSelector);
 
       const variablesKeyValueSelectorMap = await Promise.all(
-        variables.map(async variable => {
+        variables.map(async (variable) => {
           const subVars = await variable.findAllByCssSelector('td');
           const selector = await subVars[0].findByTagName('a');
           const key = await selector.getVisibleText();
@@ -502,14 +502,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async setBackgroundColor(colorHex: string): Promise<void> {
       await this.clickColorPicker();
       await this.checkColorPickerPopUpIsPresent();
-      await find.setValue('.tvbColorPickerPopUp input', colorHex);
+      await find.setValue('.euiColorPicker input', colorHex);
       await this.clickColorPicker();
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     }
 
     public async checkColorPickerPopUpIsPresent(): Promise<void> {
       log.debug(`Check color picker popup is present`);
-      await testSubjects.existOrFail('tvbColorPickerPopUp', { timeout: 5000 });
+      await testSubjects.existOrFail('colorPickerPopover', { timeout: 5000 });
     }
 
     public async changePanelPreview(nth: number = 0): Promise<void> {

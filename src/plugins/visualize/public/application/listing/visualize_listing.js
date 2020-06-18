@@ -25,11 +25,13 @@ import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
 import { syncQueryStateWithUrl } from '../../../../data/public';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
+
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 
 export function initListingDirective(app, I18nContext) {
-  app.directive('visualizeListingTable', reactDirective =>
+  app.directive('visualizeListingTable', (reactDirective) =>
     reactDirective(withI18nContext(I18nContext))
   );
 }
@@ -44,6 +46,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     toastNotifications,
     visualizations,
     core: { docLinks, savedObjects, uiSettings, application },
+    savedObjects: savedObjectsPublic,
   } = getServices();
 
   chrome.docTitle.change(
@@ -118,26 +121,28 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     });
   }
 
-  this.fetchItems = filter => {
-    const isLabsEnabled = uiSettings.get('visualize:enableLabs');
+  this.fetchItems = (filter) => {
+    const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
     return savedVisualizations
-      .findListItems(filter, uiSettings.get('savedObjects:listingLimit'))
-      .then(result => {
+      .findListItems(filter, savedObjectsPublic.settings.getListingLimit())
+      .then((result) => {
         this.totalItems = result.total;
 
         return {
           total: result.total,
-          hits: result.hits.filter(result => isLabsEnabled || result.type.stage !== 'experimental'),
+          hits: result.hits.filter(
+            (result) => isLabsEnabled || result.type.stage !== 'experimental'
+          ),
         };
       });
   };
 
   this.deleteSelectedItems = function deleteSelectedItems(selectedItems) {
     return Promise.all(
-      selectedItems.map(item => {
+      selectedItems.map((item) => {
         return savedObjectsClient.delete(item.savedObjectType, item.id);
       })
-    ).catch(error => {
+    ).catch((error) => {
       toastNotifications.addError(error, {
         title: i18n.translate('visualize.visualizeListingDeleteErrorTitle', {
           defaultMessage: 'Error deleting visualization',
@@ -154,7 +159,8 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     },
   ]);
 
-  this.listingLimit = uiSettings.get('savedObjects:listingLimit');
+  this.listingLimit = savedObjectsPublic.settings.getListingLimit();
+  this.initialPageSize = savedObjectsPublic.settings.getPerPage();
 
   addHelpMenuToAppChrome(chrome, docLinks);
 

@@ -48,6 +48,7 @@ export function getSavedObjectFormat({
   return {
     id: state.persistedId,
     title: state.title,
+    description: state.description,
     type: 'lens',
     visualizationType: state.visualization.activeId,
     expression: expression ? toExpression(expression) : '',

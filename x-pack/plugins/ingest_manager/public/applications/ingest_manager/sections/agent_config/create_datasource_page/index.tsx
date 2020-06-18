@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, ReactEventHandler } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,7 +17,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
+import {
+  AgentConfig,
+  PackageInfo,
+  NewDatasource,
+  CreateDatasourceRouteState,
+} from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -34,12 +39,14 @@ import { StepSelectPackage } from './step_select_package';
 import { StepSelectConfig } from './step_select_config';
 import { StepConfigureDatasource } from './step_configure_datasource';
 import { StepDefineDatasource } from './step_define_datasource';
+import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
 export const CreateDatasourcePage: React.FunctionComponent = () => {
   const {
     notifications,
     chrome: { getIsNavDrawerLocked$ },
     uiSettings,
+    application: { navigateToApp },
   } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
@@ -49,6 +56,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   } = useRouteMatch();
   const { getHref, getPath } = useLink();
   const history = useHistory();
+  const routeState = useIntraAppState<CreateDatasourceRouteState>();
   const from: CreateDatasourceFrom = configId ? 'config' : 'package';
   const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
 
@@ -95,32 +103,46 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   // Datasource validation state
   const [validationResults, setValidationResults] = useState<DatasourceValidationResults>();
 
-  // Update package info method
-  const updatePackageInfo = (updatedPackageInfo: PackageInfo | undefined) => {
-    if (updatedPackageInfo) {
-      setPackageInfo(updatedPackageInfo);
-      setFormState('VALID');
-    } else {
-      setFormState('INVALID');
-      setPackageInfo(undefined);
-    }
+  // Form state
+  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
 
-    // eslint-disable-next-line no-console
-    console.debug('Package info updated', updatedPackageInfo);
-  };
+  // Update package info method
+  const updatePackageInfo = useCallback(
+    (updatedPackageInfo: PackageInfo | undefined) => {
+      if (updatedPackageInfo) {
+        setPackageInfo(updatedPackageInfo);
+        if (agentConfig) {
+          setFormState('VALID');
+        }
+      } else {
+        setFormState('INVALID');
+        setPackageInfo(undefined);
+      }
+
+      // eslint-disable-next-line no-console
+      console.debug('Package info updated', updatedPackageInfo);
+    },
+    [agentConfig, setPackageInfo, setFormState]
+  );
 
   // Update agent config method
-  const updateAgentConfig = (updatedAgentConfig: AgentConfig | undefined) => {
-    if (updatedAgentConfig) {
-      setAgentConfig(updatedAgentConfig);
-    } else {
-      setFormState('INVALID');
-      setAgentConfig(undefined);
-    }
+  const updateAgentConfig = useCallback(
+    (updatedAgentConfig: AgentConfig | undefined) => {
+      if (updatedAgentConfig) {
+        setAgentConfig(updatedAgentConfig);
+        if (packageInfo) {
+          setFormState('VALID');
+        }
+      } else {
+        setFormState('INVALID');
+        setAgentConfig(undefined);
+      }
 
-    // eslint-disable-next-line no-console
-    console.debug('Agent config updated', updatedAgentConfig);
-  };
+      // eslint-disable-next-line no-console
+      console.debug('Agent config updated', updatedAgentConfig);
+    },
+    [packageInfo, setAgentConfig, setFormState]
+  );
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
@@ -157,13 +179,26 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   };
 
   // Cancel path
-  const cancelUrl =
-    from === 'config'
-      ? getHref('configuration_details', { configId: agentConfig?.id || configId })
+  const cancelUrl = useMemo(() => {
+    if (routeState && routeState.onCancelUrl) {
+      return routeState.onCancelUrl;
+    }
+    return from === 'config'
+      ? getHref('configuration_details', { configId: agentConfigId || configId })
       : getHref('integration_details', { pkgkey });
+  }, [agentConfigId, configId, from, getHref, pkgkey, routeState]);
+
+  const cancelClickHandler: ReactEventHandler = useCallback(
+    (ev) => {
+      if (routeState && routeState.onCancelNavigateTo) {
+        ev.preventDefault();
+        navigateToApp(...routeState.onCancelNavigateTo);
+      }
+    },
+    [routeState, navigateToApp]
+  );
 
   // Save datasource
-  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
   const saveDatasource = async () => {
     setFormState('LOADING');
     const result = await sendCreateDatasource(datasource);
@@ -180,9 +215,18 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       setFormState('CONFIRM');
       return;
     }
-    const { error } = await saveDatasource();
+    const { error, data } = await saveDatasource();
     if (!error) {
-      history.push(getPath('configuration_details', { configId: agentConfig?.id || configId }));
+      if (routeState && routeState.onSaveNavigateTo) {
+        navigateToApp(
+          ...(typeof routeState.onSaveNavigateTo === 'function'
+            ? routeState.onSaveNavigateTo(data!.item)
+            : routeState.onSaveNavigateTo)
+        );
+      } else {
+        history.push(getPath('configuration_details', { configId: agentConfig?.id || configId }));
+      }
+
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.ingestManager.createDatasource.addedNotificationTitle', {
           defaultMessage: `Successfully added '{datasourceName}'`,
@@ -199,6 +243,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
                 },
               })
             : undefined,
+        'data-test-subj': 'datasourceCreateSuccessToast',
       });
     } else {
       notifications.toasts.addError(error, {
@@ -211,9 +256,34 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const layoutProps = {
     from,
     cancelUrl,
+    cancelOnClick: cancelClickHandler,
     agentConfig,
     packageInfo,
   };
+
+  const stepSelectConfig = useMemo(
+    () => (
+      <StepSelectConfig
+        pkgkey={pkgkey}
+        updatePackageInfo={updatePackageInfo}
+        agentConfig={agentConfig}
+        updateAgentConfig={updateAgentConfig}
+      />
+    ),
+    [pkgkey, updatePackageInfo, agentConfig, updateAgentConfig]
+  );
+
+  const stepSelectPackage = useMemo(
+    () => (
+      <StepSelectPackage
+        agentConfigId={configId}
+        updateAgentConfig={updateAgentConfig}
+        packageInfo={packageInfo}
+        updatePackageInfo={updatePackageInfo}
+      />
+    ),
+    [configId, updateAgentConfig, packageInfo, updatePackageInfo]
+  );
 
   const steps: EuiStepProps[] = [
     from === 'package'
@@ -221,27 +291,13 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
           title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectAgentConfigTitle', {
             defaultMessage: 'Select an agent configuration',
           }),
-          children: (
-            <StepSelectConfig
-              pkgkey={pkgkey}
-              updatePackageInfo={updatePackageInfo}
-              agentConfig={agentConfig}
-              updateAgentConfig={updateAgentConfig}
-            />
-          ),
+          children: stepSelectConfig,
         }
       : {
           title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectPackageTitle', {
             defaultMessage: 'Select an integration',
           }),
-          children: (
-            <StepSelectPackage
-              agentConfigId={configId}
-              updateAgentConfig={updateAgentConfig}
-              packageInfo={packageInfo}
-              updatePackageInfo={updatePackageInfo}
-            />
-          ),
+          children: stepSelectPackage,
         },
     {
       title: i18n.translate('xpack.ingestManager.createDatasource.stepDefineDatasourceTitle', {
@@ -264,6 +320,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         defaultMessage: 'Select the data you want to collect',
       }),
       status: !packageInfo || !agentConfig ? 'disabled' : undefined,
+      'data-test-subj': 'dataCollectionSetupStep',
       children:
         agentConfig && packageInfo ? (
           <StepConfigureDatasource
@@ -278,7 +335,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   ];
 
   return (
-    <CreateDatasourcePageLayout {...layoutProps}>
+    <CreateDatasourcePageLayout {...layoutProps} data-test-subj="createDataSource">
       {formState === 'CONFIRM' && agentConfig && (
         <ConfirmDeployConfigModal
           agentCount={agentCount}
@@ -311,7 +368,13 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       >
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="ghost" href={cancelUrl}>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiButtonEmpty
+              color="ghost"
+              href={cancelUrl}
+              onClick={cancelClickHandler}
+              data-test-subj="createDatasourceCancelButton"
+            >
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.cancelButton"
                 defaultMessage="Cancel"
@@ -326,6 +389,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
               iconType="save"
               color="primary"
               fill
+              data-test-subj="createDatasourceSaveButton"
             >
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.saveButton"

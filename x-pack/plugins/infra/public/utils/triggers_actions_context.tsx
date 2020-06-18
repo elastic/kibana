@@ -5,10 +5,10 @@
  */
 
 import * as React from 'react';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
+import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 
 interface ContextProps {
-  triggersActionsUI: TriggersAndActionsUIPublicPluginSetup | null;
+  triggersActionsUI: TriggersAndActionsUIPublicPluginStart | null;
 }
 
 export const TriggerActionsContext = React.createContext<ContextProps>({
@@ -16,10 +16,10 @@ export const TriggerActionsContext = React.createContext<ContextProps>({
 });
 
 interface Props {
-  triggersActionsUI: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
 }
 
-export const TriggersActionsProvider: React.FC<Props> = props => {
+export const TriggersActionsProvider: React.FC<Props> = (props) => {
   return (
     <TriggerActionsContext.Provider
       value={{

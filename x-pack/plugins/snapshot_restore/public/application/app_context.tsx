@@ -7,7 +7,7 @@
 import React, { createContext, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart, ScopedHistory } from '../../../../../src/core/public';
 import { ClientConfigType } from '../types';
 import { HttpService, UiMetricService } from './services';
 
@@ -19,6 +19,7 @@ export interface AppDependencies {
     httpService: HttpService;
     uiMetricService: UiMetricService;
     i18n: typeof i18n;
+    history: ScopedHistory;
   };
   config: ClientConfigType;
 }

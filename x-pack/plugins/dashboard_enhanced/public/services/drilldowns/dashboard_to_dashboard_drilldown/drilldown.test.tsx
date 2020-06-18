@@ -101,13 +101,13 @@ describe('.execute() & getHref', () => {
           },
         },
         plugins: {
-          advancedUiActions: {},
+          uiActionsEnhanced: {},
           data: {
             actions: dataPluginActions,
           },
         },
         self: {},
-      })) as unknown) as StartServicesGetter<Pick<StartDependencies, 'data' | 'advancedUiActions'>>,
+      })) as unknown) as StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>,
       getDashboardUrlGenerator: () =>
         new UrlGeneratorsService().setup(coreMock.createSetup()).registerUrlGenerator(
           createDashboardUrlGenerator(() =>
@@ -134,10 +134,12 @@ describe('.execute() & getHref', () => {
     };
 
     const context = ({
-      data: useRangeEvent
-        ? ({ range: {} } as RangeSelectTriggerContext['data'])
-        : ({ data: [] } as ValueClickTriggerContext['data']),
-      timeFieldName: 'order_date',
+      data: {
+        ...(useRangeEvent
+          ? ({ range: {} } as RangeSelectTriggerContext['data'])
+          : ({ data: [] } as ValueClickTriggerContext['data'])),
+        timeFieldName: 'order_date',
+      },
       embeddable: {
         getInput: () => ({
           filters: [],

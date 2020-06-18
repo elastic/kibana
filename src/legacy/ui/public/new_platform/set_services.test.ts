@@ -29,8 +29,8 @@ import { npSetup, npStart } from './__mocks__';
 describe('ui/new_platform', () => {
   describe('set service getters', () => {
     const testServiceGetters = (name: string, services: Record<string, Function>) => {
-      const getters = Object.keys(services).filter(k => k.substring(0, 3) === 'get');
-      getters.forEach(g => {
+      const getters = Object.keys(services).filter((k) => k.substring(0, 3) === 'get');
+      getters.forEach((g) => {
         it(`ui/new_platform sets a value for ${name} getter ${g}`, () => {
           __reset__();
           __setup__(

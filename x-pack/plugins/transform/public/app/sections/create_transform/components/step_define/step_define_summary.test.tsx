@@ -24,7 +24,7 @@ jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: <DefinePivotSummary />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async done => {
+  test('Minimal initialization', async (done) => {
     // Arrange
     const searchItems = {
       indexPattern: {

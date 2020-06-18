@@ -27,7 +27,7 @@ interface LazyScope extends IScope {
 
 export function CollapsibleSidebarProvider() {
   // simply a list of all of all of angulars .col-md-* classes except 12
-  const listOfWidthClasses = _.times(11, function(i) {
+  const listOfWidthClasses = _.times(11, function (i) {
     return 'col-md-' + i;
   });
 
@@ -60,7 +60,7 @@ export function CollapsibleSidebarProvider() {
       // If there is are only two elements we can assume the other one will take 100% of the width.
       const hasSingleSibling = $siblings.length === 1 && siblingsClass;
 
-      $collapser.on('click', function() {
+      $collapser.on('click', function () {
         if (isCollapsed) {
           isCollapsed = false;
           $elem.removeClass('closed');

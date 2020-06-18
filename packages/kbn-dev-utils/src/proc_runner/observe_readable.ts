@@ -33,7 +33,7 @@ export function observeReadable(readable: Readable): Rx.Observable<never> {
 
     Rx.fromEvent(readable, 'error').pipe(
       first(),
-      mergeMap(err => Rx.throwError(err))
+      mergeMap((err) => Rx.throwError(err))
     )
   );
 }

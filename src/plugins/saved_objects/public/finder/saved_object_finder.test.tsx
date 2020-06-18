@@ -21,7 +21,7 @@ jest.mock('lodash', () => ({
   debounce: (fn: any) => fn,
 }));
 
-const nextTick = () => new Promise(res => process.nextTick(res));
+const nextTick = () => new Promise((res) => process.nextTick(res));
 
 import {
   EuiEmptyPrompt,
@@ -130,10 +130,7 @@ describe('SavedObjectsFinder', () => {
 
     wrapper.instance().componentDidMount!();
     await nextTick();
-    wrapper
-      .find(EuiListGroupItem)
-      .first()
-      .simulate('click');
+    wrapper.find(EuiListGroupItem).first().simulate('click');
     expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`, doc)).toEqual(
       true
     );
@@ -469,12 +466,7 @@ describe('SavedObjectsFinder', () => {
     wrapper.instance().componentDidMount!();
     await nextTick();
 
-    expect(
-      wrapper
-        .find(EuiEmptyPrompt)
-        .first()
-        .prop('body')
-    ).toEqual(noItemsMessage);
+    expect(wrapper.find(EuiEmptyPrompt).first().prop('body')).toEqual(noItemsMessage);
   });
 
   describe('pagination', () => {
@@ -504,12 +496,7 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(
-        wrapper
-          .find(EuiTablePagination)
-          .first()
-          .prop('itemsPerPage')
-      ).toEqual(15);
+      expect(wrapper.find(EuiTablePagination).first().prop('itemsPerPage')).toEqual(15);
       expect(wrapper.find(EuiListGroup).children().length).toBe(15);
     });
 
@@ -531,10 +518,7 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper
-        .find(EuiTablePagination)
-        .first()
-        .prop('onChangeItemsPerPage')!(5);
+      wrapper.find(EuiTablePagination).first().prop('onChangeItemsPerPage')!(5);
       expect(wrapper.find(EuiListGroup).children().length).toBe(5);
     });
 
@@ -556,17 +540,8 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper
-        .find(EuiTablePagination)
-        .first()
-        .prop('onChangePage')!(1);
-      expect(
-        wrapper
-          .find(EuiListGroup)
-          .children()
-          .first()
-          .key()
-      ).toBe('15');
+      wrapper.find(EuiTablePagination).first().prop('onChangePage')!(1);
+      expect(wrapper.find(EuiListGroup).children().first().key()).toBe('15');
     });
 
     it('should show an ordinary pagination for fixed page sizes', async () => {
@@ -587,12 +562,7 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(
-        wrapper
-          .find(EuiPagination)
-          .first()
-          .prop('pageCount')
-      ).toEqual(2);
+      expect(wrapper.find(EuiPagination).first().prop('pageCount')).toEqual(2);
       expect(wrapper.find(EuiListGroup).children().length).toBe(33);
     });
 
@@ -614,17 +584,8 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper
-        .find(EuiPagination)
-        .first()
-        .prop('onPageClick')!(1);
-      expect(
-        wrapper
-          .find(EuiListGroup)
-          .children()
-          .first()
-          .key()
-      ).toBe('33');
+      wrapper.find(EuiPagination).first().prop('onPageClick')!(1);
+      expect(wrapper.find(EuiListGroup).children().first().key()).toBe('33');
     });
   });
 

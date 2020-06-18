@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, truncate } from '../../../../style/variables';
-import { asDecimal, convertTo } from '../../../../utils/formatters';
+import { asDecimal, asMillisecondDuration } from '../../../../utils/formatters';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
@@ -45,7 +45,7 @@ export const SERVICE_COLUMNS = [
   {
     field: 'serviceName',
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
-      defaultMessage: 'Name'
+      defaultMessage: 'Name',
     }),
     width: '40%',
     sortable: true,
@@ -53,46 +53,42 @@ export const SERVICE_COLUMNS = [
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
         <AppLink serviceName={serviceName}>{formatString(serviceName)}</AppLink>
       </EuiToolTip>
-    )
+    ),
   },
   {
     field: 'environments',
     name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
-      defaultMessage: 'Environment'
+      defaultMessage: 'Environment',
     }),
     width: '20%',
     sortable: true,
     render: (environments: string[]) => (
       <EnvironmentBadge environments={environments} />
-    )
+    ),
   },
   {
     field: 'agentName',
     name: i18n.translate('xpack.apm.servicesTable.agentColumnLabel', {
-      defaultMessage: 'Agent'
+      defaultMessage: 'Agent',
     }),
     sortable: true,
-    render: (agentName: string) => formatString(agentName)
+    render: (agentName: string) => formatString(agentName),
   },
   {
     field: 'avgResponseTime',
     name: i18n.translate('xpack.apm.servicesTable.avgResponseTimeColumnLabel', {
-      defaultMessage: 'Avg. response time'
+      defaultMessage: 'Avg. response time',
     }),
     sortable: true,
     dataType: 'number',
-    render: (time: number) =>
-      convertTo({
-        unit: 'milliseconds',
-        microseconds: time
-      }).formatted
+    render: (time: number) => asMillisecondDuration(time),
   },
   {
     field: 'transactionsPerMinute',
     name: i18n.translate(
       'xpack.apm.servicesTable.transactionsPerMinuteColumnLabel',
       {
-        defaultMessage: 'Trans. per minute'
+        defaultMessage: 'Trans. per minute',
       }
     ),
     sortable: true,
@@ -101,14 +97,14 @@ export const SERVICE_COLUMNS = [
       `${formatNumber(value)} ${i18n.translate(
         'xpack.apm.servicesTable.transactionsPerMinuteUnitLabel',
         {
-          defaultMessage: 'tpm'
+          defaultMessage: 'tpm',
         }
-      )}`
+      )}`,
   },
   {
     field: 'errorsPerMinute',
     name: i18n.translate('xpack.apm.servicesTable.errorsPerMinuteColumnLabel', {
-      defaultMessage: 'Errors per minute'
+      defaultMessage: 'Errors per minute',
     }),
     sortable: true,
     dataType: 'number',
@@ -116,10 +112,10 @@ export const SERVICE_COLUMNS = [
       `${formatNumber(value)} ${i18n.translate(
         'xpack.apm.servicesTable.errorsPerMinuteUnitLabel',
         {
-          defaultMessage: 'err.'
+          defaultMessage: 'err.',
         }
-      )}`
-  }
+      )}`,
+  },
 ];
 
 export function ServiceList({ items, noItemsMessage }: Props) {

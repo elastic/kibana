@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { CloudSetup } from '../../cloud/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { Config } from '../common/config';
@@ -24,7 +24,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
     if (!enabled) {
       return;
     }
-    const appRegistrar = management.sections.getSection('elasticsearch')!;
+    const appRegistrar = management.sections.getSection(ManagementSectionId.Stack);
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
     appRegistrar.registerApp({
@@ -33,7 +33,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
         defaultMessage: '{version} Upgrade Assistant',
         values: { version: `${NEXT_MAJOR_VERSION}.0` },
       }),
-      order: 1000,
+      order: 1,
       async mount(params) {
         const { mountManagementSection } = await import('./application/mount_management_section');
         return mountManagementSection(coreSetup, isCloudEnabled, params);

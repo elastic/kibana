@@ -12,14 +12,14 @@ const INITIAL_DATA = { transactionTypes: [] };
 export function useServiceTransactionTypes(urlParams: IUrlParams) {
   const { serviceName, start, end } = urlParams;
   const { data = INITIAL_DATA } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/transaction_types',
           params: {
             path: { serviceName },
-            query: { start, end }
-          }
+            query: { start, end },
+          },
         });
       }
     },

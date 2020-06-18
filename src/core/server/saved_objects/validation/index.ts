@@ -57,7 +57,7 @@ export function docValidator(validators: PropertyValidators = {}): ValidateDoc {
   return function validateDoc(doc: SavedObjectDoc) {
     Object.keys(doc)
       .concat(doc.type)
-      .forEach(prop => {
+      .forEach((prop) => {
         const validator = validators[prop];
         if (validator) {
           validator(doc);

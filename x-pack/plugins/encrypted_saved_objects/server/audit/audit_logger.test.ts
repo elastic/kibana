@@ -9,7 +9,7 @@ import { mockAuthenticatedUser } from '../../../security/common/model/authentica
 
 it('properly logs audit events', () => {
   const mockInternalAuditLogger = { log: jest.fn() };
-  const audit = new EncryptedSavedObjectsAuditLogger(() => mockInternalAuditLogger);
+  const audit = new EncryptedSavedObjectsAuditLogger(mockInternalAuditLogger);
 
   audit.encryptAttributesSuccess(['one', 'two'], {
     type: 'known-type',

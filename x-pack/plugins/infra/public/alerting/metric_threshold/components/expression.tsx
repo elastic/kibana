@@ -4,25 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce } from 'lodash';
+import { debounce, pick } from 'lodash';
+import * as rt from 'io-ts';
+import { HttpSetup } from 'src/core/public';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
   EuiFormRow,
+  EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
   EuiToolTip,
   EuiIcon,
   EuiFieldSearch,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getIntervalInSeconds } from '../../../../server/utils/get_interval_in_seconds';
 import {
   Comparator,
   Aggregators,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
+  INFRA_ALERT_PREVIEW_PATH,
+  alertPreviewRequestParamsRT,
+  alertPreviewSuccessResponsePayloadRT,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '../../../../common/alerting/metrics';
 import {
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -40,6 +51,7 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionRow } from './expression_row';
 import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
+import { validateMetricThreshold } from './validation';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -54,6 +66,7 @@ interface Props {
     alertOnNoData?: boolean;
   };
   alertsContext: AlertsContextValue<AlertContextMeta>;
+  alertInterval: string;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
 }
@@ -66,14 +79,37 @@ const defaultExpression = {
   timeUnit: 'm',
 } as MetricExpression;
 
-export const Expressions: React.FC<Props> = props => {
-  const { setAlertParams, alertParams, errors, alertsContext } = props;
+async function getAlertPreview({
+  fetch,
+  params,
+}: {
+  fetch: HttpSetup['fetch'];
+  params: rt.TypeOf<typeof alertPreviewRequestParamsRT>;
+}): Promise<rt.TypeOf<typeof alertPreviewSuccessResponsePayloadRT>> {
+  return await fetch(`${INFRA_ALERT_PREVIEW_PATH}`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...params,
+      alertType: METRIC_THRESHOLD_ALERT_TYPE_ID,
+    }),
+  });
+}
+
+export const Expressions: React.FC<Props> = (props) => {
+  const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
     fetch: alertsContext.http.fetch,
     toastWarning: alertsContext.toastNotifications.addWarning,
   });
+
+  const [previewLookbackInterval, setPreviewLookbackInterval] = useState<string>('h');
+  const [isPreviewLoading, setIsPreviewLoading] = useState<boolean>(false);
+  const [previewError, setPreviewError] = useState<boolean>(false);
+  const [previewResult, setPreviewResult] = useState<rt.TypeOf<
+    typeof alertPreviewSuccessResponsePayloadRT
+  > | null>(null);
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
@@ -90,6 +126,7 @@ export const Expressions: React.FC<Props> = props => {
         aggregation: 'avg',
       };
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [alertsContext.metadata]);
 
   const updateParams = useCallback(
@@ -103,9 +140,14 @@ export const Expressions: React.FC<Props> = props => {
 
   const addExpression = useCallback(() => {
     const exp = alertParams.criteria?.slice() || [];
-    exp.push(defaultExpression);
+    exp.push({
+      ...defaultExpression,
+      timeSize: timeSize ?? defaultExpression.timeSize,
+      timeUnit: timeUnit ?? defaultExpression.timeUnit,
+    });
     setAlertParams('criteria', exp);
-  }, [setAlertParams, alertParams.criteria]);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
@@ -115,6 +157,7 @@ export const Expressions: React.FC<Props> = props => {
         setAlertParams('criteria', exp);
       }
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [setAlertParams, alertParams.criteria]
   );
 
@@ -129,13 +172,14 @@ export const Expressions: React.FC<Props> = props => {
     [setAlertParams, derivedIndexPattern]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
     onFilterChange,
   ]);
 
   const onGroupByChange = useCallback(
-    (group: string | null) => {
-      setAlertParams('groupBy', group || '');
+    (group: string | null | string[]) => {
+      setAlertParams('groupBy', group && group.length ? group : '');
     },
     [setAlertParams]
   );
@@ -151,26 +195,28 @@ export const Expressions: React.FC<Props> = props => {
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
       const criteria =
-        alertParams.criteria?.map(c => ({
+        alertParams.criteria?.map((c) => ({
           ...c,
           timeSize: ts,
         })) || [];
       setTimeSize(ts || undefined);
       setAlertParams('criteria', criteria);
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [alertParams.criteria, setAlertParams]
   );
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
       const criteria =
-        alertParams.criteria?.map(c => ({
+        alertParams.criteria?.map((c) => ({
           ...c,
           timeUnit: tu,
         })) || [];
       setTimeUnit(tu as TimeUnit);
       setAlertParams('criteria', criteria);
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [alertParams.criteria, setAlertParams]
   );
 
@@ -179,7 +225,7 @@ export const Expressions: React.FC<Props> = props => {
     if (md && md.currentOptions?.metrics) {
       setAlertParams(
         'criteria',
-        md.currentOptions.metrics.map(metric => ({
+        md.currentOptions.metrics.map((metric) => ({
           metric: metric.field,
           comparator: Comparator.GT,
           threshold: [],
@@ -202,7 +248,10 @@ export const Expressions: React.FC<Props> = props => {
         convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
       );
     } else if (md && md.currentOptions?.groupBy && md.series) {
-      const filter = `${md.currentOptions?.groupBy}: "${md.series.id}"`;
+      const { groupBy } = md.currentOptions;
+      const filter = Array.isArray(groupBy)
+        ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
+        : `${groupBy}: "${md.series.id}"`;
       setAlertParams('filterQueryText', filter);
       setAlertParams(
         'filterQuery',
@@ -210,6 +259,33 @@ export const Expressions: React.FC<Props> = props => {
       );
     }
   }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
+
+  const onSelectPreviewLookbackInterval = useCallback((e) => {
+    setPreviewLookbackInterval(e.target.value);
+    setPreviewResult(null);
+  }, []);
+
+  const onClickPreview = useCallback(async () => {
+    setIsPreviewLoading(true);
+    setPreviewResult(null);
+    setPreviewError(false);
+    try {
+      const result = await getAlertPreview({
+        fetch: alertsContext.http.fetch,
+        params: {
+          ...pick(alertParams, 'criteria', 'groupBy', 'filterQuery'),
+          sourceId: alertParams.sourceId,
+          lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
+          alertInterval,
+        },
+      });
+      setPreviewResult(result);
+    } catch (e) {
+      setPreviewError(true);
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  }, [alertParams, alertInterval, alertsContext, previewLookbackInterval]);
 
   useEffect(() => {
     if (alertParams.criteria && alertParams.criteria.length) {
@@ -232,6 +308,23 @@ export const Expressions: React.FC<Props> = props => {
     (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
     [onFilterChange]
   );
+
+  const previewIntervalError = useMemo(() => {
+    const intervalInSeconds = getIntervalInSeconds(alertInterval);
+    const lookbackInSeconds = getIntervalInSeconds(`1${previewLookbackInterval}`);
+    if (intervalInSeconds >= lookbackInSeconds) {
+      return true;
+    }
+    return false;
+  }, [previewLookbackInterval, alertInterval]);
+
+  const isPreviewDisabled = useMemo(() => {
+    const validationResult = validateMetricThreshold({ criteria: alertParams.criteria } as any);
+    const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
+      Object.values(result).some((arr) => Array.isArray(arr) && arr.length)
+    );
+    return hasValidationErrors || previewIntervalError;
+  }, [alertParams.criteria, previewIntervalError]);
 
   return (
     <>
@@ -281,6 +374,7 @@ export const Expressions: React.FC<Props> = props => {
         />
       </div>
 
+      <EuiSpacer size={'m'} />
       <div>
         <EuiButtonEmpty
           color={'primary'}
@@ -315,7 +409,7 @@ export const Expressions: React.FC<Props> = props => {
           </>
         }
         checked={alertParams.alertOnNoData}
-        onChange={e => setAlertParams('alertOnNoData', e.target.checked)}
+        onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
       />
 
       <EuiSpacer size={'m'} />
@@ -367,6 +461,191 @@ export const Expressions: React.FC<Props> = props => {
           }}
         />
       </EuiFormRow>
+
+      <EuiSpacer size={'m'} />
+      <EuiFormRow
+        label={i18n.translate('xpack.infra.metrics.alertFlyout.previewLabel', {
+          defaultMessage: 'Preview',
+        })}
+        fullWidth
+        compressed
+      >
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiSelect
+                id="selectPreviewLookbackInterval"
+                value={previewLookbackInterval}
+                onChange={onSelectPreviewLookbackInterval}
+                options={previewOptions}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                isLoading={isPreviewLoading}
+                isDisabled={isPreviewDisabled}
+                onClick={onClickPreview}
+              >
+                {i18n.translate('xpack.infra.metrics.alertFlyout.testAlertTrigger', {
+                  defaultMessage: 'Test alert trigger',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiSpacer size={'s'} />
+          </EuiFlexGroup>
+          {previewResult && !previewIntervalError && !previewResult.resultTotals.tooManyBuckets && (
+            <>
+              <EuiSpacer size={'s'} />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.infra.metrics.alertFlyout.alertPreviewResult"
+                  defaultMessage="This alert would have fired {fired} {timeOrTimes} in the past {lookback}"
+                  values={{
+                    timeOrTimes:
+                      previewResult.resultTotals.fired === 1 ? firedTimeLabel : firedTimesLabel,
+                    fired: <strong>{previewResult.resultTotals.fired}</strong>,
+                    lookback: previewOptions.find((e) => e.value === previewLookbackInterval)
+                      ?.shortText,
+                  }}
+                />{' '}
+                {alertParams.groupBy ? (
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.alertPreviewGroups"
+                    defaultMessage="across {numberOfGroups} {groupName}{plural}."
+                    values={{
+                      numberOfGroups: <strong>{previewResult.numberOfGroups}</strong>,
+                      groupName: alertParams.groupBy,
+                      plural: previewResult.numberOfGroups !== 1 ? 's' : '',
+                    }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.alertPreviewAllData"
+                    defaultMessage="across the entire infrastructure."
+                  />
+                )}
+              </EuiText>
+              {alertParams.alertOnNoData && previewResult.resultTotals.noData ? (
+                <>
+                  <EuiSpacer size={'s'} />
+                  <EuiText>
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.alertPreviewNoDataResult"
+                      defaultMessage="There {were} {noData} result{plural} of no data."
+                      values={{
+                        were: previewResult.resultTotals.noData !== 1 ? 'were' : 'was',
+                        noData: <strong>{previewResult.resultTotals.noData}</strong>,
+                        plural: previewResult.resultTotals.noData !== 1 ? 's' : '',
+                      }}
+                    />
+                  </EuiText>
+                </>
+              ) : null}
+              {previewResult.resultTotals.error ? (
+                <>
+                  <EuiSpacer size={'s'} />
+                  <EuiText>
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.alertPreviewErrorResult"
+                      defaultMessage="An error occurred when trying to evaluate some of the data."
+                    />
+                  </EuiText>
+                </>
+              ) : null}
+            </>
+          )}
+          {previewResult && previewResult.resultTotals.tooManyBuckets ? (
+            <>
+              <EuiSpacer size={'s'} />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.infra.metrics.alertFlyout.tooManyBucketsError"
+                  defaultMessage="Too much data to preview. Please select a shorter preview length, or increase the amount of time in the {forTheLast} field."
+                  values={{
+                    forTheLast: <strong>FOR THE LAST</strong>,
+                  }}
+                />
+              </EuiText>
+            </>
+          ) : null}
+          {previewIntervalError && (
+            <>
+              <EuiSpacer size={'s'} />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.infra.metrics.alertFlyout.previewIntervalTooShort"
+                  defaultMessage="Not enough data to preview. Please select a longer preview length, or increase the amount of time in the {checkEvery} field."
+                  values={{
+                    checkEvery: <strong>check every</strong>,
+                  }}
+                />
+              </EuiText>
+            </>
+          )}
+          {previewError && (
+            <>
+              <EuiSpacer size={'s'} />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.infra.metrics.alertFlyout.alertPreviewError"
+                  defaultMessage="An error occurred when trying to preview this alert trigger."
+                />
+              </EuiText>
+            </>
+          )}
+        </>
+      </EuiFormRow>
+      <EuiSpacer size={'m'} />
     </>
   );
 };
+
+const previewOptions = [
+  {
+    value: 'h',
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastHourLabel', {
+      defaultMessage: 'Last hour',
+    }),
+    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.hourLabel', {
+      defaultMessage: 'hour',
+    }),
+  },
+  {
+    value: 'd',
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastDayLabel', {
+      defaultMessage: 'Last day',
+    }),
+    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.dayLabel', {
+      defaultMessage: 'day',
+    }),
+  },
+  {
+    value: 'w',
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastWeekLabel', {
+      defaultMessage: 'Last week',
+    }),
+    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.weekLabel', {
+      defaultMessage: 'week',
+    }),
+  },
+  {
+    value: 'M',
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastMonthLabel', {
+      defaultMessage: 'Last month',
+    }),
+    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.monthLabel', {
+      defaultMessage: 'month',
+    }),
+  },
+];
+
+const firedTimeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTime', {
+  defaultMessage: 'time',
+});
+const firedTimesLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTimes', {
+  defaultMessage: 'times',
+});
+
+// required for dynamic import
+// eslint-disable-next-line import/no-default-export
+export default Expressions;

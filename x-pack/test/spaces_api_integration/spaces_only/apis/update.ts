@@ -28,7 +28,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
       {
         spaceId: SPACES.SPACE_1.spaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       updateTest(`can update from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         tests: {

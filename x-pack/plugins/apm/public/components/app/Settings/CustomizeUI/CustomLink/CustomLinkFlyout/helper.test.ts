@@ -5,7 +5,7 @@
  */
 import {
   getSelectOptions,
-  replaceTemplateVariables
+  replaceTemplateVariables,
 } from '../CustomLinkFlyout/helper';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 
@@ -18,7 +18,7 @@ describe('Custom link helper', () => {
             { key: '', value: '' },
             { key: '', value: '' },
             { key: '', value: '' },
-            { key: '', value: '' }
+            { key: '', value: '' },
           ],
           ''
         )
@@ -27,7 +27,7 @@ describe('Custom link helper', () => {
         { value: 'service.name', text: 'service.name' },
         { value: 'service.environment', text: 'service.environment' },
         { value: 'transaction.type', text: 'transaction.type' },
-        { value: 'transaction.name', text: 'transaction.name' }
+        { value: 'transaction.name', text: 'transaction.name' },
       ]);
     });
     it('removes item added in another filter', () => {
@@ -37,7 +37,7 @@ describe('Custom link helper', () => {
             { key: 'service.name', value: 'foo' },
             { key: '', value: '' },
             { key: '', value: '' },
-            { key: '', value: '' }
+            { key: '', value: '' },
           ],
           ''
         )
@@ -45,7 +45,7 @@ describe('Custom link helper', () => {
         { value: 'DEFAULT', text: 'Select field...' },
         { value: 'service.environment', text: 'service.environment' },
         { value: 'transaction.type', text: 'transaction.type' },
-        { value: 'transaction.name', text: 'transaction.name' }
+        { value: 'transaction.name', text: 'transaction.name' },
       ]);
     });
     it('removes item added in another filter but keep the current selected', () => {
@@ -55,7 +55,7 @@ describe('Custom link helper', () => {
             { key: 'service.name', value: 'foo' },
             { key: 'transaction.name', value: 'bar' },
             { key: '', value: '' },
-            { key: '', value: '' }
+            { key: '', value: '' },
           ],
           'transaction.name'
         )
@@ -63,7 +63,7 @@ describe('Custom link helper', () => {
         { value: 'DEFAULT', text: 'Select field...' },
         { value: 'service.environment', text: 'service.environment' },
         { value: 'transaction.type', text: 'transaction.type' },
-        { value: 'transaction.name', text: 'transaction.name' }
+        { value: 'transaction.name', text: 'transaction.name' },
       ]);
     });
     it('returns empty when all option were selected', () => {
@@ -73,7 +73,7 @@ describe('Custom link helper', () => {
             { key: 'service.name', value: 'foo' },
             { key: 'transaction.name', value: 'bar' },
             { key: 'service.environment', value: 'baz' },
-            { key: 'transaction.type', value: 'qux' }
+            { key: 'transaction.type', value: 'qux' },
           ],
           ''
         )
@@ -84,7 +84,7 @@ describe('Custom link helper', () => {
   describe('replaceTemplateVariables', () => {
     const transaction = ({
       service: { name: 'foo' },
-      trace: { id: '123' }
+      trace: { id: '123' },
     } as unknown) as Transaction;
 
     it('replaces template variables', () => {
@@ -95,7 +95,7 @@ describe('Custom link helper', () => {
         )
       ).toEqual({
         error: undefined,
-        formattedUrl: 'https://elastic.co?service.name=foo&trace.id=123'
+        formattedUrl: 'https://elastic.co?service.name=foo&trace.id=123',
       });
     });
 
@@ -103,7 +103,7 @@ describe('Custom link helper', () => {
       const expectedResult = {
         error:
           "We couldn't find a matching transaction document based on the defined filters.",
-        formattedUrl: 'https://elastic.co?service.name=&trace.id='
+        formattedUrl: 'https://elastic.co?service.name=&trace.id=',
       };
       expect(
         replaceTemplateVariables(
@@ -127,7 +127,7 @@ describe('Custom link helper', () => {
       ).toEqual({
         error:
           "We couldn't find a value match for {{service.nam}}, {{trace.i}} in the example transaction document.",
-        formattedUrl: 'https://elastic.co?service.name=&trace.id='
+        formattedUrl: 'https://elastic.co?service.name=&trace.id=',
       });
     });
 
@@ -140,7 +140,7 @@ describe('Custom link helper', () => {
       ).toEqual({
         error:
           "We couldn't find an example transaction document due to invalid variable(s) defined.",
-        formattedUrl: 'https://elastic.co?service.name={{service.name}'
+        formattedUrl: 'https://elastic.co?service.name={{service.name}',
       });
     });
   });

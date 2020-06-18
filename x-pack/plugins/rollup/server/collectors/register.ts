@@ -50,7 +50,7 @@ async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: CallCl
 
   const esResponse = await callCluster('search', searchParams);
 
-  return get(esResponse, 'hits.hits', []).map(indexPattern => {
+  return get(esResponse, 'hits.hits', []).map((indexPattern) => {
     const { _id: savedObjectId } = indexPattern;
     return getIdFromSavedObjectId(savedObjectId);
   });
@@ -138,7 +138,7 @@ async function fetchRollupVisualizations(
   let rollupVisualizations = 0;
   let rollupVisualizationsFromSavedSearches = 0;
 
-  visualizations.forEach(visualization => {
+  visualizations.forEach((visualization) => {
     const {
       _source: {
         visualization: {
@@ -153,7 +153,7 @@ async function fetchRollupVisualizations(
 
     if (savedSearchRefName) {
       // This visualization depends upon a saved search.
-      const savedSearch = references.find(ref => ref.name === savedSearchRefName);
+      const savedSearch = references.find((ref) => ref.name === savedSearchRefName);
       if (rollupSavedSearchesToFlagMap[savedSearch.id]) {
         rollupVisualizations++;
         rollupVisualizationsFromSavedSearches++;

@@ -108,7 +108,7 @@ export class LogEntryCategoriesAnalysis {
     const topLogEntryCategoriesSpan = finalizeTopLogEntryCategoriesSpan();
 
     return {
-      data: topLogEntryCategories.map(topCategory => ({
+      data: topLogEntryCategories.map((topCategory) => ({
         ...topCategory,
         regularExpression: logEntryCategoriesById[topCategory.categoryId]?._source.regex ?? '',
         histograms: categoryHistogramsById[topCategory.categoryId] ?? [],
@@ -183,7 +183,9 @@ export class LogEntryCategoriesAnalysis {
     const logEntryDatasetsSpan = finalizeLogEntryDatasetsSpan();
 
     return {
-      data: logEntryDatasetBuckets.map(logEntryDatasetBucket => logEntryDatasetBucket.key.dataset),
+      data: logEntryDatasetBuckets.map(
+        (logEntryDatasetBucket) => logEntryDatasetBucket.key.dataset
+      ),
       timing: {
         spans: [logEntryDatasetsSpan, ...esSearchSpans],
       },
@@ -297,7 +299,7 @@ export class LogEntryCategoriesAnalysis {
     }
 
     const topLogEntryCategories = topLogEntryCategoriesResponse.aggregations.terms_category_id.buckets.map(
-      topCategoryBucket => {
+      (topCategoryBucket) => {
         const maximumAnomalyScoresByDataset = topCategoryBucket.filter_record.terms_dataset.buckets.reduce<
           Record<string, number>
         >(
@@ -312,7 +314,7 @@ export class LogEntryCategoriesAnalysis {
           categoryId: parseCategoryId(topCategoryBucket.key),
           logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
           datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets
-            .map(datasetBucket => ({
+            .map((datasetBucket) => ({
               name: datasetBucket.key,
               maximumAnomalyScore: maximumAnomalyScoresByDataset[datasetBucket.key] ?? 0,
             }))
@@ -403,7 +405,7 @@ export class LogEntryCategoriesAnalysis {
             )
           )
           .then(decodeOrThrow(logEntryCategoryHistogramsResponseRT))
-          .then(response => ({
+          .then((response) => ({
             histogramId,
             histogramBuckets: response.aggregations.filters_categories.buckets,
           }))
@@ -435,7 +437,7 @@ export class LogEntryCategoriesAnalysis {
                 ...(innerAccumulatedHistograms[categoryId] ?? []),
                 {
                   histogramId,
-                  buckets: categoryBucket.histogram_timestamp.buckets.map(bucket => ({
+                  buckets: categoryBucket.histogram_timestamp.buckets.map((bucket) => ({
                     bucketDuration: categoryBucket.histogram_timestamp.meta.bucketDuration,
                     logEntryCount: bucket.sum_actual.value,
                     startTime: bucket.key,
@@ -518,7 +520,7 @@ export class LogEntryCategoriesAnalysis {
     const esSearchSpan = finalizeEsSearchSpan();
 
     return {
-      examples: hits.map(hit => ({
+      examples: hits.map((hit) => ({
         dataset: hit._source.event?.dataset ?? '',
         message: hit._source.message ?? '',
         timestamp: hit.sort[0],

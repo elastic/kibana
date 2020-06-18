@@ -133,7 +133,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
 
     // Can access via router's handler function 'context' parameter - context.ml.mlClient
-    const mlClient = coreSetup.elasticsearch.createClient(PLUGIN_ID, {
+    const mlClient = coreSetup.elasticsearch.legacy.createClient(PLUGIN_ID, {
       plugins: [elasticsearchJsPlugin],
     });
 

@@ -33,13 +33,11 @@ export function formatMonitoringError(err: any) {
   return formatMsg(err);
 }
 
-export function ajaxErrorHandlersProvider($injector: any) {
-  const kbnUrl = $injector.get('kbnUrl');
-
+export function ajaxErrorHandlersProvider() {
   return (err: any) => {
     if (err.status === 403) {
       // redirect to error message view
-      kbnUrl.redirect('access-denied');
+      history.replaceState(null, '', '#/access-denied');
     } else if (err.status === 404 && !contains(window.location.hash, 'no-data')) {
       // pass through if this is a 404 and we're already on the no-data page
       Legacy.shims.toastNotifications.addDanger({

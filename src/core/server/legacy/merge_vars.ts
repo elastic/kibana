@@ -25,9 +25,9 @@ export function mergeVars(...sources: LegacyVars[]): LegacyVars {
   return Object.assign(
     {},
     ...sources,
-    ...ELIGIBLE_FLAT_MERGE_KEYS.flatMap(key =>
-      sources.some(source => key in source)
-        ? [{ [key]: Object.assign({}, ...sources.map(source => source[key] || {})) }]
+    ...ELIGIBLE_FLAT_MERGE_KEYS.flatMap((key) =>
+      sources.some((source) => key in source)
+        ? [{ [key]: Object.assign({}, ...sources.map((source) => source[key] || {})) }]
         : []
     )
   );

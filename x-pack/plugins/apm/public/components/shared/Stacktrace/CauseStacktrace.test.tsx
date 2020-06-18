@@ -24,7 +24,7 @@ describe('CauseStacktrace', () => {
       it('says "Caused by …', () => {
         const props = {
           id: 'testId',
-          stackframes: [{ filename: 'testFilename', line: { number: 1 } }]
+          stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
         };
 
         expect(
@@ -40,7 +40,7 @@ describe('CauseStacktrace', () => {
         const props = {
           id: 'testId',
           message: 'testMessage',
-          stackframes: [{ filename: 'testFilename', line: { number: 1 } }]
+          stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
         };
 
         expect(

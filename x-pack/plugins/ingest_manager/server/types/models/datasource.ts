@@ -17,7 +17,7 @@ const ConfigRecordSchema = schema.recordOf(
 const DatasourceBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  namespace: schema.maybe(schema.string()),
+  namespace: schema.string({ minLength: 1 }),
   config_id: schema.string(),
   enabled: schema.boolean(),
   package: schema.maybe(

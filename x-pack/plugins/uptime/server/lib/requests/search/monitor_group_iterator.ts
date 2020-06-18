@@ -90,7 +90,7 @@ export class MonitorGroupIterator {
     }
 
     while (true) {
-      const result = await this.attemptBufferMore(CHUNK_SIZE);
+      const result = await this.attemptBufferMore(size);
       if (result.gotHit || !result.hasMore) {
         return;
       }

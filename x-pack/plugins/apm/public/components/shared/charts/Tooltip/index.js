@@ -15,7 +15,7 @@ import {
   px,
   borderRadius,
   fontSize,
-  fontSizes
+  fontSizes,
 } from '../../../../style/variables';
 import { Legend } from '../Legend';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -117,7 +117,7 @@ Tooltip.propTypes = {
   header: PropTypes.string,
   tooltipPoints: PropTypes.array.isRequired,
   x: PropTypes.number,
-  y: PropTypes.number
+  y: PropTypes.number,
 };
 
 Tooltip.defaultProps = {};

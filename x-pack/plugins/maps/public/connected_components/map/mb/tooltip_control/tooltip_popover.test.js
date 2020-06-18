@@ -23,7 +23,7 @@ const layerId = 'tfi3f';
 
 const mockMbMapHandlers = {};
 const mockMBMap = {
-  project: lonLatArray => {
+  project: (lonLatArray) => {
     const lonDistanceFromCenter = Math.abs(lonLatArray[0] - mapCenter[0]);
     const latDistanceFromCenter = Math.abs(lonLatArray[1] - mapCenter[1]);
     return {
@@ -34,7 +34,7 @@ const mockMBMap = {
   on: (eventName, callback) => {
     mockMbMapHandlers[eventName] = callback;
   },
-  off: eventName => {
+  off: (eventName) => {
     delete mockMbMapHandlers[eventName];
   },
   getBounds: () => {
@@ -95,7 +95,7 @@ describe('TooltipPopover', () => {
       const component = shallow(
         <TooltipPopover
           {...defaultProps}
-          renderTooltipContent={props => {
+          renderTooltipContent={(props) => {
             return <div {...props}>Custom tooltip content</div>;
           }}
         />

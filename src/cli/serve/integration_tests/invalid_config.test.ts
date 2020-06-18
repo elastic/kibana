@@ -29,10 +29,10 @@ interface LogEntry {
   type: string;
 }
 
-describe('cli invalid config support', function() {
+describe('cli invalid config support', function () {
   it(
     'exits with statusCode 64 and logs a single line when config is invalid',
-    function() {
+    function () {
       // Unused keys only throw once LegacyService starts, so disable migrations so that Core
       // will finish the start lifecycle without a running Elasticsearch instance.
       const { error, status, stdout } = spawnSync(
@@ -47,9 +47,9 @@ describe('cli invalid config support', function() {
         .toString('utf8')
         .split('\n')
         .filter(Boolean)
-        .map(line => JSON.parse(line) as LogEntry)
-        .filter(line => line.tags.includes('fatal'))
-        .map(obj => ({
+        .map((line) => JSON.parse(line) as LogEntry)
+        .filter((line) => line.tags.includes('fatal'))
+        .map((obj) => ({
           ...obj,
           pid: '## PID ##',
           '@timestamp': '## @timestamp ##',

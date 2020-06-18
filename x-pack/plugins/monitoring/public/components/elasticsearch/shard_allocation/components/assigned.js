@@ -8,8 +8,18 @@ import { get, sortBy } from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
 import { calculateClass } from '../lib/calculate_class';
-import { generateQueryAndLink } from '../lib/generate_query_and_link';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiKeyboardAccessible } from '@elastic/eui';
+import { getSafeForExternalLink } from '../../../../lib/get_safe_for_external_link';
+
+const generateQueryAndLink = (data) => {
+  let type = 'indices';
+  let ident = data.name;
+  if (data.type === 'node') {
+    type = 'nodes';
+    ident = data.id;
+  }
+  return getSafeForExternalLink(`#/elasticsearch/${type}/${ident}`);
+};
 
 function sortByName(item) {
   if (item.type === 'node') {
@@ -19,15 +29,18 @@ function sortByName(item) {
 }
 
 export class Assigned extends React.Component {
-  createShard = shard => {
+  createShard = (shard) => {
     const type = shard.primary ? 'primary' : 'replica';
     const key = `${shard.index}.${shard.node}.${type}.${shard.state}.${shard.shard}`;
     return <Shard shard={shard} key={key} />;
   };
 
-  createChild = data => {
+  createChild = (data) => {
     const key = data.id;
     const initialClasses = ['monChild'];
+    if (data.type === 'index') {
+      initialClasses.push('monChild--index');
+    }
     const shardStats = get(this.props.shardStats.indices, key);
     if (shardStats) {
       switch (shardStats.status) {
@@ -40,17 +53,13 @@ export class Assigned extends React.Component {
       }
     }
 
-    const changeUrl = () => {
-      this.props.changeUrl(generateQueryAndLink(data));
-    };
-
     // TODO: redesign for shard allocation, possibly giving shard display the
     // ability to use the euiLink CSS class (blue link text instead of white link text)
     // Disabling eslint because EuiKeyboardAccessible does it for us
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     const name = (
       <EuiKeyboardAccessible>
-        <a onClick={changeUrl}>
+        <a href={generateQueryAndLink(data)}>
           <span>{data.name}</span>
         </a>
       </EuiKeyboardAccessible>

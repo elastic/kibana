@@ -11,7 +11,7 @@ import {
   LineSeries,
   LineMarkSeries,
   AreaSeries,
-  VerticalRectSeries
+  VerticalRectSeries,
 } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
@@ -27,14 +27,14 @@ import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
 
 // undefined values are converted by react-vis into NaN when stacking
 // see https://github.com/uber/react-vis/issues/1214
-const getNull = d => isValidCoordinateValue(d.y) && !isNaN(d.y);
+const getNull = (d) => isValidCoordinateValue(d.y) && !isNaN(d.y);
 
 class StaticPlot extends PureComponent {
   getVisSeries(series, plotValues) {
     return series
       .slice()
       .reverse()
-      .map(serie => this.getSerie(serie, plotValues));
+      .map((serie) => this.getSerie(serie, plotValues));
   }
 
   getSerie(serie, plotValues) {
@@ -68,12 +68,12 @@ class StaticPlot extends PureComponent {
       case 'areaStacked': {
         // convert null into undefined because of stack issues,
         // see https://github.com/uber/react-vis/issues/1214
-        const data = serie.data.map(value => {
+        const data = serie.data.map((value) => {
           return 'y' in value && isValidCoordinateValue(value.y)
             ? value
             : {
                 ...value,
-                y: undefined
+                y: undefined,
               };
         });
         return [
@@ -98,17 +98,17 @@ class StaticPlot extends PureComponent {
             color={serie.color}
             stack={true}
             cluster="line"
-          />
+          />,
         ];
       }
 
       case 'areaMaxHeight':
         const yMax = last(plotValues.yTickValues);
-        const data = serie.data.map(p => ({
+        const data = serie.data.map((p) => ({
           x0: p.x0,
           x: p.x,
           y0: 0,
-          y: yMax
+          y: yMax,
         }));
 
         return (
@@ -147,14 +147,14 @@ class StaticPlot extends PureComponent {
    * This produces the same results as the built-in formatter from D3, which is
    * what react-vis uses, but shifts the timezone.
    */
-  tickFormatXTime = value => {
+  tickFormatXTime = (value) => {
     const xDomain = this.props.plotValues.x.domain();
 
     const time = value.getTime();
 
-    return scaleUtc()
-      .domain(xDomain)
-      .tickFormat()(new Date(time - getTimezoneOffsetInMs(time)));
+    return scaleUtc().domain(xDomain).tickFormat()(
+      new Date(time - getTimezoneOffsetInMs(time))
+    );
   };
 
   render() {
@@ -175,7 +175,7 @@ class StaticPlot extends PureComponent {
           <StatusText
             marginLeft={30}
             text={i18n.translate('xpack.apm.metrics.plot.noDataLabel', {
-              defaultMessage: 'No data within this time range.'
+              defaultMessage: 'No data within this time range.',
             })}
           />
         ) : (
@@ -187,10 +187,10 @@ class StaticPlot extends PureComponent {
               tickValues={yTickValues}
               tickFormat={tickFormatY}
               style={{
-                line: { stroke: 'none', fill: 'none' }
+                line: { stroke: 'none', fill: 'none' },
               }}
             />,
-            this.getVisSeries(series, plotValues)
+            this.getVisSeries(series, plotValues),
           ]
         )}
       </SharedPlot>
@@ -206,5 +206,5 @@ StaticPlot.propTypes = {
   plotValues: PropTypes.object.isRequired,
   tickFormatX: PropTypes.func,
   tickFormatY: PropTypes.func.isRequired,
-  width: PropTypes.number.isRequired
+  width: PropTypes.number.isRequired,
 };

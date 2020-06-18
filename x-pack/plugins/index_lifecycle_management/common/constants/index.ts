@@ -17,6 +17,4 @@ export const PLUGIN = {
   }),
 };
 
-export const BASE_PATH = '/management/elasticsearch/index_lifecycle_management/';
-
 export const API_BASE_PATH = '/api/index_lifecycle_management';

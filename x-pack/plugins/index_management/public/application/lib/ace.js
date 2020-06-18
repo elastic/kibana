@@ -7,10 +7,10 @@
 import brace from 'brace';
 import 'brace/ext/language_tools';
 
-const splitTokens = line => {
+const splitTokens = (line) => {
   return line.split(/\s+/);
 };
-const wordCompleter = words => {
+const wordCompleter = (words) => {
   return {
     identifierRegexps: [
       /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/, // adds support for dot character
@@ -31,7 +31,7 @@ const wordCompleter = words => {
       const endQuote = secondFullToken === '""' ? '' : '"';
       callback(
         null,
-        words.map(word => {
+        words.map((word) => {
           return {
             caption: ` ${word}`,
             value: `${startQuote}${word}${endQuote}`,

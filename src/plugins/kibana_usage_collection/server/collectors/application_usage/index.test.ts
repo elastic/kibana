@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/server';
 import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CollectorOptions } from '../../../../../plugins/usage_collection/server/collector/collector';
+import {
+  CollectorOptions,
+  createUsageCollectionSetupMock,
+} from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerApplicationUsageCollector } from './';
 import {
@@ -34,10 +35,11 @@ describe('telemetry_application_usage', () => {
 
   let collector: CollectorOptions;
 
-  const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = {
-    makeUsageCollector: jest.fn().mockImplementation(config => (collector = config)),
-    registerCollector: jest.fn(),
-  } as any;
+  const usageCollectionMock = createUsageCollectionSetupMock();
+  usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+    collector = config;
+    return createUsageCollectionSetupMock().makeUsageCollector(config);
+  });
 
   const getUsageCollector = jest.fn();
   const registerType = jest.fn();
@@ -77,7 +79,7 @@ describe('telemetry_application_usage', () => {
   test('paging in findAll works', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
     let total = 201;
-    savedObjectClient.find.mockImplementation(async opts => {
+    savedObjectClient.find.mockImplementation(async (opts) => {
       if (opts.type === SAVED_OBJECTS_TOTAL_TYPE) {
         return {
           saved_objects: [

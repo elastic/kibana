@@ -24,7 +24,7 @@ import {
 
 import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_list';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     clusters: getClustersList(state),
     isDetailPanelOpen: isDetailPanelOpen(state),
@@ -35,7 +35,7 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     loadClusters: () => {
       dispatch(loadClusters());
@@ -43,7 +43,7 @@ const mapDispatchToProps = dispatch => {
     refreshClusters: () => {
       dispatch(refreshClusters());
     },
-    openDetailPanel: name => {
+    openDetailPanel: (name) => {
       dispatch(openDetailPanel({ name }));
     },
     closeDetailPanel: () => {

@@ -76,7 +76,7 @@ export const validateDatasource = (
   }, {} as Record<string, RegistryInput>);
 
   // Validate each datasource input with either its own config fields or streams
-  datasource.inputs.forEach(input => {
+  datasource.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
@@ -109,37 +109,32 @@ export const validateDatasource = (
 
     // Validate each input stream with config fields
     if (input.streams.length) {
-      input.streams.forEach(stream => {
-        if (!stream.vars) {
-          return;
-        }
-
-        const streamValidationResults: DatasourceConfigValidationResults = {
-          vars: undefined,
-        };
-
-        const streamVarsByName = (
-          (
-            registryInputsByType[input.type].streams.find(
-              registryStream => registryStream.dataset === stream.dataset
-            ) || {}
-          ).vars || []
-        ).reduce((vars, registryVar) => {
-          vars[registryVar.name] = registryVar;
-          return vars;
-        }, {} as Record<string, RegistryVarsEntry>);
+      input.streams.forEach((stream) => {
+        const streamValidationResults: DatasourceConfigValidationResults = {};
 
         // Validate stream-level config fields
-        streamValidationResults.vars = Object.entries(stream.vars).reduce(
-          (results, [name, configEntry]) => {
-            results[name] =
-              input.enabled && stream.enabled
-                ? validateDatasourceConfig(configEntry, streamVarsByName[name])
-                : null;
-            return results;
-          },
-          {} as ValidationEntry
-        );
+        if (stream.vars) {
+          const streamVarsByName = (
+            (
+              registryInputsByType[input.type].streams.find(
+                (registryStream) => registryStream.dataset === stream.dataset
+              ) || {}
+            ).vars || []
+          ).reduce((vars, registryVar) => {
+            vars[registryVar.name] = registryVar;
+            return vars;
+          }, {} as Record<string, RegistryVarsEntry>);
+          streamValidationResults.vars = Object.entries(stream.vars).reduce(
+            (results, [name, configEntry]) => {
+              results[name] =
+                input.enabled && stream.enabled
+                  ? validateDatasourceConfig(configEntry, streamVarsByName[name])
+                  : null;
+              return results;
+            },
+            {} as ValidationEntry
+          );
+        }
 
         inputValidationResults.streams![stream.id] = streamValidationResults;
       });
@@ -228,5 +223,6 @@ export const validationHasErrors = (
     | DatasourceConfigValidationResults
 ) => {
   const flattenedValidation = getFlattenedObject(validationResults);
+
   return !!Object.entries(flattenedValidation).find(([, value]) => !!value);
 };

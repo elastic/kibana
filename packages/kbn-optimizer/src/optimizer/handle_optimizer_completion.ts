@@ -32,7 +32,7 @@ export function handleOptimizerCompletion(config: OptimizerConfig) {
 
     return update$.pipe(
       tap({
-        next: update => {
+        next: (update) => {
           prevState = update.state;
         },
         complete: () => {

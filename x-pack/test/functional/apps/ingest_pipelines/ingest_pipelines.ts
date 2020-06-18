@@ -11,22 +11,6 @@ const PIPELINE = {
   name: 'test_pipeline',
   description: 'My pipeline description.',
   version: 1,
-  processors: JSON.stringify([
-    {
-      set: {
-        field: 'foo',
-        value: 'new',
-      },
-    },
-  ]),
-  onFailureProcessors: JSON.stringify([
-    {
-      set: {
-        field: '_index',
-        value: 'failed-{{ _index }}',
-      },
-    },
-  ]),
 };
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -34,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('legacyEs');
 
-  describe('Ingest Pipelines', function() {
+  describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
       await pageObjects.common.navigateToApp('ingestPipelines');
@@ -52,7 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
       const newPipelineExists = Boolean(
-        pipelinesList.find(pipelineName => pipelineName === PIPELINE.name)
+        pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
       );
 
       expect(newPipelineExists).to.be(true);

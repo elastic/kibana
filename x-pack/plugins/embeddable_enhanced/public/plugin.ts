@@ -17,6 +17,7 @@ import {
   defaultEmbeddableFactoryProvider,
   EmbeddableContext,
   PANEL_NOTIFICATION_TRIGGER,
+  ViewMode,
 } from '../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
 import {
@@ -27,7 +28,7 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
-} from '../../advanced_ui_actions/public';
+} from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
 
 declare module '../../../../src/plugins/ui_actions/public' {
@@ -38,12 +39,12 @@ declare module '../../../../src/plugins/ui_actions/public' {
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
-  advancedUiActions: AdvancedUiActionsSetup;
+  uiActionsEnhanced: AdvancedUiActionsSetup;
 }
 
 export interface StartDependencies {
   embeddable: EmbeddableStart;
-  advancedUiActions: AdvancedUiActionsStart;
+  uiActionsEnhanced: AdvancedUiActionsStart;
 }
 
 // eslint-disable-next-line
@@ -56,20 +57,20 @@ export class EmbeddableEnhancedPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   constructor(protected readonly context: PluginInitializerContext) {}
 
-  private uiActions?: StartDependencies['advancedUiActions'];
+  private uiActions?: StartDependencies['uiActionsEnhanced'];
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
 
     const panelNotificationAction = new PanelNotificationsAction();
-    plugins.advancedUiActions.registerAction(panelNotificationAction);
-    plugins.advancedUiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
+    plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
+    plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
 
     return {};
   }
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
-    this.uiActions = plugins.advancedUiActions;
+    this.uiActions = plugins.uiActionsEnhanced;
 
     return {};
   }
@@ -106,6 +107,15 @@ export class EmbeddableEnhancedPlugin
     );
   }
 
+  private readonly isEmbeddableContext = (context: unknown): context is EmbeddableContext => {
+    if (!(context as EmbeddableContext)?.embeddable) {
+      // eslint-disable-next-line no-console
+      console.warn('For drilldowns to work action context should contain .embeddable field.');
+      return false;
+    }
+    return true;
+  };
+
   private enhanceEmbeddableWithDynamicActions<E extends IEmbeddable>(
     embeddable: E
   ): EnhancedEmbeddable<E> {
@@ -114,30 +124,28 @@ export class EmbeddableEnhancedPlugin
     const storage = new EmbeddableActionStorage(embeddable as EmbeddableWithDynamicActions);
     const dynamicActions = new DynamicActionManager({
       isCompatible: async (context: unknown) => {
-        if (!(context as EmbeddableContext)?.embeddable) {
-          // eslint-disable-next-line no-console
-          console.warn('For drilldowns to work action context should contain .embeddable field.');
-          return false;
-        }
-
-        return (context as EmbeddableContext).embeddable.runtimeId === embeddable.runtimeId;
+        if (!this.isEmbeddableContext(context)) return false;
+        if (context.embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
+        return context.embeddable.runtimeId === embeddable.runtimeId;
       },
       storage,
       uiActions: this.uiActions!,
     });
 
-    dynamicActions.start().catch(error => {
-      /* eslint-disable */	
-      console.log('Failed to start embeddable dynamic actions', embeddable);	
-      console.error(error);	
+    dynamicActions.start().catch((error) => {
+      /* eslint-disable */
+
+      console.log('Failed to start embeddable dynamic actions', embeddable);
+      console.error(error);
       /* eslint-enable */
     });
 
     const stop = () => {
-      dynamicActions.stop().catch(error => {
-        /* eslint-disable */	
-        console.log('Failed to stop embeddable dynamic actions', embeddable);	
-        console.error(error);	
+      dynamicActions.stop().catch((error) => {
+        /* eslint-disable */
+
+        console.log('Failed to stop embeddable dynamic actions', embeddable);
+        console.error(error);
         /* eslint-enable */
       });
     };

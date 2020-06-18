@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export const STATIC_SITE_URL_PROP_NAME = 'staticSiteUrl';
 export const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
 export const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;

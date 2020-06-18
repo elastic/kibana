@@ -33,9 +33,9 @@ export function actionsMenuContent(
         defaultMessage: 'Start datafeed',
       }),
       icon: 'play',
-      enabled: item => item.deleting !== true && canStartStopDatafeed,
-      available: item => isStartable([item]),
-      onClick: item => {
+      enabled: (item) => item.deleting !== true && canStartStopDatafeed,
+      available: (item) => isStartable([item]),
+      onClick: (item) => {
         showStartDatafeedModal([item]);
         closeMenu();
       },
@@ -49,9 +49,9 @@ export function actionsMenuContent(
         defaultMessage: 'Stop datafeed',
       }),
       icon: 'stop',
-      enabled: item => item.deleting !== true && canStartStopDatafeed,
-      available: item => isStoppable([item]),
-      onClick: item => {
+      enabled: (item) => item.deleting !== true && canStartStopDatafeed,
+      available: (item) => isStoppable([item]),
+      onClick: (item) => {
         stopDatafeeds([item], refreshJobs);
         closeMenu(true);
       },
@@ -65,9 +65,9 @@ export function actionsMenuContent(
         defaultMessage: 'Close job',
       }),
       icon: 'cross',
-      enabled: item => item.deleting !== true && canCloseJob,
-      available: item => isClosable([item]),
-      onClick: item => {
+      enabled: (item) => item.deleting !== true && canCloseJob,
+      available: (item) => isClosable([item]),
+      onClick: (item) => {
         closeJobs([item], refreshJobs);
         closeMenu(true);
       },
@@ -81,19 +81,19 @@ export function actionsMenuContent(
         defaultMessage: 'Clone job',
       }),
       icon: 'copy',
-      enabled: item => {
+      enabled: (item) => {
         // We only allow cloning of a job if the user has the right permissions and can still access
         // the indexPattern the job was created for. An indexPattern could either have been deleted
         // since the the job was created or the current user doesn't have the required permissions to
         // access the indexPattern.
         const indexPatternNames = getIndexPatternNames();
-        const jobIndicesAvailable = item.datafeedIndices.every(dfiName => {
-          return indexPatternNames.some(ipName => ipName === dfiName);
+        const jobIndicesAvailable = item.datafeedIndices.every((dfiName) => {
+          return indexPatternNames.some((ipName) => ipName === dfiName);
         });
 
         return item.deleting !== true && canCreateJob && jobIndicesAvailable;
       },
-      onClick: item => {
+      onClick: (item) => {
         cloneJob(item.id);
         closeMenu(true);
       },
@@ -107,8 +107,8 @@ export function actionsMenuContent(
         defaultMessage: 'Edit job',
       }),
       icon: 'pencil',
-      enabled: item => item.deleting !== true && canUpdateJob && canUpdateDatafeed,
-      onClick: item => {
+      enabled: (item) => item.deleting !== true && canUpdateJob && canUpdateDatafeed,
+      onClick: (item) => {
         showEditJobFlyout(item);
         closeMenu();
       },
@@ -124,7 +124,7 @@ export function actionsMenuContent(
       icon: 'trash',
       color: 'danger',
       enabled: () => canDeleteJob,
-      onClick: item => {
+      onClick: (item) => {
         showDeleteJobModal([item]);
         closeMenu();
       },

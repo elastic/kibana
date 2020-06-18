@@ -68,7 +68,7 @@ describe('metricBuckets(req, panel, series)', () => {
   });
 
   test('returns metric aggs', () => {
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = metricBuckets(req, panel, series)(next)({});
     expect(doc).toEqual({
       aggs: {

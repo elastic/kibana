@@ -117,7 +117,7 @@ export class TooltipSelector extends Component<Props, State> {
   };
 
   _getTooltipFieldNames(): string[] {
-    return this.props.tooltipFields ? this.props.tooltipFields.map(field => field.getName()) : [];
+    return this.props.tooltipFields ? this.props.tooltipFields.map((field) => field.getName()) : [];
   }
 
   _onAdd = (properties: string[]) => {

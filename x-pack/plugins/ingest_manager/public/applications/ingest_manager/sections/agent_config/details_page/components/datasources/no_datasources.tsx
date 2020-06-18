@@ -38,7 +38,7 @@ export const NoDatasources = memo<{ configId: string }>(({ configId }) => {
         >
           <FormattedMessage
             id="xpack.ingestManager.configDetailsDatasources.createFirstButtonText"
-            defaultMessage="Create data source"
+            defaultMessage="Add data source"
           />
         </EuiButton>
       }

@@ -21,7 +21,7 @@ export const encryptedSavedObjectsServiceMock = {
       attrs: T,
       action: (attrs: T, attrName: string, shouldExpose: boolean) => void
     ) {
-      const registration = registrations.find(r => r.type === descriptor.type);
+      const registration = registrations.find((r) => r.type === descriptor.type);
       if (!registration) {
         return attrs;
       }
@@ -40,7 +40,7 @@ export const encryptedSavedObjectsServiceMock = {
     }
 
     mock.isRegistered.mockImplementation(
-      type => registrations.findIndex(r => r.type === type) >= 0
+      (type) => registrations.findIndex((r) => r.type === type) >= 0
     );
     mock.encryptAttributes.mockImplementation(async (descriptor, attrs) =>
       processAttributes(

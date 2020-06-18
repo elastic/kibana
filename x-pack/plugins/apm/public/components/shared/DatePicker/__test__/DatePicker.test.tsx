@@ -8,7 +8,7 @@ import React from 'react';
 import { LocationProvider } from '../../../../context/LocationContext';
 import {
   UrlParamsContext,
-  useUiFilters
+  useUiFilters,
 } from '../../../../context/UrlParamsContext';
 import { DatePicker } from '../index';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
@@ -27,7 +27,7 @@ const MockUrlParamsProvider: React.FC<{
     value={{
       urlParams: params,
       refreshTimeRange: mockRefreshTimeRange,
-      uiFilters: useUiFilters(params)
+      uiFilters: useUiFilters(params),
     }}
     children={children}
   />
@@ -60,18 +60,15 @@ describe('DatePicker', () => {
 
   it('should update the URL when the date range changes', () => {
     const datePicker = mountDatePicker();
-    datePicker
-      .find(EuiSuperDatePicker)
-      .props()
-      .onTimeChange({
-        start: 'updated-start',
-        end: 'updated-end',
-        isInvalid: false,
-        isQuickSelection: true
-      });
+    datePicker.find(EuiSuperDatePicker).props().onTimeChange({
+      start: 'updated-start',
+      end: 'updated-end',
+      isInvalid: false,
+      isQuickSelection: true,
+    });
     expect(mockHistoryPush).toHaveBeenCalledWith(
       expect.objectContaining({
-        search: 'rangeFrom=updated-start&rangeTo=updated-end'
+        search: 'rangeFrom=updated-start&rangeTo=updated-end',
       })
     );
   });
@@ -80,7 +77,7 @@ describe('DatePicker', () => {
     jest.useFakeTimers();
     const wrapper = mountDatePicker({
       refreshPaused: false,
-      refreshInterval: 1000
+      refreshInterval: 1000,
     });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);

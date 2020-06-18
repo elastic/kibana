@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const parseAutoFollowError = error => {
+export const parseAutoFollowError = (error) => {
   if (!error.leaderIndex) {
     return null;
   }
@@ -27,7 +27,7 @@ export const parseAutoFollowError = error => {
 export const parseAutoFollowErrors = (recentAutoFollowErrors, maxErrorsToShow = 5) =>
   recentAutoFollowErrors
     .map(parseAutoFollowError)
-    .filter(error => error !== null)
+    .filter((error) => error !== null)
     .reduce((byId, error) => {
       if (!byId[error.id]) {
         byId[error.id] = [];

@@ -17,14 +17,14 @@ export const TimestampFromString = new rt.Type<number, string>(
   (input, context) =>
     pipe(
       rt.string.validate(input, context),
-      chain(stringInput => {
+      chain((stringInput) => {
         const momentValue = moment(stringInput);
         return momentValue.isValid()
           ? rt.success(momentValue.valueOf())
           : rt.failure(stringInput, context);
       })
     ),
-  output => new Date(output).toISOString()
+  (output) => new Date(output).toISOString()
 );
 
 /**

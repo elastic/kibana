@@ -13,7 +13,7 @@ import { notificationService } from '../../services/notification';
 import { clearRowStatus, reloadIndices } from '../actions';
 
 export const clearCacheIndicesStart = createAction('INDEX_MANAGEMENT_CLEAR_CACHE_INDICES_START');
-export const clearCacheIndices = ({ indexNames }) => async dispatch => {
+export const clearCacheIndices = ({ indexNames }) => async (dispatch) => {
   dispatch(clearCacheIndicesStart({ indexNames }));
   try {
     await request(indexNames);

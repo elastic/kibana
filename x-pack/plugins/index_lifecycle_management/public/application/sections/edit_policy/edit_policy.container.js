@@ -29,7 +29,7 @@ import { findFirstError } from '../../services/find_errors';
 import { EditPolicy as PresentationComponent } from './edit_policy';
 
 export const EditPolicy = connect(
-  state => {
+  (state) => {
     const errors = validateLifecycle(state);
     const firstError = findFirstError(errors);
     return {

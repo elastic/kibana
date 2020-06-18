@@ -37,7 +37,7 @@ const EuiTabLink = (props: Props) => {
   const { isSelected, children } = props;
 
   const className = cls('euiTab', {
-    'euiTab-isSelected': isSelected
+    'euiTab-isSelected': isSelected,
   });
 
   return (

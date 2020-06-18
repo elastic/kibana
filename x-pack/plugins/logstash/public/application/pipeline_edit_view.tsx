@@ -64,7 +64,7 @@ const useIsUpgraded = (upgradeService: any) => {
   const mounted = usePromise();
 
   useLayoutEffect(() => {
-    mounted(upgradeService.executeUpgrade() as Promise<boolean>).then(result =>
+    mounted(upgradeService.executeUpgrade() as Promise<boolean>).then((result) =>
       setIsUpgraded(result)
     );
   }, [mounted, upgradeService]);

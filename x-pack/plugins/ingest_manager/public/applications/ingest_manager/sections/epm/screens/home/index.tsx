@@ -70,11 +70,11 @@ function InstalledPackages() {
 
   const allInstalledPackages =
     allPackages && allPackages.response
-      ? allPackages.response.filter(pkg => pkg.status === 'installed')
+      ? allPackages.response.filter((pkg) => pkg.status === 'installed')
       : [];
 
   const updatablePackages = allInstalledPackages.filter(
-    item => 'savedObject' in item && item.version > item.savedObject.attributes.version
+    (item) => 'savedObject' in item && item.version > item.savedObject.attributes.version
   );
 
   const categories = [

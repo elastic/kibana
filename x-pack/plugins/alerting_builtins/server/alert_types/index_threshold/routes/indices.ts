@@ -53,7 +53,7 @@ export function createIndicesRoute(service: Service, router: IRouter, baseRoute:
 
     let aliases: string[] = [];
     try {
-      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.dataClient, pattern);
+      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
     } catch (err) {
       service.logger.warn(
         `route ${path} error getting aliases from pattern "${pattern}": ${err.message}`
@@ -62,7 +62,7 @@ export function createIndicesRoute(service: Service, router: IRouter, baseRoute:
 
     let indices: string[] = [];
     try {
-      indices = await getIndicesFromPattern(ctx.core.elasticsearch.dataClient, pattern);
+      indices = await getIndicesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
     } catch (err) {
       service.logger.warn(
         `route ${path} error getting indices from pattern "${pattern}": ${err.message}`
@@ -110,7 +110,7 @@ async function getIndicesFromPattern(
     return [];
   }
 
-  return (response.aggregations as IndiciesAggregation).indices.buckets.map(bucket => bucket.key);
+  return (response.aggregations as IndiciesAggregation).indices.buckets.map((bucket) => bucket.key);
 }
 
 async function getAliasesFromPattern(

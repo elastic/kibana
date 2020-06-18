@@ -25,7 +25,7 @@ export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrP
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'newsfeed']);
 
-  describe('Newsfeed icon button handle errors', function() {
+  describe('Newsfeed icon button handle errors', function () {
     this.tags('ciGroup6');
 
     before(async () => {
@@ -51,8 +51,7 @@ export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrP
       expect(objects).to.eql([]);
     });
 
-    // TODO currently fails because styles are not correctly applied in the new platform
-    it.skip('clicking on newsfeed icon should close opened newsfeed', async () => {
+    it('clicking on newsfeed icon should close opened newsfeed', async () => {
       await globalNav.clickNewsfeed();
       const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
       expect(isOpen).to.be(false);

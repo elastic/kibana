@@ -35,7 +35,7 @@ export const useIndexData = (
 
   // EuiDataGrid State
   const columns = [
-    ...indexPatternFields.map(id => {
+    ...indexPatternFields.map((id) => {
       const field = indexPattern.fields.getByName(id);
       const schema = getDataGridSchemaFromKibanaFieldType(field);
       return { id, schema };
@@ -61,7 +61,7 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
-  const getIndexData = async function() {
+  const getIndexData = async function () {
     setErrorMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
@@ -84,7 +84,7 @@ export const useIndexData = (
     try {
       const resp: IndexSearchResponse = await api.esSearch(esSearchRequest);
 
-      const docs = resp.hits.hits.map(d => d._source);
+      const docs = resp.hits.hits.map((d) => d._source);
 
       setRowCount(resp.hits.total.value);
       setTableItems(docs);

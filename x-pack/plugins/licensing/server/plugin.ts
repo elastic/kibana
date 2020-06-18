@@ -12,11 +12,12 @@ import stringify from 'json-stable-stringify';
 
 import {
   CoreSetup,
-  CoreStart,
   Logger,
   Plugin,
   PluginInitializerContext,
   IClusterClient,
+  IScopedClusterClient,
+  ScopeableRequest,
 } from 'src/core/server';
 
 import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
@@ -85,6 +86,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   private loggingSubscription?: Subscription;
   private featureUsage = new FeatureUsageService();
 
+  private refresh?: () => Promise<ILicense>;
+  private license$?: Observable<ILicense>;
+
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config$ = this.context.config.create<LicenseConfigType>();
@@ -94,10 +98,33 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     this.logger.debug('Setting up Licensing plugin');
     const config = await this.config$.pipe(take(1)).toPromise();
     const pollingFrequency = config.api_polling_frequency;
-    const dataClient = await core.elasticsearch.dataClient;
+
+    async function callAsInternalUser(
+      ...args: Parameters<IScopedClusterClient['callAsInternalUser']>
+    ): ReturnType<IScopedClusterClient['callAsInternalUser']> {
+      const [coreStart] = await core.getStartServices();
+      const client = coreStart.elasticsearch.legacy.client;
+      return await client.callAsInternalUser(...args);
+    }
+
+    const client: IClusterClient = {
+      callAsInternalUser,
+      asScoped(request?: ScopeableRequest): IScopedClusterClient {
+        return {
+          async callAsCurrentUser(
+            ...args: Parameters<IScopedClusterClient['callAsCurrentUser']>
+          ): ReturnType<IScopedClusterClient['callAsCurrentUser']> {
+            const [coreStart] = await core.getStartServices();
+            const _client = coreStart.elasticsearch.legacy.client;
+            return await _client.asScoped(request).callAsCurrentUser(...args);
+          },
+          callAsInternalUser,
+        };
+      },
+    };
 
     const { refresh, license$ } = this.createLicensePoller(
-      dataClient,
+      client,
       pollingFrequency.asMilliseconds()
     );
 
@@ -105,6 +132,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
     registerRoutes(core.http.createRouter(), core.getStartServices);
     core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
+
+    this.refresh = refresh;
+    this.license$ = license$;
 
     return {
       refresh,
@@ -123,7 +153,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       this.fetchLicense(clusterClient)
     );
 
-    this.loggingSubscription = license$.subscribe(license =>
+    this.loggingSubscription = license$.subscribe((license) =>
       this.logger.debug(
         'Imported license information from Elasticsearch:' +
           [
@@ -189,9 +219,15 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return error.message;
   }
 
-  public async start(core: CoreStart) {
+  public async start() {
+    if (!this.refresh || !this.license$) {
+      throw new Error('Setup has not been completed');
+    }
     return {
+      refresh: this.refresh,
+      license$: this.license$,
       featureUsage: this.featureUsage.start(),
+      createLicensePoller: this.createLicensePoller.bind(this),
     };
   }
 

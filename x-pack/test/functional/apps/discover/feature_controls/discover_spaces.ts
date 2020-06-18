@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
@@ -51,7 +51,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Discover');
       });
 
@@ -95,7 +95,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Discover');
       });
 
@@ -140,19 +140,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     describe('space with index pattern management disabled', () => {
       before(async () => {
         await spacesService.create({
-          id: 'custom_space',
-          name: 'custom_space',
+          id: 'custom_space_no_index_patterns',
+          name: 'custom_space_no_index_patterns',
           disabledFeatures: ['indexPatterns'],
         });
       });
 
       after(async () => {
-        await spacesService.delete('custom_space');
+        await spacesService.delete('custom_space_no_index_patterns');
       });
 
       it('Navigates to Kibana home rather than index pattern management when no index patterns exist', async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
-          basePath: '/s/custom_space',
+          basePath: '/s/custom_space_no_index_patterns',
           ensureCurrentUrl: false,
         });
         await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });

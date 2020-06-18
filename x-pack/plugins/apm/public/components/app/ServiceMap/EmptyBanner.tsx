@@ -28,7 +28,7 @@ export function EmptyBanner() {
   const [nodeCount, setNodeCount] = useState(0);
 
   useEffect(() => {
-    const handler: cytoscape.EventHandler = event =>
+    const handler: cytoscape.EventHandler = (event) =>
       setNodeCount(event.cy.nodes().length);
 
     if (cy) {
@@ -58,19 +58,19 @@ export function EmptyBanner() {
     <EmptyBannerContainer style={{ width }}>
       <EuiCallOut
         title={i18n.translate('xpack.apm.serviceMap.emptyBanner.title', {
-          defaultMessage: "Looks like there's only a single service."
+          defaultMessage: "Looks like there's only a single service.",
         })}
       >
         {i18n.translate('xpack.apm.serviceMap.emptyBanner.message', {
           defaultMessage:
-            "We will map out connected services and external requests if we can detect them. Please make sure you're running the latest version of the APM agent."
+            "We will map out connected services and external requests if we can detect them. Please make sure you're running the latest version of the APM agent.",
         })}{' '}
         <ElasticDocsLink
           section="/kibana"
           path="/service-maps.html#service-maps-supported"
         >
           {i18n.translate('xpack.apm.serviceMap.emptyBanner.docsLink', {
-            defaultMessage: 'Learn more in the docs'
+            defaultMessage: 'Learn more in the docs',
           })}
         </ElasticDocsLink>
       </EuiCallOut>

@@ -8,12 +8,12 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
+import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
-import { decodePath, getTemplateDetailsLink } from '../../services/routing';
+import { decodePathFromReactRouter, getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
-import { getFormatVersionFromQueryparams } from '../../lib/index_templates';
+import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
 
 interface MatchParams {
   name: string;
@@ -26,15 +26,14 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   location,
   history,
 }) => {
-  const decodedTemplateName = decodePath(name);
-  const formatVersion =
-    getFormatVersionFromQueryparams(location) ?? DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT;
+  const decodedTemplateName = decodePathFromReactRouter(name);
+  const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
   const { error: templateToCloneError, data: templateToClone, isLoading } = useLoadIndexTemplate(
     decodedTemplateName,
-    formatVersion
+    isLegacy
   );
 
   const onSave = async (template: TemplateDeserialized) => {
@@ -52,7 +51,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(getTemplateDetailsLink(newTemplateName, template._kbnMeta.formatVersion));
+    history.push(getTemplateDetailsLink(newTemplateName, template._kbnMeta.isLegacy));
   };
 
   const clearSaveError = () => {

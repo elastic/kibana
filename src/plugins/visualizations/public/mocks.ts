@@ -66,6 +66,7 @@ const createInstance = async () => {
       inspector: inspectorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
       application: applicationServiceMock.createStartContract(),
+      embeddable: embeddablePluginMock.createStartContract(),
     });
 
   return {

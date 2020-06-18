@@ -96,7 +96,7 @@ export function plot(): ExpressionFunctionDefinition<'plot', PointSeries, Argume
         return {
           ...flotStyle,
           label,
-          data: series.map(point => {
+          data: series.map((point) => {
             const attrs: {
               size?: number;
               text?: string;

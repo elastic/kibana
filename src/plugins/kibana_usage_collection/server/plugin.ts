@@ -58,7 +58,9 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     { savedObjects, metrics, getStartServices }: CoreSetup,
     { usageCollection }: KibanaUsageCollectionPluginsDepsSetup
   ) {
-    this.registerUsageCollectors(usageCollection, metrics, opts => savedObjects.registerType(opts));
+    this.registerUsageCollectors(usageCollection, metrics, (opts) =>
+      savedObjects.registerType(opts)
+    );
   }
 
   public start(core: CoreStart) {

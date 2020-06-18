@@ -24,13 +24,13 @@ import * as states from './states';
 import Status from './status';
 import ServerStatus from './server_status';
 
-describe('ServerStatus class', function() {
+describe('ServerStatus class', function () {
   const plugin = { id: 'name', version: '1.2.3' };
 
   let server;
   let serverStatus;
 
-  beforeEach(function() {
+  beforeEach(function () {
     server = { expose: sinon.stub(), logWithMetadata: sinon.stub() };
     serverStatus = new ServerStatus(server);
   });
@@ -42,8 +42,8 @@ describe('ServerStatus class', function() {
     });
   });
 
-  describe('#createForPlugin(plugin)', function() {
-    it('should create a new status by plugin', function() {
+  describe('#createForPlugin(plugin)', function () {
+    it('should create a new status by plugin', function () {
       const status = serverStatus.createForPlugin(plugin);
       expect(status).toBeInstanceOf(Status);
     });
@@ -61,41 +61,41 @@ describe('ServerStatus class', function() {
     });
   });
 
-  describe('#getForPluginId(plugin)', function() {
-    it('exposes plugin status for the plugin', function() {
+  describe('#getForPluginId(plugin)', function () {
+    it('exposes plugin status for the plugin', function () {
       const status = serverStatus.createForPlugin(plugin);
       expect(serverStatus.getForPluginId(plugin.id)).toBe(status);
     });
 
-    it('does not get plain statuses by their id', function() {
+    it('does not get plain statuses by their id', function () {
       serverStatus.create('someid');
       expect(serverStatus.getForPluginId('someid')).toBe(undefined);
     });
   });
 
-  describe('#getState(id)', function() {
-    it('should expose the state of a status by id', function() {
+  describe('#getState(id)', function () {
+    it('should expose the state of a status by id', function () {
       const status = serverStatus.create('someid');
       status.green();
       expect(serverStatus.getState('someid')).toBe('green');
     });
   });
 
-  describe('#getStateForPluginId(plugin)', function() {
-    it('should expose the state of a plugin by id', function() {
+  describe('#getStateForPluginId(plugin)', function () {
+    it('should expose the state of a plugin by id', function () {
       const status = serverStatus.createForPlugin(plugin);
       status.green();
       expect(serverStatus.getStateForPluginId(plugin.id)).toBe('green');
     });
   });
 
-  describe('#overall()', function() {
-    it('considers each status to produce a summary', function() {
+  describe('#overall()', function () {
+    it('considers each status to produce a summary', function () {
       const status = serverStatus.createForPlugin(plugin);
 
       expect(serverStatus.overall().state).toBe('uninitialized');
 
-      const match = function(overall, state) {
+      const match = function (overall, state) {
         expect(overall).toHaveProperty('state', state.id);
         expect(overall).toHaveProperty('title', state.title);
         expect(overall).toHaveProperty('icon', state.icon);
@@ -114,8 +114,8 @@ describe('ServerStatus class', function() {
     });
   });
 
-  describe('#toJSON()', function() {
-    it('serializes to overall status and individuals', function() {
+  describe('#toJSON()', function () {
+    it('serializes to overall status and individuals', function () {
       const pluginOne = { id: 'one', version: '1.0.0' };
       const pluginTwo = { id: 'two', version: '2.0.0' };
       const pluginThree = { id: 'three', version: 'kibana' };
@@ -134,7 +134,7 @@ describe('ServerStatus class', function() {
       expect(json.overall.state).toEqual(serverStatus.overall().state);
       expect(json.statuses).toHaveLength(4);
 
-      const out = status => find(json.statuses, { id: status.id });
+      const out = (status) => find(json.statuses, { id: status.id });
       expect(out(service)).toHaveProperty('state', 'green');
       expect(out(p1)).toHaveProperty('state', 'yellow');
       expect(out(p2)).toHaveProperty('state', 'red');

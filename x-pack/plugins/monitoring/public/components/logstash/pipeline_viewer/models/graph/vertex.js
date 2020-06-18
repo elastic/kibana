@@ -31,7 +31,7 @@ export class Vertex {
   }
 
   get incomingVertices() {
-    return this.incomingEdges.map(e => e.from);
+    return this.incomingEdges.map((e) => e.from);
   }
 
   get outgoingEdges() {
@@ -39,7 +39,7 @@ export class Vertex {
   }
 
   get outgoingVertices() {
-    return this.outgoingEdges.map(e => e.to);
+    return this.outgoingEdges.map((e) => e.to);
   }
 
   get meta() {
@@ -57,7 +57,7 @@ export class Vertex {
     const seen = {};
     while (pending.length > 0) {
       const vertex = pending.pop();
-      vertex.outgoingEdges.forEach(edge => {
+      vertex.outgoingEdges.forEach((edge) => {
         edges.push(edge);
         const to = edge.to;
         if (seen[to.id] !== true) {

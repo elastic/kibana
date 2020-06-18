@@ -17,11 +17,11 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
 
   const params = {
     index: indices.apmAgentConfigurationIndex,
-    size: 200
+    size: 200,
   };
 
   const resp = await internalClient.search<AgentConfiguration>(params);
   return resp.hits.hits
     .map(convertConfigSettingsToString)
-    .map(hit => hit._source);
+    .map((hit) => hit._source);
 }

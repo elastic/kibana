@@ -83,7 +83,7 @@ class ReportErrorButtonUi extends Component<Props, State> {
   }
 
   private togglePopover = () => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       return { isPopoverOpen: !prevState.isPopoverOpen };
     });
 

@@ -40,7 +40,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     this.isDownloading = false;
     this.core = core;
 
-    license$.subscribe(license => {
+    license$.subscribe((license) => {
       const results = license.check('reporting', 'basic');
       const { showLinks } = checkLicense(results);
       this.canDownloadCSV = showLinks;
@@ -57,7 +57,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     });
   }
 
-  public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
+  public getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
     const adapters = searchEmbeddable.getInspectorAdapters();
     if (!adapters) {
       return {};

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsSetup, setupSavedObjects } from '.';
+import { ClientInstanciator, setupSavedObjects } from '.';
 
 import {
   coreMock,
@@ -24,13 +24,14 @@ import {
 import { EncryptedSavedObjectsService } from '../crypto';
 
 describe('#setupSavedObjects', () => {
-  let setupContract: SavedObjectsSetup;
+  let setupContract: ClientInstanciator;
+  let coreStartMock: ReturnType<typeof coreMock.createStart>;
   let coreSetupMock: ReturnType<typeof coreMock.createSetup>;
   let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
   let mockSavedObjectTypeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   let mockEncryptedSavedObjectsService: jest.Mocked<EncryptedSavedObjectsService>;
   beforeEach(() => {
-    const coreStartMock = coreMock.createStart();
+    coreStartMock = coreMock.createStart();
 
     mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
     coreStartMock.savedObjects.createInternalRepository.mockReturnValue(mockSavedObjectsRepository);
@@ -70,6 +71,33 @@ describe('#setupSavedObjects', () => {
     ).toBeInstanceOf(EncryptedSavedObjectsClientWrapper);
   });
 
+  it('properly registers client wrapper factory with', () => {
+    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
+    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledWith(
+      Number.MAX_SAFE_INTEGER,
+      'encryptedSavedObjects',
+      expect.any(Function)
+    );
+
+    const [[, , clientFactory]] = coreSetupMock.savedObjects.addClientWrapper.mock.calls;
+    expect(
+      clientFactory({
+        client: savedObjectsClientMock.create(),
+        typeRegistry: savedObjectsTypeRegistryMock.create(),
+        request: httpServerMock.createKibanaRequest(),
+      })
+    ).toBeInstanceOf(EncryptedSavedObjectsClientWrapper);
+  });
+
+  describe('#setupContract', () => {
+    it('includes hiddenTypes when specified', async () => {
+      await setupContract({ includedHiddenTypes: ['hiddenType'] });
+      expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith([
+        'hiddenType',
+      ]);
+    });
+  });
+
   describe('#getDecryptedAsInternalUser', () => {
     it('includes `namespace` for single-namespace saved objects', async () => {
       const mockSavedObject: SavedObject = {
@@ -82,7 +110,7 @@ describe('#setupSavedObjects', () => {
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
 
       await expect(
-        setupContract.getDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
+        setupContract().getDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
           namespace: 'some-ns',
         })
       ).resolves.toEqual({
@@ -115,7 +143,7 @@ describe('#setupSavedObjects', () => {
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(false);
 
       await expect(
-        setupContract.getDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
+        setupContract().getDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
           namespace: 'some-ns',
         })
       ).resolves.toEqual({

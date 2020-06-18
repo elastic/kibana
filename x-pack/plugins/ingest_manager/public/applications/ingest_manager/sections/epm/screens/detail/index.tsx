@@ -27,7 +27,7 @@ export function Detail() {
   const [info, setInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
   useEffect(() => {
-    sendGetPackageInfoByKey(pkgkey).then(response => {
+    sendGetPackageInfoByKey(pkgkey).then((response) => {
       const packageInfo = response.data?.response;
       const title = packageInfo?.title;
       const name = packageInfo?.name;
@@ -53,13 +53,13 @@ export function Detail() {
 }
 
 const FullWidthHeader = styled(EuiPage)`
-  border-bottom: ${props => props.theme.eui.euiBorderThin};
-  padding-bottom: ${props => props.theme.eui.paddingSizes.xl};
+  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+  padding-bottom: ${(props) => props.theme.eui.paddingSizes.xl};
 `;
 
 const FullWidthContent = styled(EuiPage)`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
-  padding-top: ${props => parseInt(props.theme.eui.paddingSizes.xl, 10) * 1.25}px;
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+  padding-top: ${(props) => parseInt(props.theme.eui.paddingSizes.xl, 10) * 1.25}px;
   flex-grow: 1;
 `;
 

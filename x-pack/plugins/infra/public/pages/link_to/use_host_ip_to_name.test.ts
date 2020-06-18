@@ -8,7 +8,7 @@ import { useHostIpToName } from './use_host_ip_to_name';
 import { renderHook } from '@testing-library/react-hooks';
 
 const renderUseHostIpToNameHook = () =>
-  renderHook(props => useHostIpToName(props.ipAddress, props.indexPattern), {
+  renderHook((props) => useHostIpToName(props.ipAddress, props.indexPattern), {
     initialProps: { ipAddress: '127.0.0.1', indexPattern: 'metricbest-*' },
   });
 

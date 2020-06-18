@@ -45,7 +45,7 @@ export class ESDocField extends AbstractField implements IField {
       : indexPatternField;
   }
 
-  async createTooltipProperty(value: string | undefined): Promise<ITooltipProperty> {
+  async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const indexPattern = await this._source.getIndexPattern();
     const tooltipProperty = new TooltipProperty(this.getName(), await this.getLabel(), value);
     return new ESTooltipProperty(tooltipProperty, indexPattern, this as IField);

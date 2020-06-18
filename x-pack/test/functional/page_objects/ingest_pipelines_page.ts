@@ -62,7 +62,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
         return await pipelineNameElement.getVisibleText();
       };
 
-      return await Promise.all(pipelines.map(pipeline => getPipelineName(pipeline)));
+      return await Promise.all(pipelines.map((pipeline) => getPipelineName(pipeline)));
     },
   };
 }

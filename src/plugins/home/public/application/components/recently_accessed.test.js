@@ -23,7 +23,7 @@ import { RecentlyAccessed, NUM_LONG_LINKS } from './recently_accessed';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-const createRecentlyAccessed = length => {
+const createRecentlyAccessed = (length) => {
   const recentlyAccessed = [];
   let i = 0;
   while (recentlyAccessed.length < length) {

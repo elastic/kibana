@@ -22,7 +22,7 @@ export const ShowLicenseInfo = () => {
         <p>{labels.START_TRAIL_DESC}</p>
         <EuiButton
           color="primary"
-          href={basePath + `/app/kibana#/management/elasticsearch/license_management/home`}
+          href={basePath + `/app/management/stack/license_management/home`}
           target="_blank"
         >
           {labels.START_TRAIL}

@@ -274,11 +274,7 @@ describe('<AutoFollowPatternList />', () => {
 
       test('should have a "settings" section', () => {
         actions.clickAutoFollowPatternAt(0);
-        expect(
-          find('settingsSection')
-            .find('h3')
-            .text()
-        ).toEqual('Settings');
+        expect(find('settingsSection').find('h3').text()).toEqual('Settings');
         expect(exists('settingsValues')).toBe(true);
       });
 
@@ -369,7 +365,7 @@ describe('<AutoFollowPatternList />', () => {
 
         expect(exists('autoFollowPatternDetail.errors')).toBe(true);
         expect(exists('autoFollowPatternDetail.titleErrors')).toBe(true);
-        expect(find('autoFollowPatternDetail.recentError').map(error => error.text())).toEqual([
+        expect(find('autoFollowPatternDetail.recentError').map((error) => error.text())).toEqual([
           'April 16th, 2020 8:00:00 PM: bar',
         ]);
       });

@@ -81,7 +81,7 @@ function processPipelinesAPIResponse(response, throughputMetricKey, nodesCountMe
 
   // Normalize metric names for shared component code
   // Calculate latest throughput and node count for each pipeline
-  processedResponse.pipelines.forEach(pipeline => {
+  processedResponse.pipelines.forEach((pipeline) => {
     pipeline.metrics = {
       throughput: pipeline.metrics[throughputMetricKey],
       nodesCount: pipeline.metrics[nodesCountMetricKey],
@@ -96,8 +96,8 @@ function processPipelinesAPIResponse(response, throughputMetricKey, nodesCountMe
 async function getPaginatedThroughputData(pipelines, req, lsIndexPattern, throughputMetric) {
   const metricSeriesData = Object.values(
     await Promise.all(
-      pipelines.map(pipeline => {
-        return new Promise(async resolve => {
+      pipelines.map((pipeline) => {
+        return new Promise(async (resolve) => {
           const data = await getMetrics(
             req,
             lsIndexPattern,
@@ -141,7 +141,7 @@ async function getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountM
   if (!Object.keys(pipelinesMap).length) {
     return;
   }
-  pipelines.forEach(pipeline => void (pipeline[nodesCountMetric] = pipelinesMap[pipeline.id]));
+  pipelines.forEach((pipeline) => void (pipeline[nodesCountMetric] = pipelinesMap[pipeline.id]));
 }
 
 async function getPipelines(req, lsIndexPattern, pipelines, throughputMetric, nodesCountMetric) {
@@ -156,8 +156,8 @@ async function getPipelines(req, lsIndexPattern, pipelines, throughputMetric, no
     const pipeline = {
       id,
       metrics: {
-        [throughputMetric]: throughputPipelines.find(p => p.id === id).metrics[throughputMetric],
-        [nodesCountMetric]: nodePipelines.find(p => p.id === id).metrics[nodesCountMetric],
+        [throughputMetric]: throughputPipelines.find((p) => p.id === id).metrics[throughputMetric],
+        [nodesCountMetric]: nodePipelines.find((p) => p.id === id).metrics[nodesCountMetric],
       },
     };
     return pipeline;
@@ -167,8 +167,8 @@ async function getPipelines(req, lsIndexPattern, pipelines, throughputMetric, no
 
 async function getThroughputPipelines(req, lsIndexPattern, pipelines, throughputMetric) {
   const metricsResponse = await Promise.all(
-    pipelines.map(pipeline => {
-      return new Promise(async resolve => {
+    pipelines.map((pipeline) => {
+      return new Promise(async (resolve) => {
         const data = await getMetrics(req, lsIndexPattern, [throughputMetric], [], {
           pipeline,
         });

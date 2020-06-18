@@ -32,7 +32,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
       const kibanaVersionAccessor = kibanaServer.version;
       kibanaVersion = await kibanaVersionAccessor.get();
       defaultAttributes =
-        (await getSavedObjectAttributes(supertest).catch(err => {
+        (await getSavedObjectAttributes(supertest).catch((err) => {
           if (err.message === 'expected 200 "OK", got 404 "Not Found"') {
             return null;
           }

@@ -25,28 +25,28 @@ import {
 
 import { PolicyTable as PresentationComponent } from './policy_table';
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    policyFilterChanged: filter => {
+    policyFilterChanged: (filter) => {
       dispatch(policyFilterChanged({ filter }));
     },
-    policyPageChanged: pageNumber => {
+    policyPageChanged: (pageNumber) => {
       dispatch(policyPageChanged({ pageNumber }));
     },
-    policyPageSizeChanged: pageSize => {
+    policyPageSizeChanged: (pageSize) => {
       dispatch(policyPageSizeChanged({ pageSize }));
     },
     policySortChanged: (sortField, isSortAscending) => {
       dispatch(policySortChanged({ sortField, isSortAscending }));
     },
-    fetchPolicies: withIndices => {
+    fetchPolicies: (withIndices) => {
       dispatch(fetchPolicies(withIndices));
     },
   };
 };
 
 export const PolicyTable = connect(
-  state => ({
+  (state) => ({
     totalNumberOfPolicies: getPolicies(state).length,
     policies: getPageOfPolicies(state),
     pager: getPolicyPager(state),

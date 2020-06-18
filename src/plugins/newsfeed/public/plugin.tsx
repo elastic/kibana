@@ -55,7 +55,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     const api$ = this.fetchNewsfeed(core);
     core.chrome.navControls.registerRight({
       order: 1000,
-      mount: target => this.mount(api$, target),
+      mount: (target) => this.mount(api$, target),
     });
 
     return {};

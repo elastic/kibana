@@ -24,6 +24,6 @@ export function parseCommaSeparatedList(input: any) {
 
   return String(input || '')
     .split(',')
-    .map(word => word.trim())
+    .map((word) => word.trim())
     .filter(Boolean);
 }

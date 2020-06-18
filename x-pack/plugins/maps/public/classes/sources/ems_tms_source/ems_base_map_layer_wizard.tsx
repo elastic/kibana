@@ -13,8 +13,10 @@ import { VectorTileLayer } from '../../layers/vector_tile_layer/vector_tile_laye
 // @ts-ignore
 import { TileServiceSelect } from './tile_service_select';
 import { getIsEmsEnabled } from '../../../kibana_services';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: () => {
     return getIsEmsEnabled();
   },
@@ -22,12 +24,12 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Tile map service from Elastic Maps Service',
   }),
   icon: 'emsApp',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       const layerDescriptor = VectorTileLayer.createDescriptor({
         sourceDescriptor: EMSTMSSource.createDescriptor(sourceConfig),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
 
     return <TileServiceSelect onTileSelect={onSourceConfigChange} />;

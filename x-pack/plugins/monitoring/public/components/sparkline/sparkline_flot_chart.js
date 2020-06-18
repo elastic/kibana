@@ -91,7 +91,7 @@ export class SparklineFlotChart {
     this.flotChart.draw();
   }
 
-  setupBrushHandling = onBrush => {
+  setupBrushHandling = (onBrush) => {
     // Requires `selection` flot plugin
     this.options.selection = {
       mode: 'x',
@@ -104,7 +104,7 @@ export class SparklineFlotChart {
     });
   };
 
-  setupHoverHandling = onHover => {
+  setupHoverHandling = (onHover) => {
     const container = $(this.containerElem);
     const debouncedOnHover = debounce(
       (_event, _range, item) => {

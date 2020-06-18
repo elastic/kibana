@@ -27,7 +27,7 @@ const UNKNOWN = 'unknown';
 
 export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSchema[]) => {
   router.get({ path: '/api/sample_data', validate: false }, async (context, req, res) => {
-    const registeredSampleDatasets = sampleDatasets.map(sampleDataset => {
+    const registeredSampleDatasets = sampleDatasets.map((sampleDataset) => {
       return {
         id: sampleDataset.id,
         name: sampleDataset.name,
@@ -42,12 +42,12 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
         statusMsg: sampleDataset.statusMsg,
       };
     });
-    const isInstalledPromises = registeredSampleDatasets.map(async sampleDataset => {
+    const isInstalledPromises = registeredSampleDatasets.map(async (sampleDataset) => {
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
         try {
-          const indexExists = await context.core.elasticsearch.dataClient.callAsCurrentUser(
+          const indexExists = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
             'indices.exists',
             { index }
           );
@@ -56,9 +56,12 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
             return;
           }
 
-          const { count } = await context.core.elasticsearch.dataClient.callAsCurrentUser('count', {
-            index,
-          });
+          const { count } = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+            'count',
+            {
+              index,
+            }
+          );
           if (count === 0) {
             sampleDataset.status = NOT_INSTALLED;
             return;

@@ -100,6 +100,6 @@ export class KibanaFramework {
     options?: any
   ) {
     const { elasticsearch } = requestContext.core;
-    return elasticsearch.dataClient.callAsCurrentUser(endpoint, options);
+    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, options);
   }
 }

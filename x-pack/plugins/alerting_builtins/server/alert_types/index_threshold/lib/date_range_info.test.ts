@@ -13,7 +13,7 @@ const BaseDate = Date.parse('2000-01-01T00:00:00Z');
 const Dates: string[] = [];
 
 // array of date strings, starting at 2000-01-01T00:00:00Z, decreasing by 1 minute
-times(10, index => Dates.push(new Date(BaseDate - index * 1000 * 60).toISOString()));
+times(10, (index) => Dates.push(new Date(BaseDate - index * 1000 * 60).toISOString()));
 
 const DEFAULT_WINDOW_MINUTES = 5;
 
@@ -215,7 +215,7 @@ function asReadableDateRangeInfo(info: DateRangeInfo) {
   return {
     dateStart: info.dateStart,
     dateStop_: info.dateEnd,
-    ranges: info.dateRanges.map(dateRange => {
+    ranges: info.dateRanges.map((dateRange) => {
       return {
         f: new Date(dateRange.from).toISOString(),
         t: new Date(dateRange.to).toISOString(),

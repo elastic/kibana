@@ -24,6 +24,7 @@ import { EventEmitter } from 'events';
 import { VislibError } from './errors';
 import { VisConfig } from './lib/vis_config';
 import { Handler } from './lib/handler';
+import { DIMMING_OPACITY_SETTING, HEATMAP_MAX_BUCKETS_SETTING } from '../../common';
 
 /**
  * Creates the visualizations.
@@ -38,8 +39,8 @@ export class Vis extends EventEmitter {
     super();
     this.element = element.get ? element.get(0) : element;
     this.visConfigArgs = _.cloneDeep(visConfigArgs);
-    this.visConfigArgs.dimmingOpacity = deps.uiSettings.get('visualization:dimmingOpacity');
-    this.visConfigArgs.heatmapMaxBuckets = deps.uiSettings.get('visualization:heatmap:maxBuckets');
+    this.visConfigArgs.dimmingOpacity = deps.uiSettings.get(DIMMING_OPACITY_SETTING);
+    this.visConfigArgs.heatmapMaxBuckets = deps.uiSettings.get(HEATMAP_MAX_BUCKETS_SETTING);
     this.deps = deps;
   }
 

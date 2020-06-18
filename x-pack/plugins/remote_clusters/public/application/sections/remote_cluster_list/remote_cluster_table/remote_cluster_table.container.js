@@ -10,9 +10,9 @@ import { openDetailPanel } from '../../../store/actions';
 
 import { RemoteClusterTable as RemoteClusterTableComponent } from './remote_cluster_table';
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    openDetailPanel: clusterName => {
+    openDetailPanel: (clusterName) => {
       dispatch(openDetailPanel({ name: clusterName }));
     },
   };

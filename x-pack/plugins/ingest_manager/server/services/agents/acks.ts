@@ -40,8 +40,8 @@ export async function acknowledgeAgentActions(
   }
 
   const actionIds = agentEvents
-    .map(event => event.action_id)
-    .filter(actionId => actionId !== undefined) as string[];
+    .map((event) => event.action_id)
+    .filter((actionId) => actionId !== undefined) as string[];
 
   let actions;
   try {
@@ -101,7 +101,7 @@ function buildUpdateAgentActionSentAt(
   actionsIds: string[],
   sentAt: string = new Date().toISOString()
 ) {
-  return actionsIds.map(actionId => ({
+  return actionsIds.map((actionId) => ({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     id: actionId,
     attributes: {
@@ -119,7 +119,7 @@ export async function saveAgentEvents(
   events: AgentEvent[]
 ): Promise<SavedObjectsBulkResponse<AgentEventSOAttributes>> {
   const objects: Array<SavedObjectsBulkCreateObject<AgentEventSOAttributes>> = events.map(
-    eventData => {
+    (eventData) => {
       return {
         attributes: {
           ...eventData,

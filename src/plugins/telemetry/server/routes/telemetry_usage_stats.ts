@@ -26,7 +26,7 @@ import {
   StatsGetterConfig,
 } from 'src/plugins/telemetry_collection_manager/server';
 
-const validate: TypeOptions<string | number>['validate'] = value => {
+const validate: TypeOptions<string | number>['validate'] = (value) => {
   if (!moment(value).isValid()) {
     return `${value} is not a valid date`;
   }

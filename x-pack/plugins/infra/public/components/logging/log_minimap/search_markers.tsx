@@ -31,13 +31,11 @@ export class SearchMarkers extends React.PureComponent<SearchMarkersProps, {}> {
       return null;
     }
 
-    const yScale = scaleTime()
-      .domain([start, end])
-      .range([0, height]);
+    const yScale = scaleTime().domain([start, end]).range([0, height]);
 
     return (
       <g transform={`translate(${width / 2}, 0)`} className={classes}>
-        {buckets.map(bucket => (
+        {buckets.map((bucket) => (
           <g
             key={`${bucket.representativeKey.time}:${bucket.representativeKey.tiebreaker}`}
             transform={`translate(0, ${yScale(bucket.start)})`}

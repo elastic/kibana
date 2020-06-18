@@ -26,12 +26,12 @@ interface Props {
   currentTime: number;
 }
 
-export const GroupOfGroups: React.FC<Props> = props => {
+export const GroupOfGroups: React.FC<Props> = (props) => {
   return (
     <GroupOfGroupsContainer>
       <GroupName group={props.group} onDrilldown={props.onDrilldown} options={props.options} />
       <Groups>
-        {props.group.groups.map(group => (
+        {props.group.groups.map((group) => (
           <GroupOfNodes
             isChild={true}
             key={group.id}
@@ -61,6 +61,6 @@ const Groups = euiStyled.div`
   justify-content: center;
   padding: 20px 10px 10px;
   border-radius: 4px;
-  border: 1px solid ${props => props.theme.eui.euiBorderColor};
+  border: 1px solid ${(props) => props.theme.eui.euiBorderColor};
   box-shadow: 0 1px 7px rgba(0, 0, 0, 0.1);
 `;

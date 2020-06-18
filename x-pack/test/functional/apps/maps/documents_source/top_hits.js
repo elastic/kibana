@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 const VECTOR_SOURCE_ID = 'z52lq';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const inspector = getService('inspector');
   const find = getService('find');

@@ -34,7 +34,7 @@ export function navigateToDefaultApp(
 
   // try to find an existing redirect for the target path if possible
   // this avoids having to load the legacy app just to get redirected to a core application again afterwards
-  const relevantForward = forwards.find(forward => defaultAppId.startsWith(forward.legacyAppId));
+  const relevantForward = forwards.find((forward) => defaultAppId.startsWith(forward.legacyAppId));
   if (relevantForward) {
     targetAppPath = relevantForward.rewritePath(`/${defaultAppId}`);
     targetAppId = relevantForward.newAppId;

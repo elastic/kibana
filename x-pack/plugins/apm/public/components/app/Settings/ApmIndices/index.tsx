@@ -17,7 +17,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiButton,
-  EuiButtonEmpty
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
@@ -30,44 +30,44 @@ const APM_INDEX_LABELS = [
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.sourcemapIndicesLabel',
       { defaultMessage: 'Sourcemap Indices' }
-    )
+    ),
   },
   {
     configurationName: 'apm_oss.errorIndices',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
-      defaultMessage: 'Error Indices'
-    })
+      defaultMessage: 'Error Indices',
+    }),
   },
   {
     configurationName: 'apm_oss.onboardingIndices',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.onboardingIndicesLabel',
       { defaultMessage: 'Onboarding Indices' }
-    )
+    ),
   },
   {
     configurationName: 'apm_oss.spanIndices',
     label: i18n.translate('xpack.apm.settings.apmIndices.spanIndicesLabel', {
-      defaultMessage: 'Span Indices'
-    })
+      defaultMessage: 'Span Indices',
+    }),
   },
   {
     configurationName: 'apm_oss.transactionIndices',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.transactionIndicesLabel',
       { defaultMessage: 'Transaction Indices' }
-    )
+    ),
   },
   {
     configurationName: 'apm_oss.metricsIndices',
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
-      defaultMessage: 'Metrics Indices'
-    })
-  }
+      defaultMessage: 'Metrics Indices',
+    }),
+  },
 ];
 
 async function saveApmIndices({
-  apmIndices
+  apmIndices,
 }: {
   apmIndices: Record<string, string>;
 }) {
@@ -75,8 +75,8 @@ async function saveApmIndices({
     method: 'POST',
     pathname: '/api/apm/settings/apm-indices/save',
     params: {
-      body: apmIndices
-    }
+      body: apmIndices,
+    },
   });
 
   clearCache();
@@ -92,9 +92,9 @@ export function ApmIndices() {
   const [isSaving, setIsSaving] = useState(false);
 
   const { data = INITIAL_STATE, status, refetch } = useFetcher(
-    _callApmApi =>
+    (_callApmApi) =>
       _callApmApi({
-        pathname: `/api/apm/settings/apm-index-settings`
+        pathname: `/api/apm/settings/apm-index-settings`,
       }),
     []
   );
@@ -104,7 +104,7 @@ export function ApmIndices() {
       data.reduce(
         (acc, { configurationName, savedValue }) => ({
           ...acc,
-          [configurationName]: savedValue
+          [configurationName]: savedValue,
         }),
         {}
       )
@@ -129,9 +129,9 @@ export function ApmIndices() {
           'xpack.apm.settings.apmIndices.applyChanges.succeeded.text',
           {
             defaultMessage:
-              'The indices changes were successfully applied. These changes are reflected immediately in the APM UI'
+              'The indices changes were successfully applied. These changes are reflected immediately in the APM UI',
           }
-        )
+        ),
       });
     } catch (error) {
       toasts.addDanger({
@@ -144,9 +144,9 @@ export function ApmIndices() {
           {
             defaultMessage:
               'Something went wrong when applying indices. Error: {errorMessage}',
-            values: { errorMessage: error.message }
+            values: { errorMessage: error.message },
           }
-        )
+        ),
       });
     }
     setIsSaving(false);
@@ -158,7 +158,7 @@ export function ApmIndices() {
     const { name, value } = event.target;
     setApmIndices({
       ...apmIndices,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -169,7 +169,7 @@ export function ApmIndices() {
           <EuiTitle>
             <h2>
               {i18n.translate('xpack.apm.settings.apmIndices.title', {
-                defaultMessage: 'Indices'
+                defaultMessage: 'Indices',
               })}
             </h2>
           </EuiTitle>
@@ -177,7 +177,7 @@ export function ApmIndices() {
           <EuiText size="s" grow={false}>
             <p>
               {i18n.translate('xpack.apm.settings.apmIndices.description', {
-                defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`
+                defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
               })}
             </p>
             <EuiForm>
@@ -199,7 +199,7 @@ export function ApmIndices() {
                       {
                         defaultMessage:
                           'Overrides {configurationName}: {defaultValue}',
-                        values: { configurationName, defaultValue }
+                        values: { configurationName, defaultValue },
                       }
                     )}
                     fullWidth

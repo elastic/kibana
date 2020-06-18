@@ -89,7 +89,7 @@ describe('KuiTextInput', () => {
     });
 
     describe('size', () => {
-      TEXTINPUT_SIZE.forEach(size => {
+      TEXTINPUT_SIZE.forEach((size) => {
         test(`renders ${size}`, () => {
           const component = <KuiTextInput size={size} onChange={() => {}} />;
 

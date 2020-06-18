@@ -92,14 +92,14 @@ export interface EditorActions {
   updateStateParams(params: VisParams): UpdateStateParams;
 }
 
-const addNewAgg: EditorActions['addNewAgg'] = schema => ({
+const addNewAgg: EditorActions['addNewAgg'] = (schema) => ({
   type: EditorStateActionTypes.ADD_NEW_AGG,
   payload: {
     schema,
   },
 });
 
-const discardChanges: EditorActions['discardChanges'] = vis => ({
+const discardChanges: EditorActions['discardChanges'] = (vis) => ({
   type: EditorStateActionTypes.DISCARD_CHANGES,
   payload: vis,
 });
@@ -153,7 +153,7 @@ const toggleEnabledAgg: EditorActions['toggleEnabledAgg'] = (aggId, enabled) => 
   },
 });
 
-const updateStateParams: EditorActions['updateStateParams'] = params => ({
+const updateStateParams: EditorActions['updateStateParams'] = (params) => ({
   type: EditorStateActionTypes.UPDATE_STATE_PARAMS,
   payload: {
     params,

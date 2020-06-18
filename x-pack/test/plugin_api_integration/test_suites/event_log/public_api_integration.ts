@@ -12,9 +12,9 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { IValidatedEvent } from '../../../../plugins/event_log/server/types';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
   const retry = getService('retry');
@@ -148,10 +148,7 @@ export default function({ getService }: FtrProviderContext) {
             .join('&')}`
     }`;
     log.debug(`calling ${uri}`);
-    return await supertest
-      .get(uri)
-      .set('kbn-xsrf', 'foo')
-      .expect(200);
+    return await supertest.get(uri).set('kbn-xsrf', 'foo').expect(200);
   }
 
   function assertEventsFromApiMatchCreatedEvents(

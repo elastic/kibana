@@ -29,7 +29,7 @@ export const OverviewDatastreamSection: React.FC = () => {
   let sizeBytes = 0;
   const namespaces = new Set<string>();
   if (datastreamRequest.data) {
-    datastreamRequest.data.data_streams.forEach(val => {
+    datastreamRequest.data.data_streams.forEach((val) => {
       namespaces.add(val.namespace);
       sizeBytes += val.size_in_bytes;
     });

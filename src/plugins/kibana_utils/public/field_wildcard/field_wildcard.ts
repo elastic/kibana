@@ -20,10 +20,7 @@
 import { escapeRegExp, memoize } from 'lodash';
 
 export const makeRegEx = memoize(function makeRegEx(glob: string) {
-  const globRegex = glob
-    .split('*')
-    .map(escapeRegExp)
-    .join('.*');
+  const globRegex = glob.split('*').map(escapeRegExp).join('.*');
   return new RegExp(`^${globRegex}$`);
 });
 
@@ -34,7 +31,7 @@ export function fieldWildcardMatcher(globs: string[] = [], metaFields: unknown[]
     if (metaFields.indexOf(val) !== -1) {
       return false;
     }
-    return globs.some(p => makeRegEx(p).test(`${val}`));
+    return globs.some((p) => makeRegEx(p).test(`${val}`));
   };
 }
 

@@ -111,7 +111,7 @@ export class WebElementWrapper {
   }
 
   private _wrapAll(otherWebElements: Array<WebElement | WebElementWrapper>) {
-    return otherWebElements.map(e => this._wrap(e));
+    return otherWebElements.map((e) => this._wrap(e));
   }
 
   private async retryCall<T>(
@@ -430,10 +430,7 @@ export class WebElementWrapper {
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
       if (wrapper.isW3CEnabled) {
-        await wrapper
-          .getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
+        await wrapper.getActions().move({ x: 0, y: 0 }).perform();
         await wrapper
           .getActions()
           .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
@@ -460,10 +457,7 @@ export class WebElementWrapper {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
       if (wrapper.isW3CEnabled) {
-        await wrapper
-          .getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
+        await wrapper.getActions().move({ x: 0, y: 0 }).perform();
         await wrapper
           .getActions()
           .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
@@ -489,10 +483,7 @@ export class WebElementWrapper {
   public async doubleClick() {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      await wrapper
-        .getActions()
-        .doubleClick(wrapper._webElement)
-        .perform();
+      await wrapper.getActions().doubleClick(wrapper._webElement).perform();
     });
   }
 

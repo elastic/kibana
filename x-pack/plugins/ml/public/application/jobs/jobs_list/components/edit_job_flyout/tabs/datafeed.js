@@ -61,19 +61,19 @@ export class Datafeed extends Component {
     };
   }
 
-  onQueryChange = query => {
+  onQueryChange = (query) => {
     this.setDatafeed({ datafeedQuery: query });
   };
 
-  onQueryDelayChange = e => {
+  onQueryDelayChange = (e) => {
     this.setDatafeed({ datafeedQueryDelay: e.target.value });
   };
 
-  onFrequencyChange = e => {
+  onFrequencyChange = (e) => {
     this.setDatafeed({ datafeedFrequency: e.target.value });
   };
 
-  onScrollSizeChange = e => {
+  onScrollSizeChange = (e) => {
     this.setDatafeed({ datafeedScrollSize: +e.target.value });
   };
 

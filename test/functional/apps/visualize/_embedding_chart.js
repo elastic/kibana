@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const log = getService('log');
   const renderable = getService('renderable');
@@ -34,7 +34,7 @@ export default function({ getService, getPageObjects }) {
 
   describe('embedding', () => {
     describe('a data table', () => {
-      before(async function() {
+      before(async function () {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();

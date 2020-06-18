@@ -65,10 +65,10 @@ export class JsonWatch extends BaseWatch {
           const { actions } = parsedJson;
           if (actions) {
             // Validate if the action(s) provided is one of the supported actions
-            const invalidActions = Object.keys(actions).find(actionKey => {
+            const invalidActions = Object.keys(actions).find((actionKey) => {
               const actionKeys = Object.keys(actions[actionKey]);
               let type;
-              Object.keys(ACTION_TYPES).forEach(actionTypeKey => {
+              Object.keys(ACTION_TYPES).forEach((actionTypeKey) => {
                 if (
                   actionKeys.includes(ACTION_TYPES[actionTypeKey]) &&
                   !actionKeys.includes(ACTION_TYPES.UNKNOWN)

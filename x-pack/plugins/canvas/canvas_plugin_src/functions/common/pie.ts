@@ -141,7 +141,7 @@ export function pie(): ExpressionFunctionDefinition<'pie', PointSeries, Argument
       const data: PieData[] = map(groupBy(input.rows, 'color'), (series, label = '') => {
         const item: PieData = {
           label,
-          data: series.map(point => point.size || 1),
+          data: series.map((point) => point.size || 1),
         };
 
         const style = seriesStyles[label];

@@ -141,9 +141,7 @@ describe('TaskManagerRunner', () => {
   });
 
   test('runDuration returns duration which has elapsed since start', async () => {
-    const now = moment()
-      .subtract(30, 's')
-      .toDate();
+    const now = moment().subtract(30, 's').toDate();
     const { runner } = testOpts({
       instance: {
         schedule: { interval: '10m' },
@@ -242,7 +240,7 @@ describe('TaskManagerRunner', () => {
         bar: {
           createTaskRunner: () => ({
             async run() {
-              const promise = new Promise(r => setTimeout(r, 1000));
+              const promise = new Promise((r) => setTimeout(r, 1000));
               fakeTimer.tick(1000);
               await promise;
             },
@@ -945,8 +943,8 @@ describe('TaskManagerRunner', () => {
     store.update.returns(instance);
 
     const runner = new TaskManagerRunner({
-      beforeRun: context => Promise.resolve(context),
-      beforeMarkRunning: context => Promise.resolve(context),
+      beforeRun: (context) => Promise.resolve(context),
+      beforeMarkRunning: (context) => Promise.resolve(context),
       logger,
       store,
       instance,

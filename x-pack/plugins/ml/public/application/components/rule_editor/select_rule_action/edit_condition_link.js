@@ -52,7 +52,7 @@ export class EditConditionLink extends Component {
     this.state = { value };
   }
 
-  onChangeValue = event => {
+  onChangeValue = (event) => {
     const enteredValue = event.target.value;
     this.setState({
       value: enteredValue !== '' ? +enteredValue : '',

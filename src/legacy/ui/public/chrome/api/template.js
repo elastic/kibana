@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line import/no-default-export
-export default function(chrome, internals) {
+export default function (chrome, internals) {
   /**
    * ui/chrome Template API
    *
@@ -48,7 +48,7 @@ export default function(chrome, internals) {
    * @param {string} template
    * @return {chrome}
    */
-  chrome.setRootTemplate = function(template) {
+  chrome.setRootTemplate = function (template) {
     internals.rootTemplate = template;
     return chrome;
   };
@@ -58,7 +58,7 @@ export default function(chrome, internals) {
    * @param {Function} controller - the controller initializer function
    * @return {chrome}
    */
-  chrome.setRootController = function(as, controllerName) {
+  chrome.setRootController = function (as, controllerName) {
     if (controllerName === undefined) {
       controllerName = as;
       as = null;

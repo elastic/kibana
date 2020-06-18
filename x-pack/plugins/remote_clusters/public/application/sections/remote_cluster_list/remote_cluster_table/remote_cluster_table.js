@@ -19,24 +19,24 @@ import {
   EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
-
-import { CRUD_APP_BASE_PATH, UIM_SHOW_DETAILS_CLICK } from '../../../constants';
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { UIM_SHOW_DETAILS_CLICK } from '../../../constants';
 import { PROXY_MODE } from '../../../../../common/constants';
-import { getRouterLinkProps, trackUiMetric, METRIC_TYPE } from '../../../services';
+import { trackUiMetric, METRIC_TYPE, getRouter } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
 const getFilteredClusters = (clusters, queryText) => {
   if (queryText) {
     const normalizedSearchText = queryText.toLowerCase();
 
-    return clusters.filter(cluster => {
+    return clusters.filter((cluster) => {
       const { name, seeds } = cluster;
       const normalizedName = name.toLowerCase();
       if (normalizedName.toLowerCase().includes(normalizedSearchText)) {
         return true;
       }
 
-      return seeds.some(seed => seed.includes(normalizedSearchText));
+      return seeds.some((seed) => seed.includes(normalizedSearchText));
     });
   } else {
     return clusters;
@@ -94,6 +94,7 @@ export class RemoteClusterTable extends Component {
   render() {
     const { openDetailPanel } = this.props;
     const { selectedItems, filteredClusters } = this.state;
+    const { history } = getRouter();
 
     const columns = [
       {
@@ -189,7 +190,7 @@ export class RemoteClusterTable extends Component {
           defaultMessage: 'Mode',
         }),
         sortable: true,
-        render: mode =>
+        render: (mode) =>
           mode === PROXY_MODE
             ? mode
             : i18n.translate('xpack.remoteClusters.remoteClusterList.table.sniffModeDescription', {
@@ -256,7 +257,7 @@ export class RemoteClusterTable extends Component {
                     iconType="pencil"
                     color="primary"
                     isDisabled={isConfiguredByNode}
-                    {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${name}`)}
+                    {...reactRouterNavigate(history, `/edit/${name}`)}
                     disabled={isConfiguredByNode}
                   />
                 </EuiToolTip>
@@ -282,7 +283,7 @@ export class RemoteClusterTable extends Component {
               return (
                 <EuiToolTip content={label} delay="long">
                   <RemoveClusterButtonProvider clusterNames={[name]}>
-                    {removeCluster => (
+                    {(removeCluster) => (
                       <EuiButtonIcon
                         data-test-subj="remoteClusterTableRowRemoveButton"
                         aria-label={label}
@@ -311,7 +312,7 @@ export class RemoteClusterTable extends Component {
     const search = {
       toolsLeft: selectedItems.length ? (
         <RemoveClusterButtonProvider clusterNames={selectedItems.map(({ name }) => name)}>
-          {removeCluster => (
+          {(removeCluster) => (
             <EuiButton
               color="danger"
               onClick={removeCluster}
@@ -327,9 +328,7 @@ export class RemoteClusterTable extends Component {
             </EuiButton>
           )}
         </RemoveClusterButtonProvider>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       onChange: this.onSearch,
       box: {
         incremental: true,
@@ -343,7 +342,7 @@ export class RemoteClusterTable extends Component {
     };
 
     const selection = {
-      onSelectionChange: selectedItems => this.setState({ selectedItems }),
+      onSelectionChange: (selectedItems) => this.setState({ selectedItems }),
       selectable: ({ isConfiguredByNode }) => !isConfiguredByNode,
     };
 

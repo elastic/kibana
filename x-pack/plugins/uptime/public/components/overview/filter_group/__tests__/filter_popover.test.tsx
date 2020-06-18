@@ -27,7 +27,7 @@ describe('FilterPopover component', () => {
     };
     setState = jest.fn();
     useStateSpy = jest.spyOn(React, 'useState');
-    useStateSpy.mockImplementation(initialValue => [initialValue, setState]);
+    useStateSpy.mockImplementation((initialValue) => [initialValue, setState]);
   });
 
   afterEach(() => {
@@ -62,10 +62,7 @@ describe('FilterPopover component', () => {
     expect(wrapper.find(UptimeFilterButton)).toHaveLength(1);
     wrapper.find(UptimeFilterButton).simulate('click');
     expect(wrapper.find(EuiFilterSelectItem)).toHaveLength(props.items.length);
-    wrapper
-      .find(EuiFilterSelectItem)
-      .at(1)
-      .simulate('click');
+    wrapper.find(EuiFilterSelectItem).at(1).simulate('click');
     wrapper.find('#foo').simulate('click');
     const rendered = wrapper.render();
     expect(rendered).toMatchSnapshot();

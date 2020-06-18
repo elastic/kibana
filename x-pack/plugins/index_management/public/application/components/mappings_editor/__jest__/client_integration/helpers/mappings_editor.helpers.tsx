@@ -40,7 +40,7 @@ jest.mock('@elastic/eui', () => ({
     <input
       data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
       value={props.valueOfSelected}
-      onChange={e => {
+      onChange={(e) => {
         props.onChange(e.target.value);
       }}
     />
@@ -108,7 +108,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   ): Promise<DomFields> => {
     const fields = find(
       fieldName ? (`${fieldName}.fieldsList.fieldsListItem` as TestSubjects) : 'fieldsListItem'
-    ).map(wrapper => wrapper); // convert to Array for our for of loop below
+    ).map((wrapper) => wrapper); // convert to Array for our for of loop below
 
     for (const field of fields) {
       const { hasChildren, testSubjectField } = await expandField(field);

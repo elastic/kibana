@@ -13,12 +13,12 @@ export const mlAnomalyResponse: ESResponse = ({
     total: 5,
     successful: 5,
     skipped: 0,
-    failed: 0
+    failed: 0,
   },
   hits: {
     total: 10,
     max_score: 0,
-    hits: []
+    hits: [],
   },
   aggregations: {
     ml_avg_response_times: {
@@ -28,100 +28,100 @@ export const mlAnomalyResponse: ESResponse = ({
           key: 0,
           doc_count: 0,
           anomaly_score: {
-            value: null
+            value: null,
           },
           upper: {
-            value: 200
+            value: 200,
           },
           lower: {
-            value: 20
-          }
+            value: 20,
+          },
         },
         {
           key_as_string: '2018-07-02T09:25:00.000Z',
           key: 5000,
           doc_count: 4,
           anomaly_score: {
-            value: null
+            value: null,
           },
           upper: {
-            value: null
+            value: null,
           },
           lower: {
-            value: null
-          }
+            value: null,
+          },
         },
         {
           key_as_string: '2018-07-02T09:33:20.000Z',
           key: 10000,
           doc_count: 0,
           anomaly_score: {
-            value: null
+            value: null,
           },
           upper: {
-            value: null
+            value: null,
           },
           lower: {
-            value: null
-          }
+            value: null,
+          },
         },
         {
           key_as_string: '2018-07-02T09:41:40.000Z',
           key: 15000,
           doc_count: 2,
           anomaly_score: {
-            value: 90
+            value: 90,
           },
           upper: {
-            value: 100
+            value: 100,
           },
           lower: {
-            value: 20
-          }
+            value: 20,
+          },
         },
         {
           key_as_string: '2018-07-02T09:50:00.000Z',
           key: 20000,
           doc_count: 0,
           anomaly_score: {
-            value: null
+            value: null,
           },
           upper: {
-            value: null
+            value: null,
           },
           lower: {
-            value: null
-          }
+            value: null,
+          },
         },
         {
           key_as_string: '2018-07-02T09:58:20.000Z',
           key: 25000,
           doc_count: 2,
           anomaly_score: {
-            value: 100
+            value: 100,
           },
           upper: {
-            value: 50
+            value: 50,
           },
           lower: {
-            value: 10
-          }
+            value: 10,
+          },
         },
         {
           key_as_string: '2018-07-02T10:15:00.000Z',
           key: 30000,
           doc_count: 2,
           anomaly_score: {
-            value: 0
+            value: 0,
           },
           upper: {
-            value: null
+            value: null,
           },
           lower: {
-            value: null
-          }
-        }
-      ]
-    }
-  }
+            value: null,
+          },
+        },
+      ],
+    },
+  },
 } as unknown) as ESResponse;

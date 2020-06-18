@@ -28,11 +28,11 @@ const applyCoreDeprecations = (settings: Record<string, any> = {}) => {
   const deprecationMessages: string[] = [];
   const migrated = applyDeprecations(
     settings,
-    deprecations.map(deprecation => ({
+    deprecations.map((deprecation) => ({
       deprecation,
       path: '',
     })),
-    msg => deprecationMessages.push(msg)
+    (msg) => deprecationMessages.push(msg)
   );
   return {
     messages: deprecationMessages,

@@ -18,7 +18,7 @@ interface Props {
 export const PrivilegeSummaryExpandedRow = (props: Props) => {
   return (
     <EuiFlexGroup direction="column">
-      {props.feature.getSubFeatures().map(subFeature => {
+      {props.feature.getSubFeatures().map((subFeature) => {
         return (
           <EuiFlexItem key={subFeature.name} data-test-subj="subFeatureEntry">
             <EuiFlexGroup>
@@ -107,7 +107,7 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
     privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
-    const firstSelectedPrivilege = privilegeGroup.privileges.find(p =>
+    const firstSelectedPrivilege = privilegeGroup.privileges.find((p) =>
       effectiveSubFeaturePrivileges.includes(p.id)
     )?.name;
 

@@ -90,10 +90,7 @@ describe('YExtents component', () => {
   it('should call setScale with input number', () => {
     const inputNumber = 5;
     const comp = shallow(<YExtents {...defaultProps} />);
-    const inputProps = comp
-      .find(NumberInputOption)
-      .first()
-      .props();
+    const inputProps = comp.find(NumberInputOption).first().props();
     inputProps.setValue(Y_EXTENTS, inputNumber);
 
     expect(setScale).toBeCalledWith(Y_EXTENTS, inputNumber);
@@ -101,10 +98,7 @@ describe('YExtents component', () => {
 
   it('should call setScale with null when input is empty', () => {
     const comp = shallow(<YExtents {...defaultProps} />);
-    const inputProps = comp
-      .find(NumberInputOption)
-      .first()
-      .props();
+    const inputProps = comp.find(NumberInputOption).first().props();
     inputProps.setValue(Y_EXTENTS, '');
 
     expect(setScale).toBeCalledWith(Y_EXTENTS, null);

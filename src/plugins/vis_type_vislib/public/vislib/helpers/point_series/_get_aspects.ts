@@ -30,10 +30,10 @@ import { Table } from '../../types';
  */
 export function getAspects(table: Table, dimensions: Dimensions) {
   const aspects: Partial<Aspects> = {};
-  (Object.keys(dimensions) as Array<keyof Dimensions>).forEach(name => {
+  (Object.keys(dimensions) as Array<keyof Dimensions>).forEach((name) => {
     const dimension = dimensions[name];
     const dimensionList = Array.isArray(dimension) ? dimension : [dimension];
-    dimensionList.forEach(d => {
+    dimensionList.forEach((d) => {
       if (!d) {
         return;
       }

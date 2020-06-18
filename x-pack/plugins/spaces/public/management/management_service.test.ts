@@ -39,7 +39,7 @@ describe('ManagementService', () => {
       expect(mockKibanaSection.registerApp).toHaveBeenCalledWith({
         id: 'spaces',
         title: 'Spaces',
-        order: 10,
+        order: 2,
         mount: expect.any(Function),
       });
     });
@@ -73,7 +73,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
       };
 
-      deps.management.sections.getSection.mockImplementation(id => {
+      deps.management.sections.getSection.mockImplementation((id) => {
         if (id === 'kibana') return mockKibanaSection;
         throw new Error(`unexpected getSection call: ${id}`);
       });
@@ -102,7 +102,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
       };
 
-      deps.management.sections.getSection.mockImplementation(id => {
+      deps.management.sections.getSection.mockImplementation((id) => {
         if (id === 'kibana') return mockKibanaSection;
         throw new Error(`unexpected getSection call: ${id}`);
       });
@@ -133,7 +133,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
       };
 
-      deps.management.sections.getSection.mockImplementation(id => {
+      deps.management.sections.getSection.mockImplementation((id) => {
         if (id === 'kibana') return mockKibanaSection;
         throw new Error(`unexpected getSection call: ${id}`);
       });

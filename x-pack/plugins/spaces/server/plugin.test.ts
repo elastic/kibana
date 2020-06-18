@@ -23,9 +23,6 @@ describe('Spaces Plugin', () => {
       const spacesSetup = await plugin.setup(core, { features, licensing });
       expect(spacesSetup).toMatchInlineSnapshot(`
         Object {
-          "__legacyCompat": Object {
-            "registerLegacyAPI": [Function],
-          },
           "spacesService": Object {
             "getActiveSpace": [Function],
             "getBasePath": [Function],

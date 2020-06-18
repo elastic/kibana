@@ -27,8 +27,8 @@ export const string: ExpressionTypeDefinition<typeof name, string> = {
   name,
   from: {
     null: () => '',
-    boolean: b => String(b),
-    number: n => String(n),
+    boolean: (b) => String(b),
+    number: (n) => String(n),
   },
   to: {
     render: <T>(text: T): ExpressionValueRender<{ text: T }> => {

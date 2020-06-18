@@ -10,7 +10,7 @@ import { decorateShards } from '../lib/decorate_shards';
 
 export function nodesByIndices() {
   return function nodesByIndicesFn(shards, nodes) {
-    const getNodeType = function(node) {
+    const getNodeType = function (node) {
       const attrs = node.attributes || {};
       return attrs.master === 'true' ? 'master' : 'normal';
     };
@@ -64,10 +64,10 @@ export function nodesByIndices() {
 
     return _(data)
       .values()
-      .sortBy(function(node) {
+      .sortBy(function (node) {
         return [node.name !== 'Unassigned', !node.master, node.name];
       })
-      .map(function(node) {
+      .map(function (node) {
         if (node.name === 'Unassigned') {
           node.unassignedPrimaries = node.children.some(hasPrimaryChildren);
         }

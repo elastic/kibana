@@ -2,16 +2,17 @@
 [[xpack-security-authorization]]
 
 === Granting access to {kib}
-The Elastic Stack comes with the `kibana_admin` {ref}/built-in-roles.html[built-in role], which you can use to grant access to all Kibana features in all spaces. To grant users access to a subset of spaces or features, you can create a custom role that grants the desired Kibana privileges. 
+The Elastic Stack comes with the `kibana_admin` {ref}/built-in-roles.html[built-in role], which you can use to grant access to all Kibana features in all spaces. To grant users access to a subset of spaces or features, you can create a custom role that grants the desired Kibana privileges.
 
 When you assign a user multiple roles, the user receives a union of the roles’ privileges. Therefore, assigning the `kibana_admin` role in addition to a custom role that grants Kibana privileges is ineffective because `kibana_admin` has access to all the features in all spaces.
 
 NOTE: When running multiple tenants of Kibana by changing the `kibana.index` in your `kibana.yml`, you cannot use `kibana_admin` to grant access. You must create custom roles that authorize the user for that specific tenant. Although multi-tenant installations are supported, the recommended approach to securing access to Kibana segments is to grant users access to specific spaces.
 
 [role="xpack"]
+[[xpack-kibana-role-management]]
 === {kib} role management
 
-To create a role that grants {kib} privileges, go to **Management -> Security -> Roles** and click **Create role**. 
+To create a role that grants {kib} privileges, open the menu, go to *Stack Management > Security > Roles* and click **Create role**. 
 
 [[adding_kibana_privileges]]
 ==== Adding {kib} privileges
@@ -63,7 +64,7 @@ Features are available to users when their roles grant access to the features, *
 
 Using the same role, it’s possible to assign different privileges to different spaces. After you’ve added space privileges, click **Add space privilege**. If you’ve already added privileges for either *** Global (all spaces)** or an individual space, you will not be able to select these in the **Spaces** selection control.
 
-Additionally, if you’ve already assigned privileges at *** Global (all spaces)**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, space privileges are also a union. If you’ve already granted the user the **All** privilege at *** Global (all spaces)**, you’re not able to restrict the role to only the **Read** privilege at an individual space. 
+Additionally, if you’ve already assigned privileges at *** Global (all spaces)**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, space privileges are also a union. If you’ve already granted the user the **All** privilege at *** Global (all spaces)**, you’re not able to restrict the role to only the **Read** privilege at an individual space.
 
 
 ==== Privilege summary
@@ -111,4 +112,3 @@ image::user/security/images/privilege-example-2.png[Privilege example 2]
 
 [role="screenshot"]
 image::user/security/images/privilege-example-3.png[Privilege example 3]
-

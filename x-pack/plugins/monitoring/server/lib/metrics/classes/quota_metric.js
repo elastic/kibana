@@ -50,7 +50,7 @@ export class QuotaMetric extends Metric {
       },
     };
 
-    this.calculation = bucket => {
+    this.calculation = (bucket) => {
       const quota = get(bucket, 'quota.value');
       const deltaUsageDerivNormalizedValue = get(bucket, 'usage_deriv.normalized_value');
       const periodsDerivNormalizedValue = get(bucket, 'periods_deriv.normalized_value');

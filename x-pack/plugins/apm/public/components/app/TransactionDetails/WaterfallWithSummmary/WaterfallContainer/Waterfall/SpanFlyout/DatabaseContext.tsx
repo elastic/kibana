@@ -12,7 +12,7 @@ import React, { Fragment } from 'react';
 // @ts-ignore
 import sql from 'react-syntax-highlighter/dist/languages/sql';
 import SyntaxHighlighter, {
-  registerLanguage
+  registerLanguage,
   // @ts-ignore
 } from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
@@ -25,7 +25,7 @@ import {
   fontSize,
   px,
   unit,
-  units
+  units,
 } from '../../../../../../../style/variables';
 import { TruncateHeightSection } from './TruncateHeightSection';
 
@@ -62,7 +62,7 @@ export function DatabaseContext({ dbContext }: Props) {
           {i18n.translate(
             'xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle',
             {
-              defaultMessage: 'Database statement'
+              defaultMessage: 'Database statement',
             }
           )}
         </h3>
@@ -79,7 +79,7 @@ export function DatabaseContext({ dbContext }: Props) {
               padding: null,
               lineHeight: px(dbSyntaxLineHeight),
               whiteSpace: 'pre-wrap',
-              overflowX: 'scroll'
+              overflowX: 'scroll',
             }}
           >
             {dbContext.statement}

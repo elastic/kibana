@@ -161,7 +161,7 @@ export class BfetchServerPlugin
     logger,
   }: {
     logger: Logger;
-  }): BfetchServerSetup['createStreamingRequestHandler'] => streamHandler => async (
+  }): BfetchServerSetup['createStreamingRequestHandler'] => (streamHandler) => async (
     context,
     request,
     response
@@ -186,7 +186,7 @@ export class BfetchServerPlugin
     addStreamingResponseRoute<
       BatchRequestData<BatchItemData>,
       BatchResponseItem<BatchItemResult, E>
-    >(path, request => {
+    >(path, (request) => {
       const handlerInstance = handler(request);
       return {
         getResponseStream: ({ batch }) => {

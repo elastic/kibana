@@ -43,8 +43,8 @@ describe('setDeprecationLogging', () => {
 });
 
 describe('isDeprecationLoggingEnabled', () => {
-  ['default', 'persistent', 'transient'].forEach(tier => {
-    ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ALL'].forEach(level => {
+  ['default', 'persistent', 'transient'].forEach((tier) => {
+    ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ALL'].forEach((level) => {
       it(`returns true when ${tier} is set to ${level}`, () => {
         expect(isDeprecationLoggingEnabled({ [tier]: { logger: { deprecation: level } } })).toBe(
           true
@@ -53,8 +53,8 @@ describe('isDeprecationLoggingEnabled', () => {
     });
   });
 
-  ['default', 'persistent', 'transient'].forEach(tier => {
-    ['ERROR', 'FATAL'].forEach(level => {
+  ['default', 'persistent', 'transient'].forEach((tier) => {
+    ['ERROR', 'FATAL'].forEach((level) => {
       it(`returns false when ${tier} is set to ${level}`, () => {
         expect(isDeprecationLoggingEnabled({ [tier]: { logger: { deprecation: level } } })).toBe(
           false

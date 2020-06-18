@@ -39,11 +39,11 @@ export function monitoringClustersProvider($injector) {
         },
         codePaths,
       })
-      .then(response => response.data)
-      .then(data => {
+      .then((response) => response.data)
+      .then((data) => {
         return formatClusters(data); // return set of clusters
       })
-      .catch(err => {
+      .catch((err) => {
         const Private = $injector.get('Private');
         const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
         return ajaxErrorHandlers(err);

@@ -43,7 +43,7 @@ export class SuggestionsComponent extends Component<Props> {
     const suggestions = this.props.suggestions.map((suggestion, index) => {
       return (
         <SuggestionComponent
-          innerRef={node => (this.childNodes[index] = node)}
+          innerRef={(node) => (this.childNodes[index] = node)}
           selected={index === this.props.index}
           suggestion={suggestion}
           onClick={this.props.onClick}
@@ -62,7 +62,7 @@ export class SuggestionsComponent extends Component<Props> {
               id="kbnTypeahead__items"
               className="kbnTypeahead__items"
               role="listbox"
-              ref={node => (this.parentNode = node)}
+              ref={(node) => (this.parentNode = node)}
               onScroll={this.handleScroll}
             >
               {suggestions}

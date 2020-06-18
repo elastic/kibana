@@ -29,6 +29,7 @@ import {
   FEATURE_IMPORTANCE,
   FEATURE_INFLUENCE,
   OUTLIER_SCORE,
+  TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getNestedProperty } from '../../util/object_utils';
@@ -55,8 +56,8 @@ export const euiDataGridToolbarSettings = {
 };
 
 export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): string[] => {
-  const allFields = indexPattern.fields.map(f => f.name);
-  const indexPatternFields: string[] = allFields.filter(f => {
+  const allFields = indexPattern.fields.map((f) => f.name);
+  const indexPatternFields: string[] = allFields.filter((f) => {
     if (indexPattern.metaFields.includes(f)) {
       return false;
     }
@@ -78,7 +79,7 @@ export interface FieldTypes {
 }
 
 export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, resultsField: string) => {
-  return Object.keys(fieldTypes).map(field => {
+  return Object.keys(fieldTypes).map((field) => {
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
     // To fall back to the default string schema it needs to be undefined.
     let schema;
@@ -110,7 +111,10 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       schema = 'numeric';
     }
 
-    if (field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`)) {
+    if (
+      field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`) ||
+      field.includes(`${resultsField}.${TOP_CLASSES}`)
+    ) {
       schema = 'json';
     }
 

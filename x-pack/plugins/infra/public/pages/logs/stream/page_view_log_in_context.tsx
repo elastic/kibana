@@ -8,12 +8,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
-  EuiModalBody,
   EuiOverlayMask,
   EuiText,
   EuiTextColor,
   EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { LogEntry } from '../../../../common/http_api';
@@ -22,12 +23,14 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
+import { euiStyled } from '../../../../../observability/public';
 
 const MODAL_MARGIN = 25;
 
 export const PageViewLogInContext: React.FC = () => {
   const { sourceConfiguration } = useLogSourceContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const columnConfigurations = useMemo(() => sourceConfiguration?.configuration.logColumns ?? [], [
     sourceConfiguration,
   ]);
@@ -39,7 +42,7 @@ export const PageViewLogInContext: React.FC = () => {
 
   const streamItems = useMemo(
     () =>
-      entries.map(entry => ({
+      entries.map((entry) => ({
         kind: 'logEntry' as const,
         logEntry: entry,
         highlights: [],
@@ -54,7 +57,7 @@ export const PageViewLogInContext: React.FC = () => {
   return (
     <EuiOverlayMask>
       <EuiModal onClose={closeModal} maxWidth={false}>
-        <EuiModalBody style={{ width: vw - MODAL_MARGIN * 2, height: vh - MODAL_MARGIN * 2 }}>
+        <LogInContextWrapper width={vw - MODAL_MARGIN * 2} height={vh - MODAL_MARGIN * 2}>
           <EuiFlexGroup
             direction="column"
             responsive={false}
@@ -63,6 +66,7 @@ export const PageViewLogInContext: React.FC = () => {
           >
             <EuiFlexItem grow={1}>
               <LogEntryContext context={contextEntry.context} />
+              <EuiSpacer size="m" />
               <ScrollableLogTextStreamView
                 target={contextEntry.cursor}
                 columnConfigurations={columnConfigurations}
@@ -88,15 +92,28 @@ export const PageViewLogInContext: React.FC = () => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiModalBody>
+        </LogInContextWrapper>
       </EuiModal>
     </EuiOverlayMask>
   );
 };
 
+const LogInContextWrapper = euiStyled.div<{ width: number | string; height: number | string }>`
+  padding: 16px;
+  width: ${(props) => (typeof props.width === 'number' ? `${props.width}px` : props.width)};
+  height: ${(props) => (typeof props.height === 'number' ? `${props.height}px` : props.height)};
+`;
+
 const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }) => {
+  let text;
   if ('container.id' in context) {
-    return <p>Displayed logs are from container {context['container.id']}</p>;
+    text = (
+      <FormattedMessage
+        id="xpack.infra.logs.viewInContext.logsFromContainerTitle"
+        defaultMessage="Displayed logs are from container {container}"
+        values={{ container: context['container.id'] }}
+      />
+    );
   }
 
   if ('host.name' in context) {
@@ -104,21 +121,27 @@ const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }
       context['log.file.path'].length > 45
         ? context['log.file.path'].slice(0, 20) + '...' + context['log.file.path'].slice(-25)
         : context['log.file.path'];
-
-    return (
-      <EuiText size="s">
-        <p>
-          <EuiTextColor color="subdued">
-            Displayed logs are from file{' '}
+    text = (
+      <FormattedMessage
+        id="xpack.infra.logs.viewInContext.logsFromFileTitle"
+        defaultMessage="Displayed logs are from file {file} and host {host}"
+        values={{
+          file: (
             <EuiToolTip content={context['log.file.path']}>
               <span>{shortenedFilePath}</span>
-            </EuiToolTip>{' '}
-            and host {context['host.name']}
-          </EuiTextColor>
-        </p>
-      </EuiText>
+            </EuiToolTip>
+          ),
+          host: context['host.name'],
+        }}
+      />
     );
   }
 
-  return null;
+  return (
+    <EuiText size="s">
+      <p>
+        <EuiTextColor color="subdued">{text}</EuiTextColor>
+      </p>
+    </EuiText>
+  );
 };

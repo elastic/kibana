@@ -30,7 +30,7 @@ describe('EmptyBanner', () => {
         </MockApmPluginContextWrapper>
       );
       const component = render(<EmptyBanner />, {
-        wrapper: noCytoscapeWrapper
+        wrapper: noCytoscapeWrapper,
       });
 
       expect(component.container.children).toHaveLength(0);
@@ -40,7 +40,7 @@ describe('EmptyBanner', () => {
   describe('with no nodes', () => {
     it('renders null', () => {
       const component = render(<EmptyBanner />, {
-        wrapper
+        wrapper,
       });
 
       expect(component.container.children).toHaveLength(0);

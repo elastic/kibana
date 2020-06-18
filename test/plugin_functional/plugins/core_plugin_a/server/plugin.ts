@@ -31,10 +31,10 @@ declare module 'kibana/server' {
 
 export class CorePluginAPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
-    core.http.registerRouteHandlerContext('pluginA', context => {
+    core.http.registerRouteHandlerContext('pluginA', (context) => {
       return {
         ping: () =>
-          context.core.elasticsearch.adminClient.callAsInternalUser('ping') as Promise<string>,
+          context.core.elasticsearch.legacy.client.callAsInternalUser('ping') as Promise<string>,
       };
     });
   }

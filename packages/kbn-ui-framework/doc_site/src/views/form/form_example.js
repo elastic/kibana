@@ -59,7 +59,7 @@ import CheckBox from './check_box';
 import checkBoxSource from '!!raw-loader!./check_box';
 const checkBoxHtml = renderToHtml(CheckBox);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Label"

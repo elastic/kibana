@@ -6,7 +6,11 @@
 
 import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
+import {
+  TimefilterContract,
+  TimeRange,
+  UI_SETTINGS,
+} from '../../../../../../src/plugins/data/public';
 import { getBoundsRoundedToInterval, TimeBuckets, TimeRangeBounds } from '../util/time_buckets';
 import { ExplorerJob, OverallSwimlaneData, SwimlaneData } from '../explorer/explorer_utils';
 import { VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
@@ -25,8 +29,8 @@ export class ExplorerService {
     private mlResultsService: MlResultsService
   ) {
     this.timeBuckets = new TimeBuckets({
-      'histogram:maxBars': uiSettings.get('histogram:maxBars'),
-      'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
@@ -96,7 +100,7 @@ export class ExplorerService {
     // Ensure the search bounds align to the bucketing interval used in the swimlane so
     // that the first and last buckets are complete.
     const searchBounds = getBoundsRoundedToInterval(bounds, interval, false);
-    const selectedJobIds = selectedJobs.map(d => d.id);
+    const selectedJobIds = selectedJobs.map((d) => d.id);
 
     // Load the overall bucket scores by time.
     // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
@@ -152,7 +156,7 @@ export class ExplorerService {
       false
     );
 
-    const selectedJobIds = selectedJobs.map(d => d.id);
+    const selectedJobIds = selectedJobs.map((d) => d.id);
     // load scores by influencer/jobId value and time.
     // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
     // which wouldn't be the case if e.g. '1M' was used.

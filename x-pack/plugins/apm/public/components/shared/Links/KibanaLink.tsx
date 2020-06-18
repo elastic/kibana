@@ -18,7 +18,7 @@ export function KibanaLink({ path, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const href = url.format({
     pathname: core.http.basePath.prepend('/app/kibana'),
-    hash: path
+    hash: path,
   });
   return <EuiLink {...rest} href={href} />;
 }

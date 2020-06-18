@@ -5,8 +5,6 @@
  */
 
 import React, { createContext, useMemo, useState } from 'react';
-import { store } from '../state';
-import { triggerAppRefresh } from '../state/actions';
 
 interface UptimeRefreshContext {
   lastRefresh: number;
@@ -28,8 +26,6 @@ export const UptimeRefreshContextProvider: React.FC = ({ children }) => {
   const refreshApp = () => {
     const refreshTime = Date.now();
     setLastRefresh(refreshTime);
-    // @ts-ignore
-    store.dispatch(triggerAppRefresh(refreshTime));
   };
 
   const value = useMemo(() => {

@@ -22,12 +22,12 @@ import { bucketTransform } from '../../helpers/bucket_transform';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 
 export function metricBuckets(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
-  return next => doc => {
+  return (next) => (doc) => {
     const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { intervalString } = getBucketSize(req, interval, capabilities);
     series.metrics
-      .filter(row => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
-      .forEach(metric => {
+      .filter((row) => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
+      .forEach((metric) => {
         const fn = bucketTransform[metric.type];
         if (fn) {
           try {

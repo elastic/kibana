@@ -61,7 +61,7 @@ class Suggestions extends Component {
       const key = suggestion + '_' + index;
       return (
         <Suggestion
-          innerRef={node => (this.childNodes[index] = node)}
+          innerRef={(node) => (this.childNodes[index] = node)}
           selected={index === this.props.index}
           suggestion={suggestion}
           onClick={this.props.onClick}
@@ -72,7 +72,7 @@ class Suggestions extends Component {
     });
 
     return (
-      <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>
+      <List innerRef={(node) => (this.parentNode = node)}>{suggestions}</List>
     );
   }
 }
@@ -82,7 +82,7 @@ Suggestions.propTypes = {
   onClick: PropTypes.func.isRequired,
   onMouseEnter: PropTypes.func.isRequired,
   show: PropTypes.bool,
-  suggestions: PropTypes.array.isRequired
+  suggestions: PropTypes.array.isRequired,
 };
 
 export default Suggestions;

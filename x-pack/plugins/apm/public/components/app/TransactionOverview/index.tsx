@@ -10,7 +10,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { Location } from 'history';
 import { first } from 'lodash';
@@ -39,7 +39,7 @@ import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 function getRedirectLocation({
   urlParams,
   location,
-  serviceTransactionTypes
+  serviceTransactionTypes,
 }: {
   location: Location;
   urlParams: IUrlParams;
@@ -53,8 +53,8 @@ function getRedirectLocation({
       ...location,
       search: fromQuery({
         ...toQuery(location.search),
-        transactionType: firstTransactionType
-      })
+        transactionType: firstTransactionType,
+      }),
     };
   }
 }
@@ -73,7 +73,7 @@ export function TransactionOverview() {
     getRedirectLocation({
       urlParams,
       location,
-      serviceTransactionTypes
+      serviceTransactionTypes,
     })
   );
 
@@ -83,7 +83,7 @@ export function TransactionOverview() {
   useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
   const {
     data: transactionListData,
-    status: transactionListStatus
+    status: transactionListStatus,
   } = useTransactionList(urlParams);
 
   const { http } = useApmPluginContext().core;
@@ -105,13 +105,13 @@ export function TransactionOverview() {
         'host',
         'containerId',
         'podName',
-        'serviceVersion'
+        'serviceVersion',
       ],
       params: {
         serviceName,
-        transactionType
+        transactionType,
       },
-      projection: PROJECTION.TRANSACTION_GROUPS
+      projection: PROJECTION.TRANSACTION_GROUPS,
     }),
     [serviceName, transactionType]
   );

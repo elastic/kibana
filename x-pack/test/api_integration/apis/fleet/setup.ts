@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
@@ -56,8 +56,15 @@ export default function({ getService }: FtrProviderContext) {
         cluster: ['monitor', 'manage_api_key'],
         indices: [
           {
-            names: ['logs-*', 'metrics-*', 'events-*'],
-            privileges: ['write', 'create_index'],
+            names: [
+              'logs-*',
+              'metrics-*',
+              'events-*',
+              '.ds-logs-*',
+              '.ds-metrics-*',
+              '.ds-events-*',
+            ],
+            privileges: ['write', 'create_index', 'indices:admin/auto_create'],
             allow_restricted_indices: false,
           },
         ],
@@ -69,19 +76,13 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('should not create or update the fleet_enroll user if called multiple times', async () => {
-      await supertest
-        .post(`/api/ingest_manager/fleet/setup`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
+      await supertest.post(`/api/ingest_manager/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       const { body: userResponseFirstTime } = await es.security.getUser({
         username: 'fleet_enroll',
       });
 
-      await supertest
-        .post(`/api/ingest_manager/fleet/setup`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
+      await supertest.post(`/api/ingest_manager/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       const { body: userResponseSecondTime } = await es.security.getUser({
         username: 'fleet_enroll',
@@ -93,10 +94,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('should create or update the fleet_enroll user if called multiple times with forceRecreate flag', async () => {
-      await supertest
-        .post(`/api/ingest_manager/fleet/setup`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
+      await supertest.post(`/api/ingest_manager/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       const { body: userResponseFirstTime } = await es.security.getUser({
         username: 'fleet_enroll',

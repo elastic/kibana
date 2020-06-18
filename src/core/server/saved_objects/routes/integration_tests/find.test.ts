@@ -23,7 +23,7 @@ import querystring from 'querystring';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerFindRoute } from '../find';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { setupServer } from './test_utils';
+import { setupServer } from '../test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -79,6 +79,7 @@ describe('GET /api/saved_objects/_find', () => {
           timeFieldName: '@timestamp',
           notExpandable: true,
           attributes: {},
+          score: 1,
           references: [],
         },
         {
@@ -88,6 +89,7 @@ describe('GET /api/saved_objects/_find', () => {
           timeFieldName: '@timestamp',
           notExpandable: true,
           attributes: {},
+          score: 1,
           references: [],
         },
       ],
@@ -129,9 +131,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the optional query parameter has_reference', async () => {
-    await supertest(httpSetup.server.listener)
-      .get('/api/saved_objects/_find?type=foo')
-      .expect(200);
+    await supertest(httpSetup.server.listener).get('/api/saved_objects/_find?type=foo').expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 

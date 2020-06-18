@@ -26,7 +26,7 @@ const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
       throwNotParsed();
     }
     try {
-      const colors = chain[0].arguments._.map(astObj => {
+      const colors = chain[0].arguments._.map((astObj) => {
         if (getType(astObj) !== 'string') {
           throwNotParsed();
         }

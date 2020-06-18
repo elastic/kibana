@@ -81,7 +81,7 @@ export const visDimension = (): ExpressionFunctionDefinition<
     const accessor =
       typeof args.accessor === 'number'
         ? args.accessor
-        : input.columns.find(c => c.id === args.accessor);
+        : input.columns.find((c) => c.id === args.accessor);
 
     if (accessor === undefined) {
       throw new Error(

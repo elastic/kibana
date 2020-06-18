@@ -114,7 +114,7 @@ describe('IndexPattern Field Item', () => {
     let resolveFunction: (arg: unknown) => void;
 
     core.http.post.mockImplementation(() => {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });

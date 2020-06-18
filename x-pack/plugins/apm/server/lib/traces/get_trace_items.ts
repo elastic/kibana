@@ -11,12 +11,12 @@ import {
   TRANSACTION_DURATION,
   SPAN_DURATION,
   TRANSACTION_ID,
-  ERROR_LOG_LEVEL
+  ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
 import { Span } from '../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseValueType } from '../../../typings/common';
 
@@ -41,10 +41,10 @@ export async function getTraceItems(
           filter: [
             { term: { [TRACE_ID]: traceId } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            { range: rangeFilter(start, end) }
+            { range: rangeFilter(start, end) },
           ],
-          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } }
-        }
+          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
+        },
       },
       aggs: {
         by_transaction_id: {
@@ -52,17 +52,17 @@ export async function getTraceItems(
             field: TRANSACTION_ID,
             size: maxTraceItems,
             // high cardinality
-            execution_hint: 'map' as const
-          }
-        }
-      }
-    }
+            execution_hint: 'map' as const,
+          },
+        },
+      },
+    },
   });
 
   const traceResponsePromise = client.search({
     index: [
       indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices']
+      indices['apm_oss.transactionIndices'],
     ],
     body: {
       size: maxTraceItems,
@@ -71,20 +71,20 @@ export async function getTraceItems(
           filter: [
             { term: { [TRACE_ID]: traceId } },
             { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
-            { range: rangeFilter(start, end) }
+            { range: rangeFilter(start, end) },
           ],
           should: {
-            exists: { field: PARENT_ID }
-          }
-        }
+            exists: { field: PARENT_ID },
+          },
+        },
       },
       sort: [
         { _score: { order: 'asc' as const } },
         { [TRANSACTION_DURATION]: { order: 'desc' as const } },
-        { [SPAN_DURATION]: { order: 'desc' as const } }
+        { [SPAN_DURATION]: { order: 'desc' as const } },
       ],
-      track_total_hits: true
-    }
+      track_total_hits: true,
+    },
   });
 
   const [errorResponse, traceResponse]: [
@@ -98,7 +98,7 @@ export async function getTraceItems(
 
   const items = (traceResponse.hits.hits as Array<{
     _source: Transaction | Span;
-  }>).map(hit => hit._source);
+  }>).map((hit) => hit._source);
 
   const errorFrequencies: {
     errorsPerTransaction: ErrorsPerTransaction;
@@ -112,16 +112,16 @@ export async function getTraceItems(
         (acc, current) => {
           return {
             ...acc,
-            [current.key]: current.doc_count
+            [current.key]: current.doc_count,
           };
         },
         {} as ErrorsPerTransaction
-      ) ?? {}
+      ) ?? {},
   };
 
   return {
     items,
     exceedsMax,
-    ...errorFrequencies
+    ...errorFrequencies,
   };
 }

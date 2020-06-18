@@ -18,14 +18,14 @@ class MockMbMap {
   }
 
   moveLayer(mbLayerId, nextMbLayerId) {
-    const indexOfLayerToMove = this._style.layers.findIndex(layer => {
+    const indexOfLayerToMove = this._style.layers.findIndex((layer) => {
       return layer.id === mbLayerId;
     });
 
     const layerToMove = this._style.layers[indexOfLayerToMove];
     this._style.layers.splice(indexOfLayerToMove, 1);
 
-    const indexOfNextLayer = this._style.layers.findIndex(layer => {
+    const indexOfNextLayer = this._style.layers.findIndex((layer) => {
       return layer.id === nextMbLayerId;
     });
 
@@ -37,7 +37,7 @@ class MockMbMap {
   }
 
   removeLayer(layerId) {
-    const layerToRemove = this._style.layers.findIndex(layer => {
+    const layerToRemove = this._style.layers.findIndex((layer) => {
       return layer.id === layerId;
     });
     this._style.layers.splice(layerToRemove, 1);
@@ -65,13 +65,13 @@ class MockLayer {
   }
 
   ownsMbLayerId(mbLayerId) {
-    return this._mbLayerIdsToSource.some(mbLayerToSource => {
+    return this._mbLayerIdsToSource.some((mbLayerToSource) => {
       return mbLayerToSource.id === mbLayerId;
     });
   }
 
   ownsMbSourceId(mbSourceId) {
-    return this._mbSourceIds.some(id => mbSourceId === id);
+    return this._mbSourceIds.some((id) => mbSourceId === id);
   }
 }
 
@@ -81,8 +81,8 @@ function getMockStyle(orderedMockLayerList) {
     layers: [],
   };
 
-  orderedMockLayerList.forEach(mockLayer => {
-    mockLayer.getMbSourceIds().forEach(mbSourceId => {
+  orderedMockLayerList.forEach((mockLayer) => {
+    mockLayer.getMbSourceIds().forEach((mbSourceId) => {
       mockStyle.sources[mbSourceId] = {};
     });
     mockLayer.getMbLayersIdsToSource().forEach(({ id, source }) => {

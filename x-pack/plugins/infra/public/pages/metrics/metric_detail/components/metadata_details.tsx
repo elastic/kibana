@@ -83,7 +83,7 @@ const FIELDS = [
 ] as FieldDef[];
 
 const getLabelForField = ({ field }: FieldDef) => {
-  const fieldDef = FIELDS.find(f => f.field === field);
+  const fieldDef = FIELDS.find((f) => f.field === field);
   if (!fieldDef) return field;
   return fieldDef.label;
 };
@@ -115,13 +115,13 @@ export const MetadataDetails = (props: Props) => {
   const filteredFields = useMemo(() => {
     if (props.fields && props.fields.length) {
       return props.fields
-        .map(field => {
-          const fieldDef = FIELDS.find(f => f.field === field);
+        .map((field) => {
+          const fieldDef = FIELDS.find((f) => f.field === field);
           if (fieldDef) {
             return fieldDef;
           }
         })
-        .filter(f => f) as FieldDef[];
+        .filter((f) => f) as FieldDef[];
     } else {
       return FIELDS;
     }
@@ -150,7 +150,7 @@ export const MetadataDetails = (props: Props) => {
         </Controls>
       ) : null}
       <EuiFlexGrid columns={NUMBER_OF_COLUMNS} style={{ flexGrow: 1 }} gutterSize="s">
-        {fields.map(field => (
+        {fields.map((field) => (
           <EuiFlexItem key={field.field} style={{ minWidth: 0 }}>
             <EuiTitle size="xs">
               <h5>{getLabelForField(field)}</h5>
@@ -164,17 +164,17 @@ export const MetadataDetails = (props: Props) => {
 };
 
 const MetadataContainer = euiStyled.div`
-border-top: ${props => props.theme.eui.euiBorderWidthThin} solid ${props =>
+border-top: ${(props) => props.theme.eui.euiBorderWidthThin} solid ${(props) =>
   props.theme.eui.euiBorderColor};
-border-bottom: ${props => props.theme.eui.euiBorderWidthThin} solid ${props =>
+border-bottom: ${(props) => props.theme.eui.euiBorderWidthThin} solid ${(props) =>
   props.theme.eui.euiBorderColor};
-padding: ${props => props.theme.eui.paddingSizes.m} 0;
-margin-bottom: ${props => props.theme.eui.paddingSizes.m};
+padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
+margin-bottom: ${(props) => props.theme.eui.paddingSizes.m};
 display: flex;
 `;
 
 const Controls = euiStyled.div`
 flex-grow: 0;
-margin-right: ${props => props.theme.eui.paddingSizes.m};
+margin-right: ${(props) => props.theme.eui.paddingSizes.m};
 min-width: 0px;
 `;

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
+import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -30,7 +30,7 @@ import * as Breadcrumbs from './breadcrumbs';
 
 export const renderApp = async (
   core: CoreStart,
-  { basePath, element, setBreadcrumbs }: ManagementAppMountParams,
+  { history, element, setBreadcrumbs }: ManagementAppMountParams,
   isMonitoringEnabled: boolean,
   licenseService$: Observable<any>
 ) => {
@@ -43,12 +43,12 @@ export const renderApp = async (
 
   ReactDOM.render(
     <core.i18n.Context>
-      <HashRouter basename={basePath}>
+      <Router history={history}>
         <Switch>
           <Route
-            path="/"
+            path={['/', '']}
             exact
-            render={({ history }) => {
+            render={() => {
               setBreadcrumbs(Breadcrumbs.getPipelineListBreadcrumbs());
               return (
                 <PipelineList
@@ -60,7 +60,7 @@ export const renderApp = async (
                   monitoringService={monitoringService}
                   openPipeline={(id: string) => history.push(`/pipeline/${id}/edit`)}
                   clonePipeline={(id: string) => history.push(`/pipeline/${id}/edit?clone`)}
-                  createPipeline={() => history.push(`/pipeline/new-pipeline`)}
+                  createPipeline={() => history.push(`pipeline/new-pipeline`)}
                   pipelinesService={pipelinesService}
                   toastNotifications={core.notifications.toasts}
                 />
@@ -70,7 +70,7 @@ export const renderApp = async (
           <Route
             path="/pipeline/new-pipeline"
             exact
-            render={({ history }) => (
+            render={() => (
               <PipelineEditView
                 history={history}
                 setBreadcrumbs={setBreadcrumbs}
@@ -89,7 +89,7 @@ export const renderApp = async (
           <Route
             path="/pipeline/:id/edit"
             exact
-            render={({ match, history }) => (
+            render={({ match }) => (
               <PipelineEditView
                 history={history}
                 setBreadcrumbs={setBreadcrumbs}
@@ -102,7 +102,7 @@ export const renderApp = async (
             )}
           />
         </Switch>
-      </HashRouter>
+      </Router>
     </core.i18n.Context>,
     element
   );

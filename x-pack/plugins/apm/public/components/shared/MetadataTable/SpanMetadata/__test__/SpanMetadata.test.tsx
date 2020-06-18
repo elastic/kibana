@@ -10,12 +10,12 @@ import { SpanMetadata } from '..';
 import { Span } from '../../../../../../typings/es_schemas/ui/span';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
 import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = {
-  wrapper: MockApmPluginContextWrapper
+  wrapper: MockApmPluginContextWrapper,
 };
 
 describe('SpanMetadata', () => {
@@ -25,18 +25,18 @@ describe('SpanMetadata', () => {
         agent: {
           ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
           name: 'java',
-          version: '1.9.1-SNAPSHOT'
+          version: '1.9.1-SNAPSHOT',
         },
         service: {
-          name: 'opbeans-java'
+          name: 'opbeans-java',
         },
         span: {
           id: '7efbc7056b746fcb',
           message: {
             age: { ms: 1577958057123 },
-            queue: { name: 'queue name' }
-          }
-        }
+            queue: { name: 'queue name' },
+          },
+        },
       } as unknown) as Span;
       const output = render(<SpanMetadata span={span} />, renderOptions);
       expectTextsInDocument(output, ['Service', 'Agent', 'Message']);
@@ -48,23 +48,23 @@ describe('SpanMetadata', () => {
         agent: {
           ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
           name: 'java',
-          version: '1.9.1-SNAPSHOT'
+          version: '1.9.1-SNAPSHOT',
         },
         service: {
-          name: 'opbeans-java'
+          name: 'opbeans-java',
         },
         span: {
           id: '7efbc7056b746fcb',
           http: {
-            response: { status_code: 200 }
+            response: { status_code: 200 },
           },
           subtype: 'http',
           type: 'external',
           message: {
             age: { ms: 1577958057123 },
-            queue: { name: 'queue name' }
-          }
-        }
+            queue: { name: 'queue name' },
+          },
+        },
       } as unknown) as Span;
       const output = render(<SpanMetadata span={span} />, renderOptions);
       expectTextsInDocument(output, ['Service', 'Agent', 'Span', 'Message']);
@@ -76,18 +76,18 @@ describe('SpanMetadata', () => {
         agent: {
           ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
           name: 'java',
-          version: '1.9.1-SNAPSHOT'
+          version: '1.9.1-SNAPSHOT',
         },
         service: {
-          name: 'opbeans-java'
+          name: 'opbeans-java',
         },
         span: {
           http: {
-            response: { status_code: 200 }
+            response: { status_code: 200 },
           },
           subtype: 'http',
-          type: 'external'
-        }
+          type: 'external',
+        },
       } as unknown) as Span;
       const output = render(<SpanMetadata span={span} />, renderOptions);
       expectTextsInDocument(output, ['Service', 'Agent']);

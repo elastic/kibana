@@ -50,7 +50,7 @@ import { contextServiceMock } from '../context/context_service.mock';
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
 mockPluginInitializerProvider.mockImplementation(
-  pluginName => mockPluginInitializers.get(pluginName)!
+  (pluginName) => mockPluginInitializers.get(pluginName)!
 );
 
 let plugins: InjectedPluginMetadata[];
@@ -89,6 +89,7 @@ describe('PluginsService', () => {
     mockSetupDeps = {
       application: applicationServiceMock.createInternalSetupContract(),
       context: contextServiceMock.createSetupContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),
       injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
@@ -250,7 +251,7 @@ describe('PluginsService', () => {
     });
 
     describe('timeout', () => {
-      const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
       beforeAll(() => {
         jest.useFakeTimers();
       });
@@ -262,7 +263,7 @@ describe('PluginsService', () => {
         mockPluginInitializers.set(
           'pluginA',
           jest.fn(() => ({
-            setup: jest.fn(() => new Promise(i => i)),
+            setup: jest.fn(() => new Promise((i) => i)),
             start: jest.fn(() => ({ value: 1 })),
             stop: jest.fn(),
           }))
@@ -343,7 +344,7 @@ describe('PluginsService', () => {
           'pluginA',
           jest.fn(() => ({
             setup: jest.fn(() => ({ value: 1 })),
-            start: jest.fn(() => new Promise(i => i)),
+            start: jest.fn(() => new Promise((i) => i)),
             stop: jest.fn(),
           }))
         );

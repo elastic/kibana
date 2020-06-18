@@ -8,7 +8,7 @@ import { SettingsChecker } from '../checkers/settings_checker';
 import { startChecks } from '../';
 
 describe('Start Checks of Elasticsearch Settings', () => {
-  const getHttp = data => ({
+  const getHttp = (data) => ({
     get() {
       return Promise.resolve({ data });
     },
@@ -30,7 +30,7 @@ describe('Start Checks of Elasticsearch Settings', () => {
     checker3.setMessage('Checking example for unit test 03');
 
     const checkers = [checker1, checker2, checker3];
-    const mockSetInModel = data => data;
+    const mockSetInModel = (data) => data;
 
     expect(await startChecks(checkers, mockSetInModel)).toEqual({
       reason: { context: 'unit_test 03' },

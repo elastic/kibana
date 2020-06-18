@@ -40,12 +40,12 @@ const dataTypesArray = [
   ['stackedSeries', stackedSeries],
 ];
 
-describe('Vislib Heatmap Chart Test Suite', function() {
-  dataTypesArray.forEach(function(dataType) {
+describe('Vislib Heatmap Chart Test Suite', function () {
+  dataTypesArray.forEach(function (dataType) {
     const name = dataType[0];
     const data = dataType[1];
 
-    describe('for ' + name + ' Data', function() {
+    describe('for ' + name + ' Data', function () {
       let vis;
       let mockUiState;
       const visLibParams = {
@@ -72,12 +72,12 @@ describe('Vislib Heatmap Chart Test Suite', function() {
         generateVis();
       });
 
-      afterEach(function() {
+      afterEach(function () {
         vis.destroy();
       });
 
       it('category axes should be rendered in reverse order', () => {
-        const renderedCategoryAxes = vis.handler.renderArray.filter(item => {
+        const renderedCategoryAxes = vis.handler.renderArray.filter((item) => {
           return (
             item.constructor &&
             item.constructor.name === 'Axis' &&
@@ -93,9 +93,9 @@ describe('Vislib Heatmap Chart Test Suite', function() {
         );
       });
 
-      describe('addSquares method', function() {
-        it('should append rects', function() {
-          vis.handler.charts.forEach(function(chart) {
+      describe('addSquares method', function () {
+        it('should append rects', function () {
+          vis.handler.charts.forEach(function (chart) {
             const numOfRects = chart.chartData.series.reduce((result, series) => {
               return result + series.values.length;
             }, 0);
@@ -104,11 +104,9 @@ describe('Vislib Heatmap Chart Test Suite', function() {
         });
       });
 
-      describe('addBarEvents method', function() {
+      describe('addBarEvents method', function () {
         function checkChart(chart) {
-          const rect = $(chart.chartEl)
-            .find('.series rect')
-            .get(0);
+          const rect = $(chart.chartEl).find('.series rect').get(0);
 
           return {
             click: !!rect.__onclick,
@@ -122,8 +120,8 @@ describe('Vislib Heatmap Chart Test Suite', function() {
           };
         }
 
-        it('should attach the brush if data is a set of ordered dates', function() {
-          vis.handler.charts.forEach(function(chart) {
+        it('should attach the brush if data is a set of ordered dates', function () {
+          vis.handler.charts.forEach(function (chart) {
             const has = checkChart(chart);
             const ordered = vis.handler.data.get('ordered');
             const date = Boolean(ordered && ordered.date);
@@ -131,30 +129,30 @@ describe('Vislib Heatmap Chart Test Suite', function() {
           });
         });
 
-        it('should attach a click event', function() {
-          vis.handler.charts.forEach(function(chart) {
+        it('should attach a click event', function () {
+          vis.handler.charts.forEach(function (chart) {
             const has = checkChart(chart);
             expect(has.click).to.be(true);
           });
         });
 
-        it('should attach a hover event', function() {
-          vis.handler.charts.forEach(function(chart) {
+        it('should attach a hover event', function () {
+          vis.handler.charts.forEach(function (chart) {
             const has = checkChart(chart);
             expect(has.mouseOver).to.be(true);
           });
         });
       });
 
-      describe('draw method', function() {
-        it('should return a function', function() {
-          vis.handler.charts.forEach(function(chart) {
+      describe('draw method', function () {
+        it('should return a function', function () {
+          vis.handler.charts.forEach(function (chart) {
             expect(_.isFunction(chart.draw())).to.be(true);
           });
         });
 
-        it('should return a yMin and yMax', function() {
-          vis.handler.charts.forEach(function(chart) {
+        it('should return a yMin and yMax', function () {
+          vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
             const domain = yAxis.getScale().domain();
 
@@ -164,11 +162,11 @@ describe('Vislib Heatmap Chart Test Suite', function() {
         });
       });
 
-      it('should define default colors', function() {
+      it('should define default colors', function () {
         expect(mockUiState.get('vis.defaultColors')).to.not.be(undefined);
       });
 
-      it('should set custom range', function() {
+      it('should set custom range', function () {
         vis.destroy();
         generateVis({
           setColorRange: true,
@@ -186,7 +184,7 @@ describe('Vislib Heatmap Chart Test Suite', function() {
         expect(labels[3]).to.be('500 - Infinity');
       });
 
-      it('should show correct Y axis title', function() {
+      it('should show correct Y axis title', function () {
         expect(vis.handler.categoryAxes[1].axisConfig.get('title.text')).to.equal('');
       });
     });

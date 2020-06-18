@@ -1,6 +1,6 @@
 [role="xpack"]
 [[ml-settings-kb]]
-=== Machine learning settings in Kibana
+=== Machine learning settings in {kib}
 ++++
 <titleabbrev>Machine learning settings</titleabbrev>
 ++++
@@ -13,7 +13,7 @@ enabled by default.
 
 [cols="2*<"]
 |===
-| `xpack.ml.enabled`
+| `xpack.ml.enabled` {ess-icon}
   | Set to `true` (default) to enable {kib} {ml-features}. +
   +
   If set to `false` in `kibana.yml`, the {ml} icon is hidden in this {kib}
@@ -23,13 +23,7 @@ enabled by default.
 
 |===
 
-[[data-visualizer-settings]]
-==== {data-viz} settings
+[[advanced-ml-settings-kb]]
+==== Advanced {ml} settings
 
-[cols="2*<"]
-|===
-| `xpack.ml.file_data_visualizer.max_file_size`
-  | Sets the file size limit when importing data in the {data-viz}. The default
-  value is `100MB`. The highest supported value for this setting is `1GB`.
-
-|===
+Refer to <<kibana-ml-settings,Advanced {ml} settings in {kib}>>.

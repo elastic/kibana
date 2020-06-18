@@ -40,7 +40,7 @@ export const ActionTypeMenu = ({
         // would be enabled by upgrading to gold or trial
         if (setHasActionsUpgradeableByTrial) {
           const hasActionsUpgradeableByTrial = availableActionTypes.some(
-            action =>
+            (action) =>
               !index[action.id].enabledInLicense &&
               index[action.id].minimumLicenseRequired === 'gold'
           );

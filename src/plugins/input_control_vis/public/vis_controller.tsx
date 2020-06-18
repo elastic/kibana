@@ -64,7 +64,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     destroy() {
       this.updateSubsciption.unsubscribe();
       unmountComponentAtNode(this.el);
-      this.controls.forEach(control => control.destroy());
+      this.controls.forEach((control) => control.destroy());
     }
 
     drawVis = () => {
@@ -92,13 +92,13 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
 
     async initControls() {
       const controlParamsList = (this.visParams?.controls as ControlParams[])?.filter(
-        controlParams => {
+        (controlParams) => {
           // ignore controls that do not have indexPattern or field
           return controlParams.indexPattern && controlParams.fieldName;
         }
       );
 
-      const controlFactoryPromises = controlParamsList.map(controlParams => {
+      const controlFactoryPromises = controlParamsList.map((controlParams) => {
         const factory = getControlFactory(controlParams);
 
         return factory(controlParams, this.visParams?.useTimeFilter, deps);
@@ -114,7 +114,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         // first lineage item is the control. remove it
         lineage.shift();
         const ancestors: Array<RangeControl | ListControl> = [];
-        lineage.forEach(ancestorId => {
+        lineage.forEach((ancestorId) => {
           const control = getControl(ancestorId);
 
           if (control) {
@@ -146,19 +146,19 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     };
 
     submitFilters = () => {
-      const stagedControls = this.controls.filter(control => {
+      const stagedControls = this.controls.filter((control) => {
         return control.hasChanged();
       });
 
       const newFilters = stagedControls
-        .map(control => control.getKbnFilter())
+        .map((control) => control.getKbnFilter())
         .filter((filter): filter is Filter => {
           return filter !== null;
         });
 
-      stagedControls.forEach(control => {
+      stagedControls.forEach((control) => {
         // to avoid duplicate filters, remove any old filters for control
-        control.filterManager.findFilters().forEach(existingFilter => {
+        control.filterManager.findFilters().forEach((existingFilter) => {
           this.filterManager.removeFilter(existingFilter);
         });
       });
@@ -166,9 +166,9 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       // Clean up filter pills for nested controls that are now disabled because ancestors are not set.
       // This has to be done after looking up the staged controls because otherwise removing a filter
       // will re-sync the controls of all other filters.
-      this.controls.map(control => {
+      this.controls.map((control) => {
         if (control.hasAncestors() && control.hasUnsetAncestor()) {
-          control.filterManager.findFilters().forEach(existingFilter => {
+          control.filterManager.findFilters().forEach((existingFilter) => {
             this.filterManager.removeFilter(existingFilter);
           });
         }
@@ -178,7 +178,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     };
 
     clearControls = async () => {
-      this.controls.forEach(control => {
+      this.controls.forEach((control) => {
         control.clear();
       });
       await this.updateNestedControls();
@@ -186,7 +186,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     };
 
     updateControlsFromKbn = async () => {
-      this.controls.forEach(control => {
+      this.controls.forEach((control) => {
         control.reset();
       });
       await this.updateNestedControls();
@@ -194,7 +194,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     };
 
     async updateNestedControls() {
-      const fetchPromises = this.controls.map(async control => {
+      const fetchPromises = this.controls.map(async (control) => {
         if (control.hasAncestors()) {
           await control.fetch();
         }
@@ -203,12 +203,12 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     }
 
     hasChanges = () => {
-      return this.controls.map(control => control.hasChanged()).some(control => control);
+      return this.controls.map((control) => control.hasChanged()).some((control) => control);
     };
 
     hasValues = () => {
       return this.controls
-        .map(control => {
+        .map((control) => {
           return control.hasValue();
         })
         .reduce((a, b) => {

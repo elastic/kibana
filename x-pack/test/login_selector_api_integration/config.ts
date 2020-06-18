@@ -8,11 +8,11 @@ import { resolve } from 'path';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaAPITestsConfig = await readConfigFile(
     require.resolve('../../../test/api_integration/config.js')
   );
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
 
   const kerberosKeytabPath = resolve(__dirname, '../kerberos_api_integration/fixtures/krb5.keytab');

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getMlIndex } from '../../../../../common/ml_job_constants';
+import { getMlJobId } from '../../../../../common/ml_job_constants';
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
@@ -18,7 +18,7 @@ export async function anomalySeriesFetcher({
   transactionType,
   intervalString,
   mlBucketSize,
-  setup
+  setup,
 }: {
   serviceName: string;
   transactionType: string;
@@ -26,31 +26,35 @@ export async function anomalySeriesFetcher({
   mlBucketSize: number;
   setup: Setup & SetupTimeRange;
 }) {
-  const { client, start, end } = setup;
+  const { ml, start, end } = setup;
+  if (!ml) {
+    return;
+  }
 
   // move the start back with one bucket size, to ensure to get anomaly data in the beginning
   // this is required because ML has a minimum bucket size (default is 900s) so if our buckets are smaller, we might have several null buckets in the beginning
   const newStart = start - mlBucketSize * 1000;
+  const jobId = getMlJobId(serviceName, transactionType);
 
   const params = {
-    index: getMlIndex(serviceName, transactionType),
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
+            { term: { job_id: jobId } },
             { exists: { field: 'bucket_span' } },
             {
               range: {
                 timestamp: {
                   gte: newStart,
                   lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
-        }
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
+        },
       },
       aggs: {
         ml_avg_response_times: {
@@ -60,21 +64,21 @@ export async function anomalySeriesFetcher({
             min_doc_count: 0,
             extended_bounds: {
               min: newStart,
-              max: end
-            }
+              max: end,
+            },
           },
           aggs: {
             anomaly_score: { max: { field: 'anomaly_score' } },
             lower: { min: { field: 'model_lower' } },
-            upper: { max: { field: 'model_upper' } }
-          }
-        }
-      }
-    }
+            upper: { max: { field: 'model_upper' } },
+          },
+        },
+      },
+    },
   };
 
   try {
-    const response = await client.search(params);
+    const response = await ml.mlSystem.mlAnomalySearch(params);
     return response;
   } catch (err) {
     const isHttpError = 'statusCode' in err;

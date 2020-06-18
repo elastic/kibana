@@ -7,6 +7,7 @@
 import { APICaller } from 'kibana/server';
 
 import { of } from 'rxjs';
+import moment from 'moment';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import {
   ConcreteTaskInstance,
@@ -38,6 +39,7 @@ const defaultMockSavedObjects = [
     _source: {
       type: 'visualization',
       visualization: { visState: '{"type": "shell_beads"}' },
+      updated_at: moment().subtract(7, 'days').startOf('day').toString(),
     },
   },
 ];
@@ -60,7 +62,7 @@ export const getMockTaskFetch = (
   docs: ConcreteTaskInstance[] = defaultMockTaskDocs
 ): Partial<jest.Mocked<TaskManagerStartContract>> => {
   return {
-    fetch: jest.fn(fetchOpts => {
+    fetch: jest.fn((fetchOpts) => {
       return Promise.resolve({ docs, searchAfter: [] });
     }),
   } as Partial<jest.Mocked<TaskManagerStartContract>>;
@@ -70,7 +72,7 @@ export const getMockThrowingTaskFetch = (
   throws: Error
 ): Partial<jest.Mocked<TaskManagerStartContract>> => {
   return {
-    fetch: jest.fn(fetchOpts => {
+    fetch: jest.fn((fetchOpts) => {
       throw throws;
     }),
   } as Partial<jest.Mocked<TaskManagerStartContract>>;

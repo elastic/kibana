@@ -40,7 +40,7 @@ describe('plugin discovery/extend config service', () => {
       new Plugin({
         configPrefix: 'foo.bar.baz',
 
-        config: Joi =>
+        config: (Joi) =>
           Joi.object({
             enabled: Joi.boolean().default(true),
             test: Joi.string().default('bonk'),

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
@@ -29,7 +29,7 @@ export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
 
   describe('dashboard saved queries', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -37,7 +37,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    describe('saved query management component functionality', function() {
+    describe('saved query management component functionality', function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();

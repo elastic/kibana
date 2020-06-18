@@ -30,7 +30,7 @@ import { reorder } from './lib/reorder';
 const DROPPABLE_ID = 'series_editor_dnd';
 
 export class SeriesEditor extends Component {
-  handleClone = series => {
+  handleClone = (series) => {
     const newSeries = reIdSeries(series);
 
     handleAdd.call(null, this.props, () => newSeries);
@@ -90,7 +90,7 @@ export class SeriesEditor extends Component {
               draggableId={`${DROPPABLE_ID}:${row.id}`}
               disableInteractiveElementBlocking
             >
-              {provided => (
+              {(provided) => (
                 <Series
                   className="tvbSeriesEditor"
                   colorPicker={colorPicker}
@@ -98,7 +98,7 @@ export class SeriesEditor extends Component {
                   disableDelete={model[name].length < 2}
                   fields={fields}
                   onAdd={() => handleAdd(this.props, newSeriesFn)}
-                  onChange={doc => handleChange(this.props, doc)}
+                  onChange={(doc) => handleChange(this.props, doc)}
                   onClone={() => this.handleClone(row)}
                   onDelete={() => handleDelete(this.props, row)}
                   model={row}

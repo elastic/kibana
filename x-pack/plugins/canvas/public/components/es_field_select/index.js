@@ -19,7 +19,7 @@ export const ESFieldSelect = compose(
     componentDidUpdate({ index }) {
       const { value, onChange, setFields } = this.props;
       if (this.props.index !== index) {
-        getFields(this.props.index).then(fields => {
+        getFields(this.props.index).then((fields) => {
           setFields(fields);
         });
       }

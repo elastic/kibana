@@ -21,5 +21,5 @@ module.exports = {
     await unoptimizeTsConfig();
     // eslint-disable-next-line no-console
     console.log('Removed APM TypeScript optimizations');
-  }
+  },
 };

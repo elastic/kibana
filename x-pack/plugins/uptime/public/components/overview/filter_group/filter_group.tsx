@@ -85,7 +85,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
 
   return (
     <Container>
-      {filterPopoverProps.map(item => (
+      {filterPopoverProps.map((item) => (
         <FilterPopover key={item.id} {...item} />
       ))}
     </Container>

@@ -18,7 +18,7 @@ export const readStreamToCompletion = <T = any>(stream: Readable) => {
           done();
         },
       }),
-      err => {
+      (err) => {
         if (err) {
           reject(err);
         } else {
