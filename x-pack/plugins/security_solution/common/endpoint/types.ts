@@ -468,7 +468,7 @@ export interface EndpointEvent {
     domain?: string;
     name: string;
   };
-  file: { path: unknown };
+  file?: { path: unknown };
   registry?: { path: unknown; key: unknown };
 }
 
