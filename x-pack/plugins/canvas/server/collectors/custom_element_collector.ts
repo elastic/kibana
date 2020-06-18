@@ -113,7 +113,7 @@ const customElementCollector: TelemetryCollector = async function customElementC
 
   const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
 
-  if (get<number>(esResponse, 'hits.hits.length') > 0) {
+  if ((get(esResponse, 'hits.hits.length') as number) > 0) {
     const customElements = esResponse.hits.hits.map((hit) => hit._source[CUSTOM_ELEMENT_TYPE]);
     return summarizeCustomElements(customElements);
   }

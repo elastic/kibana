@@ -34,10 +34,10 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
 
     const response = await this.database.get(user, params);
 
-    const tokenDetails = get<TokenEnrollmentData>(response, '_source.enrollment_token', {
+    const tokenDetails = get(response, '_source.enrollment_token', {
       expires_on: '0',
       token: null,
-    });
+    }) as TokenEnrollmentData;
 
     // Elasticsearch might return fast if the token is not found. OR it might return fast
     // if the token *is* found. Either way, an attacker could using a timing attack to figure

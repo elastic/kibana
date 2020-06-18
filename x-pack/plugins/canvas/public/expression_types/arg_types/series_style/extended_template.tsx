@@ -46,7 +46,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
     name = typeInstance.name;
   }
 
-  const fields = get<string[]>(typeInstance, 'options.include', []);
+  const fields = get(typeInstance, 'options.include', []) as string[];
   const hasPropFields = fields.some((field) => ['lines', 'bars', 'points'].indexOf(field) !== -1);
 
   const handleChange: <T extends Argument>(key: T, val: ChangeEvent<HTMLSelectElement>) => void = (
@@ -91,7 +91,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
         <Fragment>
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s">
-            {fields.includes('lines') && (
+            {(fields as any).includes('lines') && (
               <EuiFlexItem>
                 <EuiFormRow label={strings.getLineLabel()} display="rowCompressed">
                   <EuiSelect
@@ -103,7 +103,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
                 </EuiFormRow>
               </EuiFlexItem>
             )}
-            {fields.includes('bars') && (
+            {(fields as any).includes('bars') && (
               <EuiFlexItem>
                 <EuiFormRow label={strings.getBarLabel()} display="rowCompressed">
                   <EuiSelect
@@ -115,7 +115,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
                 </EuiFormRow>
               </EuiFlexItem>
             )}
-            {fields.includes('points') && (
+            {(fields as any).includes('points') && (
               <EuiFlexItem>
                 <EuiFormRow label={strings.getPointLabel()} display="rowCompressed">
                   <EuiSelect

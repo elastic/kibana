@@ -41,7 +41,7 @@ export default function (kibana: any) {
     uiExports: {
       injectDefaultVars: () => ({
         elasticsearchUrl: url.format(
-          Object.assign(url.parse(head(_legacyEsConfig.hosts)), { auth: false })
+          Object.assign(url.parse(head(_legacyEsConfig.hosts) as any), { auth: false })
         ),
       }),
     },

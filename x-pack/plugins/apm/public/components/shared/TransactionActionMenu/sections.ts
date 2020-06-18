@@ -69,7 +69,7 @@ export const getSections = ({
           dateRangeEnd: urlParams.rangeTo,
           search: `url.domain:"${transaction.url?.domain}"`,
         },
-        (val: string) => !isEmpty(val)
+        (val) => !isEmpty(val)
       )
     )}`,
   });

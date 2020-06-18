@@ -19,6 +19,7 @@
 
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { defaults } from 'lodash';
 import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
@@ -168,7 +169,7 @@ export class ExpressionLoader {
     }
 
     if (params.searchContext) {
-      this.params.searchContext = _.defaults(
+      this.params.searchContext = defaults(
         {},
         params.searchContext,
         this.params.searchContext || {}

@@ -54,7 +54,7 @@ export class MappedColors {
   }
 
   get(key: string | number) {
-    return this.getConfigColorMapping()[key] || this._mapping[key];
+    return this.getConfigColorMapping()[key as any] || this._mapping[key];
   }
 
   flush() {
@@ -75,7 +75,7 @@ export class MappedColors {
     const keysToMap: Array<string | number> = [];
     _.each(keys, (key) => {
       // If this key is mapped in the config, it's unnecessary to have it mapped here
-      if (configMapping[key]) delete this._mapping[key];
+      if (configMapping[key as any]) delete this._mapping[key];
 
       // If this key is mapped to a color used by the config color mapping, we need to remap it
       if (_.includes(configColors, this._mapping[key])) keysToMap.push(key);

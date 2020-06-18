@@ -233,7 +233,7 @@ export class FieldFormatsRegistry {
   parseDefaultTypeMap(value: any) {
     this.defaultMap = value;
     forOwn(this, (fn) => {
-      if (isFunction(fn) && fn.cache) {
+      if (isFunction(fn) && (fn as any).cache) {
         // clear all memoize caches
         // @ts-ignore
         fn.cache = new memoize.Cache();

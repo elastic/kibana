@@ -108,7 +108,7 @@ export const normalize = (target: Targets) => (data: IndexMap) => {
 
 export const initDataFor = (target: Targets) =>
   flow(
-    cloneDeep,
+    cloneDeep as any,
     initShards,
     calculateShardValues(target),
     initIndices,

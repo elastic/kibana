@@ -186,8 +186,8 @@ export async function getTransactionBreakdown({
     // is drawn correctly.
     // If we set all values to 0, the chart always displays null values as 0,
     // and the chart looks weird.
-    const hasAnyValues = lastValues.some((value) => value.y !== null);
-    const hasNullValues = lastValues.some((value) => value.y === null);
+    const hasAnyValues = lastValues.some((value: any) => value.y !== null);
+    const hasNullValues = lastValues.some((value: any) => value.y === null);
 
     if (hasAnyValues && hasNullValues) {
       Object.values(updatedSeries).forEach((series) => {

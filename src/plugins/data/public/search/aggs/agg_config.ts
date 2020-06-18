@@ -280,7 +280,7 @@ export class AggConfig {
 
     const outParams = _.transform(
       this.getAggParams(),
-      (out, aggParam) => {
+      (out: any, aggParam) => {
         let val = params[aggParam.name];
 
         // don't serialize undefined/null values

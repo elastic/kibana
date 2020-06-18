@@ -78,7 +78,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   }
 
   const tabs = getTabs(error);
-  const currentTab = getCurrentTab(tabs, urlParams.detailTab);
+  const currentTab = getCurrentTab(tabs, urlParams.detailTab) as any;
 
   const errorUrl = error.error.page?.url || error.url?.full;
 

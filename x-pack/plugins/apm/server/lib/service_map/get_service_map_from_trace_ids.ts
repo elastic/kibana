@@ -257,22 +257,21 @@ export async function getServiceMapFromTraceIds({
     });
   }
 
-  const connections = uniqBy(
-    paths.flatMap((path) => {
-      return path.reduce((conns, location, index) => {
-        const prev = path[index - 1];
-        if (prev) {
-          return conns.concat({
-            source: prev,
-            destination: location,
-          });
-        }
-        return conns;
-      }, [] as Connection[]);
-    }, [] as Connection[]),
-    (value, _index, array) => {
-      return find(array, value);
-    }
+  const connectionsArr = paths.flatMap((path) => {
+    return path.reduce((conns, location, index) => {
+      const prev = path[index - 1];
+      if (prev) {
+        return conns.concat({
+          source: prev,
+          destination: location,
+        });
+      }
+      return conns;
+    }, [] as Connection[]);
+  }, [] as Connection[]);
+
+  const connections = uniqBy(connectionsArr, (value) =>
+    find(connectionsArr, value)
   );
 
   return {

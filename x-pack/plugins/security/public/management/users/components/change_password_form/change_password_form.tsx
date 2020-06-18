@@ -12,6 +12,7 @@ import {
   EuiForm,
   EuiFormRow,
 } from '@elastic/eui';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component } from 'react';

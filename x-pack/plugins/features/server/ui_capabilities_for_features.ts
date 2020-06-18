@@ -67,7 +67,10 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
 
 function buildCapabilities(...allFeatureCapabilities: FeatureCapabilities[]): UICapabilities {
   return allFeatureCapabilities.reduce<UICapabilities>((acc, capabilities) => {
-    const mergableCapabilities: UICapabilities = _.omit(capabilities, ...ELIGIBLE_FLAT_MERGE_KEYS);
+    const mergableCapabilities: UICapabilities = _.omit(
+      capabilities,
+      ...ELIGIBLE_FLAT_MERGE_KEYS
+    ) as UICapabilities;
 
     const mergedFeatureCapabilities = {
       ...mergableCapabilities,

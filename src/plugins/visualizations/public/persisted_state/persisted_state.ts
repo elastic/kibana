@@ -159,7 +159,7 @@ export class PersistedState extends EventEmitter {
       while (partialPath.length > 0) {
         const lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
         const statePath = [...this._path, partialPath];
-        const stateVal = statePath.length > 0 ? get(stateTree, statePath) : stateTree;
+        const stateVal = statePath.length > 0 ? get(stateTree, statePath as string[]) : stateTree;
 
         // if stateVal isn't an object, do nothing
         if (!isPlainObject(stateVal)) return;

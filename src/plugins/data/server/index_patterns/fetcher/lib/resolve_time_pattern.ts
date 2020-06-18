@@ -46,7 +46,7 @@ export async function resolveTimePattern(callCluster: APICaller, timePattern: st
       []
     )
     .sortBy((indexName: string) => indexName)
-    .uniq(true)
+    .sortedUniq()
     .map((indexName) => {
       const parsed = moment(indexName, timePattern, true);
       if (!parsed.isValid()) {

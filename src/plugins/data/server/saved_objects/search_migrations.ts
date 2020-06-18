@@ -22,13 +22,16 @@ import { SavedObjectMigrationFn } from 'kibana/server';
 import { DEFAULT_QUERY_LANGUAGE } from '../../common';
 
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get<string>(
+    doc as any,
+    'attributes.kibanaSavedObjectMeta.searchSourceJSON' as any
+  );
 
   if (searchSourceJSON) {
     let searchSource: any;
 
     try {
-      searchSource = JSON.parse(searchSourceJSON);
+      searchSource = JSON.parse(searchSourceJSON as any);
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
     }
@@ -122,7 +125,7 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) =
 };
 
 export const searchSavedObjectTypeMigrations = {
-  '6.7.2': flow<SavedObjectMigrationFn<any, any>>(migrateMatchAllQuery),
-  '7.0.0': flow<SavedObjectMigrationFn<any, any>>(setNewReferences),
-  '7.4.0': flow<SavedObjectMigrationFn<any, any>>(migrateSearchSortToNestedArray),
+  '6.7.2': flow(migrateMatchAllQuery),
+  '7.0.0': flow(setNewReferences),
+  '7.4.0': flow(migrateSearchSortToNestedArray),
 };

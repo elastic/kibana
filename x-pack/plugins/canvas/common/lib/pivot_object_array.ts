@@ -21,5 +21,5 @@ export function pivotObjectArray<
   }
 
   const columnValues = map(columnNames, (name) => map(rows, name));
-  return zipObject(columnNames, columnValues);
+  return zipObject(columnNames, columnValues) as any;
 }

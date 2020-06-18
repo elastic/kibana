@@ -156,11 +156,11 @@ export const keymap: KeyMap = {
     PREV: mapValues(previousPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'backspace' and 'left' to list of shortcuts per OS
       key === 'help' ? osShortcuts : osShortcuts.concat(['backspace', 'left'])
-    ),
+    ) as any,
     NEXT: mapValues(nextPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'space' and 'right' to list of shortcuts per OS
       key === 'help' ? osShortcuts : osShortcuts.concat(['space', 'right'])
-    ),
+    ) as any,
     REFRESH: refreshShortcut,
     PAGE_CYCLE_TOGGLE: getShortcuts('p', { help: shortcutHelp.PAGE_CYCLE_TOGGLE }),
   },

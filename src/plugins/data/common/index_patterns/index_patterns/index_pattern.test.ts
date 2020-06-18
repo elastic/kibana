@@ -282,7 +282,7 @@ describe('IndexPattern', () => {
       // const saveSpy = sinon.spy(indexPattern, 'save');
       const scriptedFields = indexPattern.getScriptedFields();
       const oldCount = scriptedFields.length;
-      const scriptedField = last(scriptedFields);
+      const scriptedField = last(scriptedFields) as any;
 
       await indexPattern.removeScriptedField(scriptedField);
 
@@ -293,7 +293,7 @@ describe('IndexPattern', () => {
 
     test('should not allow duplicate names', async () => {
       const scriptedFields = indexPattern.getScriptedFields();
-      const scriptedField = last(scriptedFields);
+      const scriptedField = last(scriptedFields) as any;
       expect.assertions(1);
       try {
         await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string', 'lang');

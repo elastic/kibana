@@ -95,7 +95,7 @@ const addFieldsFromClass = function (
 ) {
   const fieldMap = keyBy(fields, 'name');
 
-  _.forOwn(Class.mapping, (esType, name) => {
+  forOwn(Class.mapping, (esType, name) => {
     if (!name || fieldMap[name]) {
       return;
     }

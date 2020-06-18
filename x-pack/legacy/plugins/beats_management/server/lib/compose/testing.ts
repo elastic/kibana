@@ -20,7 +20,7 @@ import { CMServerLibs } from '../types';
 export function compose(server: any): CMServerLibs {
   const framework = new BackendFrameworkLib(new HapiBackendFrameworkAdapter(undefined, server));
 
-  const beatsAdapter = new MemoryBeatsAdapter(server.beatsDB || []);
+  const beatsAdapter = new MemoryBeatsAdapter(server.beatsDB || []) as any;
   const configAdapter = new MemoryConfigurationBlockAdapter(server.configsDB || []);
   const tags = new CMTagsDomain(
     new MemoryTagsAdapter(server.tagsDB || []),

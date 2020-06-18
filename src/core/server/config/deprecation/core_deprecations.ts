@@ -41,7 +41,7 @@ const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (
     has(settings, 'server.xsrf.whitelist') &&
-    get<unknown[]>(settings, 'server.xsrf.whitelist').length > 0
+    get<unknown[]>(settings, 'server.xsrf.whitelist' as any).length > 0
   ) {
     log(
       'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +

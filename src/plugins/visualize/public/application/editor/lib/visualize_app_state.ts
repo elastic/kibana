@@ -37,7 +37,7 @@ interface Arguments {
 function toObject(state: PureVisState): PureVisState {
   return omitBy(state, (value, key: string) => {
     return key.charAt(0) === '$' || key.charAt(0) === '_' || isFunction(value);
-  });
+  }) as PureVisState;
 }
 
 export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {

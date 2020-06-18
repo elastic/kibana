@@ -460,7 +460,7 @@ export class SearchSource {
     ]);
     let serializedSearchSourceFields: SearchSourceFields = {
       ...searchSourceFields,
-      index: searchSourceFields.index ? searchSourceFields.index.id : undefined,
+      index: searchSourceFields.index ? (searchSourceFields.index.id as any) : undefined,
     };
     if (originalFilters) {
       const filters = this.getFilters(originalFilters);

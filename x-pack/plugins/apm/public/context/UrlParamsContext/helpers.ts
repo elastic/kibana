@@ -62,7 +62,7 @@ export function getPathAsArray(pathname: string = '') {
 }
 
 export function removeUndefinedProps<T>(obj: T): Partial<T> {
-  return pickBy(obj, (value) => value !== undefined);
+  return pickBy(obj as any, (value) => value !== undefined) as any;
 }
 
 export function getPathParams(pathname: string = ''): PathParams {

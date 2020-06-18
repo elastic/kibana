@@ -44,7 +44,7 @@ export const getMaxMinTimestamp = (metric: NodeDetailsMetricData): [number, numb
     const lastRow = last(item.data);
     return acc.concat([(firstRow && firstRow.timestamp) || 0, (lastRow && lastRow.timestamp) || 0]);
   }, [] as number[]);
-  return [min(values), max(values)];
+  return [min(values) as number, max(values) as number];
 };
 
 /**

@@ -18,6 +18,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import _ from 'lodash';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';

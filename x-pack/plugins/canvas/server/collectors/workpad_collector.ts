@@ -154,8 +154,8 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
   return {
     workpads: { total: workpadsInfo.length },
     pages: pagesInfo,
-    elements: elementsInfo,
-    functions: functionsInfo,
+    elements: elementsInfo as any,
+    functions: functionsInfo as any,
   };
 }
 
@@ -170,7 +170,7 @@ const workpadCollector: TelemetryCollector = async function (kibanaIndex, callCl
 
   const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
 
-  if (get<number>(esResponse, 'hits.hits.length') > 0) {
+  if ((get(esResponse, 'hits.hits.length') as number) > 0) {
     const workpads = esResponse.hits.hits.map((hit) => hit._source[CANVAS_TYPE]);
     return summarizeWorkpads(workpads);
   }

@@ -26,7 +26,7 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
 
   checks.forEach((check: Check) => {
     // Doing this way because name is either string or null, get() default value only works on undefined value
-    const location = get<string | null>(check, 'observer.geo.name', null) || UNNAMED_LOCATION;
+    const location = get(check, 'observer.geo.name', null) || UNNAMED_LOCATION;
 
     if (check.monitor.status === STATUS.UP) {
       upChecks.add(upperFirst(location));

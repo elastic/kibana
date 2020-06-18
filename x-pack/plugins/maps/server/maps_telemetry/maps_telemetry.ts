@@ -50,8 +50,8 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
     );
     const typeCountsSum = _.sum(typeCounts);
     accu[type] = {
-      min: typeCounts.length ? _.min(typeCounts) : 0,
-      max: typeCounts.length ? _.max(typeCounts) : 0,
+      min: typeCounts.length ? (_.min(typeCounts) as number) : 0,
+      max: typeCounts.length ? (_.max(typeCounts) as number) : 0,
       avg: typeCountsSum ? typeCountsSum / mapsCount : 0,
     };
     return accu;
@@ -122,7 +122,7 @@ export function buildMapsTelemetry({
       })
       .pickBy((val, key) => key !== 'false')
       .value()
-  );
+  ) as ILayerTypeCount[];
 
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
@@ -179,10 +179,10 @@ export async function getMapsTelemetry(config: MapsConfigType) {
   const savedObjectsClient = getInternalRepository();
   // @ts-ignore
   const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects: IIndexPattern[] = await getIndexPatternSavedObjects(
+  const indexPatternSavedObjects: IIndexPattern[] = (await getIndexPatternSavedObjects(
     // @ts-ignore
     savedObjectsClient
-  );
+  )) as IIndexPattern[];
   const settings: SavedObjectAttribute = {
     showMapVisualizationTypes: config.showMapVisualizationTypes,
   };

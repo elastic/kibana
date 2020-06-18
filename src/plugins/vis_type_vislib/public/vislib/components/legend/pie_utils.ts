@@ -61,7 +61,7 @@ function getNames(data: any, columns: any): string[] {
       .sortBy(function (obj) {
         return obj.index;
       })
-      .uniq(function (d) {
+      .uniqBy(function (d) {
         return d.label;
       })
       .value();

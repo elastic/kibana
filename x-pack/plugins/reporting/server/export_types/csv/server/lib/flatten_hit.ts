@@ -30,7 +30,7 @@ export function createFlattenHit(
         } else if (_.isArray(flat[key])) {
           flat[key].push(val);
         } else {
-          flat[key] = [flat[key], val];
+          flat[key] = [flat[key], val] as any;
         }
         return;
       }

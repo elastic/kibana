@@ -162,7 +162,9 @@ export class SavedObjectsClient {
             });
 
             if (!foundObject) {
-              return queueItem.resolve(this.createSavedObject(pick(queueItem, ['id', 'type'])));
+              return queueItem.resolve(
+                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+              );
             }
 
             queueItem.resolve(foundObject);

@@ -116,7 +116,7 @@ export const getStdDeviationMetricAgg = ({
       },
 
       getValue(agg, bucket) {
-        return get(bucket[agg.parentId], agg.valProp());
+        return get(bucket[agg.parentId], agg.valProp() as any);
       },
     },
     {

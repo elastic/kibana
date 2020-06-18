@@ -40,7 +40,7 @@ async function getStats(callCluster: APICaller, index: string) {
     },
   };
   const esResponse = await callCluster('search', searchParams);
-  const size = _.get<number>(esResponse, 'hits.hits.length');
+  const size = _.get(esResponse, 'hits.hits.length') as number;
   if (size < 1) {
     return;
   }

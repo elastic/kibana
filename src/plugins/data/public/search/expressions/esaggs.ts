@@ -292,7 +292,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
       aggs,
       indexPattern,
       timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined),
+      query: get(input, 'query', undefined) as Query | undefined,
       filters: get(input, 'filters', undefined),
       timeFields: args.timeFields,
       forceFetch: true,

@@ -359,7 +359,7 @@ export class TaskManagerRunner implements TaskRunner {
     await this.bufferedTaskStore.update(
       defaults(
         {
-          ...fieldUpdates,
+          ...(fieldUpdates as Partial<ConcreteTaskInstance>),
           // reset fields that track the lifecycle of the concluded `task run`
           startedAt: null,
           retryAt: null,

@@ -53,7 +53,7 @@ interface HandlerProps {
   resetErrorState: ResetErrorState;
 }
 
-export const errorBoundaryHoc = compose<ComponentProps, {}>(
+export const errorBoundaryHoc = compose(
   withState('error', 'setError', null),
   withState('errorInfo', 'setErrorInfo', null),
   withHandlers<HOCProps, HandlerProps>({
@@ -68,9 +68,9 @@ export const errorBoundaryHoc = compose<ComponentProps, {}>(
       this.props.setErrorInfo(errorInfo);
     },
   }),
-  mapProps<HOCProps, Omit<HOCProps, 'setError' | 'setErrorInfo'>>((props) =>
-    omit(props, ['setError', 'setErrorInfo'])
+  mapProps<HOCProps, Omit<HOCProps, 'setError' | 'setErrorInfo'>>(
+    (props) => omit(props, ['setError', 'setErrorInfo']) as HOCProps
   )
-);
+) as any;
 
 export const ErrorBoundary = errorBoundaryHoc(ErrorBoundaryComponent);
