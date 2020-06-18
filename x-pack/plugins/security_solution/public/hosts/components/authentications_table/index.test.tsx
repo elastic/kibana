@@ -14,6 +14,7 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
 import { hostsModel } from '../../store';
@@ -25,10 +26,23 @@ describe('Authentication Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {

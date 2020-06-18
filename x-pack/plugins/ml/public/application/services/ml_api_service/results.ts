@@ -5,14 +5,14 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
-import { http, http$ } from '../http_service';
+import { HttpService } from '../http_service';
 
 import { basePath } from './index';
 
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
-export const results = {
+export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
     jobIds: string[],
     criteriaFields: string[],
@@ -40,7 +40,7 @@ export const results = {
       influencersFilterQuery,
     });
 
-    return http$<any>({
+    return httpService.http$<any>({
       path: `${basePath()}/results/anomalies_table_data`,
       method: 'POST',
       body,
@@ -53,7 +53,7 @@ export const results = {
       earliestMs,
       latestMs,
     });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/results/max_anomaly_score`,
       method: 'POST',
       body,
@@ -62,7 +62,7 @@ export const results = {
 
   getCategoryDefinition(jobId: string, categoryId: string) {
     const body = JSON.stringify({ jobId, categoryId });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/results/category_definition`,
       method: 'POST',
       body,
@@ -75,7 +75,7 @@ export const results = {
       categoryIds,
       maxExamples,
     });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/results/category_examples`,
       method: 'POST',
       body,
@@ -90,10 +90,10 @@ export const results = {
     latestMs: number
   ) {
     const body = JSON.stringify({ jobId, searchTerm, criteriaFields, earliestMs, latestMs });
-    return http$<PartitionFieldsDefinition>({
+    return httpService.http$<PartitionFieldsDefinition>({
       path: `${basePath()}/results/partition_fields_values`,
       method: 'POST',
       body,
     });
   },
-};
+});

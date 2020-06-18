@@ -19,7 +19,7 @@ import { alertMiddlewareFactory } from '../../../endpoint_alerts/store/middlewar
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createKibanaContextProviderMock } from '../kibana_react';
-import { SUB_PLUGINS_REDUCER, mockGlobalState } from '..';
+import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -56,11 +56,14 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
+  const { storage } = createSecuritySolutionStorageMock();
+
   const store = createStore(
     mockGlobalState,
     SUB_PLUGINS_REDUCER,
     apolloClientObservable,
     kibanaObservable,
+    storage,
     [
       substateMiddlewareFactory(
         (globalState) => globalState.alertList,
@@ -70,6 +73,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
       middlewareSpy.actionSpyMiddleware,
     ]
   );
+
   const MockKibanaContextProvider = createKibanaContextProviderMock();
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (

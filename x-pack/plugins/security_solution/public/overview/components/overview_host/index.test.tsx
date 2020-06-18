@@ -15,6 +15,7 @@ import {
   TestProviders,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 
 import { OverviewHost } from '.';
@@ -93,11 +94,24 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
 describe('OverviewHost', () => {
   const state: State = mockGlobalState;
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   test('it renders the expected widget title', () => {

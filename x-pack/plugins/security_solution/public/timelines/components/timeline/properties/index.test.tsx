@@ -11,6 +11,7 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
   TestProviders,
   kibanaObservable,
 } from '../../../../common/mock';
@@ -99,13 +100,26 @@ const defaultProps = {
 };
 describe('Properties', () => {
   const state: State = mockGlobalState;
-
+  const { storage } = createSecuritySolutionStorageMock();
   let mockedWidth = 1000;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
+
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
     (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: mockedWidth });
   });
 

@@ -188,7 +188,6 @@ const StatefulTimelineComponent = React.memo<Props>(
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             sort={sort!}
             start={start}
-            timelineType={timelineType}
             status={status}
             toggleColumn={toggleColumn}
             usersViewing={usersViewing}

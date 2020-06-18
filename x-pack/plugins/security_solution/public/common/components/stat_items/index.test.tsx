@@ -35,6 +35,7 @@ import {
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
+  createSecuritySolutionStorageMock,
 } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -54,7 +55,14 @@ jest.mock('../charts/barchart', () => {
 describe('Stat Items Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const state: State = mockGlobalState;
-  const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, kibanaObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   describe.each([
     [

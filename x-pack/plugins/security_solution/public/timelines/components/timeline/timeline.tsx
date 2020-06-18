@@ -38,7 +38,7 @@ import {
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../manage_timeline';
-import { TimelineTypeLiteral, TimelineStatusLiteral } from '../../../../common/types/timeline';
+import { TimelineStatusLiteral } from '../../../../common/types/timeline';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -109,7 +109,6 @@ export interface Props {
   start: number;
   sort: Sort;
   status: TimelineStatusLiteral;
-  timelineType: TimelineTypeLiteral;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }

@@ -24,7 +24,7 @@ import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./properties/properties_right');
@@ -102,7 +102,6 @@ describe('Timeline', () => {
       start: startDate,
       sort,
       status: TimelineStatus.active,
-      timelineType: TimelineType.default,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };
