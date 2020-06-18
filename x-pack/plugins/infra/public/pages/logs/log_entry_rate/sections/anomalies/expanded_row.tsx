@@ -17,73 +17,53 @@ import {
   getLogEntryRateSeriesForPartition,
   getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
-import { AnomaliesChart } from './chart';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
-  partitionId: string;
+  id: string;
   results: LogEntryRateResults;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   jobId: string;
-}> = ({ results, timeRange, setTimeRange, partitionId, jobId }) => {
-  const logEntryRateSeries = useMemo(
-    () =>
-      results?.histogramBuckets ? getLogEntryRateSeriesForPartition(results, partitionId) : [],
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [results, partitionId]
-  );
-  const anomalyAnnotations = useMemo(
-    () =>
-      results?.histogramBuckets
-        ? getAnnotationsForPartition(results, partitionId)
-        : {
-            warning: [],
-            minor: [],
-            major: [],
-            critical: [],
-          },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [results, partitionId]
-  );
-  const totalNumberOfLogEntries = useMemo(
-    () =>
-      results?.histogramBuckets
-        ? getTotalNumberOfLogEntriesForPartition(results, partitionId)
-        : undefined,
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [results, partitionId]
-  );
+}> = ({ id, results, timeRange, setTimeRange, jobId }) => {
+  const anomaly = useMemo(() => {
+    return results.anomalies.find((_anomaly) => _anomaly.uuid === id);
+  }, [results, id]);
+
+  if (!anomaly) return null;
+
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={8}>
-        <AnomaliesChart
-          chartId={`${partitionId}-anomalies`}
-          timeRange={timeRange}
-          setTimeRange={setTimeRange}
-          series={logEntryRateSeries}
-          annotations={anomalyAnnotations}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiStat
-          title={numeral(totalNumberOfLogEntries).format('0.00a')}
-          titleSize="m"
-          description={i18n.translate(
-            'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogEntriesDescription',
-            {
-              defaultMessage: 'Number of log entries',
-            }
-          )}
-          reverse
-        />
-        <EuiSpacer size="m" />
+    <>
+      <div>Example logs</div>
+      <div>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} partition={partitionId} />
+          <EuiFlexItem>
+            <EuiStat
+              title={numeral(anomaly.typicalLogEntryRate).format('0.00a')}
+              titleSize="m"
+              description={i18n.translate(
+                'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateDescription',
+                {
+                  defaultMessage: 'Typical',
+                }
+              )}
+              reverse
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiStat
+              title={numeral(anomaly.actualLogEntryRate).format('0.00a')}
+              titleSize="m"
+              description={i18n.translate(
+                'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateDescription',
+                {
+                  defaultMessage: 'Actual',
+                }
+              )}
+              reverse
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </div>
+    </>
   );
 };

@@ -92,10 +92,18 @@ export const AnomaliesTable: React.FunctionComponent<{
       [...expandedUuids].reduce<Record<string, React.ReactNode>>((aggregatedDatasetRows, uuid) => {
         return {
           ...aggregatedDatasetRows,
-          [uuid]: <div>Working</div>,
+          [uuid]: (
+            <AnomaliesTableExpandedRow
+              id={uuid}
+              results={results}
+              setTimeRange={setTimeRange}
+              timeRange={timeRange}
+              jobId={jobId}
+            />
+          ),
         };
       }, {}),
-    [expandedUuids]
+    [expandedUuids, results, setTimeRange, timeRange, jobId]
   );
 
   const [sorting, setSorting] = useState<SortingOptions>({
@@ -167,7 +175,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       },
       {
         field: 'anomalyMessage',
-        name: anomalyScoreColumnName,
+        name: anomalyMessageColumnName,
         sortable: false,
         truncateText: true,
       },
