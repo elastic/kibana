@@ -7,15 +7,19 @@
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
-  describe('EPM Endpoints', function () {
-    this.tags('ciGroup7');
+  const dockerServers = getService('dockerServers');
+  const log = getService('log');
 
-    const dockerServers = getService('dockerServers');
-    const log = getService('log');
-    if (!dockerServers.isEnabled('registry')) {
-      log.warning('skipping EPM Endpoints tests because registry docker server is disabled');
-      return;
-    }
+  let maybeSkipped: typeof global.describe | typeof global.describe.skip = describe;
+
+  if (!dockerServers.isEnabled('registry')) {
+    log.warning('skipping EPM Endpoints tests because registry docker server is disabled');
+    maybeSkipped = describe.skip.bind(describe);
+    return;
+  }
+
+  maybeSkipped('EPM Endpoints', function () {
+    this.tags('ciGroup7');
 
     loadTestFile(require.resolve('./list'));
     // loadTestFile(require.resolve('./file'));
