@@ -37,36 +37,26 @@ const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 //  * id: conflict_2b, originId: conflict_2
 //  * id: conflict_3
 //  * id: conflict_4a, originId: conflict_4
-// using the six conflict test case objects below, we can exercise various permutations of exact/inexact/ambiguous conflict scenarios
-const CID = 'conflict_';
+// using the three conflict test case objects below, we can exercise various permutations of exact/inexact/ambiguous conflict scenarios
 export const TEST_CASES = Object.freeze({
   ...CASES,
-  CONFLICT_1A_OBJ: Object.freeze({
-    type: 'sharedtype',
-    id: `${CID}1a`,
-    originId: `${CID}1`,
-    idToOverwrite: `${CID}1`,
-  }),
-  CONFLICT_1B_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}1b`, originId: `${CID}1` }),
   CONFLICT_2C_OBJ: Object.freeze({
     type: 'sharedtype',
-    id: `${CID}2c`,
-    originId: `${CID}2`,
-    idToOverwrite: `${CID}2a`,
-  }),
-  CONFLICT_2D_OBJ: Object.freeze({
-    type: 'sharedtype',
-    id: `${CID}2d`,
-    originId: `${CID}2`,
-    idToOverwrite: `${CID}2b`,
+    id: `conflict_2c`,
+    originId: `conflict_2`,
+    idToOverwrite: `conflict_2a`,
   }),
   CONFLICT_3A_OBJ: Object.freeze({
     type: 'sharedtype',
-    id: `${CID}3a`,
-    originId: `${CID}3`,
-    idToOverwrite: `${CID}3`,
+    id: `conflict_3a`,
+    originId: `conflict_3`,
+    idToOverwrite: `conflict_3`,
   }),
-  CONFLICT_4_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}4`, idToOverwrite: `${CID}4a` }),
+  CONFLICT_4_OBJ: Object.freeze({
+    type: 'sharedtype',
+    id: `conflict_4`,
+    idToOverwrite: `conflict_4a`,
+  }),
 });
 
 /**

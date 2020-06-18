@@ -64,11 +64,6 @@ const createRequest = ({ type, id, originId }: ImportTestCase) => ({
   ...(originId && { originId }),
 });
 
-const getConflictSource = (id: string) => ({
-  id,
-  title: NEW_ATTRIBUTE_VAL,
-  // our source objects being imported does not include the `updatedAt` field (though they could)
-});
 const getConflictDest = (id: string) => ({
   id,
   title: 'A shared saved-object in all spaces',
@@ -147,21 +142,18 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
             // "ambiguous source" conflict
             error = {
               type: 'ambiguous_conflict',
-              sources: [getConflictSource(`${CID}1a`), getConflictSource(`${CID}1b`)],
               destinations: [getConflictDest(`${CID}1`)],
             };
           } else if (fail409Param === 'ambiguous_conflict_2c') {
             // "ambiguous destination" conflict
             error = {
               type: 'ambiguous_conflict',
-              sources: [getConflictSource(`${CID}2c`)],
               destinations: [getConflictDest(`${CID}2a`), getConflictDest(`${CID}2b`)],
             };
           } else if (fail409Param === 'ambiguous_conflict_2c2d') {
             // "ambiguous source and destination" conflict
             error = {
               type: 'ambiguous_conflict',
-              sources: [getConflictSource(`${CID}2c`), getConflictSource(`${CID}2d`)],
               destinations: [getConflictDest(`${CID}2a`), getConflictDest(`${CID}2b`)],
             };
           }

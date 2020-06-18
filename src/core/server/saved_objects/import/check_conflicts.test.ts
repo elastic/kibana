@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { mockUuidv4 } from './__mocks__';
 import {
   SavedObjectsClientContract,
   SavedObjectReference,
@@ -46,6 +47,10 @@ const createObject = (type: string, id: string, originId?: string): SavedObjectT
 
 const MULTI_NS_TYPE = 'multi';
 const OTHER_TYPE = 'other';
+
+beforeEach(() => {
+  mockUuidv4.mockClear();
+});
 
 describe('#checkConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -151,7 +156,6 @@ describe('#checkConflicts', () => {
         .sort((a: { id: string }, b: { id: string }) => (a.id > b.id ? 1 : b.id > a.id ? -1 : 0));
     const createAmbiguousConflictError = (
       object: SavedObjectType,
-      sources: SavedObjectType[],
       destinations: SavedObjectType[]
     ): SavedObjectsImportError => ({
       type: object.type,
@@ -159,7 +163,6 @@ describe('#checkConflicts', () => {
       title: object.attributes?.title,
       error: {
         type: 'ambiguous_conflict',
-        sources: getAmbiguousConflicts(sources),
         destinations: getAmbiguousConflicts(destinations),
       },
     });
@@ -320,8 +323,8 @@ describe('#checkConflicts', () => {
       });
     });
 
-    describe('error result (ambiguous conflict)', () => {
-      test('returns ambiguous_conflict error when multiple inexact matches are detected that target the same single destination', async () => {
+    describe('ambiguous conflicts', () => {
+      test('returns object with a `importIdMap` entry when multiple inexact matches are detected that target the same single destination', async () => {
         // objA and objB exist in this space
         // try to import obj1, obj2, obj3, and obj4
         const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
@@ -338,15 +341,16 @@ describe('#checkConflicts', () => {
 
         const checkConflictsResult = await checkConflicts([obj1, obj2, obj3, obj4], options);
         const expectedResult = {
-          filteredObjects: [],
-          importIdMap: new Map(),
-          errors: [
-            createAmbiguousConflictError(obj1, [obj1, obj2], [objA]),
-            createAmbiguousConflictError(obj2, [obj1, obj2], [objA]),
-            createAmbiguousConflictError(obj3, [obj3, obj4], [objB]),
-            createAmbiguousConflictError(obj4, [obj3, obj4], [objB]),
-          ],
+          filteredObjects: [obj1, obj2, obj3, obj4],
+          importIdMap: new Map([
+            [`${obj1.type}:${obj1.id}`, { id: 'uuidv4', omitOriginId: true }],
+            [`${obj2.type}:${obj2.id}`, { id: 'uuidv4', omitOriginId: true }],
+            [`${obj3.type}:${obj3.id}`, { id: 'uuidv4', omitOriginId: true }],
+            [`${obj4.type}:${obj4.id}`, { id: 'uuidv4', omitOriginId: true }],
+          ]),
+          errors: [],
         };
+        expect(mockUuidv4).toHaveBeenCalledTimes(4);
         expect(checkConflictsResult).toEqual(expectedResult);
       });
 
@@ -368,14 +372,15 @@ describe('#checkConflicts', () => {
           filteredObjects: [],
           importIdMap: new Map(),
           errors: [
-            createAmbiguousConflictError(obj1, [obj1], [objA, objB]),
-            createAmbiguousConflictError(obj2, [obj2], [objC, objD]),
+            createAmbiguousConflictError(obj1, [objA, objB]),
+            createAmbiguousConflictError(obj2, [objC, objD]),
           ],
         };
+        expect(mockUuidv4).not.toHaveBeenCalled();
         expect(checkConflictsResult).toEqual(expectedResult);
       });
 
-      test('returns ambiguous_conflict error when multiple inexact matches are detected that target the same multiple destinations', async () => {
+      test('returns object with a `importIdMap` entry when multiple inexact matches are detected that target the same multiple destinations', async () => {
         // objA, objB, objC, and objD exist in this space
         // try to import obj1, obj2, obj3, and obj4
         const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
@@ -394,15 +399,16 @@ describe('#checkConflicts', () => {
 
         const checkConflictsResult = await checkConflicts([obj1, obj2, obj3, obj4], options);
         const expectedResult = {
-          filteredObjects: [],
-          importIdMap: new Map(),
-          errors: [
-            createAmbiguousConflictError(obj1, [obj1, obj2], [objA, objB]),
-            createAmbiguousConflictError(obj2, [obj1, obj2], [objA, objB]),
-            createAmbiguousConflictError(obj3, [obj3, obj4], [objC, objD]),
-            createAmbiguousConflictError(obj4, [obj3, obj4], [objC, objD]),
-          ],
+          filteredObjects: [obj1, obj2, obj3, obj4],
+          importIdMap: new Map([
+            [`${obj1.type}:${obj1.id}`, { id: 'uuidv4', omitOriginId: true }],
+            [`${obj2.type}:${obj2.id}`, { id: 'uuidv4', omitOriginId: true }],
+            [`${obj3.type}:${obj3.id}`, { id: 'uuidv4', omitOriginId: true }],
+            [`${obj4.type}:${obj4.id}`, { id: 'uuidv4', omitOriginId: true }],
+          ]),
+          errors: [],
         };
+        expect(mockUuidv4).toHaveBeenCalledTimes(4);
         expect(checkConflictsResult).toEqual(expectedResult);
       });
     });
@@ -417,10 +423,13 @@ describe('#checkConflicts', () => {
       const obj4 = createObject(MULTI_NS_TYPE, 'id-4', obj3.id);
       const obj5 = createObject(MULTI_NS_TYPE, 'id-5');
       const obj6 = createObject(MULTI_NS_TYPE, 'id-6');
-      const obj7 = createObject(MULTI_NS_TYPE, 'id-7', obj6.id);
+      const obj7 = createObject(MULTI_NS_TYPE, 'id-7');
+      const obj8 = createObject(MULTI_NS_TYPE, 'id-8', obj7.id);
       const objA = createObject(MULTI_NS_TYPE, 'id-A', obj5.id);
       const objB = createObject(MULTI_NS_TYPE, 'id-B', obj6.id);
       const objC = createObject(MULTI_NS_TYPE, 'id-C', obj6.id);
+      const objD = createObject(MULTI_NS_TYPE, 'id-D', obj7.id);
+      const objE = createObject(MULTI_NS_TYPE, 'id-E', obj7.id);
       const options = setupOptions();
       // obj1 is a non-multi-namespace type, so it is skipped while searching
       mockFindResult(); // find for obj2: the result is no match
@@ -428,18 +437,21 @@ describe('#checkConflicts', () => {
       mockFindResult(obj3); // find for obj4: the result is an inexact match with one destination that is exactly matched by obj3 so it is ignored -- accordingly, obj4 has no match
       mockFindResult(objA); // find for obj5: the result is an inexact match with one destination
       mockFindResult(objB, objC); // find for obj6: the result is an inexact match with two destinations
-      mockFindResult(objB, objC); // find for obj7: the result is an inexact match with two destinations
+      mockFindResult(objD, objE); // find for obj7: the result is an inexact match with two destinations
+      mockFindResult(objD, objE); // find for obj8: the result is an inexact match with two destinations
 
-      const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7];
+      const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8];
       const checkConflictsResult = await checkConflicts(objects, options);
       const expectedResult = {
-        filteredObjects: [obj1, obj2, obj3, obj4, obj5],
-        importIdMap: new Map([[`${obj5.type}:${obj5.id}`, { id: objA.id }]]),
-        errors: [
-          createAmbiguousConflictError(obj6, [obj6, obj7], [objB, objC]),
-          createAmbiguousConflictError(obj7, [obj6, obj7], [objB, objC]),
-        ],
+        filteredObjects: [obj1, obj2, obj3, obj4, obj5, obj7, obj8],
+        importIdMap: new Map([
+          [`${obj5.type}:${obj5.id}`, { id: objA.id }],
+          [`${obj7.type}:${obj7.id}`, { id: 'uuidv4', omitOriginId: true }],
+          [`${obj8.type}:${obj8.id}`, { id: 'uuidv4', omitOriginId: true }],
+        ]),
+        errors: [createAmbiguousConflictError(obj6, [objB, objC])],
       };
+      expect(mockUuidv4).toHaveBeenCalledTimes(2);
       expect(checkConflictsResult).toEqual(expectedResult);
     });
   });

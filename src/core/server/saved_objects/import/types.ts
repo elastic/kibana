@@ -55,7 +55,6 @@ export interface SavedObjectsImportConflictError {
  */
 export interface SavedObjectsImportAmbiguousConflictError {
   type: 'ambiguous_conflict';
-  sources: Array<{ id: string; title?: string; updatedAt?: string }>;
   destinations: Array<{ id: string; title?: string; updatedAt?: string }>;
 }
 

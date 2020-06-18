@@ -1320,12 +1320,6 @@ export interface SavedObjectsImportAmbiguousConflictError {
         updatedAt?: string;
     }>;
     // (undocumented)
-    sources: Array<{
-        id: string;
-        title?: string;
-        updatedAt?: string;
-    }>;
-    // (undocumented)
     type: 'ambiguous_conflict';
 }
 

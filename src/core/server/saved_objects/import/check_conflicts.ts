@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -153,7 +154,7 @@ export async function checkConflicts(
 
   const errors: SavedObjectsImportError[] = [];
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
-  const importIdMap = new Map<string, { id: string }>();
+  const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
   checkConflictResults.forEach((result) => {
     if (!isLeft(result)) {
       filteredObjects.push(result.value);
@@ -175,13 +176,19 @@ export async function checkConflicts(
     //  - a single import object has 2+ destination conflicts ("ambiguous destination")
     //  - 2+ import objects have the same single destination conflict ("ambiguous source")
     //  - 2+ import objects have the same 2+ destination conflicts ("ambiguous source and destination")
+    if (sources.length > 1) {
+      // In the case of ambiguous source conflicts, don't treat them as errors; instead, regenerate the object ID and reset its origin
+      // (e.g., make a "true copy").
+      importIdMap.set(`${type}:${id}`, { id: uuidv4(), omitOriginId: true });
+      filteredObjects.push(object);
+      return;
+    }
     errors.push({
       type,
       id,
       title: attributes?.title,
       error: {
         type: 'ambiguous_conflict',
-        sources,
         destinations,
       },
     });

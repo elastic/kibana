@@ -39,8 +39,8 @@ const createTestCases = (overwrite: boolean) => {
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...destinationId() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...destinationId() },
-    { ...CASES.CONFLICT_1A_OBJ, ...ambiguousConflict('1a1b') }, // "ambiguous source" conflict
-    { ...CASES.CONFLICT_1B_OBJ, ...ambiguousConflict('1a1b') }, // "ambiguous source" conflict
+    { ...CASES.CONFLICT_1A_OBJ, ...destinationId() }, // "ambiguous source" conflict which results in a new destination ID
+    { ...CASES.CONFLICT_1B_OBJ, ...destinationId() }, // "ambiguous source" conflict which results in a new destination ID
     { ...CASES.CONFLICT_2C_OBJ, ...ambiguousConflict('2c') }, // "ambiguous destination" conflict
     { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
     { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
@@ -49,8 +49,8 @@ const createTestCases = (overwrite: boolean) => {
     { ...CASES.CONFLICT_1_OBJ, ...fail409(!overwrite) }, // "exact match" conflict
     CASES.CONFLICT_1A_OBJ, // no conflict because CONFLICT_1_OBJ is an exact match
     CASES.CONFLICT_1B_OBJ, // no conflict because CONFLICT_1_OBJ is an exact match
-    { ...CASES.CONFLICT_2C_OBJ, ...ambiguousConflict('2c2d') }, // "ambiguous source and destination" conflict
-    { ...CASES.CONFLICT_2D_OBJ, ...ambiguousConflict('2c2d') }, // "ambiguous source and destination" conflict
+    { ...CASES.CONFLICT_2C_OBJ, ...destinationId() }, // "ambiguous source and destination" conflict which results in a new destination ID
+    { ...CASES.CONFLICT_2D_OBJ, ...destinationId() }, // "ambiguous source and destination" conflict which results in a new destination ID
   ];
   return { group1Importable, group1NonImportable, group1All, group2, group3 };
 };

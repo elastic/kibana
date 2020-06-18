@@ -50,12 +50,9 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
     { ...CASES.HIDDEN, ...fail400() },
     // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
-    // if we call _resolve_import_errors and don't specify overwrite or duplicate, each of these will not result in a conflict because they
-    // will skip the preflight search results; so the objects will be created instead.
-    { ...CASES.CONFLICT_1A_OBJ, ...destinationId(overwrite) }, // "ambiguous source" conflict; if overwrite=true, will overwrite 'conflict_1'
-    CASES.CONFLICT_1B_OBJ, // "ambiguous source" conflict; if overwrite=true, will create a new object (since 'conflict_1a' is overwriting 'conflict_1')
-    { ...CASES.CONFLICT_2C_OBJ, ...destinationId(overwrite) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
-    { ...CASES.CONFLICT_2D_OBJ, ...destinationId(overwrite) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2b'
+    // if we call _resolve_import_errors and don't specify overwrite, each of these will not result in a conflict because they will skip the
+    // preflight search results; so the objects will be created instead.
+    { ...CASES.CONFLICT_2C_OBJ, ...destinationId(overwrite) }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
     { ...CASES.CONFLICT_3A_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
     { ...CASES.CONFLICT_4_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
   ];

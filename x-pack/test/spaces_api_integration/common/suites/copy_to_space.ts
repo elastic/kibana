@@ -463,9 +463,6 @@ export function copyToSpaceTestSuiteFactory(
             // because of that, a consumer who is authorized to read (but not write) will see the same response as a user who is authorized
             const { success, successCount, successResults, errors } = getResult(response);
             const updatedAt = '2017-09-21T18:59:16.270Z';
-            const sources = [
-              { id: ambiguousConflictId, title: 'A shared saved-object in one space', updatedAt },
-            ];
             const destinations = [
               // response should be sorted by ID in ascending order
               { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
@@ -476,7 +473,7 @@ export function copyToSpaceTestSuiteFactory(
             expect(successResults).to.be(undefined);
             expect(errors).to.eql([
               {
-                error: { type: 'ambiguous_conflict', sources, destinations },
+                error: { type: 'ambiguous_conflict', destinations },
                 type,
                 id: ambiguousConflictId,
                 title: 'A shared saved-object in one space',
