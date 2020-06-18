@@ -26,6 +26,9 @@ import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { ErrorRateChart } from '../../shared/charts/ErrorRateChart';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -61,49 +64,43 @@ export function ErrorGroupDetails() {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, start, end, errorGroupId } = urlParams;
 
-  const { data: errorGroupData } = useFetcher(
-    (callApmApi) => {
-      if (serviceName && start && end && errorGroupId) {
-        return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/errors/{groupId}',
-          params: {
-            path: {
-              serviceName,
-              groupId: errorGroupId,
-            },
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-            },
+  const { data: errorGroupData } = useFetcher(() => {
+    if (serviceName && start && end && errorGroupId) {
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors/{groupId}',
+        params: {
+          path: {
+            serviceName,
+            groupId: errorGroupId,
           },
-        });
-      }
-    },
-    [serviceName, start, end, errorGroupId, uiFilters]
-  );
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+          },
+        },
+      });
+    }
+  }, [serviceName, start, end, errorGroupId, uiFilters]);
 
-  const { data: errorDistributionData } = useFetcher(
-    (callApmApi) => {
-      if (serviceName && start && end && errorGroupId) {
-        return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/errors/distribution',
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              start,
-              end,
-              groupId: errorGroupId,
-              uiFilters: JSON.stringify(uiFilters),
-            },
+  const { data: errorDistributionData } = useFetcher(() => {
+    if (serviceName && start && end && errorGroupId) {
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors/distribution',
+        params: {
+          path: {
+            serviceName,
           },
-        });
-      }
-    },
-    [serviceName, start, end, errorGroupId, uiFilters]
-  );
+          query: {
+            start,
+            end,
+            groupId: errorGroupId,
+            uiFilters: JSON.stringify(uiFilters),
+          },
+        },
+      });
+    }
+  }, [serviceName, start, end, errorGroupId, uiFilters]);
 
   useTrackPageview({ app: 'apm', path: 'error_group_details' });
   useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });
@@ -185,16 +182,24 @@ export function ErrorGroupDetails() {
             </EuiText>
           </Titles>
         )}
-
-        <ErrorDistribution
-          distribution={errorDistributionData}
-          title={i18n.translate(
-            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-            {
-              defaultMessage: 'Occurrences',
-            }
-          )}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <ChartsSyncContextProvider>
+            <EuiFlexItem>
+              <ErrorDistribution
+                distribution={errorDistributionData}
+                title={i18n.translate(
+                  'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+                  {
+                    defaultMessage: 'Occurrences',
+                  }
+                )}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ErrorRateChart />
+            </EuiFlexItem>
+          </ChartsSyncContextProvider>
+        </EuiFlexGroup>
       </EuiPanel>
       <EuiSpacer size="s" />
       {showDetails && (

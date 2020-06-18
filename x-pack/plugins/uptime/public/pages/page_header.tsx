@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { UptimeDatePicker } from '../components/common/uptime_date_picker';
 import { SETTINGS_ROUTE } from '../../common/constants';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface PageHeaderProps {
   headingText: string | JSX.Element;
@@ -21,6 +22,10 @@ interface PageHeaderProps {
 
 const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
   defaultMessage: 'Settings',
+});
+
+const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
+  defaultMessage: 'Add data',
 });
 
 const StyledPicker = styled(EuiFlexItem)`
@@ -52,6 +57,8 @@ export const PageHeader = React.memo(
         </StyledPicker>
       ) : null;
 
+    const kibana = useKibana();
+
     const extraLinkComponents = !extraLinks ? null : (
       <EuiFlexGroup alignItems="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -63,6 +70,15 @@ export const PageHeader = React.memo(
               {SETTINGS_LINK_TEXT}
             </EuiButtonEmpty>
           </Link>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
+            color="primary"
+            iconType="plusInCircle"
+          >
+            {ADD_DATA_LABEL}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
