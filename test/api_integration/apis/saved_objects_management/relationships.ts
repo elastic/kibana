@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
               inAppUrl: {
                 path:
                   '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.index_patterns',
+                uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
             },
           },
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
               inAppUrl: {
                 path:
                   '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.index_patterns',
+                uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
             },
             relationship: 'child',
