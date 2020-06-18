@@ -14,6 +14,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 
@@ -195,6 +196,14 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiLink target="_blank" href={'https://support.google.com/a/answer/176600?hl=en'} external>
+        {i18n.translate(
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.helpLink',
+          {
+            defaultMessage: 'How to configure Gmail',
+          }
+        )}
+      </EuiLink>
     </Fragment>
   );
 };
