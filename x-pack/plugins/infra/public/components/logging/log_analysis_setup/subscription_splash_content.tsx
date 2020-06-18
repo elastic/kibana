@@ -20,6 +20,7 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { LoadingPage } from '../../loading_page';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled } from '../../../../../observability/public';
@@ -29,7 +30,17 @@ export const SubscriptionSplashContent: React.FC = () => {
   const { services } = useKibana();
   const { loadState, isTrialAvailable } = useTrialStatus();
 
-  const canStartTrial = isTrialAvailable && loadState === TrialStatusLoadState.Ok; // FIXME
+  if (loadState === TrialStatusLoadState.Loading) {
+    return (
+      <LoadingPage
+        message={i18n.translate('xpack.infra.logs.logAnalysis.splash.loadingMessage', {
+          defaultMessage: 'Checking license...',
+        })}
+      />
+    );
+  }
+
+  const canStartTrial = isTrialAvailable && loadState === TrialStatusLoadState.Ok;
 
   let title;
   let description;
