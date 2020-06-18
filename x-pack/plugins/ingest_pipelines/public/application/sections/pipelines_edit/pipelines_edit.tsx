@@ -54,7 +54,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(BASE_PATH + `?pipeline=${updatedPipeline.name}`);
+    history.push(BASE_PATH + `?pipeline=${encodeURIComponent(updatedPipeline.name)}`);
   };
 
   const onCancel = () => {
