@@ -1196,6 +1196,8 @@ a new `abort$` option:
 class FooService {
   setup() {
     return {
+      // note: using an abortion observable is usually an anti-pattern, as unsubscribing from the observable
+      // is, most of the time, a better solution. This is only used for the example purpose.
       getUpdate$: ({ abort$ = EMPTY }: { abort$?: Observable<undefined> } = {}) => {
         return interval(100).pipe(
             takeUntil(abort$), 
