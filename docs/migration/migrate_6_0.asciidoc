@@ -11,7 +11,7 @@ See also <<release-highlights>> and <<release-notes>>.
 
 [float]
 === Saved objects `bulk_get` and `find` endpoints renamed
-//{pull}17512[#17512]
+//{kib-pull}17512[#17512]
 
 *Details:*
 To support sending larger and more expressive queries to the Saved Objects find
