@@ -40,6 +40,7 @@ export default async function ({ readConfigFile }) {
     ],
     pageObjects,
     services,
+
     servers: commonConfig.get('servers'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
