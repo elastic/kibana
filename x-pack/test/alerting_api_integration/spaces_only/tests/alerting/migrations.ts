@@ -5,8 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -25,7 +24,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('7.9.0 migrates the `alerting` consumer to be the `alerts`', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix()}/api/alerts/alert/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
+        `${getUrlPrefix(``)}/api/alerts/alert/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
       );
 
       expect(response.status).to.eql(200);
