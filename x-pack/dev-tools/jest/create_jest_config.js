@@ -19,6 +19,7 @@ export function createJestConfig({
       "json",
       "ts",
       "tsx",
+      "node",
     ],
     moduleNameMapper: {
       "^ui/(.*)": `${kibanaDirectory}/src/ui/public/$1`,
