@@ -1,8 +1,14 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Getting started with Elastic Maps
+== Get started with Maps
 
-You work with *Elastic Maps* by adding layers. The data for a layer can come from
+++++
+<titleabbrev>Get started</titleabbrev>
+++++
+
+
+
+You work with Maps by adding layers. The data for a layer can come from
 sources such as {es} documents, vector sources, tile map services, web map
 services, and more. You can symbolize the data in different ways.
 For example, you might show which airports have the longest flight
@@ -25,7 +31,7 @@ image::maps/images/read-only-badge.png[Example of Maps' read only access indicat
 [float]
 === Prerequisites
 Before you start this tutorial, <<add-sample-data, add the web logs sample data set>>. Each
-sample data set includes a map to go along with the data. Once you've added the data, open *Elastic Maps* and
+sample data set includes a map to go along with the data. Once you've added the data, open Maps and
 explore the different layers of the *[Logs] Total Requests and Bytes* map.
 You'll re-create this map in this tutorial.
 
@@ -40,7 +46,7 @@ In this tutorial, you'll learn to:
 
 [role="xpack"]
 [[maps-create]]
-=== Creating a new map
+=== Create a map
 
 The first thing to do is to create a new map.
 
@@ -55,7 +61,7 @@ image::maps/images/gs_create_new_map.png[]
 
 [role="xpack"]
 [[maps-add-choropleth-layer]]
-=== Adding a choropleth layer
+=== Add a choropleth layer
 
 Now that you have a map, you'll want to add layers to it.
 The first layer you'll add is a choropleth layer to shade world countries
@@ -106,7 +112,7 @@ image::maps/images/gs_add_cloropeth_layer.png[]
 
 [role="xpack"]
 [[maps-add-elasticsearch-layer]]
-=== Adding layers for {es} data
+=== Add layers for the {es} data
 
 To avoid overwhelming the user with too much data at once, you'll add two layers for {es} data.
 
@@ -183,7 +189,7 @@ image::maps/images/sample_data_web_logs.png[]
 
 [role="xpack"]
 [[maps-save]]
-=== Saving the map
+=== Save the map
 Now that your map is complete, you'll want to save it so others can use it.
 
 . In the application toolbar, click *Save*.
@@ -202,7 +208,7 @@ You have completed the steps for re-creating the sample data map.
 
 [role="xpack"]
 [[maps-embedding]]
-=== Adding the map to a dashboard
+=== Add the map to a dashboard
 You can add your saved map to a {kibana-ref}/dashboard.html[dashboard] and view your geospatial data alongside bar charts, pie charts, and other visualizations.
 
 . Open the menu, then go to *Dashboard*.
@@ -224,7 +230,7 @@ Your dashboard should look like this:
 [role="screenshot"]
 image::maps/images/gs_dashboard_with_map.png[]
 
-==== Exploring your data using filters
+==== Explore your data using filters
 
 You can apply filters to your dashboard to hone in on the data that you are most interested in.
 The dashboard is interactive--you can quickly create filters by clicking on the desired data in the map and visualizations.
