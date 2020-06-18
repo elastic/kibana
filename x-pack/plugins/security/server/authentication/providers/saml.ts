@@ -349,16 +349,29 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         },
       });
 
+      // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
+      // depending on the configuration we may need to redirect user to this URL.
+      let redirectURLFromRelayState;
+      if (isIdPInitiatedLogin && relayState) {
+        if (!this.useRelayStateDeepLink) {
+          this.options.logger.debug(
+            `"RelayState" is provided, but deep links support is not enabled for "${this.type}/${this.options.name}" provider.`
+          );
+        } else if (!isInternalURL(relayState, this.options.basePath.serverBasePath)) {
+          this.options.logger.debug(
+            `"RelayState" is provided, but it is not a valid Kibana internal URL.`
+          );
+        } else {
+          this.options.logger.debug(
+            `User will be redirected to the Kibana internal URL specified in "RelayState".`
+          );
+          redirectURLFromRelayState = relayState;
+        }
+      }
+
       this.logger.debug('Login has been performed with SAML response.');
       return AuthenticationResult.redirectTo(
-        // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
-        // depending on the configuration we may need to redirect user to this link.
-        isIdPInitiatedLogin &&
-          relayState &&
-          this.useRelayStateDeepLink &&
-          isInternalURL(relayState, this.options.basePath.serverBasePath)
-          ? relayState
-          : stateRedirectURL || `${this.options.basePath.get(request)}/`,
+        redirectURLFromRelayState || stateRedirectURL || `${this.options.basePath.get(request)}/`,
         { state: { username, accessToken, refreshToken, realm: this.realm } }
       );
     } catch (err) {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'url';
+import { parse, URL } from 'url';
 
 export function isInternalURL(url: string, basePath = '') {
   const { protocol, hostname, port, pathname } = parse(
@@ -22,5 +22,17 @@ export function isInternalURL(url: string, basePath = '') {
     return false;
   }
 
-  return String(pathname).startsWith(basePath);
+  if (basePath) {
+    // Now we need to normalize URL to make sure any relative path segments (`..`) cannot escape expected
+    // base path. We can rely on `URL` with a localhost to automatically "normalize" the URL.
+    const normalizedPathname = new URL(String(pathname), 'https://localhost').pathname;
+    return (
+      // Normalized pathname can add a leading slash, but we should also make sure it's included in
+      // the original URL too
+      pathname?.startsWith('/') &&
+      (normalizedPathname === basePath || normalizedPathname.startsWith(`${basePath}/`))
+    );
+  }
+
+  return true;
 }

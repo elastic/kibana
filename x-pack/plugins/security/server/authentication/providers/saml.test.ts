@@ -110,6 +110,51 @@ describe('SAMLAuthenticationProvider', () => {
       );
     });
 
+    it('gets token and redirects user to the requested URL if SAML Response is valid ignoring Relay State.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
+        username: 'user',
+        access_token: 'some-token',
+        refresh_token: 'some-refresh-token',
+      });
+
+      provider = new SAMLAuthenticationProvider(mockOptions, {
+        realm: 'test-realm',
+        maxRedirectURLSize: new ByteSizeValue(100),
+        useRelayStateDeepLink: true,
+      });
+      await expect(
+        provider.login(
+          request,
+          {
+            type: SAMLLogin.LoginWithSAMLResponse,
+            samlResponse: 'saml-response-xml',
+            relayState: `${mockOptions.basePath.serverBasePath}/app/some-app#some-deep-link`,
+          },
+          {
+            requestId: 'some-request-id',
+            redirectURL: '/test-base-path/some-path#some-app',
+            realm: 'test-realm',
+          }
+        )
+      ).resolves.toEqual(
+        AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+          state: {
+            username: 'user',
+            accessToken: 'some-token',
+            refreshToken: 'some-refresh-token',
+            realm: 'test-realm',
+          },
+        })
+      );
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
+        'shield.samlAuthenticate',
+        { body: { ids: ['some-request-id'], content: 'saml-response-xml', realm: 'test-realm' } }
+      );
+    });
+
     it('fails if SAML Response payload is presented but state does not contain SAML Request token.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
@@ -160,6 +205,45 @@ describe('SAMLAuthenticationProvider', () => {
         provider.login(
           request,
           { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+          { requestId: 'some-request-id', redirectURL: '', realm: 'test-realm' }
+        )
+      ).resolves.toEqual(
+        AuthenticationResult.redirectTo('/base-path/', {
+          state: {
+            accessToken: 'user-initiated-login-token',
+            refreshToken: 'user-initiated-login-refresh-token',
+            realm: 'test-realm',
+          },
+        })
+      );
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
+        'shield.samlAuthenticate',
+        { body: { ids: ['some-request-id'], content: 'saml-response-xml', realm: 'test-realm' } }
+      );
+    });
+
+    it('redirects to the default location if state contains empty redirect URL ignoring Relay State.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
+        access_token: 'user-initiated-login-token',
+        refresh_token: 'user-initiated-login-refresh-token',
+      });
+
+      provider = new SAMLAuthenticationProvider(mockOptions, {
+        realm: 'test-realm',
+        maxRedirectURLSize: new ByteSizeValue(100),
+        useRelayStateDeepLink: true,
+      });
+      await expect(
+        provider.login(
+          request,
+          {
+            type: SAMLLogin.LoginWithSAMLResponse,
+            samlResponse: 'saml-response-xml',
+            relayState: `${mockOptions.basePath.serverBasePath}/app/some-app#some-deep-link`,
+          },
           { requestId: 'some-request-id', redirectURL: '', realm: 'test-realm' }
         )
       ).resolves.toEqual(
@@ -233,7 +317,6 @@ describe('SAMLAuthenticationProvider', () => {
 
     describe('IdP initiated login', () => {
       beforeEach(() => {
-        mockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
         mockOptions.basePath.get.mockReturnValue(mockOptions.basePath.serverBasePath);
 
         const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -266,10 +349,10 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(httpServerMock.createKibanaRequest({ headers: {} }), {
             type: SAMLLogin.LoginWithSAMLResponse,
             samlResponse: 'saml-response-xml',
-            relayState: '/mock-server-basepath/app/some-app#some-deep-link',
+            relayState: `${mockOptions.basePath.serverBasePath}/app/some-app#some-deep-link`,
           })
         ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
             state: {
               username: 'user',
               accessToken: 'valid-token',
@@ -287,7 +370,7 @@ describe('SAMLAuthenticationProvider', () => {
             samlResponse: 'saml-response-xml',
           })
         ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
             state: {
               username: 'user',
               accessToken: 'valid-token',
@@ -303,10 +386,10 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(httpServerMock.createKibanaRequest({ headers: {} }), {
             type: SAMLLogin.LoginWithSAMLResponse,
             samlResponse: 'saml-response-xml',
-            relayState: 'https://evil.com/mock-server-basepath/app/some-app#some-deep-link',
+            relayState: `https://evil.com${mockOptions.basePath.serverBasePath}/app/some-app#some-deep-link`,
           })
         ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
             state: {
               username: 'user',
               accessToken: 'valid-token',
@@ -322,10 +405,10 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(httpServerMock.createKibanaRequest({ headers: {} }), {
             type: SAMLLogin.LoginWithSAMLResponse,
             samlResponse: 'saml-response-xml',
-            relayState: '//mock-server-basepath/app/some-app#some-deep-link',
+            relayState: `//${mockOptions.basePath.serverBasePath}/app/some-app#some-deep-link`,
           })
         ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
             state: {
               username: 'user',
               accessToken: 'valid-token',
@@ -341,17 +424,20 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(httpServerMock.createKibanaRequest({ headers: {} }), {
             type: SAMLLogin.LoginWithSAMLResponse,
             samlResponse: 'saml-response-xml',
-            relayState: '/mock-server-basepath/app/some-app#some-deep-link',
+            relayState: `${mockOptions.basePath.serverBasePath}/app/some-app#some-deep-link`,
           })
         ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/mock-server-basepath/app/some-app#some-deep-link', {
-            state: {
-              username: 'user',
-              accessToken: 'valid-token',
-              refreshToken: 'valid-refresh-token',
-              realm: 'test-realm',
-            },
-          })
+          AuthenticationResult.redirectTo(
+            `${mockOptions.basePath.serverBasePath}/app/some-app#some-deep-link`,
+            {
+              state: {
+                username: 'user',
+                accessToken: 'valid-token',
+                refreshToken: 'valid-refresh-token',
+                realm: 'test-realm',
+              },
+            }
+          )
         );
       });
     });
