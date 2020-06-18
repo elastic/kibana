@@ -19,6 +19,9 @@
 
 /* @notice
  *
+ * This product includes code that is based on Ace editor, which was available
+ * under a "BSD" license.
+ *
  * Distributed under the BSD license:
  *
  * Copyright (c) 2010, Ajax.org B.V.
