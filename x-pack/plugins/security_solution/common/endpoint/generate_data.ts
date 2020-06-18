@@ -506,7 +506,10 @@ export class EndpointDocGenerator {
         parent: options.parentEntityID
           ? {
               entity_id: options.parentEntityID,
-              pid: options.parentPid ? options.parentPid : this.randomN(5000),
+              pid:
+                'parentPid' in options && typeof options.parentPid !== 'undefined'
+                  ? options.parentPid
+                  : this.randomN(5000),
             }
           : undefined,
         name: processName,
