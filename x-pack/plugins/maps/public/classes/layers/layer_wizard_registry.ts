@@ -7,6 +7,7 @@
 
 import { ReactElement } from 'react';
 import { LayerDescriptor } from '../../../common/descriptor_types';
+import { LAYER_WIZARD_CATEGORY } from '../../../common/constants';
 
 export type RenderWizardArguments = {
   previewLayers: (layerDescriptors: LayerDescriptor[], isIndexingSource?: boolean) => void;
@@ -20,6 +21,7 @@ export type RenderWizardArguments = {
 };
 
 export type LayerWizard = {
+  categories: LAYER_WIZARD_CATEGORY[];
   checkVisibility?: () => Promise<boolean>;
   description: string;
   icon: string;
