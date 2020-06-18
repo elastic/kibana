@@ -121,7 +121,7 @@ export function FormWizardProvider<T extends object = { [key: string]: any }>({
             // Before navigating away we validate the active content in the DOM
             const isValid = await validate();
 
-            // If step is not valid do go any further
+            // If step is not valid do not go any further
             if (!isValid) {
               return;
             }
