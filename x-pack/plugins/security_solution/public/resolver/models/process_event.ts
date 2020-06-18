@@ -107,8 +107,7 @@ export function processParentPid(passedEvent: ResolverEvent): number | undefined
   if (event.isLegacyEvent(passedEvent)) {
     return passedEvent.endgame.ppid;
   } else {
-    const ppid = passedEvent.process.parent?.pid;
-    return ppid ? ppid : undefined;
+    return passedEvent.process.parent?.pid;
   }
 }
 
