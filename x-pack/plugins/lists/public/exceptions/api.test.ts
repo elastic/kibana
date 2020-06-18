@@ -93,7 +93,7 @@ describe('Exceptions Lists API', () => {
           list: (payload as unknown) as ExceptionListSchema,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "123" supplied to "description"');
+      ).rejects.toEqual('Invalid value "["123"]" supplied to "description"');
     });
 
     test('it returns error if response payload fails decode', async () => {
@@ -155,7 +155,7 @@ describe('Exceptions Lists API', () => {
           listItem: (payload as unknown) as ExceptionListItemSchema,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "123" supplied to "description"');
+      ).rejects.toEqual('Invalid value "["123"]" supplied to "description"');
     });
 
     test('it returns error if response payload fails decode', async () => {
@@ -530,7 +530,7 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       } as unknown) as ApiCallByListIdProps & { listId: number };
       await expect(fetchExceptionListItemsByListId(payload)).rejects.toEqual(
-        'Invalid value "not a namespace type" supplied to ""'
+        'Invalid value "not a namespace type" supplied to "namespace_type"'
       );
     });
 
@@ -597,7 +597,7 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       } as unknown) as ApiCallByIdProps & { namespaceType: string };
       await expect(fetchExceptionListItemById(payload)).rejects.toEqual(
-        'Invalid value "not a namespace type" supplied to ""'
+        'Invalid value "not a namespace type" supplied to "namespace_type"'
       );
     });
 

@@ -27,7 +27,7 @@ describe('delete_exception_list_item_schema', () => {
   });
 
   // TODO It does allow an id of undefined, is this wanted behavior?
-  xtest('it should NOT accept an undefined for an "id"', () => {
+  test.skip('it should NOT accept an undefined for an "id"', () => {
     const payload = getDeleteExceptionListItemSchemaMock();
     delete payload.id;
     const decoded = deleteExceptionListItemSchema.decode(payload);

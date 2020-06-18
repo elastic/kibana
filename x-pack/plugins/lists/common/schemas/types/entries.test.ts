@@ -68,7 +68,7 @@ describe('Entries', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "some value" supplied to "value"',
+        'Invalid value "["some value"]" supplied to "value"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -138,7 +138,7 @@ describe('Entries', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "some string" supplied to ""',
+        'Invalid value "some string" supplied to "value"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -259,7 +259,9 @@ describe('Entries', () => {
       const decoded = entriesList.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "someListId" supplied to ""']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "someListId" supplied to "value"',
+      ]);
       expect(message.schema).toEqual({});
     });
 

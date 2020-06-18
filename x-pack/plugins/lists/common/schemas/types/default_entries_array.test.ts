@@ -13,6 +13,12 @@ import { DefaultEntryArray } from './default_entries_array';
 import { EntriesArray } from './entries';
 import { getEntriesArrayMock, getEntryMatchMock, getEntryNestedMock } from './entries.mock';
 
+// NOTE: This may seem weird, but when validating schemas that use a union
+// it checks against every item in that union. Since entries consist of 5
+// different entry types, it returns 5 of these. To make more readable,
+// extracted here.
+const returnedSchemaError = `"Array<({| field: string, operator: "excluded" | "included", type: "match", value: string |} | {| field: string, operator: "excluded" | "included", type: "match_any", value: DefaultStringArray |} | {| field: string, operator: "excluded" | "included", type: "list", value: DefaultStringArray |} | {| field: string, operator: "excluded" | "included", type: "exists" |} | {| entries: Array<({| field: string, operator: "excluded" | "included", type: "match", value: string |} | {| field: string, operator: "excluded" | "included", type: "match_any", value: DefaultStringArray |} | {| field: string, operator: "excluded" | "included", type: "list", value: DefaultStringArray |} | {| field: string, operator: "excluded" | "included", type: "exists" |})>, field: string, type: "nested" |})>"`;
+
 describe('default_entries_array', () => {
   test('it should validate an empty array', () => {
     const payload: EntriesArray = [];
@@ -57,11 +63,11 @@ describe('default_entries_array', () => {
 
     // TODO: Known weird error formatting that is on our list to address
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "1" supplied to ""',
-      'Invalid value "1" supplied to ""',
-      'Invalid value "1" supplied to ""',
-      'Invalid value "1" supplied to ""',
-      'Invalid value "1" supplied to ""',
+      `Invalid value "1" supplied to ${returnedSchemaError}`,
+      `Invalid value "1" supplied to ${returnedSchemaError}`,
+      `Invalid value "1" supplied to ${returnedSchemaError}`,
+      `Invalid value "1" supplied to ${returnedSchemaError}`,
+      `Invalid value "1" supplied to ${returnedSchemaError}`,
     ]);
     expect(message.schema).toEqual({});
   });
@@ -72,11 +78,11 @@ describe('default_entries_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "some string" supplied to ""',
-      'Invalid value "some string" supplied to ""',
-      'Invalid value "some string" supplied to ""',
-      'Invalid value "some string" supplied to ""',
-      'Invalid value "some string" supplied to ""',
+      `Invalid value "some string" supplied to ${returnedSchemaError}`,
+      `Invalid value "some string" supplied to ${returnedSchemaError}`,
+      `Invalid value "some string" supplied to ${returnedSchemaError}`,
+      `Invalid value "some string" supplied to ${returnedSchemaError}`,
+      `Invalid value "some string" supplied to ${returnedSchemaError}`,
     ]);
     expect(message.schema).toEqual({});
   });

@@ -111,7 +111,7 @@ describe('update_exception_list_schema', () => {
 
   // TODO: Is it expected behavior for it not to auto-generate a uui or throw
   // error if list_id is not passed in?
-  xtest('it should accept an undefined for "list_id" and auto generate a uuid', () => {
+  test.skip('it should accept an undefined for "list_id" and auto generate a uuid', () => {
     const inputPayload = getUpdateExceptionListSchemaMock();
     delete inputPayload.list_id;
     const decoded = updateExceptionListSchema.decode(inputPayload);
