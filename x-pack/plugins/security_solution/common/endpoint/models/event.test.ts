@@ -15,25 +15,27 @@ describe('Event descriptive names', () => {
   it('returns the right name for a registry event', () => {
     const extensions = { registry: { key: `HKLM/Windows/Software/abc` } };
     const event = generator.generateEvent({ eventCategory: 'registry', extensions });
-    expect(descriptiveName(event)).toEqual(`HKLM/Windows/Software/abc`);
+    expect(descriptiveName(event)).toEqual({ subject: `HKLM/Windows/Software/abc` });
   });
 
   it('returns the right name for a network event', () => {
     const randomIP = `${generator.randomIP()}`;
     const extensions = { network: { direction: 'outbound', forwarded_ip: randomIP } };
     const event = generator.generateEvent({ eventCategory: 'network', extensions });
-    expect(descriptiveName(event)).toEqual(`outbound ${randomIP}`);
+    expect(descriptiveName(event)).toEqual({ subject: `${randomIP}`, descriptor: 'outbound' });
   });
 
   it('returns the right name for a file event', () => {
     const extensions = { file: { path: 'C:\\My Documents\\business\\January\\processName' } };
     const event = generator.generateEvent({ eventCategory: 'file', extensions });
-    expect(descriptiveName(event)).toEqual('C:\\My Documents\\business\\January\\processName');
+    expect(descriptiveName(event)).toEqual({
+      subject: 'C:\\My Documents\\business\\January\\processName',
+    });
   });
 
   it('returns the right name for a dns event', () => {
     const extensions = { dns: { question: { name: `${generator.randomIP()}` } } };
     const event = generator.generateEvent({ eventCategory: 'dns', extensions });
-    expect(descriptiveName(event)).toEqual(extensions.dns.question.name);
+    expect(descriptiveName(event)).toEqual({ subject: extensions.dns.question.name });
   });
 });
