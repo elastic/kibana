@@ -71,7 +71,8 @@ export function WorkspacePanelWrapper({
             })}
           >
             <span data-test-subj="lns_ChartTitle">
-              {title || i18n.translate('lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
+              {title ||
+                i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
             </span>
           </EuiPageContentHeader>
           <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
