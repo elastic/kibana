@@ -34,7 +34,6 @@ import { createTimelinesRoute } from '../lib/timeline/routes/create_timelines_ro
 import { updateTimelinesRoute } from '../lib/timeline/routes/update_timelines_route';
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/get_draft_timelines_route';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/clean_draft_timelines_route';
-import { postEndpointSetup } from '../lib/setup';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 
@@ -72,8 +71,6 @@ export const initRoutes = (
   cleanDraftTimelinesRoute(router, config, security);
 
   findRulesStatusesRoute(router);
-
-  postEndpointSetup(router, security);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status

@@ -185,7 +185,6 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         return {
           run: async () => {
-
             const state = Object.assign({}, ...taskInstance.state);
             await run(taskInstance.id, state);
 
