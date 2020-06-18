@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayerDescriptor } from '../../common/descriptor_types';
+import { createMapStore } from '../reducers/store';
 
-export function getInitialLayers(
-  layerListJSON?: string,
-  initialLayers?: LayerDescriptor[]
-): LayerDescriptor[];
+const store = createMapStore();
+
+export const getStore = () => store;

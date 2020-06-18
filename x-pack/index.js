@@ -9,7 +9,6 @@ import { monitoring } from './legacy/plugins/monitoring';
 import { security } from './legacy/plugins/security';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { beats } from './legacy/plugins/beats_management';
-import { maps } from './legacy/plugins/maps';
 import { spaces } from './legacy/plugins/spaces';
 import { ingestManager } from './legacy/plugins/ingest_manager';
 
@@ -21,7 +20,6 @@ module.exports = function (kibana) {
     security(kibana),
     dashboardMode(kibana),
     beats(kibana),
-    maps(kibana),
     ingestManager(kibana),
   ];
 };

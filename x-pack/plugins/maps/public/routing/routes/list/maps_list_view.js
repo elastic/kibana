@@ -5,10 +5,14 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import _ from 'lodash';
-
-import { getToasts } from '../kibana_services';
+import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
+import {
+  getMapsCapabilities,
+  getUiSettings,
+  getToasts,
+  getCoreChrome,
+} from '../../../kibana_services';
 import {
   EuiTitle,
   EuiFieldSearch,
@@ -27,11 +31,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { addHelpMenuToAppChrome } from '../help_menu_util';
+import { addHelpMenuToAppChrome } from '../../../help_menu_util';
+import { Link } from 'react-router-dom';
+import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
+import { goToSpecifiedPath } from '../../maps_router';
 
 export const EMPTY_FILTER = '';
 
-export class MapListing extends React.Component {
+export class MapsListView extends React.Component {
   state = {
     hasInitialFetchReturned: false,
     isFetchingItems: false,
@@ -42,10 +49,13 @@ export class MapListing extends React.Component {
     selectedIds: [],
     page: 0,
     perPage: 20,
+    readOnly: !getMapsCapabilities().save,
+    listingLimit: getUiSettings().get('savedObjects:listingLimit'),
   };
 
   UNSAFE_componentWillMount() {
     this._isMounted = true;
+    updateBreadcrumbs();
   }
 
   componentWillUnmount() {
@@ -54,12 +64,21 @@ export class MapListing extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchItems();
-    addHelpMenuToAppChrome();
+    this.initMapList();
   }
 
+  async initMapList() {
+    this.fetchItems();
+    addHelpMenuToAppChrome();
+    getCoreChrome().docTitle.change('Maps');
+  }
+
+  _find = (search) => getMapsSavedObjectLoader().find(search, this.state.listingLimit);
+
+  _delete = (ids) => getMapsSavedObjectLoader().delete(ids);
+
   debouncedFetch = _.debounce(async (filter) => {
-    const response = await this.props.find(filter);
+    const response = await this._find(filter);
 
     if (!this._isMounted) {
       return;
@@ -73,7 +92,7 @@ export class MapListing extends React.Component {
         isFetchingItems: false,
         items: response.hits,
         totalItems: response.total,
-        showLimitError: response.total > this.props.listingLimit,
+        showLimitError: response.total > this.state.listingLimit,
       });
     }
   }, 300);
@@ -89,7 +108,7 @@ export class MapListing extends React.Component {
 
   deleteSelectedItems = async () => {
     try {
-      await this.props.delete(this.state.selectedIds);
+      await this._delete(this.state.selectedIds);
     } catch (error) {
       getToasts().addDanger({
         title: i18n.translate('xpack.maps.mapListing.unableToDeleteToastTitle', {
@@ -211,11 +230,11 @@ export class MapListing extends React.Component {
               <FormattedMessage
                 id="xpack.maps.mapListing.limitHelpDescription"
                 defaultMessage="You have {totalItems} items,
-              but your <strong>listingLimit</strong> setting prevents the table below from displaying more than {listingLimit}.
-              You can change this setting under "
+            but your <strong>listingLimit</strong> setting prevents the table below from displaying more than {listingLimit}.
+            You can change this setting under "
                 values={{
                   totalItems: this.state.totalItems,
-                  listingLimit: this.props.listingLimit,
+                  listingLimit: this.state.listingLimit,
                 }}
               />
               <EuiLink href="#/management/kibana/settings">
@@ -307,7 +326,10 @@ export class MapListing extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            href={`#/map/${record.id}`}
+            onClick={(e) => {
+              e.preventDefault();
+              goToSpecifiedPath(`/map/${record.id}`);
+            }}
             data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
@@ -331,7 +353,7 @@ export class MapListing extends React.Component {
     };
 
     let selection = false;
-    if (!this.props.readOnly) {
+    if (!this.state.readOnly) {
       selection = {
         onSelectionChange: (selection) => {
           this.setState({
@@ -369,14 +391,16 @@ export class MapListing extends React.Component {
 
   renderListing() {
     let createButton;
-    if (!this.props.readOnly) {
+    if (!this.state.readOnly) {
       createButton = (
-        <EuiButton href={`#/map`} data-test-subj="newMapLink" fill>
-          <FormattedMessage
-            id="xpack.maps.mapListing.createMapButtonLabel"
-            defaultMessage="Create map"
-          />
-        </EuiButton>
+        <Link to={'/map'}>
+          <EuiButton data-test-subj="newMapLink" fill>
+            <FormattedMessage
+              id="xpack.maps.mapListing.createMapButtonLabel"
+              defaultMessage="Create map"
+            />
+          </EuiButton>
+        </Link>
       );
     }
     return (
@@ -427,10 +451,3 @@ export class MapListing extends React.Component {
     );
   }
 }
-
-MapListing.propTypes = {
-  readOnly: PropTypes.bool.isRequired,
-  find: PropTypes.func.isRequired,
-  delete: PropTypes.func.isRequired,
-  listingLimit: PropTypes.number.isRequired,
-};
