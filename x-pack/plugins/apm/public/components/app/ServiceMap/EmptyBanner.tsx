@@ -23,7 +23,7 @@ const EmptyBannerContainer = styled.div`
   z-index: 1;
 `;
 
-export const EmptyBanner = () => {
+export function EmptyBanner() {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [nodeCount, setNodeCount] = useState(0);
@@ -77,4 +77,4 @@ export const EmptyBanner = () => {
       </EuiCallOut>
     </EmptyBannerContainer>
   );
-};
+}

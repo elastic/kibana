@@ -15,7 +15,7 @@ import { defaultIcon, iconForNode } from './icons';
 
 export const popoverMinWidth = 280;
 
-export const getSeverityColor = (theme: EuiTheme, nodeSeverity?: string) => {
+export function getSeverityColor(theme: EuiTheme, nodeSeverity?: string) {
   switch (nodeSeverity) {
     case severity.warning:
       return theme.eui.euiColorVis0;
@@ -27,11 +27,11 @@ export const getSeverityColor = (theme: EuiTheme, nodeSeverity?: string) => {
     default:
       return;
   }
-};
+}
 
-const getBorderColorFn = (
+function getBorderColorFn(
   theme: EuiTheme
-): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> => {
+): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
     const hasAnomalyDetectionJob = el.data('ml_job_id') !== undefined;
     const nodeSeverity = el.data('anomaly_severity');
@@ -45,7 +45,7 @@ const getBorderColorFn = (
     }
     return theme.eui.euiColorMediumShade;
   };
-};
+}
 
 const getBorderStyle: cytoscape.Css.MapperFunction<
   cytoscape.NodeSingular,
@@ -59,7 +59,7 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
   }
 };
 
-const getBorderWidth = (el: cytoscape.NodeSingular) => {
+function getBorderWidth(el: cytoscape.NodeSingular) {
   const nodeSeverity = el.data('anomaly_severity');
 
   if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
@@ -69,7 +69,7 @@ const getBorderWidth = (el: cytoscape.NodeSingular) => {
   } else {
     return 4;
   }
-};
+}
 
 // IE 11 does not properly load some SVGs or draw certain shapes. This causes
 // a runtime error and the map fails work at all. We would prefer to do some

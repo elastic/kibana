@@ -105,14 +105,14 @@ function selectRoots(cy: cytoscape.Core): string[] {
     .map((el) => el.id());
 }
 
-export const Cytoscape = ({
+export function Cytoscape({
   children,
   elements,
   height,
   width,
   serviceName,
   style,
-}: CytoscapeProps) => {
+}: CytoscapeProps) {
   const theme = useTheme();
   const [ref, cy] = useCytoscape({
     ...getCytoscapeOptions(theme),
@@ -260,4 +260,4 @@ export const Cytoscape = ({
       </div>
     </CytoscapeContext.Provider>
   );
-};
+}

@@ -25,7 +25,7 @@ interface PopoverProps {
   focusedServiceName?: string;
 }
 
-export const Popover = ({ focusedServiceName }: PopoverProps) => {
+export function Popover({ focusedServiceName }: PopoverProps) {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [selectedNode, setSelectedNode] = useState<
@@ -127,4 +127,4 @@ export const Popover = ({ focusedServiceName }: PopoverProps) => {
       />
     </EuiPopover>
   );
-};
+}

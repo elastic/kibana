@@ -59,7 +59,7 @@ function doZoom(
   }
 }
 
-export const Controls = () => {
+export function Controls() {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useUrlParams();
@@ -172,4 +172,4 @@ export const Controls = () => {
       )}
     </ControlsContainer>
   );
-};
+}

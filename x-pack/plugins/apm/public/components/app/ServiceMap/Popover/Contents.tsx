@@ -51,13 +51,13 @@ const FlexColumnGroup = (props: {
 const FlexColumnItem = (props: { children: React.ReactNode }) =>
   isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
 
-export const Contents = ({
+export function Contents({
   selectedNodeData,
   isService,
   label,
   onFocusClick,
   selectedNodeServiceName,
-}: ContentsProps) => {
+}: ContentsProps) {
   return (
     <FlexColumnGroup
       direction="column"
@@ -91,4 +91,4 @@ export const Contents = ({
       )}
     </FlexColumnGroup>
   );
-};
+}
