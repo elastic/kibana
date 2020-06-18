@@ -59,7 +59,7 @@ describe('agent config', () => {
             api_key: undefined,
           },
         },
-        datasources: [],
+        inputs: [],
         revision: 1,
         settings: {
           monitoring: {
@@ -88,7 +88,7 @@ describe('agent config', () => {
             api_key: undefined,
           },
         },
-        datasources: [],
+        inputs: [],
         revision: 1,
         settings: {
           monitoring: {
@@ -118,7 +118,7 @@ describe('agent config', () => {
             api_key: undefined,
           },
         },
-        datasources: [],
+        inputs: [],
         revision: 1,
         settings: {
           monitoring: {
