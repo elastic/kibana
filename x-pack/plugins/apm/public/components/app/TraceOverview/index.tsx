@@ -16,7 +16,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 type TracesAPIResponse = APIReturnType<'/api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
-  transactionGroups: [],
+  items: [],
   isAggregationAccurate: true,
   bucketSize: 0,
 };
@@ -64,7 +64,7 @@ export function TraceOverview() {
         <EuiFlexItem grow={7}>
           <EuiPanel>
             <TraceList
-              items={data.transactionGroups}
+              items={data.items}
               isLoading={status === FETCH_STATUS.LOADING}
             />
           </EuiPanel>

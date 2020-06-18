@@ -12,10 +12,10 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiCallOut,
-  EuiLink,
   EuiCode,
 } from '@elastic/eui';
 import { Location } from 'history';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -25,6 +25,7 @@ import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { TransactionList } from './List';
+import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { useRedirect } from './useRedirect';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
@@ -161,7 +162,7 @@ export function TransactionOverview() {
             {!transactionListData.isAggregationAccurate && (
               <EuiCallOut
                 title={i18n.translate(
-                  'xpack.apm.transactionCardinalityWarning',
+                  'xpack.apm.transactionCardinalityWarning.title',
                   {
                     defaultMessage:
                       'This view shows a subset of reported transactions.',
@@ -171,21 +172,32 @@ export function TransactionOverview() {
                 iconType="alert"
               >
                 <p>
-                  The number of unique transaction names exceeds the configured
-                  value of {transactionListData.bucketSize}. Try reconfiguring
-                  your agents to group similar transactions or increase the
-                  value of
-                  <EuiCode>
-                    xpack.apm.ui.transactionGroupBucketSize
-                  </EuiCode>.{' '}
-                  <EuiLink href="#">Learn more in the docs.</EuiLink>.
+                  <FormattedMessage
+                    id="xpack.apm.transactionCardinalityWarning.body"
+                    defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
+                    values={{
+                      bucketSize: transactionListData.bucketSize,
+                      codeBlock: (
+                        <EuiCode>
+                          xpack.apm.ui.transactionGroupBucketSize
+                        </EuiCode>
+                      ),
+                    }}
+                  />
+
+                  <ElasticDocsLink section="/kibana" path="TODO">
+                    {i18n.translate(
+                      'xpack.apm.transactionCardinalityWarning.docsLink',
+                      { defaultMessage: 'Learn more in the docs' }
+                    )}
+                  </ElasticDocsLink>
                 </p>
               </EuiCallOut>
             )}
             <EuiSpacer size="s" />
             <TransactionList
               isLoading={transactionListStatus === 'loading'}
-              items={transactionListData.transactionGroups}
+              items={transactionListData.items}
             />
           </EuiPanel>
         </EuiFlexItem>

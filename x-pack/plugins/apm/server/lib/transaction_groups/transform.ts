@@ -67,7 +67,7 @@ export function transactionGroupsTransformer({
   end: number;
   bucketSize: number;
 }): {
-  transactionGroups: ITransactionGroup[];
+  items: ITransactionGroup[];
   isAggregationAccurate: boolean;
   bucketSize: number;
 } {
@@ -83,7 +83,7 @@ export function transactionGroupsTransformer({
   );
 
   return {
-    transactionGroups: transactionGroupsWithRelativeImpact,
+    items: transactionGroupsWithRelativeImpact,
 
     // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
     // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit

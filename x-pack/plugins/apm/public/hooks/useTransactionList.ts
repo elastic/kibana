@@ -24,9 +24,7 @@ type TransactionsAPIResponse = APIReturnType<
   '/api/apm/services/{serviceName}/transaction_groups'
 >;
 
-function getWithRelativeImpact(
-  items: TransactionsAPIResponse['transactionGroups']
-) {
+function getWithRelativeImpact(items: TransactionsAPIResponse['items']) {
   const impacts = items
     .map(({ impact }) => impact)
     .filter((impact) => impact !== null) as number[];
@@ -46,7 +44,7 @@ function getWithRelativeImpact(
 }
 
 const DEFAULT_RESPONSE: TransactionsAPIResponse = {
-  transactionGroups: [],
+  items: [],
   isAggregationAccurate: true,
   bucketSize: 0,
 };
@@ -76,7 +74,7 @@ export function useTransactionList(urlParams: IUrlParams) {
 
   const memoizedData = useMemo(
     () => ({
-      transactionGroups: getWithRelativeImpact(data.transactionGroups),
+      items: getWithRelativeImpact(data.items),
       isAggregationAccurate: data.isAggregationAccurate,
       bucketSize: data.bucketSize,
     }),
