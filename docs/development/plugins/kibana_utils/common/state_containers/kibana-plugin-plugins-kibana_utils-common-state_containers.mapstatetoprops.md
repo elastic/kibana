@@ -4,6 +4,7 @@
 
 ## MapStateToProps type
 
+State container state to component props mapper. See [Connect](./kibana-plugin-plugins-kibana_utils-common-state_containers.connect.md)
 
 <b>Signature:</b>
 

@@ -4,7 +4,17 @@
 
 ## CreateStateContainerOptions.freeze property
 
-Function to use when freezing state. Supply identity function
+Function to use when freezing state. Supply identity function. If not provided, default deepFreeze is use.
+
+<b>Signature:</b>
+
+```typescript
+freeze?: <T>(state: T) => T;
+```
+
+## Example
+
+If you expect that your state will be mutated externally an you cannot prevent that
 
 ```ts
 {
@@ -12,10 +22,4 @@ Function to use when freezing state. Supply identity function
 }
 
 ```
-if you expect that your state will be mutated externally an you cannot prevent that.
 
-<b>Signature:</b>
-
-```typescript
-freeze?: <T>(state: T) => T;
-```

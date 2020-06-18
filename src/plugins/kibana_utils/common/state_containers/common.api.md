@@ -21,10 +21,10 @@ export interface BaseStateContainer<State extends BaseState> {
     state$: Observable<State>;
 }
 
-// @public (undocumented)
+// @public
 export type Comparator<Result> = (previous: Result, current: Result) => boolean;
 
-// @public (undocumented)
+// @public
 export type Connect<State extends BaseState> = <Props extends object, StatePropKeys extends keyof Props>(mapStateToProp: MapStateToProps<State, Pick<Props, StatePropKeys>>) => (component: ComponentType<Props>) => FC<Omit<Props, StatePropKeys>>;
 
 // @public
@@ -58,7 +58,7 @@ export const createStateContainerReactHelpers: <Container extends StateContainer
 // @public
 export type Dispatch<T> = (action: T) => void;
 
-// @internal (undocumented)
+// @public (undocumented)
 export type EnsurePureSelector<T> = Ensure<T, PureSelector<any, any, any>>;
 
 // Warning: (ae-incompatible-release-tags) The symbol "EnsurePureTransition" is marked as @public, but its signature references "PureTransition" which is marked as @internal
@@ -66,7 +66,7 @@ export type EnsurePureSelector<T> = Ensure<T, PureSelector<any, any, any>>;
 // @public (undocumented)
 export type EnsurePureTransition<T> = Ensure<T, PureTransition<any, any>>;
 
-// @public (undocumented)
+// @public
 export type MapStateToProps<State extends BaseState, StateProps extends object> = (state: State) => StateProps;
 
 // Warning: (ae-incompatible-release-tags) The symbol "Middleware" is marked as @public, but its signature references "TransitionDescription" which is marked as @internal
@@ -74,17 +74,15 @@ export type MapStateToProps<State extends BaseState, StateProps extends object> 
 // @public
 export type Middleware<State extends BaseState = BaseState> = (store: Pick<ReduxLikeStateContainer<State, any>, 'getState' | 'dispatch'>) => (next: (action: TransitionDescription) => TransitionDescription | any) => Dispatch<TransitionDescription>;
 
-// Warning: (ae-incompatible-release-tags) The symbol "PureSelector" is marked as @public, but its signature references "Selector" which is marked as @internal
-//
 // @public (undocumented)
 export type PureSelector<State extends BaseState, Result, Args extends any[] = []> = (state: State) => Selector<Result, Args>;
 
-// @internal (undocumented)
+// @public (undocumented)
 export type PureSelectorsToSelectors<T extends object> = {
     [K in keyof T]: PureSelectorToSelector<EnsurePureSelector<T[K]>>;
 };
 
-// @internal (undocumented)
+// @public (undocumented)
 export type PureSelectorToSelector<T extends PureSelector<any, any, any>> = ReturnType<EnsurePureSelector<T>>;
 
 // @internal (undocumented)
@@ -121,13 +119,11 @@ export interface ReduxLikeStateContainer<State extends BaseState, PureTransition
     subscribe: (listener: (state: State) => void) => () => void;
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export type Selector<Result, Args extends any[] = []> = (...args: Args) => Result;
 
 // @public
 export interface StateContainer<State extends BaseState, PureTransitions extends object = object, PureSelectors extends object = {}> extends BaseStateContainer<State> {
-    // Warning: (ae-incompatible-release-tags) The symbol "selectors" is marked as @public, but its signature references "PureSelectorsToSelectors" which is marked as @internal
-    //
     // (undocumented)
     selectors: Readonly<PureSelectorsToSelectors<PureSelectors>>;
     // Warning: (ae-incompatible-release-tags) The symbol "transitions" is marked as @public, but its signature references "PureTransitionsToTransitions" which is marked as @internal

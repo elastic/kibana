@@ -50,16 +50,17 @@ const defaultFreeze: <T>(value: T) => T = isProduction
  */
 export interface CreateStateContainerOptions {
   /**
-   * Function to use when freezing state. Supply identity function
+   * Function to use when freezing state. Supply identity function.
+   * If not provided, default deepFreeze is use.
    *
+   * @example
+   * If you expect that your state will be mutated externally an you cannot
+   * prevent that
    * ```ts
    * {
    *   freeze: state => state,
    * }
    * ```
-   *
-   * if you expect that your state will be mutated externally an you cannot
-   * prevent that.
    */
   freeze?: <T>(state: T) => T;
 }

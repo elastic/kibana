@@ -4,7 +4,7 @@
 
 ## useContainerState variable
 
-Returns the latest state of a [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md)<!-- -->.
+React hooks that returns the latest state of a [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md)<!-- -->.
 
 <b>Signature:</b>
 

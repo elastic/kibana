@@ -25,7 +25,7 @@ import { Comparator, Connect, StateContainer, UnboxState } from './types';
 const { useContext, useLayoutEffect, useRef, createElement: h } = React;
 
 /**
- * Returns the latest state of a {@link StateContainer}.
+ * React hooks that returns the latest state of a {@link StateContainer}.
  *
  * @param container - {@link StateContainer} which state to track.
  * @returns - latest {@link StateContainer} state
@@ -36,7 +36,7 @@ export const useContainerState = <Container extends StateContainer<any, any>>(
 ): UnboxState<Container> => useObservable(container.state$, container.get());
 
 /**
- * Apply selector to state container to extract only needed information. Will
+ * React hook to apply selector to state container to extract only needed information. Will
  * re-render your component only when the section changes.
  *
  * @param container - {@link StateContainer} which state to track.
@@ -74,7 +74,7 @@ export const useContainerSelector = <Container extends StateContainer<any, any>,
 
 /**
  * Creates helpers for using {@link StateContainer | State Containers} with react
- * Refer to [guide](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md) for details
+ * Refer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details
  * @public
  */
 export const createStateContainerReactHelpers = <Container extends StateContainer<any, any>>() => {

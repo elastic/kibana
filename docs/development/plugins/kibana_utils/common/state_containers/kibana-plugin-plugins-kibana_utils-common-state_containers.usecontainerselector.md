@@ -4,7 +4,7 @@
 
 ## useContainerSelector variable
 
-Apply selector to state container to extract only needed information. Will re-render your component only when the section changes.
+React hook to apply selector to state container to extract only needed information. Will re-render your component only when the section changes.
 
 <b>Signature:</b>
 

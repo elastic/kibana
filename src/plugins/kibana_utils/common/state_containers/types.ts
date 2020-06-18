@@ -155,7 +155,7 @@ export type UnboxTransitions<
 > = Container extends StateContainer<any, infer T> ? T : never;
 
 /**
- * @internal
+ * @public
  */
 export type Selector<Result, Args extends any[] = []> = (...args: Args) => Result;
 /**
@@ -165,33 +165,38 @@ export type PureSelector<State extends BaseState, Result, Args extends any[] = [
   state: State
 ) => Selector<Result, Args>;
 /**
- * @internal
+ * @public
  */
 export type EnsurePureSelector<T> = Ensure<T, PureSelector<any, any, any>>;
 /**
- * @internal
+ * @public
  */
 export type PureSelectorToSelector<T extends PureSelector<any, any, any>> = ReturnType<
   EnsurePureSelector<T>
 >;
 /**
- * @internal
+ * @public
  */
 export type PureSelectorsToSelectors<T extends object> = {
   [K in keyof T]: PureSelectorToSelector<EnsurePureSelector<T[K]>>;
 };
 
 /**
+ * Used to compare state. see {@link useContainerSelector}
  * @public
  */
 export type Comparator<Result> = (previous: Result, current: Result) => boolean;
 /**
+ * State container state to component props mapper.
+ * See {@link Connect}
  * @public
  */
 export type MapStateToProps<State extends BaseState, StateProps extends object> = (
   state: State
 ) => StateProps;
 /**
+ * Similar to `connect` from react-redux,
+ * allows to map state from state container to component's props
  * @public
  */
 export type Connect<State extends BaseState> = <

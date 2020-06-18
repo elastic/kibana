@@ -4,6 +4,7 @@
 
 ## Comparator type
 
+Used to compare state. see [useContainerSelector](./kibana-plugin-plugins-kibana_utils-common-state_containers.usecontainerselector.md)
 
 <b>Signature:</b>
 

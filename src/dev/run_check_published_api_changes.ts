@@ -240,6 +240,7 @@ async function run(
     'plugins/data/server',
     'plugins/data/public',
     'plugins/kibana_utils/common/state_containers',
+    'plugins/kibana_utils/public/state_sync',
   ];
   const folders = [...core, ...plugins];
 
