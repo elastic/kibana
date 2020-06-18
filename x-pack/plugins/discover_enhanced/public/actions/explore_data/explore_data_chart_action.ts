@@ -5,27 +5,34 @@
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import { EmbeddableContext } from '../../../../../../src/plugins/embeddable/public';
+import {
+  ValueClickTriggerContext,
+  RangeSelectTriggerContext,
+} from '../../../../../../src/plugins/embeddable/public';
 import { VisualizeEmbeddableContract } from '../../../../../../src/plugins/visualizations/public';
 import { KibanaURL } from './kibana_url';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
-export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
+export type ExploreDataChartActionContext = ValueClickTriggerContext | RangeSelectTriggerContext;
+
+export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
 
 /**
- * This is "Explore underlying data" action which appears in the context
- * menu of a dashboard panel.
+ * This is "Explore underlying data" action which appears in popup context
+ * menu when user clicks a value in visualization or brushes a time range.
  */
-export class ExploreDataContextMenuAction extends AbstractExploreDataAction<EmbeddableContext>
-  implements Action<EmbeddableContext> {
-  public readonly id = ACTION_EXPLORE_DATA;
+export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDataChartActionContext>
+  implements Action<ExploreDataChartActionContext> {
+  public readonly id = ACTION_EXPLORE_DATA_CHART;
 
-  public readonly type = ACTION_EXPLORE_DATA;
+  public readonly type = ACTION_EXPLORE_DATA_CHART;
 
   public readonly order = 200;
 
-  protected async getUrl(embeddable: VisualizeEmbeddableContract): Promise<KibanaURL> {
+  protected readonly getUrl = async (
+    embeddable: VisualizeEmbeddableContract
+  ): Promise<KibanaURL> => {
     const { plugins } = this.params.start();
     const { urlGenerator } = plugins.discover;
 
@@ -44,5 +51,5 @@ export class ExploreDataContextMenuAction extends AbstractExploreDataAction<Embe
     });
 
     return new KibanaURL(path);
-  }
+  };
 }

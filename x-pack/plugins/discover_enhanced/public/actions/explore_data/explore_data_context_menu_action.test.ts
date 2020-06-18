@@ -83,19 +83,20 @@ const setup = () => {
 
 describe('"Explore underlying data" panel action', () => {
   test('action has Discover icon', () => {
-    const { action } = setup();
-    expect(action.getIconType()).toBe('discoverApp');
+    const { action, context } = setup();
+    expect(action.getIconType(context)).toBe('discoverApp');
   });
 
   test('title is "Explore underlying data"', () => {
-    const { action } = setup();
-    expect(action.getDisplayName()).toBe('Explore underlying data');
+    const { action, context } = setup();
+    expect(action.getDisplayName(context)).toBe('Explore underlying data');
   });
 
   test('translates title', () => {
     expect(i18nTranslateSpy).toHaveBeenCalledTimes(0);
 
-    setup().action.getDisplayName();
+    const { action, context } = setup();
+    action.getDisplayName(context);
 
     expect(i18nTranslateSpy).toHaveBeenCalledTimes(1);
     expect(i18nTranslateSpy.mock.calls[0][0]).toBe(
