@@ -153,7 +153,9 @@ export class DockerServersService {
             process.exit(1);
           });
 
-          lifecycle.cleanup.trigger();
+          if (!lifecycle.cleanup.triggered) {
+            lifecycle.cleanup.trigger();
+          }
         },
       })
     );

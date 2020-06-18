@@ -28,6 +28,8 @@ export type GetArgsType<T extends LifecyclePhase<any>> = T extends LifecyclePhas
 export class LifecyclePhase<Args extends readonly any[]> {
   private readonly handlers: Array<(...args: Args) => Promise<void> | void> = [];
 
+  public triggered = false;
+
   private readonly beforeSubj = new Rx.Subject<void>();
   public readonly before$ = this.beforeSubj.asObservable();
 
@@ -53,9 +55,11 @@ export class LifecyclePhase<Args extends readonly any[]> {
   }
 
   public async trigger(...args: Args) {
-    if (this.beforeSubj.isStopped) {
+    if (this.triggered) {
       throw new Error(`singular lifecycle event can only be triggered once`);
     }
+
+    this.triggered = true;
 
     this.beforeSubj.next(undefined);
     if (this.options.singular) {
