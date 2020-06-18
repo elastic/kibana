@@ -26,6 +26,10 @@ import Tooltip from '../Tooltip';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { tint } from 'polished';
 import { getTimeTicksTZ, getDomainTZ } from '../helper/timezone';
+import Legends from '../CustomPlot/Legends';
+import StatusText from '../CustomPlot/StatusText';
+import { i18n } from '@kbn/i18n';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 
 const XY_HEIGHT = unit * 10;
 const XY_MARGIN = {
@@ -99,6 +103,7 @@ export class HistogramInner extends PureComponent {
       tooltipHeader,
       verticalLineHover,
       width: XY_WIDTH,
+      legends,
     } = this.props;
     const { hoveredBucket } = this.state;
     if (isEmpty(buckets) || XY_WIDTH === 0) {
@@ -139,102 +144,140 @@ export class HistogramInner extends PureComponent {
     const showVerticalLineHover = verticalLineHover(hoveredBucket);
     const showBackgroundHover = backgroundHover(hoveredBucket);
 
+    const hasValidCoordinates = buckets.some((bucket) =>
+      isValidCoordinateValue(bucket.y)
+    );
+    const noHits = this.props.noHits || !hasValidCoordinates;
+
+    const xyPlotProps = {
+      dontCheckIfEmpty: true,
+      xType: this.props.xType,
+      width: XY_WIDTH,
+      height: XY_HEIGHT,
+      margin: XY_MARGIN,
+      xDomain: xDomain,
+      yDomain: yDomain,
+    };
+
+    const xAxisProps = {
+      style: { strokeWidth: '1px' },
+      marginRight: 10,
+      tickSize: 0,
+      tickTotal: X_TICK_TOTAL,
+      tickFormat: formatX,
+      tickValues: xTickValues,
+    };
+
+    const emptyStateChart = (
+      <XYPlot {...xyPlotProps}>
+        <XAxis {...xAxisProps} />
+        <StatusText
+          marginLeft={30}
+          text={i18n.translate('xpack.apm.histogram.plot.noDataLabel', {
+            defaultMessage: 'No data within this time range.',
+          })}
+        />
+      </XYPlot>
+    );
+
     return (
       <div style={{ position: 'relative', height: XY_HEIGHT }}>
         <ChartsWrapper>
-          <XYPlot
-            xType={this.props.xType}
-            width={XY_WIDTH}
-            height={XY_HEIGHT}
-            margin={XY_MARGIN}
-            xDomain={xDomain}
-            yDomain={yDomain}
-          >
-            <HorizontalGridLines tickValues={yTickValues} />
-            <XAxis
-              style={{ strokeWidth: '1px' }}
-              marginRight={10}
-              tickSizeOuter={10}
-              tickSizeInner={0}
-              tickTotal={X_TICK_TOTAL}
-              tickFormat={formatX}
-              tickValues={xTickValues}
-            />
-            <YAxis
-              tickSize={0}
-              hideLine
-              tickValues={yTickValues}
-              tickFormat={formatYShort}
-            />
+          {noHits ? (
+            <>{emptyStateChart}</>
+          ) : (
+            <>
+              <XYPlot {...xyPlotProps}>
+                <HorizontalGridLines tickValues={yTickValues} />
+                <XAxis {...xAxisProps} />
+                <YAxis
+                  tickSize={0}
+                  hideLine
+                  tickValues={yTickValues}
+                  tickFormat={formatYShort}
+                />
 
-            {showBackgroundHover && (
-              <SingleRect
-                x={x(hoveredBucket.x0)}
-                width={x(bucketSize) - x(0)}
-                style={{
-                  fill: theme.euiColorLightestShade,
-                }}
-              />
-            )}
+                {showBackgroundHover && (
+                  <SingleRect
+                    x={x(hoveredBucket.x0)}
+                    width={x(bucketSize) - x(0)}
+                    style={{
+                      fill: theme.euiColorLightestShade,
+                    }}
+                  />
+                )}
 
-            {shouldShowTooltip && (
-              <Tooltip
-                style={{
-                  marginLeft: '1%',
-                  marginRight: '1%',
-                }}
-                header={tooltipHeader(hoveredBucket)}
-                footer={tooltipFooter(hoveredBucket)}
-                tooltipPoints={[{ value: formatYLong(hoveredBucket.y) }]}
-                x={hoveredBucket.xCenter}
-                y={yDomain[1] / 2}
-              />
-            )}
+                {shouldShowTooltip && (
+                  <Tooltip
+                    style={{
+                      marginLeft: '1%',
+                      marginRight: '1%',
+                    }}
+                    header={tooltipHeader(hoveredBucket)}
+                    footer={tooltipFooter(hoveredBucket)}
+                    tooltipPoints={[{ value: formatYLong(hoveredBucket.y) }]}
+                    x={hoveredBucket.xCenter}
+                    y={yDomain[1] / 2}
+                  />
+                )}
 
-            {selectedBucket && (
-              <SingleRect
-                x={x(selectedBucket.x0)}
-                width={x(bucketSize) - x(0)}
-                style={{
-                  fill: 'transparent',
-                  stroke: theme.euiColorVis1,
-                  rx: '0px',
-                  ry: '0px',
-                }}
-              />
-            )}
+                {selectedBucket && (
+                  <SingleRect
+                    x={x(selectedBucket.x0)}
+                    width={x(bucketSize) - x(0)}
+                    style={{
+                      fill: 'transparent',
+                      stroke: theme.euiColorVis1,
+                      rx: '0px',
+                      ry: '0px',
+                    }}
+                  />
+                )}
 
-            <VerticalRectSeries
-              colorType="literal"
-              data={chartData}
-              style={{
-                rx: '0px',
-                ry: '0px',
-              }}
-            />
+                <VerticalRectSeries
+                  colorType="literal"
+                  data={chartData}
+                  style={{
+                    rx: '0px',
+                    ry: '0px',
+                  }}
+                />
 
-            {showVerticalLineHover && (
-              <VerticalGridLines tickValues={[hoveredBucket.x]} />
-            )}
+                {showVerticalLineHover && hoveredBucket?.x && (
+                  <VerticalGridLines tickValues={[hoveredBucket.x]} />
+                )}
 
-            <Voronoi
-              extent={[
-                [XY_MARGIN.left, XY_MARGIN.top],
-                [XY_WIDTH, XY_HEIGHT],
-              ]}
-              nodes={buckets.map((bucket) => {
-                return {
-                  ...bucket,
-                  xCenter: (bucket.x0 + bucket.x) / 2,
-                };
-              })}
-              onClick={this.onClick}
-              onHover={this.onHover}
-              onBlur={this.onBlur}
-              x={(d) => x(d.xCenter)}
-              y={() => 1}
-            />
-          </XYPlot>
+                <Voronoi
+                  extent={[
+                    [XY_MARGIN.left, XY_MARGIN.top],
+                    [XY_WIDTH, XY_HEIGHT],
+                  ]}
+                  nodes={buckets.map((bucket) => {
+                    return {
+                      ...bucket,
+                      xCenter: (bucket.x0 + bucket.x) / 2,
+                    };
+                  })}
+                  onClick={this.onClick}
+                  onHover={this.onHover}
+                  onBlur={this.onBlur}
+                  x={(d) => x(d.xCenter)}
+                  y={() => 1}
+                />
+              </XYPlot>
+
+              {legends && (
+                <Legends
+                  series={legends}
+                  seriesEnabledState={[]}
+                  hiddenSeriesCount={0}
+                  clickLegend={() => {}}
+                  truncateLegends={false}
+                  noHits={noHits}
+                />
+              )}
+            </>
+          )}
         </ChartsWrapper>
       </div>
     );
@@ -255,6 +298,8 @@ HistogramInner.propTypes = {
   verticalLineHover: PropTypes.func,
   width: PropTypes.number.isRequired,
   xType: PropTypes.string,
+  legends: PropTypes.array,
+  noHits: PropTypes.bool,
 };
 
 HistogramInner.defaultProps = {
@@ -265,6 +310,7 @@ HistogramInner.defaultProps = {
   tooltipHeader: () => null,
   verticalLineHover: () => null,
   xType: 'linear',
+  noHits: false,
 };
 
 export default makeWidthFlexible(HistogramInner);
