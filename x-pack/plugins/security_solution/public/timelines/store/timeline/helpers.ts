@@ -23,21 +23,9 @@ import { TimelineTypeLiteral } from '../../../../common/types/timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
-import { TimelineById, TimelineState } from './types';
-
-const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
+import { TimelineById } from './types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
-
-export const initialTimelineState: TimelineState = {
-  timelineById: EMPTY_TIMELINE_BY_ID,
-  autoSavedWarningMsg: {
-    timelineId: null,
-    newTimelineModel: null,
-  },
-  showCallOutUnauthorizedMsg: false,
-  insertTimeline: null,
-};
 
 interface AddTimelineHistoryParams {
   id: string;
