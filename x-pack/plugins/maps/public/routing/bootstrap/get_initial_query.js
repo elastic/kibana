@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getUiSettings } from '../kibana_services';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
+import { getUiSettings } from '../../kibana_services';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 export function getInitialQuery({ mapStateJSON, appState = {}, userQueryLanguage }) {
   const settings = getUiSettings();
