@@ -17,7 +17,13 @@
  * under the License.
  */
 import React from 'react';
-import { DataPublicPluginSetup, DataPublicPluginStart, Filter } from '../../data/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  Filter,
+  TimeRange,
+  esFilters,
+} from '../../data/public';
 import { getSavedObjectFinder } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
@@ -70,7 +76,18 @@ export interface EmbeddableStart {
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   EmbeddablePanel: React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
+
+  /**
+   * Given {@link ChartActionContext} returns a list of `data` plugin {@link Filter} entries.
+   */
   filtersFromContext: (context: ChartActionContext) => Promise<Filter[]>;
+
+  /**
+   * Returns possible time range and filters that can be constructed from {@link ChartActionContext} object.
+   */
+  filtersAndTimeRangeFromContext: (
+    context: ChartActionContext
+  ) => Promise<{ filters: Filter[]; timeRange?: TimeRange }>;
 }
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -114,6 +131,41 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     });
     this.isRegistryReady = true;
 
+    const filtersFromContext: EmbeddableStart['filtersFromContext'] = async (context) => {
+      try {
+        if (isRangeSelectTriggerContext(context))
+          return await data.actions.createFiltersFromRangeSelectAction(context.data);
+        if (isValueClickTriggerContext(context))
+          return await data.actions.createFiltersFromValueClickAction(context.data);
+        // eslint-disable-next-line no-console
+        console.warn("Can't extract filters from action.", context);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn('Error extracting filters from action. Returning empty filter list.', error);
+      }
+      return [];
+    };
+
+    const filtersAndTimeRangeFromContext: EmbeddableStart['filtersAndTimeRangeFromContext'] = async (
+      context
+    ) => {
+      const filters = await filtersFromContext(context);
+
+      if (!context.data.timeFieldName) return { filters };
+
+      const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
+        context.data.timeFieldName,
+        filters
+      );
+
+      return {
+        filters: restOfFilters,
+        timeRange: timeRangeFilter
+          ? esFilters.convertRangeFilterToTimeRangeString(timeRangeFilter)
+          : undefined,
+      };
+    };
+
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
@@ -137,21 +189,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
         />
       ),
-
-      filtersFromContext: async (context) => {
-        try {
-          if (isRangeSelectTriggerContext(context))
-            return await data.actions.createFiltersFromRangeSelectAction(context.data);
-          if (isValueClickTriggerContext(context))
-            return await data.actions.createFiltersFromValueClickAction(context.data);
-          // eslint-disable-next-line no-console
-          console.warn("Can't extract filters from action.", context);
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.warn('Error extracting filters from action. Returning empty filter list.', error);
-        }
-        return [];
-      },
+      filtersFromContext,
+      filtersAndTimeRangeFromContext,
     };
   }
 
