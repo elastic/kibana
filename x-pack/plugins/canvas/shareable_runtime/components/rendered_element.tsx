@@ -5,11 +5,11 @@
  */
 
 import React, { FC, PureComponent } from 'react';
-// @ts-ignore Untyped library
+// @ts-expect-error untyped library
 import Style from 'style-it';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { Positionable } from '../../public/components/positionable/positionable';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { elementToShape } from '../../public/components/workpad_page/utils';
 import { CanvasRenderedElement } from '../types';
 import { CanvasShareableContext, useCanvasShareableState } from '../context';
