@@ -30,7 +30,12 @@ import {
   mockNoChartMappings,
   mockNarrowDateRange,
 } from '../../../network/components/kpi_network/mock';
-import { mockGlobalState, apolloClientObservable, SUB_PLUGINS_REDUCER } from '../../mock';
+import {
+  mockGlobalState,
+  apolloClientObservable,
+  SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
+} from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { KpiNetworkData, KpiHostsData } from '../../../graphql/types';
@@ -49,7 +54,8 @@ jest.mock('../charts/barchart', () => {
 describe('Stat Items Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const state: State = mockGlobalState;
-  const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   describe.each([
     [
@@ -91,10 +97,6 @@ describe('Stat Items Component', () => {
       ),
     ],
   ])('disable charts', (wrapper) => {
-    test('it renders the default widget', () => {
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('should render titles', () => {
       expect(wrapper.find('[data-test-subj="stat-title"]')).toBeTruthy();
     });
@@ -179,9 +181,6 @@ describe('Stat Items Component', () => {
           <StatItemsComponent {...mockStatItemsData} />
         </ReduxStoreProvider>
       );
-    });
-    test('it renders the default widget', () => {
-      expect(wrapper).toMatchSnapshot();
     });
 
     test('should handle multiple titles', () => {

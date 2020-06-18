@@ -1264,6 +1264,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                     >
                                                       <span
                                                         className="euiToolTipAnchor"
+                                                        onKeyUp={[Function]}
                                                         onMouseOut={[Function]}
                                                         onMouseOver={[Function]}
                                                       >
@@ -2772,6 +2773,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                     >
                                                       <span
                                                         className="euiToolTipAnchor"
+                                                        onKeyUp={[Function]}
                                                         onMouseOut={[Function]}
                                                         onMouseOver={[Function]}
                                                       >

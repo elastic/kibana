@@ -12,7 +12,10 @@ import {
   UiActionsActionDefinition as ActionDefinition,
 } from '../../../../../src/plugins/ui_actions/public';
 import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
-import { StateContainer, createStateContainer } from '../../../../../src/plugins/kibana_utils';
+import {
+  StateContainer,
+  createStateContainer,
+} from '../../../../../src/plugins/kibana_utils/common';
 import { StartContract } from '../plugin';
 import { SerializedAction, SerializedEvent } from './types';
 

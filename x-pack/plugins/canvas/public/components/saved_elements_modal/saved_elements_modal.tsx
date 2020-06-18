@@ -18,7 +18,7 @@ import {
   EuiOverlayMask,
   EuiButton,
 } from '@elastic/eui';
-import { map, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import { ComponentStrings } from '../../../i18n';
 import { CustomElement } from '../../../types';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
@@ -84,7 +84,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   const handleEdit = async (name: string, description: string, image: string) => {
     if (elementToEdit) {
-      await updateCustomElement(elementToEdit.id, name, description, image);
+      updateCustomElement(elementToEdit.id, name, description, image);
     }
     hideEditModal();
   };
@@ -94,7 +94,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   const handleDelete = async () => {
     if (elementToDelete) {
-      await removeCustomElement(elementToDelete.id);
+      removeCustomElement(elementToDelete.id);
     }
     hideDeleteModal();
   };
@@ -137,10 +137,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   };
 
   const sortElements = (elements: CustomElement[]): CustomElement[] =>
-    sortBy(
-      map(elements, (element, name) => ({ name, ...element })),
-      'displayName'
-    );
+    sortBy(elements, 'displayName');
 
   const onSearch = (e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value);
 

@@ -20,7 +20,7 @@ import {
 import {
   ConnectionsResponse,
   ServicesResponse,
-  AnomaliesResponse,
+  ServiceAnomalies,
 } from './get_service_map';
 import { addAnomaliesDataToNodes } from './ml_helpers';
 
@@ -38,14 +38,10 @@ function getConnectionId(connection: Connection) {
   )}`;
 }
 
-export type ServiceMapResponse = ConnectionsResponse & {
-  anomalies: AnomaliesResponse;
-  services: ServicesResponse;
-};
-
-export function transformServiceMapResponses(response: ServiceMapResponse) {
-  const { anomalies, discoveredServices, services, connections } = response;
-
+export function getAllNodes(
+  services: ServiceMapResponse['services'],
+  connections: ServiceMapResponse['connections']
+) {
   // Derive the rest of the map nodes from the connections and add the services
   // from the services data query
   const allNodes: ConnectionNode[] = connections
@@ -58,10 +54,28 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       }))
     );
 
+  return allNodes;
+}
+
+export function getServiceNodes(allNodes: ConnectionNode[]) {
   // List of nodes that are services
   const serviceNodes = allNodes.filter(
     (node) => SERVICE_NAME in node
   ) as ServiceConnectionNode[];
+
+  return serviceNodes;
+}
+
+export type ServiceMapResponse = ConnectionsResponse & {
+  anomalies: ServiceAnomalies;
+  services: ServicesResponse;
+};
+
+export function transformServiceMapResponses(response: ServiceMapResponse) {
+  const { anomalies, discoveredServices, services, connections } = response;
+
+  const allNodes = getAllNodes(services, connections);
+  const serviceNodes = getServiceNodes(allNodes);
 
   // List of nodes that are externals
   const externalNodes = allNodes.filter(

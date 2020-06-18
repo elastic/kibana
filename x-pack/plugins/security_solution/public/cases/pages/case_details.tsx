@@ -10,7 +10,6 @@ import { useParams, Redirect } from 'react-router-dom';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { useGetUserSavedObjectPermissions } from '../../common/lib/kibana';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
@@ -36,7 +35,6 @@ export const CaseDetailsPage = React.memo(() => {
         )}
         <CaseView caseId={caseId} userCanCrud={userPermissions?.crud ?? false} />
       </WrapperPage>
-      <SpyRoute />
     </>
   ) : null;
 });

@@ -113,6 +113,7 @@ export const WindowsEvents = React.memo(() => {
             <EventsCheckbox
               name={item.name}
               key={index}
+              data-test-subj={`policyWindowsEvent_${item.protectionField}`}
               setter={(config, checked) =>
                 setIn(config)(item.os)('events')(item.protectionField)(checked)
               }

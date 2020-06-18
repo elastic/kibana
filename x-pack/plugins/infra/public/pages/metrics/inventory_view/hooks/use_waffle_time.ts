@@ -26,7 +26,9 @@ export const useWaffleTime = () => {
 
   const [state, setState] = useState<WaffleTimeState>(urlState);
 
-  useEffect(() => setUrlState(state), [setUrlState, state]);
+  useEffect(() => {
+    setUrlState(state);
+  }, [setUrlState, state]);
 
   const { currentTime, isAutoReloading } = urlState;
 

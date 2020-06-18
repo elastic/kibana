@@ -16,7 +16,7 @@ import { addBasePath } from '../index';
 
 export function registerGetAllRoute({ router, license }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/index-templates'), validate: false },
+    { path: addBasePath('/index_templates'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
@@ -55,7 +55,7 @@ const querySchema = schema.object({
 export function registerGetOneRoute({ router, license, lib }: RouteDependencies) {
   router.get(
     {
-      path: addBasePath('/index-templates/{name}'),
+      path: addBasePath('/index_templates/{name}'),
       validate: { params: paramsSchema, query: querySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {

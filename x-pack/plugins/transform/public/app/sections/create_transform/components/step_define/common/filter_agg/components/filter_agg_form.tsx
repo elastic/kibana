@@ -62,7 +62,7 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
         label={
           <FormattedMessage
             id="xpack.transform.agg.popoverForm.filerAggLabel"
-            defaultMessage="Filter agg"
+            defaultMessage="Filter query"
           />
         }
       >

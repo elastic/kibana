@@ -5,6 +5,8 @@
  */
 
 /* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable complexity */
+// TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
   EuiButton,
@@ -22,6 +24,7 @@ import { Redirect, useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
@@ -70,16 +73,24 @@ import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
 import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
+import { ExceptionListType } from '../../../../../common/components/exceptions/types';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
   failures = 'failures',
+  exceptions = 'exceptions',
 }
 
 const ruleDetailTabs = [
   {
     id: RuleDetailTabs.alerts,
     name: detectionI18n.ALERT,
+    disabled: false,
+  },
+  {
+    id: RuleDetailTabs.exceptions,
+    name: i18n.EXCEPTIONS_TAB,
     disabled: false,
   },
   {
@@ -376,6 +387,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         <EuiSpacer />
                         {ruleId != null && (
                           <AlertsTable
+                            timelineId={TimelineId.alertsRulesDetailsPage}
                             canUserCRUD={canUserCRUD ?? false}
                             defaultFilters={alertDefaultFilters}
                             hasIndexWrite={hasIndexWrite ?? false}
@@ -386,6 +398,17 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                           />
                         )}
                       </>
+                    )}
+                    {ruleDetailTab === RuleDetailTabs.exceptions && (
+                      <ExceptionsViewer
+                        ruleId={ruleId ?? ''}
+                        availableListTypes={[
+                          ExceptionListType.DETECTION_ENGINE,
+                          ExceptionListType.ENDPOINT,
+                        ]}
+                        commentsAccordionId={'ruleDetailsTabExceptions'}
+                        exceptionListsMeta={[]}
+                      />
                     )}
                     {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
                   </WrapperPage>

@@ -20,13 +20,13 @@ import {
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
+import { Messages } from '../shared';
 import {
   DEFAULT_MODEL_MEMORY_LIMIT,
   getJobConfigFromFormState,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { shouldAddAsDepVarOption } from '../../../analytics_management/components/create_analytics_form/form_options_validation';
+import { shouldAddAsDepVarOption } from './form_options_validation';
 import { ml } from '../../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
@@ -56,7 +56,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const { currentSavedSearch, currentIndexPattern } = mlContext;
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
-  const { initiateWizard, setEstimatedModelMemoryLimit, setFormState } = actions;
+  const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
   const {
@@ -75,8 +75,11 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     modelMemoryLimit,
     previousJobType,
     requiredFieldsError,
+    sourceIndex,
     trainingPercent,
   } = form;
+
+  const toastNotifications = getToastNotifications();
 
   const setJobConfigQuery = ({ query, queryString }: { query: any; queryString: string }) => {
     setFormState({ jobConfigQuery: query, jobConfigQueryString: queryString });
@@ -90,7 +93,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const indexPreviewProps = {
     ...indexData,
     dataTestSubj: 'mlAnalyticsCreationDataGrid',
-    toastNotifications: getToastNotifications(),
+    toastNotifications,
   };
 
   const isJobTypeWithDepVar =
@@ -209,7 +212,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         });
       }
     } catch (e) {
-      let errorMessage;
+      let maxDistinctValuesErrorMessage;
+
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
         e.body &&
@@ -218,7 +222,23 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         (e.body.message.includes('must have at most') ||
           e.body.message.includes('must have at least'))
       ) {
-        errorMessage = e.body.message;
+        maxDistinctValuesErrorMessage = e.body.message;
+      }
+
+      if (
+        e.body &&
+        e.body.message !== undefined &&
+        e.body.message.includes('status_exception') &&
+        e.body.message.includes('Unable to estimate memory usage as no documents')
+      ) {
+        toastNotifications.addWarning(
+          i18n.translate('xpack.ml.dataframe.analytics.create.allDocsMissingFieldsErrorMessage', {
+            defaultMessage: `Unable to estimate memory usage. There are mapped fields for source index [{index}] that do not exist in any indexed documents. You will have to switch to the JSON editor for explicit field selection and include only fields that exist in indexed documents.`,
+            values: {
+              index: sourceIndex,
+            },
+          })
+        );
       }
       const fallbackModelMemoryLimit =
         jobType !== undefined
@@ -227,16 +247,12 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       setEstimatedModelMemoryLimit(fallbackModelMemoryLimit);
       setFormState({
         fieldOptionsFetchFail: true,
-        maxDistinctValuesError: errorMessage,
+        maxDistinctValuesError: maxDistinctValuesErrorMessage,
         loadingFieldOptions: false,
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
     }
   }, 300);
-
-  useEffect(() => {
-    initiateWizard();
-  }, []);
 
   useEffect(() => {
     setFormState({ sourceIndex: currentIndexPattern.title });

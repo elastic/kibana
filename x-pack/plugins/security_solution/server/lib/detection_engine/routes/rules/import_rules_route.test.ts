@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  buildHapiStream,
-  ruleIdsToNdJsonString,
-  rulesToNdJsonString,
-  getSimpleRuleWithId,
-} from '../__mocks__/utils';
+import { buildHapiStream } from '../__mocks__/utils';
 import {
   getImportRulesRequest,
   getImportRulesRequestOverwriteTrue,
@@ -25,6 +20,11 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { importRulesRoute } from './import_rules_route';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import {
+  getImportRulesWithIdSchemaMock,
+  ruleIdsToNdJsonString,
+  rulesToNdJsonString,
+} from '../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -239,7 +239,11 @@ describe('import_rules_route', () => {
     });
 
     test('returns 200 with errors if all rules are missing rule_ids and import fails on validation', async () => {
-      const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map((ruleId) => getSimpleRuleWithId(ruleId));
+      const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map((ruleId) =>
+        getImportRulesWithIdSchemaMock(ruleId)
+      );
+      delete rulesWithoutRuleIds[0].rule_id;
+      delete rulesWithoutRuleIds[1].rule_id;
       const badPayload = buildHapiStream(rulesToNdJsonString(rulesWithoutRuleIds));
       const badRequest = getImportRulesRequest(badPayload);
 
@@ -251,7 +255,7 @@ describe('import_rules_route', () => {
           {
             error: {
               // TODO: Change the formatter to do better than output [object Object]
-              message: '[object Object],[object Object]',
+              message: '[object Object]',
               status_code: 400,
             },
             rule_id: '(unknown id)',
@@ -259,7 +263,7 @@ describe('import_rules_route', () => {
           {
             error: {
               // TODO: Change the formatter to do better than output [object Object]
-              message: '[object Object],[object Object]',
+              message: '[object Object]',
               status_code: 400,
             },
             rule_id: '(unknown id)',

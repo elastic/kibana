@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
-        modelMemory: '55mb',
+        modelMemory: '5mb',
         createIndexPattern: true,
         expected: {
           row: {
@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
-          await ml.testResources.deleteIndexPattern(testData.destinationIndex);
+          await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
         it('loads the data frame analytics page', async () => {
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('selects the source data and loads the job wizard page', async () => {
-          ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
         });
 
         it('selects the job type', async () => {

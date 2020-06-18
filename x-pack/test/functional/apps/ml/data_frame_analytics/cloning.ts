@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
               includes: [],
               excludes: [],
             },
-            model_memory_limit: '350mb',
+            model_memory_limit: '60mb',
             allow_lazy_start: false,
           },
         },
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
               includes: [],
               excludes: [],
             },
-            model_memory_limit: '55mb',
+            model_memory_limit: '5mb',
           },
         },
         {
@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
               includes: [],
               excludes: [],
             },
-            model_memory_limit: '105mb',
+            model_memory_limit: '20mb',
           },
         },
       ];
@@ -153,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
         after(async () => {
           await ml.api.deleteIndices(cloneDestIndex);
           await ml.api.deleteIndices(testData.job.dest!.index as string);
-          await ml.testResources.deleteIndexPattern(testData.job.dest!.index as string);
+          await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
         });
 
         it('should open the flyout with a proper header', async () => {

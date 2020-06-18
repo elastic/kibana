@@ -4,24 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResolverEvent } from '../../../../common/endpoint/types';
-import { RelatedEventDataEntry } from '../../types';
+import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
-  readonly payload: ResolverEvent[];
+  readonly events: ResolverEvent[];
+  readonly stats: Map<string, ResolverNodeStats>;
 }
 
 interface ServerFailedToReturnResolverData {
   readonly type: 'serverFailedToReturnResolverData';
-}
-
-/**
- * Will occur when a request for related event data is fulfilled by the API.
- */
-interface ServerReturnedRelatedEventData {
-  readonly type: 'serverReturnedRelatedEventData';
-  readonly payload: Map<ResolverEvent, RelatedEventDataEntry>;
 }
 
 /**
@@ -35,5 +27,4 @@ interface ServerFailedToReturnRelatedEventData {
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
-  | ServerReturnedRelatedEventData
   | ServerFailedToReturnRelatedEventData;

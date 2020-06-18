@@ -51,12 +51,10 @@ export const getDraftTimelinesRoute = (
           });
         }
 
-        const newTimelineResponse = await persistTimeline(
-          frameworkRequest,
-          null,
-          null,
-          draftTimelineDefaults
-        );
+        const newTimelineResponse = await persistTimeline(frameworkRequest, null, null, {
+          ...draftTimelineDefaults,
+          timelineType: request.query.timelineType,
+        });
 
         if (newTimelineResponse.code === 200) {
           return response.ok({

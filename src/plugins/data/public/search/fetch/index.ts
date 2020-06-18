@@ -20,6 +20,7 @@
 export * from './types';
 export {
   getSearchParams,
+  getSearchParamsFromRequest,
   getPreference,
   getTimeout,
   getIgnoreThrottled,

@@ -94,6 +94,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LegacyCoreSetup](./kibana-plugin-core-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-core-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyNavLink](./kibana-plugin-core-public.legacynavlink.md) |  |
+|  [NavigateToAppOptions](./kibana-plugin-core-public.navigatetoappoptions.md) | Options for the [navigateToApp API](./kibana-plugin-core-public.applicationstart.navigatetoapp.md) |
 |  [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-core-public.notificationsstart.md) |  |
 |  [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |  |

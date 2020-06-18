@@ -34,11 +34,6 @@ export interface ReturnTypeBulkCreate<T> extends BaseReturnType {
   }>;
 }
 
-// delete
-export interface ReturnTypeDelete extends BaseReturnType {
-  action: 'deleted';
-}
-
 export interface ReturnTypeBulkDelete extends BaseReturnType {
   results: Array<{
     success: boolean;
@@ -84,12 +79,6 @@ export interface ReturnTypeBulkGet<T> extends BaseReturnType {
   items: T[];
 }
 
-// action -- e.g. validate config block. Like ES simulate endpoint
-export interface ReturnTypeAction extends BaseReturnType {
-  result: {
-    [key: string]: any;
-  };
-}
 // e.g.
 // {
 //   result: {

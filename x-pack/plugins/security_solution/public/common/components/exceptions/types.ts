@@ -5,6 +5,12 @@
  */
 import { ReactNode } from 'react';
 
+import {
+  NamespaceType,
+  ExceptionList,
+  ExceptionListItemSchema as ExceptionItem,
+} from '../../../lists_plugin_deps';
+
 export interface OperatorOption {
   message: string;
   value: string;
@@ -51,9 +57,50 @@ export interface DescriptionListItem {
 }
 
 export interface Comment {
-  user: string;
-  timestamp: string;
+  created_by: string;
+  created_at: string;
   comment: string;
+}
+
+export enum ExceptionListType {
+  DETECTION_ENGINE = 'detection',
+  ENDPOINT = 'endpoint',
+}
+
+export interface FilterOptions {
+  filter: string;
+  showDetectionsList: boolean;
+  showEndpointList: boolean;
+  tags: string[];
+}
+
+export interface Filter {
+  filter: Partial<FilterOptions>;
+  pagination: Partial<ExceptionsPagination>;
+}
+
+export interface SetExceptionsProps {
+  lists: ExceptionList[];
+  exceptions: ExceptionItem[];
+  pagination: Pagination;
+}
+
+export interface ApiProps {
+  id: string;
+  namespaceType: NamespaceType;
+}
+
+export interface Pagination {
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+export interface ExceptionsPagination {
+  pageIndex: number;
+  pageSize: number;
+  totalItemCount: number;
+  pageSizeOptions: number[];
 }
 
 // TODO: Delete once types are updated

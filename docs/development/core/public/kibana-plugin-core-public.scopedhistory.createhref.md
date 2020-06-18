@@ -11,5 +11,5 @@ Creates an href (string) to the location. If `prependBasePath` is true (default)
 ```typescript
 createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
-    }) => string;
+    }) => Href;
 ```

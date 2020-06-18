@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sampleRule } from '../signals/__mocks__/es_results';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
+import { getRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 
 describe('getExportDetailsNdjson', () => {
   test('it ends with a new line character', () => {
-    const rule = sampleRule();
+    const rule = getRulesSchemaMock();
     const details = getExportDetailsNdjson([rule]);
     expect(details.endsWith('\n')).toEqual(true);
   });
 
   test('it exports a correct count given a single rule and no missing rules', () => {
-    const rule = sampleRule();
+    const rule = getRulesSchemaMock();
     const details = getExportDetailsNdjson([rule]);
     const reParsed = JSON.parse(details);
     expect(reParsed).toEqual({
@@ -37,8 +37,8 @@ describe('getExportDetailsNdjson', () => {
   });
 
   test('it exports a correct count given multiple rules and multiple missing rules', () => {
-    const rule1 = sampleRule();
-    const rule2 = sampleRule();
+    const rule1 = getRulesSchemaMock();
+    const rule2 = getRulesSchemaMock();
     rule2.rule_id = 'some other id';
     rule2.id = 'some other id';
 
