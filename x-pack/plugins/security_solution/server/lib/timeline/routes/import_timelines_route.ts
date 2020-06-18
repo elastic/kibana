@@ -73,7 +73,7 @@ export const importTimelinesRoute = (
 
         const { file } = request.body;
         const { filename } = file.hapi;
-
+        console.log('----file-----');
         const fileExtension = extname(filename).toLowerCase();
 
         if (fileExtension !== '.ndjson') {
