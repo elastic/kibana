@@ -55,9 +55,8 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
         currentProcessAdjacencyMap.parent = uniqueParentPid;
       }
     } else {
-      idToChildren.set(uniqueParentPid, [process]);
-
       if (uniqueParentPid) {
+        idToChildren.set(uniqueParentPid, [process]);
         /**
          * Get the parent's map, otherwise set an empty one
          */
