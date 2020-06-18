@@ -24,7 +24,7 @@ export const DefaultNamespace: DefaultNamespaceC = new t.Type<
 >(
   'DefaultNamespace',
   namespaceType.is,
-  (input): Either<t.Errors, NamespaceType> =>
-    input == null ? t.success('single') : namespaceType.decode(input),
+  (input, context): Either<t.Errors, NamespaceType> =>
+    input == null ? t.success('single') : namespaceType.validate(input, context),
   t.identity
 );
