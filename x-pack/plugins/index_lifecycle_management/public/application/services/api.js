@@ -13,7 +13,7 @@ import {
 } from '../constants';
 
 import { trackUiMetric } from './ui_metric';
-import { sendGet, sendPost, sendDelete } from './http';
+import { sendGet, sendPost, sendDelete, useRequest } from './http';
 
 export async function loadNodes() {
   return await sendGet(`nodes/list`);
@@ -68,4 +68,12 @@ export const addLifecyclePolicyToTemplate = async (body) => {
   // Only track successful actions.
   trackUiMetric('count', UIM_POLICY_ATTACH_INDEX_TEMPLATE);
   return response;
+};
+
+export const useLoadSnapshotPolicies = () => {
+  return useRequest({
+    path: `snapshot_policies`,
+    method: 'get',
+    initialData: [],
+  });
 };
