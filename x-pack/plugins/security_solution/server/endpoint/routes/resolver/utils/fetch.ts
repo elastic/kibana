@@ -209,7 +209,10 @@ export class Fetcher {
   }
 
   private async doStats(tree: Tree) {
-    const statsQuery = new StatsQuery(this.eventsIndexPattern, this.endpointID);
+    const statsQuery = new StatsQuery(
+      [this.eventsIndexPattern, this.alertsIndexPattern],
+      this.endpointID
+    );
     const ids = tree.ids();
     const res = await statsQuery.search(this.client, ids);
     const alerts = res.alerts;
