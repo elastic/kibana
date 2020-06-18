@@ -78,6 +78,8 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
       expect(stats.stack_stats.kibana.plugins.maps.timeCaptured).to.be.a('string');
       expect(stats.stack_stats.kibana.plugins.maps.attributes).to.be(undefined);
+      expect(stats.stack_stats.kibana.plugins.maps.id).to.be(undefined);
+      expect(stats.stack_stats.kibana.plugins.maps.type).to.be(undefined);
 
       expect(stats.stack_stats.kibana.plugins.reporting.enabled).to.be(true);
       expect(stats.stack_stats.kibana.plugins.rollups.index_patterns).to.be.an('object');
