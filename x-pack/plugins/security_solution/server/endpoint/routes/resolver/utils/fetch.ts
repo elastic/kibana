@@ -33,9 +33,13 @@ export class Fetcher {
      */
     private readonly id: string,
     /**
-     * Index pattern for searching ES
+     * Index pattern for searching ES for events
      */
-    private readonly indexPattern: string,
+    private readonly eventsIndexPattern: string,
+    /**
+     * Index pattern for searching ES for alerts
+     */
+    private readonly alertsIndexPattern: string,
     /**
      * This is used for searching legacy events
      */
@@ -112,7 +116,7 @@ export class Fetcher {
       return;
     }
 
-    const query = new LifecycleQuery(this.indexPattern, this.endpointID);
+    const query = new LifecycleQuery(this.eventsIndexPattern, this.endpointID);
     const results = await query.search(this.client, curNodeID);
 
     if (results.length === 0) {
@@ -130,7 +134,7 @@ export class Fetcher {
   private async doEvents(limit: number, after?: string) {
     const query = new EventsQuery(
       PaginationBuilder.createBuilder(limit, after),
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID
     );
 
@@ -153,7 +157,7 @@ export class Fetcher {
   private async doAlerts(limit: number, after?: string) {
     const query = new AlertsQuery(
       PaginationBuilder.createBuilder(limit, after),
-      this.indexPattern,
+      this.alertsIndexPattern,
       this.endpointID
     );
 
@@ -186,10 +190,10 @@ export class Fetcher {
 
     const childrenQuery = new ChildrenQuery(
       PaginationBuilder.createBuilder(limit, after),
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID
     );
-    const lifecycleQuery = new LifecycleQuery(this.indexPattern, this.endpointID);
+    const lifecycleQuery = new LifecycleQuery(this.eventsIndexPattern, this.endpointID);
 
     const { totals, results } = await childrenQuery.search(this.client, ids);
     if (results.length === 0) {
@@ -205,7 +209,7 @@ export class Fetcher {
   }
 
   private async doStats(tree: Tree) {
-    const statsQuery = new StatsQuery(this.indexPattern, this.endpointID);
+    const statsQuery = new StatsQuery(this.eventsIndexPattern, this.endpointID);
     const ids = tree.ids();
     const res = await statsQuery.search(this.client, ids);
     const alerts = res.alerts;

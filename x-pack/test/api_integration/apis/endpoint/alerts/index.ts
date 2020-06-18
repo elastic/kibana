@@ -6,7 +6,7 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { AlertData } from '../../../../../plugins/security_solution/common/endpoint_alerts/types';
-import { eventsIndexPattern } from '../../../../../plugins/security_solution/common/endpoint/constants';
+import { alertsIndexPattern } from '../../../../../plugins/security_solution/common/endpoint/constants';
 import {
   deleteEventsStream,
   deleteMetadataStream,
@@ -84,14 +84,15 @@ export default function ({ getService }: FtrProviderContext) {
           'alerts-seed',
           numberOfHosts,
           1,
-          'metrics-endpoint.metadata-default-1',
-          'metrics-endpoint.policy-default-1',
-          'events-endpoint-1',
+          'metrics-endpoint.metadata-default',
+          'metrics-endpoint.policy-default',
+          'logs-endpoint.events.fake-default',
+          'logs-endpoint.alerts-default',
           numberOfAlertsPerHost
         );
 
         const res = await es.search({
-          index: eventsIndexPattern,
+          index: alertsIndexPattern,
           body: ES_QUERY_MISSING,
         });
         nullableEventId = res.hits.hits[0]._source.event.id;
