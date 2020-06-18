@@ -24,11 +24,8 @@ export function getMigrations(
 }
 
 /**
- * In v7.9 we made a couple of changes:
- * 1. We changed the Alerting plugin so it uses the `consumer` value of `alerts`
- * Prior to that we were using `alerting` and we need to keep these in sync for RBAC
- * 2. We aligned the metrics alerts with the feature that needs to grant them privileges
- * so their consumer field has changed from `metrics` to `infrastructure`
+ * In v7.9.0 we changed the Alerting plugin so it uses the `consumer` value of `alerts`
+ * prior to that we were using `alerting` and we need to keep these in sync
  */
 function changeAlertingConsumer(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
@@ -36,7 +33,6 @@ function changeAlertingConsumer(
 ): SavedObjectMigrationFn<RawAlert, RawAlert> {
   const consumerMigration = new Map<string, string>();
   consumerMigration.set('alerting', 'alerts');
-  consumerMigration.set('metrics', 'infrastructure');
 
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldbeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
