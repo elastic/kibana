@@ -355,7 +355,7 @@ const getLegendText = (chartData: ChartData): LegendText => {
     return fromValue !== toValue ? `${fromValue} - ${toValue}` : '' + fromValue;
   }
 
-  throw new Error('Invalid chart data.');
+  return '';
 };
 
 interface ColumnChart {
