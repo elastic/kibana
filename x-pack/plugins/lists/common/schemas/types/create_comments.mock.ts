@@ -9,7 +9,4 @@ export const getCreateCommentsMock = (): CreateComments => ({
   comment: 'some comments',
 });
 
-export const getCreateCommentsArrayMock = (): CreateCommentsArray => [
-  getCreateCommentsMock(),
-  getCreateCommentsMock(),
-];
+export const getCreateCommentsArrayMock = (): CreateCommentsArray => [getCreateCommentsMock()];

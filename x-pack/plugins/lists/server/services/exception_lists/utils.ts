@@ -319,7 +319,7 @@ export const transformUpdateComments = ({
 }): Comments => {
   if (comment.created_by !== user) {
     // existing comment is being edited, can only be edited by author
-    throw new ErrorWithStatusCode('Not authorized to edit others comments', 403);
+    throw new ErrorWithStatusCode('Not authorized to edit others comments', 401);
   } else if (existingComment.created_at !== comment.created_at) {
     throw new ErrorWithStatusCode('Unable to update comment', 403);
   } else if (comment.comment.trim().length === 0) {
