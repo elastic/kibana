@@ -315,25 +315,27 @@ features.registerFeature({
 	privileges: {
 		all: {
 			alerting: {
-		all: [
-				// grant `all` over our own types
-				'my-application-id.my-alert-type',
-				'my-application-id.my-restricted-alert-type',
-				// grant `all` over the built-in IndexThreshold
-				'.index-threshold',
-				// grant `all` over Uptime's TLS AlertType
-				'xpack.uptime.alerts.actionGroups.tls'],
+				all: [
+					// grant `all` over our own types
+					'my-application-id.my-alert-type',
+					'my-application-id.my-restricted-alert-type',
+					// grant `all` over the built-in IndexThreshold
+					'.index-threshold',
+					// grant `all` over Uptime's TLS AlertType
+					'xpack.uptime.alerts.actionGroups.tls'
+				],
 			},
 		},
 		read: {
 			alerting: {
-		read: [
-				// grant `read` over our own type
-				'my-application-id.my-alert-type',
-				// grant `read` over the built-in IndexThreshold
-				'.index-threshold', 
-				// grant `read` over Uptime's TLS AlertType
-				'xpack.uptime.alerts.actionGroups.tls'],
+				read: [
+					// grant `read` over our own type
+					'my-application-id.my-alert-type',
+					// grant `read` over the built-in IndexThreshold
+					'.index-threshold', 
+					// grant `read` over Uptime's TLS AlertType
+					'xpack.uptime.alerts.actionGroups.tls'
+				],
 			},
 		},
 	},
