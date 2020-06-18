@@ -255,10 +255,6 @@ export class MapsAppView extends React.Component {
         time || this.state.time
       );
     });
-    updateGlobalState(
-      { ...newState, filters: filterManager.getGlobalFilters() },
-      !this.state.initialized
-    );
   };
 
   _initQueryTimeRefresh() {
