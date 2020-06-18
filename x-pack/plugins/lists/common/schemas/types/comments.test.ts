@@ -48,8 +48,8 @@ describe('Comments', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to ""',
-        'Invalid value "undefined" supplied to ""',
+        'Invalid value "undefined" supplied to "({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)"',
+        'Invalid value "undefined" supplied to "({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -63,7 +63,7 @@ describe('Comments', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "some value" supplied to "comment"',
+        'Invalid value "["some value"]" supplied to "comment"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -164,7 +164,9 @@ describe('Comments', () => {
       const decoded = commentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to ""']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+      ]);
       expect(message.schema).toEqual({});
     });
 
@@ -174,8 +176,8 @@ describe('Comments', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to ""',
-        'Invalid value "1" supplied to ""',
+        'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -206,8 +208,8 @@ describe('Comments', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to ""',
-        'Invalid value "1" supplied to ""',
+        'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });

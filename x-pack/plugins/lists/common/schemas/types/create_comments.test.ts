@@ -35,7 +35,9 @@ describe('CreateComments', () => {
       const decoded = createComments.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to ""']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "{| comment: string |}"',
+      ]);
       expect(message.schema).toEqual({});
     });
 
@@ -48,7 +50,7 @@ describe('CreateComments', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "some value" supplied to "comment"',
+        'Invalid value "["some value"]" supplied to "comment"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -81,7 +83,9 @@ describe('CreateComments', () => {
       const decoded = createCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to ""']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "Array<{| comment: string |}>"',
+      ]);
       expect(message.schema).toEqual({});
     });
 
@@ -90,7 +94,9 @@ describe('CreateComments', () => {
       const decoded = createCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "1" supplied to ""']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "1" supplied to "Array<{| comment: string |}>"',
+      ]);
       expect(message.schema).toEqual({});
     });
   });
@@ -119,7 +125,9 @@ describe('CreateComments', () => {
       const decoded = createCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "1" supplied to ""']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "1" supplied to "Array<{| comment: string |}>"',
+      ]);
       expect(message.schema).toEqual({});
     });
   });

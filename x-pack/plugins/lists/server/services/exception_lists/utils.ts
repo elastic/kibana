@@ -300,7 +300,7 @@ export const transformUpdateCommentsToComments = ({
         existingComment != null &&
         !isCommentEqual(c, existingComment)
       ) {
-        return transformUpdateComments({ comment: c, user });
+        return transformUpdateComments({ comment: c, existingComment, user });
       } else {
         return transformCreateCommentsToComments({ comments: [c], user }) ?? [];
       }
@@ -310,12 +310,21 @@ export const transformUpdateCommentsToComments = ({
 
 export const transformUpdateComments = ({
   comment,
+  existingComment,
   user,
 }: {
   comment: Comments;
+  existingComment: Comments;
   user: string;
 }): Comments => {
-  if (comment.created_by === user) {
+  if (comment.created_by !== user) {
+    // existing comment is being edited, can only be edited by author
+    throw new ErrorWithStatusCode('Not authorized to edit others comments', 403);
+  } else if (existingComment.created_at !== comment.created_at) {
+    throw new ErrorWithStatusCode('Unable to update comment', 403);
+  } else if (comment.comment.trim().length === 0) {
+    throw new ErrorWithStatusCode('Empty comments not allowed', 403);
+  } else {
     const dateNow = new Date().toISOString();
 
     return {
@@ -323,9 +332,6 @@ export const transformUpdateComments = ({
       updated_at: dateNow,
       updated_by: user,
     };
-  } else {
-    // existing comment is being edited, can only be edited by author
-    throw new ErrorWithStatusCode("Not authorized to edit other's comments", 403);
   }
 };
 
@@ -339,11 +345,15 @@ export const transformCreateCommentsToComments = ({
   const dateNow = new Date().toISOString();
   if (comments != null) {
     return comments.map((c: CreateComments) => {
-      return {
-        comment: c.comment,
-        created_at: dateNow,
-        created_by: user,
-      };
+      if (c.comment.trim().length === 0) {
+        throw new ErrorWithStatusCode('Empty comments not allowed', 403);
+      } else {
+        return {
+          comment: c.comment,
+          created_at: dateNow,
+          created_by: user,
+        };
+      }
     });
   } else {
     return comments;

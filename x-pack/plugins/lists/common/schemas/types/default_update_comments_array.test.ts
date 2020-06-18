@@ -39,9 +39,9 @@ describe('default_update_comments_array', () => {
 
     // TODO: Known weird error formatting that is on our list to address
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "1" supplied to ""',
-      'Invalid value "1" supplied to ""',
-      'Invalid value "1" supplied to ""',
+      'Invalid value "1" supplied to "Array<(({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: string |})>"',
+      'Invalid value "1" supplied to "Array<(({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: string |})>"',
+      'Invalid value "1" supplied to "Array<(({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: string |})>"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -52,9 +52,9 @@ describe('default_update_comments_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "some string" supplied to ""',
-      'Invalid value "some string" supplied to ""',
-      'Invalid value "some string" supplied to ""',
+      'Invalid value "some string" supplied to "Array<(({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: string |})>"',
+      'Invalid value "some string" supplied to "Array<(({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: string |})>"',
+      'Invalid value "some string" supplied to "Array<(({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: string |})>"',
     ]);
     expect(message.schema).toEqual({});
   });

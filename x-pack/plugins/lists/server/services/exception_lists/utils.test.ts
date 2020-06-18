@@ -182,7 +182,7 @@ describe('utils', () => {
           ],
           user: 'bane',
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Not authorized to edit other's comments"`);
+      ).toThrowErrorMatchingInlineSnapshot(`"Not authorized to edit others comments"`);
     });
 
     test('it throws if user tries to update existing comment author', () => {
@@ -194,7 +194,7 @@ describe('utils', () => {
           ],
           user: 'bane',
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Not authorized to edit other's comments"`);
+      ).toThrowErrorMatchingInlineSnapshot(`"Not authorized to edit others comments"`);
     });
 
     test('it throws if user tries to update an existing comment that is not their own', () => {
@@ -212,7 +212,7 @@ describe('utils', () => {
           ],
           user: 'bane',
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Not authorized to edit other's comments"`);
+      ).toThrowErrorMatchingInlineSnapshot(`"Not authorized to edit others comments"`);
     });
 
     test('it throws if user tries to update order of comments', () => {
@@ -243,6 +243,21 @@ describe('utils', () => {
           user: 'lily',
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Only new comments may be added"`);
+    });
+
+    test('it throws if empty comment exists', () => {
+      expect(() =>
+        transformUpdateCommentsToComments({
+          comments: [
+            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+            { comment: '    ' },
+          ],
+          existingComments: [
+            { comment: 'Im an old comment', created_at: DATE_NOW, created_by: 'lily' },
+          ],
+          user: 'lily',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Empty comments not allowed"`);
     });
   });
 
@@ -275,6 +290,15 @@ describe('utils', () => {
         },
       ]);
     });
+
+    test('it throws an error if user tries to add an empty comment', () => {
+      expect(() =>
+        transformCreateCommentsToComments({
+          comments: [{ comment: '   ' }],
+          user: 'lily',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Empty comments not allowed"`);
+    });
   });
 
   describe('#transformUpdateComments', () => {
@@ -282,6 +306,11 @@ describe('utils', () => {
       const comments = transformUpdateComments({
         comment: {
           comment: 'Im an old comment that is trying to be updated',
+          created_at: DATE_NOW,
+          created_by: 'lily',
+        },
+        existingComment: {
+          comment: 'Im an old comment',
           created_at: DATE_NOW,
           created_by: 'lily',
         },
@@ -305,9 +334,32 @@ describe('utils', () => {
             created_at: DATE_NOW,
             created_by: 'lily',
           },
+          existingComment: {
+            comment: 'Im an old comment',
+            created_at: DATE_NOW,
+            created_by: 'lily',
+          },
           user: 'bane',
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Not authorized to edit other's comments"`);
+      ).toThrowErrorMatchingInlineSnapshot(`"Not authorized to edit others comments"`);
+    });
+
+    test('it throws if user tries to update an existing comments timestamp', () => {
+      expect(() =>
+        transformUpdateComments({
+          comment: {
+            comment: 'Im an old comment that is trying to be updated',
+            created_at: anchor,
+            created_by: 'lily',
+          },
+          existingComment: {
+            comment: 'Im an old comment',
+            created_at: DATE_NOW,
+            created_by: 'lily',
+          },
+          user: 'lily',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Unable to update comment"`);
     });
   });
 

@@ -38,7 +38,9 @@ describe('default_create_comments_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     // TODO: Known weird error formatting that is on our list to address
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "1" supplied to "Array<{| comment: string |}>"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -47,7 +49,9 @@ describe('default_create_comments_array', () => {
     const decoded = DefaultCreateCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "some string" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "some string" supplied to "Array<{| comment: string |}>"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
