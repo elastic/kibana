@@ -337,9 +337,6 @@ export const getSignalTimeTuples = ({
         // this is to keep our ratio of MAX_SIGNALS : rule intervals equivalent.
         const dateMathRuleParamsFrom = dateMath.parse(ruleParamsFrom);
         const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
-        logger.debug(
-          `calculatedFromAsMoment: ${calculatedFromAsMoment.toISOString()}, calculatedNowAsMoment: ${calculatedNowAsMoment.toISOString()}`
-        );
         const gapDiffInUnits = calculatedFromAsMoment.diff(dateMathRuleParamsFrom, momentUnit);
 
         // make an array that represents the number of intervals of (to, from) tuples

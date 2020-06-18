@@ -116,10 +116,6 @@ export const searchAfterAndBulkCreate = async ({
     previousStartedAt,
     interval,
   });
-
-  logger.debug(
-    `${JSON.stringify(totalToFromTuples, (_, value) => (value === 'undefined' ? null : value), 4)}`
-  );
   const useSortIds = totalToFromTuples.length <= 1;
   while (totalToFromTuples.length > 0) {
     const tuple = totalToFromTuples.pop();
