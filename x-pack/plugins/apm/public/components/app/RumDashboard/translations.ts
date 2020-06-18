@@ -71,3 +71,10 @@ export const ResetZoomLabel = i18n.translate(
     defaultMessage: 'Reset zoom',
   }
 );
+
+export const OverallLabel = i18n.translate(
+  'xpack.apm.rum.dashboard.overall.label',
+  {
+    defaultMessage: 'Overall',
+  }
+);

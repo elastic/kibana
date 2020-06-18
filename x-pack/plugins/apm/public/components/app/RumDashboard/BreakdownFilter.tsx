@@ -18,7 +18,7 @@ interface Props {
 export const BreakdownFilter = ({ fieldName, onBreakdownChange }: Props) => {
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['transactionUrl', 'location', 'device', 'os', 'browser'],
+      filterNames: ['location', 'device', 'os', 'browser'],
       projection: PROJECTION.RUM_OVERVIEW,
       params: { uiFilters: '{}' },
     };

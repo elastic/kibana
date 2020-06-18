@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { CurveType, LineSeries, ScaleType } from '@elastic/charts';
 import { usePageLoadBreakdowns } from './use_breakdowns';
 import { PercentileR } from './index';
@@ -13,18 +13,24 @@ interface Props {
   field: string;
   value: string;
   percentileRange: PercentileR;
+  onLoadingChange: (loading: boolean) => void;
 }
 
 export const BreakdownSeries: FC<Props> = ({
   field,
   value,
   percentileRange,
+  onLoadingChange,
 }) => {
-  const { data } = usePageLoadBreakdowns({
+  const { data, loading } = usePageLoadBreakdowns({
     field,
     value,
     percentileRange,
   });
+
+  useEffect(() => {
+    onLoadingChange(loading);
+  }, [loading, onLoadingChange]);
 
   return (
     <LineSeries

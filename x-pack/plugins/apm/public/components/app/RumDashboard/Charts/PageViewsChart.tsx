@@ -18,7 +18,7 @@ import {
 } from '@elastic/charts';
 import moment from 'moment';
 import { Position } from '@elastic/charts/dist/utils/commons';
-import { DateTimeLabel, PageViewsLabel } from '../translations';
+import { DateTimeLabel, OverallLabel, PageViewsLabel } from '../translations';
 import { formatBigValue } from '../ClientMetrics';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
@@ -27,14 +27,9 @@ import { ChartWrapper } from '../ChartWrapper';
 interface Props {
   data: any;
   loading: boolean;
-  breakdowns: Map<string, string[]>;
 }
 
-export const PageViewsChart: FC<Props> = ({
-  data,
-  loading,
-  breakdowns,
-}: Props) => {
+export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
   const formatter = timeFormatter(niceTimeFormatByDay(2));
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
@@ -64,7 +59,7 @@ export const PageViewsChart: FC<Props> = ({
 
   const customSeriesNaming: SeriesNameFn = ({ yAccessor }) => {
     if (yAccessor === 'y') {
-      return 'Overall';
+      return OverallLabel;
     }
 
     return yAccessor.toString().split?.('__')[1];
@@ -72,30 +67,32 @@ export const PageViewsChart: FC<Props> = ({
 
   return (
     <ChartWrapper loading={loading} height="200px">
-      <Chart>
-        <Settings showLegend onBrushEnd={onBrushEnd} />
-        <Axis
-          id="date_time"
-          position={Position.Bottom}
-          title={DateTimeLabel}
-          tickFormat={formatter}
-        />
-        <Axis
-          id="page_views"
-          title={PageViewsLabel}
-          position={Position.Left}
-          tickFormat={(d) => formatBigValue(Number(d))}
-        />
-        <BarSeries
-          id={PageViewsLabel}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={breakdownAccessors}
-          data={data ?? []}
-          name={customSeriesNaming}
-        />
-      </Chart>
+      {(!loading || data) && (
+        <Chart>
+          <Settings showLegend onBrushEnd={onBrushEnd} />
+          <Axis
+            id="date_time"
+            position={Position.Bottom}
+            title={DateTimeLabel}
+            tickFormat={formatter}
+          />
+          <Axis
+            id="page_views"
+            title={PageViewsLabel}
+            position={Position.Left}
+            tickFormat={(d) => formatBigValue(Number(d))}
+          />
+          <BarSeries
+            id={PageViewsLabel}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={breakdownAccessors}
+            data={data ?? []}
+            name={customSeriesNaming}
+          />
+        </Chart>
+      )}
     </ChartWrapper>
   );
 };
