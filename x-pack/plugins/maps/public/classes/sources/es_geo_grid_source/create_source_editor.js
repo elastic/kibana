@@ -8,13 +8,12 @@ import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { ES_GEO_FIELD_TYPES } from '../../../../common/constants';
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
-import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
+import { getIndexPatternService } from '../../../kibana_services';
+import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import {
   getFieldsWithGeoTileAgg,
   getGeoFields,
@@ -37,7 +36,6 @@ export class CreateSourceEditor extends Component {
     indexPatternId: '',
     geoField: '',
     requestType: this.props.requestType,
-    noGeoIndexPatternsExist: false,
   };
 
   componentWillUnmount() {
@@ -129,10 +127,6 @@ export class CreateSourceEditor extends Component {
     this.props.onSourceConfigChange(sourceConfig);
   };
 
-  _onNoIndexPatterns = () => {
-    this.setState({ noGeoIndexPatternsExist: true });
-  };
-
   _renderGeoSelect() {
     if (!this.state.indexPattern) {
       return null;
@@ -170,47 +164,13 @@ export class CreateSourceEditor extends Component {
     );
   }
 
-  _renderIndexPatternSelect() {
-    const IndexPatternSelect = getIndexPatternSelectComponent();
-
-    return (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternLabel', {
-          defaultMessage: 'Index pattern',
-        })}
-      >
-        <IndexPatternSelect
-          isDisabled={this.state.noGeoIndexPatternsExist}
-          indexPatternId={this.state.indexPatternId}
-          onChange={this.onIndexPatternSelect}
-          placeholder={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternPlaceholder', {
-            defaultMessage: 'Select index pattern',
-          })}
-          fieldTypes={ES_GEO_FIELD_TYPES}
-          onNoIndexPatterns={this._onNoIndexPatterns}
-        />
-      </EuiFormRow>
-    );
-  }
-
-  _renderNoIndexPatternWarning() {
-    if (!this.state.noGeoIndexPatternsExist) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <NoIndexPatternCallout />
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
-
   render() {
     return (
       <Fragment>
-        {this._renderNoIndexPatternWarning()}
-        {this._renderIndexPatternSelect()}
+        <GeoIndexPatternSelect
+          value={this.state.indexPatternId}
+          onChange={this.onIndexPatternSelect}
+        />
         {this._renderGeoSelect()}
         {this._renderRenderAsSelect()}
       </Fragment>

@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 
 import { getEmsTmsServices } from '../../../meta';
-import { getEmsUnavailableMessage } from '../ems_unavailable_message';
+import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
 
 export const AUTO_SELECT = 'auto_select';

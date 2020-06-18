@@ -10,10 +10,10 @@ import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
-import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
+import { getIndexPatternService } from '../../../kibana_services';
+import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { i18n } from '@kbn/i18n';
-import { ES_GEO_FIELD_TYPES, SCALING_TYPES } from '../../../../common/constants';
+import { SCALING_TYPES } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ScalingForm } from './scaling_form';
 import {
@@ -46,7 +46,6 @@ export class CreateSourceEditor extends Component {
 
   state = {
     isLoadingIndexPattern: false,
-    noGeoIndexPatternsExist: false,
     ...RESET_INDEX_PATTERN_STATE,
   };
 
@@ -168,10 +167,6 @@ export class CreateSourceEditor extends Component {
     this.props.onSourceConfigChange(sourceConfig);
   };
 
-  _onNoIndexPatterns = () => {
-    this.setState({ noGeoIndexPatternsExist: true });
-  };
-
   _renderGeoSelect() {
     if (!this.state.indexPattern) {
       return;
@@ -227,45 +222,13 @@ export class CreateSourceEditor extends Component {
     );
   }
 
-  _renderNoIndexPatternWarning() {
-    if (!this.state.noGeoIndexPatternsExist) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <NoIndexPatternCallout />
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
-
   render() {
-    const IndexPatternSelect = getIndexPatternSelectComponent();
-
     return (
       <Fragment>
-        {this._renderNoIndexPatternWarning()}
-
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.source.esSearch.indexPatternLabel', {
-            defaultMessage: 'Index pattern',
-          })}
-        >
-          <IndexPatternSelect
-            isDisabled={this.state.noGeoIndexPatternsExist}
-            indexPatternId={this.state.indexPatternId}
-            onChange={this._onIndexPatternSelect}
-            placeholder={i18n.translate(
-              'xpack.maps.source.esSearch.selectIndexPatternPlaceholder',
-              {
-                defaultMessage: 'Select index pattern',
-              }
-            )}
-            fieldTypes={ES_GEO_FIELD_TYPES}
-            onNoIndexPatterns={this._onNoIndexPatterns}
-          />
-        </EuiFormRow>
+        <GeoIndexPatternSelect
+          value={this.state.indexPatternId}
+          onChange={this._onIndexPatternSelect}
+        />
 
         {this._renderGeoSelect()}
 
