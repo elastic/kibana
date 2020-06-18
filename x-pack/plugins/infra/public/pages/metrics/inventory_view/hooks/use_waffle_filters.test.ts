@@ -8,6 +8,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useWaffleFilters, WaffleFiltersState } from './use_waffle_filters';
 
+// Mock useUrlState hook
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     location: '',
