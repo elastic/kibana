@@ -33,7 +33,9 @@ describe('default_boolean_true', () => {
     const decoded = DefaultBooleanTrue.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "DefaultBooleanTrue"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
