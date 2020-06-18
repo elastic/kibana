@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ConfigBlockSchema } from './domain_types';
 
-export const supportedConfigLabelsMap = new Map<string, string>([
+const supportedConfigLabelsMap = new Map<string, string>([
   [
     'filebeatInputConfig.paths.ui.label',
     i18n.translate('xpack.beatsManagement.filebeatInputConfig.pathsLabel', {

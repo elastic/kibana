@@ -41,6 +41,7 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
+  SavedObjectsFindResult,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsBulkUpdateObject,
@@ -674,8 +675,11 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map((hit: SavedObjectsRawDoc) =>
-        this._rawToSavedObject(hit)
+      saved_objects: response.hits.hits.map(
+        (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
+          ...this._rawToSavedObject(hit),
+          score: (hit as any)._score,
+        })
       ),
     };
   }
