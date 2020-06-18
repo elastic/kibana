@@ -36,6 +36,9 @@ import {
   AggConfigs,
   getCalculateAutoTimeExpression,
 } from './aggs';
+import { 
+  z
+ } from '../field_formats';
 import { ISearchGeneric } from './types';
 
 interface SearchServiceSetupDependencies {

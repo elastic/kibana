@@ -24,7 +24,6 @@ import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
 import { ISearchOptions } from './types';
 import { getLongQueryNotification } from './long_query_notification';
-import { TStrategyTypes } from './strategy_types';
 
 const LONG_QUERY_NOTIFICATION_DELAY = 10000;
 
