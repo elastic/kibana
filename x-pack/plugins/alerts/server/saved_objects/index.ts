@@ -12,6 +12,13 @@ export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
+  savedObjects.registerType({
+    name: 'alert',
+    hidden: true,
+    namespaceType: 'single',
+    mappings: mappings.alert,
+  });
+
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: 'alert',
@@ -22,12 +29,5 @@ export function setupSavedObjects(
       'mutedInstanceIds',
       'updatedBy',
     ]),
-  });
-
-  savedObjects.registerType({
-    name: 'alert',
-    hidden: true,
-    namespaceType: 'single',
-    mappings: mappings.alert,
   });
 }
