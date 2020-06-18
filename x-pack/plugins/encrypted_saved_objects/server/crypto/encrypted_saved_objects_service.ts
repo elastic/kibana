@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import nodeCrypto, { Crypto } from '@elastic/node-crypto';
+import { Crypto } from '@elastic/node-crypto';
 import typeDetect from 'type-detect';
 import { Logger } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
@@ -70,8 +70,6 @@ export function descriptorToArray(descriptor: SavedObjectDescriptor) {
  * attributes.
  */
 export class EncryptedSavedObjectsService {
-  private readonly crypto: Readonly<Crypto>;
-
   /**
    * Map of all registered saved object types where the `key` is saved object type and the `value`
    * is the definition (names of attributes that need to be encrypted etc.).
@@ -82,17 +80,15 @@ export class EncryptedSavedObjectsService {
   > = new Map();
 
   /**
-   * @param encryptionKey The key used to encrypt and decrypt saved objects attributes.
+   * @param Crypto nodeCrypto instance.
    * @param logger Ordinary logger instance.
    * @param audit Audit logger instance.
    */
   constructor(
-    encryptionKey: string,
+    private readonly crypto: Readonly<Crypto>,
     private readonly logger: Logger,
     private readonly audit: EncryptedSavedObjectsAuditLogger
-  ) {
-    this.crypto = nodeCrypto({ encryptionKey });
-  }
+  ) {}
 
   /**
    * Registers saved object type as the one that contains attributes that should be encrypted.

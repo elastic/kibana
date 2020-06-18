@@ -9,6 +9,7 @@ import {
   CoreSetup,
   PluginInitializer,
   SavedObjectsNamespaceType,
+  SavedObjectUnsanitizedDoc,
 } from '../../../../../../src/core/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -82,7 +83,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
       mappings: deepFreeze({ properties: { publicProperty: { type: 'keyword' } } }),
     });
 
-    this.defineTypeWithMigration(core, deps);
+    defineTypeWithMigration(core, deps);
 
     const router = core.http.createRouter();
     router.get(
@@ -91,7 +92,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
         validate: { params: (value) => ({ value }) },
       },
       async (context, request, response) => {
-        const [{ savedObjects }, { encryptedSavedObjects }] = await core.getStartServices();
+        const [, { encryptedSavedObjects }] = await core.getStartServices();
         const spaceId = deps.spaces.spacesService.getSpaceId(request);
         const namespace = deps.spaces.spacesService.spaceIdToNamespace(spaceId);
 
@@ -115,84 +116,86 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
   },
   start() {},
   stop() {},
+});
 
-  defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSetup) {
-    const type = {
-      type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
-      attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
-    };
+function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSetup) {
+  const type = {
+    type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
+    attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
+  };
 
-    const typePriorTo790 = {
-      type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
-      attributesToEncrypt: new Set(['encryptedAttribute']),
-    };
+  const typePriorTo790 = {
+    type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
+    attributesToEncrypt: new Set(['encryptedAttribute']),
+  };
 
-    // current type is registered
-    deps.encryptedSavedObjects.registerType(type);
+  // current type is registered
+  deps.encryptedSavedObjects.registerType(type);
 
-    core.savedObjects.registerType({
-      name: SAVED_OBJECT_WITH_MIGRATION_TYPE,
-      mappings: {
-        properties: {
-          nonEncryptedAttribute: {
-            type: 'keyword',
-          },
-          encryptedAttribute: {
-            type: 'binary',
-          },
-          additionalEncryptedAttribute: {
-            type: 'keyword',
-          },
+  core.savedObjects.registerType({
+    name: SAVED_OBJECT_WITH_MIGRATION_TYPE,
+    hidden: false,
+    namespaceType: 'single',
+    mappings: {
+      properties: {
+        nonEncryptedAttribute: {
+          type: 'keyword',
+        },
+        encryptedAttribute: {
+          type: 'binary',
+        },
+        additionalEncryptedAttribute: {
+          type: 'keyword',
         },
       },
-      migrations: {
-        // in this version we migrated a non encrypted field and type didnt change
-        '7.8.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedTypePre790>(
-          function shouldbeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
-            return true;
-          },
-          (
-            doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
-          ): SavedObjectUnsanitizedDoc<MigratedTypePre790> => {
-            const {
-              attributes: { nonEncryptedAttribute },
-            } = doc;
-            return {
-              ...doc,
-              attributes: {
-                ...doc.attributes,
-                nonEncryptedAttribute: `${nonEncryptedAttribute}-migrated`,
-              },
-            };
-          },
-          // type hasn't changed as the field we're updating is not an encrypted one
-          typePriorTo790
-        ),
-        // in this version we encrypted an existing non encrypted field
-        '7.9.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedType>(
-          function shouldbeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
-            return true;
-          },
-          (
-            doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
-          ): SavedObjectUnsanitizedDoc<MigratedType> => {
-            const {
-              attributes: { nonEncryptedAttribute },
-            } = doc;
-            return {
-              ...doc,
-              attributes: {
-                ...doc.attributes,
-                nonEncryptedAttribute,
-                // clone and modify the non encrypted field
-                additionalEncryptedAttribute: `${nonEncryptedAttribute}-encrypted`,
-              },
-            };
-          },
-          typePriorTo790,
-          type
-        ),
-      },
-    });
-  },
-});
+    },
+    migrations: {
+      // in this version we migrated a non encrypted field and type didnt change
+      '7.8.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedTypePre790>(
+        function shouldbeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+          return true;
+        },
+        (
+          doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
+        ): SavedObjectUnsanitizedDoc<MigratedTypePre790> => {
+          const {
+            attributes: { nonEncryptedAttribute },
+          } = doc;
+          return {
+            ...doc,
+            attributes: {
+              ...doc.attributes,
+              nonEncryptedAttribute: `${nonEncryptedAttribute}-migrated`,
+            },
+          };
+        },
+        // type hasn't changed as the field we're updating is not an encrypted one
+        typePriorTo790
+      ),
+      // in this version we encrypted an existing non encrypted field
+      '7.9.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedType>(
+        function shouldbeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+          return true;
+        },
+        (
+          doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
+        ): SavedObjectUnsanitizedDoc<MigratedType> => {
+          const {
+            attributes: { nonEncryptedAttribute },
+          } = doc;
+          return {
+            ...doc,
+            attributes: {
+              ...doc.attributes,
+              nonEncryptedAttribute,
+              // clone and modify the non encrypted field
+              additionalEncryptedAttribute: `${nonEncryptedAttribute}-encrypted`,
+            },
+          };
+        },
+        typePriorTo790,
+        type
+      ),
+    },
+  });
+}

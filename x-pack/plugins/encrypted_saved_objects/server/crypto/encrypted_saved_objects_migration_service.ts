@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import nodeCrypto, { Crypto } from '@elastic/node-crypto';
+import { Crypto } from '@elastic/node-crypto';
 import typeDetect from 'type-detect';
 import { Logger } from 'src/core/server';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
@@ -14,20 +14,17 @@ import { getAAD } from './get_aad';
 
 /**
  * Represents the service that handles the migration of encrypted saved objects. The service
- * performs encryption based on registered saved object types that are known to contain such
- * attributes and on types provided by the migration.
+ * performs encryption and decryption based on a pair of saved object definitions for a type,
+ * the first representing the pre-migration definition and the second based on the post-migration
+ * definition
  */
 export class EncryptedSavedObjectsMigrationService {
-  private readonly crypto: Readonly<Crypto>;
-
   /**
-   * @param encryptionKey The key used to encrypt and decrypt saved objects attributes.
+   * @param Crypto nodeCrypto instance.
    * @param logger Ordinary logger instance.
    * @param service Encrypted Saved Objects Service instance.
    */
-  constructor(encryptionKey: string, private readonly logger: Logger) {
-    this.crypto = nodeCrypto({ encryptionKey });
-  }
+  constructor(private readonly crypto: Readonly<Crypto>, private readonly logger: Logger) {}
 
   /**
    * Takes saved object attributes for the specified type and encrypts all of them that are supposed
@@ -100,7 +97,6 @@ export class EncryptedSavedObjectsMigrationService {
       }
 
       if (typeof attributeValue !== 'string') {
-        // this.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
         throw new Error(
           `Encrypted "${attributeName}" attribute should be a string, but found ${typeDetect(
             attributeValue
@@ -115,7 +111,6 @@ export class EncryptedSavedObjectsMigrationService {
         ) as string;
       } catch (err) {
         this.logger.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
-        // this.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
 
         throw new EncryptionError(
           `Unable to decrypt attribute "${attributeName}"`,
@@ -142,8 +137,6 @@ export class EncryptedSavedObjectsMigrationService {
     if (decryptedAttributesKeys.length === 0) {
       return attributes;
     }
-
-    // this.audit.decryptAttributesSuccess(decryptedAttributesKeys, descriptor, params?.user);
 
     return {
       ...attributes,

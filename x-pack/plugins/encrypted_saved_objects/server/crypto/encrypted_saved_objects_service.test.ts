@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import nodeCrypto, { Crypto } from '@elastic/node-crypto';
+
 import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
-
-jest.mock('@elastic/node-crypto', () => jest.fn());
-
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';
@@ -16,31 +15,44 @@ import { loggingServiceMock } from 'src/core/server/mocks';
 import { encryptedSavedObjectsAuditLoggerMock } from '../audit/index.mock';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 
+const crypto = nodeCrypto({ encryptionKey: 'encryption-key-abc' });
+
+const mockNodeCrypto: jest.Mocked<Crypto> = {
+  encrypt: jest.fn(),
+  decrypt: jest.fn(),
+  encryptSync: jest.fn(),
+  decryptSync: jest.fn(),
+};
+
+beforeEach(() => {
+  service = new EncryptedSavedObjectsService(
+    mockNodeCrypto,
+    loggingServiceMock.create().get(),
+    mockAuditLogger
+  );
+
+  // Call actual `@elastic/node-crypto` by default, but allow to override implementation in tests.
+  mockNodeCrypto.encrypt.mockImplementation(async (input: any, aad?: string) =>
+    crypto.encrypt(input, aad)
+  );
+  mockNodeCrypto.decrypt.mockImplementation(
+    async (encryptedOutput: string | Buffer, aad?: string) => crypto.decrypt(encryptedOutput, aad)
+  );
+});
+
 let service: EncryptedSavedObjectsService;
 let mockAuditLogger: jest.Mocked<EncryptedSavedObjectsAuditLogger>;
 beforeEach(() => {
   mockAuditLogger = encryptedSavedObjectsAuditLoggerMock.create();
 
-  // Call actual `@elastic/node-crypto` by default, but allow to override implementation in tests.
-  jest.requireMock('@elastic/node-crypto').mockImplementation((...args: any[]) => {
-    const { default: nodeCrypto } = jest.requireActual('@elastic/node-crypto');
-    return nodeCrypto(...args);
-  });
-
   service = new EncryptedSavedObjectsService(
-    'encryption-key-abc',
+    mockNodeCrypto,
     loggingServiceMock.create().get(),
     mockAuditLogger
   );
 });
 
 afterEach(() => jest.resetAllMocks());
-
-it('correctly initializes crypto', () => {
-  const mockNodeCrypto = jest.requireMock('@elastic/node-crypto');
-  expect(mockNodeCrypto).toHaveBeenCalledTimes(1);
-  expect(mockNodeCrypto).toHaveBeenCalledWith({ encryptionKey: 'encryption-key-abc' });
-});
 
 describe('#registerType', () => {
   it('throws if `attributesToEncrypt` is empty', () => {
@@ -230,15 +242,13 @@ describe('#stripOrDecryptAttributes', () => {
 });
 
 describe('#encryptAttributes', () => {
-  let mockEncrypt: jest.Mock;
   beforeEach(() => {
-    mockEncrypt = jest
-      .fn()
-      .mockImplementation(async (valueToEncrypt, aad) => `|${valueToEncrypt}|${aad}|`);
-    jest.requireMock('@elastic/node-crypto').mockReturnValue({ encrypt: mockEncrypt });
+    mockNodeCrypto.encrypt.mockImplementation(
+      async (valueToEncrypt, aad) => `|${valueToEncrypt}|${aad}|`
+    );
 
     service = new EncryptedSavedObjectsService(
-      'encryption-key-abc',
+      mockNodeCrypto,
       loggingServiceMock.create().get(),
       mockAuditLogger
     );
@@ -416,7 +426,7 @@ describe('#encryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
-    mockEncrypt
+    mockNodeCrypto.encrypt
       .mockResolvedValueOnce('Successfully encrypted attrOne')
       .mockRejectedValueOnce(new Error('Something went wrong with attrThree...'));
 
@@ -932,7 +942,7 @@ describe('#decryptAttributes', () => {
 
     it('fails if encrypted with another encryption key', async () => {
       service = new EncryptedSavedObjectsService(
-        'encryption-key-abc*',
+        nodeCrypto({ encryptionKey: 'encryption-key-abc*' }),
         loggingServiceMock.create().get(),
         mockAuditLogger
       );

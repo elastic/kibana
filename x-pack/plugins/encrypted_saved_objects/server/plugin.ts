@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import nodeCrypto from '@elastic/node-crypto';
 import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { first } from 'rxjs/operators';
 import { SecurityPluginSetup } from '../../security/server';
@@ -48,13 +49,16 @@ export class Plugin {
     core: CoreSetup,
     deps: PluginsSetup
   ): Promise<EncryptedSavedObjectsPluginSetup> {
-    const { config, usingEphemeralEncryptionKey } = await createConfig$(this.initializerContext)
-      .pipe(first())
-      .toPromise();
+    const {
+      config: { encryptionKey },
+      usingEphemeralEncryptionKey,
+    } = await createConfig$(this.initializerContext).pipe(first()).toPromise();
+
+    const crypto = nodeCrypto({ encryptionKey });
 
     const service = Object.freeze(
       new EncryptedSavedObjectsService(
-        config.encryptionKey,
+        crypto,
         this.logger,
         new EncryptedSavedObjectsAuditLogger(
           deps.security?.audit.getLogger('encryptedSavedObjects')
@@ -74,7 +78,7 @@ export class Plugin {
         service.registerType(typeRegistration),
       usingEphemeralEncryptionKey,
       createMigration: getCreateMigration(
-        new EncryptedSavedObjectsMigrationService(config.encryptionKey, this.logger)
+        new EncryptedSavedObjectsMigrationService(crypto, this.logger)
       ),
     };
   }
