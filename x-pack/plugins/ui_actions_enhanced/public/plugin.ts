@@ -99,7 +99,7 @@ export class AdvancedUiActionsPublicPlugin
       ...this.enhancements,
       FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
         actionFactories: this.enhancements.getActionFactories(),
-        storage: new Storage(localStorage),
+        storage: new Storage(window?.localStorage),
         toastService: core.notifications.toasts,
         docsLink: core.docLinks.links.dashboard.drilldowns,
       }),
