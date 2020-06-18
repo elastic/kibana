@@ -956,6 +956,7 @@ export interface HttpServerInfo {
 
 // @public
 export interface HttpServiceSetup {
+    // @deprecated
     auth: HttpAuth;
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;

@@ -204,6 +204,8 @@ export interface HttpServiceSetup {
   /**
    * Auth status.
    * See {@link HttpAuth}
+   *
+   * @deprecated use {@link HttpServiceStart.auth | the start contract} instead.
    */
   auth: HttpAuth;
 
