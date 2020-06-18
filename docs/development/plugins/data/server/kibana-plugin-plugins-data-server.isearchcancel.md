@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type ISearchCancel<T extends TStrategyTypes> = (id: string) => Promise<void>;
+export declare type ISearchCancel<T extends TStrategyTypes> = (context: RequestHandlerContext, id: string) => Promise<void>;
 ```

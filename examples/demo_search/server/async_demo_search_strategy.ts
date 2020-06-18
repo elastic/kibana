@@ -17,30 +17,32 @@
  * under the License.
  */
 
-import { TSearchStrategyProvider } from '../../../src/plugins/data/server';
-import { ASYNC_DEMO_SEARCH_STRATEGY } from '../common';
+import { ISearchStrategy } from '../../../src/plugins/data/server';
+import { ASYNC_DEMO_SEARCH_STRATEGY, IAsyncDemoRequest } from '../common';
 
-function getFibonacciSequence(n = 0) {
-  const beginning = [0, 1].slice(0, n);
-  return Array(Math.max(0, n))
-    .fill(null)
-    .reduce((sequence, value, i) => {
-      if (i < 2) return sequence;
-      return [...sequence, sequence[i - 1] + sequence[i - 2]];
-    }, beginning);
-}
+export const asyncDemoSearchStrategyProvider = (): ISearchStrategy<
+  typeof ASYNC_DEMO_SEARCH_STRATEGY
+> => {
+  function getFibonacciSequence(n = 0) {
+    const beginning = [0, 1].slice(0, n);
+    return Array(Math.max(0, n))
+      .fill(null)
+      .reduce((sequence, value, i) => {
+        if (i < 2) return sequence;
+        return [...sequence, sequence[i - 1] + sequence[i - 2]];
+      }, beginning);
+  }
 
-const generateId = (() => {
-  let id = 0;
-  return () => `${id++}`;
-})();
+  const generateId = (() => {
+    let id = 0;
+    return () => `${id++}`;
+  })();
 
-const loadedMap = new Map<string, number>();
-const totalMap = new Map<string, number>();
+  const loadedMap = new Map<string, number>();
+  const totalMap = new Map<string, number>();
 
-export const asyncDemoSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_DEMO_SEARCH_STRATEGY> = () => {
   return {
-    search: async (request) => {
+    search: async (context, request: IAsyncDemoRequest) => {
       const id = request.id ?? generateId();
 
       const loaded = (loadedMap.get(id) ?? 0) + 1;
@@ -52,7 +54,7 @@ export const asyncDemoSearchStrategyProvider: TSearchStrategyProvider<typeof ASY
       const fibonacciSequence = getFibonacciSequence(loaded);
       return { id, total, loaded, fibonacciSequence };
     },
-    cancel: async (id) => {
+    cancel: async (context, id) => {
       loadedMap.delete(id);
       totalMap.delete(id);
     },

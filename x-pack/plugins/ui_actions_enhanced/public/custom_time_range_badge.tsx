@@ -82,7 +82,10 @@ export class CustomTimeRangeBadge implements ActionByType<typeof CUSTOM_TIME_RAN
           embeddable={embeddable}
           dateFormat={this.dateFormat}
           commonlyUsedRanges={this.commonlyUsedRanges}
-        />
+        />,
+        {
+          'data-test-subj': 'customizeTimeRangeModal',
+        }
       );
     }
   }
