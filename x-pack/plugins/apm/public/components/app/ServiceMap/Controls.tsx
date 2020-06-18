@@ -56,30 +56,9 @@ function doZoom(cy: cytoscape.Core | undefined, increment: number) {
   }
 }
 
-export function Controls() {
-  const cy = useContext(CytoscapeContext);
-  const { urlParams } = useUrlParams();
-  const currentSearch = urlParams.kuery ?? '';
-  const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
+function useDebugDownloadUrl(cy?: cytoscape.Core) {
   const [downloadUrl, setDownloadUrl] = useState<string | undefined>(undefined);
   const debug = sessionStorage.getItem('apm_debug') === 'true';
-
-  // Handle zoom events
-  useEffect(() => {
-    const zoomHandler: cytoscape.EventHandler = (event) => {
-      setZoom(event.cy.zoom());
-    };
-
-    if (cy) {
-      cy.on('zoom', zoomHandler);
-    }
-
-    return () => {
-      if (cy) {
-        cy.off('zoom', undefined, zoomHandler);
-      }
-    };
-  }, [cy]);
 
   // Handle elements changes to update the download URL
   useEffect(() => {
@@ -109,6 +88,33 @@ export function Controls() {
       }
     };
   }, [cy, debug]);
+
+  return downloadUrl;
+}
+
+export function Controls() {
+  const cy = useContext(CytoscapeContext);
+  const { urlParams } = useUrlParams();
+  const currentSearch = urlParams.kuery ?? '';
+  const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
+  const downloadUrl = useDebugDownloadUrl(cy);
+
+  // Handle zoom events
+  useEffect(() => {
+    const zoomHandler: cytoscape.EventHandler = (event) => {
+      setZoom(event.cy.zoom());
+    };
+
+    if (cy) {
+      cy.on('zoom', zoomHandler);
+    }
+
+    return () => {
+      if (cy) {
+        cy.off('zoom', undefined, zoomHandler);
+      }
+    };
+  }, [cy]);
 
   function center() {
     if (cy) {
