@@ -6,7 +6,10 @@
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
 import { handleDatasourceCreate } from './ingest_integration';
 
-type EndpointAppContextServiceStartProps = Pick<IngestManagerStartContract, 'agentService'> & {
+export type EndpointAppContextServiceStartContract = Pick<
+  IngestManagerStartContract,
+  'agentService'
+> & {
   registerIngestCallback: IngestManagerStartContract['registerExternalCallback'];
 };
 
@@ -17,7 +20,7 @@ type EndpointAppContextServiceStartProps = Pick<IngestManagerStartContract, 'age
 export class EndpointAppContextService {
   private agentService: AgentService | undefined;
 
-  public start(dependencies: EndpointAppContextServiceStartProps) {
+  public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
     dependencies.registerIngestCallback('datasourceCreate', handleDatasourceCreate);
   }

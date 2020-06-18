@@ -27,7 +27,10 @@ import {
 } from '../../../../common/endpoint/types';
 import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './index';
-import { createMockAgentService, createRouteHandlerContext } from '../../mocks';
+import {
+  createMockEndpointAppContextServiceStartContract,
+  createRouteHandlerContext,
+} from '../../mocks';
 import { AgentService } from '../../../../../ingest_manager/server';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -56,11 +59,8 @@ describe('test endpoint route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
-    mockAgentService = createMockAgentService();
     endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.start({
-      agentService: mockAgentService,
-    });
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
     registerEndpointRoutes(routerMock, {
       logFactory: loggingServiceMock.create(),

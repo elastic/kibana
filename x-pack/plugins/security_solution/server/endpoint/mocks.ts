@@ -9,9 +9,25 @@ import { xpackMocks } from '../../../../mocks';
 import {
   AgentService,
   IngestManagerStartContract,
-  ExternalCallbacks,
+  ExternalCallback,
   DatasourceServiceInterface,
 } from '../../../ingest_manager/server';
+import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
+
+/**
+ * Crates a mocked input contract for the `EndpointAppContextService#start()` method
+ */
+export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
+  EndpointAppContextServiceStartContract
+> => {
+  return {
+    agentService: createMockAgentService(),
+    registerIngestCallback: jest.fn<
+      ReturnType<IngestManagerStartContract['registerExternalCallback']>,
+      Parameters<IngestManagerStartContract['registerExternalCallback']>
+    >(),
+  };
+};
 
 /**
  * Creates a mock AgentService
@@ -51,7 +67,7 @@ export const createMockIngestManagerStartContract = (
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
     agentService: createMockAgentService(),
-    register: jest.fn((...args: ExternalCallbacks) => {}),
+    registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     datasourceService: createMockDatasourceService(),
   };
 };
