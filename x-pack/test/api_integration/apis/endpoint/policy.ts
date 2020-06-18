@@ -11,13 +11,9 @@ import { deletePolicyStream } from './data_stream_helper';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const ingestManager = getService('ingestManager');
   describe('Endpoint policy api', () => {
     describe('GET /api/endpoint/policy_response', () => {
-      before(async () => {
-        await ingestManager.setup();
-        await esArchiver.load('endpoint/policy', { useCreate: true });
-      });
+      before(async () => await esArchiver.load('endpoint/policy', { useCreate: true }));
 
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
@@ -31,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(body.policy_response.host.id).to.eql(expectedHostId);
-        expect(body.policy_response.endpoint.policy).to.not.be(undefined);
+        expect(body.policy_response.Endpoint.policy).to.not.be(undefined);
       });
 
       it('should return not found if host has no policy response', async () => {
