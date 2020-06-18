@@ -18,7 +18,7 @@ export const choroplethLayerWizardConfig: LayerWizard = {
   }),
   icon: 'logoElasticsearch',
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
-    return <div />;
+    return <LayerTemplate {...renderWizardArguments} />;
   },
   title: i18n.translate('xpack.maps.choropleth.title', {
     defaultMessage: 'Choropleth',
