@@ -88,7 +88,7 @@ export class IngestManagerPlugin
             isInitialized ? Promise.resolve(true) : Promise.reject(new Error('Unknown setup error'))
           );
       } else {
-throw new Error(permissionsResponse?.error || 'Unknown permissions error');
+        throw new Error(permissionsResponse?.error || 'Unknown permissions error');
       }
     } catch (error) {
       successPromise = Promise.reject(error);
