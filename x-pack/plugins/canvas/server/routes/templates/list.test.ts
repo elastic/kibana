@@ -69,11 +69,9 @@ describe('Find workpad', () => {
       Object {
         "templates": Array [
           Object {
-            "id": 1,
             "name": "template1",
           },
           Object {
-            "id": 2,
             "name": "template2",
           },
         ],

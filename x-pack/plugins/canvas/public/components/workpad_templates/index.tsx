@@ -13,6 +13,7 @@ import { WorkpadTemplates as Component } from './workpad_templates';
 import { CanvasTemplate } from '../../../types';
 import { UseKibanaProps } from '../../';
 import { list } from '../../lib/template_service';
+import { applyTemplateStrings } from '../../../i18n/templates/apply_strings';
 
 interface WorkpadTemplatesProps {
   onClose: () => void;
@@ -27,7 +28,7 @@ export const WorkpadTemplates: React.FunctionComponent<WorkpadTemplatesProps> = 
     if (!templates) {
       (async () => {
         const fetchedTemplates = await list();
-        setTemplates(fetchedTemplates);
+        setTemplates(applyTemplateStrings(fetchedTemplates));
       })();
     }
   }, [templates]);

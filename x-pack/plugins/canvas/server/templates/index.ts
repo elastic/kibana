@@ -5,11 +5,11 @@
  */
 
 import { SavedObjectsRepository } from 'src/core/server';
-import pitch from './pitch_presentation.json';
-import status from './status_report.json';
-import summary from './summary_report.json';
-import dark from './theme_dark.json';
-import light from './theme_light.json';
+import { pitch } from './pitch_presentation';
+import { status } from './status_report';
+import { summary } from './summary_report';
+import { dark } from './theme_dark';
+import { light } from './theme_light';
 
 import { TEMPLATE_TYPE } from '../../common/lib/constants';
 

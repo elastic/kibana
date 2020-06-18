@@ -16,9 +16,9 @@ export interface CanvasAsset {
 export interface CanvasElement {
   id: string;
   position: ElementPosition;
-  type: 'element';
+  type?: 'element';
   expression: string;
-  filter: string;
+  filter?: string;
 }
 
 export interface CanvasGroup {
@@ -58,6 +58,7 @@ export interface CanvasTemplate {
   help: string;
   tags: string[];
   template_key: string;
+  template?: Omit<CanvasWorkpad, 'id' | 'isWriteable'>;
 }
 
 export interface CanvasWorkpadBoundingBox {
