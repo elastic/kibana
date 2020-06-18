@@ -49,7 +49,9 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const selected = processor.id === movingProcessor?.id;
     const isBeingEdited =
       editor.mode.id === 'editingProcessor' && processor.id === editor.mode.arg.processor.id;
-    const isDimmed = editor.mode.id === 'editingProcessor' && !isBeingEdited;
+    const isDimmed =
+      (editor.mode.id === 'editingProcessor' && !isBeingEdited) ||
+      (editor.mode.id === 'movingProcessor' && !selected);
 
     const panelClasses = classNames({
       'pipelineProcessorsEditor__item--selected': selected || isBeingEdited,
