@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+import { DataPublicPluginSetup, DataPublicPluginStart, Filter } from '../../data/public';
 import { getSavedObjectFinder } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
@@ -30,14 +31,19 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   EmbeddablePanel,
+  ChartActionContext,
+  isRangeSelectTriggerContext,
+  isValueClickTriggerContext,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 
 export interface EmbeddableSetupDependencies {
+  data: DataPublicPluginSetup;
   uiActions: UiActionsSetup;
 }
 
 export interface EmbeddableStartDependencies {
+  data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   inspector: InspectorStart;
 }
@@ -64,6 +70,7 @@ export interface EmbeddableStart {
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   EmbeddablePanel: React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
+  filtersFromContext: (context: ChartActionContext) => Promise<Filter[]>;
 }
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -95,7 +102,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(
     core: CoreStart,
-    { uiActions, inspector }: EmbeddableStartDependencies
+    { data, uiActions, inspector }: EmbeddableStartDependencies
   ): EmbeddableStart {
     this.embeddableFactoryDefinitions.forEach((def) => {
       this.embeddableFactories.set(
@@ -130,6 +137,21 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
         />
       ),
+
+      filtersFromContext: async (context) => {
+        try {
+          if (isRangeSelectTriggerContext(context))
+            return await data.actions.createFiltersFromRangeSelectAction(context.data);
+          if (isValueClickTriggerContext(context))
+            return await data.actions.createFiltersFromValueClickAction(context.data);
+          // eslint-disable-next-line no-console
+          console.warn("Can't extract filters from action.", context);
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.warn('Error extracting filters from action. Returning empty filter list.', error);
+        }
+        return [];
+      },
     };
   }
 
