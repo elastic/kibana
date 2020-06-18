@@ -4,26 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { FC, useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
-import React from 'react';
 import { PalettePicker } from '../palette_picker';
 
-import { paulTor14 } from '../../../../common/lib/palettes';
+import { paulTor14, ColorPalette } from '../../../../common/lib/palettes';
+
+const Interactive: FC = () => {
+  const [palette, setPalette] = useState<ColorPalette | null>(paulTor14);
+  return <PalettePicker palette={palette} onChange={setPalette} clearable={true} />;
+};
 
 storiesOf('components/Color/PalettePicker', module)
-  .add('default', () => (
-    <div className="canvasContainerWrapper" style={{ width: '200px' }}>
-      <PalettePicker palette={paulTor14} ariaLabel="palette picker" onChange={action('onChange')} />
-    </div>
-  ))
+  .addDecorator((fn) => <div style={{ width: '350px' }}>{fn()}</div>)
+  .add('default', () => <PalettePicker palette={paulTor14} onChange={action('onChange')} />)
   .add('clearable', () => (
-    <div className="canvasContainerWrapper" style={{ width: '200px' }}>
-      <PalettePicker
-        palette={null}
-        ariaLabel="palette picker"
-        onChange={action('onChange')}
-        clearable={true}
-      />
-    </div>
-  ));
+    <PalettePicker palette={null} onChange={action('onChange')} clearable={true} />
+  ))
+  .add('interactive', () => <Interactive />);

@@ -15,10 +15,10 @@ const { Palettes: strings } = LibStrings;
 export type PaletteID = typeof palettes[number]['id'];
 
 /**
- * An interface representing a font in Canvas, with a textual label and the CSS
- * `font-value`.
+ * An interface representing a color palette in Canvas, with a textual label and a set of
+ * hex values.
  */
-export interface Palette {
+export interface ColorPalette {
   id: PaletteID;
   label: string;
   colors: string[];
@@ -43,8 +43,8 @@ function createPalette<
  * palette doesn't match.
  */
 export const identifyPalette = (
-  input: Pick<Palette, 'colors' | 'gradient'>
-): Palette | undefined => {
+  input: Pick<ColorPalette, 'colors' | 'gradient'>
+): ColorPalette | undefined => {
   return palettes.find((palette) => {
     const { colors, gradient } = palette;
     return gradient === input.gradient && isEqual(colors, input.colors);

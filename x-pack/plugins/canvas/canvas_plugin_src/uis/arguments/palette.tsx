@@ -12,7 +12,7 @@ import { ExpressionAstFunction, ExpressionAstExpression } from 'src/plugins/expr
 import { PalettePicker } from '../../../public/components/palette_picker';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
-import { identifyPalette, Palette } from '../../../common/lib';
+import { identifyPalette, ColorPalette } from '../../../common/lib';
 
 const { Palette: strings } = ArgumentStrings;
 
@@ -25,7 +25,7 @@ interface Props {
 export const PaletteArgInput: FC<Props> = ({ onValueChange, argValue, renderError }) => {
   // TODO: This is weird, its basically a reimplementation of what the interpretter would return.
   // Probably a better way todo this, and maybe a better way to handle template type objects in general?
-  const astToPalette = ({ chain }: { chain: ExpressionAstFunction[] }): Palette | null => {
+  const astToPalette = ({ chain }: { chain: ExpressionAstFunction[] }): ColorPalette | null => {
     if (chain.length !== 1 || chain[0].function !== 'palette') {
       renderError();
       return null;
@@ -51,14 +51,14 @@ export const PaletteArgInput: FC<Props> = ({ onValueChange, argValue, renderErro
         label: strings.getCustomPaletteLabel(),
         colors,
         gradient,
-      } as any) as Palette;
+      } as any) as ColorPalette;
     } catch (e) {
       renderError();
     }
     return null;
   };
 
-  const handleChange = (palette: Palette): void => {
+  const handleChange = (palette: ColorPalette): void => {
     const astObj: ExpressionAstExpression = {
       type: 'expression',
       chain: [
@@ -83,9 +83,7 @@ export const PaletteArgInput: FC<Props> = ({ onValueChange, argValue, renderErro
     return null;
   }
 
-  return (
-    <PalettePicker palette={palette} onChange={handleChange} ariaLabel={strings.getDisplayName()} />
-  );
+  return <PalettePicker palette={palette} onChange={handleChange} />;
 };
 
 PaletteArgInput.propTypes = {
