@@ -33,25 +33,25 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseGetParams
   ): Promise<DatabaseGetDocumentResponse<Source>> {
-    return this.callWithUser(user, 'get', params);
+    return await this.callWithUser(user, 'get', params);
   }
 
   public async mget<T>(
     user: FrameworkUser,
     params: DatabaseMGetParams
   ): Promise<DatabaseMGetResponse<T>> {
-    return this.callWithUser(user, 'mget', params);
+    return await this.callWithUser(user, 'mget', params);
   }
 
   public async bulk(user: FrameworkUser, params: DatabaseBulkIndexDocumentsParams): Promise<any> {
-    return this.callWithUser(user, 'bulk', params);
+    return await this.callWithUser(user, 'bulk', params);
   }
 
   public async create(
     user: FrameworkUser,
     params: DatabaseCreateDocumentParams
   ): Promise<DatabaseCreateDocumentResponse> {
-    return this.callWithUser(user, 'create', params);
+    return await this.callWithUser(user, 'create', params);
   }
 
   public async index<T>(user: FrameworkUser, params: DatabaseIndexDocumentParams<T>): Promise<any> {
@@ -62,28 +62,28 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseDeleteDocumentParams
   ): Promise<DatabaseDeleteDocumentResponse> {
-    return this.callWithUser(user, 'delete', params);
+    return await this.callWithUser(user, 'delete', params);
   }
 
   public async deleteByQuery(
     user: FrameworkUser,
     params: DatabaseSearchParams
   ): Promise<DatabaseDeleteDocumentResponse> {
-    return this.callWithUser(user, 'deleteByQuery', params);
+    return await this.callWithUser(user, 'deleteByQuery', params);
   }
 
   public async search<Source>(
     user: FrameworkUser,
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<Source>> {
-    return this.callWithUser(user, 'search', params);
+    return await this.callWithUser(user, 'search', params);
   }
 
   public async searchAll<Source>(
     user: FrameworkUser,
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<Source>> {
-    return this.callWithUser(user, 'search', {
+    return await this.callWithUser(user, 'search', {
       scroll: '1m',
       ...params,
       body: {
@@ -94,7 +94,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
 
   public async putTemplate(name: string, template: any): Promise<any> {
-    return this.callWithUser({ kind: 'internal' }, 'indices.putTemplate', {
+    return await this.callWithUser({ kind: 'internal' }, 'indices.putTemplate', {
       name,
       body: template,
     });
