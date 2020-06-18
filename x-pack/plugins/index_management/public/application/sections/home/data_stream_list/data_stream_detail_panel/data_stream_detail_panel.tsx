@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -15,6 +15,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 
 import { SectionLoading, SectionError, Error } from '../../../../components';
@@ -61,7 +64,29 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       />
     );
   } else if (dataStream) {
-    content = <Fragment>{JSON.stringify(dataStream)}</Fragment>;
+    const { timeStampField, generation } = dataStream;
+
+    content = (
+      <EuiDescriptionList textStyle="reverse">
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle"
+            defaultMessage="Timestamp field"
+          />
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>{timeStampField.name}</EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.idxMgmt.dataStreamDetailPanel.generationTitle"
+            defaultMessage="Generation"
+          />
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>{generation}</EuiDescriptionListDescription>
+      </EuiDescriptionList>
+    );
   }
 
   return (

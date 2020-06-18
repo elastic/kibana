@@ -13,6 +13,7 @@ import { ScopedHistory } from 'kibana/public';
 import { DataStream } from '../../../../../../common/types';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { encodePathForReactRouter } from '../../../../services/routing';
+import { Section } from '../../../home';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 
 interface Props {
@@ -39,7 +40,19 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      // TODO: Render as a link to open the detail panel
+      render: (name: DataStream['name'], item: DataStream) => {
+        return (
+          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+          <EuiLink
+            {...reactRouterNavigate(history, {
+              pathname: `/${Section.DataStreams}/${encodePathForReactRouter(name)}`,
+            })}
+            data-test-subj="dataStreamDetailsLink"
+          >
+            {name}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'indices',
@@ -61,22 +74,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           {indices.length}
         </EuiLink>
       ),
-    },
-    {
-      field: 'timeStampField.name',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.timeStampFieldColumnTitle', {
-        defaultMessage: 'Timestamp field',
-      }),
-      truncateText: true,
-      sortable: true,
-    },
-    {
-      field: 'generation',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.generationFieldColumnTitle', {
-        defaultMessage: 'Generation',
-      }),
-      truncateText: true,
-      sortable: true,
     },
     {
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionColumnTitle', {

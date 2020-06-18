@@ -15,7 +15,10 @@ import { reactRouterNavigate } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
+import { decodePathFromReactRouter } from '../../../services/routing';
+import { Section } from '../../home';
 import { DataStreamTable } from './data_stream_table';
+import { DataStreamDetailPanel } from './data_stream_detail_panel';
 
 interface MatchParams {
   dataStreamName?: string;
@@ -106,21 +109,22 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         <EuiSpacer size="l" />
 
         <DataStreamTable
-          filters={dataStreamName !== undefined ? `name=${dataStreamName}` : ''}
+          filters={
+            dataStreamName !== undefined ? `name=${decodePathFromReactRouter(dataStreamName)}` : ''
+          }
           dataStreams={dataStreams}
           reload={reload}
           history={history as ScopedHistory}
         />
 
-        {/* TODO: Implement this once we have something to put in here, e.g. storage size, docs count */}
-        {/* dataStreamName && (
+        {dataStreamName && (
           <DataStreamDetailPanel
             dataStreamName={decodePathFromReactRouter(dataStreamName)}
             onClose={() => {
-              history.push('/data_streams');
+              history.push(`/${Section.DataStreams}`);
             }}
           />
-        )*/}
+        )}
       </>
     );
   }
