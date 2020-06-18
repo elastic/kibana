@@ -8,11 +8,15 @@ import { asPercent } from '../formatters';
 describe('formatters', () => {
   describe('asPercent', () => {
     it('should divide and format item as percent', () => {
-      expect(asPercent(3725, 10000, 'n/a')).toEqual('37.3%');
+      expect(asPercent(3725, 10000, 'n/a')).toEqual('37%');
+    });
+
+    it('should add a decimal when value is below 10', () => {
+      expect(asPercent(0.092, 1)).toEqual('9.2%');
     });
 
     it('should format when numerator is 0', () => {
-      expect(asPercent(0, 1, 'n/a')).toEqual('0.0%');
+      expect(asPercent(0, 1, 'n/a')).toEqual('0%');
     });
 
     it('should return fallback when denominator is undefined', () => {
