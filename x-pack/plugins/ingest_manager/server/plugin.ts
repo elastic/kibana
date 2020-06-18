@@ -55,6 +55,7 @@ import {
 } from './services';
 import { getAgentStatusById } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
+import { agentCheckinState } from './services/agents/checkin/state';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -229,6 +230,8 @@ export class IngestManagerPlugin
       logger: this.logger,
     });
     licenseService.start(this.licensing$);
+    agentCheckinState.start();
+
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
@@ -240,5 +243,6 @@ export class IngestManagerPlugin
   public async stop() {
     appContextService.stop();
     licenseService.stop();
+    agentCheckinState.stop();
   }
 }
