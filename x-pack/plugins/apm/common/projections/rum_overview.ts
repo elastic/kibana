@@ -10,45 +10,27 @@ import {
   SetupUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  PROCESSOR_EVENT,
-  TRANSACTION_NAME,
-} from '../elasticsearch_fieldnames';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../utils/range_filter';
 
-export function getTransactionsProjection({
+export function getRumOverviewProjection({
   setup,
-  serviceName,
-  transactionName,
-  transactionType,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
-  serviceName?: string;
-  transactionName?: string;
-  transactionType?: string;
 }) {
   const { start, end, uiFiltersES, indices } = setup;
-
-  const transactionNameFilter = transactionName
-    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
-    : [];
-  const transactionTypeFilter = transactionType
-    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-    : [];
-  const serviceNameFilter = serviceName
-    ? [{ term: { [SERVICE_NAME]: serviceName } }]
-    : [];
 
   const bool = {
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [PROCESSOR_EVENT]: 'transaction' } },
-      ...transactionNameFilter,
-      ...transactionTypeFilter,
-      ...serviceNameFilter,
+      { term: { [TRANSACTION_TYPE]: 'page-load' } },
+      {
+        // Adding this filter to cater for some inconsistent rum data
+        exists: {
+          field: 'transaction.marks.navigationTiming.fetchStart',
+        },
+      },
       ...uiFiltersES,
     ],
   };
