@@ -137,15 +137,6 @@ export interface AggregationOptionsByType {
     >;
     keyed?: boolean;
   };
-  auto_date_histogram: {
-    field: string;
-    buckets: number;
-  };
-  percentile_ranks: {
-    field: string;
-    values: string[];
-    keyed?: boolean;
-  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -309,23 +300,6 @@ interface AggregationResponsePart<
     buckets: TAggregationOptionsMap extends { date_range: { keyed: true } }
       ? Record<string, DateRangeBucket>
       : { buckets: DateRangeBucket[] };
-  };
-  auto_date_histogram: {
-    buckets: Array<
-      {
-        doc_count: number;
-        key: number;
-        key_as_string: string;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
-    >;
-    interval: string;
-  };
-
-  percentile_ranks: {
-    values: Record<string, number> | Array<{ key: number; value: number }>;
   };
 }
 

@@ -67,7 +67,8 @@ export interface IngestManagerSetupDeps {
 export type IngestManagerStartDeps = object;
 
 export interface IngestManagerAppContext {
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
@@ -115,6 +116,7 @@ export class IngestManagerPlugin
   private isProductionMode: boolean;
   private kibanaVersion: string;
   private httpSetup: HttpServiceSetup | undefined;
+  private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
@@ -129,6 +131,7 @@ export class IngestManagerPlugin
     if (deps.security) {
       this.security = deps.security;
     }
+    this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
 
     registerSavedObjects(core.savedObjects);
@@ -187,12 +190,22 @@ export class IngestManagerPlugin
       }
 
       if (config.fleet.enabled) {
-        registerAgentRoutes(router);
-        registerEnrollmentApiKeyRoutes(router);
-        registerInstallScriptRoutes({
-          router,
-          basePath: core.http.basePath,
-        });
+        const isESOUsingEphemeralEncryptionKey =
+          deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
+        if (isESOUsingEphemeralEncryptionKey) {
+          if (this.logger) {
+            this.logger.warn(
+              'Fleet APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+            );
+          }
+        } else {
+          registerAgentRoutes(router);
+          registerEnrollmentApiKeyRoutes(router);
+          registerInstallScriptRoutes({
+            router,
+            basePath: core.http.basePath,
+          });
+        }
       }
     }
   }
@@ -204,7 +217,8 @@ export class IngestManagerPlugin
     }
   ) {
     await appContextService.start({
-      encryptedSavedObjects: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: this.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
