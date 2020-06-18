@@ -88,4 +88,5 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
   }>;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getLayerName(): string;
 }

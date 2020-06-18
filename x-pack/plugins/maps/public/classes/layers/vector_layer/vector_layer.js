@@ -672,10 +672,10 @@ export class VectorLayer extends AbstractLayer {
     }
 
     this.syncVisibilityWithMb(mbMap, markerLayerId);
-    mbMap.setLayerZoomRange(markerLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setLayerZoomRange(markerLayerId, this.getMinZoom(), this.getMaxZoom());
     if (markerLayerId !== textLayerId) {
       this.syncVisibilityWithMb(mbMap, textLayerId);
-      mbMap.setLayerZoomRange(textLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+      mbMap.setLayerZoomRange(textLayerId, this.getMinZoom(), this.getMaxZoom());
     }
   }
 
@@ -802,14 +802,14 @@ export class VectorLayer extends AbstractLayer {
     });
 
     this.syncVisibilityWithMb(mbMap, fillLayerId);
-    mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setLayerZoomRange(fillLayerId, this.getMinZoom(), this.getMaxZoom());
     const fillFilterExpr = getFillFilterExpression(hasJoins);
     if (fillFilterExpr !== mbMap.getFilter(fillLayerId)) {
       mbMap.setFilter(fillLayerId, fillFilterExpr);
     }
 
     this.syncVisibilityWithMb(mbMap, lineLayerId);
-    mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setLayerZoomRange(lineLayerId, this.getMinZoom(), this.getMaxZoom());
     const lineFilterExpr = getLineFilterExpression(hasJoins);
     if (lineFilterExpr !== mbMap.getFilter(lineLayerId)) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);

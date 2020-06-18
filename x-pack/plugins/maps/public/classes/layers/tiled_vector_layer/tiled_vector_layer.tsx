@@ -21,6 +21,8 @@ import {
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 
+const DELIMITER = '~';
+
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
@@ -66,26 +68,16 @@ export class TiledVectorLayer extends VectorLayer {
     );
     const prevDataRequest = this.getSourceDataRequest();
 
-    const canSkipBecauseNoChangesInState = await canSkipSourceUpdate({
-      source: this._source as ISource,
-      prevDataRequest,
-      nextMeta: searchFilters,
-    });
-
-    console.log('pdr', prevDataRequest, this._source);
-    let canSkipBecauseNoChangesInZoom = false;
     if (prevDataRequest) {
       const data: MVTSingleLayerVectorSourceConfig = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-      canSkipBecauseNoChangesInZoom =
+      const canSkipBecauseNoChanges =
+        data.layerName === this._source.getLayerName() &&
         data.minSourceZoom === this._source.getMinZoom() &&
         data.maxSourceZoom === this._source.getMaxZoom();
-    }
 
-    console.log(canSkipBecauseNoChangesInZoom, canSkipBecauseNoChangesInState);
-
-    if (canSkipBecauseNoChangesInState && canSkipBecauseNoChangesInZoom) {
-      console.log('can skip update');
-      return null;
+      if (canSkipBecauseNoChanges) {
+        return null;
+      }
     }
 
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
@@ -98,47 +90,55 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   async syncData(syncContext: DataRequestContext) {
-    console.log('syncData');
     await this._syncSourceStyleMeta(syncContext, this._source, this._style);
     await this._syncSourceFormatters(syncContext, this._source, this._style);
     await this._syncMVTUrlTemplate(syncContext);
   }
 
+  // getId() {
+  //   return this._descriptor.id + DELIMITER + this._source.getLayerName() + DELIMITER;
+  // }
+
+  _getMbSourceId(): string {
+    return this.getId();
+  }
+
   _syncSourceBindingWithMb(mbMap: unknown) {
-    console.log('syncsourcedata');
-    // @ts-ignore
-    const mbSource = mbMap.getSource(this.getId());
-    console.log('mbs',mbSource);
-    if (!mbSource) {
-      const sourceDataRequest = this.getSourceDataRequest();
-      if (!sourceDataRequest) {
-        // this is possible if the layer was invisible at startup.
-        // the actions will not perform any data=syncing as an optimization when a layer is invisible
-        // when turning the layer back into visible, it's possible the url has not been resovled yet.
-        return;
-      }
-
-      const sourceMeta: TiledSingleLayerVectorSourceDescriptor | null = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-      if (!sourceMeta) {
-        return;
-      }
-
-      const sourceId = this.getId();
-
-      // @ts-ignore
-
-      mbMap.addSource(sourceId, {
-        type: 'vector',
-        tiles: [sourceMeta.urlTemplate],
-        minzoom: sourceMeta.minSourceZoom,
-        maxzoom: sourceMeta.maxSourceZoom,
-      });
+    // @ts-expect-error
+    const mbSource = mbMap.getSource(this._getMbSourceId());
+    if (mbSource) {
+      return;
     }
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      // this is possible if the layer was invisible at startup.
+      // the actions will not perform any data=syncing as an optimization when a layer is invisible
+      // when turning the layer back into visible, it's possible the url has not been resovled yet.
+      return;
+    }
+
+    const sourceMeta: TiledSingleLayerVectorSourceDescriptor | null = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+    if (!sourceMeta) {
+      return;
+    }
+
+    const mbSourceId = this._getMbSourceId();
+    // @ts-expect-error
+    mbMap.addSource(mbSourceId, {
+      type: 'vector',
+      tiles: [sourceMeta.urlTemplate],
+      minzoom: sourceMeta.minSourceZoom,
+      maxzoom: sourceMeta.maxSourceZoom,
+    });
+  }
+
+  ownsMbSourceId(mbSourceId): boolean {
+    return mbSourceId === this._getMbSourceId();
   }
 
   _syncStylePropertiesWithMb(mbMap: unknown) {
     // @ts-ignore
-    const mbSource = mbMap.getSource(this.getId());
+    const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {
       return;
     }
@@ -149,41 +149,50 @@ export class TiledVectorLayer extends VectorLayer {
     }
     const sourceMeta: TiledSingleLayerVectorSourceDescriptor = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
 
-    console.log('syncstylepore', sourceMeta.layerName);
     this._setMbPointsProperties(mbMap, sourceMeta.layerName);
     this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
   }
 
   _requiresPrevSourceCleanup(mbMap: unknown): boolean {
-    console.log('does it require cleanup?');
     // @ts-ignore
-    const mbTileSource = mbMap.getSource(this.getId());
+    const mbTileSource = mbMap.getSource(this._getMbSourceId());
     if (!mbTileSource) {
       return false;
     }
+
     const dataRequest = this.getSourceDataRequest();
     if (!dataRequest) {
       return false;
     }
     const tiledSourceMeta: TiledSingleLayerVectorSourceDescriptor | null = dataRequest.getData() as MVTSingleLayerVectorSourceConfig;
 
-    console.log('so is this different?', mbTileSource, tiledSourceMeta);
-    if (
-      mbTileSource.tiles[0] === tiledSourceMeta.urlTemplate &&
-      mbTileSource.minzoom === tiledSourceMeta.minSourceZoom &&
-      mbTileSource.maxzoom === tiledSourceMeta.maxSourceZoom
-    ) {
-
-      // TileURL and zoom-range captures all the state. If this does not change, no updates are required.
+    if (!tiledSourceMeta) {
       return false;
     }
 
-    console.log('YES cleanuo');
-    return true;
+    // check if layername has changed
+    const isSourceDifferent =
+      mbTileSource.tiles[0] !== tiledSourceMeta.urlTemplate ||
+      mbTileSource.minzoom !== tiledSourceMeta.minSourceZoom ||
+      mbTileSource.maxzoom !== tiledSourceMeta.maxSourceZoom;
+
+    if (isSourceDifferent) {
+      return true;
+    }
+
+    const layerIds = this.getMbLayerIds();
+    // just check the first layer
+    for (let i = 0; i < layerIds.length; i++) {
+      const mbLayer = mbMap.getLayer(layerIds[i]);
+      if (mbLayer && mbLayer.sourceLayer !== tiledSourceMeta.layerName) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   syncLayerWithMB(mbMap: unknown) {
-    console.log('synclayewithmb');
     this._removeStaleMbSourcesAndLayers(mbMap);
     this._syncSourceBindingWithMb(mbMap);
     this._syncStylePropertiesWithMb(mbMap);

@@ -55,12 +55,10 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _handleLayerNameInputChange = (layerName: string) => {
-    console.log('ln', layerName);
     this.props.onChange({ propName: 'layerName', value: layerName });
   };
 
   _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
-    console.log('f', fields);
     this.props.onChange({ propName: 'fields', value: fields });
   };
 
@@ -71,14 +69,11 @@ export class UpdateSourceEditor extends Component<Props, State> {
     minSourceZoom: number;
     maxSourceZoom: number;
   }) => {
-    console.log('zr', minSourceZoom, maxSourceZoom);
     this.props.onChange({ propName: 'minSourceZoom', value: minSourceZoom });
     this.props.onChange({ propName: 'maxSourceZoom', value: maxSourceZoom });
   };
 
   _renderSourceSettingsCard() {
-    console.log(this.props.source);
-
     const fields: MVTFieldDescriptor[] = (this.state.fields || []).map((field: MVTField) => {
       return field.getMVTFieldDescriptor();
     });

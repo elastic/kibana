@@ -111,9 +111,13 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & 
 
   // These are the min/max zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.
   // These are _not_ the visible zoom-range of the data on a map.
-  // Tiled data can be displayed at higher levels of zoom than that they are stored in the tileset.
-  // e.g. EMS basemap data from level 14 is at most detailed resolution and can be displayed at higher levels
+  // These are important so mapbox does not issue invalid requests based on the zoom level.
+
+  // Tiled layer data cannot be displayed at lower levels of zoom than that they are stored in the tileset.
+  // e.g. building footprints at level 14 cannot be displayed at level 0.
   minSourceZoom: number;
+  // Tiled layer data can be displayed at higher levels of zoom than that they are stored in the tileset.
+  // e.g. EMS basemap data from level 14 is at most detailed resolution and can be displayed at higher levels
   maxSourceZoom: number;
 
   fields: MVTFieldDescriptor[];

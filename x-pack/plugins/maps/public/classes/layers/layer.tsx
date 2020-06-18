@@ -331,23 +331,21 @@ export class AbstractLayer implements ILayer {
 
   _removeStaleMbSourcesAndLayers(mbMap: unknown) {
     if (this._requiresPrevSourceCleanup(mbMap)) {
-      console.log('requresprevsourcelcan');
-      // @ts-ignore
+      // @ts-expect-error
       const mbStyle = mbMap.getStyle();
-      // @ts-ignore
+      // @ts-expect-error
       mbStyle.layers.forEach((mbLayer) => {
-        // @ts-ignore
+        // @ts-expect-error
         if (this.ownsMbLayerId(mbLayer.id)) {
-          // @ts-ignore
+          // @ts-expect-error
           mbMap.removeLayer(mbLayer.id);
         }
       });
-      // @ts-ignore
+      // @ts-expect-error
       Object.keys(mbStyle.sources).some((mbSourceId) => {
-        // @ts-ignore
+        // @ts-expect-error
         if (this.ownsMbSourceId(mbSourceId)) {
-          // @ts-ignore
-          console.log('remnove source', mbSourceId);
+          // @ts-expect-error
           mbMap.removeSource(mbSourceId);
         }
       });
