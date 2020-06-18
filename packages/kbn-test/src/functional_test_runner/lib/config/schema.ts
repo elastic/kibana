@@ -38,6 +38,14 @@ const urlPartsSchema = () =>
       password: Joi.string(),
       pathname: Joi.string().regex(/^\//, 'start with a /'),
       hash: Joi.string().regex(/^\//, 'start with a /'),
+      ssl: Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(false),
+          certificate: Joi.string().optional(),
+          certificateAuthorities: Joi.string().optional(),
+          key: Joi.string().optional(),
+        })
+        .default(),
     })
     .default();
 
@@ -122,6 +130,7 @@ export const schema = Joi.object()
         type: Joi.string().valid('chrome', 'firefox', 'ie', 'msedge').default('chrome'),
 
         logPollingMs: Joi.number().default(100),
+        acceptInsecureCerts: Joi.boolean().default(false),
       })
       .default(),
 

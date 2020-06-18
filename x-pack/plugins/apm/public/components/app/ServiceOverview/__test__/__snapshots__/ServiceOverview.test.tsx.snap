@@ -114,7 +114,7 @@ NodeList [
                   <span
                     class="euiButton__text"
                   >
-                    Setup Instructions
+                    Setup instructions
                   </span>
                 </span>
               </button>
@@ -203,7 +203,7 @@ NodeList [
       <div
         class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
       >
-        1 ms
+        0.6 ms
       </div>
     </td>
     <td
@@ -338,7 +338,7 @@ NodeList [
       <div
         class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
       >
-        0 ms
+        0.3 ms
       </div>
     </td>
     <td
