@@ -584,8 +584,8 @@ export abstract class FieldFormat {
     textConvert: TextContextTypeConvert | undefined;
     static title: string;
     toJSON(): {
-        id: unknown;
-        params: _.Dictionary<unknown> | undefined;
+        id: any;
+        params: any;
     };
     type: any;
 }
