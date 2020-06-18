@@ -6,7 +6,7 @@
 // @flow
 import * as React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { BackEndLabel, FrontEndLabel, PageViewsLabel } from '../translations';

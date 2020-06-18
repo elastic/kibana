@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import {
   Axis,
   BarSeries,
