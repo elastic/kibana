@@ -22,6 +22,7 @@ import {
   EuiAccordion,
   EuiFilterGroup,
   EuiFilterButton,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -545,32 +546,43 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               >
                 <EuiSpacer size="s" />
-                {!!filteredFieldGroups.availableFields.length ? (
-                  <div className="lnsInnerIndexPatternDataPanel__fieldItems">
-                    {paginatedAvailableFields.map((field: IndexPatternField) => {
-                      return (
-                        <FieldItem
-                          core={core}
-                          data={data}
-                          indexPattern={currentIndexPattern}
-                          key={field.name}
-                          field={field}
-                          highlight={hilight}
-                          exists={true}
-                          dateRange={dateRange}
-                          query={query}
-                          filters={filters}
-                        />
-                      );
-                    })}
-                  </div>
+                {hasSyncedExistingFields ? (
+                  !!filteredFieldGroups.availableFields.length ? (
+                    <div className="lnsInnerIndexPatternDataPanel__fieldItems">
+                      {paginatedAvailableFields.map((field: IndexPatternField) => {
+                        return (
+                          <FieldItem
+                            core={core}
+                            data={data}
+                            indexPattern={currentIndexPattern}
+                            key={field.name}
+                            field={field}
+                            highlight={hilight}
+                            exists={true}
+                            dateRange={dateRange}
+                            query={query}
+                            filters={filters}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <NoFieldsCallout
+                      isAffectedByGlobalFilter={!!filters.length}
+                      isAffectedByFieldFilter={hasFieldFilter}
+                      isAffectedByTimerange={true}
+                      existFieldsInIndex={!!fieldGroups.emptyFields.length}
+                    />
+                  )
                 ) : (
-                  <NoFieldsCallout
-                    isAffectedByGlobalFilter={!!filters.length}
-                    isAffectedByFieldFilter={hasFieldFilter}
-                    isAffectedByTimerange={true}
-                    existFieldsInIndex={!!fieldGroups.emptyFields.length}
-                  />
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiFlexGroup justifyContent="spaceAround">
+                      <EuiFlexItem grow={false}>
+                        <EuiLoadingSpinner size="m" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
                 )}
               </EuiAccordion>
               <EuiSpacer size="m" />
@@ -614,30 +626,42 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               >
                 <EuiSpacer size="s" />
-                {!!filteredFieldGroups.emptyFields.length ? (
-                  <div className="lnsInnerIndexPatternDataPanel__fieldItems">
-                    {paginatedEmptyFields.map((field: IndexPatternField) => {
-                      return (
-                        <FieldItem
-                          core={core}
-                          data={data}
-                          indexPattern={currentIndexPattern}
-                          key={field.name}
-                          field={field}
-                          highlight={hilight}
-                          exists={false}
-                          dateRange={dateRange}
-                          query={query}
-                          filters={filters}
-                        />
-                      );
-                    })}
-                  </div>
+
+                {hasSyncedExistingFields ? (
+                  !!filteredFieldGroups.emptyFields.length ? (
+                    <div className="lnsInnerIndexPatternDataPanel__fieldItems">
+                      {paginatedEmptyFields.map((field: IndexPatternField) => {
+                        return (
+                          <FieldItem
+                            core={core}
+                            data={data}
+                            indexPattern={currentIndexPattern}
+                            key={field.name}
+                            field={field}
+                            highlight={hilight}
+                            exists={false}
+                            dateRange={dateRange}
+                            query={query}
+                            filters={filters}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <NoFieldsCallout
+                      isAffectedByFieldFilter={hasFieldFilter}
+                      existFieldsInIndex={!!fieldGroups.emptyFields.length}
+                    />
+                  )
                 ) : (
-                  <NoFieldsCallout
-                    isAffectedByFieldFilter={hasFieldFilter}
-                    existFieldsInIndex={!!fieldGroups.emptyFields.length}
-                  />
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiFlexGroup justifyContent="spaceAround">
+                      <EuiFlexItem grow={false}>
+                        <EuiLoadingSpinner size="m" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
                 )}
               </EuiAccordion>
               <EuiSpacer size="m" />
