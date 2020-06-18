@@ -11,10 +11,10 @@ import { deletePolicyStream } from './data_stream_helper';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const ingestManager = getService('ingestManager');
   describe('Endpoint policy api', () => {
     describe('GET /api/endpoint/policy_response', () => {
       before(async () => {
-        const ingestManager = getService('ingestManager');
         await ingestManager.setup();
         await esArchiver.load('endpoint/policy', { useCreate: true });
       });
