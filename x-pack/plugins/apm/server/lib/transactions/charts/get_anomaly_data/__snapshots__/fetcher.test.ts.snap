@@ -39,6 +39,11 @@ Array [
           "bool": Object {
             "filter": Array [
               Object {
+                "term": Object {
+                  "job_id": "myservicename-mytransactiontype-high_mean_response_time",
+                },
+              },
+              Object {
                 "exists": Object {
                   "field": "bucket_span",
                 },
@@ -57,7 +62,6 @@ Array [
         },
         "size": 0,
       },
-      "index": ".ml-anomalies-myservicename-mytransactiontype-high_mean_response_time",
     },
   ],
 ]
