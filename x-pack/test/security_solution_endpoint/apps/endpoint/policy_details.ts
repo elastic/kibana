@@ -99,107 +99,71 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(agentFullConfig).to.eql({
-          datasources: [
+          inputs: [
             {
-              enabled: true,
               id: policyInfo.datasource.id,
-              inputs: [
-                {
-                  enabled: true,
-                  policy: {
-                    linux: {
-                      advanced: {
-                        elasticsearch: {
-                          indices: {
-                            control: 'control-index',
-                            event: 'event-index',
-                            logging: 'logging-index',
-                          },
-                          kernel: {
-                            connect: true,
-                            process: true,
-                          },
-                        },
-                      },
-                      events: {
-                        file: false,
-                        network: true,
-                        process: true,
-                      },
-                      logging: {
-                        file: 'info',
-                        stdout: 'debug',
-                      },
-                    },
-                    mac: {
-                      advanced: {
-                        elasticsearch: {
-                          indices: {
-                            control: 'control-index',
-                            event: 'event-index',
-                            logging: 'logging-index',
-                          },
-                          kernel: {
-                            connect: true,
-                            process: true,
-                          },
-                        },
-                      },
-                      events: {
-                        file: false,
-                        network: true,
-                        process: true,
-                      },
-                      logging: {
-                        file: 'info',
-                        stdout: 'debug',
-                      },
-                      malware: {
-                        mode: 'detect',
-                      },
-                    },
-                    windows: {
-                      advanced: {
-                        elasticsearch: {
-                          indices: {
-                            control: 'control-index',
-                            event: 'event-index',
-                            logging: 'logging-index',
-                          },
-                          kernel: {
-                            connect: true,
-                            process: true,
-                          },
-                        },
-                      },
-                      events: {
-                        dll_and_driver_load: true,
-                        dns: true,
-                        file: false,
-                        network: true,
-                        process: true,
-                        registry: true,
-                        security: true,
-                      },
-                      logging: {
-                        file: 'info',
-                        stdout: 'debug',
-                      },
-                      malware: {
-                        mode: 'prevent',
-                      },
-                    },
-                  },
-                  streams: [],
-                  type: 'endpoint',
-                },
-              ],
+              dataset: { namespace: 'default' },
               name: 'Protect East Coast',
-              namespace: 'default',
               package: {
                 name: 'endpoint',
                 version: policyInfo.packageInfo.version,
               },
+              policy: {
+                linux: {
+                  advanced: {
+                    elasticsearch: {
+                      indices: {
+                        control: 'control-index',
+                        event: 'event-index',
+                        logging: 'logging-index',
+                      },
+                      kernel: { connect: true, process: true },
+                    },
+                  },
+                  events: { file: false, network: true, process: true },
+                  logging: { file: 'info', stdout: 'debug' },
+                },
+                mac: {
+                  advanced: {
+                    elasticsearch: {
+                      indices: {
+                        control: 'control-index',
+                        event: 'event-index',
+                        logging: 'logging-index',
+                      },
+                      kernel: { connect: true, process: true },
+                    },
+                  },
+                  events: { file: false, network: true, process: true },
+                  logging: { file: 'info', stdout: 'debug' },
+                  malware: { mode: 'detect' },
+                },
+                windows: {
+                  advanced: {
+                    elasticsearch: {
+                      indices: {
+                        control: 'control-index',
+                        event: 'event-index',
+                        logging: 'logging-index',
+                      },
+                      kernel: { connect: true, process: true },
+                    },
+                  },
+                  events: {
+                    dll_and_driver_load: true,
+                    dns: true,
+                    file: false,
+                    network: true,
+                    process: true,
+                    registry: true,
+                    security: true,
+                  },
+                  logging: { file: 'info', stdout: 'debug' },
+                  malware: { mode: 'prevent' },
+                },
+              },
+              streams: [],
+              type: 'endpoint',
               use_output: 'default',
             },
           ],
