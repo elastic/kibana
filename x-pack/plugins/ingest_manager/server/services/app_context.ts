@@ -23,7 +23,7 @@ class AppContextService {
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
-  private externalCallbacks: ExternalCallbacksStorage | undefined;
+  private externalCallbacks: ExternalCallbacksStorage = new Map();
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects?.getClient();
@@ -34,7 +34,6 @@ class AppContextService {
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.httpSetup = appContext.httpSetup;
-    this.externalCallbacks = appContext.externalCallbacks;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -44,7 +43,9 @@ class AppContextService {
     }
   }
 
-  public stop() {}
+  public stop() {
+    this.externalCallbacks.clear();
+  }
 
   public getEncryptedSavedObjects() {
     if (!this.encryptedSavedObjects) {
@@ -102,6 +103,13 @@ class AppContextService {
       throw new Error('Kibana version is not set.');
     }
     return this.kibanaVersion;
+  }
+
+  public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
+    if (!this.externalCallbacks.has(type)) {
+      this.externalCallbacks.set(type, new Set());
+    }
+    this.externalCallbacks.get(type)!.add(callback);
   }
 
   public getExternalCallbacks(type: ExternalCallback[0]) {

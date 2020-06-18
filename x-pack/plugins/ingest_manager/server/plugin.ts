@@ -74,7 +74,6 @@ export interface IngestManagerAppContext {
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: boolean;
   kibanaVersion: string;
-  externalCallbacks: ExternalCallbacksStorage;
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -136,14 +135,12 @@ export class IngestManagerPlugin
   private isProductionMode: boolean;
   private kibanaVersion: string;
   private httpSetup: HttpServiceSetup | undefined;
-  private externalCallbacks: ExternalCallbacksStorage;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.logger = this.initializerContext.logger.get();
-    this.externalCallbacks = new Map();
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
@@ -233,7 +230,6 @@ export class IngestManagerPlugin
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
-      externalCallbacks: this.externalCallbacks,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
@@ -246,7 +242,7 @@ export class IngestManagerPlugin
       },
       datasourceService,
       registerExternalCallback: (...args: ExternalCallback) => {
-        return this.registerCallback(...args);
+        return appContextService.addExternalCallback(...args);
       },
     };
   }
@@ -254,13 +250,5 @@ export class IngestManagerPlugin
   public async stop() {
     appContextService.stop();
     licenseService.stop();
-    this.externalCallbacks.clear();
-  }
-
-  private registerCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
-    if (!this.externalCallbacks.has(type)) {
-      this.externalCallbacks.set(type, new Set());
-    }
-    this.externalCallbacks.get(type)!.add(callback);
   }
 }
