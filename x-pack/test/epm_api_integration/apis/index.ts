@@ -19,7 +19,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   }
 
   maybeSkipped('EPM Endpoints', function () {
-    this.tags('ciGroup7');
+    this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./list'));
     // loadTestFile(require.resolve('./file'));
