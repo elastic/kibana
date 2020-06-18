@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import './discover_grid.scss';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,6 @@ import {
   EuiIcon,
   EuiScreenReaderOnly,
   htmlIdGenerator,
-  EuiDataGridStyle,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -76,9 +75,30 @@ const gridStyle = {
   border: 'horizontal',
   fontSize: 's',
   cellPadding: 's',
-} as EuiDataGridStyle;
+};
 const pageSizeArr = [25, 50, 100, 500];
 const defaultPageSize = 50;
+// @ts-ignore
+const DiscoverGridContext = React.createContext();
+
+export const SelectButton = ({ rowIndex }: { rowIndex: number }) => {
+  // @ts-ignore
+  const [flyoutRow, setFlyoutRow] = useContext(DiscoverGridContext);
+
+  return (
+    <button
+      aria-label={i18n.translate('discover.grid.viewDoc', {
+        defaultMessage: 'Toggle dialog with details',
+      })}
+      onClick={() => (flyoutRow === rowIndex ? setFlyoutRow(-1) : setFlyoutRow(rowIndex))}
+      className="dscTable__buttonToggle"
+    >
+      <EuiIcon size="s" type={flyoutRow === rowIndex ? 'eyeClosed' : 'eye'} />
+    </button>
+  );
+};
+
+export const EuiDataGridMemoized = React.memo((props: any) => <EuiDataGrid {...props} />);
 
 export const DiscoverGrid = React.memo(
   ({
@@ -98,6 +118,8 @@ export const DiscoverGrid = React.memo(
     showTimeCol,
     onSetColumns,
   }: Props) => {
+    const flyoutRowState = useState<number>(-1);
+    const [flyoutRow, setFlyoutRow] = flyoutRowState;
     const timeString = useMemo(
       () =>
         i18n.translate('discover.timeLabel', {
@@ -105,8 +127,6 @@ export const DiscoverGrid = React.memo(
         }),
       []
     );
-    const [flyoutRow, setFlyoutRow] = useState<number | undefined>(undefined);
-
     /**
      * Pagination
      */
@@ -211,9 +231,8 @@ export const DiscoverGrid = React.memo(
       sortingColumns,
       onTableSort,
     ]);
-
-    const leadingControlControls = useMemo(
-      () => [
+    const lead = useMemo(() => {
+      return [
         {
           id: 'openDetails',
           width: 31,
@@ -226,50 +245,35 @@ export const DiscoverGrid = React.memo(
               </span>
             </EuiScreenReaderOnly>
           ),
-          rowCellRender: ({ rowIndex }: { rowIndex: number }) => (
-            <button
-              aria-label={i18n.translate('discover.grid.viewDoc', {
-                defaultMessage: 'Toggle dialog with details',
-              })}
-              onClick={(event) => {
-                event.stopPropagation();
-                event.preventDefault();
-                const newIndex = flyoutRow === rowIndex ? undefined : rowIndex;
-                setFlyoutRow(newIndex);
-              }}
-              className="dscTable__buttonToggle"
-            >
-              <EuiIcon size="s" type={flyoutRow === rowIndex ? 'eyeClosed' : 'eye'} />
-            </button>
-          ),
+          rowCellRender: SelectButton,
         },
-      ],
-      [flyoutRow]
-    );
+      ];
+    }, []);
 
     if (!rowCount) {
       return null;
     }
 
     return (
-      <>
-        <EuiDataGrid
-          aria-labelledby={ariaLabelledBy}
-          aria-describedby={randomId}
-          sorting={sorting}
-          rowCount={rowCount}
-          columns={euiGridColumns}
-          renderCellValue={renderCellValue}
-          leadingControlColumns={leadingControlControls}
-          columnVisibility={colummsVisibility}
-          pagination={paginationObj}
-          toolbarVisibility={toolbarVisibility}
-          gridStyle={gridStyle}
-          schemaDetectors={schemaDetectors}
-          popoverContents={popoverContents}
-        />
-        {showDisclaimer && (
-          <>
+      <DiscoverGridContext.Provider value={flyoutRowState}>
+        <>
+          <EuiDataGridMemoized
+            aria-labelledby={ariaLabelledBy}
+            aria-describedby={randomId}
+            sorting={sorting}
+            rowCount={rowCount}
+            columns={euiGridColumns}
+            renderCellValue={renderCellValue}
+            leadingControlColumns={lead}
+            columnVisibility={colummsVisibility}
+            pagination={paginationObj}
+            toolbarVisibility={toolbarVisibility}
+            gridStyle={gridStyle}
+            schemaDetectors={schemaDetectors}
+            popoverContents={popoverContents}
+          />
+
+          {showDisclaimer && (
             <p className="dscTable__footer">
               <FormattedMessage
                 id="discover.howToSeeOtherMatchingDocumentsDescription"
@@ -280,40 +284,40 @@ export const DiscoverGrid = React.memo(
                 <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top" />
               </a>
             </p>
-          </>
-        )}
-        {searchTitle && (
-          <EuiScreenReaderOnly>
-            <p id={String(randomId)}>
-              {searchDescription ? (
-                <FormattedMessage
-                  id="discover.searchGenerationWithDescription"
-                  defaultMessage="Table generated by search {searchTitle} ({searchDescription})"
-                  values={{ searchTitle, searchDescription }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="discover.searchGenerationWithDescription"
-                  defaultMessage="Table generated by search {searchTitle}"
-                  values={{ searchTitle }}
-                />
-              )}
-            </p>
-          </EuiScreenReaderOnly>
-        )}
-        {typeof flyoutRow !== 'undefined' && (
-          <DiscoverGridFlyout
-            indexPattern={indexPattern}
-            getContextAppHref={getContextAppHref}
-            hit={rows[flyoutRow]}
-            columns={columns}
-            onFilter={onFilter}
-            onClose={() => setFlyoutRow(undefined)}
-            onRemoveColumn={onRemoveColumn}
-            onAddColumn={onAddColumn}
-          />
-        )}
-      </>
+          )}
+          {searchTitle && (
+            <EuiScreenReaderOnly>
+              <p id={String(randomId)}>
+                {searchDescription ? (
+                  <FormattedMessage
+                    id="discover.searchGenerationWithDescription"
+                    defaultMessage="Table generated by search {searchTitle} ({searchDescription})"
+                    values={{ searchTitle, searchDescription }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="discover.searchGenerationWithDescription"
+                    defaultMessage="Table generated by search {searchTitle}"
+                    values={{ searchTitle }}
+                  />
+                )}
+              </p>
+            </EuiScreenReaderOnly>
+          )}
+          {flyoutRow >= 0 && (
+            <DiscoverGridFlyout
+              indexPattern={indexPattern}
+              getContextAppHref={getContextAppHref}
+              hit={rows[flyoutRow]}
+              columns={columns}
+              onFilter={onFilter}
+              onRemoveColumn={onRemoveColumn}
+              onAddColumn={onAddColumn}
+              onClose={() => setFlyoutRow(-1)}
+            />
+          )}
+        </>
+      </DiscoverGridContext.Provider>
     );
   }
 );
