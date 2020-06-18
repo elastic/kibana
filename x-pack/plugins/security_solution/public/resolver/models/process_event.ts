@@ -81,11 +81,11 @@ export function uniquePidForProcess(passedEvent: ResolverEvent): string {
 /**
  * Returns the pid for the process on the host
  */
-export function processPid(passedEvent: ResolverEvent): string {
+export function processPid(passedEvent: ResolverEvent): number | undefined {
   if (event.isLegacyEvent(passedEvent)) {
-    return String(passedEvent.endgame.pid);
+    return passedEvent.endgame.pid;
   } else {
-    return String(passedEvent.process.pid);
+    return passedEvent.process.pid;
   }
 }
 
