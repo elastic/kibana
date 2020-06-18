@@ -10,8 +10,8 @@ module.exports = {
   "RUM Dashboard": {
     "Client metrics": {
       "1": "62",
-      "2": "74.68 sec",
-      "3": "5.42 sec"
+      "2": "0.07 sec",
+      "3": "0.01 sec"
     }
   }
 }
