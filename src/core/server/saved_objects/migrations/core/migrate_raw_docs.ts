@@ -33,26 +33,42 @@ import { SavedObjectsMigrationLogger } from '.';
  * @param {SavedObjectsRawDoc[]} rawDocs
  * @returns {SavedObjectsRawDoc[]}
  */
-export function migrateRawDocs(
+export async function migrateRawDocs(
   serializer: SavedObjectsSerializer,
   migrateDoc: TransformFn,
   rawDocs: SavedObjectsRawDoc[],
   log: SavedObjectsMigrationLogger
 ): SavedObjectsRawDoc[] {
-  return rawDocs.map((raw) => {
+  const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
+  const processesDocs = [];
+  for (const raw of rawDocs) {
     if (serializer.isRawSavedObject(raw)) {
       const savedObject = serializer.rawToSavedObject(raw);
       savedObject.migrationVersion = savedObject.migrationVersion || {};
-      return serializer.savedObjectToRaw({
-        references: [],
-        ...migrateDoc(savedObject),
-      });
+      processesDocs.push(
+        serializer.savedObjectToRaw({
+          references: [],
+          ...(await migrateDocWithoutBlocking(savedObject)),
+        })
+      );
+    } else {
+      log.error(
+        `Error: Unable to migrate the corrupt Saved Object document ${raw._id}. To prevent Kibana from performing a migration on every restart, please delete or fix this document by ensuring that the namespace and type in the document's id matches the values in the namespace and type fields.`,
+        { rawDocument: raw }
+      );
+      processesDocs.push(raw);
     }
+  }
+  return processesDocs;
+}
 
-    log.error(
-      `Error: Unable to migrate the corrupt Saved Object document ${raw._id}. To prevent Kibana from performing a migration on every restart, please delete or fix this document by ensuring that the namespace and type in the document's id matches the values in the namespace and type fields.`,
-      { rawDocument: raw }
-    );
-    return raw;
-  });
+function transformNonBlocking(transform: TransformFn): Promise<ReturnType<TransformFn>> {
+  // promises aren't enough to unblock the event loop
+  return (...args) =>
+    new Promise((resolve) => {
+      // set immediate is though
+      setImmediate(() => {
+        resolve(transform(...args));
+      });
+    });
 }

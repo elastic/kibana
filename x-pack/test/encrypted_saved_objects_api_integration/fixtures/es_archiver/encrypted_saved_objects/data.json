@@ -205,48 +205,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e",
-    "index": ".kibana_1",
-    "source": {
-      "alert": {
-        "actions": [
-        ],
-        "alertTypeId": "example.always-firing",
-        "apiKey": "erUMhI0y92leBCopRrSA9Ngm5Rd8RCglWRDcNLD0iw+/rcBLKfL/5CuaUM87OYb3ew/o3jPAIr1fD2El8dW4ZLseRecOGyDC39BKztmXRUtqp+mrNnozJx+kXlDJz/rbDRVAODsX6xI+xKQNLNna7SYn4ybDyZqVL+s6L128ujpEb6HD1HDHBwJguaXwHshGWM2GMpZDee/Swg==",
-        "apiKeyOwner": "elastic",
-        "consumer": "alerts",
-        "createdAt": "2020-06-17T15:35:38.497Z",
-        "createdBy": "elastic",
-        "enabled": true,
-        "muteAll": false,
-        "mutedInstanceIds": [
-        ],
-        "name": "always-firing-alert",
-        "params": {
-        },
-        "schedule": {
-          "interval": "1m"
-        },
-        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
-        "tags": [
-        ],
-        "throttle": null,
-        "updatedBy": "elastic"
-      },
-      "migrationVersion": {
-        "alert": "7.9.0"
-      },
-      "references": [
-      ],
-      "type": "alert",
-      "updated_at": "2020-06-17T15:35:39.839Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "saved-object-with-migration:74f3e6d7-b7bb-477d-ac28-92ee22728e6e",
     "index": ".kibana_1",
     "source": {
