@@ -6,15 +6,14 @@
 
 interface Percentage {
   pct: number;
+  color?: string;
 }
 interface Bytes {
   bytes: number;
+  color?: string;
 }
 interface Numeral {
-  numeral: number;
-}
-
-interface Color {
+  value: number;
   color?: string;
 }
 
@@ -37,35 +36,33 @@ interface FetchDataResponse {
 }
 
 interface LogsFetchDataResponse extends FetchDataResponse {
-  stats: {
-    [logName: string]: Numeral;
-  };
+  stats: Record<string, Numeral>;
 }
 
 interface MetricsFetchDataResponse extends FetchDataResponse {
   stats: {
-    hots: Numeral & Color;
-    cpu: Percentage & Color;
-    memory: Percentage & Color;
-    disk: Percentage & Color;
-    inboundTraffic: Bytes & Color;
-    outboundTraffic: Bytes & Color;
+    hots: Numeral;
+    cpu: Percentage;
+    memory: Percentage;
+    disk: Percentage;
+    inboundTraffic: Bytes;
+    outboundTraffic: Bytes;
   };
 }
 
 interface UptimeFetchDataResponse extends FetchDataResponse {
   stats: {
-    monitors: Numeral & Color;
-    up: Numeral & Color;
-    down: Numeral & Color;
+    monitors: Numeral;
+    up: Numeral;
+    down: Numeral;
   };
 }
 
 interface ApmFetchDataResponse extends FetchDataResponse {
   stats: {
-    services: Numeral & Color;
-    transactions: Numeral & Color;
-    errorRate?: Percentage & Color;
+    services: Numeral;
+    transactions: Numeral;
+    errorRate?: Percentage;
   };
 }
 
