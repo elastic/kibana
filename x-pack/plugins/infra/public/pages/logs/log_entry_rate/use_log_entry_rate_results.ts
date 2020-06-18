@@ -6,6 +6,7 @@
 
 import { useMemo, useState } from 'react';
 
+import uuid from 'uuid';
 import {
   GetLogEntryRateSuccessResponsePayload,
   LogEntryRateHistogramBucket,
@@ -23,11 +24,22 @@ type PartitionRecord = Record<
   { buckets: PartitionBucket[]; topAnomalyScore: number; totalNumberOfLogEntries: number }
 >;
 
+interface AnomalyRecord {
+  partitionId: string;
+  anomalyScore: number;
+  actualLogEntryRate: number;
+  typicalLogEntryRate: number;
+  startTime: number;
+  duration: number;
+  uuid: string;
+}
+
 export interface LogEntryRateResults {
   bucketDuration: number;
   totalNumberOfLogEntries: number;
   histogramBuckets: LogEntryRateHistogramBucket[];
   partitionBuckets: PartitionRecord;
+  anomalies: AnomalyRecord[];
 }
 
 export const useLogEntryRateResults = ({
@@ -55,6 +67,7 @@ export const useLogEntryRateResults = ({
           totalNumberOfLogEntries: data.totalNumberOfLogEntries,
           histogramBuckets: data.histogramBuckets,
           partitionBuckets: formatLogEntryRateResultsByPartition(data),
+          anomalies: formatLogEntryRateResultsByAllAnomalies(data),
         });
       },
       onReject: () => {
@@ -116,4 +129,25 @@ const formatLogEntryRateResultsByPartition = (
   });
 
   return resultsByPartition;
+};
+
+const formatLogEntryRateResultsByAllAnomalies = (
+  results: GetLogEntryRateSuccessResponsePayload['data']
+): AnomalyRecord[] => {
+  return results.histogramBuckets.reduce<AnomalyRecord[]>((anomalies, bucket) => {
+    return bucket.partitions.reduce<AnomalyRecord[]>((_anomalies, partition) => {
+      if (partition.anomalies.length > 0) {
+        partition.anomalies.forEach((anomaly) => {
+          _anomalies.push({
+            uuid: uuid.v4(),
+            partitionId: partition.partitionId,
+            ...anomaly,
+          });
+        });
+        return _anomalies;
+      } else {
+        return _anomalies;
+      }
+    }, anomalies);
+  }, []);
 };

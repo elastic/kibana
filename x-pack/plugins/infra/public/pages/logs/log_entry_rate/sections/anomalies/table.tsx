@@ -20,9 +20,11 @@ import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 
 interface TableItem {
-  partitionName: string;
-  partitionId: string;
-  topAnomalyScore: number;
+  uuid: string;
+  dataset: string;
+  datasetName: string;
+  anomalyScore: number;
+  anomalyMessage: string;
 }
 
 interface SortingOptions {
@@ -32,17 +34,32 @@ interface SortingOptions {
   };
 }
 
-const partitionColumnName = i18n.translate(
-  'xpack.infra.logs.analysis.anomaliesTablePartitionColumnName',
+interface PaginationOptions {
+  pageIndex: number;
+  pageSize: number;
+  totalItemCount: number;
+  pageSizeOptions: number[];
+  hidePerPageOptions: boolean;
+}
+
+const anomalyScoreColumnName = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableAnomalyScoreColumnName',
   {
-    defaultMessage: 'Partition',
+    defaultMessage: 'Anomaly score',
   }
 );
 
-const maxAnomalyScoreColumnName = i18n.translate(
-  'xpack.infra.logs.analysis.anomaliesTableMaxAnomalyScoreColumnName',
+const anomalyMessageColumnName = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableAnomalyMessageName',
   {
-    defaultMessage: 'Max anomaly score',
+    defaultMessage: 'Anomaly',
+  }
+);
+
+const datasetColumnName = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableAnomalyDatasetName',
+  {
+    defaultMessage: 'Dataset',
   }
 );
 
@@ -53,52 +70,66 @@ export const AnomaliesTable: React.FunctionComponent<{
   jobId: string;
 }> = ({ results, timeRange, setTimeRange, jobId }) => {
   const tableItems: TableItem[] = useMemo(() => {
-    return Object.entries(results.partitionBuckets).map(([key, value]) => {
+    return results.anomalies.map((anomaly) => {
       return {
+        uuid: anomaly.uuid,
         // The real ID
-        partitionId: key,
+        dataset: anomaly.partitionId,
         // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
-        partitionName: getFriendlyNameForPartitionId(key),
-        topAnomalyScore: formatAnomalyScore(value.topAnomalyScore),
+        datasetName: getFriendlyNameForPartitionId(anomaly.partitionId),
+        anomalyScore: formatAnomalyScore(anomaly.anomalyScore),
+        anomalyMessage: 'Less than expected', // TODO: Make these real
       };
     });
   }, [results]);
 
-  const [expandedDatasetIds, { add: expandDataset, remove: collapseDataset }] = useSet<string>(
+  const [expandedUuids, { add: expandDataset, remove: collapseDataset }] = useSet<string>(
     new Set()
   );
 
   const expandedDatasetRowContents = useMemo(
     () =>
-      [...expandedDatasetIds].reduce<Record<string, React.ReactNode>>(
-        (aggregatedDatasetRows, datasetId) => {
-          return {
-            ...aggregatedDatasetRows,
-            [getFriendlyNameForPartitionId(datasetId)]: (
-              <AnomaliesTableExpandedRow
-                partitionId={datasetId}
-                results={results}
-                setTimeRange={setTimeRange}
-                timeRange={timeRange}
-                jobId={jobId}
-              />
-            ),
-          };
-        },
-        {}
-      ),
-    [expandedDatasetIds, jobId, results, setTimeRange, timeRange]
+      [...expandedUuids].reduce<Record<string, React.ReactNode>>((aggregatedDatasetRows, uuid) => {
+        return {
+          ...aggregatedDatasetRows,
+          [uuid]: <div>Working</div>,
+        };
+      }, {}),
+    [expandedUuids]
   );
 
   const [sorting, setSorting] = useState<SortingOptions>({
     sort: {
-      field: 'topAnomalyScore',
+      field: 'anomalyScore',
       direction: 'desc',
     },
   });
 
+  const [_pagination, setPagination] = useState<PaginationOptions>({
+    pageIndex: 0,
+    pageSize: 20,
+    totalItemCount: results.anomalies.length,
+    pageSizeOptions: [10, 20, 50],
+    hidePerPageOptions: false,
+  });
+
+  const paginationOptions = useMemo(() => {
+    return {
+      ..._pagination,
+      totalItemCount: results.anomalies.length,
+    };
+  }, [_pagination, results]);
+
   const handleTableChange = useCallback(
-    ({ sort = {} }) => {
+    ({ page = {}, sort = {} }) => {
+      const { index, size } = page;
+      setPagination((currentPagination) => {
+        return {
+          ...currentPagination,
+          pageIndex: index,
+          pageSize: size,
+        };
+      });
       const { field, direction } = sort;
       setSorting({
         sort: {
@@ -107,33 +138,44 @@ export const AnomaliesTable: React.FunctionComponent<{
         },
       });
     },
-    [setSorting]
+    [setSorting, setPagination]
   );
 
   const sortedTableItems = useMemo(() => {
     let sortedItems: TableItem[] = [];
-    if (sorting.sort.field === 'partitionName') {
-      sortedItems = tableItems.sort((a, b) => (a.partitionId > b.partitionId ? 1 : -1));
-    } else if (sorting.sort.field === 'topAnomalyScore') {
-      sortedItems = tableItems.sort((a, b) => a.topAnomalyScore - b.topAnomalyScore);
+    if (sorting.sort.field === 'datasetName') {
+      sortedItems = tableItems.sort((a, b) => (a.datasetName > b.datasetName ? 1 : -1));
+    } else if (sorting.sort.field === 'anomalyScore') {
+      sortedItems = tableItems.sort((a, b) => a.anomalyScore - b.anomalyScore);
     }
     return sorting.sort.direction === 'asc' ? sortedItems : sortedItems.reverse();
   }, [tableItems, sorting]);
 
+  const pageOfItems: TableItem[] = useMemo(() => {
+    const { pageIndex, pageSize } = paginationOptions;
+    return sortedTableItems.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
+  }, [paginationOptions, sortedTableItems]);
+
   const columns: Array<EuiBasicTableColumn<TableItem>> = useMemo(
     () => [
       {
-        field: 'partitionName',
-        name: partitionColumnName,
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: 'topAnomalyScore',
-        name: maxAnomalyScoreColumnName,
+        field: 'anomalyScore',
+        name: anomalyScoreColumnName,
         sortable: true,
         truncateText: true,
         dataType: 'number' as const,
+      },
+      {
+        field: 'anomalyMessage',
+        name: anomalyScoreColumnName,
+        sortable: false,
+        truncateText: true,
+      },
+      {
+        field: 'datasetName',
+        name: datasetColumnName,
+        sortable: true,
+        truncateText: true,
       },
       {
         align: RIGHT_ALIGNMENT,
@@ -141,25 +183,26 @@ export const AnomaliesTable: React.FunctionComponent<{
         isExpander: true,
         render: (item: TableItem) => (
           <RowExpansionButton
-            isExpanded={expandedDatasetIds.has(item.partitionId)}
-            item={item.partitionId}
+            isExpanded={expandedUuids.has(item.uuid)}
+            item={item.uuid}
             onExpand={expandDataset}
             onCollapse={collapseDataset}
           />
         ),
       },
     ],
-    [collapseDataset, expandDataset, expandedDatasetIds]
+    [collapseDataset, expandDataset, expandedUuids]
   );
 
   return (
     <StyledEuiBasicTable
-      items={sortedTableItems}
-      itemId="partitionName"
+      items={pageOfItems}
+      itemId="uuid"
       itemIdToExpandedRowMap={expandedDatasetRowContents}
       isExpandable={true}
       hasActions={true}
       columns={columns}
+      pagination={paginationOptions}
       sorting={sorting}
       onChange={handleTableChange}
     />
