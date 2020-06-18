@@ -50,9 +50,12 @@ export async function getClientMetrics({
   const response = await client.search(params);
   const { backEnd, domInteractive, pageViews } = response.aggregations!;
 
+  // Divide by 1000 to convert ms into seconds
   return {
     pageViews,
-    backEnd,
-    frontEnd: { value: domInteractive.value! - backEnd.value! },
+    backEnd: { value: (backEnd.value || 0) / 1000 },
+    frontEnd: {
+      value: ((domInteractive.value || 0) - (backEnd.value || 0)) / 1000,
+    },
   };
 }

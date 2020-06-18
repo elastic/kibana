@@ -25,6 +25,12 @@ export function getRumOverviewProjection({
       { range: rangeFilter(start, end) },
       { term: { [PROCESSOR_EVENT]: 'transaction' } },
       { term: { [TRANSACTION_TYPE]: 'page-load' } },
+      {
+        // Adding this filter to cater for some inconsistent rum data
+        exists: {
+          field: 'transaction.marks.navigationTiming.fetchStart',
+        },
+      },
       ...uiFiltersES,
     ],
   };
