@@ -15,7 +15,8 @@ interface ServerReturnedResolverData {
   readonly payload: {
     readonly events: ResolverEvent[];
     readonly stats: Map<string, ResolverNodeStats>;
-  }
+    readonly limitReached: boolean;
+  };
 }
 
 interface ServerFailedToReturnResolverData {
