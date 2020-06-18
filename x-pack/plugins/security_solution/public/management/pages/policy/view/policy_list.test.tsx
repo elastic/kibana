@@ -31,7 +31,7 @@ describe('when on the policies page', () => {
 
   it('should display the onboarding steps', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('onBoardingSteps');
+    const table = await renderResult.findByTestId('onboardingSteps');
     expect(table).not.toBeNull();
   });
 
