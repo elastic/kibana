@@ -493,7 +493,7 @@ export class EndpointDocGenerator {
       },
       host: this.commonInfo.host,
       process: {
-        pid: options.pid ? options.pid : this.randomN(5000),
+        pid: 'pid' in options ? options.pid : this.randomN(5000),
         executable: `C:\\${processName}`,
         args: `"C:\\${processName}" \\${this.randomString(3)}`,
         code_signature: {
