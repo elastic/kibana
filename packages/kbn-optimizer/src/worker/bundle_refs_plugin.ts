@@ -40,51 +40,69 @@ interface RequestData {
 type Callback<T> = (error?: any, result?: T) => void;
 type ModuleFactory = (data: RequestData, callback: Callback<BundleRefModule>) => void;
 
-/**
- * Isolate the weired type juggling we have to do to add a hook to the webpack compiler
- */
-function hookIntoCompiler(
-  compiler: webpack.Compiler,
-  handler: (context: string, request: string) => Promise<BundleRefModule | undefined>
-) {
-  compiler.hooks.compile.tap('BundleRefsPlugin', (compilationParams: any) => {
-    compilationParams.normalModuleFactory.hooks.factory.tap(
-      'BundleRefsPlugin/normalModuleFactory/factory',
-      (wrappedFactory: ModuleFactory): ModuleFactory => (data, callback) => {
-        const context = data.context;
-        const dep = data.dependencies[0];
-
-        handler(context, dep.request).then(
-          (result) => {
-            if (!result) {
-              wrappedFactory(data, callback);
-            } else {
-              callback(undefined, result);
-            }
-          },
-          (error) => callback(error)
-        );
-      }
-    );
-  });
-}
-
 export class BundleRefsPlugin {
-  private resolvedRequestCache = new Map<string, Promise<string | undefined>>();
+  private readonly resolvedRefEntryCache = new Map<BundleRef, Promise<string>>();
+  private readonly resolvedRequestCache = new Map<string, Promise<string | undefined>>();
+  private readonly ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
 
-  constructor(private readonly bundle: Bundle, public readonly bundleRefs: BundleRefs) {}
+  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {}
 
-  apply(compiler: webpack.Compiler) {
-    hookIntoCompiler(compiler, async (context, request) => {
-      const ref = await this.resolveRef(context, request);
-      if (ref) {
-        return new BundleRefModule(ref.exportId);
-      }
+  /**
+   * Called by webpack when the plugin is passed in the webpack config
+   */
+  public apply(compiler: webpack.Compiler) {
+    // called whenever the compiler starts to compile, passed the params
+    // that will be used to create the compilation
+    compiler.hooks.compile.tap('BundleRefsPlugin', (compilationParams: any) => {
+      // clear caches because a new compilation is starting, meaning that files have
+      // changed and we should re-run resolutions
+      this.resolvedRefEntryCache.clear();
+      this.resolvedRequestCache.clear();
+
+      // hook into the creation of NormalModule instances in webpack, if the import
+      // statement leading to the creation of the module is pointing to a bundleRef
+      // entry then create a BundleRefModule instead of a NormalModule.
+      compilationParams.normalModuleFactory.hooks.factory.tap(
+        'BundleRefsPlugin/normalModuleFactory/factory',
+        (wrappedFactory: ModuleFactory): ModuleFactory => (data, callback) => {
+          const context = data.context;
+          const dep = data.dependencies[0];
+
+          this.maybeReplaceImport(context, dep.request).then(
+            (module) => {
+              if (!module) {
+                wrappedFactory(data, callback);
+              } else {
+                callback(undefined, module);
+              }
+            },
+            (error) => callback(error)
+          );
+        }
+      );
     });
   }
 
-  private cachedResolveRequest(context: string, request: string) {
-    const absoluteRequest = Path.resolve(context, request);
+  private cachedResolveRefEntry(ref: BundleRef) {
+    const cached = this.resolvedRefEntryCache.get(ref);
+
+    if (cached) {
+      return cached;
+    }
+
+    const absoluteRequest = Path.resolve(ref.contextDir, ref.entry);
+    const promise = this.cachedResolveRequest(absoluteRequest).then((resolved) => {
+      if (!resolved) {
+        throw new Error(`Unable to resolve request [${ref.entry}] relative to [${ref.contextDir}]`);
+      }
+
+      return resolved;
+    });
+    this.resolvedRefEntryCache.set(ref, promise);
+    return promise;
+  }
+
+  private cachedResolveRequest(absoluteRequest: string) {
     const cached = this.resolvedRequestCache.get(absoluteRequest);
 
     if (cached) {
@@ -102,6 +120,7 @@ export class BundleRefsPlugin {
       return absoluteRequest;
     }
 
+    // look for an index file in directories
     if (stats?.isDirectory()) {
       for (const ext of RESOLVE_EXTENSIONS) {
         const indexPath = Path.resolve(absoluteRequest, `index${ext}`);
@@ -109,6 +128,15 @@ export class BundleRefsPlugin {
         if (indexStats?.isFile()) {
           return indexPath;
         }
+      }
+    }
+
+    // look for a file with one of the supported extensions
+    for (const ext of RESOLVE_EXTENSIONS) {
+      const filePath = `${absoluteRequest}${ext}`;
+      const fileStats = await safeStat(filePath);
+      if (fileStats?.isFile()) {
+        return filePath;
       }
     }
 
@@ -121,7 +149,7 @@ export class BundleRefsPlugin {
    * then an error is thrown. If the request does not resolve to a bundleRef then
    * undefined is returned. Otherwise it returns the referenced bundleRef.
    */
-  private async resolveRef(context: string, request: string) {
+  private async maybeReplaceImport(context: string, request: string) {
     // ignore imports that have loaders defined or are not relative seeming
     if (request.includes('!') || !request.startsWith('.')) {
       return;
@@ -132,7 +160,12 @@ export class BundleRefsPlugin {
       return;
     }
 
-    const resolved = await this.cachedResolveRequest(context, request);
+    const absoluteRequest = Path.resolve(context, request);
+    if (absoluteRequest.startsWith(this.ignorePrefix)) {
+      return;
+    }
+
+    const resolved = await this.cachedResolveRequest(absoluteRequest);
     if (!resolved) {
       return;
     }
@@ -143,23 +176,17 @@ export class BundleRefsPlugin {
       return;
     }
 
-    let matchingRef: BundleRef | undefined;
     for (const ref of eligibleRefs) {
-      const resolvedEntry = await this.cachedResolveRequest(ref.contextDir, ref.entry);
+      const resolvedEntry = await this.cachedResolveRefEntry(ref);
       if (resolved === resolvedEntry) {
-        matchingRef = ref;
-        break;
+        return new BundleRefModule(ref.exportId);
       }
     }
 
-    if (!matchingRef) {
-      const bundleId = Array.from(new Set(eligibleRefs.map((r) => r.bundleId))).join(', ');
-      const publicDir = eligibleRefs.map((r) => r.entry).join(', ');
-      throw new Error(
-        `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
-      );
-    }
-
-    return matchingRef;
+    const bundleId = Array.from(new Set(eligibleRefs.map((r) => r.bundleId))).join(', ');
+    const publicDir = eligibleRefs.map((r) => r.entry).join(', ');
+    throw new Error(
+      `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
+    );
   }
 }

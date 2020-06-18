@@ -172,8 +172,10 @@ export {
   ISearchOptions,
   IRequestTypesMap,
   IResponseTypesMap,
-  ISearchContext,
-  TSearchStrategyProvider,
+  ISearchSetup,
+  ISearchStart,
+  TStrategyTypes,
+  ISearchStrategy,
   getDefaultSearchParams,
   getTotalLoaded,
 } from './search';
