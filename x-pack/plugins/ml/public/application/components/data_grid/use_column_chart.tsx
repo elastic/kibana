@@ -75,7 +75,7 @@ interface NumericColumnStats {
 type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 const getAggIntervals = async (
   indexPatternTitle: string,
-  api: any,
+  esSearch: (payload: any) => Promise<any>,
   query: any,
   columnTypes: EuiDataGridColumn[]
 ): Promise<NumericColumnStatsMap> => {
@@ -100,7 +100,7 @@ const getAggIntervals = async (
 
   let respStats: any;
   try {
-    respStats = await api.esSearch({
+    respStats = await esSearch({
       index: indexPatternTitle,
       size: 0,
       body: {
@@ -159,11 +159,11 @@ type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
 
 export const fetchChartsData = async (
   indexPatternTitle: string,
-  api: any,
+  esSearch: (payload: any) => Promise<any>,
   query: any,
   columnTypes: EuiDataGridColumn[]
 ): Promise<ChartData[]> => {
-  const aggIntervals = await getAggIntervals(indexPatternTitle, api, query, columnTypes);
+  const aggIntervals = await getAggIntervals(indexPatternTitle, esSearch, query, columnTypes);
 
   const chartDataAggs = columnTypes.reduce((aggs, c) => {
     const fieldType = getFieldType(c.schema);
@@ -201,7 +201,7 @@ export const fetchChartsData = async (
 
   let respChartsData: any;
   try {
-    respChartsData = await api.esSearch({
+    respChartsData = await esSearch({
       index: indexPatternTitle,
       size: 0,
       body: {

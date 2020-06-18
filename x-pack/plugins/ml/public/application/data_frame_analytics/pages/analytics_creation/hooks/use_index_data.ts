@@ -107,7 +107,7 @@ export const useIndexData = (
     try {
       const columnChartsData = await fetchChartsData(
         indexPattern.title,
-        ml,
+        ml.esSearch,
         query,
         columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
       );

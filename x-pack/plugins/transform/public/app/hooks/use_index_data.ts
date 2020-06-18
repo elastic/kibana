@@ -109,7 +109,7 @@ export const useIndexData = (
     try {
       const columnChartsData = await fetchChartsData(
         indexPattern.title,
-        api,
+        api.esSearch,
         isDefaultQuery(query) ? matchAllQuery : query,
         columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
       );

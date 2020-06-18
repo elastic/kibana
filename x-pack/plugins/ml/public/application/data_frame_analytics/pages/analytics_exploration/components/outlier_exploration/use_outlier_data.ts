@@ -84,7 +84,7 @@ export const useOutlierData = (
       if (jobConfig !== undefined) {
         const columnChartsData = await fetchChartsData(
           jobConfig.dest.index,
-          ml,
+          ml.esSearch,
           searchQuery,
           columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
         );
