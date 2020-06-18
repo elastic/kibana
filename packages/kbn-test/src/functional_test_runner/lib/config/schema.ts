@@ -57,6 +57,27 @@ const appUrlPartsSchema = () =>
     })
     .default();
 
+const requiredWhenEnabled = (schema: Joi.Schema) => {
+  return Joi.when('enabled', {
+    is: true,
+    then: schema.required(),
+    otherwise: schema.optional(),
+  });
+};
+
+const dockerServerSchema = () =>
+  Joi.object()
+    .keys({
+      enabled: Joi.boolean().required(),
+      image: requiredWhenEnabled(Joi.string()),
+      port: requiredWhenEnabled(Joi.number()),
+      portInContainer: requiredWhenEnabled(Joi.number()),
+      waitForLogLine: Joi.alternatives(Joi.object().type(RegExp), Joi.string()).optional(),
+      waitFor: Joi.func().optional(),
+      args: Joi.array().items(Joi.string()).optional(),
+    })
+    .default();
+
 const defaultRelativeToConfigPath = (path: string) => {
   const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
   makeDefault.description = `<config.js directory>/${path}`;
@@ -259,5 +280,7 @@ export const schema = Joi.object()
         disableTestUser: Joi.boolean(),
       })
       .default(),
+
+    dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
   })
   .default();
