@@ -33,8 +33,6 @@ import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
 
-import './index.scss';
-
 interface AdvancedSettingsProps {
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
