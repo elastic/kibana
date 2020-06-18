@@ -15,6 +15,7 @@ import {
   GetOneAgentConfigRequestSchema,
   CreateAgentConfigRequestSchema,
   UpdateAgentConfigRequestSchema,
+  CopyAgentConfigRequestSchema,
   DeleteAgentConfigRequestSchema,
   GetFullAgentConfigRequestSchema,
   AgentConfig,
@@ -27,6 +28,7 @@ import {
   GetOneAgentConfigResponse,
   CreateAgentConfigResponse,
   UpdateAgentConfigResponse,
+  CopyAgentConfigResponse,
   DeleteAgentConfigResponse,
   GetFullAgentConfigResponse,
 } from '../../../common';
@@ -166,6 +168,34 @@ export const updateAgentConfigHandler: RequestHandler<
       }
     );
     const body: UpdateAgentConfigResponse = { item: agentConfig, success: true };
+    return response.ok({
+      body,
+    });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const copyAgentConfigHandler: RequestHandler<
+  TypeOf<typeof CopyAgentConfigRequestSchema.params>,
+  unknown,
+  TypeOf<typeof CopyAgentConfigRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  try {
+    const agentConfig = await agentConfigService.copy(
+      soClient,
+      request.params.agentConfigId,
+      request.body,
+      {
+        user: user || undefined,
+      }
+    );
+    const body: CopyAgentConfigResponse = { item: agentConfig, success: true };
     return response.ok({
       body,
     });

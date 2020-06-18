@@ -10,11 +10,15 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '../../../../src/core/public';
+import { RegisterDataHandler, registerDataHandler } from './data_handler';
 
-export type ClientSetup = void;
-export type ClientStart = void;
+export interface ObservabilityPluginSetup {
+  dashboard: { register: RegisterDataHandler };
+}
 
-export class Plugin implements PluginClass<ClientSetup, ClientStart> {
+export type ObservabilityPluginStart = void;
+
+export class Plugin implements PluginClass<ObservabilityPluginSetup, ObservabilityPluginStart> {
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
@@ -25,7 +29,7 @@ export class Plugin implements PluginClass<ClientSetup, ClientStart> {
       appRoute: '/app/observability',
       category: DEFAULT_APP_CATEGORIES.observability,
 
-      async mount(params: AppMountParameters<unknown>) {
+      mount: async (params: AppMountParameters<unknown>) => {
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services
@@ -34,6 +38,10 @@ export class Plugin implements PluginClass<ClientSetup, ClientStart> {
         return renderApp(coreStart, params);
       },
     });
+
+    return {
+      dashboard: { register: registerDataHandler },
+    };
   }
   public start() {}
 }

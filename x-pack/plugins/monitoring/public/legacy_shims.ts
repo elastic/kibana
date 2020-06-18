@@ -6,8 +6,15 @@
 
 import { CoreStart } from 'kibana/public';
 import angular from 'angular';
+import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
 import { MonitoringPluginDependencies } from './types';
+
+interface BreadcrumbItem {
+  ['data-test-subj']?: string;
+  href?: string;
+  text: string;
+}
 
 export interface KFetchQuery {
   [key: string]: string | number | boolean | undefined;
@@ -29,7 +36,10 @@ export interface IShims {
   getAngularInjector: () => angular.auto.IInjectorService;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
-  breadcrumbs: { set: () => void };
+  breadcrumbs: {
+    set: (breadcrumbs: BreadcrumbItem[]) => void;
+    update: (breadcrumbs?: BreadcrumbItem[]) => void;
+  };
   I18nContext: CoreStart['i18n']['Context'];
   docLinks: CoreStart['docLinks'];
   docTitle: CoreStart['chrome']['docTitle'];
@@ -56,7 +66,30 @@ export class Legacy {
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
         core.injectedMetadata.getInjectedVar(name, defaultValue),
       breadcrumbs: {
-        set: (...args: any[0]) => core.chrome.setBreadcrumbs.apply(this, args),
+        set: (breadcrumbs: BreadcrumbItem[]) => this._shims.breadcrumbs.update(breadcrumbs),
+        update: (breadcrumbs?: BreadcrumbItem[]) => {
+          if (!breadcrumbs) {
+            const currentBreadcrumbs: Observable<any> & {
+              value?: BreadcrumbItem[];
+            } = core.chrome.getBreadcrumbs$()?.source;
+            breadcrumbs = currentBreadcrumbs?.value;
+          }
+          const globalStateStr = location.hash.split('?')[1];
+          if (
+            !breadcrumbs?.length ||
+            globalStateStr?.indexOf('_g') !== 0 ||
+            breadcrumbs[0].href?.split('?')[1] === globalStateStr
+          ) {
+            return;
+          }
+          breadcrumbs.forEach((breadcrumb: BreadcrumbItem) => {
+            const breadcrumbHref = breadcrumb.href?.split('?')[0];
+            if (breadcrumbHref) {
+              breadcrumb.href = `${breadcrumbHref}?${globalStateStr}`;
+            }
+          });
+          core.chrome.setBreadcrumbs(breadcrumbs.slice(0));
+        },
       },
       I18nContext: core.i18n.Context,
       docLinks: core.docLinks,
