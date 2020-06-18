@@ -229,7 +229,6 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                         references,
                         note,
                         version,
-                        exceptions_list,
                         anomalyThreshold,
                         machineLearningJobId,
                       });
