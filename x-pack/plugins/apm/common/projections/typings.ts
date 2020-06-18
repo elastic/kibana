@@ -29,5 +29,4 @@ export enum PROJECTION {
   METRICS = 'metrics',
   ERROR_GROUPS = 'errorGroups',
   SERVICE_NODES = 'serviceNodes',
-  RUM_OVERVIEW = 'rumOverview',
 }
