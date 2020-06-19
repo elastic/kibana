@@ -41,7 +41,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         selection.length > 0 ? (
           <EuiButton
             data-test-subj="deletePipelinesButton"
-            onClick={() => onDeletePipelineClick(selection.map(pipeline => pipeline.name))}
+            onClick={() => onDeletePipelineClick(selection.map((pipeline) => pipeline.name))}
             color="danger"
           >
             <FormattedMessage
@@ -50,9 +50,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               values={{ count: selection.length }}
             />
           </EuiButton>
-        ) : (
-          undefined
-        ),
+        ) : undefined,
       toolsRight: [
         <EuiButton
           key="reloadButton"
