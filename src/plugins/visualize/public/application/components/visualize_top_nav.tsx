@@ -135,12 +135,13 @@ const TopNav = ({
   }, [services.data.indexPatterns, vis.data.indexPattern]);
 
   return isChromeVisible ? (
-    // Local nav.
-    // Most visualizations have all search bar components enabled
-    // Some visualizations have fewer options but all visualizations have a search bar
-    // which is why show-search-baris set to "true".
-    // All visualizaions also have least a timepicker \ autorefresh component, which is why
-    // show-query-bar is set to "true".
+    /**
+     * Most visualizations have all search bar components enabled.
+     * Some visualizations have fewer options, but all visualizations have the search bar.
+     * That's is why the showSearchBar prop is set.
+     * All visualizations also have the timepicker\autorefresh component,
+     * it is enabled by default in the TopNavMenu component.
+     */
     <TopNavMenu
       appName={APP_NAME}
       config={config}
@@ -159,8 +160,10 @@ const TopNav = ({
       useDefaultBehaviors
     />
   ) : showFilterBar ? (
-    // The top nav is hidden in embed mode but the filter bar must still be present so
-    // we show the filter bar on its own here if the chrome is not visible.
+    /**
+     * The top nav is hidden in embed mode, but the filter bar must still be present so
+     * we show the filter bar on its own here if the chrome is not visible.
+     */
     <TopNavMenu
       appName={APP_NAME}
       indexPatterns={indexPattern ? [indexPattern] : undefined}

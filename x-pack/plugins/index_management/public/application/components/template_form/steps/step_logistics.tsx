@@ -8,9 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonEmpty, EuiSpacer } from '
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { useForm, Form, getUseField, getFormRow, Field } from '../../../../shared_imports';
+import { useForm, Form, getUseField, getFormRow, Field, Forms } from '../../../../shared_imports';
 import { documentationService } from '../../../services/documentation';
-import { StepProps } from '../types';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
 
 // Create or Form components with partial props that are common to all instances
@@ -59,96 +58,102 @@ const fieldsMeta = {
   },
 };
 
-export const StepLogistics: React.FunctionComponent<StepProps> = ({
-  template,
-  isEditing,
-  setDataGetter,
-  onStepValidityChange,
-}) => {
-  const { form } = useForm({
-    schema: schemas.logistics,
-    defaultValue: template,
-    options: { stripEmptyFields: false },
-  });
+interface Props {
+  defaultValue: { [key: string]: any };
+  onChange: (content: Forms.Content) => void;
+  isEditing?: boolean;
+}
 
-  useEffect(() => {
-    onStepValidityChange(form.isValid);
-  }, [form.isValid, onStepValidityChange]);
+export const StepLogistics: React.FunctionComponent<Props> = React.memo(
+  ({ defaultValue, isEditing, onChange }) => {
+    const { form } = useForm({
+      schema: schemas.logistics,
+      defaultValue,
+      options: { stripEmptyFields: false },
+    });
 
-  useEffect(() => {
-    setDataGetter(form.submit);
-  }, [form.submit, setDataGetter]);
+    useEffect(() => {
+      const validate = async () => {
+        return (await form.submit()).isValid;
+      };
+      onChange({
+        isValid: form.isValid,
+        validate,
+        getData: form.getFormData,
+      });
+    }, [form.isValid, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { name, indexPatterns, order, version } = fieldsMeta;
+    const { name, indexPatterns, order, version } = fieldsMeta;
 
-  return (
-    <Form form={form} data-test-subj="stepLogistics">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
+    return (
+      <Form form={form} data-test-subj="stepLogistics">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
+                  defaultMessage="Logistics"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              flush="right"
+              href={documentationService.getTemplatesDocumentationLink()}
+              target="_blank"
+              iconType="help"
+            >
               <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
-                defaultMessage="Logistics"
+                id="xpack.idxMgmt.templateForm.stepLogistics.docsButtonLabel"
+                defaultMessage="Index Templates docs"
               />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={documentationService.getTemplatesDocumentationLink()}
-            target="_blank"
-            iconType="help"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepLogistics.docsButtonLabel"
-              defaultMessage="Index Templates docs"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      {/* Name */}
-      <FormRow title={name.title} description={name.description}>
-        <UseField
-          path="name"
-          componentProps={{
-            ['data-test-subj']: name.testSubject,
-            euiFieldProps: { disabled: isEditing },
-          }}
-          config={isEditing ? nameConfigWithoutValidations : nameConfig}
-        />
-      </FormRow>
-      {/* Index patterns */}
-      <FormRow title={indexPatterns.title} description={indexPatterns.description}>
-        <UseField
-          path="indexPatterns"
-          componentProps={{
-            ['data-test-subj']: indexPatterns.testSubject,
-          }}
-        />
-      </FormRow>
-      {/* Order */}
-      <FormRow title={order.title} description={order.description}>
-        <UseField
-          path="order"
-          componentProps={{
-            ['data-test-subj']: order.testSubject,
-          }}
-        />
-      </FormRow>
-      {/* Version */}
-      <FormRow title={version.title} description={version.description}>
-        <UseField
-          path="version"
-          componentProps={{
-            ['data-test-subj']: version.testSubject,
-          }}
-        />
-      </FormRow>
-    </Form>
-  );
-};
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        {/* Name */}
+        <FormRow title={name.title} description={name.description}>
+          <UseField
+            path="name"
+            componentProps={{
+              ['data-test-subj']: name.testSubject,
+              euiFieldProps: { disabled: isEditing },
+            }}
+            config={isEditing ? nameConfigWithoutValidations : nameConfig}
+          />
+        </FormRow>
+        {/* Index patterns */}
+        <FormRow title={indexPatterns.title} description={indexPatterns.description}>
+          <UseField
+            path="indexPatterns"
+            componentProps={{
+              ['data-test-subj']: indexPatterns.testSubject,
+            }}
+          />
+        </FormRow>
+        {/* Order */}
+        <FormRow title={order.title} description={order.description}>
+          <UseField
+            path="order"
+            componentProps={{
+              ['data-test-subj']: order.testSubject,
+            }}
+          />
+        </FormRow>
+        {/* Version */}
+        <FormRow title={version.title} description={version.description}>
+          <UseField
+            path="version"
+            componentProps={{
+              ['data-test-subj']: version.testSubject,
+            }}
+          />
+        </FormRow>
+      </Form>
+    );
+  }
+);

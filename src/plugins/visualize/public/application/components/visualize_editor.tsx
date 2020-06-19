@@ -23,6 +23,7 @@ import { useParams } from 'react-router-dom';
 import { parse } from 'query-string';
 import { EventEmitter } from 'events';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 
 import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../../embeddable/public';
 import { removeQueryParam } from '../../../../kibana_utils/public';
@@ -61,7 +62,6 @@ export const VisualizeEditor = () => {
     services,
     eventEmitter,
     setHasUnsavedChanges,
-    isChromeVisible,
     appState,
     savedVisInstance,
     visEditorController
@@ -103,16 +103,18 @@ export const VisualizeEditor = () => {
       )}
       {savedVisInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
       {savedVisInstance && (
-        <h1 className="euiScreenReaderOnly">
-          <FormattedMessage
-            id="visualize.pageHeading"
-            defaultMessage="{chartName} {chartType} visualization"
-            values={{
-              chartName: savedVisInstance.savedVis.title,
-              chartType: savedVisInstance.vis.type.title,
-            }}
-          />
-        </h1>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="visualize.pageHeading"
+              defaultMessage="{chartName} {chartType} visualization"
+              values={{
+                chartName: savedVisInstance.savedVis.title,
+                chartType: savedVisInstance.vis.type.title,
+              }}
+            />
+          </h1>
+        </EuiScreenReaderOnly>
       )}
       <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
     </div>

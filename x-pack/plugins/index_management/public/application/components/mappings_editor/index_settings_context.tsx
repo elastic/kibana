@@ -13,7 +13,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const IndexSettingsProvider = ({ indexSettings, children }: Props) => (
+export const IndexSettingsProvider = ({ indexSettings = {}, children }: Props) => (
   <IndexSettingsContext.Provider value={indexSettings}>{children}</IndexSettingsContext.Provider>
 );
 

@@ -35,7 +35,6 @@ export const useEditorUpdates = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   setHasUnsavedChanges: (value: boolean) => void,
-  isChromeVisible: boolean | undefined,
   appState: VisualizeAppStateContainer | null,
   savedVisInstance: SavedVisInstance | undefined,
   visEditorController: IEditorController | undefined
@@ -173,7 +172,6 @@ export const useEditorUpdates = (
   }, [
     appState,
     eventEmitter,
-    isChromeVisible,
     savedVisInstance,
     services,
     setHasUnsavedChanges,
