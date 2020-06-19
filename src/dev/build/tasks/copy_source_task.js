@@ -45,7 +45,6 @@ export const CopySourceTask = {
         'typings/**',
         'webpackShims/**',
         'config/kibana.yml',
-        'config/node.options',
         'tsconfig*.json',
         '.i18nrc.json',
         'kibana.d.ts',
