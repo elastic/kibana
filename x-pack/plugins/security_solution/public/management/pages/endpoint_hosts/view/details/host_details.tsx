@@ -93,13 +93,40 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
 
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
+  const [policyDetailsRoutePath, policyDetailsRouteUrl] = useMemo(() => {
+    return [
+      getManagementUrl({
+        name: 'policyDetails',
+        policyId: details.Endpoint.policy.applied.id,
+        excludePrefix: true,
+      }),
+      getManagementUrl({
+        name: 'policyDetails',
+        policyId: details.Endpoint.policy.applied.id,
+      }),
+    ];
+  }, [details.Endpoint.policy.applied.id]);
+
+  const policyDetailsClickHandler = useNavigateByRouterEventHandler(policyDetailsRoutePath);
+
   const detailsResultsPolicy = useMemo(() => {
     return [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
           defaultMessage: 'Policy',
         }),
-        description: details.endpoint.policy.applied.id,
+        description: (
+          <>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiLink
+              data-test-subj="policyDetailsValue"
+              href={policyDetailsRouteUrl}
+              onClick={policyDetailsClickHandler}
+            >
+              {details.Endpoint.policy.applied.name}
+            </EuiLink>
+          </>
+        ),
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policyStatus', {
@@ -128,7 +155,14 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         ),
       },
     ];
-  }, [details, policyResponseUri, policyStatus, policyStatusClickHandler]);
+  }, [
+    details,
+    policyResponseUri,
+    policyStatus,
+    policyStatusClickHandler,
+    policyDetailsRouteUrl,
+    policyDetailsClickHandler,
+  ]);
   const detailsResultsLower = useMemo(() => {
     return [
       {

@@ -13,6 +13,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 
 import { OverviewNetwork } from '.';
@@ -83,11 +84,12 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
 describe('OverviewNetwork', () => {
   const state: State = mockGlobalState;
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
   });
 
   test('it renders the expected widget title', () => {
