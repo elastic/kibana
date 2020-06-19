@@ -22,7 +22,7 @@ interface Props {
 function generateAnnotationData(
   values?: Record<string, number>
 ): LineAnnotationDatum[] {
-  return Object.entries(values ?? {}).map((value, index) => ({
+  return Object.entries(values ?? {}).map((value) => ({
     dataValue: value[1],
     details: `${(+value[0]).toFixed(0)}`,
   }));

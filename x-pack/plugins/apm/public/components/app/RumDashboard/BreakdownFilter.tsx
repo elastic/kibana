@@ -59,8 +59,7 @@ export const BreakdownFilter = ({
 
   return (
     <BreakdownGroup
-      fieldName={fieldName}
-      id={fieldName}
+      id={'Breakdown'}
       items={sItems}
       loading={false}
       onChange={onChange}

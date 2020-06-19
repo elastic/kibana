@@ -25,7 +25,6 @@ import { LoadingLabel, SearchBreakdownLabel } from './translations';
 import { BreakdownItem } from '../../../../typings/ui_filters';
 
 export interface FilterPopoverProps {
-  fieldName: string;
   id: string;
   loading: boolean;
   disabled?: boolean;
