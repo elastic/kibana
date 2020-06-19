@@ -42,8 +42,6 @@ export class ManifestEntry {
 
   public getState(): object {
     // TODO: type
-    // console.log(this);
-    // console.log(sha256);
     return {
       identifier: this.getIdentifier(),
       url: this.getUrl(),

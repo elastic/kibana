@@ -58,15 +58,11 @@ export class ManifestService {
 
   public getState(): object {
     // TODO: type
-    // console.log(this.sha256);
     return this.entries
       .map((entry) => {
-        // console.log(this.sha256);
         return entry.getState();
       })
       .reduce((map, state) => {
-        // console.log(state.sha256);
-        // console.log(state.size);
         map[state.identifier] = {
           url: state.url,
           sha256: state.sha256,
@@ -82,13 +78,17 @@ export class ManifestService {
 
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
       for (const schemaVersion of ArtifactConstants.SUPPORTED_SCHEMA_VERSIONS) {
-        entries.push(new ManifestEntry(this.exceptionListClient, os, schemaVersion));
+        const entry = new ManifestEntry(this.exceptionListClient, os, schemaVersion);
+
+        try {
+          await entry.refresh();
+          entries.push(entry);
+        } catch (err) {
+          // TODO: context logger?
+          // console.log(err);
+        }
       }
     }
-
-    entries.map(async (entry) => {
-      await entry.refresh();
-    });
 
     this.entries = entries;
   }

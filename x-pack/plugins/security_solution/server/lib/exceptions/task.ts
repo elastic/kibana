@@ -20,7 +20,7 @@ import { ListPluginSetup } from '../../../../lists/server';
 import { ConfigType } from '../../config';
 import { ExceptionsCache } from './cache';
 import { GetFullEndpointExceptionList, CompressExceptionList } from './lists';
-import { ManifestService } from './manifest';
+import { ArtifactConstants, ManifestService } from './manifest';
 import { ArtifactSoSchema } from './schemas';
 
 const PackagerTaskConstants = {
@@ -55,8 +55,9 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
     return `${PackagerTaskConstants.TYPE}:${PackagerTaskConstants.VERSION}`;
   };
 
-  const run = async (taskId: int, taskState: Record<string, string>): Record<string, string> => {
-    const state = Object.assign({}, ...taskState);
+  const run = async (taskId: int, state: Record<string, string>): Record<string, string> => {
+    // console.log(taskState);
+    // const state = Object.assign({}, ...taskState);
 
     // Check that this task is current
     if (taskId !== getTaskId()) {
@@ -72,7 +73,12 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       savedObjects,
     });
 
-    await manifest.refresh();
+    try {
+      await manifest.refresh();
+    } catch (err) {
+      context.logger.error(err);
+    }
+
     return manifest.getState();
   };
 
@@ -204,10 +210,42 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
         return {
           run: async () => {
             const state = await run(taskInstance.id, taskInstance.state);
-            // console.log(state);
 
-            // TODO: compare state to taskInstance.state
-            // If different, update manifest
+            // Get clients
+            const [{ savedObjects }] = await context.core.getStartServices();
+            const savedObjectsRepository = savedObjects.createInternalRepository();
+            const soClient = new SavedObjectsClient(savedObjectsRepository);
+
+            // Create/update the artifacts
+            let updated = false;
+            state.forEach((id, entry) => {
+              const soResponse = await soClient.create<ArtifactSoSchema>(
+                ArtifactConstants.SAVED_OBJECT_TYPE,
+                entry.getSavedObject(),
+                { id, overwrite: true }
+              );
+
+              // If new, update state
+              if (state[id].sha256 !== soResponse.attributes.sha256) {
+                context.logger.info(
+                  `Change to artifact[${id}] detected hash[${soResponse.attributes.sha256}]`
+                );
+
+                state[id] = entry;
+                updated = true;
+              }
+
+              // TODO: Update the cache
+              /*
+              const cacheKey = `${id}-${soResponse.attributes.sha256}`;
+              // TODO: does this reset the ttl?
+              context.cache.set(cacheKey, compressedExceptions.toString('binary'));
+              */
+            });
+
+            if (updated) {
+              // TODO: update manifest in config
+            }
 
             const nextRun = new Date();
             nextRun.setSeconds(nextRun.getSeconds() + context.config.packagerTaskInterval);
