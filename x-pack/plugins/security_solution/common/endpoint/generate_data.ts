@@ -652,6 +652,7 @@ export class EndpointDocGenerator {
     const ancestry = this.createAlertEventAncestry(
       options.ancestors,
       options.relatedEvents,
+      options.relatedAlerts,
       options.percentWithRelated,
       options.percentTerminated
     );
