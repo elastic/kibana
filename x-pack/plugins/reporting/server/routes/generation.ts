@@ -17,15 +17,21 @@ import { HandlerFunction } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
-export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
+const getDownloadBaseUrl = (reporting: ReportingCore) => {
   const config = reporting.getConfig();
-  const downloadBaseUrl =
-    config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
+  return config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
+};
 
+export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
   /*
    * Generates enqueued job details to use in responses
    */
   const handler: HandlerFunction = async (user, exportTypeId, jobParams, context, req, res) => {
+    // ensure the async dependencies are loaded
+    if (!context.reporting) {
+      return res.custom({ statusCode: 503, body: 'Not Available' });
+    }
+
     const licenseInfo = await reporting.getLicenseInfo();
     const licenseResults = licenseInfo[exportTypeId];
 
@@ -42,6 +48,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
 
     // return the queue's job information
     const jobJson = job.toJSON();
+    const downloadBaseUrl = getDownloadBaseUrl(reporting);
 
     return res.ok({
       headers: {
@@ -86,10 +93,6 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
   }
 
   registerGenerateFromJobParams(reporting, handler, handleError);
-
-  // Register beta panel-action download-related API's
-  if (config.get('csv', 'enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(reporting, handler, handleError);
-    registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
-  }
+  registerGenerateCsvFromSavedObject(reporting, handler, handleError); // FIXME: remove this https://github.com/elastic/kibana/issues/62986
+  registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
 }

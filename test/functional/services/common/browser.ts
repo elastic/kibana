@@ -479,11 +479,27 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<R>(
-      fn: string | ((...args: any[]) => Promise<R>),
+    public async executeAsync<T = unknown>(fn: (cb: (value?: T) => void) => void): Promise<T>;
+    public async executeAsync<T = unknown, A1 = unknown>(
+      fn: (a1: A1, cb: (value?: T) => void) => void,
+      a1: A1
+    ): Promise<T>;
+    public async executeAsync<T = unknown, A1 = unknown, A2 = unknown>(
+      fn: (a1: A1, a2: A2, cb: (value?: T) => void) => void,
+      a1: A1,
+      a2: A2
+    ): Promise<T>;
+    public async executeAsync<T = unknown, A1 = unknown, A2 = unknown, A3 = unknown>(
+      fn: (a1: A1, a2: A2, a3: A3, cb: (value?: T) => void) => void,
+      a1: A1,
+      a2: A2,
+      a3: A3
+    ): Promise<T>;
+    public async executeAsync<T = unknown>(
+      fn: (...args: any[]) => void,
       ...args: any[]
-    ): Promise<R> {
-      return await driver.executeAsyncScript(
+    ): Promise<T> {
+      return await driver.executeAsyncScript<T>(
         fn,
         ...cloneDeep<any>(args, (arg) => {
           if (arg instanceof WebElementWrapper) {
@@ -512,6 +528,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async setScrollLeft(scrollSize: number | string) {
       await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
       return this.getScrollLeft();
+    }
+
+    public async switchToFrame(idOrElement: number | WebElementWrapper) {
+      const _id = idOrElement instanceof WebElementWrapper ? idOrElement._webElement : idOrElement;
+      await driver.switchTo().frame(_id);
     }
   })();
 }
