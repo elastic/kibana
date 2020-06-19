@@ -28,7 +28,7 @@ import { seriesChangeHandler } from '../lib/series_change_handler';
 import { handleAdd, handleDelete } from '../lib/collection_actions';
 import { newMetricAggFn } from '../lib/new_metric_agg_fn';
 import { PanelSchema, SeriesItemsSchema } from '../../../../common/types';
-import { UIRestrictions } from '../../../../common/ui_restrictions';
+import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 import { IFieldType } from '../../../../../data/common/index_patterns/fields';
 
 const DROPPABLE_ID = 'aggs_dnd';
@@ -37,7 +37,7 @@ export interface AggsProps {
   panel: PanelSchema;
   model: SeriesItemsSchema;
   fields: IFieldType[];
-  uiRestrictions: UIRestrictions;
+  uiRestrictions: TimeseriesUIRestrictions;
 }
 
 export class Aggs extends PureComponent<AggsProps> {

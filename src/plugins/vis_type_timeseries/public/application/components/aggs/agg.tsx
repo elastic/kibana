@@ -26,7 +26,7 @@ import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
 import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
-import { UIRestrictions } from '../../../../common/ui_restrictions';
+import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 import { IFieldType } from '../../../../../data/common/index_patterns/fields';
 
 interface AggProps extends HTMLAttributes<HTMLElement> {
@@ -36,7 +36,7 @@ interface AggProps extends HTMLAttributes<HTMLElement> {
   panel: PanelSchema;
   series: SeriesItemsSchema;
   siblings: MetricsItemsSchema[];
-  uiRestrictions: UIRestrictions;
+  uiRestrictions: TimeseriesUIRestrictions;
   dragHandleProps: DragHandleProps;
   onAdd: () => void;
   onChange: () => void;

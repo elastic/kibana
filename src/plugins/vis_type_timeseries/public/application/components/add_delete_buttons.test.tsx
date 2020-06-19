@@ -18,51 +18,49 @@
  */
 
 import React from 'react';
-import expect from '@kbn/expect';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import sinon from 'sinon';
 import { AddDeleteButtons } from './add_delete_buttons';
 
 describe('AddDeleteButtons', () => {
   it('calls onAdd={handleAdd}', () => {
-    const handleAdd = sinon.spy();
+    const handleAdd = jest.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onAdd={handleAdd} />);
     wrapper.find('EuiButtonIcon').at(0).simulate('click');
-    expect(handleAdd.calledOnce).to.equal(true);
+    expect(handleAdd).toHaveBeenCalled();
   });
 
   it('calls onDelete={handleDelete}', () => {
-    const handleDelete = sinon.spy();
+    const handleDelete = jest.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onDelete={handleDelete} />);
     wrapper.find('EuiButtonIcon').at(1).simulate('click');
-    expect(handleDelete.calledOnce).to.equal(true);
+    expect(handleDelete).toHaveBeenCalled();
   });
 
   it('calls onClone={handleClone}', () => {
-    const handleClone = sinon.spy();
+    const handleClone = jest.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onClone={handleClone} />);
     wrapper.find('EuiButtonIcon').at(0).simulate('click');
-    expect(handleClone.calledOnce).to.equal(true);
+    expect(handleClone).toHaveBeenCalled();
   });
 
   it('disableDelete={true}', () => {
     const wrapper = shallowWithIntl(<AddDeleteButtons disableDelete={true} />);
-    expect(wrapper.find({ text: 'Delete' })).to.have.length(0);
+    expect(wrapper.find({ text: 'Delete' })).toHaveLength(0);
   });
 
   it('disableAdd={true}', () => {
     const wrapper = shallowWithIntl(<AddDeleteButtons disableAdd={true} />);
-    expect(wrapper.find({ text: 'Add' })).to.have.length(0);
+    expect(wrapper.find({ text: 'Add' })).toHaveLength(0);
   });
 
   it('should not display clone by default', () => {
     const wrapper = shallowWithIntl(<AddDeleteButtons />);
-    expect(wrapper.find({ text: 'Clone' })).to.have.length(0);
+    expect(wrapper.find({ text: 'Clone' })).toHaveLength(0);
   });
 
   it('should not display clone when disableAdd={true}', () => {
-    const fn = sinon.spy();
+    const fn = jest.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onClone={fn} disableAdd={true} />);
-    expect(wrapper.find({ text: 'Clone' })).to.have.length(0);
+    expect(wrapper.find({ text: 'Clone' })).toHaveLength(0);
   });
 });
