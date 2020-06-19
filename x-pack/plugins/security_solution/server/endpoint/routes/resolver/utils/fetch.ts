@@ -88,7 +88,7 @@ export class Fetcher {
   private async searchWithoutAncestryArray(options: TreeOptions, originNode: LifecycleNode) {
     const [childrenNodes, ancestry, relatedEvents, relatedAlerts] = await Promise.all([
       this.children(options.children, options.afterChild),
-      this.doStuff(options.ancestors, originNode),
+      this.doAncestors(options.ancestors, originNode),
       this.events(options.events, options.afterEvent),
       this.alerts(options.alerts, options.afterAlert),
     ]);
@@ -144,17 +144,6 @@ export class Fetcher {
       ancestry: ancestryHandler.getResults(),
       relatedEvents: eventsHandler.getResults(),
     });
-  }
-
-  // TODO rename
-  private async doStuff(limit: number, originNode: LifecycleNode) {
-    const ancestryHandler = new AncestryQueryHandler(
-      limit,
-      this.indexPattern,
-      this.endpointID,
-      originNode
-    );
-    return ancestryHandler.doSearch(this.client);
   }
 
   /**
@@ -251,85 +240,6 @@ export class Fetcher {
     return createLifecycle(entityID, results);
   }
 
-  private static getAncestryAsArray(event: ResolverEvent): string[] {
-    const ancestors = ancestryArray(event);
-    if (ancestors) {
-      return ancestors;
-    }
-
-    const parentID = parentEntityId(event);
-    if (parentID) {
-      return [parentID];
-    }
-
-    return [];
-  }
-
-  private toMapOfNodes(results: ResolverEvent[]) {
-    return results.reduce((nodes: Map<string, LifecycleNode>, event: ResolverEvent) => {
-      const nodeId = entityId(event);
-      let node = nodes.get(nodeId);
-      if (!node) {
-        node = createLifecycle(nodeId, []);
-      }
-
-      node.lifecycle.push(event);
-      return nodes.set(nodeId, node);
-    }, new Map());
-  }
-
-  private async doAncestors(
-    ancestors: string[],
-    levels: number,
-    ancestorInfo: ResolverAncestry
-  ): Promise<void> {
-    if (levels <= 0) {
-      return;
-    }
-
-    const query = new LifecycleQuery(this.indexPattern, this.endpointID);
-    const results = await query.search(this.client, ancestors);
-
-    if (results.length === 0) {
-      ancestorInfo.nextAncestor = null;
-      return;
-    }
-
-    // bucket the start and end events together for a single node
-    const ancestryNodes = this.toMapOfNodes(results);
-
-    // the order of this array is going to be weird, it will look like this
-    // [furthest grandparent...closer grandparent, next recursive call furthest grandparent...closer grandparent]
-    ancestorInfo.ancestors.push(...ancestryNodes.values());
-    ancestorInfo.nextAncestor = parentEntityId(results[0]) || null;
-    const levelsLeft = levels - ancestryNodes.size;
-    // the results come back in ascending order on timestamp so the first entry in the
-    // results should be the further ancestor (most distant grandparent)
-    const next = Fetcher.getAncestryAsArray(results[0]).slice(0, levelsLeft);
-    // the ancestry array currently only holds up to 20 values but we can't rely on that so keep recursing
-    await this.doAncestors(next, levelsLeft, ancestorInfo);
-  }
-
-  private async doEvents(limit: number, after?: string) {
-    const query = new EventsQuery(
-      PaginationBuilder.createBuilder(limit, after),
-      this.indexPattern,
-      this.endpointID
-    );
-
-    const results = await query.search(this.client, this.id);
-    if (results.length === 0) {
-      // return an empty set of results
-      return createRelatedEvents(this.id);
-    }
-
-    return createRelatedEvents(
-      this.id,
-      results,
-      PaginationBuilder.buildCursorRequestLimit(limit, results)
-    );
-  }
-
   private async doChildren(
     cache: ChildrenNodesHelper,
     ids: string[],
@@ -361,6 +271,18 @@ export class Fetcher {
     await this.doChildren(cache, childIDs, nodesLeft);
   }
 
+  private async doAncestors(limit: number, originNode: LifecycleNode) {
+    const ancestryHandler = new AncestryQueryHandler(
+      limit,
+      this.indexPattern,
+      this.endpointID,
+      originNode
+    );
+    return ancestryHandler.doSearch(this.client);
+  }
+
+  // TODO have this take an array of entity ids and have the tree accept the format this function returns so the tree
+  // doesn't have to be instantiated before calling this function
   private async doStats(tree: Tree) {
     const statsQuery = new StatsQuery(this.indexPattern, this.endpointID);
     const ids = tree.ids();
