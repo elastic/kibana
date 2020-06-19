@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env/node_version_validator');
-require('../node_modules/.bin/backport');
+require('backport');

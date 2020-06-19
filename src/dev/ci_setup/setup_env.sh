@@ -14,6 +14,8 @@ cacheDir="$HOME/.kibana"
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
+export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
+
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
 ### Node/Chalk and other color libs disable their color output. But Jenkins
@@ -50,12 +52,6 @@ export PARENT_DIR="$parentDir"
 
 kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
-
-###
-### Sets correct NODE_OPTIONS for CI
-###
-export KIBANA_CONFIG_DIR=${KIBANA_PATH_CONF:-"$KIBANA_DIR/config"}
-export NODE_OPTIONS="$(grep -v ^# < ${KIBANA_CONFIG_DIR}/node.ci.options | xargs) $NODE_OPTIONS"
 
 ###
 ### download node
