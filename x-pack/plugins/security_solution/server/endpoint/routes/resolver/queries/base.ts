@@ -65,17 +65,27 @@ export abstract class ResolverQuery<T> implements MSearchQuery {
   }
 
   /**
-   * Searches ES for the specified ids.
+   * Searches ES for the specified ids and format the response.
    *
    * @param client a client for searching ES
    * @param ids a single more multiple unique node ids (e.g. entity_id or unique_pid)
    */
-  async search(client: IScopedClusterClient, ids: string | string[]): Promise<T> {
+  async searchAndFormat(client: IScopedClusterClient, ids: string | string[]): Promise<T> {
     const res: SearchResponse<ResolverEvent> = await client.callAsCurrentUser(
       'search',
       this.buildSearch(ids)
     );
     return this.formatResponse(res);
+  }
+
+  /**
+   * Searches ES for the specified ids but do not format the response.
+   *
+   * @param client a client for searching ES
+   * @param ids a single more multiple unique node ids (e.g. entity_id or unique_pid)
+   */
+  async search(client: IScopedClusterClient, ids: string | string[]) {
+    return client.callAsCurrentUser('search', this.buildSearch(ids));
   }
 
   /**

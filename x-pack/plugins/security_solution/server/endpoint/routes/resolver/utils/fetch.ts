@@ -5,6 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 import {
   ResolverChildren,
   ResolverRelatedEvents,
@@ -24,10 +25,30 @@ import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
-import { createAncestry, createRelatedEvents, createLifecycle, createRelatedAlerts } from './node';
+import { createRelatedEvents, createLifecycle, createRelatedAlerts } from './node';
 import { AlertsQuery } from '../queries/alerts';
 import { ChildrenNodesHelper } from './children_helper';
 import { TotalsPaginationBuilder } from './totals_pagination';
+import { MultiSearcher, QueryInfo } from '../queries/multi_searcher';
+import { AncestryQueryHandler } from './ancestry_query_handler';
+import { RelatedEventsQueryHandler } from './events_query_handler';
+
+export interface TreeOptions {
+  children: number;
+  ancestors: number;
+  events: number;
+  alerts: number;
+  afterAlert?: string;
+  afterEvent?: string;
+  afterChild?: string;
+}
+
+export interface QueryHandler<T> {
+  buildQuery(): QueryInfo | undefined;
+  handleResponse(searchResponse: SearchResponse<ResolverEvent>): void;
+  getResults(): T | undefined;
+  doSearch(client: IScopedClusterClient): Promise<T>;
+}
 
 /**
  * Handles retrieving nodes of a resolver tree.
@@ -49,27 +70,107 @@ export class Fetcher {
     private readonly endpointID?: string
   ) {}
 
+  public async tree(options: TreeOptions) {
+    const originNode = await this.getNode(this.id);
+    if (!originNode) {
+      // empty tree
+      return new Tree(this.id);
+    }
+    const hasAncestryArray = ancestryArray(originNode.lifecycle[0]);
+
+    if (!hasAncestryArray) {
+      return this.searchWithoutAncestryArray(options, originNode);
+    } else {
+      return this.searchWithAncestryArray(options, originNode);
+    }
+  }
+
+  private async searchWithoutAncestryArray(options: TreeOptions, originNode: LifecycleNode) {
+    const [childrenNodes, ancestry, relatedEvents, relatedAlerts] = await Promise.all([
+      this.children(options.children, options.afterChild),
+      this.doStuff(options.ancestors, originNode),
+      this.events(options.events, options.afterEvent),
+      this.alerts(options.alerts, options.afterAlert),
+    ]);
+
+    const tree = new Tree(this.id, {
+      ancestry,
+      children: childrenNodes,
+      relatedEvents,
+      relatedAlerts,
+    });
+
+    return this.stats(tree);
+  }
+
+  private async searchWithAncestryArray(options: TreeOptions, originNode: LifecycleNode) {
+    const ancestryHandler = new AncestryQueryHandler(
+      options.ancestors,
+      this.indexPattern,
+      this.endpointID,
+      originNode
+    );
+
+    const eventsHandler = new RelatedEventsQueryHandler(
+      options.events,
+      this.id,
+      options.afterEvent,
+      this.indexPattern,
+      this.endpointID
+    );
+
+    const msearch = new MultiSearcher(this.client);
+
+    while (true) {
+      const queries: QueryInfo[] = [];
+      const ancestryQuery = ancestryHandler.buildQuery();
+      if (ancestryQuery) {
+        queries.push(ancestryQuery);
+      }
+
+      const eventsQuery = eventsHandler.buildQuery();
+      if (eventsQuery) {
+        queries.push(eventsQuery);
+      }
+
+      if (queries.length === 0) {
+        break;
+      }
+
+      await msearch.search(queries);
+    }
+
+    return new Tree(this.id, {
+      ancestry: ancestryHandler.getResults(),
+      relatedEvents: eventsHandler.getResults(),
+    });
+  }
+
+  // TODO rename
+  private async doStuff(limit: number, originNode: LifecycleNode) {
+    const ancestryHandler = new AncestryQueryHandler(
+      limit,
+      this.indexPattern,
+      this.endpointID,
+      originNode
+    );
+    return ancestryHandler.doSearch(this.client);
+  }
+
   /**
    * Retrieves the ancestor nodes for the resolver tree.
    *
    * @param limit upper limit of ancestors to retrieve
    */
   public async ancestors(limit: number): Promise<ResolverAncestry> {
-    const ancestryInfo = createAncestry();
     const originNode = await this.getNode(this.id);
-    if (originNode) {
-      ancestryInfo.ancestors.push(originNode);
-      // If the request is only for the origin node then set next to its parent
-      ancestryInfo.nextAncestor = parentEntityId(originNode.lifecycle[0]) || null;
-      await this.doAncestors(
-        // limit the ancestors we're looking for to the number of levels
-        // the array could be up to length 20 but that could change
-        Fetcher.getAncestryAsArray(originNode.lifecycle[0]).slice(0, limit),
-        limit,
-        ancestryInfo
-      );
-    }
-    return ancestryInfo;
+    const ancestryHandler = new AncestryQueryHandler(
+      limit,
+      this.indexPattern,
+      this.endpointID,
+      originNode
+    );
+    return ancestryHandler.doSearch(this.client);
   }
 
   /**
@@ -93,7 +194,15 @@ export class Fetcher {
    * @param after a cursor to use as the starting point for retrieving related events
    */
   public async events(limit: number, after?: string): Promise<ResolverRelatedEvents> {
-    return this.doEvents(limit, after);
+    const eventsHandler = new RelatedEventsQueryHandler(
+      limit,
+      this.id,
+      after,
+      this.indexPattern,
+      this.endpointID
+    );
+
+    return eventsHandler.doSearch(this.client);
   }
 
   /**
@@ -134,7 +243,7 @@ export class Fetcher {
 
   private async getNode(entityID: string): Promise<LifecycleNode | undefined> {
     const query = new LifecycleQuery(this.indexPattern, this.endpointID);
-    const results = await query.search(this.client, entityID);
+    const results = await query.searchAndFormat(this.client, entityID);
     if (results.length === 0) {
       return;
     }
