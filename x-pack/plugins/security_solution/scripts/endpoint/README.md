@@ -44,8 +44,10 @@ Options:
                                                            [number] [default: 3]
   --relatedEvents, --related     number of related events to create for each
                                  process event             [number] [default: 5]
+  --relatedAlerts, --relAlerts   number of related alerts to create for each
+                                 process event             [number] [default: 5]
   --percentWithRelated, --pr     percent of process events to add related events
-                                 to                       [number] [default: 30]
+                                 and related alerts to    [number] [default: 30]
   --percentTerminated, --pt      percent of process events to add termination
                                  event for                [number] [default: 30]
   --maxChildrenPerNode, --maxCh  always generate the max number of children per

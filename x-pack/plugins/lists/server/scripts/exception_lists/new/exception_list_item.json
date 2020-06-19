@@ -9,13 +9,14 @@
   "entries": [
     {
       "field": "actingProcess.file.signer",
-      "operator": "included",
-      "match": "Elastic, N.V."
+      "operator": "excluded",
+      "type": "exists"
     },
     {
-      "field": "event.category",
+      "field": "host.name",
       "operator": "included",
-      "match_any": ["process", "malware"]
+      "type": "match_any",
+      "value": ["some host", "another host"]
     }
   ]
 }

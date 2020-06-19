@@ -5,7 +5,7 @@
  */
 
 import { ReportingCore } from '../core';
-import { JobDocOutput, JobSource } from '../types';
+import { JobSource, TaskRunResult } from '../types';
 import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 import { createWorkerFactory } from './create_worker';
 import { Job } from './enqueue_job';
@@ -31,11 +31,11 @@ export interface ESQueueInstance {
   ) => ESQueueWorker;
 }
 
-// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>,
+// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<ScheduledTaskParamsType>,
 type GenericWorkerFn<JobParamsType> = (
   jobSource: JobSource<JobParamsType>,
   ...workerRestArgs: any[]
-) => void | Promise<JobDocOutput>;
+) => void | Promise<TaskRunResult>;
 
 export async function createQueueFactory<JobParamsType, JobPayloadType>(
   reporting: ReportingCore,

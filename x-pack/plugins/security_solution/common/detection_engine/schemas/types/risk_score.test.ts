@@ -33,7 +33,7 @@ describe('risk_score', () => {
     const decoded = RiskScore.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "RiskScore"']);
     expect(message.schema).toEqual({});
   });
 
@@ -42,7 +42,9 @@ describe('risk_score', () => {
     const decoded = RiskScore.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "some string" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "some string" supplied to "RiskScore"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -51,7 +53,7 @@ describe('risk_score', () => {
     const decoded = RiskScore.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "101" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "101" supplied to "RiskScore"']);
     expect(message.schema).toEqual({});
   });
 });
