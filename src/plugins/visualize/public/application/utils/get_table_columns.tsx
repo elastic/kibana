@@ -127,38 +127,36 @@ export const getTableColumns = (application: ApplicationStart, history: History)
 ];
 
 export const getNoItemsMessage = (createItem: () => void) => (
-  <div>
-    <EuiEmptyPrompt
-      iconType="visualizeApp"
-      title={
-        <h1 id="visualizeListingHeading">
-          <FormattedMessage
-            id="visualize.listing.createNew.title"
-            defaultMessage="Create your first visualization"
-          />
-        </h1>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="visualize.listing.createNew.description"
-            defaultMessage="You can create different visualizations, based on your data."
-          />
-        </p>
-      }
-      actions={
-        <EuiButton
-          onClick={createItem}
-          fill
-          iconType="plusInCircle"
-          data-test-subj="createVisualizationPromptButton"
-        >
-          <FormattedMessage
-            id="visualize.listing.createNew.createButtonLabel"
-            defaultMessage="Create new visualization"
-          />
-        </EuiButton>
-      }
-    />
-  </div>
+  <EuiEmptyPrompt
+    iconType="visualizeApp"
+    title={
+      <h1 id="visualizeListingHeading">
+        <FormattedMessage
+          id="visualize.listing.createNew.title"
+          defaultMessage="Create your first visualization"
+        />
+      </h1>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="visualize.listing.createNew.description"
+          defaultMessage="You can create different visualizations, based on your data."
+        />
+      </p>
+    }
+    actions={
+      <EuiButton
+        onClick={createItem}
+        fill
+        iconType="plusInCircle"
+        data-test-subj="createVisualizationPromptButton"
+      >
+        <FormattedMessage
+          id="visualize.listing.createNew.createButtonLabel"
+          defaultMessage="Create new visualization"
+        />
+      </EuiButton>
+    }
+  />
 );
