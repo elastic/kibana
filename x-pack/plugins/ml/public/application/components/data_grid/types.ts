@@ -13,6 +13,8 @@ import { Dictionary } from '../../../../common/types/common';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
 
+import { ChartData } from './use_column_chart';
+
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;
 
@@ -54,6 +56,9 @@ export interface SearchResponse7 extends SearchResponse<any> {
 export interface UseIndexDataReturnType
   extends Pick<
     UseDataGridReturnType,
+    | 'chartsVisible'
+    | 'chartsButtonVisible'
+    | 'columnsWithCharts'
     | 'errorMessage'
     | 'invalidSortingColumnns'
     | 'noDataMessage'
@@ -67,13 +72,16 @@ export interface UseIndexDataReturnType
     | 'sortingColumns'
     | 'status'
     | 'tableItems'
+    | 'toggleChartVisibility'
     | 'visibleColumns'
   > {
-  columns: EuiDataGridColumn[];
   renderCellValue: RenderCellValue;
 }
 
 export interface UseDataGridReturnType {
+  chartsVisible: boolean;
+  chartsButtonVisible: boolean;
+  columnsWithCharts: EuiDataGridColumn[];
   errorMessage: string;
   invalidSortingColumnns: ColumnId[];
   noDataMessage: string;
@@ -83,6 +91,7 @@ export interface UseDataGridReturnType {
   pagination: IndexPagination;
   resetPagination: () => void;
   rowCount: number;
+  setColumnCharts: Dispatch<SetStateAction<ChartData[]>>;
   setErrorMessage: Dispatch<SetStateAction<string>>;
   setNoDataMessage: Dispatch<SetStateAction<string>>;
   setPagination: Dispatch<SetStateAction<IndexPagination>>;
@@ -94,5 +103,6 @@ export interface UseDataGridReturnType {
   sortingColumns: EuiDataGridSorting['columns'];
   status: INDEX_STATUS;
   tableItems: DataGridItem[];
+  toggleChartVisibility: () => void;
   visibleColumns: ColumnId[];
 }
