@@ -30,16 +30,17 @@ describe('useImportList', () => {
   it('invokes Api.importList', async () => {
     const fileMock = ('my file' as unknown) as File;
 
-    const { result } = renderHook(() => useImportList());
+    const { result, waitForNextUpdate } = renderHook(() => useImportList());
 
-    await act(() =>
+    act(() => {
       result.current.start({
         file: fileMock,
         http: httpMock,
         listId: 'my_list_id',
         type: 'keyword',
-      })
-    );
+      });
+    });
+    await waitForNextUpdate();
 
     expect(Api.importList).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -53,16 +54,17 @@ describe('useImportList', () => {
   it('populates result with the response of Api.importList', async () => {
     const fileMock = ('my file' as unknown) as File;
 
-    const { result } = renderHook(() => useImportList());
+    const { result, waitForNextUpdate } = renderHook(() => useImportList());
 
-    await act(() =>
+    act(() => {
       result.current.start({
         file: fileMock,
         http: httpMock,
         listId: 'my_list_id',
         type: 'keyword',
-      })
-    );
+      });
+    });
+    await waitForNextUpdate();
 
     expect(result.current.result).toEqual(getListResponseMock());
   });
@@ -71,9 +73,9 @@ describe('useImportList', () => {
     expect.assertions(3);
     const fileMock = ('my file' as unknown) as File;
     (Api.importList as jest.Mock).mockRejectedValue(new Error('whoops'));
-    const { result } = renderHook(() => useImportList());
+    const { result, waitForNextUpdate } = renderHook(() => useImportList());
 
-    await act(() =>
+    act(() => {
       result.current
         .start({
           file: fileMock,
@@ -81,8 +83,10 @@ describe('useImportList', () => {
           listId: 'my_list_id',
           type: 'keyword',
         })
-        .catch((e) => expect(e).toEqual(new Error('whoops')))
-    );
+        .catch((e) => expect(e).toEqual(new Error('whoops')));
+    });
+
+    await waitForNextUpdate();
 
     expect(result.current.result).toBeUndefined();
     expect(result.current.error).toEqual(new Error('whoops'));

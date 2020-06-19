@@ -21,22 +21,26 @@ describe('useAsyncTask', () => {
   });
 
   it('invokes the task when start is called', async () => {
-    const { result } = renderHook(() => useAsyncTask(task));
+    const { result, waitForNextUpdate } = renderHook(() => useAsyncTask(task));
 
-    await act(() => result.current.start({}));
+    act(() => {
+      result.current.start({});
+    });
+    await waitForNextUpdate();
 
     expect(task).toHaveBeenCalled();
   });
 
   it('invokes the task with a signal and start args', async () => {
-    const { result } = renderHook(() => useAsyncTask(task));
+    const { result, waitForNextUpdate } = renderHook(() => useAsyncTask(task));
 
-    await act(() =>
+    act(() => {
       result.current.start({
         arg1: 'value1',
         arg2: 'value2',
-      })
-    );
+      });
+    });
+    await waitForNextUpdate();
 
     expect(task).toHaveBeenCalledWith(expect.any(AbortController), {
       arg1: 'value1',
@@ -45,9 +49,12 @@ describe('useAsyncTask', () => {
   });
 
   it('populates result with the resolved value of the task', async () => {
-    const { result } = renderHook(() => useAsyncTask(task));
+    const { result, waitForNextUpdate } = renderHook(() => useAsyncTask(task));
 
-    await act(() => result.current.start({}));
+    act(() => {
+      result.current.start({});
+    });
+    await waitForNextUpdate();
 
     expect(result.current.result).toEqual('resolved value');
   });
@@ -55,9 +62,12 @@ describe('useAsyncTask', () => {
   it('start rejects and error is populated if task rejects', async () => {
     expect.assertions(3);
     task.mockRejectedValue(new Error('whoops'));
-    const { result } = renderHook(() => useAsyncTask(task));
+    const { result, waitForNextUpdate } = renderHook(() => useAsyncTask(task));
 
-    await act(() => result.current.start({}).catch((e) => expect(e).toEqual(new Error('whoops'))));
+    act(() => {
+      result.current.start({}).catch((e) => expect(e).toEqual(new Error('whoops')));
+    });
+    await waitForNextUpdate();
 
     expect(result.current.result).toBeUndefined();
     expect(result.current.error).toEqual(new Error('whoops'));
