@@ -34,40 +34,40 @@ const env = {
 };
 
 describe('Ingesting coverage', () => {
-  // const verboseArgs = [
-  //   'scripts/ingest_coverage.js',
-  //   '--verbose',
-  //   '--vcsInfoPath',
-  //   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
-  //   '--path',
-  // ];
+  const verboseArgs = [
+    'scripts/ingest_coverage.js',
+    '--verbose',
+    '--vcsInfoPath',
+    'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
+    '--path',
+  ];
 
   const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
   const resolved = resolve(MOCKS_DIR, summaryPath);
 
-  // describe(`staticSiteUrl`, () => {
-  //   let actualUrl = '';
-  //   const siteUrlRegex = /"staticSiteUrl":\s*(.+,)/;
-  //
-  //   beforeAll(async () => {
-  //     const opts = [...verboseArgs, resolved];
-  //     const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-  //     actualUrl = siteUrlRegex.exec(stdout)[1];
-  //   });
-  //
-  //   it('should contain the static host', () => {
-  //     const staticHost = /https:\/\/kibana-coverage\.elastic\.dev/;
-  //     expect(staticHost.test(actualUrl)).ok();
-  //   });
-  //   it('should contain the timestamp', () => {
-  //     const timeStamp = /\d{4}-\d{2}-\d{2}T\d{2}.*\d{2}.*\d{2}Z/;
-  //     expect(timeStamp.test(actualUrl)).ok();
-  //   });
-  //   it('should contain the folder structure', () => {
-  //     const folderStructure = /(?:.*|.*-combined)\//;
-  //     expect(folderStructure.test(actualUrl)).ok();
-  //   });
-  // });
+  describe(`staticSiteUrl`, () => {
+    let actualUrl = '';
+    const siteUrlRegex = /"staticSiteUrl":\s*(.+,)/;
+
+    beforeAll(async () => {
+      const opts = [...verboseArgs, resolved];
+      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+      actualUrl = siteUrlRegex.exec(stdout)[1];
+    });
+
+    it('should contain the static host', () => {
+      const staticHost = /https:\/\/kibana-coverage\.elastic\.dev/;
+      expect(staticHost.test(actualUrl)).ok();
+    });
+    it('should contain the timestamp', () => {
+      const timeStamp = /\d{4}-\d{2}-\d{2}T\d{2}.*\d{2}.*\d{2}Z/;
+      expect(timeStamp.test(actualUrl)).ok();
+    });
+    it('should contain the folder structure', () => {
+      const folderStructure = /(?:.*|.*-combined)\//;
+      expect(folderStructure.test(actualUrl)).ok();
+    });
+  });
 
   describe(`vcsInfo`, () => {
     describe(`without a commit msg in the vcs info file`, () => {
@@ -92,34 +92,35 @@ describe('Ingesting coverage', () => {
       });
     });
   });
-  // describe(`team assignment`, () => {
-  //   const args = [
-  //     'scripts/ingest_coverage.js',
-  //     '--verbose',
-  //     '--vcsInfoPath',
-  //     'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
-  //     '--path',
-  //   ];
-  //   const teamAssignRE = /pipeline:/;
-  //
-  //   it(`should not occur when going to the totals index`, async () => {
-  //     const shouldNotHavePipelineOut = await prokJustTotalOrNot(true, args);
-  //     const actual = teamAssignRE.test(shouldNotHavePipelineOut);
-  //     expect(actual).to.not.be.ok();
-  //   });
-  //   it(`should indeed occur when going to the coverage index`, async () => {
-  //     const shouldIndeedHavePipelineOut = await prokJustTotalOrNot(false, args);
-  //     const actual = teamAssignRE.test(shouldIndeedHavePipelineOut);
-  //     expect(actual).to.be.ok();
-  //   });
-  // });
+  describe(`team assignment`, () => {
+    const args = [
+      'scripts/ingest_coverage.js',
+      '--verbose',
+      '--vcsInfoPath',
+      'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
+      '--path',
+    ];
+
+    it(`should not occur when going to the totals index`, async () => {
+      const teamAssignRE = /"pipeline":/;
+      const shouldNotHavePipelineOut = await prokJustTotalOrNot(true, args);
+      const actual = teamAssignRE.test(shouldNotHavePipelineOut);
+      expect(actual).to.not.be.ok();
+    });
+    it(`should indeed occur when going to the coverage index`, async () => {
+      const shouldIndeedHavePipelineOut = await prokJustTotalOrNot(false, args);
+      const onlyForTestingRe = /ingest-pipe=>team_assignment/;
+      const actual = onlyForTestingRe.test(shouldIndeedHavePipelineOut);
+      expect(actual).to.be.ok();
+    });
+  });
 });
-// async function prokJustTotalOrNot(isTotal, args) {
-//   const justTotalPath = 'jest-combined/coverage-summary-just-total.json';
-//   const notJustTotalPath = 'jest-combined/coverage-summary-manual-mix.json';
-//
-//   const resolved = resolve(MOCKS_DIR, isTotal ? justTotalPath : notJustTotalPath);
-//   const opts = [...args, resolved];
-//   const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-//   return stdout;
-// }
+async function prokJustTotalOrNot(isTotal, args) {
+  const justTotalPath = 'jest-combined/coverage-summary-just-total.json';
+  const notJustTotalPath = 'jest-combined/coverage-summary-manual-mix.json';
+
+  const resolved = resolve(MOCKS_DIR, isTotal ? justTotalPath : notJustTotalPath);
+  const opts = [...args, resolved];
+  const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+  return stdout;
+}

@@ -81,14 +81,12 @@ function logSend(actuallySent) {
       `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
 ${redactedEsHostUrl ? `\t### ES Host: ${redactedEsHostUrl}` : ''}
 \t### Index: ${green(index)}
-\t### payload.body: ${pretty(body)}`
+\t### payload.body: ${body}
+${process.env.NODE_ENV === 'integration_test' ? `ingest-pipe=>${payload.pipeline}` : ''}
+`
     );
   };
 }
 function eitherSendOrNot(payload) {
   return process.env.NODE_ENV === 'integration_test' ? left(payload) : right(payload);
 }
-
-// function parse(body) {
-//   return JSON.parse(body);
-// }
