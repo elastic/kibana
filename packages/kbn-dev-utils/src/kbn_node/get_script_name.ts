@@ -17,5 +17,8 @@
  * under the License.
  */
 
-require('../src/setup_node_env/node_version_validator');
-require('../node_modules/.bin/backport');
+import { platform } from 'os';
+
+export function getScriptName() {
+  return platform() === 'win32' ? 'kbn-node.cmd' : 'kbn-node';
+}

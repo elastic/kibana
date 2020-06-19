@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env/node_version_validator');
-require('../node_modules/.bin/backport');
+require('../src/setup_node_env/prebuilt_dev_only_entry');
+require('@kbn/dev-utils/target/kbn_node/register_kbn_node');

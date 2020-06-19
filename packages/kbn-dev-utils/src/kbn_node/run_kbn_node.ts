@@ -17,5 +17,22 @@
  * under the License.
  */
 
-require('../src/setup_node_env/node_version_validator');
-require('../node_modules/.bin/backport');
+import { execFileSync } from 'child_process';
+import { existsSync } from 'fs';
+import { resolve } from 'path';
+import { getNodeBinDir } from './get_node_bin_dir';
+import { getScriptName } from './get_script_name';
+
+const args = process.argv.slice(2);
+const stdio = [0, 1, 2];
+const maxBuffer = 100 * 1024 * 1024;
+const nodeDir = getNodeBinDir();
+const scriptName = getScriptName();
+
+if (existsSync(resolve(nodeDir, scriptName))) {
+  execFileSync(`${resolve(nodeDir, scriptName)}`, args, { maxBuffer, stdio });
+} else {
+  throw new Error(
+    `Kbn-node bin script is not installed. Please run 'yarn kbn bootstrap' or 'node scripts/register_kbn_node' and then retry.`
+  );
+}
