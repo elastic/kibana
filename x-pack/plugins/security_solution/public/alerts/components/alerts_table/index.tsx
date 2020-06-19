@@ -50,7 +50,10 @@ import {
 } from '../../../common/components/toasters';
 import { Ecs } from '../../../graphql/types';
 import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
-import { AddExceptionModal, AddExceptionOnClick } from '../add_exception';
+import {
+  AddExceptionModal,
+  AddExceptionOnClick,
+} from '../../../common/components/exceptions/add_exception_modal';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;

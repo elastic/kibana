@@ -28,19 +28,20 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui/lib/services';
-import { Comment } from '../../../../../lists/common/schemas';
+import { Comment } from '../../../../../../lists/common/schemas';
 import * as i18n from './translations';
-import { TimelineNonEcsData, Ecs } from '../../../graphql/types';
-import { TimelineDetailsQuery } from '../../../timelines/containers/details';
-import { useCurrentUser, useKibana } from '../../../common/lib/kibana';
+import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { TimelineDetailsQuery } from '../../../../timelines/containers/details';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import {
   errorToToaster,
   displaySuccessToast,
   useStateToaster,
-} from '../../../common/components/toasters';
-import { usePersistExceptionList, usePersistExceptionItem } from '../../../../../lists/public';
-import { ExceptionBuilder } from '../../../common/components/exception_builder';
-import { ExceptionItem } from '../../../common/components/exception_builder/types';
+} from '../../toasters';
+import { usePersistExceptionList, usePersistExceptionItem } from '../../../../../../lists/public';
+import { ExceptionBuilder } from '../../exception_builder';
+import { ExceptionItem } from '../../exception_builder/types';
+import { useAddException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
 
 // TODO: What's the different between ECS data and Non ECS data
 interface AddExceptionModalProps {
@@ -172,11 +173,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     { isLoading: exceptionsIsLoading, isSaved: exceptionsIsSaved },
     setExceptionList,
   ] = usePersistExceptionList({ onError, http });
-  console.log(eventEcsData, eventData);
   const [
     { isLoading: exceptionItemPersistIsLoading, isSaved: exceptionItemPersistIsSaved },
     setExceptionItem,
   ] = usePersistExceptionItem({ onError, onSuccess, http });
+
+  const [{ isLoading: addExceptionIsLoading }, addExceptionItems] = useAddException({
+    onSuccess,
+    onError,
+    http,
+  });
 
   // TODO: file hash is not present in data from generator
   // TODO: hash is an array
@@ -302,14 +308,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     enrichExceptionItems();
     console.log(exceptionItemsToAdd);
     // TODO: Create API hook for persisting and closing
+    // TODO: insert OS tag into entries before persisting for endpoint exceptions
     // setExceptionItem(exceptionItemToAdd);
-  }, [enrichExceptionItems, exceptionItemsToAdd]);
+    addExceptionItems(exceptionItemsToAdd, eventEcsData._id);
+    // TODO: if close checkbox is selected, refresh signals table
+  }, [exceptionItemsToAdd, addExceptionItems]);
 
   const ruleName = useMemo(() => {
     const [title] = getMappedNonEcsValue({ data: eventData, fieldName: 'signal.rule.name' }) ?? '';
     return title;
   }, [eventData]);
 
+  // TODO: builder - Grab appropriate listId that's associated with the rule
+  // TODO: builder - dynamically set listType
   return (
     <EuiOverlayMask>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
