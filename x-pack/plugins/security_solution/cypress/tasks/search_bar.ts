@@ -18,6 +18,7 @@ import {
 } from '../screens/search_bar';
 
 export const openAddFilterPopover = () => {
+  cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.disabled');
   cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click({ force: true });
 };
