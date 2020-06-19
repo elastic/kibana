@@ -17,5 +17,6 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
+//require('../src/setup_node_env');
+require('../src/setup_node_env/babel_register');
 require('../src/dev/run_check_published_api_changes');
