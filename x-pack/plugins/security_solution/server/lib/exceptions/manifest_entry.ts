@@ -26,6 +26,8 @@ export class ManifestEntry {
   private sha256: string;
   private size: int;
 
+  private savedObject: object; // TODO: type
+
   constructor(exceptionListClient: ExceptionListClient, os: string, schemaVersion: string) {
     this.exceptionListClient = exceptionListClient;
     this.os = os;
@@ -38,6 +40,10 @@ export class ManifestEntry {
 
   public getUrl(): string {
     return `/api/endpoint/allowlist/download/${this.getIdentifier()}/${this.sha256}`;
+  }
+
+  public getSavedObject(): object {
+    return this.savedObject;
   }
 
   public getState(): object {
@@ -65,7 +71,6 @@ export class ManifestEntry {
     this.sha256 = sha256Hash;
     this.size = Buffer.from(JSON.stringify(exceptions)).byteLength;
 
-    /*
     this.savedObject = {
       name: this.getIdentifier(),
       schemaVersion: this.schemaVersion,
@@ -75,6 +80,5 @@ export class ManifestEntry {
       body: compressedExceptions.toString('binary'),
       size: Buffer.from(JSON.stringify(exceptions)).byteLength,
     };
-    */
   }
 }

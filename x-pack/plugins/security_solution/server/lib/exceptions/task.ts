@@ -218,30 +218,31 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
 
             // Create/update the artifacts
             let updated = false;
-            state.forEach((id, entry) => {
-              const soResponse = await soClient.create<ArtifactSoSchema>(
-                ArtifactConstants.SAVED_OBJECT_TYPE,
-                entry.getSavedObject(),
-                { id, overwrite: true }
-              );
-
-              // If new, update state
-              if (state[id].sha256 !== soResponse.attributes.sha256) {
-                context.logger.info(
-                  `Change to artifact[${id}] detected hash[${soResponse.attributes.sha256}]`
+            for (const id in state) {
+              if (Object.prototype.hasOwnProperty.call(state, id)) {
+                const soResponse = await soClient.create<ArtifactSoSchema>(
+                  ArtifactConstants.SAVED_OBJECT_TYPE,
+                  state[id].getSavedObject(),
+                  { id, overwrite: true }
                 );
 
-                state[id] = entry;
-                updated = true;
-              }
+                // If new, update state
+                if (state[id].sha256 !== soResponse.attributes.sha256) {
+                  context.logger.info(
+                    `Change to artifact[${id}] detected hash[${soResponse.attributes.sha256}]`
+                  );
 
-              // TODO: Update the cache
-              /*
-              const cacheKey = `${id}-${soResponse.attributes.sha256}`;
-              // TODO: does this reset the ttl?
-              context.cache.set(cacheKey, compressedExceptions.toString('binary'));
-              */
-            });
+                  updated = true;
+                }
+
+                // TODO: Update the cache
+                /*
+                const cacheKey = `${id}-${soResponse.attributes.sha256}`;
+                // TODO: does this reset the ttl?
+                context.cache.set(cacheKey, compressedExceptions.toString('binary'));
+                */
+              }
+            }
 
             if (updated) {
               // TODO: update manifest in config
