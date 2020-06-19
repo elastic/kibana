@@ -95,7 +95,7 @@ describe('filterEventsAgainstList', () => {
       message = exc.message;
     }
     expect(message).toEqual(
-      'Failed to query lists index. Reason: Unsupported list type used, please use one of ip,keyword'
+      'Failed to query lists index. Reason: Unsupported list type used, please use one of binary,boolean,byte,date,date_nanos,date_range,double,double_range,flattened,float,float_range,geo_point,geo_shape,half_float,histogram,integer,integer_range,ip,ip_range,keyword,long,long_range,shape,short,text'
     );
   });
 
