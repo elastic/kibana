@@ -38,6 +38,7 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
+import { PRIVACY_STATEMENT_URL } from '../common/constants';
 
 export interface TelemetryPluginSetup {
   telemetryService: TelemetryService;
@@ -46,6 +47,9 @@ export interface TelemetryPluginSetup {
 export interface TelemetryPluginStart {
   telemetryService: TelemetryService;
   telemetryNotifications: TelemetryNotifications;
+  telemetryConstants: {
+    getPrivacyStatementUrl: () => string;
+  };
 }
 
 export interface TelemetryPluginConfig {
@@ -115,6 +119,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     return {
       telemetryService: this.telemetryService,
       telemetryNotifications: this.telemetryNotifications,
+      telemetryConstants: {
+        getPrivacyStatementUrl: () => PRIVACY_STATEMENT_URL,
+      },
     };
   }
 
