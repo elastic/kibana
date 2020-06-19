@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
+import { ColumnChart } from './column_chart';
 import { INIT_MAX_COLUMNS } from './common';
 import {
   ColumnId,
@@ -20,6 +21,7 @@ import {
   OnSort,
   UseDataGridReturnType,
 } from './types';
+import { ChartData } from './use_column_chart';
 
 export const useDataGrid = (
   columns: EuiDataGridColumn[],
@@ -33,9 +35,15 @@ export const useDataGrid = (
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
   const [rowCount, setRowCount] = useState(0);
+  const [columnCharts, setColumnCharts] = useState<ChartData[]>([]);
   const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
+  const [chartsVisible, setChartsVisible] = useState(false);
+
+  const toggleChartVisibility = () => {
+    setChartsVisible(!chartsVisible);
+  };
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback((pageSize) => {
     setPagination((p) => {
@@ -87,6 +95,23 @@ export const useDataGrid = (
   );
 
   return {
+    chartsVisible,
+    chartsButtonVisible: true,
+    columnsWithCharts: columns.map((c, index) => {
+      const chartData = columnCharts.find((cd) => cd.id === c.id);
+
+      return {
+        ...c,
+        display:
+          chartData !== undefined && chartsVisible === true ? (
+            <ColumnChart
+              chartData={chartData}
+              columnType={c}
+              dataTestSubj={`mlDataGridChart-${index}`}
+            />
+          ) : undefined,
+      };
+    }),
     errorMessage,
     invalidSortingColumnns,
     noDataMessage,
@@ -96,6 +121,7 @@ export const useDataGrid = (
     pagination,
     resetPagination,
     rowCount,
+    setColumnCharts,
     setErrorMessage,
     setNoDataMessage,
     setPagination,
@@ -107,6 +133,7 @@ export const useDataGrid = (
     sortingColumns,
     status,
     tableItems,
+    toggleChartVisibility,
     visibleColumns,
   };
 };
