@@ -61,7 +61,6 @@ export const VisualizeEditor = () => {
     services,
     eventEmitter,
     setHasUnsavedChanges,
-    isChromeVisible,
     appState,
     savedVisInstance,
     visEditorController
