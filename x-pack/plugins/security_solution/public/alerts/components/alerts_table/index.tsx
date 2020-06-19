@@ -50,7 +50,7 @@ import {
 } from '../../../common/components/toasters';
 import { Ecs } from '../../../graphql/types';
 import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
-import { AddExceptionModal } from '../add_exception';
+import { AddExceptionModal, AddExceptionOnClick } from '../add_exception';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -65,11 +65,10 @@ interface OwnProps {
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
-// TODO: type
-const addExceptionModalInitialState = {
+const addExceptionModalInitialState: AddExceptionOnClick = {
   modalType: 'detection',
-  ecsData: null,
-  data: null,
+  ecsData: undefined,
+  data: [],
 };
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
@@ -206,7 +205,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // TODO: type
   const openAddExceptionModalCallback = useCallback(
-    ({ modalType, ecsData, data }: any) => {
+    ({ modalType, ecsData, data }: AddExceptionOnClick) => {
       setShouldShowAddExceptionModal(true);
       setAddExceptionModalState({ modalType, ecsData, data });
     },

@@ -37,6 +37,7 @@ import {
   UpdateTimelineLoading,
 } from './types';
 import { Ecs } from '../../../graphql/types';
+import { AddExceptionOnClick } from '../add_exception';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -195,7 +196,7 @@ interface AlertActionArgs {
   status: Status;
   timelineId: string;
   updateTimelineIsLoading: UpdateTimelineLoading;
-  openAddExceptionModal: ({ ecsData }: TimelineRowActionOnClick) => void;
+  openAddExceptionModal: ({ modalType, ecsData, data }: AddExceptionOnClick) => void;
 }
 
 export const getAlertActions = ({

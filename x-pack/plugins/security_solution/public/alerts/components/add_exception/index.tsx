@@ -38,19 +38,24 @@ import {
   displaySuccessToast,
   useStateToaster,
 } from '../../../common/components/toasters';
-import {
-  usePersistExceptionList,
-  usePersistExceptionItem,
-} from '../../../../../lists/public';
+import { usePersistExceptionList, usePersistExceptionItem } from '../../../../../lists/public';
 import { ExceptionBuilder } from '../../../common/components/exception_builder';
+import { ExceptionItem } from '../../../common/components/exception_builder/types';
 
 // TODO: What's the different between ECS data and Non ECS data
 interface AddExceptionModalProps {
   modalType?: 'endpoint' | 'detection';
   eventData: TimelineNonEcsData[];
-  eventEcsData: Ecs;
+  eventEcsData: Ecs; // TODO: Do we need this
   onCancel: () => void;
   onConfirm: () => void;
+}
+
+// TODO: need to move this somewhere else probably
+export interface AddExceptionOnClick {
+  modalType: 'endpoint' | 'detection';
+  data: TimelineNonEcsData[];
+  ecsData?: Ecs; // TODO: Do we need this? should it be optional?
 }
 
 function generateExceptionList() {
@@ -148,23 +153,26 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
-  const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState([]);
+  const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionItem[]>([]);
   const currentUser = useCurrentUser();
   const [, dispatchToaster] = useStateToaster();
-  const onError = useCallback((error) => {
-    errorToToaster({ title: i18n.ADD_EXCEPTION_ERROR, error, dispatchToaster });
-    onCancel();
-  }, []);
+  const onError = useCallback(
+    (error) => {
+      errorToToaster({ title: i18n.ADD_EXCEPTION_ERROR, error, dispatchToaster });
+      onCancel();
+    },
+    [dispatchToaster, onCancel]
+  );
   const onSuccess = useCallback(() => {
     displaySuccessToast(i18n.ADD_EXCEPTION_SUCCESS, dispatchToaster);
     onConfirm();
-  }, []);
+  }, [dispatchToaster, onConfirm]);
 
   const [
     { isLoading: exceptionsIsLoading, isSaved: exceptionsIsSaved },
     setExceptionList,
   ] = usePersistExceptionList({ onError, http });
-
+  console.log(eventEcsData, eventData);
   const [
     { isLoading: exceptionItemPersistIsLoading, isSaved: exceptionItemPersistIsSaved },
     setExceptionItem,
@@ -227,11 +235,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             },
           ],
         },
-      ];
+      ] as ExceptionItem[];
     } else {
       return [];
     }
-  }, [eventData, eventEcsData]);
+  }, [eventData, modalType]);
 
   const onCommentChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -252,54 +260,55 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [comment]);
 
   const enrichWithComments = useCallback(
-    (exceptions: []) => {
-      const newComment: Comment = {
-        comment,
-        created_by: currentUser,
-        created_at: new Date(),
-      };
-      for (const exception of exceptions) {
-        exception.comments = [newComment];
-      }
-    },
-    [comment]
-  );
-
-  const enrichWithOS = useCallback(
-    (exceptions) => {
-      const name = 'windows';
-      // TODO: get this working and use the helper
-      // const {
-      //   value: [name],
-      // } = eventData.find((data) => data.field === 'host.os.family');
-      const osField = `os:${name}`;
-      for (const exception of exceptions) {
-        if (exception._tags.includes(osField) === false) {
-          exception._tags.push(osField);
+    (exceptions: ExceptionItem[]) => {
+      // TODO: need to update types to use
+      if (currentUser) {
+        const newComment: Comment = {
+          comment,
+          created_by: currentUser?.username, // TODO: is username the proper thing to use here?
+          created_at: new Date().toDateString(), // TODO: do we want ISO here?
+        };
+        for (const exception of exceptions) {
+          exception.comments = [newComment];
         }
       }
     },
-    [eventData]
+    [comment, currentUser]
   );
+
+  const enrichWithOS = useCallback((exceptions: ExceptionItem[]) => {
+    const name = 'windows';
+    // TODO: dont hardcode this
+    // const [name] = getMappedNonEcsValue({ data: eventData, fieldName: 'host.os.family' });
+    const osField = `os:${name}`;
+    for (const exception of exceptions) {
+      if (exception._tags === undefined) {
+        exception._tags = [];
+      }
+      if (exception._tags.includes(osField) === false) {
+        exception._tags.push(osField);
+      }
+    }
+  }, []);
 
   const enrichExceptionItems = useCallback(() => {
     enrichWithComments(exceptionItemsToAdd);
     if (modalType === 'endpoint') {
       enrichWithOS(exceptionItemsToAdd);
     }
-  }, [exceptionItemsToAdd]);
+  }, [enrichWithComments, enrichWithOS, exceptionItemsToAdd, modalType]);
 
   const onAddExceptionConfirm = useCallback(() => {
     enrichExceptionItems();
     console.log(exceptionItemsToAdd);
     // TODO: Create API hook for persisting and closing
-    // TODO: insert OS tag into entries before persisting for endpoint exceptions
     // setExceptionItem(exceptionItemToAdd);
-  }, [exceptionItemToAdd]);
+  }, [enrichExceptionItems, exceptionItemsToAdd]);
 
   const ruleName = useMemo(() => {
-    return getMappedNonEcsValue({ data: eventData, fieldName: 'signal.rule.name' }) ?? '';
-  }, [getMappedNonEcsValue]);
+    const [title] = getMappedNonEcsValue({ data: eventData, fieldName: 'signal.rule.name' }) ?? '';
+    return title;
+  }, [eventData]);
 
   return (
     <EuiOverlayMask>
