@@ -176,6 +176,7 @@ describe('useVisualizeAppState', () => {
     };
 
     it('should successfully update vis state and set up app state container', async () => {
+      // @ts-ignore
       stateContainerGetStateMock.mockImplementation(() => state);
       const { result, waitForNextUpdate } = renderHook(() =>
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
@@ -198,6 +199,7 @@ describe('useVisualizeAppState', () => {
 
     it(`should add warning toast and redirect to the landing page
         if setting new vis state was not successful, e.x. invalid query params`, async () => {
+      // @ts-ignore
       stateContainerGetStateMock.mockImplementation(() => state);
       // @ts-ignore
       savedVisInstance.vis.setState.mockRejectedValue({

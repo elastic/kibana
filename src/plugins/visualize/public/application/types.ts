@@ -42,7 +42,7 @@ export type PureVisState = SavedVisState;
 
 export interface VisualizeAppState {
   filters: Filter[];
-  uiState: PersistedState;
+  uiState: Record<string, unknown>;
   vis: PureVisState;
   query: Query;
   savedQuery?: string;

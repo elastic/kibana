@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export const visualizeAppStateStub = {
+import { VisualizeAppState } from '../types';
+
+export const visualizeAppStateStub: VisualizeAppState = {
   uiState: {
     vis: {
       defaultColors: {
@@ -36,6 +38,7 @@ export const visualizeAppStateStub = {
       {
         id: '1',
         enabled: true,
+        // @ts-ignore
         type: 'avg',
         schema: 'metric',
         params: { field: 'total_quantity', customLabel: 'average items' },

@@ -19,8 +19,8 @@
 
 import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { createVisualizeAppState } from './create_visualize_app_state';
-import { VisualizeAppState } from '../types';
 import { migrateAppState } from './migrate_app_state';
+import { visualizeAppStateStub } from './stubs';
 
 const mockStartStateSync = jest.fn();
 const mockStopStateSync = jest.fn();
@@ -39,22 +39,13 @@ jest.mock('./migrate_app_state', () => ({
 const { createStateContainer, syncState } = jest.requireMock('../../../../kibana_utils/public');
 
 describe('createVisualizeAppState', () => {
-  const stateDefaults = ({
-    uiState: {},
-    query: {},
-    filters: [{ test: 'filter1' }],
-    vis: {
-      params: 'params',
-    },
-    linked: true,
-  } as unknown) as VisualizeAppState;
   const kbnUrlStateStorage = ({
     set: jest.fn(),
     get: jest.fn(() => ({ linked: false })),
   } as unknown) as IKbnUrlStateStorage;
 
   const { stateContainer, stopStateSync } = createVisualizeAppState({
-    stateDefaults,
+    stateDefaults: visualizeAppStateStub,
     kbnUrlStateStorage,
   });
   const transitions = createStateContainer.mock.calls[0][1];
@@ -62,7 +53,7 @@ describe('createVisualizeAppState', () => {
   test('should initialize visualize app state', () => {
     expect(kbnUrlStateStorage.get).toHaveBeenCalledWith('_a');
     expect(migrateAppState).toHaveBeenCalledWith({
-      ...stateDefaults,
+      ...visualizeAppStateStub,
       linked: false,
     });
     expect(kbnUrlStateStorage.set).toHaveBeenCalledWith('_a', 'migratedAppState', {
@@ -82,18 +73,18 @@ describe('createVisualizeAppState', () => {
   describe('stateContainer transitions', () => {
     test('set', () => {
       const newQuery = { query: '', language: '' };
-      expect(transitions.set(stateDefaults)('query', newQuery)).toEqual({
-        ...stateDefaults,
+      expect(transitions.set(visualizeAppStateStub)('query', newQuery)).toEqual({
+        ...visualizeAppStateStub,
         query: newQuery,
       });
     });
 
     test('setVis', () => {
       const newVis = { data: 'data' };
-      expect(transitions.setVis(stateDefaults)(newVis)).toEqual({
-        ...stateDefaults,
+      expect(transitions.setVis(visualizeAppStateStub)(newVis)).toEqual({
+        ...visualizeAppStateStub,
         vis: {
-          ...stateDefaults.vis,
+          ...visualizeAppStateStub.vis,
           ...newVis,
         },
       });
@@ -104,10 +95,10 @@ describe('createVisualizeAppState', () => {
         query: { query: '', language: '' },
         parentFilters: [{ test: 'filter2' }],
       };
-      expect(transitions.unlinkSavedSearch(stateDefaults)(params)).toEqual({
-        ...stateDefaults,
+      expect(transitions.unlinkSavedSearch(visualizeAppStateStub)(params)).toEqual({
+        ...visualizeAppStateStub,
         query: params.query,
-        filters: [{ test: 'filter1' }, { test: 'filter2' }],
+        filters: [...visualizeAppStateStub.filters, { test: 'filter2' }],
         linked: false,
       });
     });
@@ -119,16 +110,16 @@ describe('createVisualizeAppState', () => {
         $c: 3,
         d: () => {},
       };
-      expect(transitions.updateVisState(stateDefaults)(newVisState)).toEqual({
-        ...stateDefaults,
+      expect(transitions.updateVisState(visualizeAppStateStub)(newVisState)).toEqual({
+        ...visualizeAppStateStub,
         vis: { a: 1 },
       });
     });
 
     test('updateSavedQuery: add savedQuery', () => {
       const savedQueryId = '123test';
-      expect(transitions.updateSavedQuery(stateDefaults)(savedQueryId)).toEqual({
-        ...stateDefaults,
+      expect(transitions.updateSavedQuery(visualizeAppStateStub)(savedQueryId)).toEqual({
+        ...visualizeAppStateStub,
         savedQuery: savedQueryId,
       });
     });
@@ -136,8 +127,8 @@ describe('createVisualizeAppState', () => {
     test('updateSavedQuery: remove savedQuery from state', () => {
       const savedQueryId = '123test';
       expect(
-        transitions.updateSavedQuery({ ...stateDefaults, savedQuery: savedQueryId })()
-      ).toEqual(stateDefaults);
+        transitions.updateSavedQuery({ ...visualizeAppStateStub, savedQuery: savedQueryId })()
+      ).toEqual(visualizeAppStateStub);
     });
   });
 });
