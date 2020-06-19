@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { createSavedObjectClass } from '../../../../../../src/plugins/saved_objects/public';
+import { createSavedObjectClass } from '../../../../../../../src/plugins/saved_objects/public';
 import {
   getTimeFilters,
   getMapZoom,
@@ -15,11 +15,12 @@ import {
   getQuery,
   getFilters,
   getMapSettings,
-} from '../../selectors/map_selectors';
-import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../selectors/ui_selectors';
-import { copyPersistentState } from '../../reducers/util';
-import { extractReferences, injectReferences } from '../../../common/migrations/references';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+} from '../../../selectors/map_selectors';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
+import { copyPersistentState } from '../../../reducers/util';
+import { extractReferences, injectReferences } from '../../../../common/migrations/references';
+import { MAP_BASE_URL, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { getStore } from '../../store_operations';
 
 export function createSavedGisMapClass(services) {
   const SavedObjectClass = createSavedObjectClass(services);
@@ -73,14 +74,17 @@ export function createSavedGisMapClass(services) {
       });
       this.showInRecentlyAccessed = true;
     }
+
     getFullPath() {
-      return `/app/maps#map/${this.id}`;
+      return `${MAP_BASE_URL}/${this.id}`;
     }
+
     getLayerList() {
       return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
     }
 
-    syncWithStore(state) {
+    syncWithStore() {
+      const state = getStore().getState();
       const layerList = getLayerListRaw(state);
       const layerListConfigOnly = copyPersistentState(layerList);
       this.layerListJSON = JSON.stringify(layerListConfigOnly);
