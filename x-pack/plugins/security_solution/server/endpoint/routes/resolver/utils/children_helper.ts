@@ -10,8 +10,8 @@ import {
   isProcessStart,
 } from '../../../../../common/endpoint/models/event';
 import { ChildNode, ResolverEvent, ResolverChildren } from '../../../../../common/endpoint/types';
-import { PaginationBuilder } from './pagination';
 import { createChild } from './node';
+import { TotalsPaginationBuilder } from './totals_pagination';
 
 /**
  * This class helps construct the children structure when building a resolver tree.
@@ -86,7 +86,7 @@ export class ChildrenNodesHelper {
       const parentNode = this.cache.get(parentID);
       const childrenStartEvents = startEventsCache.get(parentID);
       if (parentNode && childrenStartEvents) {
-        parentNode.nextChild = PaginationBuilder.buildCursor(total, childrenStartEvents);
+        parentNode.nextChild = TotalsPaginationBuilder.buildCursor(total, childrenStartEvents);
       }
     });
   }

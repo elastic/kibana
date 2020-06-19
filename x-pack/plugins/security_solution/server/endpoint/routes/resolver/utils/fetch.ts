@@ -25,8 +25,9 @@ import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
 import { createAncestry, createRelatedEvents, createLifecycle, createRelatedAlerts } from './node';
-import { ChildrenNodesHelper } from './children_helper';
 import { AlertsQuery } from '../queries/alerts';
+import { ChildrenNodesHelper } from './children_helper';
+import { TotalsPaginationBuilder } from './totals_pagination';
 
 /**
  * Handles retrieving nodes of a resolver tree.
@@ -75,17 +76,12 @@ export class Fetcher {
    * Retrieves the children nodes for the resolver tree.
    *
    * @param limit the number of children to retrieve for a single level
-   * @param generations number of levels to return
    * @param after a cursor to use as the starting point for retrieving children
    */
-  public async children(
-    limit: number,
-    generations: number,
-    after?: string
-  ): Promise<ResolverChildren> {
+  public async children(limit: number, after?: string): Promise<ResolverChildren> {
     const helper = new ChildrenNodesHelper(this.id);
 
-    await this.doChildren(helper, [this.id], limit, generations, after);
+    await this.doChildren(helper, [this.id], limit, after);
 
     return helper.getNodes();
   }
@@ -113,19 +109,16 @@ export class Fetcher {
       this.endpointID
     );
 
-    const { totals, results } = await query.search(this.client, this.id);
+    const results = await query.search(this.client, this.id);
     if (results.length === 0) {
       // return an empty set of results
       return createRelatedAlerts(this.id);
-    }
-    if (!totals[this.id]) {
-      throw new Error(`Could not find the totals for related events entity_id: ${this.id}`);
     }
 
     return createRelatedAlerts(
       this.id,
       results,
-      PaginationBuilder.buildCursor(totals[this.id], results)
+      PaginationBuilder.buildCursorRequestLimit(limit, results)
     );
   }
 
@@ -163,6 +156,19 @@ export class Fetcher {
     return [];
   }
 
+  private toMapOfNodes(results: ResolverEvent[]) {
+    return results.reduce((nodes: Map<string, LifecycleNode>, event: ResolverEvent) => {
+      const nodeId = entityId(event);
+      let node = nodes.get(nodeId);
+      if (!node) {
+        node = createLifecycle(nodeId, []);
+      }
+
+      node.lifecycle.push(event);
+      return nodes.set(nodeId, node);
+    }, new Map());
+  }
+
   private async doAncestors(
     ancestors: string[],
     levels: number,
@@ -181,19 +187,7 @@ export class Fetcher {
     }
 
     // bucket the start and end events together for a single node
-    const ancestryNodes = results.reduce(
-      (nodes: Map<string, LifecycleNode>, ancestorEvent: ResolverEvent) => {
-        const nodeId = entityId(ancestorEvent);
-        let node = nodes.get(nodeId);
-        if (!node) {
-          node = createLifecycle(nodeId, []);
-        }
-
-        node.lifecycle.push(ancestorEvent);
-        return nodes.set(nodeId, node);
-      },
-      new Map()
-    );
+    const ancestryNodes = this.toMapOfNodes(results);
 
     // the order of this array is going to be weird, it will look like this
     // [furthest grandparent...closer grandparent, next recursive call furthest grandparent...closer grandparent]
@@ -214,19 +208,16 @@ export class Fetcher {
       this.endpointID
     );
 
-    const { totals, results } = await query.search(this.client, this.id);
+    const results = await query.search(this.client, this.id);
     if (results.length === 0) {
       // return an empty set of results
       return createRelatedEvents(this.id);
-    }
-    if (!totals[this.id]) {
-      throw new Error(`Could not find the totals for related events entity_id: ${this.id}`);
     }
 
     return createRelatedEvents(
       this.id,
       results,
-      PaginationBuilder.buildCursor(totals[this.id], results)
+      PaginationBuilder.buildCursorRequestLimit(limit, results)
     );
   }
 
@@ -234,15 +225,14 @@ export class Fetcher {
     cache: ChildrenNodesHelper,
     ids: string[],
     limit: number,
-    levels: number,
     after?: string
   ) {
-    if (levels === 0 || ids.length === 0) {
+    if (ids.length === 0) {
       return;
     }
 
     const childrenQuery = new ChildrenQuery(
-      PaginationBuilder.createBuilder(limit, after),
+      TotalsPaginationBuilder.createBuilder(limit, after),
       this.indexPattern,
       this.endpointID
     );
@@ -257,8 +247,9 @@ export class Fetcher {
     const children = await lifecycleQuery.search(this.client, childIDs);
 
     cache.addChildren(totals, children);
+    const nodesLeft = limit - childIDs.length;
 
-    await this.doChildren(cache, childIDs, limit, levels - 1);
+    await this.doChildren(cache, childIDs, nodesLeft);
   }
 
   private async doStats(tree: Tree) {

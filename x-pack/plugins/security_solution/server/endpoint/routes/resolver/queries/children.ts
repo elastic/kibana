@@ -6,7 +6,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
-import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
+import { TotalsPaginationBuilder, PaginatedResults } from '../utils/totals_pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
@@ -14,7 +14,7 @@ import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/com
  */
 export class ChildrenQuery extends ResolverQuery<PaginatedResults> {
   constructor(
-    private readonly pagination: PaginationBuilder,
+    private readonly pagination: TotalsPaginationBuilder,
     indexPattern: string,
     endpointID?: string
   ) {
@@ -88,7 +88,7 @@ export class ChildrenQuery extends ResolverQuery<PaginatedResults> {
   formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
     return {
       results: ResolverQuery.getResults(response),
-      totals: PaginationBuilder.getTotals(response.aggregations),
+      totals: TotalsPaginationBuilder.getTotals(response.aggregations),
     };
   }
 }
