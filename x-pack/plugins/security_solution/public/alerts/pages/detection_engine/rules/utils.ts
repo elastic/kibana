@@ -30,7 +30,6 @@ const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetU
       text: i18nDetections.ALERT,
       href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
         path: getDetectionEngineTabUrl(tabPath, !isEmpty(search[0]) ? search[0] : ''),
-        absolute: true,
       }),
     };
   }
@@ -40,7 +39,6 @@ const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetU
       text: i18nRules.PAGE_TITLE,
       href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
         path: getRulesUrl(!isEmpty(search[0]) ? search[0] : ''),
-        absolute: true,
       }),
     };
   }
@@ -62,7 +60,6 @@ export const getBreadcrumbs = (
       text: i18nDetections.PAGE_TITLE,
       href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
         path: !isEmpty(search[0]) ? search[0] : '',
-        absolute: true,
       }),
     },
   ];
@@ -80,7 +77,6 @@ export const getBreadcrumbs = (
         text: params.state.ruleName,
         href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
           path: getRuleDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
-          absolute: true,
         }),
       },
     ];
@@ -93,7 +89,6 @@ export const getBreadcrumbs = (
         text: i18nRules.ADD_PAGE_TITLE,
         href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
           path: getCreateRuleUrl(!isEmpty(search[0]) ? search[0] : ''),
-          absolute: true,
         }),
       },
     ];
@@ -106,7 +101,6 @@ export const getBreadcrumbs = (
         text: i18nRules.EDIT_PAGE_TITLE,
         href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
           path: getEditRuleUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
-          absolute: true,
         }),
       },
     ];

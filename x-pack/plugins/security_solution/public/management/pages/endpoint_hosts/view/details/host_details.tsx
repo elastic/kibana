@@ -100,10 +100,10 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
 
   const [policyDetailsRoutePath, policyDetailsRouteUrl] = useMemo(() => {
     return [
-      getPolicyDetailPath(details.endpoint.policy.applied.id),
-      formatUrl(getPolicyDetailPath(details.endpoint.policy.applied.id)),
+      getPolicyDetailPath(details.Endpoint.policy.applied.id),
+      formatUrl(getPolicyDetailPath(details.Endpoint.policy.applied.id)),
     ];
-  }, [details.endpoint.policy.applied.id, formatUrl]);
+  }, [details.Endpoint.policy.applied.id, formatUrl]);
 
   const policyDetailsClickHandler = useNavigateByRouterEventHandler(policyDetailsRoutePath);
 

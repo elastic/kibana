@@ -72,7 +72,6 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         onClick={goToRuleDetails}
         href={getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
           path: getRuleDetailsUrl(ruleId, search),
-          absolute: true,
         })}
       >
         {content}

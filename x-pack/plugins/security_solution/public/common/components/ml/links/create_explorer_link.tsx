@@ -27,7 +27,6 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
     <EuiLink
       href={`${getUrlForApp('ml', {
         path: createExplorerLink(score, startDate, endDate),
-        absolute: true,
       })}`}
       target="_blank"
     >

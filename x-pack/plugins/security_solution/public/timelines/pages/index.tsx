@@ -39,7 +39,6 @@ export const getBreadcrumbs = (
       text: PAGE_TITLE,
       href: getUrlForApp(`${APP_ID}:${SecurityPageName.timelines}`, {
         path: !isEmpty(search[0]) ? search[0] : '',
-        absolute: true,
       }),
     },
   ];

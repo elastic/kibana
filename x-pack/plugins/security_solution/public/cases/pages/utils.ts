@@ -27,7 +27,6 @@ export const getBreadcrumbs = (
       text: i18n.PAGE_TITLE,
       href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: queryParameters,
-        absolute: true,
       }),
     },
   ];
@@ -38,7 +37,6 @@ export const getBreadcrumbs = (
         text: i18n.CREATE_BC_TITLE,
         href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
           path: getCreateCaseUrl(queryParameters),
-          absolute: true,
         }),
       },
     ];
@@ -49,7 +47,6 @@ export const getBreadcrumbs = (
         text: params.state?.caseTitle ?? '',
         href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
           path: getCaseDetailsUrl({ id: params.detailName, search: queryParameters }),
-          absolute: true,
         }),
       },
     ];

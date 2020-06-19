@@ -46,7 +46,6 @@ const TabNavigationItemComponent = ({
       ? formatUrl(href)
       : getUrlForApp(`${APP_ID}:${id}`, {
           path: urlSearch,
-          absolute: true,
         });
   return (
     <EuiTab

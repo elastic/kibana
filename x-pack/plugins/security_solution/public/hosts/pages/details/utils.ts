@@ -39,7 +39,6 @@ export const getBreadcrumbs = (
       text: i18n.PAGE_TITLE,
       href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
         path: !isEmpty(search[0]) ? search[0] : '',
-        absolute: true,
       }),
     },
   ];
@@ -51,7 +50,6 @@ export const getBreadcrumbs = (
         text: params.detailName,
         href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
           path: getHostDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
-          absolute: true,
         }),
       },
     ];

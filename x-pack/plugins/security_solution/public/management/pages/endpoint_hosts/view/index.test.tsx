@@ -249,7 +249,7 @@ describe('when on the hosts page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `/policy/${hostDetails.metadata.endpoint.policy.applied.id}`
+        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -265,7 +265,7 @@ describe('when on the hosts page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `/policy/${hostDetails.metadata.endpoint.policy.applied.id}`
+        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
