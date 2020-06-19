@@ -5,7 +5,6 @@
  */
 
 import { ResolverEvent } from '../../../../../common/endpoint/types';
-import { eventId } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { PaginationBuilder } from './pagination';
 
@@ -21,11 +20,6 @@ interface TotalsAggregation {
   totals?: {
     buckets?: AggBucket[];
   };
-}
-
-interface PaginationCursor {
-  timestamp: number;
-  eventID: string;
 }
 
 /**
