@@ -43,6 +43,7 @@ interface ThresholdExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const ThresholdExpression = ({
@@ -51,6 +52,7 @@ export const ThresholdExpression = ({
   onChangeSelectedThresholdComparator,
   onChangeSelectedThreshold,
   customComparators,
+  display = 'inline',
   threshold = [],
   popupPosition,
 }: ThresholdExpressionProps) => {
@@ -81,11 +83,12 @@ export const ThresholdExpression = ({
           onClick={() => {
             setAlertThresholdPopoverOpen(true);
           }}
-          color={
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={
             (errors.threshold0 && errors.threshold0.length) ||
-            (errors.threshold1 && errors.threshold1.length)
-              ? 'danger'
-              : 'secondary'
+            (errors.threshold1 && errors.threshold1.length) > 0
+              ? true
+              : false
           }
         />
       }
@@ -95,6 +98,7 @@ export const ThresholdExpression = ({
       }}
       ownFocus
       withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>

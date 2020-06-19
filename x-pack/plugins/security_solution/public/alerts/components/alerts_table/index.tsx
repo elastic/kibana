@@ -10,7 +10,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -27,16 +29,10 @@ import { updateAlertStatusAction } from './actions';
 import {
   getAlertActions,
   requiredFieldsForActions,
-  alertsClosedFilters,
   alertsDefaultModel,
-  alertsOpenFilters,
+  buildAlertStatusFilter,
 } from './default_config';
-import {
-  FILTER_CLOSED,
-  FILTER_OPEN,
-  AlertFilterOption,
-  AlertsTableFilterGroup,
-} from './alerts_filter_group';
+import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AlertsUtilityBar } from './alerts_utility_bar';
 import * as i18n from './translations';
 import {
@@ -53,9 +49,8 @@ import {
   displayErrorToast,
 } from '../../../common/components/toasters';
 
-export const ALERTS_TABLE_TIMELINE_ID = 'alerts-table';
-
 interface OwnProps {
+  timelineId: TimelineIdLiteral;
   canUserCRUD: boolean;
   defaultFilters?: Filter[];
   hasIndexWrite: boolean;
@@ -68,6 +63,7 @@ interface OwnProps {
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
+  timelineId,
   canUserCRUD,
   clearEventsDeleted,
   clearEventsLoading,
@@ -92,33 +88,36 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const apolloClient = useApolloClient();
 
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
-  const [filterGroup, setFilterGroup] = useState<AlertFilterOption>(FILTER_OPEN);
+  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
     signalsIndex !== '' ? [signalsIndex] : []
   );
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
 
-  const getGlobalQuery = useCallback(() => {
-    if (browserFields != null && indexPatterns != null) {
-      return combineQueries({
-        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-        dataProviders: [],
-        indexPattern: indexPatterns,
-        browserFields,
-        filters: isEmpty(defaultFilters)
-          ? globalFilters
-          : [...(defaultFilters ?? []), ...globalFilters],
-        kqlQuery: globalQuery,
-        kqlMode: globalQuery.language,
-        start: from,
-        end: to,
-        isEventViewer: true,
-      });
-    }
-    return null;
+  const getGlobalQuery = useCallback(
+    (customFilters: Filter[]) => {
+      if (browserFields != null && indexPatterns != null) {
+        return combineQueries({
+          config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+          dataProviders: [],
+          indexPattern: indexPatterns,
+          browserFields,
+          filters: isEmpty(defaultFilters)
+            ? [...globalFilters, ...customFilters]
+            : [...(defaultFilters ?? []), ...globalFilters, ...customFilters],
+          kqlQuery: globalQuery,
+          kqlMode: globalQuery.language,
+          start: from,
+          end: to,
+          isEventViewer: true,
+        });
+      }
+      return null;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]);
+    [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]
+  );
 
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
@@ -142,36 +141,49 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      setEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isLoading });
+      setEventsLoading!({ id: timelineId, eventIds, isLoading });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setEventsLoading, ALERTS_TABLE_TIMELINE_ID]
+    [setEventsLoading, timelineId]
   );
 
   const setEventsDeletedCallback = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      setEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isDeleted });
+      setEventsDeleted!({ id: timelineId, eventIds, isDeleted });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setEventsDeleted, ALERTS_TABLE_TIMELINE_ID]
+    [setEventsDeleted, timelineId]
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
-    (count: number, status: string) => {
-      const title =
-        status === 'closed'
-          ? i18n.CLOSED_ALERT_SUCCESS_TOAST(count)
-          : i18n.OPENED_ALERT_SUCCESS_TOAST(count);
-
+    (count: number, status: Status) => {
+      let title: string;
+      switch (status) {
+        case 'closed':
+          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
+          break;
+        case 'open':
+          title = i18n.OPENED_ALERT_SUCCESS_TOAST(count);
+          break;
+        case 'in-progress':
+          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(count);
+      }
       displaySuccessToast(title, dispatchToaster);
     },
     [dispatchToaster]
   );
 
   const onAlertStatusUpdateFailure = useCallback(
-    (status: string, error: Error) => {
-      const title =
-        status === 'closed' ? i18n.CLOSED_ALERT_FAILED_TOAST : i18n.OPENED_ALERT_FAILED_TOAST;
+    (status: Status, error: Error) => {
+      let title: string;
+      switch (status) {
+        case 'closed':
+          title = i18n.CLOSED_ALERT_FAILED_TOAST;
+          break;
+        case 'open':
+          title = i18n.OPENED_ALERT_FAILED_TOAST;
+          break;
+        case 'in-progress':
+          title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+      }
       displayErrorToast(title, [error.message], dispatchToaster);
     },
     [dispatchToaster]
@@ -188,21 +200,21 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
-    (newFilterGroup: AlertFilterOption) => {
-      clearEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID });
-      clearEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID });
-      clearSelected!({ id: ALERTS_TABLE_TIMELINE_ID });
+    (newFilterGroup: Status) => {
+      clearEventsLoading!({ id: timelineId });
+      clearEventsDeleted!({ id: timelineId });
+      clearSelected!({ id: timelineId });
       setFilterGroup(newFilterGroup);
     },
-    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
+    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup, timelineId]
   );
 
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
-    clearSelected!({ id: ALERTS_TABLE_TIMELINE_ID });
+    clearSelected!({ id: timelineId });
     setSelectAll(false);
     setShowClearSelectionAction(false);
-  }, [clearSelected, setSelectAll, setShowClearSelectionAction]);
+  }, [clearSelected, setSelectAll, setShowClearSelectionAction, timelineId]);
 
   // Callback for selecting all events on all pages from utility bar
   // Dispatches to stateful_body's selectAll via TimelineTypeContext props
@@ -213,11 +225,18 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [setSelectAll, setShowClearSelectionAction]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
-    async (refetchQuery: inputsModel.Refetch, { status }: UpdateAlertsStatusProps) => {
+    async (
+      refetchQuery: inputsModel.Refetch,
+      { status, selectedStatus }: UpdateAlertsStatusProps
+    ) => {
+      const currentStatusFilter = buildAlertStatusFilter(status);
       await updateAlertStatusAction({
-        query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
+        query: showClearSelectionAction
+          ? getGlobalQuery(currentStatusFilter)?.filterQuery
+          : undefined,
         alertIds: Object.keys(selectedEventIds),
         status,
+        selectedStatus,
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
         onAlertStatusUpdateSuccess,
@@ -245,7 +264,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
           hasIndexWrite={hasIndexWrite}
-          isFilteredToOpen={filterGroup === FILTER_OPEN}
+          currentFilter={filterGroup}
           selectAll={selectAllCallback}
           selectedEventIds={selectedEventIds}
           showClearSelection={showClearSelectionAction}
@@ -277,7 +296,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         createTimeline: createTimelineCallback,
         setEventsLoading: setEventsLoadingCallback,
         setEventsDeleted: setEventsDeletedCallback,
-        status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
+        status: filterGroup,
         updateTimelineIsLoading,
         onAlertStatusUpdateSuccess,
         onAlertStatusUpdateFailure,
@@ -298,19 +317,16 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
   const defaultFiltersMemo = useMemo(() => {
     if (isEmpty(defaultFilters)) {
-      return filterGroup === FILTER_OPEN ? alertsOpenFilters : alertsClosedFilters;
+      return buildAlertStatusFilter(filterGroup);
     } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
-      return [
-        ...defaultFilters,
-        ...(filterGroup === FILTER_OPEN ? alertsOpenFilters : alertsClosedFilters),
-      ];
+      return [...defaultFilters, ...buildAlertStatusFilter(filterGroup)];
     }
   }, [defaultFilters, filterGroup]);
   const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
-      id: ALERTS_TABLE_TIMELINE_ID,
+      id: timelineId,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       loadingText: i18n.LOADING_ALERTS,
@@ -321,7 +337,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, []);
   useEffect(() => {
     setTimelineRowActions({
-      id: ALERTS_TABLE_TIMELINE_ID,
+      id: timelineId,
       queryFields: requiredFieldsForActions,
       timelineRowActions: additionalActions,
     });
@@ -348,7 +364,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       defaultModel={alertsDefaultModel}
       end={to}
       headerFilterGroup={headerFilterGroup}
-      id={ALERTS_TABLE_TIMELINE_ID}
+      id={timelineId}
       start={from}
       utilityBar={utilityBarCallback}
     />
@@ -358,9 +374,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getGlobalInputs = inputsSelectors.globalSelector();
-  const mapStateToProps = (state: State) => {
-    const timeline: TimelineModel =
-      getTimeline(state, ALERTS_TABLE_TIMELINE_ID) ?? timelineDefaults;
+  const mapStateToProps = (state: State, ownProps: OwnProps) => {
+    const { timelineId } = ownProps;
+    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const { deletedEventIds, isSelectAllChecked, loadingEventIds, selectedEventIds } = timeline;
 
     const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);

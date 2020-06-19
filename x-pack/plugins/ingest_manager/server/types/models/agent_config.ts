@@ -8,7 +8,7 @@ import { DatasourceSchema } from './datasource';
 import { AgentConfigStatus } from '../../../common';
 
 const AgentConfigBaseSchema = {
-  name: schema.string(),
+  name: schema.string({ minLength: 1 }),
   namespace: schema.string({ minLength: 1 }),
   description: schema.maybe(schema.string()),
   monitoring_enabled: schema.maybe(

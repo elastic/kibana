@@ -14,7 +14,7 @@
     "@storybook/addon-storyshots": "^5.2.8",
     "@storybook/react": "^5.2.8",
     "@storybook/theming": "^5.2.8",
-    "copy-webpack-plugin": "5.0.3",
+    "copy-webpack-plugin": "^6.0.2",
     "fast-glob": "2.2.7",
     "glob-watcher": "5.0.3",
     "jest-specific-snapshot": "2.0.0",

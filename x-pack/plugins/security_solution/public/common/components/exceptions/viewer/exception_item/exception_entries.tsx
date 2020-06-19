@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiTableFieldDataColumnType,
   EuiHideFor,
+  EuiBadge,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -44,6 +45,7 @@ const MyRemoveButton = styled(EuiButton)`
 
 const MyAndOrBadgeContainer = styled(EuiFlexItem)`
   padding-top: ${({ theme }) => theme.eui.euiSizeXL};
+  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 interface ExceptionEntriesComponentProps {
@@ -101,9 +103,13 @@ const ExceptionEntriesComponent = ({
         render: (values: string | string[] | null) => {
           if (Array.isArray(values)) {
             return (
-              <EuiFlexGroup direction="row">
+              <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="flexStart">
                 {values.map((value) => {
-                  return <EuiFlexItem grow={1}>{value}</EuiFlexItem>;
+                  return (
+                    <EuiFlexItem key={value} grow={false}>
+                      <EuiBadge color="#DDD">{value}</EuiBadge>
+                    </EuiFlexItem>
+                  );
                 })}
               </EuiFlexGroup>
             );
