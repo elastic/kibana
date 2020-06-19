@@ -13,12 +13,18 @@ import {
   EuiDataGridStyle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
+import { CoreSetup } from 'src/core/public';
+
 import {
   IndexPattern,
   IFieldType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
 } from '../../../../../../../src/plugins/data/public';
+
+import { extractErrorMessage } from '../../../../common/util/errors';
 
 import {
   BASIC_NUMERICAL_TYPES,
@@ -37,7 +43,7 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
-export const INIT_MAX_COLUMNS = 20;
+export const INIT_MAX_COLUMNS = 10;
 
 export const euiDataGridStyle: EuiDataGridStyle = {
   border: 'all',
@@ -102,6 +108,8 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       case 'boolean':
         schema = 'boolean';
         break;
+      case 'text':
+        schema = NON_AGGREGATABLE;
     }
 
     if (
@@ -122,7 +130,10 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
   });
 };
 
-export const getDataGridSchemaFromKibanaFieldType = (field: IFieldType | undefined) => {
+export const NON_AGGREGATABLE = 'non-aggregatable';
+export const getDataGridSchemaFromKibanaFieldType = (
+  field: IFieldType | undefined
+): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
   let schema;
@@ -141,6 +152,10 @@ export const getDataGridSchemaFromKibanaFieldType = (field: IFieldType | undefin
     case KBN_FIELD_TYPES.NUMBER:
       schema = 'numeric';
       break;
+  }
+
+  if (schema === undefined && field?.aggregatable === false) {
+    return NON_AGGREGATABLE;
   }
 
   return schema;
@@ -288,4 +303,18 @@ export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['colum
   };
 
   return sortFn;
+};
+
+export const showDataGridColumnChartErrorMessageToast = (
+  e: any,
+  toastNotifications: CoreSetup['notifications']['toasts']
+) => {
+  const error = extractErrorMessage(e);
+
+  toastNotifications.addDanger(
+    i18n.translate('xpack.ml.dataGrid.columnChart.ErrorMessageToast', {
+      defaultMessage: 'An error occurred fetching the histogram charts data: {error}',
+      values: { error: error !== '' ? error : e },
+    })
+  );
 };

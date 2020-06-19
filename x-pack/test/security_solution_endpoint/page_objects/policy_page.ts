@@ -101,5 +101,13 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     async findDatasourceEndpointCustomConfiguration(onEditPage: boolean = false) {
       return await testSubjects.find(`endpointDatasourceConfig_${onEditPage ? 'edit' : 'create'}`);
     },
+
+    /**
+     * Finds and returns the onboarding button displayed in empty List pages
+     */
+    async findOnboardingStartButton() {
+      await testSubjects.waitForEnabled('onboardingStartButton');
+      return await testSubjects.find('onboardingStartButton');
+    },
   };
 }
