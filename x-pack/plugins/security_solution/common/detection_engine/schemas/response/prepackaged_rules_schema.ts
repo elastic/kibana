@@ -7,13 +7,20 @@
 import * as t from 'io-ts';
 
 /* eslint-disable @typescript-eslint/camelcase */
-import { rules_installed, rules_updated } from '../common/schemas';
+import {
+  rules_installed,
+  rules_updated,
+  timelines_installed,
+  timelines_updated,
+} from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 export const prePackagedRulesSchema = t.exact(
   t.type({
     rules_installed,
     rules_updated,
+    timelines_installed,
+    timelines_updated,
   })
 );
 
