@@ -34,6 +34,7 @@ import execa from 'execa';
 import fs from 'fs';
 import path from 'path';
 import getopts from 'getopts';
+import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 
 /*
  * Step 1: execute build:types
@@ -276,24 +277,44 @@ async function run(
     return !(extraFlags.length > 0);
   }
 
-  try {
-    log.info(`Building types for api extractor...`);
-    await runBuildTypes();
-  } catch (e) {
-    log.error(e);
-    return false;
-  }
-
   const filteredFolders = folders.filter((folder) =>
     opts.filter.length ? folder.match(opts.filter) : true
   );
-  const results = [];
-  for (const folder of filteredFolders) {
-    results.push(await run(folder, { log, opts }));
-  }
 
-  if (results.includes(false)) {
-    process.exitCode = 1;
+  if (isMainThread) {
+    try {
+      log.info(`Building types for api extractor...`);
+      await runBuildTypes();
+    } catch (e) {
+      log.error(e);
+      return false;
+    }
+
+    const results = await Promise.all(
+      filteredFolders.map((folder) => {
+        return new Promise((resolve, reject) => {
+          const worker = new Worker(
+            require('path').resolve(__dirname, '../../scripts/check_published_api_changes.js'),
+            {
+              workerData: { folder, options: opts },
+            }
+          );
+          worker.on('message', resolve);
+          worker.on('error', reject);
+          worker.on('exit', (code) => {
+            if (code !== 0) reject(new Error(`Worker stopped with exit code ${code}`));
+          });
+        });
+      })
+    );
+
+    if (results.includes(false)) {
+      process.exitCode = 1;
+    }
+  } else {
+    const { folder, options } = workerData;
+    // eslint-disable-next-line no-unused-expressions
+    parentPort?.postMessage(await run(folder, { log, opts: options }));
   }
 })().catch((e) => {
   console.log(e);
