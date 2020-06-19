@@ -155,7 +155,7 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
-  private deserializeFieldFormatMap(mapping: any) {
+  public deserializeFieldFormatMap(mapping: any) {
     const FieldFormat = this.fieldFormats.getType(mapping.id);
 
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
@@ -216,7 +216,9 @@ export class IndexPattern implements IIndexPattern {
     // @ts-ignore
     this.fields = spec.fields || [];
     this.typeMeta = spec.typeMeta;
-    this.fieldFormatMap = fieldFormatMap;
+    this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
+      return this.deserializeFieldFormatMap(mapping);
+    });
 
     this.initFields();
   }
@@ -327,13 +329,11 @@ export class IndexPattern implements IIndexPattern {
     return {
       id: this.id,
       version: this.version,
-      // should no longer rely on this
-      // ...this.prepBody(),
+
       title: this.title,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec(),
-      // fieldFormatMap?: Record<string, FieldFormatSpec>;
       typeMeta: this.typeMeta,
     } as IndexPatternSpec;
   }

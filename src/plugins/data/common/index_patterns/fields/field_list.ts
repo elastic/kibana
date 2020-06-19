@@ -44,6 +44,44 @@ export type CreateIndexPatternFieldList = (
   specs?: FieldSpec[],
   shortDotsEnable?: boolean
 ) => IIndexPatternFieldList;
+/*
+	        count: number;
+        script: string | undefined;
+        lang: string | undefined;
+        conflictDescriptions: Record<string, string[]> | undefined;
+        name: string;
+        type: string;
+        esTypes: string[] | undefined;
+        scripted: boolean;
+        searchable: boolean;
+        aggregatable: boolean;
+        readFromDocValues: boolean | undefined;
+        subType: IFieldSubType | undefined;
+        */
+
+export const fieldToFieldSpec = (field: Field) => {
+  const fieldFormatMap = field?.indexPattern?.fieldFormatMap;
+  let format: { id: string; params: unknown } | undefined;
+  if (fieldFormatMap) {
+    format = fieldFormatMap[field.name];
+  }
+
+  return {
+    count: field.count,
+    script: field.script,
+    lang: field.lang,
+    conflictDescriptions: field.conflictDescriptions,
+    name: field.name,
+    type: field.type,
+    esTypes: field.esTypes,
+    scripted: field.scripted,
+    searchable: field.searchable,
+    aggregatable: field.aggregatable,
+    readFromDocValues: field.readFromDocValues,
+    subType: field.subType,
+    format,
+  };
+};
 
 export const getIndexPatternFieldListCreator = ({
   fieldFormats,
@@ -104,11 +142,7 @@ export const getIndexPatternFieldListCreator = ({
     };
 
     toSpec = () => {
-      return [
-        ...this.map((field) => ({
-          name: field.name,
-        })),
-      ];
+      return [...this.map((field) => fieldToFieldSpec(field))];
     };
   }
 

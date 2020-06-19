@@ -948,8 +948,6 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
     // (undocumented)
     remove(field: IFieldType): void;
     // (undocumented)
-    toSpec(): FieldSpec;
-    // (undocumented)
     update(field: FieldSpec): void;
 }
 
@@ -995,7 +993,9 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     fieldFormatMap: any;
     // (undocumented)
-    fields: IIndexPatternFieldList;
+    fields: IIndexPatternFieldList & {
+        toSpec: () => FieldSpec[];
+    };
     // (undocumented)
     fieldsFetcher: any;
     // (undocumented)
@@ -1146,10 +1146,6 @@ export class IndexPatternField implements IFieldType {
     sortable?: boolean;
     // (undocumented)
     subType?: IFieldSubType;
-    // (undocumented)
-    toSpec(): {
-        field: string;
-    };
     // (undocumented)
     type: string;
     // (undocumented)
