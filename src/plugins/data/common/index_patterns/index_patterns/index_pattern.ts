@@ -40,7 +40,7 @@ import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
-import { IndexPatternSpec, TypeMeta, FieldSpec, FieldFormatSpec } from '../types';
+import { IndexPatternSpec, TypeMeta, FieldSpec, FieldFormatSpec, SourceFilter } from '../types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -62,7 +62,7 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
-  public fields: IIndexPatternFieldList;
+  public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -73,7 +73,7 @@ export class IndexPattern implements IIndexPattern {
   private savedObjectsClient: SavedObjectsClientContract;
   private patternCache: PatternCache;
   private getConfig: any;
-  private sourceFilters?: [];
+  private sourceFilters?: SourceFilter[];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
@@ -206,7 +206,18 @@ export class IndexPattern implements IIndexPattern {
       });
     }
 
-    // this.updateFromPlainObject({ fieldFormatMap, ...spec });
+    this.version = spec.version;
+
+    this.title = spec.title || '';
+    this.timeFieldName = spec.timeFieldName;
+    this.sourceFilters = spec.sourceFilters;
+
+    // ignoring this because the same thing happens elsewhere but via _.assign
+    // @ts-ignore
+    this.fields = spec.fields || [];
+    this.typeMeta = spec.typeMeta;
+    this.fieldFormatMap = fieldFormatMap;
+
     this.initFields();
   }
 

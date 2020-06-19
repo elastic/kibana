@@ -37,7 +37,6 @@ export interface IIndexPatternFieldList extends Array<Field> {
   add(field: FieldSpec): void;
   remove(field: IFieldType): void;
   update(field: FieldSpec): void;
-  toSpec(): FieldSpec;
 }
 
 export type CreateIndexPatternFieldList = (
@@ -105,7 +104,11 @@ export const getIndexPatternFieldListCreator = ({
     };
 
     toSpec = () => {
-      return [...this.map((field) => field.toSpec())];
+      return [
+        ...this.map((field) => ({
+          name: field.name,
+        })),
+      ];
     };
   }
 

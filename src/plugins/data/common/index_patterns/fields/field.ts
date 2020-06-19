@@ -148,8 +148,4 @@ export class Field implements IFieldType {
 
     return obj.create();
   }
-
-  toSpec() {
-    return { field: 'will go here' };
-  }
 }
