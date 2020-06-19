@@ -1,0 +1,3 @@
+// Importing from css was intentional because font-awesome.scss requries "file-loader" for loading fonts.
+// As we temporary using font-awesome icons in the new platform and we don't want change webpack config for tempoprary library.
+@import "~font-awesome/css/font-awesome.min.css";

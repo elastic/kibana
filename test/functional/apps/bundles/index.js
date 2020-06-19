@@ -63,7 +63,8 @@ export default function ({ getService }) {
         .expect(200)
         .expect('Content-Encoding', 'gzip'));
 
-    it('returns gzip files when no brotli version exists', () =>
+    // commons.style.css file is no longer generated since we don't have any common styles.
+    it.skip('returns gzip files when no brotli version exists', () =>
       supertest
         .get(`/${buildNum}/bundles/commons.style.css`) // legacy optimizer does not create brotli outputs
         .set('Accept-Encoding', 'gzip, br')
