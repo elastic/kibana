@@ -9,18 +9,23 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import * as api from '../api';
 import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { ExceptionListItemSchema } from '../../../common/schemas';
 import { ExceptionList, UseExceptionListProps, UseExceptionListSuccess } from '../types';
 
 import { ReturnExceptionListAndItems, useExceptionList } from './use_exception_list';
 
-jest.mock('../api');
-
 const mockKibanaHttpService = createKibanaCoreStartMock().http;
 
 describe('useExceptionList', () => {
   const onErrorMock = jest.fn();
+
+  beforeEach(() => {
+    jest.spyOn(api, 'fetchExceptionListById').mockResolvedValue(getExceptionListSchemaMock());
+    jest
+      .spyOn(api, 'fetchExceptionListItemsByListId')
+      .mockResolvedValue(getFoundExceptionListItemSchemaMock());
+  });
 
   afterEach(() => {
     onErrorMock.mockClear();
@@ -34,9 +39,15 @@ describe('useExceptionList', () => {
         ReturnExceptionListAndItems
       >(() =>
         useExceptionList({
+          filterOptions: { filter: '', tags: [] },
           http: mockKibanaHttpService,
           lists: [{ id: 'myListId', namespaceType: 'single' }],
           onError: onErrorMock,
+          pagination: {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
         })
       );
       await waitForNextUpdate();
@@ -63,10 +74,16 @@ describe('useExceptionList', () => {
         ReturnExceptionListAndItems
       >(() =>
         useExceptionList({
+          filterOptions: { filter: '', tags: [] },
           http: mockKibanaHttpService,
           lists: [{ id: 'myListId', namespaceType: 'single' }],
           onError: onErrorMock,
           onSuccess: onSuccessMock,
+          pagination: {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
         })
       );
       await waitForNextUpdate();
@@ -76,14 +93,12 @@ describe('useExceptionList', () => {
         { ...getExceptionListSchemaMock(), totalItems: 1 },
       ];
 
-      const expectedListItemsResult: ExceptionListItemSchema[] = [
-        { ...getExceptionListItemSchemaMock() },
-      ];
-
+      const expectedListItemsResult: ExceptionListItemSchema[] = getFoundExceptionListItemSchemaMock()
+        .data;
       const expectedResult: UseExceptionListSuccess = {
         exceptions: expectedListItemsResult,
         lists: expectedListResult,
-        pagination: { page: 1, perPage: 20, total: 1 },
+        pagination: { page: 1, perPage: 1, total: 1 },
       };
 
       expect(result.current).toEqual([
@@ -92,7 +107,7 @@ describe('useExceptionList', () => {
         expectedListItemsResult,
         {
           page: 1,
-          perPage: 20,
+          perPage: 1,
           total: 1,
         },
         result.current[4],
@@ -104,6 +119,7 @@ describe('useExceptionList', () => {
   test('fetch a new exception list and its items', async () => {
     const spyOnfetchExceptionListById = jest.spyOn(api, 'fetchExceptionListById');
     const spyOnfetchExceptionListItemsByListId = jest.spyOn(api, 'fetchExceptionListItemsByListId');
+    const onSuccessMock = jest.fn();
     await act(async () => {
       const { rerender, waitForNextUpdate } = renderHook<
         UseExceptionListProps,
@@ -113,18 +129,31 @@ describe('useExceptionList', () => {
           useExceptionList({ filterOptions, http, lists, onError, onSuccess, pagination }),
         {
           initialProps: {
+            filterOptions: { filter: '', tags: [] },
             http: mockKibanaHttpService,
             lists: [{ id: 'myListId', namespaceType: 'single' }],
             onError: onErrorMock,
-            onSuccess: jest.fn(),
+            onSuccess: onSuccessMock,
+            pagination: {
+              page: 1,
+              perPage: 20,
+              total: 0,
+            },
           },
         }
       );
       await waitForNextUpdate();
       rerender({
+        filterOptions: { filter: '', tags: [] },
         http: mockKibanaHttpService,
         lists: [{ id: 'newListId', namespaceType: 'single' }],
         onError: onErrorMock,
+        onSuccess: onSuccessMock,
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
       });
       await waitForNextUpdate();
 
@@ -142,9 +171,15 @@ describe('useExceptionList', () => {
         ReturnExceptionListAndItems
       >(() =>
         useExceptionList({
+          filterOptions: { filter: '', tags: [] },
           http: mockKibanaHttpService,
           lists: [{ id: 'myListId', namespaceType: 'single' }],
           onError: onErrorMock,
+          pagination: {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
         })
       );
       await waitForNextUpdate();
@@ -173,9 +208,15 @@ describe('useExceptionList', () => {
       const { waitForNextUpdate } = renderHook<UseExceptionListProps, ReturnExceptionListAndItems>(
         () =>
           useExceptionList({
+            filterOptions: { filter: '', tags: [] },
             http: mockKibanaHttpService,
             lists: [{ id: 'myListId', namespaceType: 'single' }],
             onError: onErrorMock,
+            pagination: {
+              page: 1,
+              perPage: 20,
+              total: 0,
+            },
           })
       );
       await waitForNextUpdate();
@@ -195,9 +236,15 @@ describe('useExceptionList', () => {
       const { waitForNextUpdate } = renderHook<UseExceptionListProps, ReturnExceptionListAndItems>(
         () =>
           useExceptionList({
+            filterOptions: { filter: '', tags: [] },
             http: mockKibanaHttpService,
             lists: [{ id: 'myListId', namespaceType: 'single' }],
             onError: onErrorMock,
+            pagination: {
+              page: 1,
+              perPage: 20,
+              total: 0,
+            },
           })
       );
       await waitForNextUpdate();

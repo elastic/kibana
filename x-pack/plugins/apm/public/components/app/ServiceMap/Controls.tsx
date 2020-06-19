@@ -56,18 +56,64 @@ function doZoom(cy: cytoscape.Core | undefined, increment: number) {
   }
 }
 
+function useDebugDownloadUrl(cy?: cytoscape.Core) {
+  const [downloadUrl, setDownloadUrl] = useState<string | undefined>(undefined);
+  const debug = sessionStorage.getItem('apm_debug') === 'true';
+
+  // Handle elements changes to update the download URL
+  useEffect(() => {
+    const elementsHandler: cytoscape.EventHandler = (event) => {
+      // @ts-ignore The `true` argument to `cy.json` is to flatten the elements
+      // (instead of having them broken into nodes/edges.) DefinitelyTyped has
+      // this wrong.
+      const elementsJson = event.cy.json(true)?.elements.map((element) => ({
+        data: element.data,
+      }));
+      setDownloadUrl(
+        elementsJson.length > 0 && debug
+          ? `data:application/json;charset=utf-8,${encodeURIComponent(
+              JSON.stringify({ elements: elementsJson }, null, '  ')
+            )}`
+          : undefined
+      );
+    };
+
+    if (cy) {
+      cy.on('add remove', elementsHandler);
+    }
+
+    return () => {
+      if (cy) {
+        cy.off('add remove', undefined, elementsHandler);
+      }
+    };
+  }, [cy, debug]);
+
+  return downloadUrl;
+}
+
 export function Controls() {
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useUrlParams();
   const currentSearch = urlParams.kuery ?? '';
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
+  const downloadUrl = useDebugDownloadUrl(cy);
 
+  // Handle zoom events
   useEffect(() => {
+    const zoomHandler: cytoscape.EventHandler = (event) => {
+      setZoom(event.cy.zoom());
+    };
+
     if (cy) {
-      cy.on('zoom', (event) => {
-        setZoom(event.cy.zoom());
-      });
+      cy.on('zoom', zoomHandler);
     }
+
+    return () => {
+      if (cy) {
+        cy.off('zoom', undefined, zoomHandler);
+      }
+    };
   }, [cy]);
 
   function center() {
@@ -101,6 +147,9 @@ export function Controls() {
 
   const centerLabel = i18n.translate('xpack.apm.serviceMap.center', {
     defaultMessage: 'Center',
+  });
+  const downloadLabel = i18n.translate('xpack.apm.serviceMap.download', {
+    defaultMessage: 'Download',
   });
   const viewFullMapLabel = i18n.translate('xpack.apm.serviceMap.viewFullMap', {
     defaultMessage: 'View full service map',
@@ -161,6 +210,22 @@ export function Controls() {
                 urlParams as APMQueryParams
               )}
               iconType="apps"
+            />
+          </EuiToolTip>
+        </Panel>
+      )}
+      {downloadUrl && (
+        <Panel hasShadow={true} paddingSize="none">
+          <EuiToolTip
+            anchorClassName="eui-displayInline"
+            content={downloadLabel}
+          >
+            <Button
+              aria-label={downloadLabel}
+              color="text"
+              download="service-map.json"
+              href={downloadUrl}
+              iconType="download"
             />
           </EuiToolTip>
         </Panel>

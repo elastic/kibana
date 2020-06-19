@@ -127,4 +127,45 @@ describe('utils', () => {
       'Invalid value "Some existing error 1" supplied to "some string key 2"',
     ]);
   });
+
+  test('will use a name context if it cannot find a keyContext', () => {
+    const context: t.Context = ([
+      { key: '' },
+      { key: '', type: { name: 'someName' } },
+    ] as unknown) as t.Context;
+    const validationError1: t.ValidationError = {
+      value: 'Some existing error 1',
+      context,
+    };
+    const errors: t.Errors = [validationError1];
+    const output = formatErrors(errors);
+    expect(output).toEqual(['Invalid value "Some existing error 1" supplied to "someName"']);
+  });
+
+  test('will return an empty string if name does not exist but type does', () => {
+    const context: t.Context = ([{ key: '' }, { key: '', type: {} }] as unknown) as t.Context;
+    const validationError1: t.ValidationError = {
+      value: 'Some existing error 1',
+      context,
+    };
+    const errors: t.Errors = [validationError1];
+    const output = formatErrors(errors);
+    expect(output).toEqual(['Invalid value "Some existing error 1" supplied to ""']);
+  });
+
+  test('will stringify an error value', () => {
+    const context: t.Context = ([
+      { key: '' },
+      { key: 'some string key 2' },
+    ] as unknown) as t.Context;
+    const validationError1: t.ValidationError = {
+      value: { foo: 'some error' },
+      context,
+    };
+    const errors: t.Errors = [validationError1];
+    const output = formatErrors(errors);
+    expect(output).toEqual([
+      'Invalid value "{"foo":"some error"}" supplied to "some string key 2"',
+    ]);
+  });
 });
