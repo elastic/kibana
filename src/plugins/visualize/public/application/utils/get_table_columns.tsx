@@ -141,7 +141,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
       <p>
         <FormattedMessage
           id="visualize.listing.createNew.description"
-          defaultMessage="You can create different visualizations, based on your data."
+          defaultMessage="You can create different visualizations based on your data."
         />
       </p>
     }
