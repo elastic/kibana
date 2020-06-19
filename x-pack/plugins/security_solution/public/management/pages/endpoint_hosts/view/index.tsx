@@ -18,10 +18,11 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
-
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
+import * as policySelectors from '../../policy/store//policy_list/selectors';
 import { useHostSelector } from './hooks';
+import { usePolicyListSelector } from '../../policy/view/policy_hooks';
 import {
   HOST_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_HEALTH_COLOR,
@@ -32,8 +33,13 @@ import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { ManagementPageView } from '../../../components/management_page_view';
+import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { getManagementUrl } from '../../..';
 import { FormattedDate } from '../../../../common/components/formatted_date';
+import { useEndpointPackageInfo } from '../../policy/view/ingest_hooks';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
 
 const HostListNavLink = memo<{
   name: string;
@@ -58,6 +64,7 @@ const HostListNavLink = memo<{
 HostListNavLink.displayName = 'HostListNavLink';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
+const policySelector = (createStructuredSelector as CreateStructuredSelector)(policySelectors);
 export const HostList = () => {
   const history = useHistory();
   const {
@@ -71,6 +78,8 @@ export const HostList = () => {
     hasSelectedHost,
   } = useHostSelector(selector);
 
+  const { selectPolicyItems: policyItems } = usePolicyListSelector(policySelector);
+
   const paginationSetup = useMemo(() => {
     return {
       pageIndex,
@@ -80,6 +89,8 @@ export const HostList = () => {
       hidePerPageOptions: false,
     };
   }, [pageIndex, pageSize, totalItemCount]);
+  const [packageInfo, isFetchingPackageInfo] = useEndpointPackageInfo();
+  const { services } = useKibana();
 
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
@@ -96,6 +107,26 @@ export const HostList = () => {
       );
     },
     [history, queryParams]
+  );
+
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
+    'ingestManager',
+    {
+      path: `#/integrations${packageInfo ? `/endpoint-${packageInfo.version}/add-datasource` : ''}`,
+      state: {
+        onCancelNavigateTo: [
+          'securitySolution',
+          { path: getManagementUrl({ name: 'endpointList' }) },
+        ],
+        onCancelUrl: services.application?.getUrlForApp('securitySolution', {
+          path: getManagementUrl({ name: 'endpointList' }),
+        }),
+        onSaveNavigateTo: [
+          'securitySolution',
+          { path: getManagementUrl({ name: 'endpointList' }) },
+        ],
+      },
+    }
   );
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
@@ -259,6 +290,47 @@ export const HostList = () => {
     ];
   }, [queryParams]);
 
+  const renderTableOrEmptyState = useMemo(() => {
+    if (listData && listData.length > 0) {
+      return (
+        <EuiBasicTable
+          data-test-subj="hostListTable"
+          items={[...listData]}
+          columns={columns}
+          loading={loading}
+          error={listError?.message}
+          pagination={paginationSetup}
+          onChange={onTableChange}
+        />
+      );
+    } else if (policyItems && policyItems.length > 0) {
+      return (
+        <FormattedMessage
+          id="xpack.securitySolution.endpointList.goGetEndpoints"
+          defaultMessage="Go Get Endpoints"
+        />
+      );
+    } else {
+      return (
+        <PolicyEmptyState
+          loading={loading}
+          onActionClick={handleCreatePolicyClick}
+          actionDisabled={isFetchingPackageInfo}
+        />
+      );
+    }
+  }, [
+    listData,
+    policyItems,
+    columns,
+    loading,
+    paginationSetup,
+    onTableChange,
+    listError?.message,
+    handleCreatePolicyClick,
+    isFetchingPackageInfo,
+  ]);
+
   return (
     <ManagementPageView
       viewType="list"
@@ -276,15 +348,7 @@ export const HostList = () => {
         />
       </EuiText>
       <EuiHorizontalRule margin="xs" />
-      <EuiBasicTable
-        data-test-subj="hostListTable"
-        items={useMemo(() => [...listData], [listData])}
-        columns={columns}
-        loading={loading}
-        error={listError?.message}
-        pagination={paginationSetup}
-        onChange={onTableChange}
-      />
+      {renderTableOrEmptyState}
       <SpyRoute />
     </ManagementPageView>
   );

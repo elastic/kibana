@@ -5,10 +5,13 @@
  */
 
 import { HostResultList } from '../../../../../common/endpoint/types';
+import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareFactory } from '../../../../common/store';
 import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
 import { HostState } from '../types';
+import { sendGetEndpointSpecificDatasources } from '../../policy/store/policy_list/services/ingest';
 
+// TODO: I think the problem with the type is the state in this factory
 export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (coreStart) => {
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
@@ -26,10 +29,47 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           }),
         });
         response.request_page_index = Number(pageIndex);
-        dispatch({
-          type: 'serverReturnedHostList',
-          payload: response,
-        });
+
+        if (response.hosts.length > 0) {
+          dispatch({
+            type: 'serverReturnedHostList',
+            payload: response,
+          });
+        } else {
+          const http = coreStart.http;
+          try {
+            const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificDatasources(
+              http,
+              {
+                query: {
+                  perPage: 50,
+                  page: 1,
+                },
+              }
+            );
+
+            dispatch({
+              type: 'serverReturnedHostList',
+              payload: response,
+            });
+
+            dispatch({
+              type: 'serverReturnedPolicyListData',
+              payload: {
+                policyItems: policyDataResponse.items,
+                pageIndex,
+                pageSize,
+                total: policyDataResponse.total,
+              },
+            });
+          } catch (error) {
+            dispatch({
+              type: 'serverFailedToReturnPolicyListData',
+              payload: error.body ?? error,
+            });
+            return;
+          }
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnHostList',
