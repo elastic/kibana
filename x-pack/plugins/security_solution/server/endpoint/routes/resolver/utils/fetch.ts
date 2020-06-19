@@ -44,10 +44,11 @@ export interface TreeOptions {
 }
 
 export interface QueryHandler<T> {
+  hasMore(): boolean;
   buildQuery(): QueryInfo | undefined;
   handleResponse(searchResponse: SearchResponse<ResolverEvent>): void;
   getResults(): T | undefined;
-  doSearch(client: IScopedClusterClient): Promise<T>;
+  search(client: IScopedClusterClient): Promise<T>;
 }
 
 /**
@@ -121,7 +122,7 @@ export class Fetcher {
 
     const msearch = new MultiSearcher(this.client);
 
-    while (true) {
+    while (ancestryHandler.hasMore() || eventsHandler.hasMore()) {
       const queries: QueryInfo[] = [];
       const ancestryQuery = ancestryHandler.buildQuery();
       if (ancestryQuery) {
@@ -159,7 +160,7 @@ export class Fetcher {
       this.endpointID,
       originNode
     );
-    return ancestryHandler.doSearch(this.client);
+    return ancestryHandler.search(this.client);
   }
 
   /**
@@ -191,7 +192,7 @@ export class Fetcher {
       this.endpointID
     );
 
-    return eventsHandler.doSearch(this.client);
+    return eventsHandler.search(this.client);
   }
 
   /**
@@ -278,7 +279,7 @@ export class Fetcher {
       this.endpointID,
       originNode
     );
-    return ancestryHandler.doSearch(this.client);
+    return ancestryHandler.search(this.client);
   }
 
   // TODO have this take an array of entity ids and have the tree accept the format this function returns so the tree

@@ -39,8 +39,12 @@ export class RelatedEventsQueryHandler implements QueryHandler<ResolverRelatedEv
     );
   };
 
+  hasMore(): boolean {
+    return this.relatedEvents === undefined;
+  }
+
   buildQuery(): QueryInfo | undefined {
-    if (this.relatedEvents) {
+    if (!this.hasMore()) {
       return;
     }
 
@@ -55,7 +59,7 @@ export class RelatedEventsQueryHandler implements QueryHandler<ResolverRelatedEv
     return this.relatedEvents;
   }
 
-  async doSearch(client: IScopedClusterClient) {
+  async search(client: IScopedClusterClient) {
     this.handleResponse(await this.query.search(client, this.entityID));
     return this.getResults() || createRelatedEvents(this.entityID);
   }

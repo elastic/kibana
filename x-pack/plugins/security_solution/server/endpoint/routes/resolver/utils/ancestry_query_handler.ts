@@ -90,8 +90,12 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     this.ancestorsToFind = AncestryQueryHandler.getAncestryAsArray(results[0]).slice(0, levelsLeft);
   };
 
+  hasMore(): boolean {
+    return this.levels > 0 && this.ancestorsToFind.length > 0;
+  }
+
   buildQuery(): QueryInfo | undefined {
-    if (this.levels <= 0 || this.ancestorsToFind.length === 0) {
+    if (!this.hasMore()) {
       return;
     }
 
@@ -106,14 +110,14 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     return this.ancestry;
   }
 
-  async doSearch(client: IScopedClusterClient) {
-    while (true) {
+  async search(client: IScopedClusterClient) {
+    while (this.hasMore()) {
       const info = this.buildQuery();
-      if (!info) {
+      if (info) {
+        this.handleResponse(await this.query.search(client, info.ids));
+      } else {
         break;
       }
-
-      this.handleResponse(await this.query.search(client, info.ids));
     }
     return this.getResults();
   }
