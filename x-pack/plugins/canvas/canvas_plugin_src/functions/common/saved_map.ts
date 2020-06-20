@@ -13,7 +13,8 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { MapEmbeddableInput } from '../../../../../legacy/plugins/maps/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MapEmbeddableInput } from '../../../../../plugins/maps/public/embeddable';
 
 interface Arguments {
   id: string;

@@ -173,8 +173,8 @@ describe('lists_default_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to ""',
-      'Invalid value "5" supplied to ""',
+      'Invalid value "5" supplied to "listsWithDefaultArray"',
+      'Invalid value "5" supplied to "listsWithDefaultArray"',
     ]);
     expect(message.schema).toEqual({});
   });

@@ -137,7 +137,9 @@ export const useExceptionList = ({
                 perPage: 20,
                 total: 0,
               });
-              onError(error);
+              if (onError != null) {
+                onError(error);
+              }
             }
           }
         };
