@@ -31,7 +31,6 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { AgentService } from '../../../../../ingest_manager/server';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
@@ -47,7 +46,9 @@ describe('test endpoint route', () => {
   let routeHandler: RequestHandler<any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
-  let mockAgentService: jest.Mocked<AgentService>;
+  let mockAgentService: ReturnType<
+    typeof createMockEndpointAppContextServiceStartContract
+  >['agentService'];
   let endpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
