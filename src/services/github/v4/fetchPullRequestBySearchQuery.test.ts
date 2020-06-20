@@ -1,15 +1,19 @@
 import axios from 'axios';
 import { BackportOptions } from '../../../options/options';
+import { PromiseReturnType } from '../../../types/PromiseReturnType';
+import { SpyHelper } from '../../../types/SpyHelper';
 import { fetchPullRequestBySearchQuery } from './fetchPullRequestBySearchQuery';
 import { fetchPullRequestBySearchQueryMock } from './mocks/fetchPullRequestBySearchQueryMock';
 
 describe('fetchPullRequestBySearchQuery', () => {
-  it('s', async () => {
-    const spy = jest.spyOn(axios, 'post').mockResolvedValueOnce({
+  let spy: SpyHelper<typeof axios.post>;
+  let res: PromiseReturnType<typeof fetchPullRequestBySearchQuery>;
+  beforeEach(async () => {
+    spy = jest.spyOn(axios, 'post').mockResolvedValueOnce({
       data: fetchPullRequestBySearchQueryMock,
     });
 
-    const res = await fetchPullRequestBySearchQuery({
+    res = await fetchPullRequestBySearchQuery({
       accessToken: 'myAccessToken',
       all: false,
       author: 'sqren',
@@ -18,10 +22,20 @@ describe('fetchPullRequestBySearchQuery', () => {
       repoName: 'kibana',
       repoOwner: 'elastic',
       sourceBranch: 'master',
-      sourcePRsFilter: 'label:Team:apm',
+      prFilter: 'label:Team:apm',
     } as BackportOptions);
+  });
 
+  it('should make request with correct variables', () => {
     expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][1].variables).toEqual({
+      first: 10,
+      query:
+        'type:pr is:merged sort:updated-desc repo:elastic/kibana author:sqren label:Team:apm base:master',
+    });
+  });
+
+  it('should return correct response', async () => {
     expect(res).toMatchInlineSnapshot(`
       Array [
         Object {

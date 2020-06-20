@@ -1,6 +1,6 @@
+import { BranchChoice } from '../options/cliArgs';
 import { BackportOptions } from '../options/options';
 import * as prompts from '../services/prompts';
-import { BranchChoice } from '../types/Config';
 import { SpyHelper } from '../types/SpyHelper';
 import { getTargetBranches } from './getTargetBranches';
 

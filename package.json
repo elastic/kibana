@@ -31,6 +31,8 @@
     "postinstall": "test -f ./dist/scripts/runPostinstall.js && node ./dist/scripts/runPostinstall.js || echo 'Dist folder missing'",
     "prepublishOnly": "tsc --project ./tsconfig.prod.json",
     "test": "jest",
+    "test-private": "jest --config ./jest.config.private.js",
+    "test-all": "yarn test && yarn test-private",
     "start": "ts-node --transpile-only ./src/index.ts"
   },
   "lint-staged": {

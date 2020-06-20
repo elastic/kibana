@@ -10,17 +10,18 @@ export function getTargetBranches(
   options: BackportOptions,
   commits: CommitSelected[]
 ) {
-  // target branches specified via cli
+  // target branches already specified (in contrast to letting the user choose from a list)
   if (!isEmpty(options.targetBranches)) {
     return options.targetBranches;
   }
 
-  // combine target branches from all commits
+  // combine target branches from commits that were selected for backporting
   const selectedTargetBranches = flatMap(
     commits,
     (commit) => commit.selectedTargetBranches
   ).filter(filterEmpty);
 
+  // list the target branch choices (in contrast to automatically backporting to specific branches)
   return promptForTargetBranches({
     targetBranchChoices: getTargetBranchChoices(
       options,

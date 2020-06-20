@@ -32,7 +32,6 @@ describe('runWithOptions', () => {
       githubApiBaseUrlV4: 'https://api.github.com/graphql',
       mainline: undefined,
       maxNumber: 10,
-      multiple: false,
       multipleBranches: false,
       multipleCommits: false,
       noVerify: true,
@@ -46,7 +45,7 @@ describe('runWithOptions', () => {
       sha: undefined,
       sourceBranch: 'mySourceBranch',
       sourcePRLabels: [],
-      sourcePRsFilter: undefined,
+      prFilter: undefined,
       targetBranches: [],
       targetBranchChoices: [
         { name: '6.x' },

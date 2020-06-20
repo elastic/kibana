@@ -48,7 +48,7 @@ describe('yargs', () => {
 
   it('should return error when branch is missing', () => {
     const res = runBackport(
-      `--upstream foo  --username ${username} --accessToken ${accessToken}`
+      `--upstream foo --username ${username} --accessToken ${accessToken}`
     );
     expect(res).toMatchInlineSnapshot(`
       "You must specify a target branch
@@ -62,7 +62,7 @@ describe('yargs', () => {
 
   it('should return error when upstream is missing', () => {
     const res = runBackport(
-      `--branch foo  --username ${username} --accessToken ${accessToken}`
+      `--branch foo --username ${username} --accessToken ${accessToken}`
     );
     expect(res).toMatchInlineSnapshot(`
       "You must specify a valid Github repository

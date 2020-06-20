@@ -20,7 +20,7 @@ export async function fetchPullRequestBySearchQuery(
     repoName,
     repoOwner,
     sourceBranch,
-    sourcePRsFilter,
+    prFilter,
   } = options;
   const query = /* GraphQL */ `
     query getPulLRequestBySearchQuery($query: String!, $first: Int!) {
@@ -44,7 +44,7 @@ export async function fetchPullRequestBySearchQuery(
   `;
 
   const authorFilter = all ? '' : `author:${author}`;
-  const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName} ${authorFilter} ${sourcePRsFilter} base:${sourceBranch}`;
+  const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName} ${authorFilter} ${prFilter} base:${sourceBranch}`;
   const spinner = ora('Loading pull requests...').start();
   let res: DataResponse;
   try {
@@ -93,8 +93,8 @@ export async function fetchPullRequestBySearchQuery(
   // terminate if not commits were found
   if (isEmpty(commits)) {
     const errorText = options.all
-      ? `There are no pull requests matching the filter "${sourcePRsFilter}"`
-      : `There are no commits by "${options.author}" matching the filter "${sourcePRsFilter}". Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`;
+      ? `There are no pull requests matching the filter "${prFilter}"`
+      : `There are no commits by "${options.author}" matching the filter "${prFilter}". Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`;
 
     throw new HandledError(errorText);
   }

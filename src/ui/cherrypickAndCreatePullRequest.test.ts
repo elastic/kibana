@@ -52,7 +52,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         repoOwner: 'elastic',
         username: 'sqren',
         sourceBranch: 'myDefaultSourceBranch',
-        sourcePRLabels: [],
+        sourcePRLabels: [] as string[],
       } as BackportOptions;
 
       const commits: CommitSelected[] = [
@@ -149,7 +149,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         repoName: 'kibana',
         repoOwner: 'elastic',
         username: 'sqren',
-        sourcePRLabels: [],
+        sourcePRLabels: [] as string[],
       } as BackportOptions;
 
       await cherrypickAndCreateTargetPullRequest({
@@ -209,7 +209,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         repoOwner: 'elastic',
         username: 'sqren',
         sourceBranch: 'myDefaultSourceBranch',
-        sourcePRLabels: [],
+        sourcePRLabels: [] as string[],
       } as BackportOptions;
 
       const res = await runTimersUntilResolved(() =>

@@ -19,7 +19,7 @@ export async function getCommits(options: BackportOptions) {
     ];
   }
 
-  if (options.sourcePRsFilter) {
+  if (options.prFilter) {
     const commitChoices = await fetchPullRequestBySearchQuery(options);
 
     return promptForCommits({

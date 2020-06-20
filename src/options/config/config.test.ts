@@ -11,23 +11,7 @@ describe('getOptionsFromConfigFiles', () => {
   it('should return default config values', () => {
     expect(res).toEqual({
       accessToken: 'myAccessToken',
-      all: false,
-      fork: true,
-      gitHostname: 'github.com',
-      githubApiBaseUrlV3: 'https://api.github.com',
-      githubApiBaseUrlV4: 'https://api.github.com/graphql',
-      maxNumber: 10,
-      multiple: false,
-      multipleBranches: true,
-      multipleCommits: false,
-      noVerify: true,
-      prTitle: '[{targetBranch}] {commitMessages}',
-      sourcePRLabels: [],
-      targetBranchChoices: [
-        { checked: false, name: '6.0' },
-        { checked: false, name: '5.9' },
-      ],
-      targetPRLabels: [],
+      targetBranchChoices: ['6.0', '5.9'],
       upstream: 'elastic/backport-demo',
       username: 'sqren',
     });
