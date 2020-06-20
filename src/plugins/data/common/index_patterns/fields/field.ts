@@ -145,7 +145,9 @@ export class Field implements IFieldType {
 
     // multi info
     obj.fact('subType');
-    obj.toSpec = () => {
+
+    const newObj = obj.create();
+    newObj.toSpec = function () {
       const fieldFormatMap = this?.indexPattern?.fieldFormatMap;
       // const deserialize = field?.indexPattern?.
       // ug, can't tell what code is doing
@@ -170,9 +172,8 @@ export class Field implements IFieldType {
         format: fmt,
       };
     };
-
-    return obj.create();
+    return newObj;
   }
-  // only providing type info as constrructor returns new object instead of `this`
+  // only providing type info as constructor returns new object instead of `this`
   toSpec = () => ({});
 }
