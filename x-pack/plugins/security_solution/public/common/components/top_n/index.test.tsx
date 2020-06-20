@@ -26,6 +26,14 @@ import {
   timelineDefaults,
 } from '../../../timelines/components/manage_timeline';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    useHistory: jest.fn(),
+  }),
+}));
+
+jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
 

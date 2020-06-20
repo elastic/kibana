@@ -95,6 +95,14 @@ const getSourceDestinationInstance = () => (
   />
 );
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    createHref: jest.fn(),
+    push: jest.fn(),
+  }),
+}));
+
 describe('SourceDestination', () => {
   const mount = useMountAppended();
 

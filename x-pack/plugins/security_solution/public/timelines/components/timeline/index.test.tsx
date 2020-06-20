@@ -70,6 +70,7 @@ describe('StatefulTimeline', () => {
       filters: [],
       id: 'foo',
       isLive: false,
+      isTimelineExists: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search',
