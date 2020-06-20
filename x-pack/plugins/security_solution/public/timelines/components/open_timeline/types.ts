@@ -200,4 +200,5 @@ export interface TimelineTab {
   name: string;
   disabled: boolean;
   href: string;
+  onClick: (ev: { preventDefault: () => void }) => void;
 }

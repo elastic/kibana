@@ -6,14 +6,13 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import {
   usePrePackagedRules,
   importRules,
 } from '../../../../alerts/containers/detection_engine/rules';
 import {
-  DETECTION_ENGINE_PAGE_NAME,
   getDetectionEngineUrl,
   getCreateRuleUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -28,10 +27,14 @@ import { ReadOnlyCallOut } from '../../../components/rules/read_only_callout';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import { getPrePackagedRuleStatus, redirectToDetections, userHasNoPermissions } from './helpers';
 import * as i18n from './translations';
+import { SecurityPageName } from '../../../../app/types';
+import { LinkButton } from '../../../../common/components/links';
+import { useFormatUrl } from '../../../../common/components/link_to';
 
 type Func = (refreshPrePackagedRule?: boolean) => void;
 
 const RulesPageComponent: React.FC = () => {
+  const history = useHistory();
   const [showImportModal, setShowImportModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
   const {
@@ -63,6 +66,7 @@ const RulesPageComponent: React.FC = () => {
     rulesNotInstalled,
     rulesNotUpdated
   );
+  const { formatUrl } = useFormatUrl(SecurityPageName.alerts);
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
@@ -87,8 +91,17 @@ const RulesPageComponent: React.FC = () => {
     refreshRulesData.current = refreshRule;
   }, []);
 
+  const goToNewRule = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      history.push(getCreateRuleUrl());
+    },
+    [history]
+  );
+
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    history.replace(getDetectionEngineUrl());
+    return null;
   }
 
   return (
@@ -114,6 +127,7 @@ const RulesPageComponent: React.FC = () => {
           backOptions={{
             href: getDetectionEngineUrl(),
             text: i18n.BACK_TO_ALERTS,
+            pageId: SecurityPageName.alerts,
           }}
           title={i18n.PAGE_TITLE}
         >
@@ -155,15 +169,16 @@ const RulesPageComponent: React.FC = () => {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <LinkButton
                 data-test-subj="create-new-rule"
                 fill
-                href={getCreateRuleUrl()}
+                onClick={goToNewRule}
+                href={formatUrl(getCreateRuleUrl())}
                 iconType="plusInCircle"
                 isDisabled={userHasNoPermissions(canUserCRUD) || loading}
               >
                 {i18n.ADD_NEW_RULE}
-              </EuiButton>
+              </LinkButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </DetectionEngineHeaderPage>
@@ -188,7 +203,7 @@ const RulesPageComponent: React.FC = () => {
         />
       </WrapperPage>
 
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.alerts} />
     </>
   );
 };

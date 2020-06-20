@@ -24,6 +24,8 @@ const mockSort: Sort = {
   sortDirection: Direction.desc,
 };
 
+jest.mock('../../../../common/components/link_to');
+
 jest.mock(
   'react-visibility-sensor',
   () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>

@@ -17,11 +17,13 @@ import {
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 export { nextTick } from '../../../../../../../test_utils';
 
 import { act } from 'react-dom/test-utils';
+
+jest.mock('../../../../common/components/link_to');
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
@@ -35,6 +37,7 @@ jest.mock('../../../../common/lib/kibana', () => {
               crud: true,
             },
           },
+          navigateToApp: jest.fn(),
         },
       },
     }),
@@ -340,7 +343,7 @@ describe('Properties', () => {
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
     wrapper.find('[data-test-subj="attach-timeline-case"]').first().simulate('click');
 
-    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SiemPageName.case}/create` });
+    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SecurityPageName.case}/create` });
     expect(mockDispatch).toBeCalledWith(
       setInsertTimeline({
         timelineId: defaultProps.timelineId,
