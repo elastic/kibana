@@ -12,12 +12,16 @@ import { ConfigureCaseButton, ConfigureCaseButtonProps } from './button';
 import { TestProviders } from '../../../common/mock';
 import { searchURL } from './__mock__';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    useHistory: jest.fn(),
-  }),
-}));
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
 
 jest.mock('../../../common/components/link_to');
 

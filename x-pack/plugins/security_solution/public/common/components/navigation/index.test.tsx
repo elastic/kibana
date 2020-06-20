@@ -15,12 +15,16 @@ import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    useHistory: jest.fn(),
-  }),
-}));
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
 
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),

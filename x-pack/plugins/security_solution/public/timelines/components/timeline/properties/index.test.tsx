@@ -26,9 +26,10 @@ import { act } from 'react-dom/test-utils';
 jest.mock('../../../../common/components/link_to');
 
 jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
   return {
-    ...originalModule,
+    ...original,
     useKibana: jest.fn().mockReturnValue({
       services: {
         application: {
@@ -54,27 +55,26 @@ jest.mock('../../../../common/components/utils', () => {
 });
 
 jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
+  const original = jest.requireActual('react-redux');
 
   return {
-    ...originalModule,
-    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1' }),
+    ...original,
+    useDispatch: () => mockDispatch,
+    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1', urlState: {} }),
   };
 });
-
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useDispatch: () => mockDispatch,
-  useSelector: jest.fn().mockReturnValue({ savedObjectId: '1', urlState: {} }),
-}));
 const mockHistoryPush = jest.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    push: mockHistoryPush,
-  }),
-}));
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      push: mockHistoryPush,
+    }),
+  };
+});
 
 jest.mock('./use_create_timeline', () => ({
   useCreateTimelineButton: jest.fn().mockReturnValue({ getButton: jest.fn() }),
@@ -334,7 +334,7 @@ describe('Properties', () => {
     expect(wrapper.find('[data-test-subj="avatar"]').exists()).toEqual(false);
   });
 
-  test('insert timeline - new case', () => {
+  test('insert timeline - new case', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Properties {...{ ...defaultProps, title: 'coolness' }} />

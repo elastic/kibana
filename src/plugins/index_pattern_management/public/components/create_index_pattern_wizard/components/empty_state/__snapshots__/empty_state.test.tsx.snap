@@ -18,7 +18,7 @@ exports[`EmptyState should render normally 1`] = `
         id="indexPatternManagement.createIndexPattern.emptyStateLabel.emptyStateDetail"
         values={
           Object {
-            "getStartedLink": <ForwardRef
+            "getStartedLink": <EuiLink
               href="/app/home#/tutorial_directory/sampleData"
             >
               <FormattedMessage
@@ -26,8 +26,8 @@ exports[`EmptyState should render normally 1`] = `
                 id="indexPatternManagement.createIndexPattern.emptyStateLabel.getStartedLink"
                 values={Object {}}
               />
-            </ForwardRef>,
-            "learnHowLink": <ForwardRef
+            </EuiLink>,
+            "learnHowLink": <EuiLink
               href="/app/home#/tutorial_directory"
             >
               <FormattedMessage
@@ -35,7 +35,7 @@ exports[`EmptyState should render normally 1`] = `
                 id="indexPatternManagement.createIndexPattern.emptyStateLabel.learnHowLink"
                 values={Object {}}
               />
-            </ForwardRef>,
+            </EuiLink>,
             "needToIndex": <EuiTextColor
               color="subdued"
             >
