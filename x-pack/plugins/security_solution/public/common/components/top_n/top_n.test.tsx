@@ -13,7 +13,15 @@ import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { allEvents, defaultOptions } from './helpers';
 import { TopN } from './top_n';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    useHistory: jest.fn(),
+  }),
+}));
+
 jest.mock('../../lib/kibana');
+jest.mock('../link_to');
 
 jest.mock('uuid', () => {
   return {
