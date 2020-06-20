@@ -58,9 +58,11 @@ export type CreateIndexPatternFieldList = (
         readFromDocValues: boolean | undefined;
         subType: IFieldSubType | undefined;
         */
-
+/*
 export const fieldToFieldSpec = (field: Field) => {
   const fieldFormatMap = field?.indexPattern?.fieldFormatMap;
+  // const deserialize = field?.indexPattern?.
+  // ug, can't tell what code is doing
   let format: { id: string; params: unknown } | undefined;
   if (fieldFormatMap) {
     format = fieldFormatMap[field.name];
@@ -82,6 +84,7 @@ export const fieldToFieldSpec = (field: Field) => {
     format,
   };
 };
+*/
 
 export const getIndexPatternFieldListCreator = ({
   fieldFormats,
@@ -142,7 +145,7 @@ export const getIndexPatternFieldListCreator = ({
     };
 
     toSpec = () => {
-      return [...this.map((field) => fieldToFieldSpec(field))];
+      return [...this.map((field) => field.toSpec())];
     };
   }
 

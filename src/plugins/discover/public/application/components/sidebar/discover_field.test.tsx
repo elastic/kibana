@@ -74,6 +74,7 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
     format: null,
     routes: {},
     $$spec: {},
+    toSpec: () => ({}),
   } as IndexPatternField;
 
   const props = {

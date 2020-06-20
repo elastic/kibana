@@ -37,6 +37,7 @@ export declare class Field implements IFieldType
 |  [searchable](./kibana-plugin-plugins-data-public.indexpatternfield.searchable.md) |  | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-public.indexpatternfield.sortable.md) |  | <code>boolean</code> |  |
 |  [subType](./kibana-plugin-plugins-data-public.indexpatternfield.subtype.md) |  | <code>IFieldSubType</code> |  |
+|  [toSpec](./kibana-plugin-plugins-data-public.indexpatternfield.tospec.md) |  | <code>() =&gt; {}</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.indexpatternfield.type.md) |  | <code>string</code> |  |
 |  [visualizable](./kibana-plugin-plugins-data-public.indexpatternfield.visualizable.md) |  | <code>boolean</code> |  |
 

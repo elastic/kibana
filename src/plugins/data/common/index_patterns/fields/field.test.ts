@@ -61,6 +61,7 @@ describe('Field', function () {
     format: { name: 'formatName' },
     $$spec: {},
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
+    toSpec: () => ({}),
   } as Field;
 
   it('the correct properties are writable', () => {

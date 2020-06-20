@@ -902,6 +902,10 @@ export interface IFieldType {
     sortable?: boolean;
     // (undocumented)
     subType?: IFieldSubType;
+    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    toSpec?: () => FieldSpec;
     // (undocumented)
     type: string;
     // (undocumented)
@@ -937,8 +941,6 @@ export interface IIndexPattern {
 //
 // @public (undocumented)
 export interface IIndexPatternFieldList extends Array<IndexPatternField> {
-    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     add(field: FieldSpec): void;
     // (undocumented)
@@ -986,6 +988,8 @@ export class IndexPattern implements IIndexPattern {
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
     // (undocumented)
     create(allowOverride?: boolean): Promise<string | false>;
+    // (undocumented)
+    deserializeFieldFormatMap(mapping: any): import("../..").FieldFormat | undefined;
     // (undocumented)
     destroy(): Promise<{}> | undefined;
     // (undocumented)
@@ -1146,6 +1150,8 @@ export class IndexPatternField implements IFieldType {
     sortable?: boolean;
     // (undocumented)
     subType?: IFieldSubType;
+    // (undocumented)
+    toSpec: () => {};
     // (undocumented)
     type: string;
     // (undocumented)

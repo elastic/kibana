@@ -145,7 +145,34 @@ export class Field implements IFieldType {
 
     // multi info
     obj.fact('subType');
+    obj.toSpec = () => {
+      const fieldFormatMap = this?.indexPattern?.fieldFormatMap;
+      // const deserialize = field?.indexPattern?.
+      // ug, can't tell what code is doing
+      let fmt: { id: string; params: unknown } | undefined;
+      if (fieldFormatMap) {
+        fmt = fieldFormatMap[this.name];
+      }
+
+      return {
+        count: this.count,
+        script: this.script,
+        lang: this.lang,
+        conflictDescriptions: this.conflictDescriptions,
+        name: this.name,
+        type: this.type,
+        esTypes: this.esTypes,
+        scripted: this.scripted,
+        searchable: this.searchable,
+        aggregatable: this.aggregatable,
+        readFromDocValues: this.readFromDocValues,
+        subType: this.subType,
+        format: fmt,
+      };
+    };
 
     return obj.create();
   }
+  // only providing type info as constrructor returns new object instead of `this`
+  toSpec = () => ({});
 }
