@@ -14,6 +14,15 @@ import * as i18n from './translations';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { getKibanaConfigError, getLicenseError } from './helpers';
 import { connectorsMock } from '../../containers/configure/mock';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    useHistory: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../common/components/link_to');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/configure/api');
