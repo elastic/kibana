@@ -74,6 +74,8 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     const results = this.query.formatResponse(searchResp);
     if (results.length === 0) {
       this.ancestry.nextAncestor = null;
+      this.ancestorsToFind = [];
+      this.levels = 0;
       return;
     }
 
@@ -84,10 +86,13 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     // [furthest grandparent...closer grandparent, next recursive call furthest grandparent...closer grandparent]
     this.ancestry.ancestors.push(...ancestryNodes.values());
     this.ancestry.nextAncestor = parentEntityId(results[0]) || null;
-    const levelsLeft = this.levels - ancestryNodes.size;
+    this.levels = this.levels - ancestryNodes.size;
     // the results come back in ascending order on timestamp so the first entry in the
     // results should be the further ancestor (most distant grandparent)
-    this.ancestorsToFind = AncestryQueryHandler.getAncestryAsArray(results[0]).slice(0, levelsLeft);
+    this.ancestorsToFind = AncestryQueryHandler.getAncestryAsArray(results[0]).slice(
+      0,
+      this.levels
+    );
   };
 
   hasMore(): boolean {
