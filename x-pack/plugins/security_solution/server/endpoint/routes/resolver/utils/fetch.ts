@@ -43,9 +43,18 @@ export interface TreeOptions {
   afterChild?: string;
 }
 
+// break into two interfaces
+// SingleQueryHandler
+//  buildQuery(): QueryInfo
+//  search()
+// QueryHandler
+//  buildQueery: QueryInfo
+//  hasMore()
+//  search()
 export interface QueryHandler<T> {
   hasMore(): boolean;
   buildQuery(): QueryInfo | undefined;
+  // todo remove this
   handleResponse(searchResponse: SearchResponse<ResolverEvent>): void;
   getResults(): T | undefined;
   search(client: IScopedClusterClient): Promise<T>;
@@ -119,7 +128,17 @@ export class Fetcher {
       this.indexPattern,
       this.endpointID
     );
-
+    // if ancestryQuery -> queries.push()
+    // if eventsQuery -> queries.push()
+    // if alertsQuery -> queries.push()
+    // if childrenNodesQurey -> queries.push()
+    // then
+    // if ancestryQuery -> push
+    // if lifecycle for children query -> push
+    // then
+    // loop if ancestryQuery -> push
+    // then
+    // stats
     const msearch = new MultiSearcher(this.client);
 
     while (ancestryHandler.hasMore() || eventsHandler.hasMore()) {
