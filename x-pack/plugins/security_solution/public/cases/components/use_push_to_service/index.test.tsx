@@ -15,12 +15,16 @@ import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { getKibanaConfigError, getLicenseError } from './helpers';
 import { connectorsMock } from '../../containers/configure/mock';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    useHistory: jest.fn(),
-  }),
-}));
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
 
 jest.mock('../../../common/components/link_to');
 jest.mock('../../containers/use_get_action_license');

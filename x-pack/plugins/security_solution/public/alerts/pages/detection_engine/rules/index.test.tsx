@@ -11,12 +11,16 @@ import { RulesPage } from './index';
 import { useUserInfo } from '../../../components/user_info';
 import { usePrePackagedRules } from '../../../../alerts/containers/detection_engine/rules';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    useHistory: jest.fn(),
-  }),
-}));
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
 
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../components/user_info');

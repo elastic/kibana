@@ -19,12 +19,16 @@ import { TabNavigationProps } from './types';
 jest.mock('../../../lib/kibana');
 jest.mock('../../link_to');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    push: jest.fn(),
-  }),
-}));
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      push: jest.fn(),
+    }),
+  };
+});
 
 describe('Tab Navigation', () => {
   const pageName = SecurityPageName.hosts;
