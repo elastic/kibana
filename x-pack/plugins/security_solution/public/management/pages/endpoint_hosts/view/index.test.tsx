@@ -175,6 +175,9 @@ describe('when on the hosts page', () => {
           status: overallStatus,
         };
         policyResponse.Endpoint.policy.applied.actions.push(downloadModelAction);
+      } else {
+        // Else, make sure the status of the generated action matches what was passed in
+        downloadModelAction.status = overallStatus;
       }
 
       if (
@@ -371,7 +374,7 @@ describe('when on the hosts page', () => {
       });
     });
 
-    describe.skip('when showing host Policy Response panel', () => {
+    describe('when showing host Policy Response panel', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
         coreStart.http.post.mockImplementation(async (requestOptions) => {
