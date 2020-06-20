@@ -82,7 +82,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
     <EuiPopover
       anchorPosition="downCenter"
       button={
-        <ForwardRef(Styled(EuiIcon))
+        <Icon
           type="iInCircle"
         />
       }
@@ -105,14 +105,14 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiSpacer
                   size="m"
                 />
-                <ForwardRef(Styled(EuiText))>
+                <LargeScore>
                   17
-                </ForwardRef(Styled(EuiText))>
+                </LargeScore>
               </React.Fragment>,
               "title": "Max Anomaly Score",
             },
             Object {
-              "description": <ForwardRef
+              "description": <EuiFlexGroup
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -197,7 +197,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                     startDate={0}
                   />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
               "title": <React.Fragment>
                 <EuiSpacer
                   size="m"
@@ -206,7 +206,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
               </React.Fragment>,
             },
             Object {
-              "description": <ForwardRef
+              "description": <EuiFlexGroup
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -221,19 +221,19 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  <ForwardRef
+                  <EuiLink
                     data-test-subj="anomaly-description-narrow-range-link"
                     onClick={[Function]}
                     target="_blank"
                   >
                     Narrow to this date range
-                  </ForwardRef>
+                  </EuiLink>
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
               "title": "Detected",
             },
             Object {
-              "description": <ForwardRef
+              "description": <EuiFlexGroup
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -243,11 +243,11 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 >
                   process.name: "du"
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
               "title": "Anomalous Entity",
             },
             Object {
-              "description": <ForwardRef
+              "description": <EuiFlexGroup
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -267,7 +267,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 >
                   user.name: "root"
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
               "title": "Influenced By",
             },
           ]
