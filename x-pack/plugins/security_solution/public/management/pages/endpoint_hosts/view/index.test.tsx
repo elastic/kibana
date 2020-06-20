@@ -252,7 +252,7 @@ describe('when on the hosts page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `#/management/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -268,7 +268,7 @@ describe('when on the hosts page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `/management/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -277,7 +277,7 @@ describe('when on the hosts page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '#/management/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
 
@@ -489,7 +489,7 @@ describe('when on the hosts page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '#/management/endpoints?page_index=0&page_size=10&selected_host=1'
+          '/endpoints?page_index=0&page_size=10&selected_host=1'
         );
       });
 
