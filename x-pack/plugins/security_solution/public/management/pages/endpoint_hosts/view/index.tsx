@@ -22,7 +22,11 @@ import { createStructuredSelector } from 'reselect';
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useHostSelector } from './hooks';
-import { HOST_STATUS_TO_HEALTH_COLOR } from './host_constants';
+import {
+  HOST_STATUS_TO_HEALTH_COLOR,
+  POLICY_STATUS_TO_HEALTH_COLOR,
+  POLICY_STATUS_TO_TEXT,
+} from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
@@ -31,17 +35,18 @@ import { ManagementPageView } from '../../../components/management_page_view';
 import { getManagementUrl } from '../../..';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 
-const HostLink = memo<{
+const HostListNavLink = memo<{
   name: string;
   href: string;
   route: string;
-}>(({ name, href, route }) => {
+  dataTestSubj: string;
+}>(({ name, href, route, dataTestSubj }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
-      data-test-subj="hostnameCellLink"
+      data-test-subj={dataTestSubj}
       className="eui-textTruncate"
       href={href}
       onClick={clickHandler}
@@ -50,7 +55,7 @@ const HostLink = memo<{
     </EuiLink>
   );
 });
-HostLink.displayName = 'HostLink';
+HostListNavLink.displayName = 'HostListNavLink';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const HostList = () => {
@@ -116,7 +121,14 @@ export const HostList = () => {
             name: 'endpointDetails',
             selected_host: id,
           });
-          return <HostLink name={hostname} href={toRouteUrl} route={toRoutePath} />;
+          return (
+            <HostListNavLink
+              name={hostname}
+              href={toRouteUrl}
+              route={toRoutePath}
+              dataTestSubj="hostnameCellLink"
+            />
+          );
         },
       },
       {
@@ -142,41 +154,62 @@ export const HostList = () => {
         },
       },
       {
-        field: '',
+        field: 'metadata.Endpoint.policy.applied',
         name: i18n.translate('xpack.securitySolution.endpointList.policy', {
           defaultMessage: 'Policy',
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
-        render: () => {
-          return <span className="eui-textTruncate">{'Policy Name'}</span>;
-        },
-      },
-      {
-        field: '',
-        name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
-          defaultMessage: 'Policy Status',
-        }),
-        // eslint-disable-next-line react/display-name
-        render: () => {
+        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
+          const toRoutePath = getManagementUrl({
+            name: 'policyDetails',
+            policyId: policy.id,
+            excludePrefix: true,
+          });
+          const toRouteUrl = getManagementUrl({
+            name: 'policyDetails',
+            policyId: policy.id,
+          });
           return (
-            <EuiHealth color="success" className="eui-textTruncate">
-              <FormattedMessage
-                id="xpack.securitySolution.endpointList.policyStatus"
-                defaultMessage="Policy Status"
-              />
-            </EuiHealth>
+            <HostListNavLink
+              name={policy.name}
+              href={toRouteUrl}
+              route={toRoutePath}
+              dataTestSubj="policyNameCellLink"
+            />
           );
         },
       },
       {
-        field: '',
-        name: i18n.translate('xpack.securitySolution.endpointList.alerts', {
-          defaultMessage: 'Alerts',
+        field: 'metadata.Endpoint.policy.applied',
+        name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
+          defaultMessage: 'Policy Status',
         }),
-        dataType: 'number',
-        render: () => {
-          return '0';
+        // eslint-disable-next-line react/display-name
+        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
+          const toRoutePath = getManagementUrl({
+            name: 'endpointPolicyResponse',
+            selected_host: item.metadata.host.id,
+            excludePrefix: true,
+          });
+          const toRouteUrl = getManagementUrl({
+            name: 'endpointPolicyResponse',
+            selected_host: item.metadata.host.id,
+          });
+          return (
+            <EuiHealth
+              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+              className="eui-textTruncate"
+              data-test-subj="rowPolicyStatus"
+            >
+              <HostListNavLink
+                name={POLICY_STATUS_TO_TEXT[policy.status]}
+                href={toRouteUrl}
+                route={toRoutePath}
+                dataTestSubj="policyStatusCellLink"
+              />
+            </EuiHealth>
+          );
         },
       },
       {

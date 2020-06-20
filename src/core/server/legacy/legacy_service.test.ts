@@ -85,7 +85,7 @@ beforeEach(() => {
       elasticsearch: { legacy: {} } as any,
       uiSettings: uiSettingsServiceMock.createSetupContract(),
       http: {
-        ...httpServiceMock.createSetupContract(),
+        ...httpServiceMock.createInternalSetupContract(),
         auth: {
           getAuthHeaders: () => undefined,
         } as any,
@@ -119,7 +119,7 @@ beforeEach(() => {
 
   startDeps = {
     core: {
-      ...coreMock.createStart(),
+      ...coreMock.createInternalStart(),
       savedObjects: savedObjectsServiceMock.createInternalStartContract(),
       plugins: { contracts: new Map() },
     },
