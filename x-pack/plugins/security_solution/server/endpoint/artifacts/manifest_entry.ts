@@ -10,12 +10,11 @@ import { SavedObjectsClient, SavedObjectsPluginStart } from '../../../../../../s
 
 import { ListPluginSetup } from '../../../../lists/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExceptionListClient } from '../../../../lists/server/services/exception_lists/exception_list_client';
+import { ExceptionListClient } from '../../../../lists/server';
 
 import { GetFullEndpointExceptionList, CompressExceptionList } from './lists';
 
-import { ArtifactConstants, ManifestService } from './manifest';
+import { ArtifactConstants } from './common';
 
 export class ManifestEntry {
   private exceptionListClient: ExceptionListClient;
@@ -34,8 +33,12 @@ export class ManifestEntry {
     this.schemaVersion = schemaVersion;
   }
 
+  public static getArtifactName(os: string, schemaVersion: string) {
+    return `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`;
+  }
+
   public getIdentifier(): string {
-    return ManifestService.getArtifactName(this.os, this.schemaVersion);
+    return ManifestEntry.getArtifactName(this.os, this.schemaVersion);
   }
 
   public getUrl(): string {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AgentService } from '../../../ingest_manager/server';
+import { ArtifactService, ManifestService } from './artifacts';
 
 /**
  * A singleton that holds shared services that are initialized during the start up phase
@@ -11,9 +12,13 @@ import { AgentService } from '../../../ingest_manager/server';
  */
 export class EndpointAppContextService {
   private agentService: AgentService | undefined;
+  private artifactService: ArtifactService | undefined;
+  private manifestService: ManifestService | undefined;
 
   public start(dependencies: { agentService: AgentService }) {
     this.agentService = dependencies.agentService;
+    this.artifactService = dependencies.artifactService;
+    this.manifestService = dependencies.manifestService;
   }
 
   public stop() {}
@@ -23,5 +28,19 @@ export class EndpointAppContextService {
       throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
     }
     return this.agentService;
+  }
+
+  public getArtifactService(): ArtifactService {
+    if (!this.artifactService) {
+      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+    }
+    return this.artifactService;
+  }
+
+  public getManifestService(): ManifestService {
+    if (!this.manifestService) {
+      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+    }
+    return this.manifestService;
   }
 }

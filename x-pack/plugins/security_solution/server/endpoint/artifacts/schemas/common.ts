@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 
-export const artifactName = t.string;
+export const identifier = t.string;
 
 export const body = t.string;
 

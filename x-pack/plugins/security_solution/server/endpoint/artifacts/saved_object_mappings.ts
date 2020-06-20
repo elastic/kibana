@@ -6,15 +6,13 @@
 
 import { SavedObjectsType } from '../../../../../../src/core/server';
 
-export const exceptionsArtifactSavedObjectType = 'securitySolution-exceptions-artifact';
+export const exceptionsArtifactSavedObjectType = 'securitySolution:endpoint:exceptions-artifact';
+export const manifestSavedObjectType = 'securitySolution:endpoint:artifact-manifest';
 
 export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
-    // e.g. 'global-whitelist-windows'
-    name: {
-      type: 'keyword',
-    },
-    schemaVersion: {
+    // e.g. 'global-whitelist-windows-1.0.0'
+    identifier: {
       type: 'keyword',
     },
     sha256: {
@@ -35,9 +33,33 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
   },
 };
 
-export const type: SavedObjectsType = {
+export const manifestSavedObjectMappings: SavedObjectType['mappings'] = {
+  properties: {
+    // manifest sequence number
+    manifestVersion: {
+      type: 'long',
+    },
+    // manifest schema version
+    schemaVersion: {
+      type: 'keyword',
+    },
+    // array of doc ids
+    ids: {
+      type: 'keyword',
+    },
+  },
+}
+
+export const exceptionsArtifactType: SavedObjectsType = {
   name: exceptionsArtifactSavedObjectType,
   hidden: false, // TODO: should these be hidden?
   namespaceType: 'agnostic',
   mappings: exceptionsArtifactSavedObjectMappings,
+};
+
+export const manifestType: SavedObjectsType = {
+  name: manifestSavedObjectType,
+  hidden: false, // TODO: should these be hidden?
+  namespaceType: 'agnostic',
+  mappings: manifestSavedObjectMappings,
 };

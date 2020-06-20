@@ -5,16 +5,16 @@
  */
 
 import { IRouter, KibanaResponse } from 'src/core/server';
-import { validate } from '../../../../common/validate';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { ExceptionsCache } from '../cache';
-import { ArtifactConstants } from '../manifest';
+import { validate } from '../../../../../common/validate';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { ExceptionsCache } from '../../artifacts/cache';
+import { ArtifactConstants } from '../../artifacts/manifest';
 import {
   ArtifactDownloadSchema,
   DownloadArtifactRequestParamsSchema,
   downloadArtifactRequestParamsSchema,
   downloadArtifactResponseSchema,
-} from '../schemas';
+} from '../../artifacts/schemas';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 

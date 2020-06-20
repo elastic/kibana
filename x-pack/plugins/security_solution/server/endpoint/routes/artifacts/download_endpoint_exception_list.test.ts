@@ -20,9 +20,9 @@ import {
   httpServiceMock,
   httpServerMock,
 } from 'src/core/server/mocks';
-import { ExceptionsCache } from '../cache';
-import { CompressExceptionList } from '../lists';
-import { ArtifactConstants } from '../manifest';
+import { ExceptionsCache } from '../../artifacts/cache';
+import { CompressExceptionList } from '../../artifacts/lists';
+import { ArtifactConstants } from '../../artifacts/manifest';
 import { downloadEndpointExceptionListRoute } from './download_endpoint_exception_list';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;

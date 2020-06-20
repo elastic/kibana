@@ -6,8 +6,7 @@
 
 import lzma from 'lzma-native';
 import { FoundExceptionListItemSchema } from '../../../../lists/common/schemas/response/found_exception_list_item_schema';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExceptionListClient } from '../../../../lists/server/services/exception_lists/exception_list_client';
+import { ExceptionListClient } from '../../../../lists/server';
 
 export interface EndpointExceptionList {
   exceptions_list: ExceptionsList[];
