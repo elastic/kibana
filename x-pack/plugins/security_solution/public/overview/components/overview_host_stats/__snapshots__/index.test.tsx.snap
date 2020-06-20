@@ -10,7 +10,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiAccordion
     arrowDisplay="left"
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         gutterSize="none"
         justifyContent="spaceBetween"
       >
@@ -35,7 +35,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             max={157258653}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupauditbeat"
@@ -243,7 +243,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiAccordion
     arrowDisplay="left"
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         gutterSize="none"
         justifyContent="spaceBetween"
       >
@@ -268,7 +268,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             max={157258653}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupendgame"
@@ -508,7 +508,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiAccordion
     arrowDisplay="left"
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         gutterSize="none"
         justifyContent="spaceBetween"
       >
@@ -533,7 +533,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             max={157258653}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupfilebeat"
@@ -581,7 +581,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiAccordion
     arrowDisplay="left"
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         gutterSize="none"
         justifyContent="spaceBetween"
       >
@@ -606,7 +606,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             max={157258653}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupwinlogbeat"

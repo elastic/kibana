@@ -15,7 +15,7 @@ import { Either } from 'fp-ts/lib/Either';
 export const DefaultStringBooleanFalse = new t.Type<boolean, boolean, unknown>(
   'DefaultStringBooleanFalse',
   t.boolean.is,
-  (input): Either<t.Errors, boolean> => {
+  (input, context): Either<t.Errors, boolean> => {
     if (input == null) {
       return t.success(false);
     } else if (typeof input === 'string' && input.toLowerCase() === 'true') {
@@ -23,7 +23,7 @@ export const DefaultStringBooleanFalse = new t.Type<boolean, boolean, unknown>(
     } else if (typeof input === 'string' && input.toLowerCase() === 'false') {
       return t.success(false);
     } else {
-      return t.boolean.decode(input);
+      return t.boolean.validate(input, context);
     }
   },
   t.identity

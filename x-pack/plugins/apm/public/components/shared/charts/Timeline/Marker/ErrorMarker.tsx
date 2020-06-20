@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover, EuiText } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useState } from 'react';
+import { EuiPopover, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
+import { useTheme } from '../../../../../hooks/useTheme';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -54,6 +54,7 @@ function truncateMessage(errorMessage?: string) {
 }
 
 export const ErrorMarker: React.FC<Props> = ({ mark }) => {
+  const theme = useTheme();
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 
@@ -63,7 +64,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     <Button
       data-test-subj="popover"
       clickable
-      color={theme.euiColorDanger}
+      color={theme.eui.euiColorDanger}
       shape={Shape.square}
       onClick={togglePopover}
     />

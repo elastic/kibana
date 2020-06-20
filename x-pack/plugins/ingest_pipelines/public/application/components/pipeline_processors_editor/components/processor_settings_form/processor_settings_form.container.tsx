@@ -13,9 +13,16 @@ import { ProcessorSettingsForm as ViewComponent } from './processor_settings_for
 
 export type ProcessorSettingsFromOnSubmitArg = Omit<ProcessorInternal, 'id'>;
 
+export type OnSubmitHandler = (processor: ProcessorSettingsFromOnSubmitArg) => void;
+
+export type OnFormUpdateHandler = (form: OnFormUpdateArg<any>) => void;
+
 interface Props {
-  onFormUpdate: (form: OnFormUpdateArg<any>) => void;
-  onSubmit: (processor: ProcessorSettingsFromOnSubmitArg) => void;
+  onFormUpdate: OnFormUpdateHandler;
+  onSubmit: OnSubmitHandler;
+  isOnFailure: boolean;
+  onOpen: () => void;
+  onClose: () => void;
   processor?: ProcessorInternal;
 }
 
@@ -23,6 +30,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   processor,
   onFormUpdate,
   onSubmit,
+  ...rest
 }) => {
   const handleSubmit = useCallback(
     async (data: FormData, isValid: boolean) => {
@@ -52,5 +60,5 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onFormUpdate]);
 
-  return <ViewComponent processor={processor} form={form} />;
+  return <ViewComponent processor={processor} form={form} {...rest} />;
 };
