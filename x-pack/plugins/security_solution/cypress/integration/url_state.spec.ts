@@ -234,7 +234,7 @@ describe('url state', () => {
     cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
-  it('sets and reads the url state for timeline by id', () => {
+  it.skip('sets and reads the url state for timeline by id', () => {
     loginAndWaitForPage(HOSTS_PAGE);
     openTimeline();
     executeTimelineKQL('host.name: *');
@@ -257,7 +257,7 @@ describe('url state', () => {
       const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
       expect(matched).to.have.lengthOf(1);
       closeTimeline();
-      cy.visit('/app/kibana');
+      cy.visit('/app/home');
       cy.visit(`/app/security/timelines?timeline=(id:'${newTimelineId}',isOpen:!t)`);
       cy.contains('a', 'Security');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).invoke('text').should('not.equal', 'Updating');
