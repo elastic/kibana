@@ -32,7 +32,7 @@ export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 
-export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
+export const MAP_BASE_URL = `/${MAP_APP_PATH}/${MAP_SAVED_OBJECT_TYPE}`;
 
 export function createMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;

@@ -14,8 +14,8 @@ import { Either } from 'fp-ts/lib/Either';
 export const ReferencesDefaultArray = new t.Type<string[], string[], unknown>(
   'referencesWithDefaultArray',
   t.array(t.string).is,
-  (input): Either<t.Errors, string[]> =>
-    input == null ? t.success([]) : t.array(t.string).decode(input),
+  (input, context): Either<t.Errors, string[]> =>
+    input == null ? t.success([]) : t.array(t.string).validate(input, context),
   t.identity
 );
 

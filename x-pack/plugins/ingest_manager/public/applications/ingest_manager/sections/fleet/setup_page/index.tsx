@@ -39,7 +39,9 @@ export const SetupPage: React.FunctionComponent<{
   };
 
   const content =
-    missingRequirements.includes('tls_required') || missingRequirements.includes('api_keys') ? (
+    missingRequirements.includes('tls_required') ||
+    missingRequirements.includes('api_keys') ||
+    missingRequirements.includes('encrypted_saved_object_encryption_key_required') ? (
       <>
         <EuiSpacer size="m" />
         <EuiIcon type="lock" color="subdued" size="xl" />
@@ -53,12 +55,13 @@ export const SetupPage: React.FunctionComponent<{
           </h2>
         </EuiTitle>
         <EuiSpacer size="xl" />
-        <EuiText color="subdued">
+        <EuiText color="subdued" textAlign={'left'}>
           <FormattedMessage
             id="xpack.ingestManager.setupPage.missingRequirementsDescription"
             defaultMessage="To use Fleet, you must enable the following features:
           {space}- Enable Elasticsearch API keys.
           {space}- Enable TLS to secure the communication between Agents and Kibana.
+          {space}- Set the encryption key for encrypted saved objects.
           "
             values={{
               space: <EuiSpacer size="m" />,

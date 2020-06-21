@@ -30,7 +30,7 @@ export interface EsDoc extends Record<string, any> {
   _source: EsDocSource;
 }
 
-export const MAX_COLUMNS = 20;
+export const MAX_COLUMNS = 10;
 export const DEFAULT_REGRESSION_COLUMNS = 8;
 
 export const BASIC_NUMERICAL_TYPES = new Set([
