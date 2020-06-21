@@ -127,3 +127,21 @@ export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
 
 export const namespace_type = DefaultNamespace;
 export type NamespaceType = t.TypeOf<typeof namespace_type>;
+
+export const operator = t.keyof({ excluded: null, included: null });
+export type Operator = t.TypeOf<typeof operator>;
+
+export const operator_type = t.keyof({
+  exists: null,
+  list: null,
+  match: null,
+  match_any: null,
+});
+export type OperatorType = t.TypeOf<typeof operator_type>;
+export enum OperatorTypeEnum {
+  NESTED = 'nested',
+  MATCH = 'match',
+  MATCH_ANY = 'match_any',
+  EXISTS = 'exists',
+  LIST = 'list',
+}

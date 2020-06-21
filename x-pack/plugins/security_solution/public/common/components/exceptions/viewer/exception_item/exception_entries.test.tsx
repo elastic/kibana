@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionEntries } from './exception_entries';
-import { getFormattedEntryMock } from '../../mocks';
+import { getFormattedEntryMock } from '../../exceptions.mock';
 import { getEmptyValue } from '../../../empty_value';
 
 describe('ExceptionEntries', () => {

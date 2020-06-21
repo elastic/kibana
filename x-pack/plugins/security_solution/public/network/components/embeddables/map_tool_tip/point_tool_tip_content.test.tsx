@@ -11,8 +11,10 @@ import { TestProviders } from '../../../../common/mock';
 import { getEmptyStringTag } from '../../../../common/components/empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../../common/components/links';
 import { FlowTarget } from '../../../../graphql/types';
-import { ITooltipProperty } from '../../../../../../maps/public';
-import { TooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+import {
+  TooltipProperty,
+  ITooltipProperty,
+} from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 describe('PointToolTipContent', () => {
   const mockFeatureProps: ITooltipProperty[] = [
