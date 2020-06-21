@@ -14,7 +14,7 @@
     "branches",
     "branching"
   ],
-  "version": "5.4.2",
+  "version": "5.4.3",
   "main": "./dist/index.js",
   "bin": {
     "backport": "./dist/index.js"
