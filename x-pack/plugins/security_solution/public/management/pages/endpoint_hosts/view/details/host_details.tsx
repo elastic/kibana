@@ -25,7 +25,9 @@ import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
-import { getManagementUrl } from '../../../..';
+import { getEndpointDetailsPath, getPolicyDetailPath } from '../../../../common/routing';
+import { SecurityPageName } from '../../../../../app/types';
+import { useFormatUrl } from '../../../../../common/components/link_to';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -51,6 +53,8 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const policyStatus = useHostSelector(
     policyResponseStatus
   ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
+  const { formatUrl } = useFormatUrl(SecurityPageName.management);
+
   const detailsResultsUpper = useMemo(() => {
     return [
       {
@@ -77,35 +81,29 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
     const { selected_host, show, ...currentUrlParams } = queryParams;
     return [
-      getManagementUrl({
+      formatUrl(
+        getEndpointDetailsPath({
+          name: 'endpointPolicyResponse',
+          ...currentUrlParams,
+          selected_host: details.host.id,
+        })
+      ),
+      getEndpointDetailsPath({
         name: 'endpointPolicyResponse',
-        ...currentUrlParams,
-        selected_host: details.host.id,
-      }),
-      getManagementUrl({
-        name: 'endpointPolicyResponse',
-        excludePrefix: true,
         ...currentUrlParams,
         selected_host: details.host.id,
       }),
     ];
-  }, [details.host.id, queryParams]);
+  }, [details.host.id, formatUrl, queryParams]);
 
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
   const [policyDetailsRoutePath, policyDetailsRouteUrl] = useMemo(() => {
     return [
-      getManagementUrl({
-        name: 'policyDetails',
-        policyId: details.Endpoint.policy.applied.id,
-        excludePrefix: true,
-      }),
-      getManagementUrl({
-        name: 'policyDetails',
-        policyId: details.Endpoint.policy.applied.id,
-      }),
+      getPolicyDetailPath(details.Endpoint.policy.applied.id),
+      formatUrl(getPolicyDetailPath(details.Endpoint.policy.applied.id)),
     ];
-  }, [details.Endpoint.policy.applied.id]);
+  }, [details.Endpoint.policy.applied.id, formatUrl]);
 
   const policyDetailsClickHandler = useNavigateByRouterEventHandler(policyDetailsRoutePath);
 

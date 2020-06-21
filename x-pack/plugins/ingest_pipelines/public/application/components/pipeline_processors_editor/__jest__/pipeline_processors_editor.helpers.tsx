@@ -8,37 +8,45 @@ import React from 'react';
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
 import { PipelineProcessorsEditor, Props } from '../pipeline_processors_editor.container';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-  // which does not produce a valid component wrapper
-  EuiComboBox: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockComboBox'}
-      data-currentvalue={props.selectedOptions}
-      onChange={async (syntheticEvent: any) => {
-        props.onChange([syntheticEvent['0']]);
-      }}
-    />
-  ),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-currentvalue={props.value}
-      onChange={(e: any) => {
-        props.onChange(e.jsonContent);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
 
-jest.mock('react-virtualized', () => ({
-  ...jest.requireActual('react-virtualized'),
-  AutoSizer: ({ children }: { children: any }) => (
-    <div>{children({ height: 500, width: 500 })}</div>
-  ),
-}));
+  return {
+    ...original,
+    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // which does not produce a valid component wrapper
+    EuiComboBox: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
+        data-currentvalue={props.selectedOptions}
+        onChange={async (syntheticEvent: any) => {
+          props.onChange([syntheticEvent['0']]);
+        }}
+      />
+    ),
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
+
+jest.mock('react-virtualized', () => {
+  const original = jest.requireActual('react-virtualized');
+
+  return {
+    ...original,
+    AutoSizer: ({ children }: { children: any }) => (
+      <div>{children({ height: 500, width: 500 })}</div>
+    ),
+  };
+});
 
 const testBedSetup = registerTestBed<TestSubject>(PipelineProcessorsEditor, {
   doMountAsync: false,
