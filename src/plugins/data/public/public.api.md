@@ -989,8 +989,6 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     create(allowOverride?: boolean): Promise<string | false>;
     // (undocumented)
-    deserializeFieldFormatMap(mapping: any): import("../..").FieldFormat | undefined;
-    // (undocumented)
     destroy(): Promise<{}> | undefined;
     // (undocumented)
     _fetchFields(): Promise<void>;

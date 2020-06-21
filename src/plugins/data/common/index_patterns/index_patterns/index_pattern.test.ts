@@ -30,7 +30,9 @@ import { Field } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
 
-let mockFieldsFetcherResponse: any[] = [];
+class MockFieldFormatter {}
+
+fieldFormatsMock.getType = jest.fn().mockImplementation(() => MockFieldFormatter);
 
 jest.mock('../../field_mapping', () => {
   const originalModule = jest.requireActual('../../field_mapping');
@@ -46,6 +48,8 @@ jest.mock('../../field_mapping', () => {
     })),
   };
 });
+
+let mockFieldsFetcherResponse: any[] = [];
 
 jest.mock('./_fields_fetcher', () => ({
   createFieldsFetcher: jest.fn().mockImplementation(() => ({
@@ -305,10 +309,16 @@ describe('IndexPattern', () => {
 
   describe('toSpec', () => {
     test('should match snapshot', () => {
+      indexPattern.fieldFormatMap.bytes = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      };
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
     test('can restore from spec', async () => {
+      indexPattern.fieldFormatMap.bytes = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      };
       const spec = indexPattern.toSpec();
       const restoredPattern = await create(spec.id as string);
       restoredPattern.initFromSpec(spec);
@@ -316,6 +326,7 @@ describe('IndexPattern', () => {
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
+      expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
     });
   });
 

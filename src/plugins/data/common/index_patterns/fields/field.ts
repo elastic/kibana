@@ -148,14 +148,6 @@ export class Field implements IFieldType {
 
     const newObj = obj.create();
     newObj.toSpec = function () {
-      const fieldFormatMap = this?.indexPattern?.fieldFormatMap;
-      // const deserialize = field?.indexPattern?.
-      // ug, can't tell what code is doing
-      let fmt: { id: string; params: unknown } | undefined;
-      if (fieldFormatMap) {
-        fmt = fieldFormatMap[this.name];
-      }
-
       return {
         count: this.count,
         script: this.script,
@@ -169,7 +161,7 @@ export class Field implements IFieldType {
         aggregatable: this.aggregatable,
         readFromDocValues: this.readFromDocValues,
         subType: this.subType,
-        format: fmt,
+        format: this?.indexPattern?.fieldFormatMap[this.name]?.toJSON(),
       };
     };
     return newObj;

@@ -155,7 +155,7 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
-  public deserializeFieldFormatMap(mapping: any) {
+  private deserializeFieldFormatMap(mapping: any) {
     const FieldFormat = this.fieldFormats.getType(mapping.id);
 
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
@@ -223,22 +223,6 @@ export class IndexPattern implements IIndexPattern {
     this.initFields();
   }
 
-  /*
-  private updateFromPlainObject(response: any) {
-    const localFormatMap = response.fieldFormatMap;
-    const parsedFormatMap = localFormatMap ? JSON.parse(localFormatMap) : {};
-
-    // add format attirbute to fields if found on fieldFormatMap
-    if (parsedFormatMap && response.fields) {
-      response.fields.forEach((field: FieldSpec) => {
-        if (parsedFormatMap[field.name]) {
-          field.format = parsedFormatMap[field.name];
-        }
-      });
-    }
-  }
-  */
-
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
       throw new SavedObjectNotFound(type, this.id, 'kibana#/management/kibana/indexPatterns');
@@ -252,7 +236,7 @@ export class IndexPattern implements IIndexPattern {
       response[name] = fieldMapping._deserialize(response[name]);
     });
 
-    // give index pattern all of the values in _source
+    // give index pattern all of the values
     _.assign(this, response);
 
     if (!this.title && this.id) {
@@ -455,6 +439,7 @@ export class IndexPattern implements IIndexPattern {
     // serialize json fields
     _.forOwn(this.mapping, (fieldMapping, fieldName) => {
       if (!fieldName || this[fieldName] == null) return;
+
       body[fieldName] = fieldMapping._serialize
         ? fieldMapping._serialize(this[fieldName])
         : this[fieldName];
