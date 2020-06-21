@@ -151,6 +151,25 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
 
+export const RowRendererIdRuntimeType = runtimeTypes.keyof({
+  auditd: null,
+  auditd_file: null,
+  netflow: null,
+  plain: null,
+  suricata: null,
+  system: null,
+  system_dns: null,
+  system_endgame_process: null,
+  system_file: null,
+  system_fin: null,
+  system_security_event: null,
+  system_socket: null,
+  zeek: null,
+  all: null,
+});
+
+export type RowRendererId = runtimeTypes.TypeOf<typeof RowRendererIdRuntimeType>;
+
 /*
  *  Timeline Types
  */
@@ -175,6 +194,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
   eventType: unionWithNullType(runtimeTypes.string),
+  excludedRowRendererIds: unionWithNullType(RowRendererIdRuntimeType),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
   filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
   kqlMode: unionWithNullType(runtimeTypes.string),
@@ -246,6 +266,7 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
   }),
   runtimeTypes.partial({
     eventIdToNoteIds: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
+    excludedRowRendererIds: runtimeTypes.array(RowRendererIdRuntimeType),
     noteIds: runtimeTypes.array(runtimeTypes.string),
     notes: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
     pinnedEventIds: runtimeTypes.array(runtimeTypes.string),

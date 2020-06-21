@@ -22,6 +22,10 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
+import { StatefulFieldsBrowser } from '../../fields_browser';
+import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../fields_browser/helpers';
+import { StatefulRowRenderersBrowser } from '../../row_renderers_browser';
+// import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../row_renderers_browser/helpers';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
@@ -127,11 +131,34 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
+        <div>
+          <StatefulFieldsBrowser
+            browserFields={browserFields}
+            columnHeaders={columnHeaders}
+            data-test-subj="field-browser"
+            height={FIELD_BROWSER_HEIGHT}
+            isEventViewer={isEventViewer}
+            onUpdateColumns={onUpdateColumns}
+            timelineId={id}
+            toggleColumn={toggleColumn}
+            width={FIELD_BROWSER_WIDTH}
+          />
+          <StatefulRowRenderersBrowser
+            browserFields={browserFields}
+            columnHeaders={columnHeaders}
+            data-test-subj="row-renderers-browser"
+            height={FIELD_BROWSER_HEIGHT}
+            isEventViewer={isEventViewer}
+            onUpdateColumns={onUpdateColumns}
+            timelineId={id}
+            toggleColumn={toggleColumn}
+            width={FIELD_BROWSER_WIDTH}
+          />
+        </div>
         <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
               columnHeaders={columnHeaders}
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
@@ -140,12 +167,10 @@ export const Body = React.memo<BodyProps>(
               onColumnSorted={onColumnSorted}
               onFilterChange={onFilterChange}
               onSelectAll={onSelectAll}
-              onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
               timelineId={id}
-              toggleColumn={toggleColumn}
             />
 
             <Events

@@ -10,7 +10,6 @@ import React from 'react';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
 import { Direction } from '../../../../../graphql/types';
-import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import { Sort } from '../sort';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
@@ -30,19 +29,16 @@ describe('ColumnHeaders', () => {
       const wrapper = shallow(
         <ColumnHeadersComponent
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          browserFields={mockBrowserFields}
           columnHeaders={defaultHeaders}
           isSelectAllChecked={false}
           onColumnSorted={jest.fn()}
           onColumnRemoved={jest.fn()}
           onColumnResized={jest.fn()}
           onSelectAll={jest.fn}
-          onUpdateColumns={jest.fn()}
           showEventsSelect={false}
           showSelectAllCheckbox={false}
           sort={sort}
           timelineId={'test'}
-          toggleColumn={jest.fn()}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -53,19 +49,16 @@ describe('ColumnHeaders', () => {
         <TestProviders>
           <ColumnHeadersComponent
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-            browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -78,19 +71,16 @@ describe('ColumnHeaders', () => {
         <TestProviders>
           <ColumnHeadersComponent
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-            browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );

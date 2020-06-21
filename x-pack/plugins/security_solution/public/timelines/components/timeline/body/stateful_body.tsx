@@ -59,6 +59,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     columnHeaders,
     data,
     eventIdToNoteIds,
+    excludedRowRendererIds,
     height,
     id,
     isEventViewer = false,
@@ -94,8 +95,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     const onAddNoteToEvent: AddNoteToEvent = useCallback(
       ({ eventId, noteId }: { eventId: string; noteId: string }) =>
         addNoteToEvent!({ id, eventId, noteId }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
+      [id, addNoteToEvent]
     );
 
     const onRowSelected: OnRowSelected = useCallback(
@@ -132,35 +132,36 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       (sorted) => {
         updateSort!({ id, sort: sorted });
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
+      [id, updateSort]
     );
 
     const onColumnRemoved: OnColumnRemoved = useCallback(
       (columnId) => removeColumn!({ id, columnId }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
+      [id, removeColumn]
     );
 
     const onColumnResized: OnColumnResized = useCallback(
       ({ columnId, delta }) => applyDeltaToColumnWidth!({ id, columnId, delta }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
+      [applyDeltaToColumnWidth, id]
     );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onPinEvent: OnPinEvent = useCallback((eventId) => pinEvent!({ id, eventId }), [id]);
+    const onPinEvent: OnPinEvent = useCallback((eventId) => pinEvent!({ id, eventId }), [
+      id,
+      pinEvent,
+    ]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onUnPinEvent: OnUnPinEvent = useCallback((eventId) => unPinEvent!({ id, eventId }), [id]);
+    const onUnPinEvent: OnUnPinEvent = useCallback((eventId) => unPinEvent!({ id, eventId }), [
+      id,
+      unPinEvent,
+    ]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), []);
+    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), [
+      updateNote,
+    ]);
 
     const onUpdateColumns: OnUpdateColumns = useCallback(
       (columns) => updateColumns!({ id, columns }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
+      [id, updateColumns]
     );
 
     // Sync to selectAll so parent components can select all events
@@ -168,8 +169,22 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       if (selectAll) {
         onSelectAll({ isSelected: true });
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectAll]); // onSelectAll dependency not necessary
+    }, [onSelectAll, selectAll]);
+
+    const enabledRowRenderers = useMemo(() => {
+      if (!showRowRenderers || (excludedRowRendererIds && excludedRowRendererIds[0] === 'all'))
+        return [plainRowRenderer];
+
+      if (!excludedRowRendererIds) return rowRenderers;
+
+      console.error('dupa', rowRenderers, excludedRowRendererIds);
+      console.error(
+        'enabled',
+        rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id))
+      );
+
+      return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+    }, [excludedRowRendererIds, showRowRenderers]);
 
     return (
       <Body
@@ -195,7 +210,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onUnPinEvent={onUnPinEvent}
         onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
-        rowRenderers={showRowRenderers ? rowRenderers : [plainRowRenderer]}
+        rowRenderers={enabledRowRenderers}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}
         sort={sort}
@@ -208,6 +223,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.data, nextProps.data) &&
+    deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
     deepEqual(prevProps.notesById, nextProps.notesById) &&
     prevProps.height === nextProps.height &&
@@ -238,6 +254,7 @@ const makeMapStateToProps = () => {
       columns,
       eventIdToNoteIds,
       eventType,
+      excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
       pinnedEventIds,
@@ -250,6 +267,7 @@ const makeMapStateToProps = () => {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       eventIdToNoteIds,
       eventType,
+      excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
       notesById: getNotesByIds(state),

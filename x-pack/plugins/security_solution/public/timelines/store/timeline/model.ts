@@ -15,6 +15,7 @@ import {
   TimelineStatus,
 } from '../../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import type { RowRendererId } from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -54,6 +55,8 @@ export interface TimelineModel {
   eventType?: EventType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
+  /** A list of Ids of excluded Row Renderers */
+  excludedRowRendererIds: RowRendererId[];
   filters?: Filter[];
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
@@ -129,6 +132,7 @@ export type SubsetTimelineModel = Readonly<
     | 'description'
     | 'eventType'
     | 'eventIdToNoteIds'
+    | 'excludedRowRendererIds'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
     | 'isFavorite'

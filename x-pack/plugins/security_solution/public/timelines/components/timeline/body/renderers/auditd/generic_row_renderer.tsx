@@ -22,6 +22,7 @@ export const createGenericAuditRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
+  id: 'auditd',
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
@@ -54,6 +55,7 @@ export const createGenericFileRowRenderer = ({
   text: string;
   fileIcon?: IconType;
 }): RowRenderer => ({
+  id: 'auditd_file',
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);

@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 
 import { RowRenderer } from './row_renderer';
 
+const PlainRowRenderer = () => <></>;
+
+PlainRowRenderer.displayName = 'PlainRowRenderer';
+
 export const plainRowRenderer: RowRenderer = {
+  id: 'plain',
   isInstance: (_) => true,
-  renderRow: () => <></>,
+  renderRow: PlainRowRenderer,
 };

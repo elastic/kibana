@@ -25,6 +25,7 @@ export const createGenericSystemRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
+  id: 'system',
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
@@ -55,6 +56,7 @@ export const createEndgameProcessRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
+  id: 'system_file',
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const category: string | null | undefined = get('event.category[0]', ecs);
@@ -86,6 +88,7 @@ export const createFimRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
+  id: 'system_fin',
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const category: string | null | undefined = get('event.category[0]', ecs);
@@ -117,6 +120,7 @@ export const createGenericFileRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
+  id: 'system_file',
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
@@ -147,6 +151,7 @@ export const createSocketRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
+  id: 'system_socket',
   isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     return action != null && action.toLowerCase() === actionName;
@@ -169,6 +174,7 @@ export const createSecurityEventRowRenderer = ({
 }: {
   actionName: string;
 }): RowRenderer => ({
+  id: 'system_security_event',
   isInstance: (ecs) => {
     const category: string | null | undefined = get('event.category[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
@@ -192,6 +198,7 @@ export const createSecurityEventRowRenderer = ({
 });
 
 export const createDnsRowRenderer = (): RowRenderer => ({
+  id: 'system_dns',
   isInstance: (ecs) => {
     const dnsQuestionType: string | null | undefined = get('dns.question.type[0]', ecs);
     const dnsQuestionName: string | null | undefined = get('dns.question.name[0]', ecs);

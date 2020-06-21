@@ -12,21 +12,17 @@ import deepEqual from 'fast-deep-equal';
 
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
-import { BrowserFields } from '../../../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import { StatefulFieldsBrowser } from '../../../fields_browser';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
   OnColumnSorted,
   OnFilterChange,
   OnSelectAll,
-  OnUpdateColumns,
 } from '../../events';
 import {
   EventsTh,
@@ -42,7 +38,6 @@ import { ColumnHeader } from './column_header';
 
 interface Props {
   actionsColumnWidth: number;
-  browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
@@ -51,12 +46,10 @@ interface Props {
   onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;
   onSelectAll: OnSelectAll;
-  onUpdateColumns: OnUpdateColumns;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
   sort: Sort;
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 interface DraggableContainerProps {
@@ -82,7 +75,6 @@ DraggableContainer.displayName = 'DraggableContainer';
 /** Renders the timeline header columns */
 export const ColumnHeadersComponent = ({
   actionsColumnWidth,
-  browserFields,
   columnHeaders,
   isEventViewer = false,
   isSelectAllChecked,
@@ -90,13 +82,11 @@ export const ColumnHeadersComponent = ({
   onColumnResized,
   onColumnSorted,
   onSelectAll,
-  onUpdateColumns,
   onFilterChange = noop,
   showEventsSelect,
   showSelectAllCheckbox,
   sort,
   timelineId,
-  toggleColumn,
 }: Props) => {
   const [draggingIndex, setDraggingIndex] = useState(null);
 
@@ -172,19 +162,7 @@ export const ColumnHeadersComponent = ({
           data-test-subj="actions-container"
         >
           <EventsTh>
-            <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
-              <StatefulFieldsBrowser
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                data-test-subj="field-browser"
-                height={FIELD_BROWSER_HEIGHT}
-                isEventViewer={isEventViewer}
-                onUpdateColumns={onUpdateColumns}
-                timelineId={timelineId}
-                toggleColumn={toggleColumn}
-                width={FIELD_BROWSER_WIDTH}
-              />
-            </EventsThContent>
+            <EventsThContent />
           </EventsTh>
           {showEventsSelect && (
             <EventsTh>
@@ -242,13 +220,10 @@ export const ColumnHeaders = React.memo(
     prevProps.onColumnResized === nextProps.onColumnResized &&
     prevProps.onColumnSorted === nextProps.onColumnSorted &&
     prevProps.onSelectAll === nextProps.onSelectAll &&
-    prevProps.onUpdateColumns === nextProps.onUpdateColumns &&
     prevProps.onFilterChange === nextProps.onFilterChange &&
     prevProps.showEventsSelect === nextProps.showEventsSelect &&
     prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
     prevProps.sort === nextProps.sort &&
     prevProps.timelineId === nextProps.timelineId &&
-    prevProps.toggleColumn === nextProps.toggleColumn &&
-    deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
-    deepEqual(prevProps.browserFields, nextProps.browserFields)
+    deepEqual(prevProps.columnHeaders, nextProps.columnHeaders)
 );

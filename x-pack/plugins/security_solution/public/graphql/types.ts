@@ -342,6 +342,22 @@ export enum TlsFields {
   _id = '_id',
 }
 
+export enum RowRendererId {
+  all = 'all',
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fin = 'system_fin',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
+}
+
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
@@ -1937,6 +1953,8 @@ export interface TimelineResult {
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   eventType?: Maybe<string>;
+
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
@@ -4334,6 +4352,8 @@ export namespace GetAllTimeline {
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     notes: Maybe<Notes[]>;
 
     noteIds: Maybe<string[]>;
@@ -5390,6 +5410,8 @@ export namespace GetOneTimeline {
     eventType: Maybe<string>;
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
+
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
 
     favorite: Maybe<Favorite[]>;
 

@@ -135,6 +135,22 @@ export const timelineSchema = gql`
     draft
   }
 
+  enum RowRendererId {
+    all
+    auditd
+    auditd_file
+    netflow
+    suricata
+    system
+    system_dns
+    system_endgame_process
+    system_file
+    system_fin
+    system_security_event
+    system_socket
+    zeek
+  }
+
   input TimelineInput {
     columns: [ColumnHeaderInput!]
     dataProviders: [DataProviderInput!]
@@ -239,6 +255,7 @@ export const timelineSchema = gql`
     description: String
     eventIdToNoteIds: [NoteResult!]
     eventType: String
+    excludedRowRendererIds: [RowRendererId!]
     favorite: [FavoriteTimelineResult!]
     filters: [FilterTimelineResult!]
     kqlMode: String

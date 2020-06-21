@@ -62,6 +62,7 @@ export const getAllTimeline = memoizeOne(
               return acc;
             }, {})
           : null,
+      excludedRowRendererIds: timeline.excludedRowRendererIds,
       favorite: timeline.favorite,
       noteIds: timeline.noteIds,
       notes:

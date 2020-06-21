@@ -89,6 +89,7 @@ describe('Epic Timeline', () => {
         description: '',
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
         filters: [
@@ -233,6 +234,7 @@ describe('Epic Timeline', () => {
         },
         description: '',
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [
           {
             exists: null,

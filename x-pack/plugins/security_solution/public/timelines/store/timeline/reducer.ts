@@ -25,6 +25,7 @@ import {
   removeProvider,
   setEventsDeleted,
   setEventsLoading,
+  setExcludedRowRendererIds,
   setFilters,
   setInsertTimeline,
   setKqlFilterQueryDraft,
@@ -73,6 +74,7 @@ import {
   setLoadingTimelineEvents,
   setSelectedTimelineEvents,
   unPinTimelineEvent,
+  updateExcludedRowRenderersIds,
   updateHighlightedDropAndProvider,
   updateKqlFilterQueryDraft,
   updateTimelineColumns,
@@ -295,6 +297,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         loadingEventIds: [],
       },
     },
+  }))
+  .case(setExcludedRowRendererIds, (state, { id, excludedRowRendererIds }) => ({
+    ...state,
+    timelineById: updateExcludedRowRenderersIds({
+      id,
+      excludedRowRendererIds,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(setSelected, (state, { id, eventIds, isSelected, isSelectAllChecked }) => ({
     ...state,

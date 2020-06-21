@@ -8,7 +8,7 @@ import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineTypeLiteral, RowRendererId } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -41,6 +41,7 @@ export interface OpenTimelineResult {
   created?: number | null;
   description?: string | null;
   eventIdToNoteIds?: Readonly<Record<string, string[]>> | null;
+  excludedRowRendererIds?: RowRendererId[] | null;
   favorite?: FavoriteTimelineResult[] | null;
   noteIds?: string[] | null;
   notes?: TimelineResultNote[] | null;

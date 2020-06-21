@@ -49,5 +49,5 @@ export const pickSavedTimeline = (
     savedTimeline.status = TimelineStatus.active;
   }
 
-  return savedTimeline;
+  if (!savedTimeline.showRowRe) return savedTimeline;
 };

@@ -42,6 +42,7 @@ export const allTimelinesQuery = gql`
           updatedBy
           version
         }
+        excludedRowRendererIds
         notes {
           eventId
           note

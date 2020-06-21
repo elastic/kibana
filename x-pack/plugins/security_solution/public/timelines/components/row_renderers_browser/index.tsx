@@ -7,12 +7,15 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { State } from '../../../common/store';
 import { BrowserFields } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
+import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../../timelines/store/timeline/actions';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
-import { FieldsBrowser } from './field_browser';
+import { RowRenderersBrowser } from './row_renderers_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
 import * as i18n from './translations';
 import { FieldBrowserProps } from './types';
@@ -22,16 +25,16 @@ const fieldsButtonClassName = 'fields-button';
 /** wait this many ms after the user completes typing before applying the filter input */
 export const INPUT_TIMEOUT = 250;
 
-const FieldsBrowserButtonContainer = styled.div`
+const RowRenderersBrowserButtonContainer = styled.div`
   position: relative;
 `;
 
-FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
+RowRenderersBrowserButtonContainer.displayName = 'RowRenderersBrowserButtonContainer';
 
 /**
  * Manages the state of the field browser
  */
-export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
+export const StatefulRowRenderersBrowserComponent: React.FC<FieldBrowserProps> = ({
   columnHeaders,
   browserFields,
   height,
@@ -42,6 +45,19 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   toggleColumn,
   width,
 }) => {
+  const dispatch = useDispatch();
+  const excludedRowRendererIds = useSelector(
+    (state: State) => state.timeline.timelineById[timelineId]?.excludedRowRendererIds || []
+  );
+
+  const setExcludedRowRendererIds = useCallback(
+    (payload) =>
+      dispatch(
+        dispatchSetExcludedRowRendererIds({ id: timelineId, excludedRowRendererIds: payload })
+      ),
+    [dispatch, timelineId]
+  );
+
   /** tracks the latest timeout id from `setTimeout`*/
   const inputTimeoutId = useRef(0);
 
@@ -144,7 +160,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
 
   return (
     <>
-      <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
+      <RowRenderersBrowserButtonContainer data-test-subj="fields-browser-button-container">
         <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
           <EuiButtonEmpty
             className={fieldsButtonClassName}
@@ -158,7 +174,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
         </EuiToolTip>
 
         {show && (
-          <FieldsBrowser
+          <RowRenderersBrowser
             browserFields={browserFieldsWithDefaultCategory}
             columnHeaders={columnHeaders}
             filteredBrowserFields={
@@ -180,11 +196,13 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
             timelineId={timelineId}
             toggleColumn={toggleColumn}
             width={width}
+            excludedRowRendererIds={excludedRowRendererIds}
+            setExcludedRowRendererIds={setExcludedRowRendererIds}
           />
         )}
-      </FieldsBrowserButtonContainer>
+      </RowRenderersBrowserButtonContainer>
     </>
   );
 };
 
-export const StatefulFieldsBrowser = React.memo(StatefulFieldsBrowserComponent);
+export const StatefulRowRenderersBrowser = React.memo(StatefulRowRenderersBrowserComponent);

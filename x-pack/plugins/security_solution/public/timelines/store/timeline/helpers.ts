@@ -19,7 +19,7 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineTypeLiteral, RowRendererId } from '../../../../common/types/timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
@@ -1315,6 +1315,29 @@ export const updateFilters = ({ id, filters, timelineById }: UpdateFiltersParams
     [id]: {
       ...timeline,
       filters,
+    },
+  };
+};
+
+interface UpdateExcludedRowRenderersIds {
+  id: string;
+  excludedRowRendererIds: RowRendererId[];
+  timelineById: TimelineById;
+}
+
+export const updateExcludedRowRenderersIds = ({
+  id,
+  excludedRowRendererIds,
+  timelineById,
+}: UpdateExcludedRowRenderersIds): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      excludedRowRendererIds,
+      showRowRenderers: excludedRowRendererIds[0] !== 'all',
     },
   };
 };
