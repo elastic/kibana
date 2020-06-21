@@ -66,7 +66,6 @@ import { GetSourceParams } from 'elasticsearch';
 import { GetTemplateParams } from 'elasticsearch';
 import { History } from 'history';
 import { Href } from 'history';
-import { HttpSetup } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { IndexDocumentParams } from 'elasticsearch';
 import { IndicesAnalyzeParams } from 'elasticsearch';

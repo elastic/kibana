@@ -643,7 +643,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart> {
             fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
         indexPatterns: {
-            IndexPatternsServiceFactory: (kibanaRequest: import("kibana/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
+            IndexPatternsServiceFactory: (kibanaRequest: import("../../../core/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
         };
     };
     // (undocumented)
