@@ -17,6 +17,7 @@ import {
   getFilesWithConflicts,
 } from '../services/git';
 import { getShortSha } from '../services/github/commitFormatters';
+import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
 import { addLabelsToPullRequest } from '../services/github/v3/addLabelsToPullRequest';
 import { createPullRequest } from '../services/github/v3/createPullRequest';
 import { consoleLog } from '../services/logger';
@@ -53,18 +54,27 @@ export async function cherrypickAndCreateTargetPullRequest({
   spinner.stop();
 
   const payload = getPullRequestPayload(options, targetBranch, commits);
-  const pullRequest = await createPullRequest(options, payload);
+  const targetPullRequest = await createPullRequest(options, payload);
 
-  // add targetPRLabels
+  // add assignees to target pull request
+  if (options.assignees.length > 0) {
+    await addAssigneesToPullRequest(
+      options,
+      targetPullRequest.number,
+      options.assignees
+    );
+  }
+
+  // add labels to target pull request
   if (options.targetPRLabels.length > 0) {
     await addLabelsToPullRequest(
       options,
-      pullRequest.number,
+      targetPullRequest.number,
       options.targetPRLabels
     );
   }
 
-  // add sourcePRLabels
+  // add labels to source pull requests
   if (options.sourcePRLabels.length > 0) {
     const promises = commits.map((commit) => {
       if (commit.pullNumber) {
@@ -78,7 +88,7 @@ export async function cherrypickAndCreateTargetPullRequest({
     await Promise.all(promises);
   }
 
-  consoleLog(`View pull request: ${pullRequest.html_url}`);
+  consoleLog(`View pull request: ${targetPullRequest.html_url}`);
 
   // output PR summary in dry run mode
   if (options.dryRun) {
@@ -88,7 +98,7 @@ export async function cherrypickAndCreateTargetPullRequest({
     consoleLog(`Body: ${payload.body}\n`);
   }
 
-  return pullRequest;
+  return targetPullRequest;
 }
 
 function getFeatureBranchName(targetBranch: string, commits: CommitSelected[]) {

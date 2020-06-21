@@ -119,6 +119,34 @@ Default: `false`
 
 CLI: `--all`, `-a`
 
+#### `assignees`
+
+Add assignees to the target pull request
+
+CLI: `--assignees <username>`, `-assign <username>`
+
+Config:
+
+```json
+{
+  "assignees": ["sqren"]
+}
+```
+
+#### `autoAssign`
+
+Automatically add the current user as assignee to the target pull request
+
+CLI: `--auto-assign`
+
+Config:
+
+```json
+{
+  "autoAssign": true
+}
+```
+
 #### `branchLabelMapping`
 
 Pre-select target branch choices based on the source PR labels.

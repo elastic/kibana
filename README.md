@@ -59,6 +59,8 @@ See [configuration.md](https://github.com/sqren/backport/blob/master/docs/config
 | --accesstoken      | Github access token                                    |                | string  |
 | --all              | Show commits from other than me                        | false          | boolean |
 | --author           | Filter commits by author                               | _Current user_ | string  |
+| --assignees        | Assign users to target pull request                    |                | string  |
+| --auto-assign      | Assign current user to target pull request             | false          | boolean |
 | --branch           | Target branch to backport to                           |                | string  |
 | --dry-run          | Perform backport without pushing to Github             | false          | boolean |
 | --editor           | Editor (eg. `code`) to open and solve conflicts        |                | string  |

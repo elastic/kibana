@@ -176,6 +176,7 @@ Array [
     Object {
       "accessToken": "myAccessToken",
       "all": false,
+      "assignees": Array [],
       "author": "sqren",
       "branchLabelMapping": undefined,
       "dryRun": false,

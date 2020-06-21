@@ -1,9 +1,8 @@
-import { getOptionsFromCliArgs } from './cliArgs';
-import { OptionsFromConfigFiles } from './config/config';
+import { getOptionsFromCliArgs, OptionsFromCliArgs } from './cliArgs';
 
 describe('getOptionsFromCliArgs', () => {
   it('should return correct options', () => {
-    const configOptions = {
+    const configOptions: Partial<OptionsFromCliArgs> = {
       accessToken: 'myAccessToken',
       all: false,
       fork: true,
@@ -39,6 +38,7 @@ describe('getOptionsFromCliArgs', () => {
     expect(res).toEqual({
       accessToken: 'myAccessToken',
       all: true,
+      assignees: [],
       dryRun: false,
       fork: true,
       gitHostname: 'github.com',
@@ -62,7 +62,7 @@ describe('getOptionsFromCliArgs', () => {
   });
 
   it('should accept both camel-case and dashed-case and convert them to camel cased', () => {
-    const configOptions = {} as OptionsFromConfigFiles;
+    const configOptions: Partial<OptionsFromCliArgs> = {};
     const argv = [
       '--access-token',
       'my access token',
@@ -79,7 +79,7 @@ describe('getOptionsFromCliArgs', () => {
   });
 
   it('should accept aliases (--pr) but only return the full name (--pullNumber) in the result', () => {
-    const configOptions = {} as OptionsFromConfigFiles;
+    const configOptions: Partial<OptionsFromCliArgs> = {};
     const argv = ['--pr', '1337'];
 
     const res = getOptionsFromCliArgs(configOptions, argv);

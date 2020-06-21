@@ -23,6 +23,7 @@ describe('runWithOptions', () => {
       accessToken: 'myAccessToken',
       all: false,
       author: 'sqren',
+      assignees: [],
       branchLabelMapping: undefined,
       dryRun: false,
       editor: 'code',

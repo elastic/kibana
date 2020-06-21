@@ -45,6 +45,19 @@ export function getOptionsFromCliArgs(
       type: 'string',
     })
 
+    .option('assignees', {
+      default: (configOptions.assignees || []) as string[],
+      description: 'Add assignees to the target pull request',
+      alias: ['assignee', 'assign'],
+      type: 'array',
+    })
+
+    .option('autoAssign', {
+      default: (configOptions.autoAssign ?? false) as boolean,
+      description: 'Auto assign the target pull request to yourself',
+      type: 'boolean',
+    })
+
     .option('dryRun', {
       default: false,
       description: 'Perform backport without pushing to Github',
@@ -266,10 +279,13 @@ export function getOptionsFromCliArgs(
     ).argv;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-  const { $0, _, verify, multiple, ...rest } = cliArgs;
+  const { $0, _, verify, multiple, autoAssign, ...rest } = cliArgs;
 
   return {
     ...rest,
+
+    // auto-assign the current user to the target pull request or the assignees specified
+    assignees: autoAssign ? [rest.username as string] : rest.assignees,
 
     // `branchLabelMapping` is not available as cli argument
     branchLabelMapping: configOptions.branchLabelMapping as BranchLabelMapping,

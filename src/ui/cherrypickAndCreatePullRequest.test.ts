@@ -43,6 +43,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         .mockResolvedValue({ stdout: '', stderr: '' });
 
       const options = {
+        assignees: [] as string[],
         githubApiBaseUrlV3: 'https://api.github.com',
         fork: true,
         targetPRLabels: ['backport'],
@@ -142,6 +143,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
   describe('when commit does not have a pull request reference', () => {
     beforeEach(async () => {
       const options = {
+        assignees: [] as string[],
         githubApiBaseUrlV3: 'https://api.github.com',
         fork: true,
         targetPRLabels: ['backport'],
@@ -202,6 +204,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       const execSpy = setupExecSpy();
 
       const options = {
+        assignees: [] as string[],
         fork: true,
         targetPRLabels: ['backport'],
         prTitle: '[{targetBranch}] {commitMessages}',
