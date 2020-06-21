@@ -6,11 +6,10 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import * as i18n from './translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { SiemPageName } from '../../../app/types';
 import { PropertyActions } from '../property_actions';
 import { Case } from '../../containers/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
@@ -26,6 +25,7 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({
   currentExternalIncident,
   disabled = false,
 }) => {
+  const history = useHistory();
   // Delete case
   const {
     handleToggleModal,
@@ -69,7 +69,8 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({
   );
 
   if (isDeleted) {
-    return <Redirect to={`/${SiemPageName.case}`} />;
+    history.push('/');
+    return null;
   }
   return (
     <>

@@ -61,7 +61,7 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
             id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorDescription"
             values={
               Object {
-                "link": <ForwardRef
+                "link": <EuiLink
                   href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
                   target="_blank"
                 >
@@ -70,7 +70,7 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
                     id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           >
