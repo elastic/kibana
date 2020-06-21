@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(body.policy_response.host.id).to.eql(expectedHostId);
-        expect(body.policy_response.endpoint.policy).to.not.be(undefined);
+        expect(body.policy_response.Endpoint.policy).to.not.be(undefined);
       });
 
       it('should return not found if host has no policy response', async () => {

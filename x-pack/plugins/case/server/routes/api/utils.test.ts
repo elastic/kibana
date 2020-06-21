@@ -222,7 +222,12 @@ describe('Utils', () => {
       ];
 
       const res = transformCases(
-        { saved_objects: mockCases, total: mockCases.length, per_page: 10, page: 1 },
+        {
+          saved_objects: mockCases.map((obj) => ({ ...obj, score: 1 })),
+          total: mockCases.length,
+          per_page: 10,
+          page: 1,
+        },
         2,
         2,
         extraCaseData,
@@ -232,7 +237,11 @@ describe('Utils', () => {
         page: 1,
         per_page: 10,
         total: mockCases.length,
-        cases: flattenCaseSavedObjects(mockCases, extraCaseData, '123'),
+        cases: flattenCaseSavedObjects(
+          mockCases.map((obj) => ({ ...obj, score: 1 })),
+          extraCaseData,
+          '123'
+        ),
         count_open_cases: 2,
         count_closed_cases: 2,
       });
@@ -500,7 +509,7 @@ describe('Utils', () => {
   describe('transformComments', () => {
     it('transforms correctly', () => {
       const comments = {
-        saved_objects: mockCaseComments,
+        saved_objects: mockCaseComments.map((obj) => ({ ...obj, score: 1 })),
         total: mockCaseComments.length,
         per_page: 10,
         page: 1,
