@@ -276,6 +276,7 @@ export interface AlertEvent {
     type: string;
   };
   Endpoint: {
+    status: string;
     policy: {
       applied: {
         id: string;
