@@ -31,17 +31,18 @@ describe('NoDataPopover', () => {
     clear: jest.fn(),
   });
 
-  it('should render children if showNoDataPopover is set to false', () => {
-    const child = <span />;
+  it('should hide popover if showNoDataPopover is set to false', () => {
+    const Child = () => <span />;
     const instance = mount(
       <NoDataPopover storage={createMockStorage()} showNoDataPopover={false}>
-        {child}
+        <Child />
       </NoDataPopover>
     );
-    expect(instance.childAt(0).getElement()).toStrictEqual(child);
+    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(false);
+    expect(instance.find(EuiTourStep).find(Child)).toHaveLength(1);
   });
 
-  it('should render children if showNoDataPopover is set to true, but local storage flag is set', () => {
+  it('should hide popover if showNoDataPopover is set to true, but local storage flag is set', () => {
     const child = <span />;
     const storage = createMockStorage();
     storage.get.mockReturnValue(true);
@@ -50,7 +51,7 @@ describe('NoDataPopover', () => {
         {child}
       </NoDataPopover>
     );
-    expect(instance.childAt(0).getElement()).toStrictEqual(child);
+    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(false);
   });
 
   it('should render popover if showNoDataPopover is set to true and local storage flag is not set', () => {
@@ -60,7 +61,7 @@ describe('NoDataPopover', () => {
         {child}
       </NoDataPopover>
     );
-    expect(instance.find(EuiTourStep)).toHaveLength(1);
+    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(true);
   });
 
   it('should hide popover if it is closed', async () => {
@@ -74,7 +75,7 @@ describe('NoDataPopover', () => {
       instance.find(EuiTourStep).prop('closePopover')!();
     });
     instance.setProps({ ...props });
-    expect(instance.find(EuiTourStep)).toHaveLength(0);
+    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(false);
   });
 
   it('should set local storage flag and hide on closing with button', () => {
@@ -89,6 +90,6 @@ describe('NoDataPopover', () => {
     });
     instance.setProps({ ...props });
     expect(props.storage.set).toHaveBeenCalledWith(expect.any(String), true);
-    expect(instance.find(EuiTourStep)).toHaveLength(0);
+    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(false);
   });
 });

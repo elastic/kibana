@@ -45,7 +45,7 @@ export function NoDataPopover({
     }
   }, [noDataPopoverDismissed, showNoDataPopover]);
 
-  return noDataPopoverVisible ? (
+  return (
     <EuiTourStep
       onFinish={() => {}}
       closePopover={() => {
@@ -65,7 +65,7 @@ export function NoDataPopover({
       anchorPosition="downCenter"
       step={1}
       stepsTotal={1}
-      isStepOpen={true}
+      isStepOpen={noDataPopoverVisible}
       subtitle={i18n.translate('data.noDataPopover.title', { defaultMessage: 'Tip' })}
       title=""
       footerAction={
@@ -84,9 +84,13 @@ export function NoDataPopover({
         </EuiButtonEmpty>
       }
     >
-      {children}
+      <div
+        onFocus={() => {
+          setNoDataPopoverVisible(false);
+        }}
+      >
+        {children}
+      </div>
     </EuiTourStep>
-  ) : (
-    children
   );
 }
