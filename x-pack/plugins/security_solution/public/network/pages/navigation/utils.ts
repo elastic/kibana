@@ -7,16 +7,15 @@
 import { GetNetworkRoutePath, NetworkRouteType } from './types';
 
 export const getNetworkRoutePath: GetNetworkRoutePath = (
-  pagePath,
   capabilitiesFetched,
   hasMlUserPermission
 ) => {
   if (capabilitiesFetched && !hasMlUserPermission) {
-    return `${pagePath}/:tabName(${NetworkRouteType.flows}|${NetworkRouteType.dns}|${NetworkRouteType.http}|${NetworkRouteType.tls}|${NetworkRouteType.alerts})`;
+    return `/:tabName(${NetworkRouteType.flows}|${NetworkRouteType.dns}|${NetworkRouteType.http}|${NetworkRouteType.tls}|${NetworkRouteType.alerts})`;
   }
 
   return (
-    `${pagePath}/:tabName(` +
+    `/:tabName(` +
     `${NetworkRouteType.flows}|` +
     `${NetworkRouteType.dns}|` +
     `${NetworkRouteType.anomalies}|` +

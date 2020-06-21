@@ -8,7 +8,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
@@ -41,13 +40,13 @@ const Container = styled.div<IContainerStyleProps>`
   padding-bottom: ${px(units.plus)};
   margin-right: ${(props) => px(props.timelineMargins.right)};
   margin-left: ${(props) => px(props.timelineMargins.left)};
-  border-top: 1px solid ${theme.euiColorLightShade};
-  background-color: ${(props) =>
-    props.isSelected ? theme.euiColorLightestShade : 'initial'};
+  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  background-color: ${({ isSelected, theme }) =>
+    isSelected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;
 
   &:hover {
-    background-color: ${theme.euiColorLightestShade};
+    background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
   }
 `;
 
