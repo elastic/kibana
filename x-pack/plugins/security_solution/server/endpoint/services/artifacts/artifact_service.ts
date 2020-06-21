@@ -30,4 +30,8 @@ export class ArtifactService {
       { id: `${artifact.identifier}-${artifact.sha256}` }
     );
   }
+
+  public async deleteArtifact(id: string) {
+    return this.soClient.delete(ArtifactConstants.SAVED_OBJECT_TYPE, id);
+  }
 }

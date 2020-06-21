@@ -12,6 +12,11 @@ import {
   ManifestSchemaVersion,
 } from '../../schemas/artifacts';
 
+export interface ManifestDiff {
+  type: string;
+  id: string;
+}
+
 export class Manifest {
   private entries: ManifestEntry[];
   private schemaVersion: string;
@@ -60,19 +65,27 @@ export class Manifest {
     return false;
   }
 
-  // Returns true if same
-  public equals(manifest: Manifest): boolean {
-    if (manifest.entries.length !== this.entries.length) {
-      return false;
+  public getEntries(): ManifestEntry[] {
+    return this.entries;
+  }
+
+  // Returns artifacts that are superceded in this manifest.
+  public diff(manifest: Manifest): ManifestDiff[] {
+    const diffs: string[] = [];
+
+    for (const entry of manifest.getEntries()) {
+      if (!this.contains(entry.getArtifact())) {
+        diffs.push({ type: 'delete', id: entry.getDocId() });
+      }
     }
 
     for (const entry of this.entries) {
       if (!manifest.contains(entry.getArtifact())) {
-        return false;
+        diffs.push({ type: 'add', id: entry.getDocId() });
       }
     }
 
-    return true;
+    return diffs;
   }
 
   public toEndpointFormat(): ManifestSchema {
@@ -81,9 +94,11 @@ export class Manifest {
       schemaVersion: 'todo',
       artifacts: {},
     };
+
     this.entries.forEach((entry) => {
       manifestObj.artifacts[entry.getIdentifier()] = entry.getRecord();
     });
+
     return manifestObj as ManifestSchema;
   }
 

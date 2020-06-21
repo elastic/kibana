@@ -78,10 +78,13 @@ export const refreshManifest = async (context: EndpointAppContext, createInitial
     }
   }
 
+  // TODO: can we do diff here?
+
   const artifacts = await buildExceptionListArtifacts(
     ArtifactConstants.SCHEMA_VERSION,
     exceptionListClient
   );
+
   artifacts.forEach(async (artifact: InternalArtifactSchema) => {
     if (!oldManifest.contains(artifact)) {
       try {
@@ -102,13 +105,25 @@ export const refreshManifest = async (context: EndpointAppContext, createInitial
   const newManifest = Manifest.fromArtifacts(artifacts, ManifestConstants.SCHEMA_VERSION);
   newManifest.setVersion(oldManifest.getVersion());
 
-  if (!oldManifest.equals(newManifest)) {
+  const diffs = newManifest.diff(oldManifest);
+  if (diffs && diffs.length > 0) {
     try {
+      logger.debug('Dispatching new manifest');
       await manifestService.dispatchAndUpdate(newManifest);
     } catch (err) {
       logger.error(err);
+      return;
     }
-  }
 
-  // TODO: clean up old artifacts
+    logger.debug('Cleaning up outdated artifacts.');
+    diffs.forEach(async (diff) => {
+      try {
+        if (diff.type === 'delete') {
+          await artifactService.delete(diff.id);
+        }
+      } catch (err) {
+        logger.error(err);
+      }
+    });
+  }
 };
