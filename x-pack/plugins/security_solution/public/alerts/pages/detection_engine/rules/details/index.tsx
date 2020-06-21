@@ -8,7 +8,6 @@
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
-  EuiButton,
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,17 +18,18 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useMemo, useState } from 'react';
-import { Redirect, useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import {
   getEditRuleUrl,
   getRulesUrl,
-  DETECTION_ENGINE_PAGE_NAME,
+  getDetectionEngineUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
@@ -68,6 +68,9 @@ import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
 import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { SecurityPageName } from '../../../../../app/types';
+import { LinkButton } from '../../../../../common/components/links';
+import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
 import { ExceptionListType } from '../../../../../common/components/exceptions/types';
 
@@ -125,6 +128,8 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         };
   const [lastAlerts] = useAlertInfo({ ruleId });
   const mlCapabilities = useMlCapabilities();
+  const history = useHistory();
+  const { formatUrl } = useFormatUrl(SecurityPageName.alerts);
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions =
@@ -238,10 +243,19 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [ruleEnabled, setRuleEnabled]
   );
 
+  const goToEditRule = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      history.push(getEditRuleUrl(ruleId ?? ''));
+    },
+    [history, ruleId]
+  );
+
   const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
 
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    history.replace(getDetectionEngineUrl());
+    return null;
   }
 
   return (
@@ -261,6 +275,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                   backOptions={{
                     href: getRulesUrl(),
                     text: i18n.BACK_TO_RULES,
+                    pageId: SecurityPageName.alerts,
                   }}
                   border
                   subtitle={subTitle}
@@ -304,13 +319,14 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <EuiButton
-                            href={getEditRuleUrl(ruleId ?? '')}
+                          <LinkButton
+                            onClick={goToEditRule}
                             iconType="controlsHorizontal"
                             isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
+                            href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
                           >
                             {ruleI18n.EDIT_RULE_SETTINGS}
-                          </EuiButton>
+                          </LinkButton>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <RuleActionsOverflow
@@ -382,6 +398,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     <EuiSpacer />
                     {ruleId != null && (
                       <AlertsTable
+                        timelineId={TimelineId.alertsRulesDetailsPage}
                         canUserCRUD={canUserCRUD ?? false}
                         defaultFilters={alertDefaultFilters}
                         hasIndexWrite={hasIndexWrite ?? false}
@@ -417,7 +434,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         </WrapperPage>
       )}
 
-      <SpyRoute state={{ ruleName: rule?.name }} />
+      <SpyRoute pageName={SecurityPageName.alerts} state={{ ruleName: rule?.name }} />
     </>
   );
 };

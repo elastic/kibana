@@ -11,6 +11,8 @@ exports[`Ip Details it matches the snapshot 1`] = `
     />
     <NetworkEmptyPage />
   </Memo(WrapperPageComponent)>
-  <withRouter(undefined) />
+  <withRouter(undefined)
+    pageName="network"
+  />
 </div>
 `;

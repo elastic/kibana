@@ -74,7 +74,7 @@ export const FileAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
             defaultMessage: 'Signer',
           }
         ),
-        description: alertData.file.code_signature.subject_name,
+        description: alertData.file.Ext.code_signature[0].subject_name,
       },
       {
         title: i18n.translate(

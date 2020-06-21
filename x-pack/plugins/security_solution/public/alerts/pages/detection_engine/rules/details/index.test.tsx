@@ -15,6 +15,7 @@ import { useUserInfo } from '../../../../components/user_info';
 import { useWithSource } from '../../../../../common/containers/source';
 import { useParams } from 'react-router-dom';
 
+jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../components/user_info');
 jest.mock('../../../../../common/containers/source');
 jest.mock('react-router-dom', () => {
@@ -23,6 +24,7 @@ jest.mock('react-router-dom', () => {
   return {
     ...originalModule,
     useParams: jest.fn(),
+    useHistory: jest.fn(),
   };
 });
 

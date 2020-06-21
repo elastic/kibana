@@ -42,6 +42,7 @@ import { UsersQueryTable } from './users_query_table';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../store';
+import { SecurityPageName } from '../../../app/types';
 export { getBreadcrumbs } from './utils';
 
 const IpOverviewManage = manageQuery(IpOverview);
@@ -269,7 +270,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
         </WrapperPage>
       )}
 
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.network} />
     </div>
   );
 };
