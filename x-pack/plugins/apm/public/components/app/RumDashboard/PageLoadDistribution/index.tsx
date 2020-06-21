@@ -69,7 +69,7 @@ export const PageLoadDistribution = () => {
   };
 
   return (
-    <div>
+    <div data-cy="pageLoadDist">
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -92,6 +92,7 @@ export const PageLoadDistribution = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <BreakdownFilter
+            id={'pageLoad'}
             selectedBreakdowns={breakdowns}
             onBreakdownChange={onBreakdownChange}
           />

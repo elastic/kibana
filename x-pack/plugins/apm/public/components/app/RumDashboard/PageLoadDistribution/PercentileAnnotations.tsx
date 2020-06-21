@@ -45,7 +45,9 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
   };
 
   const PercentileTooltip = ({ details }) => {
-    return <span>Percentile: {details}th</span>;
+    return (
+      <span data-cy="percentileTooltipTitle">Percentile: {details}th</span>
+    );
   };
 
   return (
@@ -59,14 +61,14 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
           style={style}
           hideTooltips={true}
           marker={
-            <PercentileMarker>
+            <PercentileMarker data-cy="percentile-markers">
               <EuiToolTip
                 title={<PercentileTooltip details={annotation.details} />}
                 content={
                   <span>Pages loaded: {annotation.dataValue.toFixed(2)}</span>
                 }
               >
-                <span>{annotation.details}th</span>
+                <>{annotation.details}th</>
               </EuiToolTip>
             </PercentileMarker>
           }

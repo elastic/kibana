@@ -13,11 +13,13 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { BreakdownItem } from '../../../../typings/ui_filters';
 
 interface Props {
+  id: string;
   selectedBreakdowns: BreakdownItem[];
   onBreakdownChange: (values: BreakdownItem[]) => void;
 }
 
 export const BreakdownFilter = ({
+  id,
   selectedBreakdowns,
   onBreakdownChange,
 }: Props) => {
@@ -59,7 +61,7 @@ export const BreakdownFilter = ({
 
   return (
     <BreakdownGroup
-      id={'Breakdown'}
+      id={id}
       items={sItems}
       loading={false}
       onChange={onChange}

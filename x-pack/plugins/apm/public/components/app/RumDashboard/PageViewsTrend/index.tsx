@@ -57,6 +57,7 @@ export const PageViewsTrend = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <BreakdownFilter
+            id={'pageView'}
             selectedBreakdowns={breakdowns}
             onBreakdownChange={onBreakdownChange}
           />

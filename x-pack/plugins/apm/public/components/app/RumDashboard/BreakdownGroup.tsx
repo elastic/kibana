@@ -81,7 +81,7 @@ export const BreakdownGroup = ({
           setIsOpen(false);
           onChange(getSelItems());
         }}
-        data-test-subj={`filter-popover_${id}`}
+        data-cy={`breakdown-popover_${id}`}
         id={id}
         isOpen={isOpen}
         ownFocus={true}
@@ -101,7 +101,7 @@ export const BreakdownGroup = ({
             getItemsToDisplay().map(({ name, count, selected }) => (
               <EuiFilterSelectItem
                 checked={!!selected ? 'on' : undefined}
-                data-test-subj={`filter-breakdown-item_${name}`}
+                data-cy={`filter-breakdown-item_${name}`}
                 key={name + count}
                 onClick={() =>
                   setItems((prevItems) =>

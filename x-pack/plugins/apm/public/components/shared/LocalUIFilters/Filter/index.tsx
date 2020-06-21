@@ -141,6 +141,7 @@ const Filter = ({
                 </FlexItem>
                 <FlexItem grow={false}>
                   <ApplyButton
+                    data-cy="applyFilter"
                     color="primary"
                     fill={true}
                     onClick={() => {
