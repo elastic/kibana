@@ -5,8 +5,8 @@
  */
 
 import lzma from 'lzma-native';
-import { FoundExceptionListItemSchema } from '../../../../lists/common/schemas/response/found_exception_list_item_schema';
-import { ExceptionListClient } from '../../../../lists/server';
+import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
+import { ExceptionListClient } from '../../../../../lists/server';
 
 export interface EndpointExceptionList {
   exceptions_list: ExceptionsList[];

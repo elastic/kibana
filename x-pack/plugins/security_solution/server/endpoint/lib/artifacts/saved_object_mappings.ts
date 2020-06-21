@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsType } from '../../../../../../src/core/server';
+import { SavedObjectsType } from '../../../../../../../src/core/server';
 
-export const exceptionsArtifactSavedObjectType = 'securitySolution:endpoint:exceptions-artifact';
-export const manifestSavedObjectType = 'securitySolution:endpoint:artifact-manifest';
+import { ArtifactConstants, ManifestConstants } from './common';
+
+export const exceptionsArtifactSavedObjectType = ArtifactConstants.SAVED_OBJECT_TYPE;
+export const manifestSavedObjectType = ManifestConstants.SAVED_OBJECT_TYPE;
 
 export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
@@ -33,12 +35,8 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
   },
 };
 
-export const manifestSavedObjectMappings: SavedObjectType['mappings'] = {
+export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
-    // manifest sequence number
-    manifestVersion: {
-      type: 'long',
-    },
     // manifest schema version
     schemaVersion: {
       type: 'keyword',
@@ -48,7 +46,7 @@ export const manifestSavedObjectMappings: SavedObjectType['mappings'] = {
       type: 'keyword',
     },
   },
-}
+};
 
 export const exceptionsArtifactType: SavedObjectsType = {
   name: exceptionsArtifactSavedObjectType,

@@ -4,25 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHash } from 'crypto';
-import {
-  CoreSetup,
-  Logger,
-  SavedObjectsClient,
-  SavedObjectsPluginStart,
-} from '../../../../../../src/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../plugins/task_manager/server';
-import { ListPluginSetup } from '../../../../lists/server';
-import { ConfigType } from '../../config';
+} from '../../../../../../plugins/task_manager/server';
 import { EndpointAppContext } from '../../types';
 import { ExceptionsCache } from './cache';
-import { GetFullEndpointExceptionList, CompressExceptionList } from './lists';
-import { ArtifactConstants, ManifestService } from './manifest';
-import { ArtifactSoSchema } from './schemas';
+import { refreshManifest } from './refresh';
 
 const PackagerTaskConstants = {
   TIMEOUT: '1m',
@@ -41,7 +30,6 @@ interface PackagerTaskRunner {
 interface PackagerTaskContext {
   endpointAppContext: EndpointAppContext;
   taskManager: TaskManagerSetupContract;
-  lists: ListPluginSetup;
   cache: ExceptionsCache;
 }
 
@@ -56,11 +44,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
 
   const logger = context.endpointAppContext.logFactory.get(getTaskId());
 
-  const run = async (taskId: int, state: Record<string, string>): Record<string, string> => {
-
-    const artifactService = context.endpointAppContext.service.getArtifactService();
-    const manifestService = context.endpointAppContext.service.getManifestService();
-
+  const run = async (taskId: string) => {
     // Check that this task is current
     if (taskId !== getTaskId()) {
       // old task, return
@@ -68,52 +52,14 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       return;
     }
 
-    // TODO
-    // 1. Pull manifest, note version
-    // 2. No manifest, do nothing (should have been created on policy create)
-    // 3. If manifest, pull all associated artifacts (if not already in memory)
-    // 4. Construct new artifacts from current exception list items
-    // 5. Any differences? Update manifest, perform conflict check.
-    // 6. Has this manifest been dispatched? If not, dispatch.
-    let oldManifest: Manifest;
-
     try {
-      oldManifest = await manifestService.getManifest();
-    catch (err) {
+      // await refreshManifest(context.endpointAppContext, false);
+      // TODO: change this to 'false' when we hook up the ingestManager callback
+      await refreshManifest(context.endpointAppContext, true);
+    } catch (err) {
       logger.debug('Manifest not created yet, nothing to do.');
-      return;
-    }
-
-    let artifacts = await artifactService.buildExceptionListArtifacts();
-    for (const artifact in artifacts) {
-      if (!oldManifest.contains(artifact)) {
-        try {
-          await artifactService.upsertArtifact(
-            ArtifactConstants.SAVED_OBJECT_TYPE,
-            artifact,
-            { id: artifact.id, overwrite: true },
-            );
-        } catch (err) {
-          // Error updating... try again later
-          logger.error(err);
-          return;
-        }
-      }
-    }
-
-    artifacts = await artifactService.buildExceptionListArtifacts();
-
-    const newManifest = buildNewManifest(artifacts);
-    if (oldManifest.diff(newManifest)) {
-      try {
-        await manifestService.dispatchAndUpdate(newManifest);
-      } catch(err) {
-        logger.error(err);
-        return;
-      }
     }
   };
-
 
   const getTaskRunner = (runnerContext: PackagerTaskRunnerContext): PackagerTaskRunner => {
     return {
@@ -144,13 +90,14 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         return {
           run: async () => {
-            await run(taskInstance.id, taskInstance.state);
+            await run(taskInstance.id);
 
             const nextRun = new Date();
-            nextRun.setSeconds(nextRun.getSeconds() + context.endpointAppContext.config.packagerTaskInterval);
+            const config = await context.endpointAppContext.config();
+            nextRun.setSeconds(nextRun.getSeconds() + config.packagerTaskInterval);
 
             return {
-              state,
+              state: {},
               runAt: nextRun,
             };
           },

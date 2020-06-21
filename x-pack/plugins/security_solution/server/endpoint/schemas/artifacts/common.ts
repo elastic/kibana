@@ -10,7 +10,7 @@ export const identifier = t.string;
 
 export const body = t.string;
 
-export const created = t.string; // TODO: Make this into an ISO Date string check
+export const created = t.number; // TODO: Make this into an ISO Date string check
 
 export const encoding = t.keyof({
   xz: null,
@@ -31,3 +31,5 @@ export const sha256 = t.string;
 export const size = t.number;
 
 export const url = t.string;
+
+export type ManifestSchemaVersion = t.TypeOf<typeof manifestSchemaVersion>;

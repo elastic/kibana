@@ -20,7 +20,7 @@ import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
-import { ListPluginSetup } from '../../lists/server';
+import { ExceptionListClient, ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -34,7 +34,7 @@ import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
-import { PackagerTask, setupPackagerTask, ExceptionsCache } from './endpoint/artifacts';
+import { PackagerTask, setupPackagerTask, ExceptionsCache } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
@@ -44,10 +44,10 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerAlertRoutes } from './endpoint/alerts/routes';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
-import { ArtifactService } from './endpoint/artifact_services';
+import { ArtifactService, ManifestService } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { downloadEndpointExceptionListRoute } from './endpoint/routes/artifacts/download_endpoint_exception_list';
+import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -77,10 +77,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
-  private readonly artifactService = new ArtifactService();
 
-  private lists: ListPluginSetup; // TODO: can we create ListPluginStart?
-  private exceptionsPackagerTask: PackagerTask;
+  private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
+  private exceptionsPackagerTask: PackagerTask | undefined;
   private exceptionsCache: ExceptionsCache;
 
   constructor(context: PluginInitializerContext) {
@@ -137,7 +136,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerResolverRoutes(router, endpointContext);
     registerAlertRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
-    downloadEndpointExceptionListRoute(router, this.exceptionsCache);
+    registerDownloadExceptionListRoute(router, this.exceptionsCache);
 
     plugins.features.registerFeature({
       id: SERVER_APP_ID,
@@ -231,7 +230,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.exceptionsPackagerTask = setupPackagerTask({
         endpointAppContext: endpointContext,
         taskManager: plugins.taskManager,
-        lists: plugins.lists,
         cache: this.exceptionsCache,
       });
     }
@@ -244,18 +242,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const artifactService = new ArtifactService({ savedObjectsClient });
 
-    let artifactService: ArtifactService;
-
+    let exceptionListClient: ExceptionListClient | undefined;
     if (this.lists) {
-      const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
-      artifactService = new ArtifactService(savedObjectsClient, exceptionListClient);
+      exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
     }
 
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager.agentService,
-      artifactService: artifactService,
-      manifestService: new ManifestService(savedObjectsClient),
+      artifactService,
+      exceptionListClient,
+      manifestService: new ManifestService({
+        artifactService,
+        savedObjectsClient,
+      }),
     });
 
     if (this.exceptionsPackagerTask) {
@@ -276,7 +277,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public stop() {
     this.logger.debug('Stopping plugin');
-    this.artifactService.stop();
     this.endpointAppContextService.stop();
   }
 }

@@ -5,11 +5,11 @@
  */
 
 import * as t from 'io-ts';
-import { artifactName, sha256 } from '../common';
+import { identifier, sha256 } from '../common';
 
 export const downloadArtifactRequestParamsSchema = t.exact(
   t.type({
-    artifactName,
+    identifier,
     sha256,
   })
 );

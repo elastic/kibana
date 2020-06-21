@@ -5,8 +5,13 @@
  */
 
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+
 import { xpackMocks } from '../../../../mocks';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
+
+import { ExceptionListClient } from '../../../lists/server';
+
+import { ArtifactService, ManifestService } from './services';
 
 /**
  * Creates a mock AgentService
@@ -14,6 +19,33 @@ import { AgentService, IngestManagerStartContract } from '../../../ingest_manage
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
+  };
+};
+
+/**
+ * Creates a mock ArtifactService
+ */
+export const createMockArtifactService = (): jest.Mocked<ArtifactService> => {
+  return {
+    // TODO
+  };
+};
+
+/**
+ * Creates a mock ManifestService
+ */
+export const createMockManifestService = (): jest.Mocked<ManifestService> => {
+  return {
+    // TODO
+  };
+};
+
+/**
+ * Creates a mock ExceptionListClient
+ */
+export const createMockExceptionListClient = (): jest.Mocked<ExceptionListClient> => {
+  return {
+    // TODO
   };
 };
 

@@ -20,10 +20,10 @@ import {
   httpServiceMock,
   httpServerMock,
 } from 'src/core/server/mocks';
-import { ExceptionsCache } from '../../artifacts/cache';
-import { CompressExceptionList } from '../../artifacts/lists';
-import { ArtifactConstants } from '../../artifacts/manifest';
-import { downloadEndpointExceptionListRoute } from './download_endpoint_exception_list';
+import { ExceptionsCache } from '../../lib/artifacts/cache';
+import { CompressExceptionList } from '../../lib/artifacts/lists';
+import { ArtifactConstants } from '../../lib/artifacts';
+import { registerDownloadExceptionListRoute } from './download_exception_list';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
 const expectedEndpointExceptions = {
@@ -65,7 +65,7 @@ describe('test alerts route', () => {
     routerMock = httpServiceMock.createRouter();
     cache = new ExceptionsCache(10000); // TODO
 
-    downloadEndpointExceptionListRoute(routerMock, cache);
+    registerDownloadExceptionListRoute(routerMock, cache);
   });
 
   it('should serve the compressed artifact to download', async () => {

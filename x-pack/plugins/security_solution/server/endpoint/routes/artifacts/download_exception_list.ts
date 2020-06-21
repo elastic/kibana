@@ -4,27 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, KibanaResponse } from 'src/core/server';
-import { validate } from '../../../../../common/validate';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { ExceptionsCache } from '../../artifacts/cache';
-import { ArtifactConstants } from '../../artifacts/manifest';
+import { IRouter } from 'src/core/server';
+import { validate } from '../../../../common/validate';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { ArtifactConstants, ExceptionsCache } from '../../lib/artifacts';
 import {
-  ArtifactDownloadSchema,
   DownloadArtifactRequestParamsSchema,
   downloadArtifactRequestParamsSchema,
   downloadArtifactResponseSchema,
-} from '../../artifacts/schemas';
+  InternalArtifactSchema,
+} from '../../schemas/artifacts';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 
 /**
  * Registers the exception list route to enable sensors to download a compressed  allowlist
  */
-export function downloadEndpointExceptionListRoute(router: IRouter, cache: ExceptionsCache) {
+export function registerDownloadExceptionListRoute(router: IRouter, cache: ExceptionsCache) {
   router.get(
     {
-      path: `${allowlistBaseRoute}/download/{artifactName}/{sha256}`,
+      path: `${allowlistBaseRoute}/download/{identifier}/{sha256}`,
       validate: {
         params: buildRouteValidation<
           typeof downloadArtifactRequestParamsSchema,
@@ -39,16 +38,16 @@ export function downloadEndpointExceptionListRoute(router: IRouter, cache: Excep
       // TODO: authenticate api key
       // https://github.com/elastic/kibana/issues/69329
 
-      const validateResponse = (resp: object): KibanaResponse => {
+      const validateResponse = (resp: object): object => {
         const [validated, errors] = validate(resp, downloadArtifactResponseSchema);
         if (errors != null) {
           return res.internalError({ body: errors });
         } else {
-          return res.ok(validated);
+          return res.ok({ body: validated ?? {} });
         }
       };
 
-      const cacheKey = `${req.params.artifactName}-${req.params.sha256}`;
+      const cacheKey = `${req.params.identifier}-${req.params.sha256}`;
       const cacheResp = cache.get(cacheKey);
 
       if (cacheResp) {
@@ -57,23 +56,24 @@ export function downloadEndpointExceptionListRoute(router: IRouter, cache: Excep
           body: Buffer.from(cacheResp, 'binary'),
           headers: {
             'content-encoding': 'xz',
-            'content-disposition': `attachment; filename=${req.params.artifactName}.xz`,
+            'content-disposition': `attachment; filename=${req.params.identifier}.xz`,
           },
         };
         return validateResponse(downloadResponse);
       } else {
         // CACHE MISS
         return soClient
-          .get<ArtifactDownloadSchema>(
+          .get<InternalArtifactSchema>(
             ArtifactConstants.SAVED_OBJECT_TYPE,
-            `${req.params.artifactName}`
+            `${req.params.identifier}`
           )
           .then((artifact) => {
             const outBuffer = Buffer.from(artifact.attributes.body, 'binary');
 
+            // TODO: probably don't need this anymore
             if (artifact.attributes.sha256 !== req.params.sha256) {
               return res.notFound({
-                body: `No artifact matching sha256: ${req.params.sha256} for type ${req.params.artifactName}`,
+                body: `No artifact matching sha256: ${req.params.sha256} for type ${req.params.identifier}`,
               });
             }
 
@@ -84,7 +84,7 @@ export function downloadEndpointExceptionListRoute(router: IRouter, cache: Excep
               body: outBuffer,
               headers: {
                 'content-encoding': 'xz',
-                'content-disposition': `attachment; filename=${artifact.attributes.name}.xz`,
+                'content-disposition': `attachment; filename=${artifact.attributes.identifier}.xz`,
               },
             };
             return validateResponse(downloadResponse);

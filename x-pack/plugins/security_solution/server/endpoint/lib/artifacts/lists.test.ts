@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExceptionListClient } from '../../../../lists/server/services/exception_lists/exception_list_client';
-import { listMock } from '../../../../lists/server/mocks';
-import { getFoundExceptionListItemSchemaMock } from '../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { ExceptionListClient } from '../../../../../lists/server';
+import { listMock } from '../../../../../lists/server/mocks';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { GetFullEndpointExceptionList } from './lists';
 
 describe('buildEventTypeSignal', () => {

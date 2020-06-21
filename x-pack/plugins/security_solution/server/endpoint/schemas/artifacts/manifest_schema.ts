@@ -5,21 +5,21 @@
  */
 
 import * as t from 'io-ts';
-import { artifactName, manifestSchemaVersion, manifestVersion, sha256, size, url } from './common';
-
-export const manifestSchema = t.exact(
-  t.type({
-    manifestVersion,
-    manifestSchemaVersion,
-    artifacts: t.record(artifactName, manifestEntrySchema),
-  })
-);
+import { identifier, manifestSchemaVersion, manifestVersion, sha256, size, url } from './common';
 
 export const manifestEntrySchema = t.exact(
   t.type({
     url,
     sha256,
     size,
+  })
+);
+
+export const manifestSchema = t.exact(
+  t.type({
+    manifestVersion,
+    schemaVersion: manifestSchemaVersion,
+    artifacts: t.record(identifier, manifestEntrySchema),
   })
 );
 

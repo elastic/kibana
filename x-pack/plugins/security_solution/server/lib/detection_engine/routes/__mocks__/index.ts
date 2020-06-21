@@ -25,4 +25,5 @@ export const createMockConfig = () => ({
     from: 'now-15m',
     to: 'now',
   },
+  packagerTaskInterval: 60,
 });
