@@ -27,8 +27,7 @@ export class ManifestService {
     return `endpoint-manifest-${schemaVersion}`;
   }
 
-  // public async getManifest(schemaVersion: string): Promise<Manifest> {
-  public async getManifest(schemaVersion: string): Manifest {
+  public async getManifest(schemaVersion: string): Promise<Manifest> {
     const manifestSo = await this.soClient.get<InternalManifestSchema>(
       ManifestConstants.SAVED_OBJECT_TYPE,
       this.getManifestId(schemaVersion)

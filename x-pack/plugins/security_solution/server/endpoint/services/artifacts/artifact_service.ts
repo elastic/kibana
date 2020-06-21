@@ -20,7 +20,6 @@ export class ArtifactService {
   }
 
   public async getArtifact(id: string) {
-    // TODO: add sha256 to id?
     return this.soClient.get<InternalArtifactSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id);
   }
 
