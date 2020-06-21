@@ -25,7 +25,7 @@ describe('ios_date_string', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "1582677283067" supplied to ""',
+      'Invalid value "1582677283067" supplied to "IsoDateString"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -35,7 +35,9 @@ describe('ios_date_string', () => {
     const decoded = IsoDateString.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "2000" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "2000" supplied to "IsoDateString"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -45,7 +47,7 @@ describe('ios_date_string', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "Wed, 26 Feb 2020 00:36:20 GMT" supplied to ""',
+      'Invalid value "Wed, 26 Feb 2020 00:36:20 GMT" supplied to "IsoDateString"',
     ]);
     expect(message.schema).toEqual({});
   });
