@@ -37,16 +37,6 @@ jest.mock('./index_pattern', () => {
   };
 });
 
-jest.mock('./index_patterns_api_client', () => {
-  class IndexPatternsApiClient {
-    getFieldsForWildcard = async () => ({});
-  }
-
-  return {
-    IndexPatternsApiClient,
-  };
-});
-
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
   let savedObjectsClient: SavedObjectsClientContract;
@@ -61,7 +51,10 @@ describe('IndexPatterns', () => {
     );
 
     indexPatterns = new IndexPatternsService({
-      uiSettings: {} as UiSettingsCommon,
+      uiSettings: ({
+        get: () => Promise.resolve(false),
+        getAll: () => {},
+      } as any) as UiSettingsCommon,
       savedObjectsClient,
       apiClient: {} as IIndexPatternsApiClient,
       fieldFormats,
