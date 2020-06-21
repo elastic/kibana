@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { navTabs } from '../../../../app/home/home_navigations';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState } from '../../../utils/route/types';
@@ -16,8 +16,22 @@ import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from './';
 import { TabNavigationProps } from './types';
 
+jest.mock('../../../lib/kibana');
+jest.mock('../../link_to');
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      push: jest.fn(),
+    }),
+  };
+});
+
 describe('Tab Navigation', () => {
-  const pageName = SiemPageName.hosts;
+  const pageName = SecurityPageName.hosts;
   const hostName = 'siem-window';
   const tabName = HostsTableType.authentications;
   const pathName = `/${pageName}/${hostName}/${tabName}`;
@@ -76,13 +90,6 @@ describe('Tab Navigation', () => {
       wrapper.update();
       expect(networkTab().prop('isSelected')).toBeTruthy();
     });
-    test('it carries the url state in the link', () => {
-      const wrapper = mount(<TabNavigationComponent {...mockProps} />);
-      const firstTab = wrapper.find('EuiTab[data-test-subj="navigation-network"]');
-      expect(firstTab.props().href).toBe(
-        "#/link-to/network?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
-      );
-    });
   });
 
   describe('Table Navigation', () => {
@@ -137,8 +144,8 @@ describe('Tab Navigation', () => {
         wrapper.find(`[data-test-subj="navigation-${HostsTableType.events}"]`).first();
       expect(tableNavigationTab().prop('isSelected')).toBeFalsy();
       wrapper.setProps({
-        pageName: SiemPageName.hosts,
-        pathName: `/${SiemPageName.hosts}`,
+        pageName: SecurityPageName.hosts,
+        pathName: `/${SecurityPageName.hosts}`,
         tabName: HostsTableType.events,
       });
       wrapper.update();
@@ -149,9 +156,7 @@ describe('Tab Navigation', () => {
       const firstTab = wrapper.find(
         `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
       );
-      expect(firstTab.props().href).toBe(
-        `#/${pageName}/${hostName}/${HostsTableType.authentications}?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`
-      );
+      expect(firstTab.props().href).toBe('/siem-window/authentications');
     });
   });
 });

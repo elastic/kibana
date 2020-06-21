@@ -10,7 +10,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 

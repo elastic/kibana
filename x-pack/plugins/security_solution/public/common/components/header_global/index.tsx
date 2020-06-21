@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { pickBy } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
-import { useLocation } from 'react-router-dom';
 import { gutterTimeline } from '../../lib/helpers';
 import { navTabs } from '../../../app/home/home_navigations';
-import { SiemPageName } from '../../../app/types';
-import { getOverviewUrl } from '../link_to';
+import { SecurityPageName } from '../../../app/types';
+import { getAppOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
 import * as i18n from './translations';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { ADD_DATA_PATH } from '../../../../common/constants';
+import { useGetUrlSearch } from '../navigation/use_get_url_search';
+import { useKibana } from '../../lib/kibana';
+import { APP_ID, ADD_DATA_PATH, APP_ALERTS_PATH } from '../../../../common/constants';
+import { LinkAnchor } from '../links';
 
 const Wrapper = styled.header`
   ${({ theme }) => css`
@@ -39,7 +41,15 @@ interface HeaderGlobalProps {
   hideDetectionEngine?: boolean;
 }
 export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = false }) => {
-  const currentLocation = useLocation();
+  const search = useGetUrlSearch(navTabs.overview);
+  const { navigateToApp } = useKibana().services.application;
+  const goToOverview = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { path: search });
+    },
+    [navigateToApp, search]
+  );
 
   return (
     <Wrapper className="siemHeaderGlobal">
@@ -50,9 +60,9 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
               <FlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <FlexItem grow={false}>
-                    <EuiLink href={getOverviewUrl()}>
+                    <LinkAnchor onClick={goToOverview} href={getAppOverviewUrl(search)}>
                       <EuiIcon aria-label={i18n.SIEM} type="securityAnalyticsApp" size="l" />
-                    </EuiLink>
+                    </LinkAnchor>
                   </FlexItem>
 
                   <FlexItem component="nav">
@@ -61,14 +71,14 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
                         display="condensed"
                         navTabs={
                           hideDetectionEngine
-                            ? pickBy((_, key) => key !== SiemPageName.detections, navTabs)
+                            ? pickBy((_, key) => key !== SecurityPageName.alerts, navTabs)
                             : navTabs
                         }
                       />
                     ) : (
                       <SiemNavigation
                         display="condensed"
-                        navTabs={pickBy((_, key) => key === SiemPageName.overview, navTabs)}
+                        navTabs={pickBy((_, key) => key === SecurityPageName.overview, navTabs)}
                       />
                     )}
                   </FlexItem>
@@ -78,7 +88,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
               <FlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
                   {indicesExistOrDataTemporarilyUnavailable(indicesExist) &&
-                    currentLocation.pathname.includes(`/${SiemPageName.detections}/`) && (
+                    window.location.pathname.includes(APP_ALERTS_PATH) && (
                       <FlexItem grow={false}>
                         <MlPopover />
                       </FlexItem>
