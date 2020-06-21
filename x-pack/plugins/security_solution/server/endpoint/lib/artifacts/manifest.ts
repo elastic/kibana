@@ -69,6 +69,14 @@ export class Manifest {
     return this.entries;
   }
 
+  public getArtifact(id: string): InternalArtifactSchema {
+    for (const entry of this.entries) {
+      if (entry.getDocId() === id) {
+        return entry.getArtifact();
+      }
+    }
+  }
+
   // Returns artifacts that are superceded in this manifest.
   public diff(manifest: Manifest): ManifestDiff[] {
     const diffs: string[] = [];

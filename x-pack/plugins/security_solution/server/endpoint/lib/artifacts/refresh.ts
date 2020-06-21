@@ -64,6 +64,7 @@ export const refreshManifest = async (context: EndpointAppContext, createInitial
 
   let oldManifest: Manifest;
 
+  // Get the last-dispatched manifest
   try {
     oldManifest = await manifestService.getManifest(ManifestConstants.SCHEMA_VERSION);
   } catch (err) {
@@ -78,15 +79,23 @@ export const refreshManifest = async (context: EndpointAppContext, createInitial
     }
   }
 
-  // TODO: can we do diff here?
-
+  // Build new exception list artifacts
   const artifacts = await buildExceptionListArtifacts(
     ArtifactConstants.SCHEMA_VERSION,
     exceptionListClient
   );
 
-  artifacts.forEach(async (artifact: InternalArtifactSchema) => {
-    if (!oldManifest.contains(artifact)) {
+  // Build new manifest
+  const newManifest = Manifest.fromArtifacts(artifacts, ManifestConstants.SCHEMA_VERSION);
+  newManifest.setVersion(oldManifest.getVersion());
+
+  // Get diffs
+  const diffs = newManifest.diff(oldManifest);
+
+  // Create new artifacts
+  diffs.forEach(async (diff) => {
+    if (diff.type === 'add') {
+      const artifact = newManifest.getArtifact(diff.id);
       try {
         await artifactService.createArtifact(artifact);
       } catch (err) {
@@ -102,11 +111,8 @@ export const refreshManifest = async (context: EndpointAppContext, createInitial
     }
   });
 
-  const newManifest = Manifest.fromArtifacts(artifacts, ManifestConstants.SCHEMA_VERSION);
-  newManifest.setVersion(oldManifest.getVersion());
-
-  const diffs = newManifest.diff(oldManifest);
-  if (diffs && diffs.length > 0) {
+  // Dispatch manifest if new
+  if (diffs.length > 0) {
     try {
       logger.debug('Dispatching new manifest');
       await manifestService.dispatchAndUpdate(newManifest);
@@ -114,16 +120,16 @@ export const refreshManifest = async (context: EndpointAppContext, createInitial
       logger.error(err);
       return;
     }
-
-    logger.debug('Cleaning up outdated artifacts.');
-    diffs.forEach(async (diff) => {
-      try {
-        if (diff.type === 'delete') {
-          await artifactService.delete(diff.id);
-        }
-      } catch (err) {
-        logger.error(err);
-      }
-    });
   }
+
+  // Clean up old artifacts
+  diffs.forEach(async (diff) => {
+    try {
+      if (diff.type === 'delete') {
+        await artifactService.delete(diff.id);
+      }
+    } catch (err) {
+      logger.error(err);
+    }
+  });
 };
