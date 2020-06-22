@@ -40,7 +40,9 @@ describe('services queries', () => {
   it('fetches the service items', async () => {
     mock = await inspectSearchParams((setup) => getServicesItems(setup));
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 
   it('fetches the legacy data status', async () => {
