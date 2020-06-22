@@ -54,7 +54,7 @@ describe('yargs', () => {
       "You must specify a target branch
 
       You can specify it via either:
-       - Config file (recommended): \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/434a28b431bb58c9a014d4489a95f561e6bb2769/docs/configuration.md#project-config-backportrcjson
+       - Config file (recommended): \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/e119d71d6dc03cd061f6ad9b9a8b1cd995f98961/docs/configuration.md#project-config-backportrcjson
        - CLI: \\"--branch 6.1\\"
       "
     `);
@@ -68,7 +68,7 @@ describe('yargs', () => {
       "You must specify a valid Github repository
 
       You can specify it via either:
-       - Config file (recommended): \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/434a28b431bb58c9a014d4489a95f561e6bb2769/docs/configuration.md#project-config-backportrcjson
+       - Config file (recommended): \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/e119d71d6dc03cd061f6ad9b9a8b1cd995f98961/docs/configuration.md#project-config-backportrcjson
        - CLI: \\"--upstream elastic/kibana\\"
       "
     `);
