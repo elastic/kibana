@@ -108,11 +108,8 @@ export const getExceptionOperatorFromSelect = (operatorSelection: string): Opera
 };
 
 export const getOperatorType = (entry: ExceptionItemEntry): OperatorType => {
-  const operatorTypes: string[] = Object.keys(entry).filter((t) =>
-    Object.values<string>(OperatorType).includes(t)
-  );
 
-  switch (operatorTypes[0]) {
+  switch (entry.type) {
     case 'match':
       return OperatorType.PHRASE;
     case 'match_any':
@@ -130,7 +127,7 @@ export const getEntryValue = (entry: ExceptionItemEntry): string | string[] => {
   if (operatorType === OperatorType.EXISTS) {
     return '';
   } else {
-    return entry[operatorType] ?? '';
+    return entry.value ?? '';
   }
 };
 
@@ -182,13 +179,15 @@ export const getUpdatedEntryFromOperator = ({
       return {
         field: entry.field,
         operator,
-        match: '',
+        type: 'match',
+        value: '',
       };
     case OperatorType.PHRASES:
       return {
         field: entry.field,
         operator,
-        match_any: [],
+        type: 'match_any',
+        value: [],
       };
     case OperatorType.LIST:
       return {
@@ -222,7 +221,8 @@ export const createExceptionItem = ({
       {
         field: '',
         operator: 'included',
-        match: '',
+        type: 'match',
+        value: '',
       },
     ],
   };
