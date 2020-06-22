@@ -270,7 +270,6 @@ export default class BaseOptimizer {
               name: 'commons',
               chunks: (chunk) =>
                 chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
-              minChunks: 2,
               reuseExistingChunk: true,
             },
             light_theme: {

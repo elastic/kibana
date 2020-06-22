@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from 'kibana/public';
 import { KibanaLegacyPlugin } from './plugin';
 
