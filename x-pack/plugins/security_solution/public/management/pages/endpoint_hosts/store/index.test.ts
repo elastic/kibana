@@ -46,6 +46,7 @@ describe('HostList store concerns', () => {
         policyResponseLoading: false,
         policyResponseError: undefined,
         location: undefined,
+        policyItems: [],
       });
     });
 
