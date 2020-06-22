@@ -14,13 +14,18 @@ import {
   downloadArtifactResponseSchema,
   InternalArtifactSchema,
 } from '../../schemas/artifacts';
+import { EndpointAppContext } from '../../types';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 
 /**
  * Registers the exception list route to enable sensors to download a compressed  allowlist
  */
-export function registerDownloadExceptionListRoute(router: IRouter, cache: ExceptionsCache) {
+export function registerDownloadExceptionListRoute(
+  router: IRouter,
+  endpointContext: EndpointAppContext,
+  cache: ExceptionsCache
+) {
   router.get(
     {
       path: `${allowlistBaseRoute}/download/{identifier}/{sha256}`,
@@ -34,6 +39,7 @@ export function registerDownloadExceptionListRoute(router: IRouter, cache: Excep
     },
     async (context, req, res) => {
       const soClient = context.core.savedObjects.client;
+      const logger = endpointContext.logFactory.get('download_exception_list');
 
       // TODO: authenticate api key
       // https://github.com/elastic/kibana/issues/69329
@@ -43,15 +49,16 @@ export function registerDownloadExceptionListRoute(router: IRouter, cache: Excep
         if (errors != null) {
           return res.internalError({ body: errors });
         } else {
-          return res.ok({ body: validated ?? {} });
+          return res.ok(validated);
         }
       };
 
-      const cacheKey = `${req.params.identifier}-${req.params.sha256}`;
-      const cacheResp = cache.get(cacheKey);
+      const id = `${req.params.identifier}-${req.params.sha256}`;
+      const cacheResp = cache.get(id);
 
       if (cacheResp) {
         // CACHE HIT
+        logger.debug(`Cache HIT artifact ${id}`);
         const downloadResponse = {
           body: Buffer.from(cacheResp, 'binary'),
           headers: {
@@ -62,23 +69,12 @@ export function registerDownloadExceptionListRoute(router: IRouter, cache: Excep
         return validateResponse(downloadResponse);
       } else {
         // CACHE MISS
+        logger.debug(`Cache MISS artifact ${id}`);
         return soClient
-          .get<InternalArtifactSchema>(
-            ArtifactConstants.SAVED_OBJECT_TYPE,
-            `${req.params.identifier}`
-          )
+          .get<InternalArtifactSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
           .then((artifact) => {
             const outBuffer = Buffer.from(artifact.attributes.body, 'binary');
-
-            // TODO: probably don't need this anymore
-            if (artifact.attributes.sha256 !== req.params.sha256) {
-              return res.notFound({
-                body: `No artifact matching sha256: ${req.params.sha256} for type ${req.params.identifier}`,
-              });
-            }
-
-            // Hashes match... populate cache
-            cache.set(cacheKey, artifact.attributes.body);
+            cache.set(id, artifact.attributes.body);
 
             const downloadResponse = {
               body: outBuffer,

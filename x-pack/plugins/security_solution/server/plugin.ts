@@ -136,7 +136,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerResolverRoutes(router, endpointContext);
     registerAlertRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
-    registerDownloadExceptionListRoute(router, this.exceptionsCache);
+    registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
 
     plugins.features.registerFeature({
       id: SERVER_APP_ID,
