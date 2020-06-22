@@ -196,7 +196,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                 >
                   <EuiEmptyPrompt
                     actions={
-                      <ForwardRef>
+                      <EuiFlexGroup>
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
@@ -222,7 +222,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                             />
                           </EuiButton>
                         </EuiFlexItem>
-                      </ForwardRef>
+                      </EuiFlexGroup>
                     }
                     body={
                       <React.Fragment>
@@ -633,7 +633,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                 >
                   <EuiEmptyPrompt
                     actions={
-                      <ForwardRef>
+                      <EuiFlexGroup>
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
@@ -659,7 +659,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                             />
                           </EuiButton>
                         </EuiFlexItem>
-                      </ForwardRef>
+                      </EuiFlexGroup>
                     }
                     body={
                       <React.Fragment>
@@ -1075,7 +1075,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                 >
                   <EuiEmptyPrompt
                     actions={
-                      <ForwardRef>
+                      <EuiFlexGroup>
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
@@ -1101,7 +1101,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                             />
                           </EuiButton>
                         </EuiFlexItem>
-                      </ForwardRef>
+                      </EuiFlexGroup>
                     }
                     body={
                       <React.Fragment>

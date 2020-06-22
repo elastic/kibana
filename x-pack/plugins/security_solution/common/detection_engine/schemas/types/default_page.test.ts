@@ -33,7 +33,9 @@ describe('default_page', () => {
     const decoded = DefaultPage.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "NaN" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "NaN" supplied to "DefaultPerPage"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -42,7 +44,9 @@ describe('default_page', () => {
     const decoded = DefaultPage.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "NaN" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "NaN" supplied to "DefaultPerPage"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -51,7 +55,9 @@ describe('default_page', () => {
     const decoded = DefaultPage.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "DefaultPerPage"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -60,7 +66,9 @@ describe('default_page', () => {
     const decoded = DefaultPage.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "DefaultPerPage"',
+    ]);
     expect(message.schema).toEqual({});
   });
 

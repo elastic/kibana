@@ -12,6 +12,6 @@ process {ref}/docs-reindex.html[reindexed data], define complex
 <<watcher-create-advanced-watch, Watcher conditions>>,
 and work with data in other contexts.
 
-To get started, go to *Dev Tools > Painless Lab*.
+To get started, open the menu, go to *Dev Tools*, then click *Painless Lab*.
 
 image::dev-tools/painlesslab/images/painless-lab.png[Painless Lab]

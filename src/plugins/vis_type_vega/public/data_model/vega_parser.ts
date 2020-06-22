@@ -18,14 +18,14 @@
  */
 
 import _ from 'lodash';
-import * as vega from 'vega-lib';
-import * as vegaLite from 'vega-lite';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 // @ts-ignore
 import hjson from 'hjson';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as vega from 'vega-lib';
+import * as vegaLite from 'vega-lite';
 import { EsQueryParser } from './es_query_parser';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
@@ -38,14 +38,13 @@ import { Bool, Data, VegaSpec } from './types';
 // Set default single color to match other Kibana visualizations
 const defaultColor: string = VISUALIZATION_COLORS[0];
 
-const DEFAULT_SCHEMA: string = 'https://vega.github.io/schema/vega/v3.0.json';
-
 const locToDirMap: any = {
   left: 'row-reverse',
   right: 'row',
   top: 'column-reverse',
   bottom: 'column',
 };
+const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v5.json';
 
 // If there is no "%type%" parameter, use this parser
 const DEFAULT_PARSER: string = 'elasticsearch';

@@ -19,6 +19,7 @@ import {
   TestProviders,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
 } from '../../common/mock';
 import { SiemNavigation } from '../../common/components/navigation';
 import { inputsActions } from '../../common/store/inputs';
@@ -171,7 +172,8 @@ describe('Hosts - rendering', () => {
     ];
     localSource[0].result.data.source.status.indicesExist = true;
     const myState: State = mockGlobalState;
-    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    const { storage } = createSecuritySolutionStorageMock();
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <MockedProvider mocks={localSource} addTypename={false}>

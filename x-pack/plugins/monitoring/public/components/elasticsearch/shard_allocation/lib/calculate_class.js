@@ -10,6 +10,7 @@ export function calculateClass(item, initial) {
     classes.push(initial);
   }
   if (item.type === 'shard') {
+    classes.push('monShard');
     classes.push((item.primary && 'primary') || 'replica');
     classes.push(item.state.toLowerCase());
     if (item.state === 'UNASSIGNED' && item.primary) {

@@ -48,13 +48,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "items",
-                    "total",
-                    "page",
-                    "perPage",
-                    "success"
-                  ]
+                  "required": ["items", "total", "page", "perPage", "success"]
                 },
                 "examples": {
                   "success": {
@@ -66,14 +60,9 @@
                           "namespace": "default",
                           "description": "Default agent configuration created by Kibana",
                           "status": "active",
-                          "datasources": [
-                            "8a5679b0-8fbf-11ea-b2ce-01c4a6127154"
-                          ],
+                          "datasources": ["8a5679b0-8fbf-11ea-b2ce-01c4a6127154"],
                           "is_default": true,
-                          "monitoring_enabled": [
-                            "logs",
-                            "metrics"
-                          ],
+                          "monitoring_enabled": ["logs", "metrics"],
                           "revision": 2,
                           "updated_on": "2020-05-06T17:32:21.905Z",
                           "updated_by": "system",
@@ -175,10 +164,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "item",
-                    "success"
-                  ]
+                  "required": ["item", "success"]
                 },
                 "examples": {
                   "success": {
@@ -213,21 +199,13 @@
                                     "dataset": "system.auth",
                                     "vars": {
                                       "paths": {
-                                        "value": [
-                                          "/var/log/auth.log*",
-                                          "/var/log/secure*"
-                                        ],
+                                        "value": ["/var/log/auth.log*", "/var/log/secure*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "paths": [
-                                        "/var/log/auth.log*",
-                                        "/var/log/secure*"
-                                      ],
-                                      "exclude_files": [
-                                        ".gz$"
-                                      ],
+                                      "paths": ["/var/log/auth.log*", "/var/log/secure*"],
+                                      "exclude_files": [".gz$"],
                                       "multiline": {
                                         "pattern": "^\\s",
                                         "match": "after"
@@ -253,21 +231,13 @@
                                     "dataset": "system.syslog",
                                     "vars": {
                                       "paths": {
-                                        "value": [
-                                          "/var/log/messages*",
-                                          "/var/log/syslog*"
-                                        ],
+                                        "value": ["/var/log/messages*", "/var/log/syslog*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "paths": [
-                                        "/var/log/messages*",
-                                        "/var/log/syslog*"
-                                      ],
-                                      "exclude_files": [
-                                        ".gz$"
-                                      ],
+                                      "paths": ["/var/log/messages*", "/var/log/syslog*"],
+                                      "exclude_files": [".gz$"],
                                       "multiline": {
                                         "pattern": "^\\s",
                                         "match": "after"
@@ -299,16 +269,12 @@
                                     "dataset": "system.core",
                                     "vars": {
                                       "core.metrics": {
-                                        "value": [
-                                          "percentages"
-                                        ],
+                                        "value": ["percentages"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "core"
-                                      ],
+                                      "metricsets": ["core"],
                                       "core.metrics": "percentages"
                                     }
                                   },
@@ -318,16 +284,11 @@
                                     "dataset": "system.cpu",
                                     "vars": {
                                       "core.metrics": {
-                                        "value": [
-                                          "percentages"
-                                        ],
+                                        "value": ["percentages"],
                                         "type": "text"
                                       },
                                       "cpu.metrics": {
-                                        "value": [
-                                          "percentages",
-                                          "normalized_percentages"
-                                        ],
+                                        "value": ["percentages", "normalized_percentages"],
                                         "type": "text"
                                       },
                                       "period": {
@@ -343,16 +304,12 @@
                                         "type": "integer"
                                       },
                                       "processes": {
-                                        "value": [
-                                          ".*"
-                                        ],
+                                        "value": [".*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "cpu"
-                                      ],
+                                      "metricsets": ["cpu"],
                                       "core.metrics": "percentages",
                                       "cpu.metrics": "percentages,normalized_percentages",
                                       "period": "10s",
@@ -366,9 +323,7 @@
                                     "enabled": true,
                                     "dataset": "system.diskio",
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "diskio"
-                                      ]
+                                      "metricsets": ["diskio"]
                                     }
                                   },
                                   {
@@ -376,9 +331,7 @@
                                     "enabled": true,
                                     "dataset": "system.entropy",
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "entropy"
-                                      ]
+                                      "metricsets": ["entropy"]
                                     }
                                   },
                                   {
@@ -396,9 +349,7 @@
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "filesystem"
-                                      ],
+                                      "metricsets": ["filesystem"],
                                       "period": "1m",
                                       "processors": [
                                         {
@@ -424,9 +375,7 @@
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "fsstat"
-                                      ],
+                                      "metricsets": ["fsstat"],
                                       "period": "1m",
                                       "processors": [
                                         {
@@ -443,16 +392,11 @@
                                     "dataset": "system.load",
                                     "vars": {
                                       "core.metrics": {
-                                        "value": [
-                                          "percentages"
-                                        ],
+                                        "value": ["percentages"],
                                         "type": "text"
                                       },
                                       "cpu.metrics": {
-                                        "value": [
-                                          "percentages",
-                                          "normalized_percentages"
-                                        ],
+                                        "value": ["percentages", "normalized_percentages"],
                                         "type": "text"
                                       },
                                       "period": {
@@ -468,16 +412,12 @@
                                         "type": "integer"
                                       },
                                       "processes": {
-                                        "value": [
-                                          ".*"
-                                        ],
+                                        "value": [".*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "load"
-                                      ],
+                                      "metricsets": ["load"],
                                       "core.metrics": "percentages",
                                       "cpu.metrics": "percentages,normalized_percentages",
                                       "period": "10s",
@@ -492,16 +432,11 @@
                                     "dataset": "system.memory",
                                     "vars": {
                                       "core.metrics": {
-                                        "value": [
-                                          "percentages"
-                                        ],
+                                        "value": ["percentages"],
                                         "type": "text"
                                       },
                                       "cpu.metrics": {
-                                        "value": [
-                                          "percentages",
-                                          "normalized_percentages"
-                                        ],
+                                        "value": ["percentages", "normalized_percentages"],
                                         "type": "text"
                                       },
                                       "period": {
@@ -517,16 +452,12 @@
                                         "type": "integer"
                                       },
                                       "processes": {
-                                        "value": [
-                                          ".*"
-                                        ],
+                                        "value": [".*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "memory"
-                                      ],
+                                      "metricsets": ["memory"],
                                       "core.metrics": "percentages",
                                       "cpu.metrics": "percentages,normalized_percentages",
                                       "period": "10s",
@@ -541,16 +472,11 @@
                                     "dataset": "system.network",
                                     "vars": {
                                       "core.metrics": {
-                                        "value": [
-                                          "percentages"
-                                        ],
+                                        "value": ["percentages"],
                                         "type": "text"
                                       },
                                       "cpu.metrics": {
-                                        "value": [
-                                          "percentages",
-                                          "normalized_percentages"
-                                        ],
+                                        "value": ["percentages", "normalized_percentages"],
                                         "type": "text"
                                       },
                                       "period": {
@@ -566,16 +492,12 @@
                                         "type": "integer"
                                       },
                                       "processes": {
-                                        "value": [
-                                          ".*"
-                                        ],
+                                        "value": [".*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "network"
-                                      ],
+                                      "metricsets": ["network"],
                                       "core.metrics": "percentages",
                                       "cpu.metrics": "percentages,normalized_percentages",
                                       "period": "10s",
@@ -589,9 +511,7 @@
                                     "enabled": true,
                                     "dataset": "system.network_summary",
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "network_summary"
-                                      ]
+                                      "metricsets": ["network_summary"]
                                     }
                                   },
                                   {
@@ -600,16 +520,11 @@
                                     "dataset": "system.process",
                                     "vars": {
                                       "core.metrics": {
-                                        "value": [
-                                          "percentages"
-                                        ],
+                                        "value": ["percentages"],
                                         "type": "text"
                                       },
                                       "cpu.metrics": {
-                                        "value": [
-                                          "percentages",
-                                          "normalized_percentages"
-                                        ],
+                                        "value": ["percentages", "normalized_percentages"],
                                         "type": "text"
                                       },
                                       "period": {
@@ -625,16 +540,12 @@
                                         "type": "integer"
                                       },
                                       "processes": {
-                                        "value": [
-                                          ".*"
-                                        ],
+                                        "value": [".*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "process"
-                                      ],
+                                      "metricsets": ["process"],
                                       "core.metrics": "percentages",
                                       "cpu.metrics": "percentages,normalized_percentages",
                                       "period": "10s",
@@ -649,16 +560,11 @@
                                     "dataset": "system.process_summary",
                                     "vars": {
                                       "core.metrics": {
-                                        "value": [
-                                          "percentages"
-                                        ],
+                                        "value": ["percentages"],
                                         "type": "text"
                                       },
                                       "cpu.metrics": {
-                                        "value": [
-                                          "percentages",
-                                          "normalized_percentages"
-                                        ],
+                                        "value": ["percentages", "normalized_percentages"],
                                         "type": "text"
                                       },
                                       "period": {
@@ -674,16 +580,12 @@
                                         "type": "integer"
                                       },
                                       "processes": {
-                                        "value": [
-                                          ".*"
-                                        ],
+                                        "value": [".*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "process_summary"
-                                      ],
+                                      "metricsets": ["process_summary"],
                                       "core.metrics": "percentages",
                                       "cpu.metrics": "percentages,normalized_percentages",
                                       "period": "10s",
@@ -697,9 +599,7 @@
                                     "enabled": true,
                                     "dataset": "system.raid",
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "raid"
-                                      ]
+                                      "metricsets": ["raid"]
                                     }
                                   },
                                   {
@@ -707,9 +607,7 @@
                                     "enabled": true,
                                     "dataset": "system.service",
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "service"
-                                      ]
+                                      "metricsets": ["service"]
                                     }
                                   },
                                   {
@@ -717,9 +615,7 @@
                                     "enabled": true,
                                     "dataset": "system.socket",
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "socket"
-                                      ]
+                                      "metricsets": ["socket"]
                                     }
                                   },
                                   {
@@ -728,16 +624,11 @@
                                     "dataset": "system.socket_summary",
                                     "vars": {
                                       "core.metrics": {
-                                        "value": [
-                                          "percentages"
-                                        ],
+                                        "value": ["percentages"],
                                         "type": "text"
                                       },
                                       "cpu.metrics": {
-                                        "value": [
-                                          "percentages",
-                                          "normalized_percentages"
-                                        ],
+                                        "value": ["percentages", "normalized_percentages"],
                                         "type": "text"
                                       },
                                       "period": {
@@ -753,16 +644,12 @@
                                         "type": "integer"
                                       },
                                       "processes": {
-                                        "value": [
-                                          ".*"
-                                        ],
+                                        "value": [".*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "socket_summary"
-                                      ],
+                                      "metricsets": ["socket_summary"],
                                       "core.metrics": "percentages",
                                       "cpu.metrics": "percentages,normalized_percentages",
                                       "period": "10s",
@@ -777,16 +664,11 @@
                                     "dataset": "system.uptime",
                                     "vars": {
                                       "core.metrics": {
-                                        "value": [
-                                          "percentages"
-                                        ],
+                                        "value": ["percentages"],
                                         "type": "text"
                                       },
                                       "cpu.metrics": {
-                                        "value": [
-                                          "percentages",
-                                          "normalized_percentages"
-                                        ],
+                                        "value": ["percentages", "normalized_percentages"],
                                         "type": "text"
                                       },
                                       "period": {
@@ -794,16 +676,12 @@
                                         "type": "text"
                                       },
                                       "processes": {
-                                        "value": [
-                                          ".*"
-                                        ],
+                                        "value": [".*"],
                                         "type": "text"
                                       }
                                     },
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "uptime"
-                                      ],
+                                      "metricsets": ["uptime"],
                                       "core.metrics": "percentages",
                                       "cpu.metrics": "percentages,normalized_percentages",
                                       "period": "10s",
@@ -815,9 +693,7 @@
                                     "enabled": true,
                                     "dataset": "system.users",
                                     "agent_stream": {
-                                      "metricsets": [
-                                        "users"
-                                      ]
+                                      "metricsets": ["users"]
                                     }
                                   }
                                 ]
@@ -827,10 +703,7 @@
                           }
                         ],
                         "is_default": true,
-                        "monitoring_enabled": [
-                          "logs",
-                          "metrics"
-                        ],
+                        "monitoring_enabled": ["logs", "metrics"],
                         "revision": 2,
                         "updated_on": "2020-05-06T17:32:21.905Z",
                         "updated_by": "system"
@@ -865,10 +738,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "item",
-                    "success"
-                  ]
+                  "required": ["item", "success"]
                 },
                 "examples": {
                   "example-1": {
@@ -916,6 +786,64 @@
         ]
       }
     },
+    "/agent_configs/{agentConfigId}/copy": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentConfigId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent config - copy one config",
+        "operationId": "agent-config-copy",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/AgentConfig"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["item", "success"]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name"]
+              },
+              "examples": {}
+            }
+          },
+          "description": ""
+        },
+        "description": "Copies one agent config"
+      }
+    },
     "/agent_configs/delete": {
       "post": {
         "summary": "Agent Config - Delete",
@@ -937,10 +865,7 @@
                         "type": "boolean"
                       }
                     },
-                    "required": [
-                      "id",
-                      "success"
-                    ]
+                    "required": ["id", "success"]
                   }
                 },
                 "examples": {
@@ -982,9 +907,7 @@
               "examples": {
                 "example-1": {
                   "value": {
-                    "agentConfigIds": [
-                      "df7d2540-5a47-11ea-80da-89b5a66da347"
-                    ]
+                    "agentConfigIds": ["df7d2540-5a47-11ea-80da-89b5a66da347"]
                   }
                 }
               }
@@ -1030,10 +953,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "items",
-                    "success"
-                  ]
+                  "required": ["items", "success"]
                 },
                 "examples": {
                   "example-1": {
@@ -1056,10 +976,7 @@
                               "type": "logs",
                               "streams": [
                                 {
-                                  "paths": [
-                                    "/var/log/hello1.log",
-                                    "/var/log/hello2.log"
-                                  ]
+                                  "paths": ["/var/log/hello1.log", "/var/log/hello2.log"]
                                 }
                               ]
                             }
@@ -1098,16 +1015,12 @@
                                 {
                                   "enabled": true,
                                   "dataset": "nginx.acccess",
-                                  "paths": [
-                                    "/var/log/nginx/access.log"
-                                  ]
+                                  "paths": ["/var/log/nginx/access.log"]
                                 },
                                 {
                                   "enabled": true,
                                   "dataset": "nginx.error",
-                                  "paths": [
-                                    "/var/log/nginx/error.log"
-                                  ]
+                                  "paths": ["/var/log/nginx/error.log"]
                                 }
                               ]
                             },
@@ -1141,16 +1054,12 @@
                                 {
                                   "enabled": true,
                                   "dataset": "nginx.acccess",
-                                  "paths": [
-                                    "/var/log/nginx/access.log"
-                                  ]
+                                  "paths": ["/var/log/nginx/access.log"]
                                 },
                                 {
                                   "enabled": true,
                                   "dataset": "nginx.error",
-                                  "paths": [
-                                    "/var/log/nginx/error.log"
-                                  ]
+                                  "paths": ["/var/log/nginx/error.log"]
                                 }
                               ]
                             },
@@ -1184,16 +1093,12 @@
                                 {
                                   "enabled": true,
                                   "dataset": "nginx.acccess",
-                                  "paths": [
-                                    "/var/log/nginx/access.log"
-                                  ]
+                                  "paths": ["/var/log/nginx/access.log"]
                                 },
                                 {
                                   "enabled": true,
                                   "dataset": "nginx.error",
-                                  "paths": [
-                                    "/var/log/nginx/error.log"
-                                  ]
+                                  "paths": ["/var/log/nginx/error.log"]
                                 }
                               ]
                             },
@@ -1224,16 +1129,12 @@
                             {
                               "streams": [
                                 {
-                                  "paths": [
-                                    "/var/log/nginx/access.log"
-                                  ],
+                                  "paths": ["/var/log/nginx/access.log"],
                                   "dataset": "nginx.acccess",
                                   "enabled": true
                                 },
                                 {
-                                  "paths": [
-                                    "/var/log/nginx/error.log"
-                                  ],
+                                  "paths": ["/var/log/nginx/error.log"],
                                   "dataset": "nginx.error",
                                   "enabled": true
                                 }
@@ -1302,16 +1203,12 @@
                           {
                             "enabled": true,
                             "dataset": "nginx.acccess",
-                            "paths": [
-                              "/var/log/nginx/access.log"
-                            ]
+                            "paths": ["/var/log/nginx/access.log"]
                           },
                           {
                             "enabled": true,
                             "dataset": "nginx.error",
-                            "paths": [
-                              "/var/log/nginx/error.log"
-                            ]
+                            "paths": ["/var/log/nginx/error.log"]
                           }
                         ]
                       },
@@ -1359,10 +1256,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "item",
-                    "success"
-                  ]
+                  "required": ["item", "success"]
                 }
               }
             }
@@ -1398,10 +1292,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "item",
-                    "sucess"
-                  ]
+                  "required": ["item", "sucess"]
                 }
               }
             }
@@ -1430,9 +1321,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "isInitialized"
-                  ]
+                  "required": ["isInitialized"]
                 },
                 "examples": {
                   "success": {
@@ -1472,9 +1361,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "isInitialized"
-                  ]
+                  "required": ["isInitialized"]
                 },
                 "examples": {
                   "success": {
@@ -1500,10 +1387,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "admin_username",
-                  "admin_password"
-                ]
+                "required": ["admin_username", "admin_password"]
               }
             }
           }
@@ -1541,19 +1425,13 @@
                       "properties": {
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "installed",
-                            "not_installed"
-                          ]
+                          "enum": ["installed", "not_installed"]
                         },
                         "savedObject": {
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "status",
-                        "savedObject"
-                      ]
+                      "required": ["status", "savedObject"]
                     }
                   ]
                 },
@@ -1567,10 +1445,7 @@
                         "readme": "/package/coredns-1.0.1/docs/README.md",
                         "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
                         "type": "integration",
-                        "categories": [
-                          "logs",
-                          "metrics"
-                        ],
+                        "categories": ["logs", "metrics"],
                         "requirement": {
                           "kibana": {
                             "versions": ">6.7.0"
@@ -1703,16 +1578,12 @@
                             "ingest_pipeline": "pipeline-entry",
                             "vars": [
                               {
-                                "default": [
-                                  "/var/log/coredns.log"
-                                ],
+                                "default": ["/var/log/coredns.log"],
                                 "name": "paths",
                                 "type": "textarea"
                               },
                               {
-                                "default": [
-                                  "coredns"
-                                ],
+                                "default": ["coredns"],
                                 "name": "tags",
                                 "type": "text"
                               }
@@ -1726,9 +1597,7 @@
                             "type": "metrics",
                             "vars": [
                               {
-                                "default": [
-                                  "http://localhost:9153"
-                                ],
+                                "default": ["http://localhost:9153"],
                                 "description": "CoreDNS hosts",
                                 "name": "hosts",
                                 "required": true
@@ -1889,20 +1758,14 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
+                        "required": ["id", "type"]
                       }
                     },
                     "success": {
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "response",
-                    "success"
-                  ]
+                  "required": ["response", "success"]
                 }
               }
             }
@@ -1939,20 +1802,14 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
+                        "required": ["id", "type"]
                       }
                     },
                     "success": {
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "response",
-                    "success"
-                  ]
+                  "required": ["response", "success"]
                 }
               }
             }
@@ -2668,11 +2525,7 @@
                         "type": "number"
                       }
                     },
-                    "required": [
-                      "id",
-                      "title",
-                      "count"
-                    ]
+                    "required": ["id", "title", "count"]
                   }
                 }
               }
@@ -2690,81 +2543,75 @@
           "200": {
             "description": "OK",
             "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "list": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "total": {
+                      "type": "number"
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "perPage": {
+                      "type": "number"
                     }
                   },
-                  "success": {
-                    "type": "boolean"
-                  },
-                  "total": {
-                    "type": "number"
-                  },
-                  "page": {
-                    "type": "number"
-                  },
-                  "perPage": {
-                    "type": "number"
-                  }
+                  "required": ["list", "success", "total", "page", "perPage"]
                 },
-                "required": [
-                  "list",
-                  "success",
-                  "total",
-                  "page",
-                  "perPage"
-                ]
-              },
-              "examples": {
-                "example-1": {
-                  "value": {
-                    "list": [
-                      {
-                        "id": "205661d0-5e53-11ea-ad31-4f31c06bd9a4",
-                        "active": true,
-                        "config_id": "ae556400-5e39-11ea-8b49-f9747e466f7b",
-                        "type": "PERMANENT",
-                        "enrolled_at": "2020-03-04T20:02:50.605Z",
-                        "user_provided_metadata": {
-                          "dev_agent_version": "0.0.1",
-                          "region": "us-east"
-                        },
-                        "local_metadata": {
-                          "host": "localhost",
-                          "ip": "127.0.0.1",
-                          "system": "Darwin 18.7.0",
-                          "memory": 34359738368
-                        },
-                        "actions": [
-                          {
-                            "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"datasources\":[]}}",
-                            "created_at": "2020-03-04T20:02:56.149Z",
-                            "id": "6a95c00a-d76d-4931-97c3-0bf935272d7d",
-                            "type": "CONFIG_CHANGE"
-                          }
-                        ],
-                        "access_api_key_id": "6Mkkp3ABz7e_XRqrzLNJ",
-                        "default_api_key": "6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw",
-                        "current_error_events": [],
-                        "last_checkin": "2020-03-04T20:03:05.700Z",
-                        "status": "online"
-                      }
-                    ],
-                    "success": true,
-                    "total": 1,
-                    "page": 1,
-                    "perPage": 20
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "list": [
+                        {
+                          "id": "205661d0-5e53-11ea-ad31-4f31c06bd9a4",
+                          "active": true,
+                          "config_id": "ae556400-5e39-11ea-8b49-f9747e466f7b",
+                          "type": "PERMANENT",
+                          "enrolled_at": "2020-03-04T20:02:50.605Z",
+                          "user_provided_metadata": {
+                            "dev_agent_version": "0.0.1",
+                            "region": "us-east"
+                          },
+                          "local_metadata": {
+                            "host": "localhost",
+                            "ip": "127.0.0.1",
+                            "system": "Darwin 18.7.0",
+                            "memory": 34359738368
+                          },
+                          "actions": [
+                            {
+                              "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"datasources\":[]}}",
+                              "created_at": "2020-03-04T20:02:56.149Z",
+                              "id": "6a95c00a-d76d-4931-97c3-0bf935272d7d",
+                              "type": "CONFIG_CHANGE"
+                            }
+                          ],
+                          "access_api_key_id": "6Mkkp3ABz7e_XRqrzLNJ",
+                          "default_api_key": "6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw",
+                          "current_error_events": [],
+                          "last_checkin": "2020-03-04T20:03:05.700Z",
+                          "status": "online"
+                        }
+                      ],
+                      "success": true,
+                      "total": 1,
+                      "page": 1,
+                      "perPage": 20
+                    }
                   }
                 }
               }
             }
-          }
           }
         },
         "operationId": "get-fleet-agents",
@@ -2804,10 +2651,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "item",
-                    "success"
-                  ]
+                  "required": ["item", "success"]
                 }
               }
             }
@@ -2880,9 +2724,7 @@
                   "properties": {
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "checkin"
-                      ]
+                      "enum": ["checkin"]
                     },
                     "success": {
                       "type": "string"
@@ -2909,13 +2751,7 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "agent_id",
-                          "data",
-                          "id",
-                          "created_at",
-                          "type"
-                        ]
+                        "required": ["agent_id", "data", "id", "created_at", "type"]
                       }
                     }
                   }
@@ -2935,9 +2771,7 @@
                               "outputs": {
                                 "default": {
                                   "type": "elasticsearch",
-                                  "hosts": [
-                                    "http://localhost:9200"
-                                  ],
+                                  "hosts": ["http://localhost:9200"],
                                   "api_key": "Z-XkgHIBvwtjzIKtSCTh:AejRqdKpQx6z-6dqSI1LHg"
                                 }
                               },
@@ -2957,13 +2791,8 @@
                                           "id": "logs-system.auth",
                                           "enabled": true,
                                           "dataset": "system.auth",
-                                          "paths": [
-                                            "/var/log/auth.log*",
-                                            "/var/log/secure*"
-                                          ],
-                                          "exclude_files": [
-                                            ".gz$"
-                                          ],
+                                          "paths": ["/var/log/auth.log*", "/var/log/secure*"],
+                                          "exclude_files": [".gz$"],
                                           "multiline": {
                                             "pattern": "^\\s",
                                             "match": "after"
@@ -2986,13 +2815,8 @@
                                           "id": "logs-system.syslog",
                                           "enabled": true,
                                           "dataset": "system.syslog",
-                                          "paths": [
-                                            "/var/log/messages*",
-                                            "/var/log/syslog*"
-                                          ],
-                                          "exclude_files": [
-                                            ".gz$"
-                                          ],
+                                          "paths": ["/var/log/messages*", "/var/log/syslog*"],
+                                          "exclude_files": [".gz$"],
                                           "multiline": {
                                             "pattern": "^\\s",
                                             "match": "after"
@@ -3021,18 +2845,14 @@
                                           "id": "system/metrics-system.core",
                                           "enabled": true,
                                           "dataset": "system.core",
-                                          "metricsets": [
-                                            "core"
-                                          ],
+                                          "metricsets": ["core"],
                                           "core.metrics": "percentages"
                                         },
                                         {
                                           "id": "system/metrics-system.cpu",
                                           "enabled": true,
                                           "dataset": "system.cpu",
-                                          "metricsets": [
-                                            "cpu"
-                                          ],
+                                          "metricsets": ["cpu"],
                                           "core.metrics": "percentages",
                                           "cpu.metrics": "percentages,normalized_percentages",
                                           "period": "10s",
@@ -3044,25 +2864,19 @@
                                           "id": "system/metrics-system.diskio",
                                           "enabled": true,
                                           "dataset": "system.diskio",
-                                          "metricsets": [
-                                            "diskio"
-                                          ]
+                                          "metricsets": ["diskio"]
                                         },
                                         {
                                           "id": "system/metrics-system.entropy",
                                           "enabled": true,
                                           "dataset": "system.entropy",
-                                          "metricsets": [
-                                            "entropy"
-                                          ]
+                                          "metricsets": ["entropy"]
                                         },
                                         {
                                           "id": "system/metrics-system.filesystem",
                                           "enabled": true,
                                           "dataset": "system.filesystem",
-                                          "metricsets": [
-                                            "filesystem"
-                                          ],
+                                          "metricsets": ["filesystem"],
                                           "period": "1m",
                                           "processors": [
                                             {
@@ -3076,9 +2890,7 @@
                                           "id": "system/metrics-system.fsstat",
                                           "enabled": true,
                                           "dataset": "system.fsstat",
-                                          "metricsets": [
-                                            "fsstat"
-                                          ],
+                                          "metricsets": ["fsstat"],
                                           "period": "1m",
                                           "processors": [
                                             {
@@ -3092,9 +2904,7 @@
                                           "id": "system/metrics-system.load",
                                           "enabled": true,
                                           "dataset": "system.load",
-                                          "metricsets": [
-                                            "load"
-                                          ],
+                                          "metricsets": ["load"],
                                           "core.metrics": "percentages",
                                           "cpu.metrics": "percentages,normalized_percentages",
                                           "period": "10s",
@@ -3106,9 +2916,7 @@
                                           "id": "system/metrics-system.memory",
                                           "enabled": true,
                                           "dataset": "system.memory",
-                                          "metricsets": [
-                                            "memory"
-                                          ],
+                                          "metricsets": ["memory"],
                                           "core.metrics": "percentages",
                                           "cpu.metrics": "percentages,normalized_percentages",
                                           "period": "10s",
@@ -3120,9 +2928,7 @@
                                           "id": "system/metrics-system.network",
                                           "enabled": true,
                                           "dataset": "system.network",
-                                          "metricsets": [
-                                            "network"
-                                          ],
+                                          "metricsets": ["network"],
                                           "core.metrics": "percentages",
                                           "cpu.metrics": "percentages,normalized_percentages",
                                           "period": "10s",
@@ -3134,17 +2940,13 @@
                                           "id": "system/metrics-system.network_summary",
                                           "enabled": true,
                                           "dataset": "system.network_summary",
-                                          "metricsets": [
-                                            "network_summary"
-                                          ]
+                                          "metricsets": ["network_summary"]
                                         },
                                         {
                                           "id": "system/metrics-system.process",
                                           "enabled": true,
                                           "dataset": "system.process",
-                                          "metricsets": [
-                                            "process"
-                                          ],
+                                          "metricsets": ["process"],
                                           "core.metrics": "percentages",
                                           "cpu.metrics": "percentages,normalized_percentages",
                                           "period": "10s",
@@ -3156,9 +2958,7 @@
                                           "id": "system/metrics-system.process_summary",
                                           "enabled": true,
                                           "dataset": "system.process_summary",
-                                          "metricsets": [
-                                            "process_summary"
-                                          ],
+                                          "metricsets": ["process_summary"],
                                           "core.metrics": "percentages",
                                           "cpu.metrics": "percentages,normalized_percentages",
                                           "period": "10s",
@@ -3170,33 +2970,25 @@
                                           "id": "system/metrics-system.raid",
                                           "enabled": true,
                                           "dataset": "system.raid",
-                                          "metricsets": [
-                                            "raid"
-                                          ]
+                                          "metricsets": ["raid"]
                                         },
                                         {
                                           "id": "system/metrics-system.service",
                                           "enabled": true,
                                           "dataset": "system.service",
-                                          "metricsets": [
-                                            "service"
-                                          ]
+                                          "metricsets": ["service"]
                                         },
                                         {
                                           "id": "system/metrics-system.socket",
                                           "enabled": true,
                                           "dataset": "system.socket",
-                                          "metricsets": [
-                                            "socket"
-                                          ]
+                                          "metricsets": ["socket"]
                                         },
                                         {
                                           "id": "system/metrics-system.socket_summary",
                                           "enabled": true,
                                           "dataset": "system.socket_summary",
-                                          "metricsets": [
-                                            "socket_summary"
-                                          ],
+                                          "metricsets": ["socket_summary"],
                                           "core.metrics": "percentages",
                                           "cpu.metrics": "percentages,normalized_percentages",
                                           "period": "10s",
@@ -3208,9 +3000,7 @@
                                           "id": "system/metrics-system.uptime",
                                           "enabled": true,
                                           "dataset": "system.uptime",
-                                          "metricsets": [
-                                            "uptime"
-                                          ],
+                                          "metricsets": ["uptime"],
                                           "core.metrics": "percentages",
                                           "cpu.metrics": "percentages,normalized_percentages",
                                           "period": "10s",
@@ -3220,9 +3010,7 @@
                                           "id": "system/metrics-system.users",
                                           "enabled": true,
                                           "dataset": "system.users",
-                                          "metricsets": [
-                                            "users"
-                                          ]
+                                          "metricsets": ["users"]
                                         }
                                       ]
                                     }
@@ -3373,15 +3161,10 @@
                     },
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "acks"
-                      ]
+                      "enum": ["acks"]
                     }
                   },
-                  "required": [
-                    "success",
-                    "action"
-                  ]
+                  "required": ["success", "action"]
                 },
                 "examples": {
                   "success": {
@@ -3498,21 +3281,14 @@
                 "properties": {
                   "type": {
                     "type": "string",
-                    "enum": [
-                      "PERMANENT",
-                      "EPHEMERAL",
-                      "TEMPORARY"
-                    ]
+                    "enum": ["PERMANENT", "EPHEMERAL", "TEMPORARY"]
                   },
                   "shared_id": {
                     "type": "string"
                   },
                   "metadata": {
                     "type": "object",
-                    "required": [
-                      "local",
-                      "user_provided"
-                    ],
+                    "required": ["local", "user_provided"],
                     "properties": {
                       "local": {
                         "$ref": "#/components/schemas/AgentMetadata"
@@ -3523,10 +3299,7 @@
                     }
                   }
                 },
-                "required": [
-                  "type",
-                  "metadata"
-                ]
+                "required": ["type", "metadata"]
               },
               "examples": {
                 "good": {
@@ -3723,10 +3496,7 @@
               },
               "status": {
                 "type": "string",
-                "enum": [
-                  "active",
-                  "inactive"
-                ]
+                "enum": ["active", "inactive"]
               },
               "datasources": {
                 "oneOf": [
@@ -3757,10 +3527,7 @@
                 "type": "number"
               }
             },
-            "required": [
-              "id",
-              "status"
-            ]
+            "required": ["id", "status"]
           }
         ]
       },
@@ -3781,10 +3548,7 @@
                 "items": {}
               }
             },
-            "required": [
-              "id",
-              "revision"
-            ]
+            "required": ["id", "revision"]
           },
           {
             "$ref": "#/components/schemas/NewDatasource"
@@ -3829,16 +3593,12 @@
                   {
                     "enabled": true,
                     "dataset": "nginx.acccess",
-                    "paths": [
-                      "/var/log/nginx/access.log"
-                    ]
+                    "paths": ["/var/log/nginx/access.log"]
                   },
                   {
                     "enabled": true,
                     "dataset": "nginx.error",
-                    "paths": [
-                      "/var/log/nginx/error.log"
-                    ]
+                    "paths": ["/var/log/nginx/error.log"]
                   }
                 ]
               },
@@ -3874,11 +3634,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "name",
-              "version",
-              "title"
-            ]
+            "required": ["name", "version", "title"]
           },
           "namespace": {
             "type": "string"
@@ -3914,11 +3670,7 @@
                   "type": "object"
                 }
               },
-              "required": [
-                "type",
-                "enabled",
-                "streams"
-              ]
+              "required": ["type", "enabled", "streams"]
             }
           },
           "config_id": {
@@ -3931,12 +3683,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "output_id",
-          "inputs",
-          "config_id",
-          "name"
-        ]
+        "required": ["output_id", "inputs", "config_id", "name"]
       },
       "PackageInfo": {
         "title": "PackageInfo",
@@ -4007,9 +3754,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "src"
-              ]
+              "required": ["src"]
             }
           },
           "icons": {
@@ -4059,10 +3804,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "name",
-                      "default"
-                    ]
+                    "required": ["name", "default"]
                   }
                 },
                 "type": {
@@ -4072,14 +3814,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "title",
-                "name",
-                "release",
-                "ingeset_pipeline",
-                "type",
-                "package"
-              ]
+              "required": ["title", "name", "release", "ingeset_pipeline", "type", "package"]
             }
           },
           "download": {
@@ -4153,13 +3888,7 @@
       "AgentStatus": {
         "type": "string",
         "title": "AgentStatus",
-        "enum": [
-          "offline",
-          "error",
-          "online",
-          "inactive",
-          "warning"
-        ]
+        "enum": ["offline", "error", "online", "inactive", "warning"]
       },
       "Agent": {
         "title": "Agent",
@@ -4187,10 +3916,7 @@
             "type": "string"
           },
           "config_revision": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "config_newest_revision": {
             "type": "number"
@@ -4223,23 +3949,12 @@
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "active",
-          "enrolled_at",
-          "id",
-          "current_error_events",
-          "status"
-        ]
+        "required": ["type", "active", "enrolled_at", "id", "current_error_events", "status"]
       },
       "AgentType": {
         "type": "string",
         "title": "AgentType",
-        "enum": [
-          "PERMANENT",
-          "EPHEMERAL",
-          "TEMPORARY"
-        ]
+        "enum": ["PERMANENT", "EPHEMERAL", "TEMPORARY"]
       },
       "AgentMetadata": {
         "title": "AgentMetadata",
@@ -4251,12 +3966,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "STATE",
-              "ERROR",
-              "ACTION_RESULT",
-              "ACTION"
-            ]
+            "enum": ["STATE", "ERROR", "ACTION_RESULT", "ACTION"]
           },
           "subtype": {
             "type": "string",
@@ -4295,13 +4005,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "subtype",
-          "timestamp",
-          "message",
-          "agent_id"
-        ]
+        "required": ["type", "subtype", "timestamp", "message", "agent_id"]
       },
       "AgentEvent": {
         "title": "AgentEvent",
@@ -4313,9 +4017,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id"
-            ]
+            "required": ["id"]
           },
           {
             "$ref": "#/components/schemas/NewAgentEvent"

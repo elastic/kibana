@@ -17,9 +17,10 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
      * Navigate to the Endpoints list page
      */
     async navigateToEndpointList(searchParams?: string) {
-      await pageObjects.common.navigateToApp('securitySolution', {
-        hash: `/management/endpoints${searchParams ? `?${searchParams}` : ''}`,
-      });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolutionManagement',
+        `/endpoints${searchParams ? `?${searchParams}` : ''}`
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -30,6 +31,16 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
           return false;
         }
         return true;
+      });
+    },
+
+    async waitForTableToNotHaveData(dataTestSubj: string) {
+      await retry.waitForWithTimeout('table to not have data', 2000, async () => {
+        const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
+        if (tableData[1][0] === 'No items found') {
+          return true;
+        }
+        return false;
       });
     },
 

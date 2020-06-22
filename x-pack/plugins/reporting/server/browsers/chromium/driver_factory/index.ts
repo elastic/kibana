@@ -28,21 +28,24 @@ import { getChromeLogLocation } from '../paths';
 import { puppeteerLaunch } from '../puppeteer';
 import { args } from './args';
 
-type binaryPath = string;
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 type ViewportConfig = CaptureConfig['viewport'];
 
 export class HeadlessChromiumDriverFactory {
-  private binaryPath: binaryPath;
+  private binaryPath: string;
   private captureConfig: CaptureConfig;
   private browserConfig: BrowserConfig;
   private userDataDir: string;
   private getChromiumArgs: (viewport: ViewportConfig) => string[];
 
-  constructor(binaryPath: binaryPath, logger: LevelLogger, captureConfig: CaptureConfig) {
+  constructor(binaryPath: string, captureConfig: CaptureConfig, logger: LevelLogger) {
     this.binaryPath = binaryPath;
     this.captureConfig = captureConfig;
     this.browserConfig = captureConfig.browser.chromium;
+
+    if (this.browserConfig.disableSandbox) {
+      logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
+    }
 
     this.userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     this.getChromiumArgs = (viewport: ViewportConfig) =>

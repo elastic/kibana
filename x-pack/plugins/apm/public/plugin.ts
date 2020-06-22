@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { ConfigSchema } from '.';
+import { ObservabilityPluginSetup } from '../../observability/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -33,10 +34,10 @@ import {
 import { AlertType } from '../common/alert_types';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { createCallApmApi } from './services/rest/createCallApmApi';
-import { createStaticIndexPattern } from './services/rest/index_pattern';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
+import { createStaticIndexPattern } from './services/rest/index_pattern';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -48,6 +49,7 @@ export interface ApmPluginSetupDeps {
   home: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  observability?: ObservabilityPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -64,6 +66,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     this.initializerContext = initializerContext;
   }
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
+    createCallApmApi(core.http);
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
 
@@ -100,8 +103,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    createCallApmApi(core.http);
-
     toggleAppLinkInNav(core, this.initializerContext.config.get());
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({
