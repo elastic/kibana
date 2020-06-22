@@ -76,21 +76,24 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
     return (
       <>
         {idx === 0 ? (
-          <DropZoneButton
-            onClick={(event) => {
-              event.preventDefault();
-              onAction({
-                type: 'move',
-                payload: {
-                  destination: selector.concat(DropSpecialLocations.top),
-                  source: movingProcessor!.selector,
-                },
-              });
-            }}
-            isDisabled={Boolean(
-              !movingProcessor || isDropZoneAboveDisabled(info, movingProcessor!)
-            )}
-          />
+          <EuiFlexItem>
+            <DropZoneButton
+              onClick={(event) => {
+                event.preventDefault();
+                onAction({
+                  type: 'move',
+                  payload: {
+                    destination: selector.concat(DropSpecialLocations.top),
+                    source: movingProcessor!.selector,
+                  },
+                });
+              }}
+              isVisible={Boolean(movingProcessor)}
+              isDisabled={Boolean(
+                !movingProcessor || isDropZoneAboveDisabled(info, movingProcessor!)
+              )}
+            />
+          </EuiFlexItem>
         ) : undefined}
         <EuiFlexItem>
           <TreeNode
@@ -101,19 +104,24 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
             movingProcessor={movingProcessor}
           />
         </EuiFlexItem>
-        <DropZoneButton
-          isDisabled={Boolean(!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor!))}
-          onClick={(event) => {
-            event.preventDefault();
-            onAction({
-              type: 'move',
-              payload: {
-                destination: selector.concat(String(idx + 1)),
-                source: movingProcessor!.selector,
-              },
-            });
-          }}
-        />
+        <EuiFlexItem>
+          <DropZoneButton
+            isVisible={Boolean(movingProcessor)}
+            isDisabled={Boolean(
+              !movingProcessor || isDropZoneBelowDisabled(info, movingProcessor!)
+            )}
+            onClick={(event) => {
+              event.preventDefault();
+              onAction({
+                type: 'move',
+                payload: {
+                  destination: selector.concat(String(idx + 1)),
+                  source: movingProcessor!.selector,
+                },
+              });
+            }}
+          />
+        </EuiFlexItem>
       </>
     );
   };

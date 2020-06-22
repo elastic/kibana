@@ -7,36 +7,58 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import classNames from 'classnames';
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 export interface Props {
+  isVisible: boolean;
   isDisabled: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-const MOVE_HERE_LABEL = i18n.translate('xpack.ingestPipelines.pipelineEditor.moveTargetLabel', {
-  defaultMessage: 'Move here',
-});
+const moveHereLabel = i18n.translate(
+  'xpack.ingestPipelines.pipelineEditor.dropZoneButton.moveHereToolTip',
+  {
+    defaultMessage: 'Move here',
+  }
+);
 
-export const DropZoneButton: FunctionComponent<Props> = ({ onClick, isDisabled }) => {
+const cannotMoveHereLabel = i18n.translate(
+  'xpack.ingestPipelines.pipelineEditor.dropZoneButton.unavailableToolTip',
+  { defaultMessage: 'Cannot move here' }
+);
+
+export const DropZoneButton: FunctionComponent<Props> = ({ onClick, isDisabled, isVisible }) => {
+  const isUnavailable = isVisible && isDisabled;
   const containerClasses = classNames({
-    'pipelineProcessorsEditor__tree__dropZoneContainer--active': !isDisabled,
+    'pipelineProcessorsEditor__tree__dropZoneContainer--visible': isVisible,
+    'pipelineProcessorsEditor__tree__dropZoneContainer--unavailable': isUnavailable,
   });
   const buttonClasses = classNames({
-    'pipelineProcessorsEditor__tree__dropZoneButton--active': !isDisabled,
+    'pipelineProcessorsEditor__tree__dropZoneButton--visible': isVisible,
+    'pipelineProcessorsEditor__tree__dropZoneButton--unavailable': isUnavailable,
   });
 
-  return (
-    <EuiFlexItem
-      className={`pipelineProcessorsEditor__tree__dropZoneContainer ${containerClasses}`}
-    >
+  const content = (
+    <div className={`pipelineProcessorsEditor__tree__dropZoneContainer ${containerClasses}`}>
       <EuiButtonIcon
         className={`pipelineProcessorsEditor__tree__dropZoneButton ${buttonClasses}`}
-        aria-label={MOVE_HERE_LABEL}
-        disabled={isDisabled}
-        onClick={onClick}
+        aria-label={moveHereLabel}
+        // We artificially disable the button so that hover and pointer events are
+        // still enabled
+        onClick={isDisabled ? () => {} : onClick}
         iconType="empty"
       />
-    </EuiFlexItem>
+    </div>
+  );
+
+  return isVisible ? (
+    <EuiToolTip
+      className="pipelineProcessorsEditor__tree__dropZoneContainer__toolTip"
+      content={isUnavailable ? cannotMoveHereLabel : moveHereLabel}
+    >
+      {content}
+    </EuiToolTip>
+  ) : (
+    content
   );
 };
