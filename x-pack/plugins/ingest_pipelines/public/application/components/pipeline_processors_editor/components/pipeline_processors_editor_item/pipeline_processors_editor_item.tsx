@@ -105,7 +105,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                       size="s"
                       disabled={disabled}
                       aria-label={editorItemMessages.moveButtonLabel}
-                      size="s"
                       onClick={onMove}
                       iconType="sortable"
                     />
@@ -146,6 +145,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ContextMenu
+              data-test-subj="moreMenu"
               disabled={disabled}
               showAddOnFailure={!processor.onFailure?.length}
               onAddOnFailure={() => {

@@ -92,9 +92,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                 });
               }}
               isVisible={Boolean(movingProcessor)}
-              isDisabled={Boolean(
-                !movingProcessor || isDropZoneAboveDisabled(info, movingProcessor!)
-              )}
+              isDisabled={!movingProcessor || isDropZoneAboveDisabled(info, movingProcessor)}
             />
           </EuiFlexItem>
         ) : undefined}
@@ -111,9 +109,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
           <DropZoneButton
             data-test-subj={`dropButtonBelow-${stringifiedSelector}`}
             isVisible={Boolean(movingProcessor)}
-            isDisabled={Boolean(
-              !movingProcessor || isDropZoneBelowDisabled(info, movingProcessor!)
-            )}
+            isDisabled={!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor)}
             onClick={(event) => {
               event.preventDefault();
               onAction({
