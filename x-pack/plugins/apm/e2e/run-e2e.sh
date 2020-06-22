@@ -23,6 +23,8 @@ APM_IT_DIR="./tmp/apm-integration-testing"
 
 cd ${E2E_DIR}
 
+KIBANA_VERSION=$(node -p "require('../../../package.json').version")
+
 #
 # Ask user to start Kibana
 ##################################################
@@ -63,7 +65,8 @@ fi
 
 # Start apm-integration-testing
 echo "Starting docker-compose"
-${APM_IT_DIR}/scripts/compose.py start master \
+echo "Using stack version: ${KIBANA_VERSION}"
+${APM_IT_DIR}/scripts/compose.py start $KIBANA_VERSION \
     --no-kibana \
     --elasticsearch-port $ELASTICSEARCH_PORT \
     --apm-server-port=$APM_SERVER_PORT \
@@ -106,7 +109,7 @@ echo "${bold}Static mock data (logs: ${E2E_DIR}${TMP_DIR}/ingest-data.log)${norm
 # Download static data if not already done
 if [ ! -e "${TMP_DIR}/events.json" ]; then
     echo 'Downloading events.json...'
-    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output ${TMP_DIR}/events.json
+    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/2020-06-12.json --output ${TMP_DIR}/events.json
 fi
 
 # echo "Deleting existing indices (apm* and .apm*)"
@@ -161,6 +164,7 @@ echo "✅ Setup completed successfully. Running tests..."
 # run cypress tests
 ##################################################
 yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
+e2e_status=$?
 
 #
 # Run interactively
@@ -168,3 +172,9 @@ yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
 echo "${bold}If you want to run the test interactively, run:${normal}"
 echo "" # newline
 echo "cd ${E2E_DIR} && yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true"
+
+# Report the e2e status at the very end
+if [ $e2e_status -ne 0 ]; then
+    echo "⚠️  Running tests failed."
+    exit 1
+fi

@@ -170,6 +170,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('saved search filtering', function () {
+      // https://github.com/elastic/kibana/issues/47286#issuecomment-644687577
+      this.tags('skipCoverage');
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -184,6 +186,43 @@ export default function ({ getService, getPageObjects }) {
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
+      });
+    });
+
+    describe('bad filters are loaded properly', function () {
+      before(async () => {
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('dashboard with bad filters');
+      });
+
+      it('filter with non-existent index pattern renders in error mode', async function () {
+        const hasBadFieldFilter = await filterBar.hasFilter('name', 'error', false);
+        expect(hasBadFieldFilter).to.be(true);
+      });
+
+      it('filter with non-existent field renders in error mode', async function () {
+        const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'error', false);
+        expect(hasBadFieldFilter).to.be(true);
+      });
+
+      it('filter from unrelated index pattern is still applicable if field name is found', async function () {
+        const hasUnrelatedIndexPatternFilterPhrase = await filterBar.hasFilter(
+          '@timestamp',
+          '123',
+          true
+        );
+        expect(hasUnrelatedIndexPatternFilterPhrase).to.be(true);
+      });
+
+      it('filter from unrelated index pattern is rendred as a warning if field name is not found', async function () {
+        const hasWarningFieldFilter = await filterBar.hasFilter('extension', 'warn', true);
+        expect(hasWarningFieldFilter).to.be(true);
+      });
+
+      it('filter without an index pattern is rendred as a warning, if the dashboard has an index pattern', async function () {
+        const noIndexPatternFilter = await filterBar.hasFilter('banana', 'warn', true);
+        expect(noIndexPatternFilter).to.be(true);
       });
     });
   });

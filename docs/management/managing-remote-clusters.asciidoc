@@ -6,7 +6,7 @@ connection from your cluster to other clusters. This functionality is
 required for {ref}/xpack-ccr.html[cross-cluster replication] and
 {ref}/modules-cross-cluster-search.html[cross-cluster search].
 
-To get started, go to *Management > Remote Clusters*.
+To get started, open the menu, then go to *Stack Management > {es} > Remote Clusters*.
 
 [role="screenshot"]
 image::images/remote-clusters-list-view.png[Remote Clusters list view, including Add a remote cluster button]
@@ -30,6 +30,10 @@ to reproduce indices in the remote cluster on a local cluster.
 
 [role="screenshot"]
 image::images/add_remote_cluster.png[][UI for adding a remote cluster]
+
+To create an index pattern to search across clusters,
+use the same syntax that you’d use in a raw cross-cluster search request in {es}: <cluster-names>:<pattern>.
+See <<management-cross-cluster-search, Creating an index pattern>> for examples.
 
 [float]
 [[manage-remote-clusters]]

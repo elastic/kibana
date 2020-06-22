@@ -17,40 +17,31 @@
  * under the License.
  */
 
+import { CoreSetup } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
-import { CoreStart } from 'kibana/public';
 import { ES_SEARCH_STRATEGY } from '../../../common/search/es_search';
 
 describe('ES search strategy', () => {
-  let mockCoreStart: MockedKeys<CoreStart>;
-  const mockSearch = jest.fn();
+  let mockCoreSetup: MockedKeys<CoreSetup>;
+  const mockSearch = { search: jest.fn() };
 
   beforeEach(() => {
-    mockCoreStart = coreMock.createStart();
-    mockSearch.mockClear();
+    mockCoreSetup = coreMock.createSetup();
+    mockSearch.search.mockClear();
   });
 
   it('returns a strategy with `search` that calls the sync search `search`', () => {
     const request = { params: {} };
     const options = {};
 
-    const esSearch = esSearchStrategyProvider({
-      core: mockCoreStart,
-      getSearchStrategy: jest.fn().mockImplementation(() => {
-        return () => {
-          return {
-            search: mockSearch,
-          };
-        };
-      }),
-    });
+    const esSearch = esSearchStrategyProvider(mockCoreSetup, mockSearch);
     esSearch.search(request, options);
 
-    expect(mockSearch.mock.calls[0][0]).toEqual({
+    expect(mockSearch.search.mock.calls[0][0]).toEqual({
       ...request,
       serverStrategy: ES_SEARCH_STRATEGY,
     });
-    expect(mockSearch.mock.calls[0][1]).toBe(options);
+    expect(mockSearch.search.mock.calls[0][1]).toBe(options);
   });
 });

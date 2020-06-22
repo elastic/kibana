@@ -46,6 +46,6 @@ export class ManageSpacesButton extends Component<Props, {}> {
       this.props.onClick();
     }
 
-    this.props.navigateToApp('kibana', { path: '#/management/kibana/spaces' });
+    this.props.navigateToApp('management', { path: 'kibana/spaces' });
   };
 }

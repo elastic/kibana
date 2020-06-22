@@ -78,7 +78,7 @@ export async function generateSampleDocuments(
   const dateOfScriptExecution = new Date();
 
   return flatten(
-    range(0, opts.instances).map((instanceNo) => {
+    range(0, opts.instances).map(() => {
       const instanceId = uuid.v4();
       const defaults = {
         cluster_uuid: instanceId,

@@ -35,6 +35,7 @@ export const useBulkGetSavedObject = (type: string) => {
       };
       fetchData();
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [type, kibana.services.savedObjects]
   );
 

@@ -9,7 +9,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
   return {
     rootDir,
     roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins', '<rootDir>/legacy/server'],
-    moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+    moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
     moduleNameMapper: {
       '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
       '@elastic/eui/lib/(.*)?': `${kibanaDirectory}/node_modules/@elastic/eui/test-env/$1`,
@@ -24,7 +24,8 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': fileMockPath,
       '\\.module.(css|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/css_module_mock.js`,
       '\\.(css|less|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`,
-      '\\.ace\\.worker.js$': `${kibanaDirectory}/src/dev/jest/mocks/ace_worker_module_mock.js`,
+      '\\.ace\\.worker.js$': `${kibanaDirectory}/src/dev/jest/mocks/worker_module_mock.js`,
+      '\\.editor\\.worker.js$': `${kibanaDirectory}/src/dev/jest/mocks/worker_module_mock.js`,
       '^test_utils/enzyme_helpers': `${xPackKibanaDirectory}/test_utils/enzyme_helpers.tsx`,
       '^test_utils/find_test_subject': `${xPackKibanaDirectory}/test_utils/find_test_subject.ts`,
       '^test_utils/stub_web_worker': `${xPackKibanaDirectory}/test_utils/stub_web_worker.ts`,
@@ -42,6 +43,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       '!**/scripts/**',
       '!**/mocks/**',
       '!**/plugins/apm/e2e/**',
+      '!**/plugins/siem/cypress/**',
     ],
     coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
     coverageDirectory: `${kibanaDirectory}/target/kibana-coverage/jest`,
@@ -56,7 +58,9 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
+    testEnvironment: 'jest-environment-jsdom-thirteen',
     testMatch: ['**/*.test.{js,ts,tsx}'],
+    testRunner: 'jest-circus/runner',
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
       '^.+\\.html?$': 'jest-raw-loader',

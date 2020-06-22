@@ -66,7 +66,7 @@ export class FollowerIndicesTable extends PureComponent {
     if (prevFollowerIndices !== followerIndices) {
       return {
         prevFollowerIndices: followerIndices,
-        filteredClusters: getFilteredIndices(followerIndices, queryText),
+        filteredIndices: getFilteredIndices(followerIndices, queryText),
       };
     }
 
@@ -97,7 +97,7 @@ export class FollowerIndicesTable extends PureComponent {
   };
 
   editFollowerIndex = (id) => {
-    const uri = routing.getFollowerIndexPath(id, '/edit', false);
+    const uri = routing.getFollowerIndexPath(id);
     routing.navigate(uri);
   };
 

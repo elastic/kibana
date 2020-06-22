@@ -37,8 +37,6 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { notificationServiceMock } from '../../../../../src/core/public/notifications/notifications_service.mock';
 
-jest.mock('ui/new_platform');
-
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
 let server = null;

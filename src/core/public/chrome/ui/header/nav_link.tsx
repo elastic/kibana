@@ -55,7 +55,12 @@ export function createEuiListItem({
   navigateToApp,
   dataTestSubj,
 }: Props) {
-  const { legacy, active, id, title, disabled, euiIconType, icon, tooltip, href } = link;
+  const { legacy, active, id, title, disabled, euiIconType, icon, tooltip } = link;
+  let { href } = link;
+
+  if (legacy) {
+    href = link.url && !active ? link.url : link.baseUrl;
+  }
 
   return {
     label: tooltip ?? title,

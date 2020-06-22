@@ -1,5 +1,5 @@
 [[production]]
-== Using Kibana in a production environment
+== Use {kib} in a production environment
 
 * <<configuring-kibana-shield>>
 * <<csp-strict-mode>>
@@ -23,7 +23,7 @@ and an Elasticsearch client node on the same machine. For more information, see
 
 [float]
 [[configuring-kibana-shield]]
-=== Using {stack} {security-features}
+=== Use {stack} {security-features}
 
 You can use {stack} {security-features} to control what {es} data users can
 access through Kibana.
@@ -59,13 +59,13 @@ csp.strict: true
 
 [float]
 [[enabling-ssl]]
-=== Enabling SSL
+=== Enable SSL
 
 See <<configuring-tls>>.
 
 [float]
 [[load-balancing-es]]
-=== Load Balancing Across Multiple Elasticsearch Nodes
+=== Load Balancing across multiple {es} nodes
 If you have multiple nodes in your Elasticsearch cluster, the easiest way to distribute Kibana requests
 across the nodes is to run an Elasticsearch _Coordinating only_ node on the same machine as Kibana.
 Elasticsearch Coordinating only nodes are essentially smart load balancers that are part of the cluster. They
@@ -145,7 +145,7 @@ bin/kibana -c config/instance2.yml
 
 [float]
 [[high-availability]]
-=== High availability across multiple Elasticsearch nodes
+=== High availability across multiple {es} nodes
 Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
 Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
 

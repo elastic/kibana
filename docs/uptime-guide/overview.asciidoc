@@ -2,10 +2,14 @@
 [[uptime-overview]]
 == Elastic Uptime overview
 
-Elastic Uptime allows you to monitor the availability and response times of applications and services in real time and to detect problems before they affect users.
+++++
+<titleabbrev>Overview</titleabbrev>
+++++
 
-Elastic Uptime can help you to understand uptime and response time characteristics for your services and applications.
-It can be deployed both inside and outside your organization's network, so you can analyze problems from multiple vantage points.
+Elastic Uptime enables you to monitor the availability and response times of applications and services in real time and to detect problems before they affect users.
+
+Elastic Uptime helps you to understand uptime and response time characteristics for your services and applications.
+It can be deployed both inside and outside your organization's network, so that you can analyze problems from multiple vantage points.
 
 Elastic Uptime uses these components: *Heartbeat*, *Elasticsearch* and *Kibana*.
 
@@ -37,17 +41,17 @@ The {kibana-ref}/xpack-uptime.html[Elasticsearch Uptime app] in Kibana provides 
 // ++ In diagram, should be Uptime app, not Uptime UI, possibly even Elastic Uptime? Also applies to Metrics/Logging/APM.
 // ++ Need more whitespace around components.
 
-image::images/uptime-simple-deployment.png[Uptime simple deployment]
-
 In this simple deployment, a single instance of Heartbeat is deployed at a single monitoring location to monitor a single service.
 The Heartbeat instance sends the monitoring data to Elasticsearch.
 Then you can use the Uptime app in Kibana to view the data from Heartbeat and determine the status of the service.
 
-image::images/uptime-multi-deployment.png[Uptime multiple server deployment]
+image::images/uptime-simple-deployment.png[Uptime simple deployment]
 
 In this deployment, two instances of Heartbeat are deployed at two different monitoring locations.
 Both instances monitor the same service.
 The Heartbeat instances send the monitoring data to Elasticsearch.
 As before, you can use the Uptime app in Kibana to view the Heartbeat data and determine the status of the service.
 When a failure occurs, the multiple monitoring locations enable you to pinpoint the area in which the failure has occurred.
+
+image::images/uptime-multi-deployment.png[Uptime multiple server deployment]
 

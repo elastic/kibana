@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleSortControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_sort_controls';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleMetricControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/metric_control';

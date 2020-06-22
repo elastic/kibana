@@ -168,7 +168,7 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MySearch`,
             icon: 'search',
-            editUrl: '#/management/kibana/objects/savedSearches/2',
+            editUrl: '/management/kibana/objects/savedSearches/2',
             inAppUrl: {
               path: '/discover/2',
               uiCapabilitiesPath: 'discover.show',
@@ -181,7 +181,7 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyDashboard`,
             icon: 'dashboardApp',
-            editUrl: '#/management/kibana/objects/savedDashboards/3',
+            editUrl: '/management/kibana/objects/savedDashboards/3',
             inAppUrl: {
               path: '/dashboard/3',
               uiCapabilitiesPath: 'dashboard.show',
@@ -194,7 +194,7 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyViz`,
             icon: 'visualizeApp',
-            editUrl: '#/management/kibana/objects/savedVisualizations/4',
+            editUrl: '/management/kibana/objects/savedVisualizations/4',
             inAppUrl: {
               path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
@@ -395,7 +395,7 @@ describe('SavedObjectsTable', () => {
       component.instance().showImportFlyout();
       component.update();
 
-      expect(component.find(Flyout)).toMatchSnapshot();
+      expect(component.find(Flyout).length).toBe(1);
     });
 
     it('should hide the flyout', async () => {
@@ -441,7 +441,7 @@ describe('SavedObjectsTable', () => {
         meta: {
           title: `MySearch`,
           icon: 'search',
-          editUrl: '#/management/kibana/objects/savedSearches/2',
+          editUrl: '/management/kibana/objects/savedSearches/2',
           inAppUrl: {
             path: '/discover/2',
             uiCapabilitiesPath: 'discover.show',
@@ -450,13 +450,13 @@ describe('SavedObjectsTable', () => {
       } as SavedObjectWithMetadata);
       component.update();
 
-      expect(component.find(Relationships)).toMatchSnapshot();
+      expect(component.find(Relationships).length).toBe(1);
       expect(component.state('relationshipObject')).toEqual({
         id: '2',
         type: 'search',
         meta: {
           title: 'MySearch',
-          editUrl: '#/management/kibana/objects/savedSearches/2',
+          editUrl: '/management/kibana/objects/savedSearches/2',
           icon: 'search',
           inAppUrl: {
             path: '/discover/2',

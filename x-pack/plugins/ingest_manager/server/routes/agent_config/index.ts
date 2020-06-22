@@ -10,6 +10,7 @@ import {
   GetOneAgentConfigRequestSchema,
   CreateAgentConfigRequestSchema,
   UpdateAgentConfigRequestSchema,
+  CopyAgentConfigRequestSchema,
   DeleteAgentConfigRequestSchema,
   GetFullAgentConfigRequestSchema,
 } from '../../types';
@@ -18,8 +19,10 @@ import {
   getOneAgentConfigHandler,
   createAgentConfigHandler,
   updateAgentConfigHandler,
+  copyAgentConfigHandler,
   deleteAgentConfigsHandler,
   getFullAgentConfig,
+  downloadFullAgentConfig,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -63,6 +66,16 @@ export const registerRoutes = (router: IRouter) => {
     updateAgentConfigHandler
   );
 
+  // Copy
+  router.post(
+    {
+      path: AGENT_CONFIG_API_ROUTES.COPY_PATTERN,
+      validate: CopyAgentConfigRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    copyAgentConfigHandler
+  );
+
   // Delete
   router.post(
     {
@@ -81,5 +94,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getFullAgentConfig
+  );
+
+  // Download one full agent config
+  router.get(
+    {
+      path: AGENT_CONFIG_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
+      validate: GetFullAgentConfigRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    downloadFullAgentConfig
   );
 };

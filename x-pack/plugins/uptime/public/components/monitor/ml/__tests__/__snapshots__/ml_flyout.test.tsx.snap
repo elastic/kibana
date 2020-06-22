@@ -31,11 +31,11 @@ exports[`ML Flyout component renders without errors 1`] = `
           id="xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription"
           values={
             Object {
-              "mlJobsPageLink": <ForwardRef
+              "mlJobsPageLink": <EuiLink
                 href="/app/ml"
               >
                 Machine Learning jobs management page
-              </ForwardRef>,
+              </EuiLink>,
             }
           }
         />
@@ -160,7 +160,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                 </p>
                 <a
                   class="euiButton euiButton--primary"
-                  href="/app/kibana#/management/stack/license_management/home"
+                  href="/app/management/stack/license_management/home"
                   rel="noopener noreferrer"
                   target="_blank"
                 >

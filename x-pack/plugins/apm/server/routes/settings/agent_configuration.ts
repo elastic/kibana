@@ -24,7 +24,7 @@ import {
 import { jsonRt } from '../../../common/runtime_types/json_rt';
 
 // get list of configurations
-export const agentConfigurationRoute = createRoute((core) => ({
+export const agentConfigurationRoute = createRoute(() => ({
   path: '/api/apm/settings/agent-configuration',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -137,7 +137,7 @@ export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
 }));
 
 // Lookup single configuration (used by APM Server)
-export const agentConfigurationSearchRoute = createRoute((core) => ({
+export const agentConfigurationSearchRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
   params: {

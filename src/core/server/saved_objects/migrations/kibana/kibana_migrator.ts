@@ -74,6 +74,7 @@ export class KibanaMigrator {
   private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
     status: 'waiting',
   });
+  private readonly activeMappings: IndexMapping;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -100,6 +101,9 @@ export class KibanaMigrator {
       validateDoc: docValidator(savedObjectValidations || {}),
       log: this.log,
     });
+    // Building the active mappings (and associated md5sums) is an expensive
+    // operation so we cache the result
+    this.activeMappings = buildActiveMappings(this.mappingProperties);
   }
 
   /**
@@ -172,7 +176,7 @@ export class KibanaMigrator {
    *
    */
   public getActiveMappings(): IndexMapping {
-    return buildActiveMappings(this.mappingProperties);
+    return this.activeMappings;
   }
 
   /**

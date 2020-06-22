@@ -16,23 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { useState } from 'react';
-import { XJsonMode, collapseLiteralStrings, expandLiteralStrings } from '../../../public';
+import { XJsonMode } from '../../../public';
+import { useXJsonMode as useBaseXJsonMode } from '../../../__packages_do_not_import__/xjson';
 
 const xJsonMode = new XJsonMode();
 
-export const useXJsonMode = (json: Record<string, any> | string | null) => {
-  const [xJson, setXJson] = useState(() =>
-    json === null
-      ? ''
-      : expandLiteralStrings(typeof json === 'string' ? json : JSON.stringify(json, null, 2))
-  );
+interface ReturnValue extends ReturnType<typeof useBaseXJsonMode> {
+  xJsonMode: typeof xJsonMode;
+}
 
+export const useXJsonMode = (json: Parameters<typeof useBaseXJsonMode>[0]): ReturnValue => {
   return {
-    xJson,
-    setXJson,
+    ...useBaseXJsonMode(json),
     xJsonMode,
-    convertToJson: collapseLiteralStrings,
   };
 };

@@ -16,9 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
+import {
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from '../../../../core/public';
 import { VisSavedObject } from '../types';
-import { injectSearchSourceReferences, extractSearchSourceReferences } from '../../../data/public';
+import {
+  extractSearchSourceReferences,
+  injectSearchSourceReferences,
+  SearchSourceFields,
+} from '../../../data/public';
 
 export function extractReferences({
   attributes,
@@ -32,9 +40,9 @@ export function extractReferences({
 
   if (updatedAttributes.searchSourceFields) {
     const [searchSource, searchSourceReferences] = extractSearchSourceReferences(
-      updatedAttributes.searchSourceFields as any
+      updatedAttributes.searchSourceFields as SearchSourceFields
     );
-    updatedAttributes.searchSourceFields = searchSource;
+    updatedAttributes.searchSourceFields = searchSource as SavedObjectAttribute;
     searchSourceReferences.forEach((r) => updatedReferences.push(r));
   }
 

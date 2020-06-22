@@ -47,10 +47,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows settings to be changed`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
         await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
         const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
@@ -59,7 +60,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with Advanced Settings disabled', function () {
-      this.tags('skipCoverage');
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -77,10 +77,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`redirects to management home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
         await testSubjects.existOrFail('managementHome', {
           timeout: config.get('timeouts.waitFor'),

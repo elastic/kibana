@@ -42,11 +42,12 @@ export class IndexLifecycleManagementPlugin {
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
-        mount: async ({ element }) => {
+        mount: async ({ element, history }) => {
           const [coreStart] = await getStartServices();
           const {
             i18n: { Context: I18nContext },
             docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+            application: { navigateToApp },
           } = coreStart;
 
           // Initialize additional services.
@@ -55,7 +56,7 @@ export class IndexLifecycleManagementPlugin {
           );
 
           const { renderApp } = await import('./application');
-          return renderApp(element, I18nContext);
+          return renderApp(element, I18nContext, history, navigateToApp);
         },
       });
 

@@ -46,6 +46,7 @@ export default function ({ getService }) {
                   attributes: {
                     title: 'Count of requests',
                   },
+                  score: 0,
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
                   references: [
                     {
@@ -134,6 +135,7 @@ export default function ({ getService }) {
                             .searchSourceJSON,
                       },
                     },
+                    score: 0,
                     references: [
                       {
                         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',

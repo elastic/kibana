@@ -83,13 +83,13 @@ For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 **Start server**
 
 ```
-node scripts/functional_tests_server --config x-pack/test/api_integration/config.js
+node scripts/functional_tests_server --config x-pack/test/api_integration/config.ts
 ```
 
 **Run tests**
 
 ```
-node scripts/functional_test_runner --config x-pack/test/api_integration/config.js --grep='APM specs'
+node scripts/functional_test_runner --config x-pack/test/api_integration/config.ts --grep='APM specs'
 ```
 
 APM tests are located in `x-pack/test/api_integration/apis/apm`.

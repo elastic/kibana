@@ -14,7 +14,7 @@ import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 
 const indexLifecycleDataEnricher = async (indicesList: any, callAsCurrentUser: APICaller) => {
   if (!indicesList || !indicesList.length) {

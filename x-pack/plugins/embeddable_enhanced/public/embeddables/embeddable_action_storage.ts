@@ -7,7 +7,7 @@
 import {
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
   UiActionsEnhancedSerializedEvent as SerializedEvent,
-} from '../../../advanced_ui_actions/public';
+} from '../../../ui_actions_enhanced/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import numeral from 'numeral';
+import numeral from '@elastic/numeral';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';

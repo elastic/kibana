@@ -7,7 +7,7 @@
 
 import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
-import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
+import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
 
 // Global map state passed to every layer.
 export type MapFilters = {

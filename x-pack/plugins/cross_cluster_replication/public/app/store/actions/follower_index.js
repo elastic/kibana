@@ -77,7 +77,7 @@ export const saveFollowerIndex = (name, followerIndex, isUpdating = false) =>
           );
 
       getToasts().addSuccess(successMessage);
-      routing.navigate(`/follower_indices`, undefined, {
+      routing.navigate(`/follower_indices`, {
         name: encodeURIComponent(name),
       });
     },
@@ -149,7 +149,6 @@ export const resumeFollowerIndex = (id) =>
     scope,
     handler: async () => resumeFollowerIndexRequest(id),
     onSuccess(response, dispatch) {
-      console.log('response', response);
       /**
        * We can have 1 or more follower index resume operation
        * that can fail or succeed. We will show 1 toast notification for each.

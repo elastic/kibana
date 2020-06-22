@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import './ccr.scss';
 
 function toSeconds(ms) {
   return Math.floor(ms / 1000) + 's';

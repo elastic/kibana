@@ -67,10 +67,11 @@ export function MachineLearningDataFrameAnalyticsProvider(
       } else {
         await testSubjects.click('mlAnalyticsButtonCreate');
       }
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyout');
+      await testSubjects.existOrFail('analyticsCreateSourceIndexModal');
     },
 
     async waitForAnalyticsCompletion(analyticsId: string) {
+      await mlApi.waitForDFAJobTrainingRecordCountToBePositive(analyticsId);
       await mlApi.waitForAnalyticsState(analyticsId, DATA_FRAME_TASK_STATE.STOPPED);
     },
   };

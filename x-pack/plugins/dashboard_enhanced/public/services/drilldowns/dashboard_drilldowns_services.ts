@@ -41,7 +41,7 @@ export class DashboardDrilldownsService {
 
   setupDrilldowns(
     core: CoreSetup<StartDependencies>,
-    { advancedUiActions: uiActions }: SetupDependencies
+    { uiActionsEnhanced: uiActions }: SetupDependencies
   ) {
     const start = createStartServicesGetter(core.getStartServices);
     const getDashboardUrlGenerator = () => {

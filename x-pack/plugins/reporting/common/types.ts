@@ -5,7 +5,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { ConfigType } from '../server/config';
+export { ReportingConfigType } from '../server/config';
 
 export type JobId = string;
 export type JobStatus =

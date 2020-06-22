@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { expectType } from 'tsd';
 import { schema } from '..';
 import { TypeOf } from './object_type';
 
@@ -360,17 +361,142 @@ test('handles optional properties', () => {
 
   type SchemaType = TypeOf<typeof type>;
 
-  let foo: SchemaType = {
+  expectType<SchemaType>({
     required: 'foo',
-  };
-  foo = {
+  });
+  expectType<SchemaType>({
     required: 'hello',
     optional: undefined,
-  };
-  foo = {
+  });
+  expectType<SchemaType>({
     required: 'hello',
     optional: 'bar',
-  };
+  });
+});
 
-  expect(foo).toBeDefined();
+describe('#extends', () => {
+  it('allows to extend an existing schema by adding new properties', () => {
+    const origin = schema.object({
+      initial: schema.string(),
+    });
+
+    const extended = origin.extends({
+      added: schema.number(),
+    });
+
+    expect(() => {
+      extended.validate({ initial: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[added]: expected value of type [number] but got [undefined]"`
+    );
+
+    expect(() => {
+      extended.validate({ initial: 'foo', added: 42 });
+    }).not.toThrowError();
+
+    expectType<TypeOf<typeof extended>>({
+      added: 12,
+      initial: 'foo',
+    });
+  });
+
+  it('allows to extend an existing schema by removing properties', () => {
+    const origin = schema.object({
+      string: schema.string(),
+      number: schema.number(),
+    });
+
+    const extended = origin.extends({ number: undefined });
+
+    expect(() => {
+      extended.validate({ string: 'foo', number: 12 });
+    }).toThrowErrorMatchingInlineSnapshot(`"[number]: definition for this key is missing"`);
+
+    expect(() => {
+      extended.validate({ string: 'foo' });
+    }).not.toThrowError();
+
+    expectType<TypeOf<typeof extended>>({
+      string: 'foo',
+    });
+  });
+
+  it('allows to extend an existing schema by overriding an existing properties', () => {
+    const origin = schema.object({
+      string: schema.string(),
+      mutated: schema.number(),
+    });
+
+    const extended = origin.extends({
+      mutated: schema.string(),
+    });
+
+    expect(() => {
+      extended.validate({ string: 'foo', mutated: 12 });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[mutated]: expected value of type [string] but got [number]"`
+    );
+
+    expect(() => {
+      extended.validate({ string: 'foo', mutated: 'bar' });
+    }).not.toThrowError();
+
+    expectType<TypeOf<typeof extended>>({
+      string: 'foo',
+      mutated: 'bar',
+    });
+  });
+
+  it('properly infer the type from optional properties', () => {
+    const origin = schema.object({
+      original: schema.maybe(schema.string()),
+      mutated: schema.maybe(schema.number()),
+      removed: schema.maybe(schema.string()),
+    });
+
+    const extended = origin.extends({
+      removed: undefined,
+      mutated: schema.string(),
+    });
+
+    expect(() => {
+      extended.validate({ original: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[mutated]: expected value of type [string] but got [undefined]"`
+    );
+    expect(() => {
+      extended.validate({ original: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[mutated]: expected value of type [string] but got [undefined]"`
+    );
+    expect(() => {
+      extended.validate({ original: 'foo', mutated: 'bar' });
+    }).not.toThrowError();
+
+    expectType<TypeOf<typeof extended>>({
+      original: 'foo',
+      mutated: 'bar',
+    });
+    expectType<TypeOf<typeof extended>>({
+      mutated: 'bar',
+    });
+  });
+
+  it(`allows to override the original schema's options`, () => {
+    const origin = schema.object(
+      {
+        initial: schema.string(),
+      },
+      { defaultValue: { initial: 'foo' } }
+    );
+
+    const extended = origin.extends(
+      {
+        added: schema.number(),
+      },
+      { defaultValue: { initial: 'bar', added: 42 } }
+    );
+
+    expect(extended.validate(undefined)).toEqual({ initial: 'bar', added: 42 });
+  });
 });

@@ -35,8 +35,10 @@ describe('Data Frame Analytics: <CreateAnalyticsButton />', () => {
   test('Minimal initialization', () => {
     const { getLastHookValue } = getMountedHook();
     const props = getLastHookValue();
-    const wrapper = mount(<CreateAnalyticsButton {...props} />);
+    const wrapper = mount(
+      <CreateAnalyticsButton {...props} setIsSourceIndexModalVisible={jest.fn()} />
+    );
 
-    expect(wrapper.find('EuiButton').text()).toBe('Create analytics job');
+    expect(wrapper.find('EuiButton').text()).toBe('Create job');
   });
 });

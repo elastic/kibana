@@ -21,7 +21,7 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerLogLegacyImportRoute } from '../log_legacy_import';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
-import { setupServer } from './test_utils';
+import { setupServer } from '../test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 

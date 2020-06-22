@@ -4,6 +4,6 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "data"],
+  "requiredPlugins": ["navigation", "data", "developerExamples"],
   "optionalPlugins": []
 }

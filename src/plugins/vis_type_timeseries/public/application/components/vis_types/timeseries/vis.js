@@ -250,6 +250,7 @@ export class TimeseriesVisualization extends Component {
           showGrid={Boolean(model.show_grid)}
           legend={Boolean(model.show_legend)}
           legendPosition={model.legend_position}
+          tooltipMode={model.tooltip_mode}
           xAxisLabel={getAxisLabelString(interval)}
           xAxisFormatter={this.xAxisFormatter(interval)}
           annotations={this.prepareAnnotations()}

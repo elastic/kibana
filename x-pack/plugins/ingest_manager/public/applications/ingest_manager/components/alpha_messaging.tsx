@@ -15,6 +15,7 @@ const Message = styled(EuiText).attrs((props) => ({
   size: 's',
 }))`
   padding: ${(props) => props.theme.eui.paddingSizes.m};
+  margin-top: auto;
 `;
 
 export const AlphaMessaging: React.FC<{}> = () => {

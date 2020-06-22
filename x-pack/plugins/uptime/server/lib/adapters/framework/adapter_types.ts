@@ -23,7 +23,7 @@ export type APICaller = (
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: { callES: APICaller; dynamicSettings: DynamicSettings } & P
-) => Promise<R> | R;
+) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
   client: SavedObjectsClientContract | ISavedObjectsRepository,

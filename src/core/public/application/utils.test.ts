@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { LegacyApp, App } from './types';
+import { of } from 'rxjs';
+import { LegacyApp, App, AppStatus, AppNavLinkStatus } from './types';
 import { BasePath } from '../http/base_path';
 import {
   removeSlashes,
@@ -25,6 +26,7 @@ import {
   isLegacyApp,
   relativeToAbsolute,
   parseAppUrl,
+  getAppInfo,
 } from './utils';
 
 describe('removeSlashes', () => {
@@ -456,6 +458,59 @@ describe('parseAppUrl', () => {
           getOrigin
         )
       ).toEqual(undefined);
+    });
+  });
+});
+
+describe('getAppInfo', () => {
+  const createApp = (props: Partial<App> = {}): App => ({
+    mount: () => () => undefined,
+    updater$: of(() => undefined),
+    id: 'some-id',
+    title: 'some-title',
+    status: AppStatus.accessible,
+    navLinkStatus: AppNavLinkStatus.default,
+    appRoute: `/app/some-id`,
+    legacy: false,
+    ...props,
+  });
+
+  const createLegacyApp = (props: Partial<LegacyApp> = {}): LegacyApp => ({
+    appUrl: '/my-app-url',
+    updater$: of(() => undefined),
+    id: 'some-id',
+    title: 'some-title',
+    status: AppStatus.accessible,
+    navLinkStatus: AppNavLinkStatus.default,
+    legacy: true,
+    ...props,
+  });
+
+  it('converts an application and remove sensitive properties', () => {
+    const app = createApp();
+    const info = getAppInfo(app);
+
+    expect(info).toEqual({
+      id: 'some-id',
+      title: 'some-title',
+      status: AppStatus.accessible,
+      navLinkStatus: AppNavLinkStatus.default,
+      appRoute: `/app/some-id`,
+      legacy: false,
+    });
+  });
+
+  it('converts a legacy application and remove sensitive properties', () => {
+    const app = createLegacyApp();
+    const info = getAppInfo(app);
+
+    expect(info).toEqual({
+      appUrl: '/my-app-url',
+      id: 'some-id',
+      title: 'some-title',
+      status: AppStatus.accessible,
+      navLinkStatus: AppNavLinkStatus.default,
+      legacy: true,
     });
   });
 });

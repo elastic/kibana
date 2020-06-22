@@ -26,7 +26,7 @@ export function getListBreadcrumbs() {
       text: i18n.translate('indexPatternManagement.indexPatterns.listBreadcrumb', {
         defaultMessage: 'Index patterns',
       }),
-      href: `#/management/kibana/indexPatterns/`,
+      href: `/`,
     },
   ];
 }
@@ -38,7 +38,7 @@ export function getCreateBreadcrumbs() {
       text: i18n.translate('indexPatternManagement.indexPatterns.createBreadcrumb', {
         defaultMessage: 'Create index pattern',
       }),
-      href: `#/management/kibana/indexPatterns/create`,
+      href: `/create`,
     },
   ];
 }
@@ -48,7 +48,7 @@ export function getEditBreadcrumbs(indexPattern: IndexPattern) {
     ...getListBreadcrumbs(),
     {
       text: indexPattern.title,
-      href: `#/management/kibana/indexPatterns/patterns/${indexPattern.id}`,
+      href: `/patterns/${indexPattern.id}`,
     },
   ];
 }

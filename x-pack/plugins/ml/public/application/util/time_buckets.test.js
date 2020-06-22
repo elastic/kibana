@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { TimeBuckets, getBoundsRoundedToInterval, calcEsInterval } from './time_buckets';
 
 describe('ML - time buckets', () => {
@@ -13,8 +14,8 @@ describe('ML - time buckets', () => {
 
   beforeEach(() => {
     const timeBucketsConfig = {
-      'histogram:maxBars': 100,
-      'histogram:barTarget': 50,
+      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: 100,
+      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: 50,
     };
 
     autoBuckets = new TimeBuckets(timeBucketsConfig);

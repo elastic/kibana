@@ -115,7 +115,11 @@ export function getPreviewRequestBody(
   });
 
   aggs.forEach((agg) => {
-    request.pivot.aggregations[agg.aggName] = getEsAggFromAggConfig(agg);
+    const result = getEsAggFromAggConfig(agg);
+    if (result === null) {
+      return;
+    }
+    request.pivot.aggregations[agg.aggName] = result;
   });
 
   return request;

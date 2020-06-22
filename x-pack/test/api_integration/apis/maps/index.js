@@ -13,6 +13,7 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', () => {
+      loadTestFile(require.resolve('./fonts_api'));
       loadTestFile(require.resolve('./index_settings'));
       loadTestFile(require.resolve('./migrations'));
     });

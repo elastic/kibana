@@ -21,7 +21,11 @@ import React, { Component } from 'react';
 import { EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { indexPatterns, IndexPatternAttributes } from '../../../../../../../plugins/data/public';
+import {
+  indexPatterns,
+  IndexPatternAttributes,
+  UI_SETTINGS,
+} from '../../../../../../../plugins/data/public';
 import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
@@ -82,7 +86,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     super(props, context);
     const { indexPatternCreationType, initialQuery } = this.props;
 
-    this.state.query = initialQuery || context.services.uiSettings.get('indexPattern:placeholder');
+    this.state.query =
+      initialQuery || context.services.uiSettings.get(UI_SETTINGS.INDEXPATTERN_PLACEHOLDER);
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
   }
 

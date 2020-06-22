@@ -7,7 +7,7 @@
   "defaultIndexPattern": "kibana_sample_data_ecommerce",
   "query": {
     "bool": {
-      "filter": [{ "term": { "_index": "kibana_sample_data_ecommerce" } }]
+      "filter": [{ "term": { "event.dataset": "sample_ecommerce" } }]
     }
   },
   "jobs": [

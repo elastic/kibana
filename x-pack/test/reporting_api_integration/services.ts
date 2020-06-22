@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import * as Rx from 'rxjs';
 import { filter, first, mapTo, switchMap, timeout } from 'rxjs/operators';
 // @ts-ignore no module definition
-import { indexTimestamp } from '../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
+import { indexTimestamp } from '../../plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
 import { services as xpackServices } from '../functional/services';
 import { FtrProviderContext } from './ftr_provider_context';
 

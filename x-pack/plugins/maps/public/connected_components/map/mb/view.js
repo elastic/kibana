@@ -118,11 +118,8 @@ export class MBMapContainer extends React.Component {
         version: 8,
         sources: {},
         layers: [],
+        glyphs: getGlyphUrl(),
       };
-      const glyphUrl = getGlyphUrl();
-      if (glyphUrl) {
-        mbStyle.glyphs = glyphUrl;
-      }
 
       const options = {
         attributionControl: false,

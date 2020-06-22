@@ -6,12 +6,15 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiEmptyPrompt, EuiLink, EuiPageBody, EuiPageContent } from '@elastic/eui';
-import { BASE_PATH } from '../../../../common/constants';
+import { EuiEmptyPrompt, EuiLink, EuiPageBody, EuiPageContent, EuiButton } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { ScopedHistory } from 'kibana/public';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { useKibana } from '../../../shared_imports';
 
 export const EmptyList: FunctionComponent = () => {
   const { services } = useKibana();
+  const history = useHistory() as ScopedHistory;
 
   return (
     <EuiPageBody>
@@ -41,7 +44,7 @@ export const EmptyList: FunctionComponent = () => {
             </p>
           }
           actions={
-            <EuiButton href={`#${BASE_PATH}/create`} iconType="plusInCircle" fill>
+            <EuiButton {...reactRouterNavigate(history, '/create')} iconType="plusInCircle" fill>
               {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
                 defaultMessage: 'Create a pipeline',
               })}

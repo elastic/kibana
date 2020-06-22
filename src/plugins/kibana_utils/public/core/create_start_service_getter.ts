@@ -19,16 +19,17 @@
 
 import { CoreStart, StartServicesAccessor } from '../../../../core/public';
 
-export interface StartServices<Plugins = unknown, OwnContract = unknown> {
+export interface StartServices<Plugins = unknown, OwnContract = unknown, Core = CoreStart> {
   plugins: Plugins;
   self: OwnContract;
-  core: CoreStart;
+  core: Core;
 }
 
-export type StartServicesGetter<Plugins = unknown, OwnContract = unknown> = () => StartServices<
-  Plugins,
-  OwnContract
->;
+export type StartServicesGetter<
+  Plugins = unknown,
+  OwnContract = unknown,
+  Core = CoreStart
+> = () => StartServices<Plugins, OwnContract>;
 
 /**
  * Use this utility to create a synchronous *start* service getter in *setup*

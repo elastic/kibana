@@ -106,6 +106,7 @@ describe('useFetcher', () => {
       jest.useFakeTimers();
 
       const hook = renderHook(
+        /* eslint-disable-next-line react-hooks/exhaustive-deps */
         ({ callback, args }) => useFetcher(callback, args),
         {
           initialProps: {
@@ -165,6 +166,7 @@ describe('useFetcher', () => {
 
     it('should return the same object reference when data is unchanged between rerenders', async () => {
       const hook = renderHook(
+        /* eslint-disable-next-line react-hooks/exhaustive-deps */
         ({ callback, args }) => useFetcher(callback, args),
         {
           initialProps: {

@@ -106,7 +106,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
             if (response.error) {
               responsesReceived++;
               items[response.id].future.reject(response.error);
-            } else if (response.result) {
+            } else if (response.result !== undefined) {
               responsesReceived++;
               items[response.id].future.resolve(response.result);
             }

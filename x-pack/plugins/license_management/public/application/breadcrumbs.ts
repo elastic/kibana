@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
-import { BASE_PATH } from '../../common/constants';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
@@ -32,7 +31,7 @@ export class BreadcrumbService {
         text: i18n.translate('xpack.licenseMgmt.dashboard.breadcrumb', {
           defaultMessage: 'License management',
         }),
-        href: `#${BASE_PATH}home`,
+        href: `/`,
       },
     ];
 

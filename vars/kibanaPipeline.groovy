@@ -98,7 +98,7 @@ def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
-    'target/kibana-siem/**/*.png',
+    'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
     'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',
@@ -221,6 +221,8 @@ def call(Map params = [:], Closure closure) {
       timestamps {
         ansiColor('xterm') {
           if (config.checkPrChanges && githubPr.isPr()) {
+            pipelineLibraryTests()
+
             print "Checking PR for changes to determine if CI needs to be run..."
 
             if (prChanges.areChangesSkippable()) {
@@ -230,6 +232,16 @@ def call(Map params = [:], Closure closure) {
           }
           closure()
         }
+      }
+    }
+  }
+}
+
+def pipelineLibraryTests() {
+  whenChanged(['vars/', '.ci/pipeline-library/']) {
+    workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
+      dir('.ci/pipeline-library') {
+        sh './gradlew test'
       }
     }
   }

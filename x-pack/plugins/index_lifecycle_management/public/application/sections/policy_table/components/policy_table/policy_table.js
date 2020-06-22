@@ -36,9 +36,8 @@ import {
 } from '@elastic/eui';
 
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
-
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { getIndexListUri } from '../../../../../../../index_management/public';
-import { BASE_PATH } from '../../../../../../common/constants';
 import { UIM_EDIT_CLICK } from '../../../../constants';
 import { getPolicyPath } from '../../../../services/navigation';
 import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
@@ -181,8 +180,9 @@ export class PolicyTable extends Component {
         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
           data-test-subj="policyTablePolicyNameLink"
-          href={getPolicyPath(value)}
-          onClick={() => trackUiMetric('click', UIM_EDIT_CLICK)}
+          {...reactRouterNavigate(this.props.history, getPolicyPath(value), () =>
+            trackUiMetric('click', UIM_EDIT_CLICK)
+          )}
         >
           {value}
         </EuiLink>
@@ -201,7 +201,7 @@ export class PolicyTable extends Component {
   renderCreatePolicyButton() {
     return (
       <EuiButton
-        href={`#${BASE_PATH}policies/edit`}
+        {...reactRouterNavigate(this.props.history, '/policies/edit')}
         fill
         iconType="plusInCircle"
         data-test-subj="createPolicyButton"
@@ -253,7 +253,9 @@ export class PolicyTable extends Component {
         name: viewIndicesLabel,
         icon: 'list',
         onClick: () => {
-          window.location.hash = getIndexListUri(`ilm.policy:${policy.name}`);
+          this.props.navigateToApp('management', {
+            path: `/data/index_management${getIndexListUri(`ilm.policy:${policy.name}`)}`,
+          });
         },
       });
     }

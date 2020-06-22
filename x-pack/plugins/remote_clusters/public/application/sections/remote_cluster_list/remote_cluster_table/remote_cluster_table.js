@@ -19,10 +19,10 @@ import {
   EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
-
-import { CRUD_APP_BASE_PATH, UIM_SHOW_DETAILS_CLICK } from '../../../constants';
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { UIM_SHOW_DETAILS_CLICK } from '../../../constants';
 import { PROXY_MODE } from '../../../../../common/constants';
-import { getRouterLinkProps, trackUiMetric, METRIC_TYPE } from '../../../services';
+import { trackUiMetric, METRIC_TYPE, getRouter } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
 const getFilteredClusters = (clusters, queryText) => {
@@ -94,6 +94,7 @@ export class RemoteClusterTable extends Component {
   render() {
     const { openDetailPanel } = this.props;
     const { selectedItems, filteredClusters } = this.state;
+    const { history } = getRouter();
 
     const columns = [
       {
@@ -256,7 +257,7 @@ export class RemoteClusterTable extends Component {
                     iconType="pencil"
                     color="primary"
                     isDisabled={isConfiguredByNode}
-                    {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${name}`)}
+                    {...reactRouterNavigate(history, `/edit/${name}`)}
                     disabled={isConfiguredByNode}
                   />
                 </EuiToolTip>

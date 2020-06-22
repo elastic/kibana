@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should not render clusters option when clustering is not supported 1`] = `
+exports[`should disable clusters option when clustering is not supported 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"
@@ -24,22 +24,33 @@ exports[`should not render clusters option when clustering is not supported 1`] 
     hasEmptyLabelSpace={false}
     labelType="label"
   >
-    <EuiRadioGroup
-      idSelected="LIMIT"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "id": "LIMIT",
-            "label": "Limit results to 10000.",
-          },
-          Object {
-            "id": "TOP_HITS",
-            "label": "Show top hits per entity.",
-          },
-        ]
-      }
-    />
+    <div>
+      <EuiRadio
+        checked={true}
+        id="LIMIT"
+        label="Limit results to 10000."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        id="TOP_HITS"
+        label="Show top hits per entity."
+        onChange={[Function]}
+      />
+      <EuiToolTip
+        content="Simulated clustering disabled"
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={true}
+          id="CLUSTERS"
+          label="Show clusters when results exceed 10000."
+          onChange={[Function]}
+        />
+      </EuiToolTip>
+    </div>
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
@@ -83,26 +94,27 @@ exports[`should render 1`] = `
     hasEmptyLabelSpace={false}
     labelType="label"
   >
-    <EuiRadioGroup
-      idSelected="LIMIT"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "id": "LIMIT",
-            "label": "Limit results to 10000.",
-          },
-          Object {
-            "id": "TOP_HITS",
-            "label": "Show top hits per entity.",
-          },
-          Object {
-            "id": "CLUSTERS",
-            "label": "Show clusters when results exceed 10000.",
-          },
-        ]
-      }
-    />
+    <div>
+      <EuiRadio
+        checked={true}
+        id="LIMIT"
+        label="Limit results to 10000."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        id="TOP_HITS"
+        label="Show top hits per entity."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        disabled={false}
+        id="CLUSTERS"
+        label="Show clusters when results exceed 10000."
+        onChange={[Function]}
+      />
+    </div>
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
@@ -146,26 +158,27 @@ exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
     hasEmptyLabelSpace={false}
     labelType="label"
   >
-    <EuiRadioGroup
-      idSelected="TOP_HITS"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "id": "LIMIT",
-            "label": "Limit results to 10000.",
-          },
-          Object {
-            "id": "TOP_HITS",
-            "label": "Show top hits per entity.",
-          },
-          Object {
-            "id": "CLUSTERS",
-            "label": "Show clusters when results exceed 10000.",
-          },
-        ]
-      }
-    />
+    <div>
+      <EuiRadio
+        checked={false}
+        id="LIMIT"
+        label="Limit results to 10000."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={true}
+        id="TOP_HITS"
+        label="Show top hits per entity."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        disabled={false}
+        id="CLUSTERS"
+        label="Show clusters when results exceed 10000."
+        onChange={[Function]}
+      />
+    </div>
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}

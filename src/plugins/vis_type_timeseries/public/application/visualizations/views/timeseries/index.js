@@ -61,6 +61,7 @@ export const TimeSeries = ({
   showGrid,
   legend,
   legendPosition,
+  tooltipMode,
   xAxisLabel,
   series,
   yAxis,
@@ -131,7 +132,7 @@ export const TimeSeries = ({
         baseTheme={theme}
         tooltip={{
           snap: true,
-          type: TooltipType.VerticalCursor,
+          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
       />
