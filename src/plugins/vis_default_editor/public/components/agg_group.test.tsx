@@ -27,14 +27,19 @@ import { DefaultEditorAggAdd } from './agg_add';
 import { ISchemas, Schemas } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
 
-jest.mock('@elastic/eui', () => ({
-  EuiTitle: 'eui-title',
-  EuiDragDropContext: 'eui-drag-drop-context',
-  EuiDroppable: 'eui-droppable',
-  EuiDraggable: (props: any) => props.children({ dragHandleProps: {} }),
-  EuiSpacer: 'eui-spacer',
-  EuiPanel: 'eui-panel',
-}));
+jest.mock('@elastic/eui', () => {
+  const originalModule = jest.requireActual('@elastic/eui');
+
+  return {
+    ...originalModule,
+    EuiTitle: 'eui-title',
+    EuiDragDropContext: 'eui-drag-drop-context',
+    EuiDroppable: 'eui-droppable',
+    EuiDraggable: (props: any) => props.children({ dragHandleProps: {} }),
+    EuiSpacer: 'eui-spacer',
+    EuiPanel: 'eui-panel',
+  };
+});
 
 jest.mock('./agg', () => ({
   DefaultEditorAgg: () => <div />,
