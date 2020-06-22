@@ -12,7 +12,7 @@ import * as H from 'history';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import { inputsSelectors, State } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
@@ -84,17 +84,17 @@ export const replaceQueryStringInLocation = (
 };
 
 export const getUrlType = (pageName: string): UrlStateType => {
-  if (pageName === SiemPageName.overview) {
+  if (pageName === SecurityPageName.overview) {
     return 'overview';
-  } else if (pageName === SiemPageName.hosts) {
+  } else if (pageName === SecurityPageName.hosts) {
     return 'host';
-  } else if (pageName === SiemPageName.network) {
+  } else if (pageName === SecurityPageName.network) {
     return 'network';
-  } else if (pageName === SiemPageName.detections) {
-    return 'detections';
-  } else if (pageName === SiemPageName.timelines) {
+  } else if (pageName === SecurityPageName.alerts) {
+    return 'alerts';
+  } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
-  } else if (pageName === SiemPageName.case) {
+  } else if (pageName === SecurityPageName.case) {
     return 'case';
   }
   return 'overview';
@@ -114,19 +114,20 @@ export const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
-  const getTimelines = timelineSelectors.getTimelines();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
-    const timeline = Object.entries(getTimelines(state)).reduce(
-      (obj, [timelineId, timelineObj]) => ({
-        id: timelineObj.savedObjectId != null ? timelineObj.savedObjectId : '',
-        isOpen: timelineObj.show,
-      }),
-      { id: '', isOpen: false }
-    );
+    const flyoutTimeline = getTimeline(state, 'timeline-1');
+    const timeline =
+      flyoutTimeline != null
+        ? {
+            id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
+            isOpen: flyoutTimeline.show,
+          }
+        : { id: '', isOpen: false };
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;

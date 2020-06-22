@@ -6,7 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState, useMemo, useCallback } from 'react';
-import { EuiSelectable, EuiButton, EuiPopover, ButtonColor, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiI18nNumber,
+  EuiSelectable,
+  EuiButton,
+  EuiPopover,
+  ButtonColor,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
 /**
@@ -74,21 +81,44 @@ const OptionList = React.memo(
                 };
           })
     );
-    return useMemo(
-      () => (
-        <EuiSelectable
-          singleSelection={true}
-          options={options}
-          onChange={(newOptions) => {
-            setOptions(newOptions);
-          }}
-          listProps={{ showIcons: true, bordered: true }}
-          isLoading={isLoading}
-        >
-          {(list) => <OptionListItem>{list}</OptionListItem>}
-        </EuiSelectable>
-      ),
-      [isLoading, options]
+
+    const actionsByLabel: Record<string, () => unknown> = useMemo(() => {
+      if (typeof subMenuOptions !== 'object') {
+        return {};
+      }
+      return subMenuOptions.reduce((titleActionRecord, opt) => {
+        const { optionTitle, action } = opt;
+        return { ...titleActionRecord, [optionTitle]: action };
+      }, {});
+    }, [subMenuOptions]);
+
+    type ChangeOptions = Array<{ label: string; prepend?: ReactNode; checked?: string }>;
+    const selectableProps = useMemo(() => {
+      return {
+        listProps: { showIcons: true, bordered: true },
+        onChange: (newOptions: ChangeOptions) => {
+          const selectedOption = newOptions.find((opt) => opt.checked === 'on');
+          if (selectedOption) {
+            const { label } = selectedOption;
+            const actionToTake = actionsByLabel[label];
+            if (typeof actionToTake === 'function') {
+              actionToTake();
+            }
+          }
+          setOptions(newOptions);
+        },
+      };
+    }, [actionsByLabel]);
+
+    return (
+      <EuiSelectable
+        singleSelection={true}
+        options={options}
+        {...selectableProps}
+        isLoading={isLoading}
+      >
+        {(list) => <OptionListItem>{list}</OptionListItem>}
+      </EuiSelectable>
     );
   }
 );
@@ -102,6 +132,7 @@ OptionList.displayName = 'OptionList';
  */
 const NodeSubMenuComponents = React.memo(
   ({
+    count,
     buttonBorderColor,
     menuTitle,
     menuAction,
@@ -113,6 +144,7 @@ const NodeSubMenuComponents = React.memo(
     menuAction?: () => unknown;
     buttonBorderColor: ButtonColor;
     buttonFill: string;
+    count?: number;
   } & {
     optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
   }) => {
@@ -176,7 +208,7 @@ const NodeSubMenuComponents = React.memo(
         iconSide="right"
         tabIndex={-1}
       >
-        {menuTitle}
+        {count ? <EuiI18nNumber value={count} /> : ''} {menuTitle}
       </EuiButton>
     );
 
