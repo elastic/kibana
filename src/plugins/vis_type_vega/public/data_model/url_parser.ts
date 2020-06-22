@@ -19,6 +19,7 @@
 
 import $ from 'jquery';
 import { i18n } from '@kbn/i18n';
+import { UrlObject } from './types';
 
 /**
  * This class processes all Vega spec customizations,
@@ -34,7 +35,7 @@ export class UrlParser {
   /**
    * Update request object
    */
-  parseUrl(obj: any, urlObj: any) {
+  parseUrl(obj: UrlObject, urlObj: UrlObject) {
     let url = urlObj.url;
     if (!url) {
       throw new Error(

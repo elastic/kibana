@@ -40,12 +40,11 @@ export class Utils {
   }
 
   static formatErrorToStr(...args: any[]) {
-    const err: Error = args[0];
-    let error: string;
-    if (!err) {
+    let error: Error | string = args[0];
+    if (!error) {
       error = 'ERR';
-    } else {
-      error = err.message;
+    } else if (error instanceof Error) {
+      error = error.message;
     }
     return Utils.formatWarningToStr(error, ...Array.from(args).slice(1));
   }
