@@ -28,26 +28,32 @@ import {
 import { commentsArray, entriesArray } from '../types';
 
 // TODO: Should we use a partial here to reflect that this can JSON serialize meta, comment as non existent?
-export const exceptionListItemSchema = t.exact(
-  t.type({
-    _tags,
-    comments: commentsArray,
-    created_at,
-    created_by,
-    description,
-    entries: entriesArray,
-    id,
-    item_id,
-    list_id,
-    meta: metaOrUndefined,
-    name,
-    namespace_type,
-    tags,
-    tie_breaker_id,
-    type: exceptionListItemType,
-    updated_at,
-    updated_by,
-  })
-);
+export const exceptionListItemSchema = t.intersection([
+  t.exact(
+    t.type({
+      created_at,
+      created_by,
+      entries: entriesArray,
+      id,
+      item_id,
+      list_id,
+      meta: metaOrUndefined,
+      name,
+      namespace_type,
+      tie_breaker_id,
+      type: exceptionListItemType,
+      updated_at,
+      updated_by,
+    })
+  ),
+  t.exact(
+    t.partial({
+      _tags,
+      comments: commentsArray,
+      description,
+      tags,
+    })
+  ),
+]);
 
 export type ExceptionListItemSchema = t.TypeOf<typeof exceptionListItemSchema>;

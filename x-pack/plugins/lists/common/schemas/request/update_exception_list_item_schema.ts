@@ -13,13 +13,19 @@ import {
   Tags,
   _Tags,
   _tags,
+  created_at,
+  created_by,
   description,
   exceptionListItemType,
   id,
+  list_id,
   meta,
   name,
   namespace_type,
   tags,
+  tie_breaker_id,
+  updated_at,
+  updated_by,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
 import {
@@ -32,9 +38,15 @@ import {
 export const updateExceptionListItemSchema = t.intersection([
   t.exact(
     t.type({
+      created_at,
+      created_by,
       description,
+      list_id,
       name,
+      tie_breaker_id,
       type: exceptionListItemType,
+      updated_at,
+      updated_by,
     })
   ),
   t.exact(
