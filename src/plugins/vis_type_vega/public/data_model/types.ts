@@ -20,6 +20,9 @@
 import { ShardsResponse, SearchResponse } from 'elasticsearch';
 import { AggParamsMapping, Filter } from 'src/plugins/data/public';
 import { DslQuery } from 'src/plugins/data/common';
+import { EsQueryParser } from './es_query_parser';
+import { EmsFileParser } from './ems_file_parser';
+import { UrlParser } from './url_parser';
 
 interface Coordinate {
   axis: {
@@ -192,8 +195,28 @@ export interface DstObj {
   delayRepaint?: boolean;
 }
 
+export type ControlsLocation = 'row' | 'column' | 'row-reverse' | 'column-reverse';
+export type ControlsDirection = 'horizontal' | 'vertical';
+
 export interface VegaConfig extends DstObj {
   [index: string]: any;
   maxBounds?: number;
   tooltips?: TooltipConfig | boolean;
+  controlsLocation?: ControlsLocation;
+  controlsDirection?: ControlsDirection;
+}
+
+export interface UrlParserConfig {
+  [index: string]: any;
+  elasticsearch: EsQueryParser;
+  emsfile: EmsFileParser;
+  url: UrlParser;
+}
+
+export interface PendingType {
+  [index: string]: any;
+  dataObject?: Data;
+  obj?: Data;
+  url?: UrlObject;
+  name?: string;
 }
