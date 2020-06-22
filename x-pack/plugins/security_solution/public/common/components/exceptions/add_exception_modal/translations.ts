@@ -6,23 +6,26 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CANCEL = i18n.translate('xpack.siem.detectionEngine.addException.cancel', {
+export const CANCEL = i18n.translate('xpack.securitySolution.exceptions.addException.cancel', {
   defaultMessage: 'Cancel',
 });
 
 export const ADD_EXCEPTION = i18n.translate(
-  'xpack.siem.detectionEngine.addException.addException',
+  'xpack.securitySolution.exceptions.addException.addException',
   {
     defaultMessage: 'Add Exception',
   }
 );
 
-export const ADD_EXCEPTION_ERROR = i18n.translate('xpack.siem.detectionEngine.addException.error', {
-  defaultMessage: 'Failed to add exception',
-});
+export const ADD_EXCEPTION_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.error',
+  {
+    defaultMessage: 'Failed to add exception',
+  }
+);
 
 export const ADD_EXCEPTION_SUCCESS = i18n.translate(
-  'xpack.siem.detectionEngine.addException.success',
+  'xpack.securitySolution.exceptions.addException.success',
   {
     defaultMessage: 'Successfully added exception',
   }

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useState, useCallback, useMemo } from 'react';
+import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
-import { getOr } from 'lodash/fp';
 import {
   EuiModal,
   EuiModalHeader,
@@ -17,91 +16,49 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiHorizontalRule,
-  EuiTextArea,
   EuiCheckbox,
-  EuiCodeBlock,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiAvatar,
   EuiFormRow,
-  EuiPanel,
 } from '@elastic/eui';
-import { htmlIdGenerator } from '@elastic/eui/lib/services';
-import { Comment } from '../../../../../../lists/common/schemas';
+import {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+  Comment,
+  useApi,
+} from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
-import { TimelineDetailsQuery } from '../../../../timelines/containers/details';
-import { useCurrentUser, useKibana } from '../../../lib/kibana';
-import {
-  errorToToaster,
-  displaySuccessToast,
-  useStateToaster,
-} from '../../toasters';
-import { usePersistExceptionList, usePersistExceptionItem } from '../../../../../../lists/public';
+import { useKibana } from '../../../lib/kibana';
+import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../../exception_builder';
 import { ExceptionItem } from '../../exception_builder/types';
 import { useAddException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
+import { AddExceptionComments } from '../add_exception_comments';
+import {
+  enrichExceptionItemsWithComments,
+  enrichExceptionItemsWithOS,
+  enrichExceptionItemsWithNamespace,
+  defaultEndpointExceptionItems,
+} from '../helpers';
+
+// TODO: move somewhere else?
+// TODO: rename?
+export interface AddExceptionOnClick {
+  ruleName: string;
+  ruleExceptionLists: ExceptionListSchema[];
+  exceptionListType: ExceptionListSchema['type'];
+  alertData: TimelineNonEcsData[] | null;
+}
 
 // TODO: What's the different between ECS data and Non ECS data
 interface AddExceptionModalProps {
-  modalType?: 'endpoint' | 'detection';
-  eventData: TimelineNonEcsData[];
-  eventEcsData: Ecs; // TODO: Do we need this
+  ruleName: string;
+  ruleExceptionLists: ExceptionListSchema[];
+  exceptionListType: ExceptionListSchema['type'];
+  alertData?: TimelineNonEcsData[];
   onCancel: () => void;
   onConfirm: () => void;
 }
-
-// TODO: need to move this somewhere else probably
-export interface AddExceptionOnClick {
-  modalType: 'endpoint' | 'detection';
-  data: TimelineNonEcsData[];
-  ecsData?: Ecs; // TODO: Do we need this? should it be optional?
-}
-
-function generateExceptionList() {
-  return {
-    list_id: 'endpoint_list',
-    _tags: ['endpoint', 'process', 'malware', 'os:linux'],
-    tags: ['user added string for a tag', 'malware'],
-    type: 'endpoint',
-    description: 'This is a sample endpoint type exception',
-    name: 'Sample Endpoint Exception List',
-  };
-}
-
-function generateExceptionItem(comment: string) {
-  return {
-    list_id: 'endpoint_list',
-    item_id: htmlIdGenerator(),
-    _tags: ['endpoint', 'process', 'malware', 'os:linux'],
-    tags: ['user added string for a tag', 'malware'],
-    type: 'simple',
-    description: 'This is a sample endpoint type exception',
-    name: 'Sample Endpoint Exception List',
-    comment: [comment],
-    entries: [
-      {
-        field: 'actingProcess.file.signer',
-        operator: 'included',
-        match: 'Elastic, N.V.',
-        match_any: undefined,
-      },
-      {
-        field: 'event.category',
-        operator: 'included',
-        match_any: ['process', 'malware'],
-        match: undefined,
-      },
-    ],
-  };
-}
-
-const Avatar = styled(EuiAvatar)`
-  ${({ theme }) => css`
-    margin-right: ${theme.eui.euiSizeM};
-  `}
-`;
 
 const Modal = styled(EuiModal)`
   ${({ theme }) => css`
@@ -127,27 +84,13 @@ const ModalBodySection = styled.section`
   `}
 `;
 
-// TODO: move to common?
-const getMappedNonEcsValue = ({
-  data,
-  fieldName,
-}: {
-  data: TimelineNonEcsData[];
-  fieldName: string;
-}): string[] | undefined => {
-  const item = data.find((d) => d.field === fieldName);
-  if (item != null && item.value != null) {
-    return item.value;
-  }
-  return undefined;
-};
-
 // TODO: add comment to exception items
 // TODO: for endpoint exceptions add OS to each entry in the exception items
 export const AddExceptionModal = memo(function AddExceptionModal({
-  modalType,
-  eventData,
-  eventEcsData,
+  ruleName,
+  ruleExceptionLists,
+  exceptionListType,
+  alertData,
   onCancel,
   onConfirm,
 }: AddExceptionModalProps) {
@@ -155,8 +98,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [comment, setComment] = useState('');
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionItem[]>([]);
-  const currentUser = useCurrentUser();
+  const [exceptionList, setExceptionList] = useState<ExceptionListSchema | null>(null);
+  const [createListError, setCreateListError] = useState(false);
   const [, dispatchToaster] = useStateToaster();
+  const { addExceptionList } = useApi(http);
   const onError = useCallback(
     (error) => {
       errorToToaster({ title: i18n.ADD_EXCEPTION_ERROR, error, dispatchToaster });
@@ -169,87 +114,51 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     onConfirm();
   }, [dispatchToaster, onConfirm]);
 
-  const [
-    { isLoading: exceptionsIsLoading, isSaved: exceptionsIsSaved },
-    setExceptionList,
-  ] = usePersistExceptionList({ onError, http });
-  const [
-    { isLoading: exceptionItemPersistIsLoading, isSaved: exceptionItemPersistIsSaved },
-    setExceptionItem,
-  ] = usePersistExceptionItem({ onError, onSuccess, http });
-
   const [{ isLoading: addExceptionIsLoading }, addExceptionItems] = useAddException({
     onSuccess,
     onError,
     http,
   });
 
-  // TODO: file hash is not present in data from generator
-  // TODO: hash is an array
-  // TODO: code_signature is missing
-  // TODO: check autocomplete or editing of text in builder
-  const endpointExceptionItems = useCallback(() => {
-    if (modalType === 'endpoint') {
-      return [
-        {
-          entries: [
-            {
-              field: 'file.path',
-              operator: 'included',
-              match: getMappedNonEcsValue({ data: eventData, fieldName: 'file.path' }) ?? '',
-            },
-          ],
-        },
-        {
-          entries: [
-            {
-              field: 'file.code_signature.signer',
-              operator: 'included',
-              match:
-                getMappedNonEcsValue({
-                  data: eventData,
-                  fieldName: 'file.code_signature.signer',
-                }) ?? '',
-            },
-            {
-              field: 'file.code_signature.trusted',
-              operator: 'included',
-              match:
-                getMappedNonEcsValue({
-                  data: eventData,
-                  fieldName: 'file.code_signature.trusted',
-                }) ?? '',
-            },
-          ],
-        },
-        {
-          entries: [
-            {
-              field: 'file.hash.sha1',
-              operator: 'included',
-              match: getMappedNonEcsValue({ data: eventData, fieldName: 'file.hash.sha1' }) ?? '',
-            },
-          ],
-        },
-        {
-          entries: [
-            {
-              field: 'event.category',
-              operator: 'included',
-              match_any:
-                getMappedNonEcsValue({ data: eventData, fieldName: 'event.category' }) ?? [],
-            },
-          ],
-        },
-      ] as ExceptionItem[];
+  useEffect(() => {
+    const listOfDesiredType = ruleExceptionLists.find((list: ExceptionListSchema) => {
+      return list.type === exceptionListType;
+    });
+    if (listOfDesiredType !== undefined) {
+      setExceptionList(listOfDesiredType);
     } else {
-      return [];
+      // Create new exception list
+      // TODO: associate it with the rule
+      // TODO: descrition shouldn't be required by create schema
+      // TODO: name shouldn't be required by create schema
+      const newExceptionList = {
+        description: 'test description',
+        name: 'test exception list',
+        type: exceptionListType,
+        namespace_type: exceptionListType === 'endpoint' ? 'agnostic' : 'single',
+      };
+      addExceptionList({
+        list: newExceptionList,
+        onSuccess: (list: ExceptionListSchema) => {
+          // TODO: set isLoading, add spinner
+          setExceptionList(list);
+        },
+        onError: () => {
+          setCreateListError(true);
+        },
+      });
     }
-  }, [eventData, modalType]);
+  }, [
+    ruleExceptionLists,
+    exceptionListType,
+    addExceptionList,
+    setExceptionList,
+    setCreateListError,
+  ]);
 
   const onCommentChange = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setComment(event.target.value);
+    (value: string) => {
+      setComment(value);
     },
     [setComment]
   );
@@ -261,66 +170,31 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldCloseAlert]
   );
 
-  const exceptionItemToAdd = useMemo(() => {
-    return generateExceptionItem(comment);
-  }, [comment]);
-
-  const enrichWithComments = useCallback(
-    (exceptions: ExceptionItem[]) => {
-      // TODO: need to update types to use
-      if (currentUser) {
-        const newComment: Comment = {
-          comment,
-          created_by: currentUser?.username, // TODO: is username the proper thing to use here?
-          created_at: new Date().toDateString(), // TODO: do we want ISO here?
-        };
-        for (const exception of exceptions) {
-          exception.comments = [newComment];
-        }
-      }
-    },
-    [comment, currentUser]
-  );
-
-  const enrichWithOS = useCallback((exceptions: ExceptionItem[]) => {
-    const name = 'windows';
-    // TODO: dont hardcode this
-    // const [name] = getMappedNonEcsValue({ data: eventData, fieldName: 'host.os.family' });
-    const osField = `os:${name}`;
-    for (const exception of exceptions) {
-      if (exception._tags === undefined) {
-        exception._tags = [];
-      }
-      if (exception._tags.includes(osField) === false) {
-        exception._tags.push(osField);
-      }
-    }
-  }, []);
-
   const enrichExceptionItems = useCallback(() => {
-    enrichWithComments(exceptionItemsToAdd);
-    if (modalType === 'endpoint') {
-      enrichWithOS(exceptionItemsToAdd);
+    let enriched = [];
+    // TODO: only add new comment if it's not empty
+    enriched = enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }]);
+    if (exceptionListType === 'endpoint') {
+      // TODO: dont hardcode 'windows'
+      enriched = enrichExceptionItemsWithOS(enriched, 'windows');
     }
-  }, [enrichWithComments, enrichWithOS, exceptionItemsToAdd, modalType]);
+
+    // TODO: delete this. Namespace should be handled by the builder
+    return enrichExceptionItemsWithNamespace(
+      enriched,
+      exceptionListType === 'endpoint' ? 'agnostic' : 'single'
+    );
+  }, [exceptionItemsToAdd, exceptionListType, comment]);
 
   const onAddExceptionConfirm = useCallback(() => {
-    enrichExceptionItems();
-    console.log(exceptionItemsToAdd);
+    console.log(enrichExceptionItems());
     // TODO: Create API hook for persisting and closing
-    // TODO: insert OS tag into entries before persisting for endpoint exceptions
-    // setExceptionItem(exceptionItemToAdd);
-    addExceptionItems(exceptionItemsToAdd, eventEcsData._id);
+    addExceptionItems(enrichExceptionItems());
     // TODO: if close checkbox is selected, refresh signals table
-  }, [exceptionItemsToAdd, addExceptionItems]);
+  }, [addExceptionItems, enrichExceptionItems]);
 
-  const ruleName = useMemo(() => {
-    const [title] = getMappedNonEcsValue({ data: eventData, fieldName: 'signal.rule.name' }) ?? '';
-    return title;
-  }, [eventData]);
-
-  // TODO: builder - Grab appropriate listId that's associated with the rule
   // TODO: builder - dynamically set listType
+  // TODO: set default exception items in builder if type is endpoint and alert data is passed in
   return (
     <EuiOverlayMask>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -331,47 +205,43 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           </div>
         </ModalHeader>
 
-        <ModalBodySection className="builder-section">
-          {/* <EuiCodeBlock language="json">{JSON.stringify(exceptionItemToAdd, null, 2)}</EuiCodeBlock>*/}
-          <ExceptionBuilder
-            exceptionItems={endpointExceptionItems()}
-            listId="endpoint_list"
-            listType="endpoint"
-            dataTestSubj="alert-exception-builder"
-            idAria="alert-exception-builder"
-            onChange={setExceptionItemsToAdd}
-          />
-          <EuiSpacer />
-          <EuiFlexGroup gutterSize={'none'}>
-            <EuiFlexItem grow={false}>
-              <Avatar name={currentUser != null ? currentUser.fullName ?? '' : ''} size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTextArea
-                placeholder="Add a new comment..."
-                aria-label="Use aria labels when no actual label is in use"
-                value={comment}
-                onChange={onCommentChange}
+        {exceptionList && createListError === false && (
+          <>
+            <ModalBodySection className="builder-section">
+              <ExceptionBuilder
+                exceptionItems={[]}
+                listId={exceptionList.list_id}
+                listType={exceptionListType}
+                dataTestSubj="alert-exception-builder"
+                idAria="alert-exception-builder"
+                onChange={setExceptionItemsToAdd}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </ModalBodySection>
-        <EuiHorizontalRule />
-        <ModalBodySection>
-          <EuiFormRow>
-            <EuiCheckbox
-              id="close-alert-on-add-add-exception-checkbox"
-              label="Close this alert"
-              checked={shouldCloseAlert}
-              onChange={onCloseAlertCheckboxChange}
-            />
-          </EuiFormRow>
-        </ModalBodySection>
+
+              <EuiSpacer />
+
+              <AddExceptionComments
+                newCommentValue={comment}
+                newCommentOnChange={onCommentChange}
+              />
+            </ModalBodySection>
+            <EuiHorizontalRule />
+            <ModalBodySection>
+              <EuiFormRow>
+                <EuiCheckbox
+                  id="close-alert-on-add-add-exception-checkbox"
+                  label="Close this alert"
+                  checked={shouldCloseAlert}
+                  onChange={onCloseAlertCheckboxChange}
+                />
+              </EuiFormRow>
+            </ModalBodySection>
+          </>
+        )}
 
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
-          <EuiButton onClick={onAddExceptionConfirm} isLoading={exceptionItemPersistIsLoading} fill>
+          <EuiButton onClick={onAddExceptionConfirm} isLoading={addExceptionIsLoading} fill>
             {i18n.ADD_EXCEPTION}
           </EuiButton>
         </EuiModalFooter>

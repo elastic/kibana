@@ -6,6 +6,7 @@
 import { FilterOptions, ExceptionsPagination, ExceptionListItemIdentifiers } from '../types';
 import {
   ExceptionList,
+  ExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionIdentifiers,
   Pagination,
@@ -22,7 +23,8 @@ export interface State {
   loadingLists: ExceptionIdentifiers[];
   loadingItemIds: ExceptionListItemIdentifiers[];
   isInitLoading: boolean;
-  isModalOpen: boolean;
+  currentModal: string | null;
+  exceptionListToEdit: ExceptionList | null;
 }
 
 export type Action =
@@ -39,9 +41,10 @@ export type Action =
       allLists: ExceptionIdentifiers[];
     }
   | { type: 'updateIsInitLoading'; loading: boolean }
-  | { type: 'updateModalOpen'; isOpen: boolean }
+  | { type: 'updateModalOpen'; modalName: string | null }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }
-  | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] };
+  | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] }
+  | { type: 'updateExceptionListToEdit'; exceptionList: ExceptionList | null };
 
 export const allExceptionItemsReducer = () => (state: State, action: Action): State => {
   switch (action.type) {
@@ -124,7 +127,13 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
     case 'updateModalOpen': {
       return {
         ...state,
-        isModalOpen: action.isOpen,
+        currentModal: action.modalName,
+      };
+    }
+    case 'updateExceptionListToEdit': {
+      return {
+        ...state,
+        exceptionListToEdit: action.exceptionList,
       };
     }
     default:

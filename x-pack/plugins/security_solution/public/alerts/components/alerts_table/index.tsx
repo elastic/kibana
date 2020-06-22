@@ -69,9 +69,10 @@ interface OwnProps {
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 const addExceptionModalInitialState: AddExceptionOnClick = {
-  modalType: 'detection',
-  ecsData: undefined,
-  data: [],
+  ruleName: '',
+  ruleExceptionLists: [],
+  exceptionListType: 'detection',
+  alertData: null,
 };
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
@@ -208,9 +209,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // TODO: type
   const openAddExceptionModalCallback = useCallback(
-    ({ modalType, ecsData, data }: AddExceptionOnClick) => {
-      setShouldShowAddExceptionModal(true);
-      setAddExceptionModalState({ modalType, ecsData, data });
+    ({ ruleName, ruleExceptionLists, exceptionListType, alertData }: AddExceptionOnClick) => {
+      if (alertData !== null && alertData !== undefined) {
+        setShouldShowAddExceptionModal(true);
+        setAddExceptionModalState({ ruleName, ruleExceptionLists, exceptionListType, alertData });
+      }
     },
     [setShouldShowAddExceptionModal, setAddExceptionModalState]
   );
@@ -419,11 +422,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         start={from}
         utilityBar={utilityBarCallback}
       />
-      {shouldShowAddExceptionModal === true && (
+      {shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null && (
         <AddExceptionModal
-          modalType={addExceptionModalState.modalType}
-          eventData={addExceptionModalState.data}
-          eventEcsData={addExceptionModalState.ecsData}
+          ruleName={addExceptionModalState.ruleName}
+          ruleExceptionLists={addExceptionModalState.ruleExceptionLists}
+          exceptionListType={addExceptionModalState.exceptionListType}
+          alertData={addExceptionModalState.alertData}
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
         />

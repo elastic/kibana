@@ -20,11 +20,33 @@ export interface ExceptionsApi {
   getExceptionList: (
     arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }
   ) => Promise<void>;
+  addExceptionList: (
+    arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }
+  ) => Promise<void>;
 }
 
 export const useApi = (http: HttpStart): ExceptionsApi => {
   return useMemo(
     (): ExceptionsApi => ({
+      // TODO: fix types
+      async addExceptionList({
+        list,
+        onSuccess,
+        onError,
+      }: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }): Promise<void> {
+        const abortCtrl = new AbortController();
+
+        try {
+          const exceptionList = await Api.addExceptionList({
+            http,
+            list,
+            signal: abortCtrl.signal,
+          });
+          onSuccess(exceptionList);
+        } catch (error) {
+          onError(error);
+        }
+      },
       async deleteExceptionItem({
         id,
         namespaceType,

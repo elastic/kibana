@@ -38,6 +38,7 @@ import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data
 
 export const isListType = (item: BuilderEntry): item is EmptyListEntry =>
   item.type === OperatorTypeEnum.LIST;
+import { TimelineNonEcsData } from '../../../graphql/types';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -340,4 +341,119 @@ export const filterExceptionItems = (
     },
     []
   );
+
+export const enrichExceptionItemsWithComments = (
+  exceptionItems: ExceptionListItemSchema[],
+  comments: Comment[]
+): ExceptionListItemSchema[] => {
+  // TODO: need to update types to use
+  return exceptionItems.map((item: ExceptionListItemSchema) => {
+    return {
+      ...item,
+      comments,
+    };
+  });
+};
+
+export const enrichExceptionItemsWithOS = (
+  exceptionItems: ExceptionListItemSchema[],
+  os: string
+): ExceptionListItemSchema[] => {
+  return exceptionItems.map((item: ExceptionListItemSchema) => {
+    // TODO: don't add the same OS tag if it's already there
+    const osTag = `os:${os}`;
+    const newTags = item._tags ? [...item._tags, osTag] : [osTag];
+    return {
+      ...item,
+      _tags: newTags,
+    };
+  });
+};
+
+// TODO: delete this. Namespace should be handled by the builder
+export const enrichExceptionItemsWithNamespace = (
+  exceptionItems: ExceptionListItemSchema[],
+  namespaceType: ExceptionListItemSchema['namespace_type']
+): ExceptionListItemSchema[] => {
+  return exceptionItems.map((item: ExceptionListItemSchema) => {
+    return {
+      ...item,
+      namespace_type: namespaceType,
+    };
+  });
+};
+
+export const getMappedNonEcsValue = ({
+  data,
+  fieldName,
+}: {
+  data: TimelineNonEcsData[];
+  fieldName: string;
+}): string[] | undefined => {
+  const item = data.find((d) => d.field === fieldName);
+  if (item != null && item.value != null) {
+    return item.value;
+  }
+  return undefined;
+};
+
+// TODO: should we use match or match_any for these default values?
+// TODO: check autocomplete or editing of text in builder
+export const defaultEndpointExceptionItems = (alertData: TimelineNonEcsData[]): EntriesArray => {
+  return [
+    {
+      entries: [
+        {
+          field: 'file.path',
+          operator: 'included',
+          type: 'match',
+          value: getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' }) ?? '',
+        },
+      ],
+    },
+    {
+      entries: [
+        {
+          field: 'file.code_signature.signer',
+          operator: 'included',
+          type: 'match',
+          value:
+            getMappedNonEcsValue({
+              data: alertData,
+              fieldName: 'file.code_signature.signer',
+            }) ?? '',
+        },
+        {
+          field: 'file.code_signature.trusted',
+          operator: 'included',
+          type: 'match',
+          value:
+            getMappedNonEcsValue({
+              data: alertData,
+              fieldName: 'file.code_signature.trusted',
+            }) ?? '',
+        },
+      ],
+    },
+    {
+      entries: [
+        {
+          field: 'file.hash.sha1',
+          operator: 'included',
+          type: 'match',
+          value: getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' }) ?? '',
+        },
+      ],
+    },
+    {
+      entries: [
+        {
+          field: 'event.category',
+          operator: 'included',
+          type: 'match_any',
+          value: getMappedNonEcsValue({ data: alertData, fieldName: 'event.category' }) ?? [],
+        },
+      ],
+    },
+  ];
 };

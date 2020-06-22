@@ -10,6 +10,8 @@ export {
   usePersistExceptionItem,
   usePersistExceptionList,
   useFindLists,
+  addExceptionListItem,
+  updateExceptionListItem,
   ExceptionIdentifiers,
   ExceptionList,
   Pagination,
@@ -39,4 +41,7 @@ export {
   entriesNested,
   entriesExists,
   entriesList,
+  // TODO: is this the right type for comments?
+  Comment,
+  CommentsArray,
 } from '../../lists/common/schemas';

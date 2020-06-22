@@ -37,7 +37,8 @@ import {
   UpdateTimelineLoading,
 } from './types';
 import { Ecs } from '../../../graphql/types';
-import { AddExceptionOnClick } from '../add_exception';
+import { AddExceptionOnClick } from '../../../common/components/exceptions/add_exception_modal';
+import { getMappedNonEcsValue } from '../../../common/components/exceptions/helpers';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -196,7 +197,11 @@ interface AlertActionArgs {
   status: Status;
   timelineId: string;
   updateTimelineIsLoading: UpdateTimelineLoading;
-  openAddExceptionModal: ({ modalType, ecsData, data }: AddExceptionOnClick) => void;
+  openAddExceptionModal: ({
+    exceptionListType,
+    alertData,
+    ruleExceptionLists,
+  }: AddExceptionOnClick) => void;
 }
 
 export const getAlertActions = ({
@@ -302,7 +307,14 @@ export const getAlertActions = ({
     // TODO: disable this option if the alert is not an Endpoint alert
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
-        openAddExceptionModal({ modalType: 'endpoint', ecsData, data });
+        const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
+        // TODO: ruleExceptionLists should come from data or ecsData
+        openAddExceptionModal({
+          ruleName: ruleNameValue ? ruleNameValue[0] : '',
+          ruleExceptionLists: [],
+          exceptionListType: 'endpoint',
+          alertData: data,
+        });
       },
       id: 'addEndpointException',
       iconType: 'documentEdit',
@@ -315,7 +327,14 @@ export const getAlertActions = ({
     // TODO: intl
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
-        openAddExceptionModal({ modalType: 'detection', ecsData, data });
+        const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
+        // TODO: ruleExceptionLists should come from data or ecsData
+        openAddExceptionModal({
+          ruleName: ruleNameValue ? ruleNameValue[0] : '',
+          ruleExceptionLists: [],
+          exceptionListType: 'detection',
+          alertData: data,
+        });
       },
       id: 'addException',
       iconType: 'documentEdit',

@@ -27,6 +27,8 @@ import {
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
+import { EditExceptionModal } from '../edit_exception_modal';
+import { AddExceptionModal } from '../add_exception_modal';
 
 const initialState: State = {
   filterOptions: { filter: '', showEndpointList: false, showDetectionsList: false, tags: [] },
@@ -44,7 +46,8 @@ const initialState: State = {
   loadingLists: [],
   loadingItemIds: [],
   isInitLoading: true,
-  isModalOpen: false,
+  currentModal: null,
+  exceptionListToEdit: null,
 };
 
 enum ModalAction {
@@ -54,6 +57,7 @@ enum ModalAction {
 
 interface ExceptionsViewerProps {
   ruleId: string;
+  ruleName: string;
   exceptionListsMeta: ExceptionIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
@@ -62,6 +66,7 @@ interface ExceptionsViewerProps {
 
 const ExceptionsViewerComponent = ({
   ruleId,
+  ruleName,
   exceptionListsMeta,
   availableListTypes,
   onAssociateList,
@@ -93,7 +98,9 @@ const ExceptionsViewerComponent = ({
       loadingLists,
       loadingItemIds,
       isInitLoading,
-      isModalOpen,
+      currentModal,
+      exceptionToEdit,
+      exceptionListToEdit,
     },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
@@ -131,11 +138,11 @@ const ExceptionsViewerComponent = ({
     }),
   });
 
-  const setIsModalOpen = useCallback(
-    (isOpen: boolean): void => {
+  const setCurrentModal = useCallback(
+    (modalName: string | null): void => {
       dispatch({
         type: 'updateModalOpen',
-        isOpen,
+        modalName,
       });
     },
     [dispatch]
@@ -161,9 +168,14 @@ const ExceptionsViewerComponent = ({
 
   const handleAddException = useCallback(
     (type: ExceptionListTypeEnum): void => {
-      setIsModalOpen(true);
+      const listToEdit = type === 'endpoint' ? endpointList : detectionsList;
+      dispatch({
+        type: 'updateExceptionListToEdit',
+        exceptionList: listToEdit,
+      });
+      setCurrentModal('addModal');
     },
-    [setIsModalOpen]
+    [setCurrentModal, endpointList, detectionsList]
   );
 
   const handleEditException = useCallback(
@@ -175,25 +187,15 @@ const ExceptionsViewerComponent = ({
         exception,
       });
 
-      setIsModalOpen(true);
+      setCurrentModal('editModal');
     },
-    [setIsModalOpen]
+    [setCurrentModal]
   );
 
-  const handleCloseExceptionModal = useCallback(
-    ({ actionType, listId }): void => {
-      setIsModalOpen(false);
-
-      // TODO: This callback along with fetchList can probably get
-      // passed to the modal for it to call itself maybe
-      if (actionType === ModalAction.CREATE && listId != null && onAssociateList != null) {
-        onAssociateList(listId);
-      }
-
-      handleFetchList();
-    },
-    [setIsModalOpen, handleFetchList, onAssociateList]
-  );
+  const handleCloseExceptionModal = useCallback((): void => {
+    setCurrentModal(null);
+    handleFetchList();
+  }, [setCurrentModal, handleFetchList]);
 
   const setLoadingItemIds = useCallback(
     (items: ExceptionListItemIdentifiers[]): void => {
@@ -254,7 +256,27 @@ const ExceptionsViewerComponent = ({
 
   return (
     <>
-      {isModalOpen && (
+      {currentModal === 'editModal' && exceptionToEdit !== null && (
+        <EditExceptionModal
+          ruleName={ruleName}
+          exceptionListType={
+            exceptionToEdit.list_id === endpointList.list_id ? 'endpoint' : 'detection'
+          }
+          exceptionItem={exceptionToEdit}
+          onCancel={onCloseExceptionModal}
+          onConfirm={onCloseExceptionModal}
+        />
+      )}
+      {currentModal === 'addModal' && exceptionListToEdit !== null && (
+        <AddExceptionModal
+          ruleName={ruleName}
+          ruleExceptionLists={[exceptionListToEdit]}
+          exceptionListType={exceptionListToEdit.type}
+          onCancel={onCloseExceptionModal}
+          onConfirm={onCloseExceptionModal}
+        />
+      )}
+      {false && (
         <EuiOverlayMask>
           <EuiModal onClose={handleCloseExceptionModal}>
             <EuiModalBody>
