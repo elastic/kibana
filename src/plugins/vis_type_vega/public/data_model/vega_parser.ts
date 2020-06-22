@@ -33,7 +33,18 @@ import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
 import { IServiceSettings } from '../../../maps_legacy/public';
-import { Bool, Data, VegaSpec } from './types';
+import {
+  Bool,
+  Data,
+  VegaSpec,
+  VegaConfig,
+  TooltipConfig,
+  DstObj,
+  UrlParserConfig,
+  PendingType,
+  ControlsLocation,
+  ControlsDirection,
+} from './types';
 
 // Set default single color to match other Kibana visualizations
 const defaultColor: string = VISUALIZATION_COLORS[0];
@@ -44,7 +55,7 @@ const locToDirMap: any = {
   top: 'column-reverse',
   bottom: 'column',
 };
-const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v5.json';
+const DEFAULT_SCHEMA: string = 'https://vega.github.io/schema/vega/v5.json';
 
 // If there is no "%type%" parameter, use this parser
 const DEFAULT_PARSER: string = 'elasticsearch';
@@ -54,20 +65,20 @@ export class VegaParser {
   hideWarnings: boolean;
   error?: string;
   warnings: string[];
-  _urlParsers: { [key: string]: any };
+  _urlParsers: UrlParserConfig;
   isVegaLite?: boolean;
   useHover?: boolean;
-  _config?: any;
+  _config?: VegaConfig;
   useMap?: boolean;
   renderer?: string;
-  tooltips?: object;
+  tooltips?: boolean | TooltipConfig;
   mapConfig?: object;
-  vlspec?: any;
+  vlspec?: VegaSpec;
   useResize?: boolean;
   paddingWidth?: number;
   paddingHeight?: number;
-  containerDir?: any;
-  controlsDir?: string;
+  containerDir?: ControlsLocation | ControlsDirection;
+  controlsDir?: ControlsLocation;
 
   constructor(
     spec: string,
@@ -145,7 +156,7 @@ export class VegaParser {
    * @private
    */
   _compileVegaLite() {
-    this.vlspec = this.spec;
+    this.vlspec = this.spec as VegaSpec;
     // eslint-disable-next-line import/namespace
     const logger = vega.logger(vega.Warn); // note: eslint has a false positive here
     logger.warn = this._onWarning.bind(this);
@@ -347,7 +358,7 @@ export class VegaParser {
       return false;
     }
 
-    const result = this._config.tooltips || {};
+    const result: TooltipConfig = (this._config?.tooltips as TooltipConfig) || {};
 
     if (result.position === undefined) {
       result.position = 'top';
@@ -401,12 +412,12 @@ export class VegaParser {
    * @private
    */
   _parseMapConfig() {
-    const res: { [key: string]: any } = {
-      delayRepaint: this._config.delayRepaint === undefined ? true : this._config.delayRepaint,
+    const res: VegaConfig = {
+      delayRepaint: this._config?.delayRepaint === undefined ? true : this._config.delayRepaint,
     };
 
     const validate = (name: string, isZoom: boolean) => {
-      const val = this._config[name];
+      const val = this._config ? this._config[name] : undefined;
       if (val !== undefined) {
         const parsed = parseFloat(val);
         if (Number.isFinite(parsed) && (!isZoom || (parsed >= 0 && parsed <= 30))) {
@@ -430,7 +441,7 @@ export class VegaParser {
     validate(`maxZoom`, true);
 
     // `false` is a valid value
-    res.mapStyle = this._config.mapStyle === undefined ? `default` : this._config.mapStyle;
+    res.mapStyle = this._config?.mapStyle === undefined ? `default` : this._config.mapStyle;
     if (res.mapStyle !== `default` && res.mapStyle !== false) {
       this._onWarning(
         i18n.translate('visTypeVega.vegaParser.mapStyleValueTypeWarningMessage', {
@@ -449,7 +460,7 @@ export class VegaParser {
     this._parseBool('zoomControl', res, true);
     this._parseBool('scrollWheelZoom', res, false);
 
-    const maxBounds = this._config.maxBounds;
+    const maxBounds = this._config?.maxBounds;
     if (maxBounds !== undefined) {
       if (
         !Array.isArray(maxBounds) ||
@@ -472,8 +483,8 @@ export class VegaParser {
     return res;
   }
 
-  _parseBool(paramName: string, dstObj: any, dflt: any) {
-    const val = this._config[paramName];
+  _parseBool(paramName: string, dstObj: DstObj, dflt: boolean | string | number) {
+    const val = this._config ? this._config[paramName] : undefined;
     if (val === undefined) {
       dstObj[paramName] = dflt;
     } else if (typeof val !== 'boolean') {
@@ -535,7 +546,7 @@ export class VegaParser {
    * @private
    */
   async _resolveDataUrls() {
-    const pending: { [key: string]: any } = {};
+    const pending: PendingType = {};
 
     this._findObjectDataUrls(this.spec, (obj: Data) => {
       const url = obj.url;
@@ -588,7 +599,7 @@ export class VegaParser {
         this._findObjectDataUrls(elem, onFind, key);
       }
     } else if (_.isPlainObject(obj)) {
-      if (key === 'data' && _.isPlainObject(obj.url)) {
+      if (key === 'data' && _.isPlainObject(obj?.url)) {
         // Assume that any  "data": {"url": {...}}  is a request for data
         if (obj.values !== undefined || obj.source !== undefined) {
           throw new Error(
