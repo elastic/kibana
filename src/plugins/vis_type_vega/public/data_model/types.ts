@@ -17,12 +17,18 @@
  * under the License.
  */
 
-import { ShardsResponse, SearchResponse } from 'elasticsearch';
+import { SearchResponse } from 'elasticsearch';
 import { AggParamsMapping, Filter } from 'src/plugins/data/public';
 import { DslQuery } from 'src/plugins/data/common';
 import { EsQueryParser } from './es_query_parser';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
+
+interface Body {
+  aggs?: AggParamsMapping;
+  query?: Query;
+  timeout?: string;
+}
 
 interface Coordinate {
   axis: {
@@ -107,38 +113,12 @@ export interface UrlObject {
   [CONSTANTS.TYPE]?: string;
   name?: string;
   index?: string;
-  body?: {
-    aggs?: AggParamsMapping;
-    query?: Query;
-    timeout?: string;
-  };
+  body?: Body;
   size?: number;
   timeout?: string;
 }
 
 export interface Data {
-  format?: {
-    help?: string;
-    property?: string;
-  };
-  values?:
-    | {
-        aggregations?: {
-          time_buckets: TimeBucket[];
-        };
-      }
-    | string;
-  hits?: {
-    hits?: any[];
-    max_score?: number;
-    total?: {
-      relation: string;
-      value: number;
-    };
-    timed_out?: boolean;
-    took?: number;
-  };
-  _shards?: ShardsResponse;
   url?: UrlObject;
 }
 
