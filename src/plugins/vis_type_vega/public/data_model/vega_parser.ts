@@ -24,8 +24,8 @@ import versionCompare from 'compare-versions';
 import hjson from 'hjson';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as vega from 'vega-lib';
-import * as vegaLite from 'vega-lite';
+// @ts-ignore
+import { vega, vegaLite } from '../lib/vega';
 import { EsQueryParser } from './es_query_parser';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
