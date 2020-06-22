@@ -24,7 +24,7 @@ import { ExprVis } from '../../../../visualizations/public';
 
 import { DEFAULT_TIME_FIELD } from '../../../common/constants';
 
-export const createBrushHandler = (vis: ExprVis) => (from: string, to: string) => {
+export const createBrushHandler = (vis: ExprVis) => (gte: string, lte: string) => {
   const timeFieldName = vis.params.time_field || DEFAULT_TIME_FIELD;
   const field = {
     name: timeFieldName,
@@ -37,8 +37,8 @@ export const createBrushHandler = (vis: ExprVis) => (from: string, to: string) =
   const timeRangeFilter = esFilters.buildRangeFilter(
     field,
     {
-      gte: moment(from).toISOString(),
-      lte: moment(to).toISOString(),
+      gte: moment(gte).toISOString(),
+      lte: moment(lte).toISOString(),
     },
     indexPattern
   );

@@ -140,6 +140,7 @@ import { PopoverAnchorPosition } from '@elastic/eui';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
+import { RangeFilter as RangeFilter_2 } from 'src/plugins/data/public';
 import React from 'react';
 import * as React_2 from 'react';
 import { ReindexParams } from 'elasticsearch';

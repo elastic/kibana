@@ -54,9 +54,13 @@ export interface RangeSelectTriggerContextTableDataEvent {
 export function isRangeSelectTriggerContextTableDataEvent(
   event: any
 ): event is RangeSelectTriggerContextTableDataEvent {
-  return event && 'range' in event && 'table' in event && 'column' in event;
+  return event && 'range' in event;
 }
 
+/** Some of our existing visualizations (Vega, TSVB, Timelion and etc) do not use AggConfigs / esaggs.
+ *  For such visualizations, instead of raising RangeSelectTriggerContextTableDataEvent event we can
+ *  generate a RangeFilter inside the visualization and pass it in RangeSelectTriggerContextTimeRangeFilterEvent
+ **/
 export interface RangeSelectTriggerContextTimeRangeFilterEvent {
   timeFieldName: string;
   timeRangeFilter: RangeFilter;
@@ -76,9 +80,8 @@ export interface RangeSelectTriggerContext<T extends IEmbeddable = IEmbeddable> 
 export const isRangeSelectTriggerContext = (
   context: ValueClickTriggerContext | RangeSelectTriggerContext
 ): context is RangeSelectTriggerContext =>
-  context.data &&
-  (isRangeSelectTriggerContextTableDataEvent(context.data) ||
-    isRangeSelectTriggerContextTimeRangeFilterEvent(context.data));
+  isRangeSelectTriggerContextTableDataEvent(context.data) ||
+  isRangeSelectTriggerContextTimeRangeFilterEvent(context.data);
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
