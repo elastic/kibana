@@ -7,12 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import classNames from 'classnames';
-import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 export interface Props {
   isVisible: boolean;
   isDisabled: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  'data-test-subj'?: string;
 }
 
 const moveHereLabel = i18n.translate(
@@ -27,7 +28,8 @@ const cannotMoveHereLabel = i18n.translate(
   { defaultMessage: 'Cannot move here' }
 );
 
-export const DropZoneButton: FunctionComponent<Props> = ({ onClick, isDisabled, isVisible }) => {
+export const DropZoneButton: FunctionComponent<Props> = (props) => {
+  const { onClick, isDisabled, isVisible } = props;
   const isUnavailable = isVisible && isDisabled;
   const containerClasses = classNames({
     'pipelineProcessorsEditor__tree__dropZoneContainer--visible': isVisible,
@@ -41,6 +43,7 @@ export const DropZoneButton: FunctionComponent<Props> = ({ onClick, isDisabled, 
   const content = (
     <div className={`pipelineProcessorsEditor__tree__dropZoneContainer ${containerClasses}`}>
       <EuiButtonIcon
+        data-test-subj={props['data-test-subj']}
         className={`pipelineProcessorsEditor__tree__dropZoneButton ${buttonClasses}`}
         aria-label={moveHereLabel}
         // We artificially disable the button so that hover and pointer events are

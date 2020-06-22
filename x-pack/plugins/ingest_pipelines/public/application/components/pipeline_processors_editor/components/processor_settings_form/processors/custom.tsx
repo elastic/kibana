@@ -77,6 +77,7 @@ export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
       defaultValue={defaultOptions}
       componentProps={{
         editorProps: {
+          'data-test-subj': 'processorOptionsEditor',
           height: 300,
           'aria-label': i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldAriaLabel',

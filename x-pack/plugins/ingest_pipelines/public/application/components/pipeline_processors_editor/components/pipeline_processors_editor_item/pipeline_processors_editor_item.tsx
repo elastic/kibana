@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
+import { selectorToDataTestSubject } from '../../utils';
 
 import { usePipelineProcessorsContext } from '../../context';
 
@@ -65,6 +66,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           responsive={false}
           alignItems="center"
           justifyContent="spaceBetween"
+          data-test-subj={selectorToDataTestSubject(selector)}
         >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
@@ -91,6 +93,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 {selected ? (
                   <EuiButtonIcon
                     aria-label={editorItemMessages.cancelMoveButtonLabel}
+                    data-test-subj="cancelMoveItemButton"
                     size="s"
                     onClick={onCancelMove}
                     iconType="crossInACircleFilled"
@@ -98,6 +101,8 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 ) : (
                   <EuiToolTip content={editorItemMessages.moveButtonLabel}>
                     <EuiButtonIcon
+                      data-test-subj="moveItemButton"
+                      size="s"
                       disabled={disabled}
                       aria-label={editorItemMessages.moveButtonLabel}
                       size="s"
