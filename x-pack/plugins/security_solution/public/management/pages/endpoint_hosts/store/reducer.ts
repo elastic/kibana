@@ -53,6 +53,19 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       error: action.payload,
       loading: false,
     };
+  } else if (action.type === 'serverReturnedHostDetails') {
+    return {
+      ...state,
+      details: action.payload.metadata,
+      detailsLoading: false,
+      detailsError: undefined,
+    };
+  } else if (action.type === 'serverFailedToReturnHostDetails') {
+    return {
+      ...state,
+      detailsError: action.payload,
+      detailsLoading: false,
+    };
   } else if (action.type === 'serverReturnEndpointPolicies') {
     return {
       ...state,
@@ -64,12 +77,6 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       ...state,
       error: action.payload,
       loading: false,
-    };
-  } else if (action.type === 'serverFailedToReturnHostDetails') {
-    return {
-      ...state,
-      detailsError: action.payload,
-      detailsLoading: false,
     };
   } else if (action.type === 'serverReturnedHostPolicyResponse') {
     return {

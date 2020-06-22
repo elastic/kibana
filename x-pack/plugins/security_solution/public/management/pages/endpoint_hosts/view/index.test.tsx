@@ -34,9 +34,10 @@ describe('when on the hosts page', () => {
     render = () => mockedContext.render(<HostList />);
   });
 
-  it('should show a table', async () => {
+  it('should show the empty state', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('hostListTable');
+    // Initially, there are no endpoints or policies, so we prompt to add policies first.
+    const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
   });
 

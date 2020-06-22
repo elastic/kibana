@@ -342,14 +342,18 @@ export const HostList = () => {
       })}
     >
       {hasSelectedHost && <HostDetailsFlyout />}
-      <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointList.totalCount"
-          defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
-          values={{ totalItemCount }}
-        />
-      </EuiText>
-      <EuiHorizontalRule margin="xs" />
+      {listData && listData.length > 0 && (
+        <>
+          <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
+            <FormattedMessage
+              id="xpack.securitySolution.endpointList.totalCount"
+              defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
+              values={{ totalItemCount }}
+            />
+          </EuiText>
+          <EuiHorizontalRule margin="xs" />
+        </>
+      )}
       {renderTableOrEmptyState}
       <SpyRoute />
     </ManagementPageView>
