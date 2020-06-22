@@ -39,7 +39,7 @@ describe('when on the policies page', () => {
     let firstPolicyID: string;
     beforeEach(() => {
       reactTestingLibrary.act(() => {
-        history.push('/management/policy');
+        history.push('/policy');
         reactTestingLibrary.act(() => {
           const policyListData = mockPolicyResultList({ total: 3 });
           firstPolicyID = policyListData.items[0].id;

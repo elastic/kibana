@@ -32,12 +32,18 @@ import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { PolicyEmptyState, EndpointsEmptyState } from '../../../components/management_empty_state';
-import { getManagementUrl } from '../../..';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useEndpointPackageInfo } from '../../policy/view/ingest_hooks';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
+import { SecurityPageName } from '../../../../app/types';
+import {
+  getEndpointListPath,
+  getEndpointDetailsPath,
+  getPolicyDetailPath,
+} from '../../../common/routing';
+import { useFormatUrl } from '../../../../common/components/link_to';
 
 const HostListNavLink = memo<{
   name: string;
@@ -75,6 +81,7 @@ export const HostList = () => {
     hasSelectedHost,
     policyItems,
   } = useHostSelector(selector);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -93,9 +100,8 @@ export const HostList = () => {
       const { index, size } = page;
       // FIXME: PT: if host details is open, table is not displaying correct number of rows
       history.push(
-        getManagementUrl({
+        getEndpointListPath({
           name: 'endpointList',
-          excludePrefix: true,
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
@@ -111,15 +117,13 @@ export const HostList = () => {
       path: `#/integrations${packageInfo ? `/endpoint-${packageInfo.version}/add-datasource` : ''}`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution',
-          { path: getManagementUrl({ name: 'endpointList' }) },
+          'securitySolution:management',
+          { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
-        onCancelUrl: services.application?.getUrlForApp('securitySolution', {
-          path: getManagementUrl({ name: 'endpointList' }),
-        }),
+        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
         onSaveNavigateTo: [
-          'securitySolution',
-          { path: getManagementUrl({ name: 'endpointList' }) },
+          'securitySolution:management',
+          { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
       },
     }
@@ -141,17 +145,15 @@ export const HostList = () => {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
-          const toRoutePath = getManagementUrl({
-            ...queryParams,
-            name: 'endpointDetails',
-            selected_host: id,
-            excludePrefix: true,
-          });
-          const toRouteUrl = getManagementUrl({
-            ...queryParams,
-            name: 'endpointDetails',
-            selected_host: id,
-          });
+          const toRoutePath = getEndpointDetailsPath(
+            {
+              ...queryParams,
+              name: 'endpointDetails',
+              selected_host: id,
+            },
+            search
+          );
+          const toRouteUrl = formatUrl(toRoutePath);
           return (
             <HostListNavLink
               name={hostname}
@@ -192,15 +194,8 @@ export const HostList = () => {
         truncateText: true,
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
-          const toRoutePath = getManagementUrl({
-            name: 'policyDetails',
-            policyId: policy.id,
-            excludePrefix: true,
-          });
-          const toRouteUrl = getManagementUrl({
-            name: 'policyDetails',
-            policyId: policy.id,
-          });
+          const toRoutePath = getPolicyDetailPath(policy.id);
+          const toRouteUrl = formatUrl(toRoutePath);
           return (
             <HostListNavLink
               name={policy.name}
@@ -218,15 +213,11 @@ export const HostList = () => {
         }),
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
-          const toRoutePath = getManagementUrl({
-            name: 'endpointPolicyResponse',
-            selected_host: item.metadata.host.id,
-            excludePrefix: true,
-          });
-          const toRouteUrl = getManagementUrl({
+          const toRoutePath = getEndpointDetailsPath({
             name: 'endpointPolicyResponse',
             selected_host: item.metadata.host.id,
           });
+          const toRouteUrl = formatUrl(toRoutePath);
           return (
             <EuiHealth
               color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
@@ -288,7 +279,7 @@ export const HostList = () => {
         },
       },
     ];
-  }, [queryParams]);
+  }, [formatUrl, queryParams, search]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (listData && listData.length > 0) {
@@ -355,7 +346,7 @@ export const HostList = () => {
         </>
       )}
       {renderTableOrEmptyState}
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.management} />
     </ManagementPageView>
   );
 };
