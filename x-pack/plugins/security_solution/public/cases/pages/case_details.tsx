@@ -5,8 +5,10 @@
  */
 
 import React from 'react';
-import { useParams, Redirect } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 
+import { SecurityPageName } from '../../app/types';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { useGetUserSavedObjectPermissions } from '../../common/lib/kibana';
@@ -16,12 +18,14 @@ import { CaseView } from '../components/case_view';
 import { savedObjectReadOnly, CaseCallOut } from '../components/callout';
 
 export const CaseDetailsPage = React.memo(() => {
+  const history = useHistory();
   const userPermissions = useGetUserSavedObjectPermissions();
   const { detailName: caseId } = useParams();
   const search = useGetUrlSearch(navTabs.case);
 
   if (userPermissions != null && !userPermissions.read) {
-    return <Redirect to={getCaseUrl(search)} />;
+    history.replace(getCaseUrl(search));
+    return null;
   }
 
   return caseId != null ? (
@@ -35,6 +39,7 @@ export const CaseDetailsPage = React.memo(() => {
         )}
         <CaseView caseId={caseId} userCanCrud={userPermissions?.crud ?? false} />
       </WrapperPage>
+      <SpyRoute pageName={SecurityPageName.case} />
     </>
   ) : null;
 });

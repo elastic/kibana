@@ -20,7 +20,7 @@ exports[`CallOuts should render normally 1`] = `
         values={
           Object {
             "deprecatedLangsInUse": "php",
-            "link": <ForwardRef
+            "link": <EuiLink
               href="http://www.elastic.co/painlessDocs"
             >
               <FormattedMessage
@@ -28,7 +28,7 @@ exports[`CallOuts should render normally 1`] = `
                 id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
                 values={Object {}}
               />
-            </ForwardRef>,
+            </EuiLink>,
           }
         }
       />

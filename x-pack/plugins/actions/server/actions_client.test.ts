@@ -388,6 +388,7 @@ describe('getAll()', () => {
               foo: 'bar',
             },
           },
+          score: 1,
           references: [],
         },
       ],
