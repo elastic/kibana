@@ -24,6 +24,7 @@ export const initialHostListState: Immutable<HostState> = {
   policyResponseLoading: false,
   policyResponseError: undefined,
   location: undefined,
+  policyItems: [],
 };
 
 export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
@@ -52,12 +53,17 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       error: action.payload,
       loading: false,
     };
-  } else if (action.type === 'serverReturnedHostDetails') {
+  } else if (action.type === 'serverReturnEndpointPolicies') {
     return {
       ...state,
-      details: action.payload.metadata,
-      detailsLoading: false,
-      detailsError: undefined,
+      policyItems: action.payload.policyItems,
+      loading: false,
+    };
+  } else if (action.type === 'serverFailedToReturnEndpointPolicies') {
+    return {
+      ...state,
+      error: action.payload,
+      loading: false,
     };
   } else if (action.type === 'serverFailedToReturnHostDetails') {
     return {

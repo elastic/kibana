@@ -11,7 +11,6 @@ import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './select
 import { HostState } from '../types';
 import { sendGetEndpointSpecificDatasources } from '../../policy/store/policy_list/services/ingest';
 
-// TODO: I think the problem with the type is the state in this factory
 export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (coreStart) => {
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
@@ -54,17 +53,14 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
             });
 
             dispatch({
-              type: 'serverReturnedPolicyListData',
+              type: 'serverReturnEndpointPolicies',
               payload: {
                 policyItems: policyDataResponse.items,
-                pageIndex,
-                pageSize,
-                total: policyDataResponse.total,
               },
             });
           } catch (error) {
             dispatch({
-              type: 'serverFailedToReturnPolicyListData',
+              type: 'serverFailedToReturnEndpointPolicies',
               payload: error.body ?? error,
             });
             return;

@@ -10,6 +10,7 @@ import {
   GetHostPolicyResponse,
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
+import { GetPolicyListResponse } from '../../policy/types';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
@@ -41,10 +42,24 @@ interface ServerFailedToReturnHostPolicyResponse {
   payload: ServerApiError;
 }
 
+interface ServerReturnEndpointPolicies {
+  type: 'serverReturnEndpointPolicies';
+  payload: {
+    policyItems: GetPolicyListResponse['items'];
+  };
+}
+
+interface ServerFailedToReturnEndpointPolicies {
+  type: 'serverFailedToReturnEndpointPolicies';
+  payload: ServerApiError;
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
   | ServerReturnedHostDetails
   | ServerFailedToReturnHostDetails
   | ServerReturnedHostPolicyResponse
-  | ServerFailedToReturnHostPolicyResponse;
+  | ServerFailedToReturnHostPolicyResponse
+  | ServerReturnEndpointPolicies
+  | ServerFailedToReturnEndpointPolicies;

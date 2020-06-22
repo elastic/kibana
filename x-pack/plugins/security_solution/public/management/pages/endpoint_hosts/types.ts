@@ -10,6 +10,7 @@ import {
   HostMetadata,
   HostPolicyResponse,
   AppLocation,
+  PolicyData,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 
@@ -40,6 +41,8 @@ export interface HostState {
   policyResponseError?: ServerApiError;
   /** current location info */
   location?: Immutable<AppLocation>;
+  /** policies */
+  policyItems: PolicyData[];
 }
 
 /**

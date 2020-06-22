@@ -37,6 +37,8 @@ export const detailsLoading = (state: Immutable<HostState>): boolean => state.de
 
 export const detailsError = (state: Immutable<HostState>) => state.detailsError;
 
+export const policyItems = (state: Immutable<HostState>) => state.policyItems;
+
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
  */

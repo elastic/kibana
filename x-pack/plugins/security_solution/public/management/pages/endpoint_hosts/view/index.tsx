@@ -20,9 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
-import * as policySelectors from '../../policy/store//policy_list/selectors';
 import { useHostSelector } from './hooks';
-import { usePolicyListSelector } from '../../policy/view/policy_hooks';
 import {
   HOST_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_HEALTH_COLOR,
@@ -64,7 +62,6 @@ const HostListNavLink = memo<{
 HostListNavLink.displayName = 'HostListNavLink';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
-const policySelector = (createStructuredSelector as CreateStructuredSelector)(policySelectors);
 export const HostList = () => {
   const history = useHistory();
   const {
@@ -76,9 +73,8 @@ export const HostList = () => {
     listError,
     uiQueryParams: queryParams,
     hasSelectedHost,
+    policyItems,
   } = useHostSelector(selector);
-
-  const { selectPolicyItems: policyItems } = usePolicyListSelector(policySelector);
 
   const paginationSetup = useMemo(() => {
     return {
