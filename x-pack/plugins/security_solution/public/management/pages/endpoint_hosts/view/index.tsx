@@ -33,7 +33,7 @@ import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { ManagementPageView } from '../../../components/management_page_view';
-import { PolicyEmptyState } from '../../../components/management_empty_state';
+import { PolicyEmptyState, EndpointsEmptyState } from '../../../components/management_empty_state';
 import { getManagementUrl } from '../../..';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useEndpointPackageInfo } from '../../policy/view/ingest_hooks';
@@ -128,6 +128,10 @@ export const HostList = () => {
       },
     }
   );
+
+  const handleDeployEndpointsClick = useNavigateToAppEventHandler('ingestManager', {
+    path: `#/fleet`,
+  });
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpointList.lastActive', {
@@ -305,9 +309,10 @@ export const HostList = () => {
       );
     } else if (policyItems && policyItems.length > 0) {
       return (
-        <FormattedMessage
-          id="xpack.securitySolution.endpointList.goGetEndpoints"
-          defaultMessage="Go Get Endpoints"
+        <EndpointsEmptyState
+          loading={loading}
+          onActionClick={handleDeployEndpointsClick}
+          actionDisabled={isFetchingPackageInfo}
         />
       );
     } else {
@@ -329,6 +334,7 @@ export const HostList = () => {
     listError?.message,
     handleCreatePolicyClick,
     isFetchingPackageInfo,
+    handleDeployEndpointsClick,
   ]);
 
   return (
