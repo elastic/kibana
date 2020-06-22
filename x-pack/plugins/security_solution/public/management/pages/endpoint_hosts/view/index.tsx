@@ -34,7 +34,6 @@ import { ManagementPageView } from '../../../components/management_page_view';
 import { PolicyEmptyState, EndpointsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useEndpointPackageInfo } from '../../policy/view/ingest_hooks';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
@@ -93,7 +92,6 @@ export const HostList = () => {
     };
   }, [pageIndex, pageSize, totalItemCount]);
   const [packageInfo, isFetchingPackageInfo] = useEndpointPackageInfo();
-  const { services } = useKibana();
 
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
