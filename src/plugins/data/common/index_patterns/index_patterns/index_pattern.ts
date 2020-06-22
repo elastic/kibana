@@ -157,10 +157,12 @@ export class IndexPattern implements IIndexPattern {
   private deserializeFieldFormatMap(mapping: any) {
     const FieldFormat = this.fieldFormats.getType(mapping.id);
 
-    // return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
     return (
       FieldFormat &&
-      new FieldFormat(mapping.params, (key: string) => this.uiSettingsValues[key]?.value)
+      new FieldFormat(
+        mapping.params,
+        (key: string) => this.uiSettingsValues[key]?.userValue || this.uiSettingsValues[key]?.value
+      )
     );
   }
 
