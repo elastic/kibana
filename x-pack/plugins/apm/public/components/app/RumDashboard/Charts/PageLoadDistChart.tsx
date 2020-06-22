@@ -15,7 +15,13 @@ import {
   Settings,
   TooltipValue,
   TooltipValueFormatter,
+  DARK_THEME,
+  LIGHT_THEME,
 } from '@elastic/charts';
+import {
+  EUI_CHARTS_THEME_DARK,
+  EUI_CHARTS_THEME_LIGHT,
+} from '@elastic/eui/dist/eui_charts_theme';
 import { Position } from '@elastic/charts/dist/utils/commons';
 import styled from 'styled-components';
 import { PercentileAnnotations } from '../PageLoadDistribution/PercentileAnnotations';
@@ -24,6 +30,7 @@ import { ChartWrapper } from '../ChartWrapper';
 import { BreakdownSeries } from '../PageLoadDistribution/BreakdownSeries';
 import { PercentileR } from '../PageLoadDistribution';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   onPercentileChange: (min: number, max: number) => void;
@@ -67,11 +74,18 @@ export const PageLoadDistChart: FC<Props> = ({
     headerFormatter,
   };
 
+  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
   return (
     <ChartWrapper loading={loading || breakdownLoading} height="200px">
       {(!loading || data) && (
-        <PageLoadChart className="story-chart">
-          <Settings onBrushEnd={onBrushEnd} tooltip={tooltipProps} showLegend />
+        <PageLoadChart>
+          <Settings
+            baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
+            onBrushEnd={onBrushEnd}
+            tooltip={tooltipProps}
+            showLegend
+          />
           <PercentileAnnotations percentiles={data?.percentiles} />
           <Axis
             id="bottom"

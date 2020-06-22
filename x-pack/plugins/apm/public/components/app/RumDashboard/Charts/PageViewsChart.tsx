@@ -16,6 +16,10 @@ import {
   Settings,
   timeFormatter,
 } from '@elastic/charts';
+import {
+  EUI_CHARTS_THEME_DARK,
+  EUI_CHARTS_THEME_LIGHT,
+} from '@elastic/eui/dist/eui_charts_theme';
 import moment from 'moment';
 import { Position } from '@elastic/charts/dist/utils/commons';
 import { DateTimeLabel, OverallLabel, PageViewsLabel } from '../translations';
@@ -23,6 +27,7 @@ import { formatBigValue } from '../ClientMetrics';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ChartWrapper } from '../ChartWrapper';
+import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   data: any;
@@ -65,11 +70,21 @@ export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
     return yAccessor.toString().split?.('__')[1];
   };
 
+  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
   return (
     <ChartWrapper loading={loading} height="200px">
       {(!loading || data) && (
-        <Chart>
-          <Settings showLegend onBrushEnd={onBrushEnd} />
+        <Chart size={{ height: 200 }}>
+          <Settings
+            theme={
+              darkMode
+                ? EUI_CHARTS_THEME_DARK.theme
+                : EUI_CHARTS_THEME_LIGHT.theme
+            }
+            showLegend
+            onBrushEnd={onBrushEnd}
+          />
           <Axis
             id="date_time"
             position={Position.Bottom}
@@ -81,6 +96,7 @@ export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
             title={PageViewsLabel}
             position={Position.Left}
             tickFormat={(d) => formatBigValue(Number(d))}
+            showGridLines
           />
           <BarSeries
             id={PageViewsLabel}
