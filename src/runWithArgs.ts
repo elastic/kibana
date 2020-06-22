@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import { ConfigOptions } from './options/ConfigOptions';
+import { getGlobalConfig } from './options/config/globalConfig';
 import { getOptions } from './options/options';
 import { runWithOptions } from './runWithOptions';
 import { HandledError } from './services/HandledError';
@@ -10,7 +11,8 @@ export async function runWithArgs(
   argv: string[],
   optionsFromModule?: ConfigOptions
 ) {
-  const logger = initLogger();
+  const globalConfig = await getGlobalConfig();
+  const logger = initLogger(globalConfig.accessToken);
 
   try {
     const options = await getOptions(argv, optionsFromModule);

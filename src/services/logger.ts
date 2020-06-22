@@ -42,7 +42,18 @@ export const logger = {
   },
 };
 
-export function initLogger() {
+function createRedactor(accessToken?: string) {
+  return (str: string) => {
+    if (!accessToken) {
+      return str;
+    }
+    return str.replace(new RegExp(accessToken, 'g'), '<REDACTED>');
+  };
+}
+
+export function initLogger(accessToken?: string) {
+  const redact = createRedactor(accessToken);
+
   winstonInstance = winston.createLogger({
     transports: [
       // log to file
@@ -55,21 +66,28 @@ export function initLogger() {
           }),
 
           format.printf((info) => {
+            // format without metadata
             if (!info.metadata.meta) {
-              return `${info.timestamp}: ${info.message}`;
+              return redact(`${info.timestamp}: ${info.message}`);
             }
 
+            // format when metadata is a string
             if (isString(info.metadata.meta)) {
-              return `${info.timestamp}: ${info.message}\n${dedent(
-                info.metadata.meta
-              )}\n`;
+              return redact(
+                `${info.timestamp}: ${info.message}\n${dedent(
+                  info.metadata.meta
+                )}\n`
+              );
             }
 
-            return `${info.timestamp}: ${info.message}\n${safeJsonStringify(
-              info.metadata.meta,
-              null,
-              2
-            )}\n`;
+            // format when metadata is an object
+            return redact(
+              `${info.timestamp}: ${info.message}\n${safeJsonStringify(
+                info.metadata.meta,
+                null,
+                2
+              )}\n`
+            );
           })
         ),
         filename: getLogfilePath(),

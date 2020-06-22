@@ -76,7 +76,7 @@
     "ora": "^4.0.4",
     "safe-json-stringify": "^1.2.0",
     "strip-json-comments": "^3.1.0",
-    "winston": "^3.2.1",
+    "winston": "^3.3.1",
     "yargs": "^15.3.1"
   },
   "devDependencies": {
@@ -84,7 +84,7 @@
     "@types/dedent": "^0.7.0",
     "@types/inquirer": "^6.5.0",
     "@types/jest": "^26.0.0",
-    "@types/lodash": "^4.14.155",
+    "@types/lodash": "^4.14.156",
     "@types/lodash.flatmap": "^4.5.6",
     "@types/lodash.isempty": "^4.4.6",
     "@types/lodash.isstring": "^4.0.6",
