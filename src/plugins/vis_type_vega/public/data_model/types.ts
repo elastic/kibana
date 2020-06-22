@@ -100,6 +100,7 @@ export interface UrlObject {
   [CONSTANTS.CONTEXT]?: boolean;
   [CONSTANTS.LEGACY_CONTEXT]?: string;
   [CONSTANTS.TYPE]?: string;
+  name?: string;
   index?: string;
   body?: {
     aggs?: AggParamsMapping;
@@ -149,4 +150,11 @@ export interface CacheOptions {
 export interface CacheBounds {
   min: number;
   max: number;
+}
+
+export interface Requests {
+  obj: {
+    url: string;
+  };
+  name: string;
 }
