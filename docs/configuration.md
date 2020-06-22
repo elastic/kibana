@@ -109,6 +109,9 @@ Config:
 }
 ```
 
+## General configuration options
+The following options can be used in both the global config, project config, and passed in through CLI.
+
 #### `all`
 
 `true`: list all commits
