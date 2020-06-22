@@ -1,7 +1,7 @@
 import del from 'del';
+import makeDir = require('make-dir');
 import { BackportOptions } from '../options/options';
 import { maybeSetupRepo } from './maybeSetupRepo';
-import makeDir = require('make-dir');
 
 describe('maybeSetupRepo', () => {
   it('should delete repo if an error occurs', async () => {

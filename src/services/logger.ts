@@ -23,6 +23,7 @@ export const logLevel = argv.verbose
 
 let winstonInstance: winston.Logger;
 
+export type Logger = typeof logger;
 export const logger = {
   info: (message: string, meta?: string | Record<string, unknown>) => {
     if (winstonInstance) {

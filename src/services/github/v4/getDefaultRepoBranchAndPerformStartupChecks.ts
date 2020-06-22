@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import ora from 'ora';
-import { validateRequiredOptions } from '../../../options/options';
+import { ValidatedOptions } from '../../../options/getValidatedOptions';
 import { HandledError } from '../../HandledError';
 import {
   apiRequestV4,
@@ -16,12 +16,16 @@ export interface DataResponse {
   };
 }
 
+// fetches the default source branch for the repo (normally "master")
+// startup checks:
+// - verify the access token
+// - ensure no branch named "backport" exists
 export async function getDefaultRepoBranchAndPerformStartupChecks({
   accessToken,
   githubApiBaseUrlV4,
   repoName,
   repoOwner,
-}: ReturnType<typeof validateRequiredOptions>) {
+}: ValidatedOptions) {
   const query = /* GraphQL */ `
     query getDefaultRepoBranchAndPerformStartupChecks(
       $repoOwner: String!

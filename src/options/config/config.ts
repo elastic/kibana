@@ -1,11 +1,8 @@
-import { PromiseReturnType } from '../../types/PromiseReturnType';
+import { ConfigOptions } from '../ConfigOptions';
 import { getGlobalConfig } from './globalConfig';
 import { getProjectConfig } from './projectConfig';
 
-export type OptionsFromConfigFiles = PromiseReturnType<
-  typeof getOptionsFromConfigFiles
->;
-export async function getOptionsFromConfigFiles() {
+export async function getOptionsFromConfigFiles(): Promise<ConfigOptions> {
   const [projectConfig, globalConfig] = await Promise.all([
     getProjectConfig(),
     getGlobalConfig(),

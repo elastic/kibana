@@ -1,6 +1,6 @@
-import del = require('del');
 import childProcess = require('child_process');
 import { promisify } from 'util';
+import del = require('del');
 import {
   INTEGRATION_TEST_DATA_PATH,
   INTEGRATION_TEST_DIR_PATH,

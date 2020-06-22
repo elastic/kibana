@@ -22,8 +22,9 @@ describe('runWithOptions', () => {
     const options: BackportOptions = {
       accessToken: 'myAccessToken',
       all: false,
-      author: 'sqren',
       assignees: [],
+      author: 'sqren',
+      autoFixConflicts: undefined,
       branchLabelMapping: undefined,
       dryRun: false,
       editor: 'code',

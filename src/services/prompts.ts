@@ -5,7 +5,7 @@ import inquirer, {
   ConfirmQuestion,
 } from 'inquirer';
 import isEmpty from 'lodash.isempty';
-import { BranchChoice } from '../options/cliArgs';
+import { BranchChoice } from '../options/ConfigOptions';
 import { CommitChoice } from '../types/Commit';
 import { getShortSha } from './github/commitFormatters';
 

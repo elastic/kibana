@@ -1,18 +1,10 @@
 import isString from 'lodash.isstring';
 import yargs from 'yargs';
-import { OptionsFromConfigFiles } from './config/config';
-
-type Maybe<T> = T | undefined;
-type BranchLabelMapping = Record<string, string> | undefined;
-type BranchChoiceRaw = string | BranchChoice;
-export interface BranchChoice {
-  name: string;
-  checked?: boolean;
-}
+import { ConfigOptions, BranchChoiceRaw, BranchChoice } from './ConfigOptions';
 
 export type OptionsFromCliArgs = ReturnType<typeof getOptionsFromCliArgs>;
 export function getOptionsFromCliArgs(
-  configOptions: OptionsFromConfigFiles,
+  configOptions: ConfigOptions,
   argv: readonly string[]
 ) {
   const cliArgs = yargs(argv)
@@ -25,7 +17,7 @@ export function getOptionsFromCliArgs(
     .wrap(Math.max(100, Math.min(120, yargs.terminalWidth())))
 
     .option('accessToken', {
-      default: configOptions.accessToken as Maybe<string>,
+      default: configOptions.accessToken,
       alias: 'accesstoken',
       description: 'Github access token',
       type: 'string',
@@ -33,27 +25,27 @@ export function getOptionsFromCliArgs(
 
     // show users own commits
     .option('all', {
-      default: (configOptions.all ?? false) as boolean,
+      default: configOptions.all ?? false,
       description: 'List all commits',
       alias: 'a',
       type: 'boolean',
     })
 
     .option('author', {
-      default: configOptions.author as Maybe<string>,
+      default: configOptions.author,
       description: 'Show commits by specific author',
       type: 'string',
     })
 
     .option('assignees', {
-      default: (configOptions.assignees || []) as string[],
+      default: configOptions.assignees || [],
       description: 'Add assignees to the target pull request',
       alias: ['assignee', 'assign'],
       type: 'array',
     })
 
     .option('autoAssign', {
-      default: (configOptions.autoAssign ?? false) as boolean,
+      default: configOptions.autoAssign ?? false,
       description: 'Auto assign the target pull request to yourself',
       type: 'boolean',
     })
@@ -65,37 +57,36 @@ export function getOptionsFromCliArgs(
     })
 
     .option('editor', {
-      default: configOptions.editor as Maybe<string>,
+      default: configOptions.editor,
       description: 'Editor to be opened during conflict resolution',
       type: 'string',
     })
 
     // push target branch to {username}/{repoName}
     .option('fork', {
-      default: (configOptions.fork ?? true) as boolean,
+      default: configOptions.fork ?? true,
       description: 'Create backports in fork or origin repo',
       type: 'boolean',
     })
 
     .option('gitHostname', {
       hidden: true,
-      default: (configOptions.gitHostname ?? 'github.com') as string,
+      default: configOptions.gitHostname ?? 'github.com',
       description: 'Hostname for Github',
       type: 'string',
     })
 
     .option('githubApiBaseUrlV3', {
       hidden: true,
-      default: (configOptions.githubApiBaseUrlV3 ??
-        'https://api.github.com') as string,
+      default: configOptions.githubApiBaseUrlV3 ?? 'https://api.github.com',
       description: `Base url for Github's REST (v3) API`,
       type: 'string',
     })
 
     .option('githubApiBaseUrlV4', {
       hidden: true,
-      default: (configOptions.githubApiBaseUrlV4 ??
-        'https://api.github.com/graphql') as string,
+      default:
+        configOptions.githubApiBaseUrlV4 ?? 'https://api.github.com/graphql',
       description: `Base url for Github's GraphQL (v4) API`,
       type: 'string',
     })
@@ -122,7 +113,7 @@ export function getOptionsFromCliArgs(
 
     // display 10 commits to pick from
     .option('maxNumber', {
-      default: (configOptions.maxNumber ?? 10) as number,
+      default: configOptions.maxNumber ?? 10,
       description: 'Number of commits to choose from',
       alias: ['number', 'n'],
       type: 'number',
@@ -136,48 +127,47 @@ export function getOptionsFromCliArgs(
 
     // allow picking multiple target branches
     .option('multipleBranches', {
-      default: (configOptions.multipleBranches ?? true) as boolean,
+      default: configOptions.multipleBranches ?? true,
       description: 'Backport to multiple branches',
       type: 'boolean',
     })
 
     // allow picking multiple commits
     .option('multipleCommits', {
-      default: (configOptions.multipleCommits ?? false) as boolean,
+      default: configOptions.multipleCommits ?? false,
       description: 'Backport multiple commits',
       type: 'boolean',
     })
 
     .option('noVerify', {
-      default: (configOptions.noVerify ?? true) as boolean,
+      default: configOptions.noVerify ?? true,
       description: 'Bypasses the pre-commit and commit-msg hooks',
       type: 'boolean',
     })
 
     .option('path', {
-      default: configOptions.path as Maybe<string>,
+      default: configOptions.path,
       description: 'Only list commits touching files under the specified path',
       alias: 'p',
       type: 'string',
     })
 
     .option('prTitle', {
-      default: (configOptions.prTitle ??
-        '[{targetBranch}] {commitMessages}') as string,
+      default: configOptions.prTitle ?? '[{targetBranch}] {commitMessages}',
       description: 'Title of pull request',
       alias: 'title',
       type: 'string',
     })
 
     .option('prDescription', {
-      default: configOptions.prDescription as Maybe<string>,
+      default: configOptions.prDescription,
       description: 'Description to be added to pull request',
       alias: 'description',
       type: 'string',
     })
 
     .option('prFilter', {
-      default: configOptions.prFilter as Maybe<string>,
+      default: configOptions.prFilter,
       conflicts: ['pullNumber', 'sha'],
       description: `Filter source pull requests by a query`,
       type: 'string',
@@ -207,20 +197,20 @@ export function getOptionsFromCliArgs(
     })
 
     .option('sourceBranch', {
-      default: configOptions.sourceBranch as Maybe<string>,
+      default: configOptions.sourceBranch,
       description: `List commits to backport from another branch than master`,
       type: 'string',
     })
 
     .option('sourcePRLabels', {
-      default: (configOptions.sourcePRLabels ?? []) as string[],
+      default: configOptions.sourcePRLabels ?? [],
       description: 'Add labels to the source (original) PR',
       alias: 'sourcePRLabel',
       type: 'array',
     })
 
     .option('targetBranches', {
-      default: (configOptions.targetBranches || []) as string[],
+      default: configOptions.targetBranches || [],
       description: 'Branch(es) to backport to',
       alias: ['targetBranch', 'branch', 'b'],
       type: 'array',
@@ -229,9 +219,8 @@ export function getOptionsFromCliArgs(
 
     .option('targetBranchChoices', {
       // backwards-compatability: `branches` was renamed `targetBranchChoices`
-      default: (configOptions.targetBranchChoices ??
-        configOptions.branches ??
-        []) as BranchChoiceRaw[],
+      default:
+        configOptions.targetBranchChoices ?? configOptions.branches ?? [],
       description: 'List branches to backport to',
       alias: 'targetBranchChoice',
       type: 'array',
@@ -239,9 +228,7 @@ export function getOptionsFromCliArgs(
 
     .option('targetPRLabels', {
       // backwards-compatability: `labels` was renamed `targetPRLabels`
-      default: (configOptions.targetPRLabels ??
-        configOptions.labels ??
-        []) as string[],
+      default: configOptions.targetPRLabels ?? configOptions.labels ?? [],
       description: 'Add labels to the target (backport) PR',
       alias: ['labels', 'label', 'l'],
       type: 'array',
@@ -254,14 +241,14 @@ export function getOptionsFromCliArgs(
     })
 
     .option('upstream', {
-      default: configOptions.upstream as Maybe<string>,
+      default: configOptions.upstream,
       description: 'Name of repository',
       alias: 'up',
       type: 'string',
     })
 
     .option('username', {
-      default: configOptions.username as Maybe<string>,
+      default: configOptions.username,
       description: 'Github username',
       type: 'string',
     })
@@ -284,11 +271,14 @@ export function getOptionsFromCliArgs(
   return {
     ...rest,
 
+    // `autoFixConflicts` is not available as cli argument
+    autoFixConflicts: configOptions.autoFixConflicts,
+
     // auto-assign the current user to the target pull request or the assignees specified
     assignees: autoAssign ? [rest.username as string] : rest.assignees,
 
     // `branchLabelMapping` is not available as cli argument
-    branchLabelMapping: configOptions.branchLabelMapping as BranchLabelMapping,
+    branchLabelMapping: configOptions.branchLabelMapping,
 
     // `multiple` is a cli-only flag to override `multipleBranches` and `multipleCommits`
     multipleBranches: multiple ?? cliArgs.multipleBranches,

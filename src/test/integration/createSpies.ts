@@ -1,8 +1,8 @@
+import childProcess = require('child_process');
 import os from 'os';
 import axios from 'axios';
 import inquirer from 'inquirer';
 import { commitsWithPullRequestsMock } from '../../services/github/v4/mocks/commitsByAuthorMock';
-import childProcess = require('child_process');
 import { logger } from '../../services/logger';
 import { SpyHelper } from '../../types/SpyHelper';
 import {

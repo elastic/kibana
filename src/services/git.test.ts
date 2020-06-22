@@ -28,8 +28,8 @@ describe('getUnmergedFiles', () => {
     } as BackportOptions;
 
     await expect(await getUnmergedFiles(options)).toEqual([
-      ' - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
-      ' - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file2.txt',
+      '/myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
+      '/myHomeDir/.backport/repositories/elastic/kibana/conflicting-file2.txt',
     ]);
   });
 
@@ -67,7 +67,7 @@ describe('getFilesWithConflicts', () => {
     } as BackportOptions;
 
     expect(await getFilesWithConflicts(options)).toEqual([
-      ' - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
+      '/myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
     ]);
   });
 });

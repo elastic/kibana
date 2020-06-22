@@ -1,15 +1,19 @@
 import chalk from 'chalk';
+import { ConfigOptions } from './options/ConfigOptions';
 import { getOptions } from './options/options';
 import { runWithOptions } from './runWithOptions';
 import { HandledError } from './services/HandledError';
 import { getLogfilePath } from './services/env';
 import { initLogger, consoleLog } from './services/logger';
 
-export async function runWithArgs(args: string[]) {
+export async function runWithArgs(
+  argv: string[],
+  optionsFromModule?: ConfigOptions
+) {
   const logger = initLogger();
 
   try {
-    const options = await getOptions(args);
+    const options = await getOptions(argv, optionsFromModule);
     await runWithOptions(options);
   } catch (e) {
     if (e instanceof HandledError) {

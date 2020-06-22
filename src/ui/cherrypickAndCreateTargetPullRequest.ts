@@ -1,4 +1,6 @@
 import chalk from 'chalk';
+import dedent = require('dedent');
+import isEmpty = require('lodash.isempty');
 import ora = require('ora');
 import { BackportOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
@@ -20,12 +22,10 @@ import { getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
 import { addLabelsToPullRequest } from '../services/github/v3/addLabelsToPullRequest';
 import { createPullRequest } from '../services/github/v3/createPullRequest';
-import { consoleLog } from '../services/logger';
+import { consoleLog, logger } from '../services/logger';
 import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
 import { CommitSelected } from '../types/Commit';
-import dedent = require('dedent');
-import isEmpty = require('lodash.isempty');
 
 export async function cherrypickAndCreateTargetPullRequest({
   options,
@@ -123,15 +123,40 @@ async function waitForCherrypick(
 
   try {
     const { needsResolving } = await cherrypick(options, commit);
+
+    // no conflicts encountered
     if (!needsResolving) {
       cherrypickSpinner.succeed();
       return;
     }
 
+    // cherrypick failed due to conflicts
     cherrypickSpinner.fail();
   } catch (e) {
     cherrypickSpinner.fail();
     throw e;
+  }
+
+  // resolve conflicts automatically
+  if (options.autoFixConflicts) {
+    const autoResolveSpinner = ora(
+      'Attempting to resolve conflicts automatically'
+    ).start();
+
+    const filesWithConflicts = await getFilesWithConflicts(options);
+    const repoPath = getRepoPath(options);
+    const didAutoFix = options.autoFixConflicts({
+      files: filesWithConflicts,
+      directory: repoPath,
+      logger,
+    });
+
+    // conflicts were automatically resolved
+    if (didAutoFix) {
+      autoResolveSpinner.succeed();
+      return;
+    }
+    autoResolveSpinner.fail();
   }
 
   /*
@@ -178,7 +203,9 @@ async function listConflictingFiles(options: BackportOptions) {
         ${chalk.reset(
           `The following files from ${getRepoPath(options)} have conflicts:`
         )}
-        ${chalk.reset(filesWithConflicts.join('\n'))}
+        ${chalk.reset(
+          filesWithConflicts.map((file) => ` - ${file}`).join('\n')
+        )}
 
         ${chalk.reset.italic(
           'You do not need to `git add` or `git commit` the files - simply fix the conflicts.'
@@ -208,7 +235,9 @@ async function listUnstagedFiles(options: BackportOptions) {
   const res = await confirmPrompt(
     dedent(`
       ${chalk.reset(`The following files are unstaged:`)}
-      ${chalk.reset(unmergedFiles.join('\n'))}
+      ${chalk.reset(unmergedFiles.map((file) => ` - ${file}`).join('\n'))}
+
+
 
       Press ENTER to stage them
     `)

@@ -182,7 +182,7 @@ export async function getFilesWithConflicts(options: BackportOptions) {
         .map((line: string) => {
           const posSeparator = line.indexOf(':');
           const filename = line.slice(0, posSeparator).trim();
-          return ` - ${pathResolve(repoPath, filename)}`;
+          return pathResolve(repoPath, filename);
         });
 
       return uniq(files);
@@ -202,7 +202,7 @@ export async function getUnmergedFiles(options: BackportOptions) {
   return res.stdout
     .split('\n')
     .filter((file) => !!file)
-    .map((file) => ` - ${pathResolve(repoPath, file)}`);
+    .map((file) => pathResolve(repoPath, file));
 }
 
 export async function setCommitAuthor(

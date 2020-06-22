@@ -1,5 +1,5 @@
-import ora = require('ora');
 import makeDir from 'make-dir';
+import ora = require('ora');
 import { BackportOptions } from '../options/options';
 import { getRepoOwnerPath } from '../services/env';
 import {

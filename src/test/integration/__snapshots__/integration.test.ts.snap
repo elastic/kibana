@@ -178,6 +178,7 @@ Array [
       "all": false,
       "assignees": Array [],
       "author": "sqren",
+      "autoFixConflicts": undefined,
       "branchLabelMapping": undefined,
       "dryRun": false,
       "editor": undefined,

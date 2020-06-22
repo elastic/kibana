@@ -257,6 +257,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             "The following files are unstaged:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
+
+
         Press ENTER to stage them",
           ],
         ]

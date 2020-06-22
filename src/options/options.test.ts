@@ -1,75 +1,94 @@
 import axios from 'axios';
-import { OptionsFromCliArgs } from './cliArgs';
-import { validateRequiredOptions, getOptions } from './options';
+import { getOptions } from './options';
 
-describe('getOptions', () => {
-  function getPerformStartChecksSpy({
-    defaultBranch,
-    refName,
-  }: {
-    defaultBranch: string;
-    refName?: 'backport';
-  }) {
-    // startup check request
-    return jest.spyOn(axios, 'post').mockResolvedValueOnce({
+function setupSpy({
+  defaultBranch,
+  refName,
+}: {
+  defaultBranch: string;
+  refName?: 'backport';
+}) {
+  // startup check request
+  return jest.spyOn(axios, 'post').mockResolvedValueOnce({
+    data: {
       data: {
-        data: {
-          repository: {
-            ref: {
-              name: refName,
-            },
-            defaultBranchRef: { name: defaultBranch },
+        repository: {
+          ref: {
+            name: refName,
           },
+          defaultBranchRef: { name: defaultBranch },
         },
       },
-    });
-  }
+    },
+  });
+}
 
-  const argv = [
+describe('getOptions', () => {
+  const defaultArgs = [
     '--branch',
     '6.0',
     '--branch',
     '6.1',
     '--upstream',
     'elastic/kibana',
-  ] as const;
+  ];
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should check whether the acccess token is valid', async () => {
-    jest.spyOn(axios, 'post').mockRejectedValueOnce({
-      response: { status: 401, data: { errors: [] } },
-    });
-    await expect(getOptions(argv)).rejects.toThrowError(
-      'Please check your access token and make sure it is valid.\nConfig: /myHomeDir/.backport/config.json'
-    );
-  });
-
-  it('should get default repository branch', async () => {
-    const spy = getPerformStartChecksSpy({
-      defaultBranch: 'my-default-branch',
-    });
-    const options = await getOptions(argv);
+  it('should use the default repository branch as sourceBranch', async () => {
+    const spy = setupSpy({ defaultBranch: 'my-default-branch' });
+    const options = await getOptions(defaultArgs);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(options.sourceBranch).toBe('my-default-branch');
   });
 
+  it('should use explicit sourceBranch instead of defaultBranch', async () => {
+    const argv = [
+      '--branch',
+      '6.0',
+      '--branch',
+      '6.1',
+      '--upstream',
+      'elastic/kibana',
+      '--source-branch',
+      'my-source-branch',
+    ];
+
+    setupSpy({ defaultBranch: 'my-default-branch' });
+    const options = await getOptions(argv);
+    expect(options.sourceBranch).toBe('my-source-branch');
+  });
+
   it('should ensure that "backport" branch does not exist', async () => {
-    getPerformStartChecksSpy({
+    setupSpy({
       defaultBranch: 'my-default-branch',
       refName: 'backport',
     });
 
-    await expect(getOptions(argv)).rejects.toThrowError(
+    await expect(getOptions(defaultArgs)).rejects.toThrowError(
       'You must delete the branch "backport" to continue. See https://github.com/sqren/backport/issues/155 for details'
     );
   });
 
+  it('should omit upstream', async () => {
+    setupSpy({ defaultBranch: 'my-default-branch' });
+    const options = await getOptions(defaultArgs);
+    //@ts-expect-error
+    expect(options.upstream).toBe(undefined);
+  });
+
+  it('should merge config options and module options', async () => {
+    setupSpy({ defaultBranch: 'my-default-branch' });
+    const myFn = () => true;
+    const options = await getOptions(defaultArgs, { autoFixConflicts: myFn });
+    expect(options.autoFixConflicts).toBe(myFn);
+  });
+
   it('should return options', async () => {
-    getPerformStartChecksSpy({ defaultBranch: 'some-branch-name' });
-    const options = await getOptions(argv);
+    setupSpy({ defaultBranch: 'some-branch-name' });
+    const options = await getOptions(defaultArgs);
 
     expect(options).toEqual({
       accessToken: 'myAccessToken',
@@ -99,124 +118,6 @@ describe('getOptions', () => {
       targetPRLabels: [],
       username: 'sqren',
       verbose: false,
-    });
-  });
-});
-
-describe('validateRequiredOptions', () => {
-  const validOptions: OptionsFromCliArgs = {
-    accessToken: 'myAccessToken',
-    all: false,
-    author: undefined,
-    assignees: [],
-    branchLabelMapping: undefined,
-    dryRun: false,
-    editor: 'code',
-    fork: true,
-    gitHostname: 'github.com',
-    githubApiBaseUrlV3: 'https://api.github.com',
-    githubApiBaseUrlV4: 'https://api.github.com/graphql',
-    mainline: undefined,
-    maxNumber: 10,
-    multipleBranches: true,
-    multipleCommits: false,
-    noVerify: true,
-    path: undefined,
-    prDescription: undefined,
-    prTitle: 'myPrTitle',
-    pullNumber: undefined,
-    resetAuthor: false,
-    sha: undefined,
-    sourceBranch: 'mySourceBranch',
-    sourcePRLabels: [],
-    prFilter: undefined,
-    targetBranchChoices: [],
-    targetBranches: ['branchA'],
-    targetPRLabels: [],
-    upstream: 'elastic/kibana',
-    username: 'sqren',
-    verbose: false,
-  };
-
-  describe('should not throw', () => {
-    it('when all options are valid and `branches` is given', () => {
-      expect(() => validateRequiredOptions(validOptions)).not.toThrow();
-    });
-
-    it('when all options are valid and `targetBranchChoices` is given', () => {
-      expect(() =>
-        validateRequiredOptions({
-          ...validOptions,
-          targetBranchChoices: [{ name: 'branchA' }],
-          targetBranches: [],
-        })
-      ).not.toThrow();
-    });
-  });
-
-  describe('should throw', () => {
-    it('when accessToken is missing', () => {
-      expect(() =>
-        validateRequiredOptions({
-          ...validOptions,
-          accessToken: undefined,
-        })
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('when accessToken is empty', () => {
-      expect(() =>
-        validateRequiredOptions({
-          ...validOptions,
-          accessToken: '',
-        })
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('when both branches and targetBranchChoices are missing', () => {
-      expect(() =>
-        validateRequiredOptions({
-          ...validOptions,
-          targetBranchChoices: [],
-          targetBranches: [],
-        })
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('when upstream is missing', () => {
-      expect(() =>
-        validateRequiredOptions({
-          ...validOptions,
-          upstream: undefined,
-        })
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('when upstream is empty', () => {
-      expect(() =>
-        validateRequiredOptions({
-          ...validOptions,
-          upstream: '',
-        })
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('when username is missing', () => {
-      expect(() =>
-        validateRequiredOptions({
-          ...validOptions,
-          username: undefined,
-        })
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('when username is empty', () => {
-      expect(() =>
-        validateRequiredOptions({
-          ...validOptions,
-          username: '',
-        })
-      ).toThrowErrorMatchingSnapshot();
     });
   });
 });
