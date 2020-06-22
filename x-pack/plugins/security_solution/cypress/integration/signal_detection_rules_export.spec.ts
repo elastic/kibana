@@ -13,7 +13,7 @@ import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { exportFirstRule } from '../tasks/alert_detection_rules';
 
-import { DETECTIONS } from '../urls/navigation';
+import { ALERTS_URL } from '../urls/navigation';
 
 const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_export.ndjson';
 
@@ -32,7 +32,7 @@ describe('Export rules', () => {
   });
 
   it('Exports a custom rule', () => {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertDetectionRules();

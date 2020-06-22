@@ -47,10 +47,6 @@ describe('LoginForm', () => {
     });
   });
 
-  afterAll(() => {
-    delete (window as any).location;
-  });
-
   it('renders as expected', () => {
     const coreStartMock = coreMock.createStart();
     expect(
