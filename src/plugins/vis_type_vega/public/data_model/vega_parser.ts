@@ -49,7 +49,7 @@ import {
 // Set default single color to match other Kibana visualizations
 const defaultColor: string = VISUALIZATION_COLORS[0];
 
-const locToDirMap: any = {
+const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
   right: 'row',
   top: 'column-reverse',
@@ -287,7 +287,7 @@ export class VegaParser {
             defaultMessage:
               'Unrecognized {controlsLocationParam} value. Expecting one of [{locToDirMap}]',
             values: {
-              locToDirMap: `"${locToDirMap.keys().join('", "')}"`,
+              locToDirMap: `"${Object.keys(locToDirMap).join('", "')}"`,
               controlsLocationParam: 'controlsLocation',
             },
           })
