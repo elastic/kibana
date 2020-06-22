@@ -79,6 +79,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly endpointAppContextService = new EndpointAppContextService();
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
+
   private exceptionsPackagerTask: PackagerTask | undefined;
   private exceptionsCache: ExceptionsCache;
 

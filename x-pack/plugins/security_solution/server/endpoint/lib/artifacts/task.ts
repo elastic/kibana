@@ -70,14 +70,15 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
             id: taskId,
             taskType: PackagerTaskConstants.TYPE,
             scope: ['securitySolution'],
+            schedule: {
+              interval: context.endpointAppContext.config.packagerTaskInterval,
+            },
             state: {},
             params: { version: PackagerTaskConstants.VERSION },
           });
         } catch (e) {
           logger.debug(`Error scheduling task, received ${e.message}`);
         }
-
-        await runnerContext.taskManager.runNow(taskId);
       },
     };
   };
@@ -91,15 +92,6 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
         return {
           run: async () => {
             await run(taskInstance.id);
-
-            const nextRun = new Date();
-            const config = await context.endpointAppContext.config();
-            nextRun.setSeconds(nextRun.getSeconds() + config.packagerTaskInterval);
-
-            return {
-              state: {},
-              runAt: nextRun,
-            };
           },
           cancel: async () => {},
         };
