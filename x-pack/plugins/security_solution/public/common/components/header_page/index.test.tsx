@@ -11,6 +11,20 @@ import React from 'react';
 import { TestProviders } from '../../mock';
 import { HeaderPage } from './index';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { SecurityPageName } from '../../../app/types';
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../link_to');
 
 describe('HeaderPage', () => {
   const mount = useMountAppended();
@@ -34,7 +48,10 @@ describe('HeaderPage', () => {
   test('it renders the back link when provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPage backOptions={{ href: '#', text: 'Test link' }} title="Test title" />
+        <HeaderPage
+          backOptions={{ href: '#', text: 'Test link', pageId: SecurityPageName.hosts }}
+          title="Test title"
+        />
       </TestProviders>
     );
 

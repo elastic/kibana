@@ -11,3 +11,5 @@ export * from './mappings_editor';
 export * from './components/load_mappings';
 
 export { OnUpdateHandler, Types } from './mappings_state';
+
+export { IndexSettings } from './types';
