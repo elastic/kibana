@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ShardsResponse, SearchResponse } from 'elasticsearch';
 import { AggParamsMapping, Filter } from 'src/plugins/data/public';
 import { DslQuery } from 'src/plugins/data/common';
 
@@ -59,6 +60,7 @@ export enum CONSTANTS {
   LEGACY_CONTEXT = '%context_query%',
   TYPE = '%type%',
   SYMBOL = 'Symbol(vega_id)',
+  AUTOINTERVAL = '%auautointerval%',
 }
 
 export interface Opts {
@@ -133,12 +135,7 @@ export interface Data {
     timed_out?: boolean;
     took?: number;
   };
-  _shards?: {
-    failed?: number;
-    skipped?: number;
-    successful?: number;
-    total?: number;
-  };
+  _shards?: ShardsResponse;
   url?: UrlObject;
 }
 
@@ -156,5 +153,19 @@ export interface Requests {
   obj: {
     url: string;
   };
+  url: string;
   name: string;
+  dataObject: {
+    values: SearchResponse<unknown>;
+  };
+}
+
+export interface ContextVarsObject {
+  [index: string]: any;
+  prop:
+    | string
+    | {
+        [CONSTANTS.AUTOINTERVAL]: number;
+      };
+  interval: string;
 }
