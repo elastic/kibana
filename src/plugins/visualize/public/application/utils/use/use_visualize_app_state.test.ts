@@ -21,12 +21,11 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
 import { Observable } from 'rxjs';
 
-import { coreMock } from '../../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../../data/public/mocks';
 import { useVisualizeAppState } from './use_visualize_app_state';
 import { VisualizeServices, SavedVisInstance } from '../../types';
 import { visualizeAppStateStub } from '../stubs';
 import { VisualizeConstants } from '../../visualize_constants';
+import { createVisualizeServicesMock } from '../mocks';
 
 jest.mock('../utils');
 jest.mock('../create_visualize_app_state');
@@ -55,9 +54,6 @@ describe('useVisualizeAppState', () => {
   }));
   connectToQueryState.mockImplementation(() => stopSyncingAppFiltersMock);
 
-  const coreStartMock = coreMock.createStart();
-  const dataStartMock = dataPluginMock.createStartContract();
-  const toastNotifications = coreStartMock.notifications.toasts;
   const eventEmitter = new EventEmitter();
   const savedVisInstance = ({
     vis: {
@@ -66,17 +62,10 @@ describe('useVisualizeAppState', () => {
     savedVis: {},
     embeddableHandler: {},
   } as unknown) as SavedVisInstance;
-  let mockServices: VisualizeServices;
+  let mockServices: jest.Mocked<VisualizeServices>;
 
   beforeEach(() => {
-    mockServices = ({
-      ...coreStartMock,
-      data: dataStartMock,
-      toastNotifications,
-      history: {
-        replace: jest.fn(),
-      },
-    } as unknown) as VisualizeServices;
+    mockServices = createVisualizeServicesMock();
 
     stopStateSyncMock.mockClear();
     stopSyncingAppFiltersMock.mockClear();
@@ -102,7 +91,7 @@ describe('useVisualizeAppState', () => {
       stateDefaults: visualizeAppStateStub,
       kbnUrlStateStorage: undefined,
     });
-    expect(dataStartMock.query.filterManager.setAppFilters).toHaveBeenCalledWith(
+    expect(mockServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
       visualizeAppStateStub.filters
     );
     expect(connectToQueryState).toHaveBeenCalledWith(mockServices.data.query, expect.any(Object), {
@@ -212,7 +201,7 @@ describe('useVisualizeAppState', () => {
         setTimeout(() => res());
       });
 
-      expect(toastNotifications.addWarning).toHaveBeenCalled();
+      expect(mockServices.toastNotifications.addWarning).toHaveBeenCalled();
       expect(mockServices.history.replace).toHaveBeenCalledWith(
         `${VisualizeConstants.LANDING_PAGE_PATH}?notFound=visualization`
       );

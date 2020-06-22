@@ -20,14 +20,12 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
 
-import { coreMock } from '../../../../../../core/public/mocks';
 import { useLinkedSearchUpdates } from './use_linked_search_updates';
 import { VisualizeServices, SavedVisInstance, VisualizeAppStateContainer } from '../../types';
+import { createVisualizeServicesMock } from '../mocks';
 
 describe('useLinkedSearchUpdates', () => {
-  const coreStartMock = coreMock.createStart();
-  const toastNotifications = coreStartMock.notifications.toasts;
-  let mockServices: VisualizeServices;
+  let mockServices: jest.Mocked<VisualizeServices>;
   const eventEmitter = new EventEmitter();
   const savedVisInstance = ({
     vis: {
@@ -40,16 +38,13 @@ describe('useLinkedSearchUpdates', () => {
   } as unknown) as SavedVisInstance;
 
   beforeEach(() => {
-    mockServices = ({
-      ...coreStartMock,
-      toastNotifications,
-    } as unknown) as VisualizeServices;
+    mockServices = createVisualizeServicesMock();
   });
 
   it('should not subscribe on unlinkFromSavedSearch event if appState or savedSearch are not defined', () => {
     renderHook(() => useLinkedSearchUpdates(mockServices, eventEmitter, null, savedVisInstance));
 
-    expect(toastNotifications.addSuccess).not.toHaveBeenCalled();
+    expect(mockServices.toastNotifications.addSuccess).not.toHaveBeenCalled();
   });
 
   it('should subscribe on unlinkFromSavedSearch event if vis is based on saved search', () => {
@@ -76,6 +71,6 @@ describe('useLinkedSearchUpdates', () => {
     expect(savedVisInstance.savedSearch?.searchSource?.getParent).toHaveBeenCalled();
     expect(savedVisInstance.savedSearch?.searchSource?.getField).toHaveBeenCalledWith('index');
     expect(mockAppState.transitions.unlinkSavedSearch).toHaveBeenCalled();
-    expect(toastNotifications.addSuccess).toHaveBeenCalled();
+    expect(mockServices.toastNotifications.addSuccess).toHaveBeenCalled();
   });
 });

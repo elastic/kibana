@@ -20,8 +20,6 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
 
-import { coreMock } from '../../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../../data/public/mocks';
 import { useEditorUpdates } from './use_editor_updates';
 import {
   VisualizeServices,
@@ -30,28 +28,19 @@ import {
   IEditorController,
 } from '../../types';
 import { visualizeAppStateStub } from '../stubs';
+import { createVisualizeServicesMock } from '../mocks';
 
 describe('useEditorUpdates', () => {
-  const coreStartMock = coreMock.createStart();
-  const dataStartMock = dataPluginMock.createStartContract();
-  const toastNotifications = coreStartMock.notifications.toasts;
   const eventEmitter = new EventEmitter();
   const setHasUnsavedChangesMock = jest.fn();
-  let mockServices: VisualizeServices;
+  let mockServices: jest.Mocked<VisualizeServices>;
 
   beforeEach(() => {
-    mockServices = ({
-      ...coreStartMock,
-      data: dataStartMock,
-      toastNotifications,
-      history: {
-        replace: jest.fn(),
-        location: { pathname: '' },
-      },
-      visualizations: {
-        convertFromSerializedVis: jest.fn(() => ({ visState: visualizeAppStateStub.vis })),
-      },
-    } as unknown) as VisualizeServices;
+    mockServices = createVisualizeServicesMock();
+    // @ts-ignore
+    mockServices.visualizations.convertFromSerializedVis.mockImplementation(() => ({
+      visState: visualizeAppStateStub.vis,
+    }));
   });
 
   test('should not create any subscriptions if app state container is not ready', () => {
@@ -117,9 +106,9 @@ describe('useEditorUpdates', () => {
     };
     mockFilters = ['mockFilters'];
     // @ts-ignore
-    dataStartMock.query.timefilter.timefilter.getTime.mockImplementation(() => timeRange);
+    mockServices.data.query.timefilter.timefilter.getTime.mockImplementation(() => timeRange);
     // @ts-ignore
-    dataStartMock.query.filterManager.getFilters.mockImplementation(() => mockFilters);
+    mockServices.data.query.filterManager.getFilters.mockImplementation(() => mockFilters);
   });
 
   test('should set up current app state and render the editor', () => {
