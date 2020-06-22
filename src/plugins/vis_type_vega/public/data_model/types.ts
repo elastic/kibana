@@ -169,3 +169,31 @@ export interface ContextVarsObject {
       };
   interval: string;
 }
+
+type ToolTipPositions = 'top' | 'right' | 'bottom' | 'left';
+
+export interface TooltipConfig {
+  position?: ToolTipPositions;
+  padding?: any;
+  centerOnMark?: any;
+}
+
+export interface DstObj {
+  [index: string]: any;
+  type?: string;
+  latitude?: number;
+  longitude?: number;
+  zoom?: number;
+  mapStyle?: string | boolean;
+  minZoom?: number;
+  maxZoom?: number;
+  zoomControl?: boolean;
+  scrollWheelZoom?: boolean;
+  delayRepaint?: boolean;
+}
+
+export interface VegaConfig extends DstObj {
+  [index: string]: any;
+  maxBounds?: number;
+  tooltips?: TooltipConfig | boolean;
+}
