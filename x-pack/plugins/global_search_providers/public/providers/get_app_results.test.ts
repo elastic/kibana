@@ -40,24 +40,6 @@ describe('getAppResults', () => {
     expect(results.length).toBe(1);
     expect(results[0]).toEqual(expect.objectContaining({ id: 'dashboard', score: 100 }));
   });
-
-  it('ignores inaccessible apps', () => {
-    const apps = [
-      createApp({ id: 'dashboard', title: 'dashboard', status: AppStatus.inaccessible }),
-    ];
-
-    const results = getAppResults('dashboard', apps);
-
-    expect(results.length).toBe(0);
-  });
-
-  it('ignores chromeless apps', () => {
-    const apps = [createApp({ id: 'dashboard', title: 'dashboard', chromeless: true })];
-
-    const results = getAppResults('dashboard', apps);
-
-    expect(results.length).toBe(0);
-  });
 });
 
 describe('scoreApp', () => {

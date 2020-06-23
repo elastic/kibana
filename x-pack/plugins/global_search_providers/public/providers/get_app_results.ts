@@ -12,14 +12,10 @@ export const getAppResults = (
   term: string,
   apps: Array<PublicAppInfo | PublicLegacyAppInfo>
 ): GlobalSearchProviderResult[] => {
-  return (
-    apps
-      // remove disabled and chromeless app (to avoid returning the login page for example)
-      .filter((app) => app.status === 0 && (app.legacy === true || app.chromeless !== true))
-      .map((app) => ({ app, score: scoreApp(term, app) }))
-      .filter(({ score }) => score > 0)
-      .map(({ app, score }) => appToResult(app, score))
-  );
+  return apps
+    .map((app) => ({ app, score: scoreApp(term, app) }))
+    .filter(({ score }) => score > 0)
+    .map(({ app, score }) => appToResult(app, score));
 };
 
 export const scoreApp = (term: string, { title }: PublicAppInfo | PublicLegacyAppInfo): number => {

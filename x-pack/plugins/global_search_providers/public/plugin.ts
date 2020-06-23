@@ -13,17 +13,8 @@ export interface GlobalSearchProvidersPluginSetupDeps {
   globalSearch: GlobalSearchPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GlobalSearchProvidersPluginStartDeps {}
-
 export class GlobalSearchProvidersPlugin
-  implements
-    Plugin<
-      GlobalSearchProvidersPluginSetup,
-      GlobalSearchProvidersPluginStart,
-      GlobalSearchProvidersPluginSetupDeps,
-      GlobalSearchProvidersPluginStartDeps
-    > {
+  implements Plugin<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}> {
   setup(
     {
       getStartServices,

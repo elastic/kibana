@@ -87,6 +87,33 @@ describe('applicationResultProvider', () => {
     ]);
   });
 
+  it('ignores inaccessible apps', async () => {
+    application.applications$ = of(
+      createAppMap([
+        createApp({ id: 'app1', title: 'App 1' }),
+        createApp({ id: 'disabled', title: 'disabled', status: AppStatus.inaccessible }),
+      ])
+    );
+    const provider = createApplicationResultProvider(Promise.resolve(application));
+    await provider.find('term', defaultOption).toPromise();
+
+    expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
+  });
+
+  it('ignores chromeless apps', async () => {
+    application.applications$ = of(
+      createAppMap([
+        createApp({ id: 'app1', title: 'App 1' }),
+        createApp({ id: 'chromeless', title: 'chromeless', chromeless: true }),
+      ])
+    );
+
+    const provider = createApplicationResultProvider(Promise.resolve(application));
+    await provider.find('term', defaultOption).toPromise();
+
+    expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
+  });
+
   it('sorts the results returned by `getAppResults`', async () => {
     getAppResultsMock.mockReturnValue([
       createResult({ id: 'r60', score: 60 }),
@@ -96,7 +123,6 @@ describe('applicationResultProvider', () => {
     ]);
 
     const provider = createApplicationResultProvider(Promise.resolve(application));
-
     const results = await provider.find('term', defaultOption).toPromise();
 
     expect(results).toEqual([
