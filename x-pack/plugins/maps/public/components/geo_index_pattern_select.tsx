@@ -52,7 +52,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
       return;
     }
 
-    // method may be called again before get returns
+    // method may be called again before 'get' returns
     // ignore response when fetched index pattern does not match active index pattern
     if (this._isMounted && indexPattern.id === indexPatternId) {
       this.props.onChange(indexPattern);

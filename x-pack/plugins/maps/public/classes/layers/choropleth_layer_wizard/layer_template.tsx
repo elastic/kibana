@@ -22,9 +22,9 @@ import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { getIndexPatternSelectComponent } from '../../../kibana_services';
-import { getGeoFields, getSourceFields } from '../../../index_pattern_util';
+import { getGeoFields, getSourceFields, getTermsFields } from '../../../index_pattern_util';
 import { getEmsFileLayers } from '../../../meta';
+import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../kibana_services';
 
 export enum BOUNDARIES_SOURCE {
   ELASTICSEARCH = 'ELASTICSEARCH',
@@ -46,8 +46,6 @@ const BOUNDARIES_OPTIONS = [
   },
 ];
 
-const IndexPatternSelect = getIndexPatternSelectComponent();
-
 interface State {
   leftSource: BOUNDARIES_SOURCE;
   leftEmsFileId: string | null;
@@ -58,6 +56,7 @@ interface State {
   leftGeoField: string | null;
   leftJoinField: string | null;
   rightIndexPatternId: string | null;
+  rightTermsFields: IFieldType[];
   rightJoinField: string | null;
 }
 
@@ -74,6 +73,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     leftGeoField: null,
     leftJoinField: null,
     rightIndexPatternId: null,
+    rightTermsFields: [],
     rightJoinField: null,
   };
 
@@ -84,6 +84,27 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   componentDidMount() {
     this._isMounted = true;
   }
+
+  _loadRightFields = async (indexPatternId) => {
+    this.setState({ rightTermsFields: [] });
+
+    let indexPattern;
+    try {
+      indexPattern = await getIndexPatternService().get(indexPatternId);
+    } catch (err) {
+      return;
+    }
+
+    // method may be called again before 'get' returns
+    // ignore response when fetched index pattern does not match active index pattern
+    if (!this._isMounted || indexPatternId !== this.state.rightIndexPatternId) {
+      return;
+    }
+
+    this.setState({
+      rightTermsFields: getTermsFields(indexPattern.fields),
+    });
+  };
 
   _loadEmsFileFields = async () => {
     const emsFileLayers = await getEmsFileLayers();
@@ -111,7 +132,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   };
 
   _onLeftSourceChange = (optionId: string) => {
-    this.setState({ leftSource: optionId, leftJoinField: null });
+    this.setState({ leftSource: optionId, leftJoinField: null, rightJoinField: null });
   };
 
   _onLeftIndexPatternChange = (indexPattern: IndexPattern) => {
@@ -122,6 +143,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
         leftJoinFields: getSourceFields(indexPattern.fields),
         leftGeoField: null,
         leftJoinField: null,
+        rightJoinField: null,
       },
       () => {
         // make default geo field selection
@@ -141,7 +163,10 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   };
 
   _onLeftEmsFileChange = (emFileId: string) => {
-    this.setState({ leftEmsFileId: emFileId, leftJoinField: null }, this._loadEmsFileFields);
+    this.setState(
+      { leftEmsFileId: emFileId, leftJoinField: null, rightJoinField: null },
+      this._loadEmsFileFields
+    );
   };
 
   _onLeftEmsFieldChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -150,6 +175,26 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     }
 
     this.setState({ leftJoinField: selectedOptions[0].value }, this._previewLayer);
+  };
+
+  _onRightIndexPatternChange = (indexPatternId: string) => {
+    if (!indexPatternId) {
+      return;
+    }
+
+    this.setState(
+      {
+        rightIndexPatternId: indexPatternId,
+        rightJoinField: null,
+      },
+      () => {
+        this._loadRightFields(indexPatternId);
+      }
+    );
+  };
+
+  _onRightJoinFieldSelect = (joinField: string) => {
+    this.setState({ rightJoinField: joinField }, this._previewLayer);
   };
 
   _isLeftConfigComplete() {
@@ -298,6 +343,28 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     if (!this._isLeftConfigComplete()) {
       return null;
     }
+    const IndexPatternSelect = getIndexPatternSelectComponent();
+
+    let joinFieldSelect;
+    if (this.state.rightTermsFields.length) {
+      joinFieldSelect = (
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.choropleth.joinFieldLabel', {
+            defaultMessage: 'Join field',
+          })}
+        >
+          <SingleFieldSelect
+            placeholder={i18n.translate('xpack.maps.choropleth.joinFieldPlaceholder', {
+              defaultMessage: 'Select field',
+            })}
+            value={this.state.rightJoinField}
+            onChange={this._onRightJoinFieldSelect}
+            fields={this.state.rightTermsFields}
+            isClearable={false}
+          />
+        </EuiFormRow>
+      );
+    }
 
     return (
       <EuiPanel>
@@ -311,6 +378,23 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
         </EuiTitle>
 
         <EuiSpacer size="m" />
+
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.choropleth.rightSourceLabel', {
+            defaultMessage: 'Index pattern',
+          })}
+        >
+          <IndexPatternSelect
+            placeholder={i18n.translate('xpack.maps.maps.choropleth.rightSourcePlaceholder', {
+              defaultMessage: 'Select index pattern',
+            })}
+            indexPatternId={this.state.rightIndexPatternId}
+            onChange={this._onRightIndexPatternChange}
+            isClearable={false}
+          />
+        </EuiFormRow>
+
+        {joinFieldSelect}
       </EuiPanel>
     );
   }
