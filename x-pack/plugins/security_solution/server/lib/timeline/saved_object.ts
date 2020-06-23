@@ -70,7 +70,6 @@ export interface Timeline {
     timelineId: string | null,
     version: string | null,
     timeline: SavedTimeline,
-    timelineType?: TimelineTypeLiteralWithNull,
     isImmutable?: boolean
   ) => Promise<ResponseTimeline>;
 
