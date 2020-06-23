@@ -98,7 +98,7 @@ export const PageLoadDistribution = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <PageLoadDistChart
         data={data}
         onPercentileChange={onPercentileChange}

@@ -82,6 +82,11 @@ export const PageLoadDistChart: FC<Props> = ({
         <PageLoadChart>
           <Settings
             baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
+            theme={
+              darkMode
+                ? EUI_CHARTS_THEME_DARK.theme
+                : EUI_CHARTS_THEME_LIGHT.theme
+            }
             onBrushEnd={onBrushEnd}
             tooltip={tooltipProps}
             showLegend

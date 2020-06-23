@@ -11,12 +11,11 @@
  */
 
 import {
-  EuiFacetButton,
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
-  EuiIcon,
+  EuiNotificationBadge,
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
@@ -24,11 +23,12 @@ import React, { useEffect, useState } from 'react';
 import { LoadingLabel, SearchBreakdownLabel } from './translations';
 import { BreakdownItem } from '../../../../typings/ui_filters';
 
-export interface FilterPopoverProps {
+export interface BreakdownGroupProps {
   id: string;
   loading: boolean;
   disabled?: boolean;
   items: BreakdownItem[];
+  categories: BreakdownItem[];
   onChange: (values: BreakdownItem[]) => void;
   title: string;
 }
@@ -40,7 +40,8 @@ export const BreakdownGroup = ({
   items: allItems,
   onChange,
   title,
-}: FilterPopoverProps) => {
+  categories,
+}: BreakdownGroupProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [query, setQuery] = useState<string>('');
 
@@ -115,12 +116,12 @@ export const BreakdownGroup = ({
                   )
                 }
               >
-                <EuiFacetButton
-                  quantity={count}
-                  icon={<EuiIcon size="s" type="visMapCoordinate" />}
-                >
-                  {name}
-                </EuiFacetButton>
+                <span className="euiFacetButton__content">
+                  <span className="euiFacetButton__text">{name}</span>
+                  <EuiNotificationBadge color={selected ? 'accent' : 'subdued'}>
+                    {count}
+                  </EuiNotificationBadge>
+                </span>
               </EuiFilterSelectItem>
             ))}
         </div>

@@ -59,10 +59,30 @@ export const BreakdownFilter = ({
     onBreakdownChange(selValues);
   };
 
+  const categories: BreakdownItem[] = [
+    {
+      name: 'Browser',
+      type: 'category',
+    },
+    {
+      name: 'OS',
+      type: 'category',
+    },
+    {
+      name: 'Device',
+      type: 'category',
+    },
+    {
+      name: 'Location',
+      type: 'category',
+    },
+  ];
+
   return (
     <BreakdownGroup
       id={id}
       items={sItems}
+      categories={categories}
       loading={false}
       onChange={onChange}
       title={'Breakdown'}

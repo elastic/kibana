@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { PageViewsLabel } from '../translations';
@@ -63,6 +63,7 @@ export const PageViewsTrend = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <PageViewsChart data={data} loading={status !== 'success'} />
     </div>
   );

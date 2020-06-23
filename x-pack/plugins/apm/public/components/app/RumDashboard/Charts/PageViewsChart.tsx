@@ -16,6 +16,8 @@ import {
   Settings,
   timeFormatter,
 } from '@elastic/charts';
+import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
+
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
@@ -77,6 +79,7 @@ export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
       {(!loading || data) && (
         <Chart size={{ height: 200 }}>
           <Settings
+            baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
             theme={
               darkMode
                 ? EUI_CHARTS_THEME_DARK.theme
@@ -96,7 +99,6 @@ export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
             title={PageViewsLabel}
             position={Position.Left}
             tickFormat={(d) => formatBigValue(Number(d))}
-            showGridLines
           />
           <BarSeries
             id={PageViewsLabel}
