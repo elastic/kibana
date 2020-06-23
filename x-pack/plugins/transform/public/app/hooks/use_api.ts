@@ -47,10 +47,16 @@ export const useApi = () => {
       deleteTransforms(
         transformsInfo: TransformEndpointRequest[],
         deleteDestIndex: boolean | undefined,
-        deleteDestIndexPattern: boolean | undefined
+        deleteDestIndexPattern: boolean | undefined,
+        forceDelete: boolean
       ): Promise<DeleteTransformEndpointResult> {
         return http.post(`${API_BASE_PATH}delete_transforms`, {
-          body: JSON.stringify({ transformsInfo, deleteDestIndex, deleteDestIndexPattern }),
+          body: JSON.stringify({
+            transformsInfo,
+            deleteDestIndex,
+            deleteDestIndexPattern,
+            forceDelete,
+          }),
         });
       },
       getTransformsPreview(obj: PreviewRequestBody): Promise<GetTransformsResponse> {
