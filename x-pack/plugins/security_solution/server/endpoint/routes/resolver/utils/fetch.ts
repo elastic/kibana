@@ -37,16 +37,9 @@ export interface TreeOptions {
   afterChild?: string;
 }
 
-// break into two interfaces
-// SingleQueryHandler
-//  buildQuery(): QueryInfo
-//  search()
-// QueryHandler
-//  buildQueery: QueryInfo
-//  hasMore()
-//  search()
 export interface SingleQueryHandler<T> {
   buildQuery(): QueryInfo;
+  // TODO make this just T
   getResults(): T | undefined;
   search(client: IScopedClusterClient): Promise<T>;
 }
@@ -163,6 +156,7 @@ export class Fetcher {
     await msearch.search(queries);
 
     queries = [];
+    // TODO need to loop this too
     const childrenLifecycleHandler = new LifecycleQueryHandler(
       childrenHandler.getResults().map(entityId),
       this.indexPattern,

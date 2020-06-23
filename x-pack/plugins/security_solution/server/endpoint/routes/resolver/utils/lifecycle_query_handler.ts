@@ -7,15 +7,22 @@
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { entityId } from '../../../../../common/endpoint/models/event';
-import { ResolverEvent, LifecycleNode } from '../../../../../common/endpoint/types';
+import {
+  ResolverEvent,
+  LifecycleNode,
+  ResolverChildren,
+} from '../../../../../common/endpoint/types';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
 import { createLifecycle } from './node';
 
-export class LifecycleQueryHandler implements SingleQueryHandler<ResolverEvent[]> {
+// TODO change the name to reflect children nodes
+export class LifecycleQueryHandler implements SingleQueryHandler<ResolverChildren> {
+  // TODO change this to be ResolverChildren
   private lifecycle: ResolverEvent[] = [];
   private readonly query: LifecycleQuery;
+  // TODO need to take in nextChild
   constructor(
     private readonly entityIDs: string[],
     indexPattern: string,
@@ -24,7 +31,7 @@ export class LifecycleQueryHandler implements SingleQueryHandler<ResolverEvent[]
     this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
   }
 
-  private toMapOfNodes(results: ResolverEvent[]) {
+  private static toMapOfNodes(results: ResolverEvent[]) {
     return results.reduce((nodes: Map<string, LifecycleNode>, event: ResolverEvent) => {
       const nodeId = entityId(event);
       let node = nodes.get(nodeId);
@@ -38,7 +45,9 @@ export class LifecycleQueryHandler implements SingleQueryHandler<ResolverEvent[]
   }
 
   handleResponse = (response: SearchResponse<ResolverEvent>) => {
-    this.lifecycle = this.query.formatResponse(response);
+    this.lifecycle = LifecycleQueryHandler.toMapOfNodes(
+      this.query.formatResponse(response)
+    ).values();
   };
 
   buildQuery(): QueryInfo {

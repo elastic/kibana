@@ -14,7 +14,7 @@ import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
 
 export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRelatedAlerts> {
-  private relatedEvents: ResolverRelatedAlerts | undefined;
+  private relatedAlerts: ResolverRelatedAlerts | undefined;
   private readonly query: AlertsQuery;
   constructor(
     private readonly limit: number,
@@ -32,7 +32,7 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
 
   handleResponse = (response: SearchResponse<ResolverEvent>) => {
     const results = this.query.formatResponse(response);
-    this.relatedEvents = createRelatedAlerts(
+    this.relatedAlerts = createRelatedAlerts(
       this.entityID,
       results,
       PaginationBuilder.buildCursorRequestLimit(this.limit, results)
@@ -48,7 +48,7 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
   }
 
   getResults() {
-    return this.relatedEvents;
+    return this.relatedAlerts;
   }
 
   async search(client: IScopedClusterClient) {
