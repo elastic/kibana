@@ -9,6 +9,7 @@ import {
   deleteEventsStream,
   deleteMetadataStream,
   deletePolicyStream,
+  deleteAlertsStream,
 } from '../data_stream_helper';
 import { indexHostsAndAlerts } from '../../../../../plugins/security_solution/common/endpoint/index_data';
 
@@ -55,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         // to do it manually
         await Promise.all([
           deleteEventsStream(getService),
+          deleteAlertsStream(getService),
           deleteMetadataStream(getService),
           deletePolicyStream(getService),
         ]);
