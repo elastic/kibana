@@ -11,7 +11,6 @@ import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
-import { SiemPageName } from '../../../../app/types';
 
 import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
 
@@ -43,7 +42,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
           encode: false,
         });
 
-        return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
+        return <Redirect to={`?${reEncoded}`} />;
       }}
     />
     <Route
@@ -68,7 +67,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
             encode: false,
           });
 
-          return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
+          return <Redirect to={`?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
           const ips: string[] = getMultipleEntities(ip);
           queryStringDecoded.query = addEntitiesToKql(
@@ -80,13 +79,13 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
             sort: false,
             encode: false,
           });
-          return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
+          return <Redirect to={`?${reEncoded}`} />;
         } else {
           const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
             sort: false,
             encode: false,
           });
-          return <Redirect to={`/${SiemPageName.network}/ip/${ip}?${reEncoded}`} />;
+          return <Redirect to={`/ip/${ip}?${reEncoded}`} />;
         }
       }}
     />
