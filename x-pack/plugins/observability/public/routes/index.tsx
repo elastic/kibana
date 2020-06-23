@@ -9,30 +9,17 @@ import { Home } from '../pages/home';
 import { Overview } from '../pages/overview';
 import { jsonRt } from './json_rt';
 
-export interface RouteParams<T extends keyof typeof routes> {
-  params: DecodeParams<typeof routes[T]['params']>;
-}
+export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
 type DecodeParams<TParams extends Params | undefined> = {
   [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
 };
 
-type OverviewRouteParams = DecodeParams<typeof routes['/overview']['params']>;
-const overviewRouteParams: OverviewRouteParams = { query: {} };
-console.log('### caue:', overviewRouteParams);
-
 export interface Params {
-  query?: t.Any;
-  path?: t.Any;
+  query?: t.HasProps;
+  path?: t.HasProps;
 }
-interface Routes {
-  [pathName: string]: {
-    handler: React.ReactNode;
-    params: Params;
-  };
-}
-
-export const routes: Routes = {
+export const routes = {
   '/': {
     handler: () => {
       return <Home />;
@@ -40,8 +27,9 @@ export const routes: Routes = {
     params: {},
   },
   '/overview': {
-    handler: ({ query, path }: { query: any; path: any }) => {
-      return <Overview />;
+    handler: ({ query }: { query: any }) => {
+      console.log('### caue: query', query);
+      return <Overview routeParams={{ query }} />;
     },
     params: {
       query: t.partial({

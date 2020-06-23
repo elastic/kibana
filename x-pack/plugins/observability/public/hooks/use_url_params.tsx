@@ -7,7 +7,7 @@ import * as t from 'io-ts';
 import { useLocation, useParams } from 'react-router-dom';
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { Route } from '../routes';
+import { routes } from '../routes';
 
 function getQueryParams(location: ReturnType<typeof useLocation>) {
   const urlSearchParms = new URLSearchParams(location.search);
@@ -18,15 +18,15 @@ function getQueryParams(location: ReturnType<typeof useLocation>) {
   return queryParams;
 }
 
-export function useUrlParams(route: Route) {
+export function useUrlParams<T extends keyof typeof routes>(route: typeof routes[T]) {
   const location = useLocation();
   const pathParams = useParams();
   const queryParams = getQueryParams(location);
 
   const { params } = route;
   const rts = {
-    queryRt: params?.query ? t.exact(params.query) : t.strict({}),
-    pathRt: params?.path ? t.exact(params.path) : t.strict({}),
+    queryRt: 'query' in params ? t.exact(params.query) : t.strict({}),
+    pathRt: 'path' in params ? t.exact(params.path) : t.strict({}),
   };
 
   const queryResult = rts.queryRt.decode(queryParams);

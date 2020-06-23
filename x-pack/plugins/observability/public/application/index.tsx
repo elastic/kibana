@@ -3,24 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as t from 'io-ts';
+import { createHashHistory } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch, useLocation } from 'react-router-dom';
-import { createHashHistory } from 'history';
-import { isLeft } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
+import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
+import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
 import { PluginContext } from '../context/plugin_context';
-import { routes } from '../routes';
 import { useUrlParams } from '../hooks/use_url_params';
+import { routes } from '../routes';
 
 const App = () => {
   return (
     <>
       <Switch>
-        {Object.keys(routes).map((path) => {
+        {Object.keys(routes).map((key) => {
+          const path = key as keyof typeof routes;
           const route = routes[path];
           return (
             <Route
@@ -28,8 +26,7 @@ const App = () => {
               path={path}
               exact={true}
               component={() => {
-                const { query, path: pathParams } = useUrlParams(route);
-
+                const { query, path: pathParams } = useUrlParams<typeof path>(route);
                 return route.handler({ query, path: pathParams });
               }}
             />

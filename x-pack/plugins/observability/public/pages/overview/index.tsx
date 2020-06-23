@@ -3,43 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  EuiDatePicker,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
-import moment from 'moment';
-import React, { useContext, useState } from 'react';
-import { ThemeContext } from 'styled-components';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import React, { useContext } from 'react';
+import { ThemeContext } from 'styled-components';
 import { APMChart } from '../../components/chart/apm';
 import { ChartContainer } from '../../components/chart/container';
 import { MetricsChart } from '../../components/chart/metrics';
 import { StackedBarChart } from '../../components/chart/stacked_bar';
 import { EmptySection } from '../../components/empty_section';
 import { WithHeaderLayout } from '../../components/layout/with_header';
-import { appsSection } from '../home/section';
+import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { getDataHandler } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
-import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
-import { useQueryParams } from '../../hooks/use_query_params';
-import { getParsedDate } from '../../utils/date';
-import { useKibanaUISettings, UI_SETTINGS } from '../../hooks/use_kibana_ui_settings';
+import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { RouteParams } from '../../routes';
+import { getParsedDate } from '../../utils/date';
+import { appsSection } from '../home/section';
 
 interface Props {
-  routeParams?: RouteParams<'/overview'>;
+  routeParams: RouteParams<'/overview'>;
 }
 
 export const Overview = ({ routeParams }: Props) => {
-  console.log('### caue: Overview -> routeParams', routeParams?.params?.query);
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
 
-  const { rangeFrom = timePickerTime.from, rangeTo = timePickerTime.to } = useQueryParams<any>();
+  const { rangeFrom = timePickerTime.from, rangeTo = timePickerTime.to } = routeParams.query;
 
   const { data = [] } = useFetcher(() => {
     const startTime = getParsedDate(rangeFrom);
