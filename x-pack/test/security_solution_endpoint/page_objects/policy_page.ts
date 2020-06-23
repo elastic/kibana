@@ -15,7 +15,10 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * Navigates to the Endpoint Policy List
      */
     async navigateToPolicyList() {
-      await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/policy' });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolutionManagement',
+        '/policy'
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -51,9 +54,10 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * @param policyId
      */
     async navigateToPolicyDetails(policyId: string) {
-      await pageObjects.common.navigateToApp('securitySolution', {
-        hash: `/management/policy/${policyId}`,
-      });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolutionManagement',
+        `/policy/${policyId}`
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -100,6 +104,14 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async findDatasourceEndpointCustomConfiguration(onEditPage: boolean = false) {
       return await testSubjects.find(`endpointDatasourceConfig_${onEditPage ? 'edit' : 'create'}`);
+    },
+
+    /**
+     * Finds and returns the onboarding button displayed in empty List pages
+     */
+    async findOnboardingStartButton() {
+      await testSubjects.waitForEnabled('onboardingStartButton');
+      return await testSubjects.find('onboardingStartButton');
     },
   };
 }

@@ -11,6 +11,8 @@ function initialState(): DataState {
   return {
     results: [],
     relatedEventsStats: new Map(),
+    relatedEvents: new Map(),
+    relatedEventsReady: new Map(),
     isLoading: false,
     hasError: false,
   };
@@ -35,6 +37,20 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     return {
       ...state,
       hasError: true,
+    };
+  } else if (
+    action.type === 'userRequestedRelatedEventData' ||
+    action.type === 'appDetectedMissingEventData'
+  ) {
+    return {
+      ...state,
+      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload, false]]),
+    };
+  } else if (action.type === 'serverReturnedRelatedEventData') {
+    return {
+      ...state,
+      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload.entityID, true]]),
+      relatedEvents: new Map([...state.relatedEvents, [action.payload.entityID, action.payload]]),
     };
   } else {
     return state;
