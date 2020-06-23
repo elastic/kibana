@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { cleanup, fireEvent, render, wait } from '@testing-library/react/pure';
-import '@testing-library/jest-dom/extend-expect';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import { dashboardFactory, urlFactory } from '../../../components/action_wizard/test_data';
 import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
