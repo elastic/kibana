@@ -128,6 +128,9 @@ export const createEmbeddable = async (
   return embeddableObject;
 };
 
+// These patterns are overly greedy and must be excluded when matching against Security indexes.
+const ignoredIndexPatterns = ['*', '*:*'];
+
 /**
  * Returns kibanaIndexPatterns that wildcard match at least one of siemDefaultIndices
  *
@@ -144,7 +147,10 @@ export const findMatchingIndexPatterns = ({
   try {
     return kibanaIndexPatterns.filter((kip) => {
       const pattern = kip.attributes.title;
-      return pattern !== '*' && siemDefaultIndices.some((sdi) => minimatch(sdi, pattern));
+      return (
+        !ignoredIndexPatterns.includes(pattern) &&
+        siemDefaultIndices.some((sdi) => minimatch(sdi, pattern))
+      );
     });
   } catch {
     return [];
