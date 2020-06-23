@@ -5,12 +5,14 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import { HostList } from './view';
 
-export const endpointHostsRoutes = () => [
-  <Route path="/:pageName(endpoint-hosts)">
-    <HostList />
-  </Route>,
-];
+export const EndpointHostsRoutes: React.FC = () => (
+  <Switch>
+    <Route path="/:pageName(endpoint-hosts)">
+      <HostList />
+    </Route>
+  </Switch>
+);
