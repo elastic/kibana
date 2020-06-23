@@ -291,9 +291,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       focusInput();
     }, []);
 
-    useEffect(() => {
-      refetch();
-    }, [refetch]);
+    useEffect(() => refetch(), [refetch]);
 
     return !isModal ? (
       <OpenTimeline

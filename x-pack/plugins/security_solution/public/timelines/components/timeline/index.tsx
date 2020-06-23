@@ -43,6 +43,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     filters,
     id,
     isLive,
+    isTimelineExists,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
@@ -153,7 +154,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     );
 
     useEffect(() => {
-      if (createTimeline != null) {
+      if (createTimeline != null && !isTimelineExists) {
         createTimeline({ id, columns: defaultHeaders, show: false });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -254,6 +255,7 @@ const makeMapStateToProps = () => {
       filters: timelineFilter,
       id,
       isLive: input.policy.kind === 'interval',
+      isTimelineExists: getTimeline(state, id) != null,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,

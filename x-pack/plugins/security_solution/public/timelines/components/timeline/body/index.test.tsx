@@ -32,6 +32,7 @@ jest.mock('react-redux', () => {
     useSelector: jest.fn(),
   };
 });
+jest.mock('../../../../common/components/link_to');
 
 jest.mock(
   'react-visibility-sensor',
@@ -130,7 +131,7 @@ describe('Body', () => {
             .exists()
         ).toEqual(true);
       });
-    });
+    }, 20000);
   });
 
   describe('action on event', () => {

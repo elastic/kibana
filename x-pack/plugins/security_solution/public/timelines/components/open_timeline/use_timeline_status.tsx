@@ -40,6 +40,13 @@ export const useTimelineStatus = ({
     disableTemplate || timelineType !== TimelineType.template ? null : TemplateTimelineType.elastic
   );
 
+  const timelineStatus =
+    templateTimelineType == null
+      ? null
+      : templateTimelineType === TemplateTimelineType.elastic
+      ? TimelineStatus.immutable
+      : TimelineStatus.active;
+
   const filters = useMemo(
     () => [
       {
@@ -61,7 +68,7 @@ export const useTimelineStatus = ({
   );
 
   const onFilterClicked = useCallback(
-    (timelineStatus, tabId) => {
+    (tabId) => {
       if (templateTimelineType === tabId) {
         setTemplateTimelineType(null);
       } else {
@@ -72,7 +79,7 @@ export const useTimelineStatus = ({
         }
       }
     },
-    [setTemplateTimelineType, templateTimelineType]
+    [setTemplateTimelineType, templateTimelineType, timelineStatus]
   );
 
   const templateTimelineFilter = useMemo(() => {
@@ -82,7 +89,7 @@ export const useTimelineStatus = ({
             hasActiveFilters={tab.id === templateTimelineType}
             key={`template-timeline-filter-${tab.id}`}
             numFilters={tab.count}
-            onClick={onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id)}
+            onClick={onFilterClicked.bind(null, tab.id)}
             withNext={tab.withNext}
             isDisabled={tab.disabled}
           >
@@ -93,12 +100,7 @@ export const useTimelineStatus = ({
   }, [templateTimelineType, filters, isTemplateFilterEnabled, onFilterClicked]);
 
   return {
-    timelineStatus:
-      templateTimelineType == null
-        ? null
-        : templateTimelineType === TemplateTimelineType.elastic
-        ? TimelineStatus.immutable
-        : TimelineStatus.active,
+    timelineStatus,
     templateTimelineType,
     templateTimelineFilter,
   };

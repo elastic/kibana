@@ -208,12 +208,13 @@ export enum TimelineTabsStyle {
 }
 
 export interface TimelineTab {
-  id: TimelineTypeLiteral;
-  name: string;
+  count: number | undefined;
   disabled: boolean;
   href: string;
+  id: TimelineTypeLiteral;
+  name: string;
+  onClick: (ev: { preventDefault: () => void }) => void;
   withNext: boolean;
-  count: number | undefined;
 }
 
 export interface TemplateTimelineFilter {
