@@ -5,11 +5,14 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import { Overview } from './pages';
-import { SiemPageName } from '../app/types';
+import { NotFoundPage } from '../app/404';
 
-export const getOverviewRoutes = () => [
-  <Route path={`/:pageName(${SiemPageName.overview})`} render={() => <Overview />} />,
-];
+export const OverviewRoutes = () => (
+  <Switch>
+    <Route path="/" render={() => <Overview />} />
+    <Route render={() => <NotFoundPage />} />
+  </Switch>
+);

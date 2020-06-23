@@ -10,7 +10,7 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
         delay="regular"
         position="top"
       >
-        <ForwardRef(Styled(EuiButtonIcon))
+        <Styled(EuiButtonIcon)
           aria-label="All actions"
           data-test-subj="rules-details-popover-button-icon"
           iconType="boxesHorizontal"
