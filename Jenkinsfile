@@ -3,9 +3,9 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
-  ciStats.trackBuild {
-    githubPr.withDefaultPrComments {
+kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
+  githubPr.withDefaultPrComments {
+    ciStats.trackBuild {
       catchError {
         retryable.enable()
         parallel([
