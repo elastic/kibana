@@ -8,10 +8,10 @@ import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
 import { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../store/model';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
-  `#/${SiemPageName.hosts}/${hostName}/${tabName}`;
+  `/${hostName}/${tabName}`;
 
 export const navTabsHostDetails = (
   hostName: string,
@@ -25,6 +25,7 @@ export const navTabsHostDetails = (
       disabled: false,
       urlKey: 'host',
       isDetailPage: true,
+      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.uncommonProcesses]: {
       id: HostsTableType.uncommonProcesses,
@@ -33,6 +34,7 @@ export const navTabsHostDetails = (
       disabled: false,
       urlKey: 'host',
       isDetailPage: true,
+      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.anomalies]: {
       id: HostsTableType.anomalies,
@@ -41,6 +43,7 @@ export const navTabsHostDetails = (
       disabled: false,
       urlKey: 'host',
       isDetailPage: true,
+      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.events]: {
       id: HostsTableType.events,
@@ -49,6 +52,7 @@ export const navTabsHostDetails = (
       disabled: false,
       urlKey: 'host',
       isDetailPage: true,
+      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.alerts]: {
       id: HostsTableType.alerts,
@@ -56,6 +60,7 @@ export const navTabsHostDetails = (
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.alerts),
       disabled: false,
       urlKey: 'host',
+      pageId: SecurityPageName.hosts,
     },
   };
 

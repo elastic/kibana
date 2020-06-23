@@ -16,19 +16,16 @@ interface Props {
   onDuplicate: () => void;
   onDelete: () => void;
   onAddOnFailure: () => void;
+  'data-test-subj'?: string;
 }
 
-export const ContextMenu: FunctionComponent<Props> = ({
-  showAddOnFailure,
-  onDuplicate,
-  onAddOnFailure,
-  onDelete,
-  disabled,
-}) => {
+export const ContextMenu: FunctionComponent<Props> = (props) => {
+  const { showAddOnFailure, onDuplicate, onAddOnFailure, onDelete, disabled } = props;
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const contextMenuItems = [
     <EuiContextMenuItem
+      data-test-subj="duplicateButton"
       key="duplicate"
       icon="copy"
       onClick={() => {
@@ -40,6 +37,7 @@ export const ContextMenu: FunctionComponent<Props> = ({
     </EuiContextMenuItem>,
     showAddOnFailure ? (
       <EuiContextMenuItem
+        data-test-subj="addOnFailureButton"
         key="addOnFailure"
         icon="indexClose"
         onClick={() => {
@@ -51,6 +49,7 @@ export const ContextMenu: FunctionComponent<Props> = ({
       </EuiContextMenuItem>
     ) : undefined,
     <EuiContextMenuItem
+      data-test-subj="deleteButton"
       key="delete"
       icon="trash"
       color="danger"
@@ -65,12 +64,14 @@ export const ContextMenu: FunctionComponent<Props> = ({
 
   return (
     <EuiPopover
+      data-test-subj={props['data-test-subj']}
       anchorPosition="leftCenter"
       panelPaddingSize="none"
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       button={
         <EuiButtonIcon
+          data-test-subj="button"
           disabled={disabled}
           onClick={() => setIsOpen((v) => !v)}
           iconType="boxesHorizontal"
