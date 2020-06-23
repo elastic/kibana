@@ -6,7 +6,6 @@
 
 import { CoreSetup, Plugin } from 'src/core/server';
 import { GlobalSearchPluginSetup } from '../../global_search/server';
-import { GlobalSearchProvidersPluginSetup, GlobalSearchProvidersPluginStart } from './types';
 import { createSavedObjectsResultProvider } from './providers';
 
 export interface GlobalSearchProvidersPluginSetupDeps {
@@ -16,16 +15,14 @@ export interface GlobalSearchProvidersPluginSetupDeps {
 export class GlobalSearchProvidersPlugin
   implements Plugin<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}> {
   setup(
-    {
-      getStartServices,
-    }: CoreSetup<GlobalSearchProvidersPluginStartDeps, GlobalSearchProvidersPluginStart>,
+    { getStartServices }: CoreSetup<{}, {}>,
     { globalSearch }: GlobalSearchProvidersPluginSetupDeps
-  ): GlobalSearchProvidersPluginSetup {
+  ) {
     globalSearch.registerResultProvider(createSavedObjectsResultProvider());
     return {};
   }
 
-  start(): GlobalSearchProvidersPluginStart {
+  start() {
     return {};
   }
 }
