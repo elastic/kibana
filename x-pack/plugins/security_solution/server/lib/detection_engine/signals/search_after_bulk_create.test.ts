@@ -11,6 +11,7 @@ import {
   sampleRuleGuid,
   mockLogger,
   repeatedSearchResultsWithSortId,
+  sampleDocSearchResultsNoSortIdNoHits,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
@@ -95,7 +96,9 @@ describe('searchAfterAndBulkCreate', () => {
             },
           },
         ],
-      });
+      })
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.entries = [
       {
@@ -135,7 +138,7 @@ describe('searchAfterAndBulkCreate', () => {
       throttle: 'no_actions',
     });
     expect(success).toEqual(true);
-    expect(mockService.callCluster).toHaveBeenCalledTimes(8);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(9);
     expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
@@ -188,6 +191,7 @@ describe('searchAfterAndBulkCreate', () => {
           },
         ],
       })
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits())
       .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12)))
       .mockResolvedValueOnce({
         took: 100,
@@ -202,7 +206,23 @@ describe('searchAfterAndBulkCreate', () => {
             },
           },
         ],
-      });
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       gap: moment.duration(2, 'm'),
@@ -241,11 +261,9 @@ describe('searchAfterAndBulkCreate', () => {
       throttle: 'no_actions',
     });
     expect(success).toEqual(true);
-    expect(mockService.callCluster).toHaveBeenCalledTimes(8);
-    expect(createdSignalsCount).toEqual(4);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(12);
+    expect(createdSignalsCount).toEqual(5);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
-    const maxResults = parseInt(mockLogger.debug.mock.calls[0][0].toString().split(' ')[2], 10);
-    expect(maxResults).toBeGreaterThan(30);
   });
 
   test('should return success when no search results are in the allowlist', async () => {
@@ -280,7 +298,9 @@ describe('searchAfterAndBulkCreate', () => {
             },
           },
         ],
-      });
+      })
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.entries = [
       {
@@ -319,7 +339,7 @@ describe('searchAfterAndBulkCreate', () => {
       throttle: 'no_actions',
     });
     expect(success).toEqual(true);
-    expect(mockService.callCluster).toHaveBeenCalledTimes(2);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(3);
     expect(createdSignalsCount).toEqual(4); // should not create any signals because all events were in the allowlist
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
@@ -356,7 +376,8 @@ describe('searchAfterAndBulkCreate', () => {
             },
           },
         ],
-      });
+      })
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
 
     listClient.getListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
@@ -392,7 +413,7 @@ describe('searchAfterAndBulkCreate', () => {
       throttle: 'no_actions',
     });
     expect(success).toEqual(true);
-    expect(mockService.callCluster).toHaveBeenCalledTimes(2);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(3);
     expect(createdSignalsCount).toEqual(4); // should not create any signals because all events were in the allowlist
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
@@ -458,7 +479,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const sampleParams = sampleRuleAlertParams();
+    const sampleParams = sampleRuleAlertParams(30);
     mockService.callCluster.mockResolvedValueOnce(sampleEmptyDocSearchResults());
     listClient.getListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(

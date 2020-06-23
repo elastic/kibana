@@ -145,19 +145,23 @@ export const searchAfterAndBulkCreate = async ({
           }
         );
         toReturn.searchAfterTimes.push(searchDuration);
-        toReturn.lastLookBackDate =
-          searchResult.hits.hits.length > 0
-            ? new Date(
-                searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp']
-              )
-            : null;
+
         const totalHits =
           typeof searchResult.hits.total === 'number'
             ? searchResult.hits.total
             : searchResult.hits.total.value;
         logger.debug(`totalHits: ${totalHits}`);
         logger.debug(`searchResult.hit.hits.length: ${searchResult.hits.hits.length}`);
-
+        if (totalHits === 0) {
+          toReturn.success = true;
+          break;
+        }
+        toReturn.lastLookBackDate =
+          searchResult.hits.hits.length > 0
+            ? new Date(
+                searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp']
+              )
+            : null;
         searchResultSize += searchResult.hits.hits.length;
 
         // filter out the search results that match with the values found in the list.
@@ -171,7 +175,6 @@ export const searchAfterAndBulkCreate = async ({
                 eventSearchResult: searchResult,
               })
             : searchResult;
-
         if (filteredEvents.hits.total === 0 || filteredEvents.hits.hits.length === 0) {
           // everything in the events were allowed, so no need to generate signals
           toReturn.success = true;
@@ -230,6 +233,5 @@ export const searchAfterAndBulkCreate = async ({
     }
   }
   logger.debug(`[+] completed bulk index of ${toReturn.createdSignalsCount}`);
-  toReturn.success = true;
   return toReturn;
 };
