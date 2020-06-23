@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { MVTField } from '../../fields/mvt_field';
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
-import { MVTSingleLayerVectorSourceEditor } from './mvt_single_layer_vector_source_editor';
 import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';

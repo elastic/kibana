@@ -16,12 +16,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MVTFieldDescriptor, MVTFieldType } from '../../../../common/descriptor_types';
+import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
+import { MVTFieldType } from '../../../../common/constants';
 
 const FIELD_TYPE_OPTIONS = [
   {
-    value: MVTFieldType.String,
+    value: MVTFieldType.STRING,
     inputDisplay: (
       <span>
         <FieldIcon type={'string'} />
@@ -30,7 +31,7 @@ const FIELD_TYPE_OPTIONS = [
     ),
   },
   {
-    value: MVTFieldType.Number,
+    value: MVTFieldType.NUMBER,
     inputDisplay: (
       <span>
         <FieldIcon type={'number'} />

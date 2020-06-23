@@ -325,6 +325,10 @@ export class AbstractLayer implements ILayer {
     return this._source.getMinZoom();
   }
 
+  _getMbSourceId() {
+    return this.getId();
+  }
+
   _requiresPrevSourceCleanup(mbMap: unknown) {
     return false;
   }

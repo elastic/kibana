@@ -10,18 +10,14 @@ import { Feature, GeoJsonProperties } from 'geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer';
-import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
 import { DataRequestContext } from '../../../actions';
-import { ISource } from '../../sources/source';
 import {
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
-
-const DELIMITER = '~';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -95,14 +91,6 @@ export class TiledVectorLayer extends VectorLayer {
     await this._syncMVTUrlTemplate(syncContext);
   }
 
-  // getId() {
-  //   return this._descriptor.id + DELIMITER + this._source.getLayerName() + DELIMITER;
-  // }
-
-  _getMbSourceId(): string {
-    return this.getId();
-  }
-
   _syncSourceBindingWithMb(mbMap: unknown) {
     // @ts-expect-error
     const mbSource = mbMap.getSource(this._getMbSourceId());
@@ -174,7 +162,6 @@ export class TiledVectorLayer extends VectorLayer {
       return false;
     }
 
-    // check if layername has changed
     const isSourceDifferent =
       mbTileSource.tiles[0] !== tiledSourceMeta.urlTemplate ||
       mbTileSource.minzoom !== tiledSourceMeta.minSourceZoom ||
@@ -185,10 +172,11 @@ export class TiledVectorLayer extends VectorLayer {
     }
 
     const layerIds = this.getMbLayerIds();
-    // just check the first layer
     for (let i = 0; i < layerIds.length; i++) {
       const mbLayer = mbMap.getLayer(layerIds[i]);
       if (mbLayer && mbLayer.sourceLayer !== tiledSourceMeta.layerName) {
+        // If the source-pointer of one of the layers is stale, they will all be stale.
+        // In this case, all the mb-layers need to be removed and re-added.
         return true;
       }
     }

@@ -822,9 +822,9 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _syncSourceBindingWithMb(mbMap) {
-    const mbSource = mbMap.getSource(this.getId());
+    const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {
-      mbMap.addSource(this.getId(), {
+      mbMap.addSource(this._getMbSourceId(), {
         type: 'geojson',
         data: EMPTY_FEATURE_COLLECTION,
       });

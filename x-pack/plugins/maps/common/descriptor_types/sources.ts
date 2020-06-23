@@ -6,7 +6,14 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Query } from 'src/plugins/data/public';
-import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
+import {
+  AGG_TYPE,
+  GRID_RESOLUTION,
+  RENDER_AS,
+  SORT_ORDER,
+  SCALING_TYPES,
+  MVTFieldType,
+} from '../constants';
 import { StyleDescriptor, VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 
@@ -94,11 +101,6 @@ export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
   AttributionDescriptor & {
     urlTemplate: string;
   };
-
-export enum MVTFieldType {
-  String = 'String',
-  Number = 'Number',
-}
 
 export type MVTFieldDescriptor = {
   name: string;

@@ -5,9 +5,9 @@
  */
 
 import { AbstractField, IField } from './field';
-import { FIELD_ORIGIN } from '../../../common/constants';
+import { FIELD_ORIGIN, MVTFieldType } from '../../../common/constants';
 import { ITiledSingleLayerVectorSource, IVectorSource } from '../sources/vector_source';
-import { MVTFieldDescriptor, MVTFieldType } from '../../../common/descriptor_types';
+import { MVTFieldDescriptor } from '../../../common/descriptor_types';
 
 export class MVTField extends AbstractField implements IField {
   private readonly _source: ITiledSingleLayerVectorSource;
@@ -40,9 +40,9 @@ export class MVTField extends AbstractField implements IField {
   }
 
   async getDataType(): Promise<string> {
-    if (this._type === MVTFieldType.String) {
+    if (this._type === MVTFieldType.STRING) {
       return 'string';
-    } else if (this._type === MVTFieldType.Number) {
+    } else if (this._type === MVTFieldType.NUMBER) {
       return 'number';
     } else {
       throw new Error(`Unrecognized MVT field-type ${this._type}`);

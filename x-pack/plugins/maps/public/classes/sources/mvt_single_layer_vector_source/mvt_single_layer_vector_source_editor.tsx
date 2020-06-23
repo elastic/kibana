@@ -10,8 +10,6 @@ import _ from 'lodash';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
-import { MVTFieldConfigEditor } from './mvt_field_config_editor';
 import {
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
