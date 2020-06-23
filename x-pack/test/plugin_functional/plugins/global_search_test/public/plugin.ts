@@ -74,13 +74,23 @@ export class GlobalSearchTestPlugin
     { globalSearch }: GlobalSearchTestPluginStartDeps
   ): GlobalSearchTestPluginStart {
     return {
-      findAll: (term) =>
+      findTest: (term) =>
         globalSearch
           .find(term, {})
           .pipe(
             map((batch) => batch.results),
             // restrict to test type to avoid failure when real providers are present
             map((results) => results.filter((r) => r.type.startsWith('test_'))),
+            reduce((memo, results) => [...memo, ...results])
+          )
+          .toPromise(),
+      findReal: (term) =>
+        globalSearch
+          .find(term, {})
+          .pipe(
+            map((batch) => batch.results),
+            // remove test types
+            map((results) => results.filter((r) => !r.type.startsWith('test_'))),
             reduce((memo, results) => [...memo, ...results])
           )
           .toPromise(),
