@@ -14,99 +14,103 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+
+import { Forms } from '../../../../shared_imports';
 import { documentationService } from '../../../services/documentation';
-import { StepProps, DataGetterFunc } from '../types';
-import { MappingsEditor, OnUpdateHandler, LoadMappingsFromJsonButton } from '../../mappings_editor';
+import {
+  MappingsEditor,
+  OnUpdateHandler,
+  LoadMappingsFromJsonButton,
+  IndexSettings,
+} from '../../mappings_editor';
 
-export const StepMappings: React.FunctionComponent<StepProps> = ({
-  template,
-  setDataGetter,
-  onStepValidityChange,
-}) => {
-  const [mappings, setMappings] = useState(template?.template.mappings);
+interface Props {
+  defaultValue: { [key: string]: any };
+  onChange: (content: Forms.Content) => void;
+  indexSettings?: IndexSettings;
+}
 
-  const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
-    ({ isValid, getData, validate }) => {
-      onStepValidityChange(isValid);
+export const StepMappings: React.FunctionComponent<Props> = React.memo(
+  ({ defaultValue, onChange, indexSettings }) => {
+    const [mappings, setMappings] = useState(defaultValue);
 
-      const dataGetterFunc: DataGetterFunc = async () => {
-        const isMappingsValid = isValid === undefined ? await validate() : isValid;
-        const data = getData(isMappingsValid);
-        return {
-          isValid: isMappingsValid,
-          data: { mappings: data },
-          path: 'template',
-        };
-      };
+    const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
+      ({ isValid, getData, validate }) => {
+        onChange({
+          isValid,
+          async validate() {
+            return isValid === undefined ? await validate() : isValid;
+          },
+          getData,
+        });
+      },
+      [onChange]
+    );
 
-      setDataGetter(dataGetterFunc);
-    },
-    [setDataGetter, onStepValidityChange]
-  );
+    const onJsonLoaded = (json: { [key: string]: any }): void => {
+      setMappings(json);
+    };
 
-  const onJsonLoaded = (json: { [key: string]: any }): void => {
-    setMappings(json);
-  };
-
-  return (
-    <div data-test-subj="stepMappings">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2 data-test-subj="stepTitle">
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepMappings.stepTitle"
-                defaultMessage="Mappings (optional)"
-              />
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepMappings.mappingsDescription"
-                defaultMessage="Define how to store and index documents."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <LoadMappingsFromJsonButton onJson={onJsonLoaded} />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                flush="right"
-                href={documentationService.getMappingDocumentationLink()}
-                target="_blank"
-                iconType="help"
-              >
+    return (
+      <div data-test-subj="stepMappings">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2 data-test-subj="stepTitle">
                 <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepMappings.docsButtonLabel"
-                  defaultMessage="Mapping docs"
+                  id="xpack.idxMgmt.templateForm.stepMappings.stepTitle"
+                  defaultMessage="Mappings (optional)"
                 />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              </h2>
+            </EuiTitle>
 
-      <EuiSpacer size="s" />
+            <EuiSpacer size="s" />
 
-      {/* Mappings code editor */}
-      <MappingsEditor
-        value={mappings}
-        onChange={onMappingsEditorUpdate}
-        indexSettings={template?.template.settings}
-      />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepMappings.mappingsDescription"
+                  defaultMessage="Define how to store and index documents."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
 
-      <EuiSpacer size="m" />
-    </div>
-  );
-};
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <LoadMappingsFromJsonButton onJson={onJsonLoaded} />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  flush="right"
+                  href={documentationService.getMappingDocumentationLink()}
+                  target="_blank"
+                  iconType="help"
+                >
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateForm.stepMappings.docsButtonLabel"
+                    defaultMessage="Mapping docs"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        {/* Mappings editor */}
+        <MappingsEditor
+          value={mappings}
+          onChange={onMappingsEditorUpdate}
+          indexSettings={indexSettings}
+        />
+
+        <EuiSpacer size="m" />
+      </div>
+    );
+  }
+);

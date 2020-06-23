@@ -12,13 +12,16 @@ import deepEqual from 'fast-deep-equal';
 import { SpyRouteProps } from './types';
 import { useRouteSpy } from './use_route_spy';
 
-export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
+export const SpyRouteComponent = memo<
+  SpyRouteProps & { location: H.Location; pageName: string | undefined }
+>(
   ({
     location: { pathname, search },
     history,
     match: {
-      params: { pageName, detailName, tabName, flowTarget },
+      params: { detailName, tabName, flowTarget },
     },
+    pageName,
     state,
   }) => {
     const [isInitializing, setIsInitializing] = useState(true);
