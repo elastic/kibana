@@ -79,8 +79,9 @@ export default {
   ],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
-  moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+  moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
+  testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,ts,tsx}'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',

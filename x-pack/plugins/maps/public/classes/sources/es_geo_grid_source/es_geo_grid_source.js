@@ -21,6 +21,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
+import { makeESBbox } from '../../../elasticsearch_geo_utils';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -146,6 +147,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     registerCancelCallback,
     bucketsPerGrid,
     isRequestStillActive,
+    bufferedExtent,
   }) {
     const gridsPerRequest = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
     const aggs = {
@@ -156,6 +158,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             {
               gridSplit: {
                 geotile_grid: {
+                  bounds: makeESBbox(bufferedExtent),
                   field: this._descriptor.geoField,
                   precision,
                 },
@@ -234,10 +237,12 @@ export class ESGeoGridSource extends AbstractESAggSource {
     precision,
     layerName,
     registerCancelCallback,
+    bufferedExtent,
   }) {
     searchSource.setField('aggs', {
       gridSplit: {
         geotile_grid: {
+          bounds: makeESBbox(bufferedExtent),
           field: this._descriptor.geoField,
           precision,
         },
@@ -282,6 +287,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             precision: searchFilters.geogridPrecision,
             layerName,
             registerCancelCallback,
+            bufferedExtent: searchFilters.buffer,
           })
         : await this._compositeAggRequest({
             searchSource,
@@ -291,6 +297,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             registerCancelCallback,
             bucketsPerGrid,
             isRequestStillActive,
+            bufferedExtent: searchFilters.buffer,
           });
 
     return {

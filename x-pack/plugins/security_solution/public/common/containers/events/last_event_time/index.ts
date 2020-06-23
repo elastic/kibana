@@ -33,7 +33,7 @@ export interface OwnProps extends QueryTemplateProps {
   indexKey: LastEventIndexKey;
 }
 
-export function useLastEventTimeQuery<TCache = object>(
+export function useLastEventTimeQuery(
   indexKey: LastEventIndexKey,
   details: LastTimeDetails,
   sourceId: string
@@ -84,6 +84,7 @@ export function useLastEventTimeQuery<TCache = object>(
     const signal = abortCtrl.signal;
     fetchLastEventTime(signal);
     return () => abortCtrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apolloClient, indexKey, details.hostName, details.ip]);
 
   return { lastSeen, loading, errorMessage };

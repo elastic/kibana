@@ -85,6 +85,7 @@ export const UserActionTree = React.memo(
           updateCase,
         });
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [caseData, handleManageMarkdownEditId, patchComment, updateCase]
     );
 
@@ -109,6 +110,7 @@ export const UserActionTree = React.memo(
           window.clearTimeout(handlerTimeoutId.current);
         }, 2400);
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [handlerTimeoutId.current]
     );
 
@@ -155,6 +157,7 @@ export const UserActionTree = React.memo(
           showLoading={false}
         />
       ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [caseData.id, handleUpdate, insertQuote, userCanCrud]
     );
 
@@ -165,6 +168,7 @@ export const UserActionTree = React.memo(
           handleOutlineComment(commentId);
         }
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [commentId, initLoading, isLoadingUserActions, isLoadingIds]);
     return (
       <>

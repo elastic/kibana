@@ -7,10 +7,8 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingCore } from '../../../..';
 import { PDF_JOB_TYPE } from '../../../../../common/constants';
-import { LevelLogger } from '../../../../lib';
-import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../../types';
+import { ESQueueWorkerExecuteFn, RunTaskFnFactory, TaskRunResult } from '../../../../types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
@@ -18,21 +16,21 @@ import {
   getFullUrls,
   omitBlacklistedHeaders,
 } from '../../../common/execute_job';
-import { JobDocPayloadPDF } from '../../types';
+import { ScheduledTaskParamsPDF } from '../../types';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 
-type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
+type QueuedPdfExecutorFactory = RunTaskFnFactory<ESQueueWorkerExecuteFn<ScheduledTaskParamsPDF>>;
 
-export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
-  reporting: ReportingCore,
-  parentLogger: LevelLogger
+export const runTaskFnFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
+  reporting,
+  parentLogger
 ) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
 
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
-  return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
+  return async function runTask(jobId, job, cancellationToken) {
     const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
@@ -40,7 +38,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
     const generatePdfObservable = await generatePdfObservableFactory(reporting);
 
     const jobLogger = logger.clone([jobId]);
-    const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
+    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
       map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
       map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),

@@ -7,7 +7,6 @@
 import { ActionCreator } from 'typescript-fsa';
 import { Query, IIndexPattern, Filter } from 'src/plugins/data/public';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { HostComponentProps } from '../../../common/components/link_to/redirect_to_hosts';
 import { HostsTableType } from '../../store/model';
 import { HostsQueryProps } from '../types';
 import { NavTab } from '../../../common/components/navigation/types';
@@ -40,7 +39,6 @@ export interface HostDetailsProps extends HostsQueryProps {
 
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
   HostDetailsComponentDispatchProps &
-  HostComponentProps &
   HostsQueryProps;
 
 type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &

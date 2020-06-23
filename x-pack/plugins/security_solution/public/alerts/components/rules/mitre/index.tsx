@@ -40,7 +40,7 @@ interface AddItemProps {
   isDisabled: boolean;
 }
 
-export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
+export const AddMitreThreat = ({ field, idAria, isDisabled }: AddItemProps) => {
   const [showValidation, setShowValidation] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -101,6 +101,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
         ...values.slice(index + 1),
       ]);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [field]
   );
 

@@ -75,7 +75,7 @@ export const getIndexFields = memoizeOne(
 );
 
 export const getBrowserFields = memoizeOne(
-  (title: string, fields: IndexField[]): BrowserFields =>
+  (_title: string, fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
       ? fields.reduce<BrowserFields>(
           (accumulator: BrowserFields, field: IndexField) =>
@@ -173,6 +173,7 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
     const signal = abortCtrl.signal;
     fetchSource(signal);
     return () => abortCtrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apolloClient, sourceId, indices]);
 
   return { indicesExist, browserFields, indexPattern, loading, errorMessage };

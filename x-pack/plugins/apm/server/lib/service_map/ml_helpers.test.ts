@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnomaliesResponse } from './get_service_map';
+import { ServiceAnomalies } from './get_service_map';
 import { addAnomaliesDataToNodes } from './ml_helpers';
 
 describe('addAnomaliesDataToNodes', () => {
@@ -22,76 +22,54 @@ describe('addAnomaliesDataToNodes', () => {
       },
     ];
 
-    const anomaliesResponse = {
-      aggregations: {
-        jobs: {
-          buckets: [
-            {
-              key: 'opbeans-ruby-request-high_mean_response_time',
-              top_score_hits: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        record_score: 50,
-                        actual: [2000],
-                        typical: [1000],
-                        job_id: 'opbeans-ruby-request-high_mean_response_time',
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-            {
-              key: 'opbeans-java-request-high_mean_response_time',
-              top_score_hits: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        record_score: 100,
-                        actual: [9000],
-                        typical: [3000],
-                        job_id: 'opbeans-java-request-high_mean_response_time',
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          ],
-        },
+    const serviceAnomalies: ServiceAnomalies = [
+      {
+        jobId: 'opbeans-ruby-request-high_mean_response_time',
+        serviceName: 'opbeans-ruby',
+        transactionType: 'request',
+        anomalyScore: 50,
+        timestamp: 1591351200000,
+        actual: 2000,
+        typical: 1000,
       },
-    };
+      {
+        jobId: 'opbeans-java-request-high_mean_response_time',
+        serviceName: 'opbeans-java',
+        transactionType: 'request',
+        anomalyScore: 100,
+        timestamp: 1591351200000,
+        actual: 9000,
+        typical: 3000,
+      },
+    ];
 
     const result = [
       {
         'service.name': 'opbeans-ruby',
         'agent.name': 'ruby',
         'service.environment': null,
-        max_score: 50,
-        severity: 'major',
+        anomaly_score: 50,
+        anomaly_severity: 'major',
         actual_value: 2000,
         typical_value: 1000,
-        job_id: 'opbeans-ruby-request-high_mean_response_time',
+        ml_job_id: 'opbeans-ruby-request-high_mean_response_time',
       },
       {
         'service.name': 'opbeans-java',
         'agent.name': 'java',
         'service.environment': null,
-        max_score: 100,
-        severity: 'critical',
+        anomaly_score: 100,
+        anomaly_severity: 'critical',
         actual_value: 9000,
         typical_value: 3000,
-        job_id: 'opbeans-java-request-high_mean_response_time',
+        ml_job_id: 'opbeans-java-request-high_mean_response_time',
       },
     ];
 
     expect(
       addAnomaliesDataToNodes(
         nodes,
-        (anomaliesResponse as unknown) as AnomaliesResponse
+        (serviceAnomalies as unknown) as ServiceAnomalies
       )
     ).toEqual(result);
   });

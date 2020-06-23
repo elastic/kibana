@@ -15,6 +15,8 @@ import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
+jest.mock('../../../../../../common/components/link_to');
+
 describe('suricata_row_renderer', () => {
   const mount = useMountAppended();
   let nonSuricata: Ecs;

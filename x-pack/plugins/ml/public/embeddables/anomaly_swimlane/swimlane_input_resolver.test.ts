@@ -156,8 +156,8 @@ describe('processFilters', () => {
                 minimum_should_match: 1,
               },
             },
-            // @ts-ignore
             $state: {
+              // @ts-ignore
               store: 'appState',
             },
           },
@@ -178,8 +178,9 @@ describe('processFilters', () => {
                 instance: 'i-16fd8d2a',
               },
             },
-            // @ts-ignore
+
             $state: {
+              // @ts-ignore
               store: 'appState',
             },
           },
@@ -196,8 +197,8 @@ describe('processFilters', () => {
             exists: {
               field: 'instance',
             },
-            // @ts-ignore
             $state: {
+              // @ts-ignore
               store: 'appState',
             },
           },
@@ -214,8 +215,8 @@ describe('processFilters', () => {
             exists: {
               field: 'region',
             },
-            // @ts-ignore
             $state: {
+              // @ts-ignore
               store: 'appState',
             },
           },

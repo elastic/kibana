@@ -5,6 +5,11 @@
  */
 import { schema } from '@kbn/config-schema';
 
+import {
+  deserializeComponentTemplate,
+  deserializeComponenTemplateList,
+} from '../../../../common/lib';
+import { ComponentTemplateFromEs } from '../../../../common';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
@@ -20,9 +25,25 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
       try {
-        const response = await callAsCurrentUser('dataManagement.getComponentTemplates');
+        const {
+          component_templates: componentTemplates,
+        }: { component_templates: ComponentTemplateFromEs[] } = await callAsCurrentUser(
+          'dataManagement.getComponentTemplates'
+        );
 
-        return res.ok({ body: response.component_templates });
+        const { index_templates: indexTemplates } = await callAsCurrentUser(
+          'dataManagement.getComposableIndexTemplates'
+        );
+
+        const body = componentTemplates.map((componentTemplate) => {
+          const deserializedComponentTemplateListItem = deserializeComponenTemplateList(
+            componentTemplate,
+            indexTemplates
+          );
+          return deserializedComponentTemplateListItem;
+        });
+
+        return res.ok({ body });
       } catch (error) {
         if (isEsError(error)) {
           return res.customError({
@@ -56,11 +77,12 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
           }
         );
 
+        const { index_templates: indexTemplates } = await callAsCurrentUser(
+          'dataManagement.getComposableIndexTemplates'
+        );
+
         return res.ok({
-          body: {
-            ...componentTemplates[0],
-            name,
-          },
+          body: deserializeComponentTemplate(componentTemplates[0], indexTemplates),
         });
       } catch (error) {
         if (isEsError(error)) {

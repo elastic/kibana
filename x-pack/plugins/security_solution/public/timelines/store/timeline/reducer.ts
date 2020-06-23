@@ -6,14 +6,17 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  addTimeline,
   addHistory,
   addNote,
   addNoteToEvent,
   addProvider,
+  addTimeline,
   applyDeltaToColumnWidth,
   applyDeltaToWidth,
   applyKqlFilterQuery,
+  clearEventsDeleted,
+  clearEventsLoading,
+  clearSelected,
   createTimeline,
   dataProviderEdited,
   endTimelineSaving,
@@ -21,12 +24,12 @@ import {
   removeColumn,
   removeProvider,
   setEventsDeleted,
-  clearEventsDeleted,
   setEventsLoading,
-  clearEventsLoading,
+  setFilters,
+  setInsertTimeline,
   setKqlFilterQueryDraft,
+  setSavedQueryId,
   setSelected,
-  clearSelected,
   showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
@@ -37,9 +40,11 @@ import {
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
   updateDescription,
+  updateEventType,
   updateHighlightedDropAndProviderId,
   updateIsFavorite,
   updateIsLive,
+  updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
   updateKqlMode,
@@ -50,10 +55,6 @@ import {
   updateTimeline,
   updateTitle,
   upsertColumn,
-  updateIsLoading,
-  setSavedQueryId,
-  setFilters,
-  updateEventType,
 } from './actions';
 import {
   addNewTimeline,
@@ -98,6 +99,7 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
+import { TimelineType } from '../../../../common/types/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -106,6 +108,7 @@ export const initialTimelineState: TimelineState = {
     newTimelineModel: null,
   },
   showCallOutUnauthorizedMsg: false,
+  insertTimeline: null,
 };
 
 /** The reducer for all timeline actions  */
@@ -129,6 +132,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         sort,
         showCheckboxes,
         showRowRenderers,
+        timelineType = TimelineType.default,
         filters,
       }
     ) => ({
@@ -146,6 +150,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         showCheckboxes,
         showRowRenderers,
         timelineById: state.timelineById,
+        timelineType,
       }),
     })
   )
@@ -482,5 +487,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       filters,
       timelineById: state.timelineById,
     }),
+  }))
+  .case(setInsertTimeline, (state, insertTimeline) => ({
+    ...state,
+    insertTimeline,
   }))
   .build();

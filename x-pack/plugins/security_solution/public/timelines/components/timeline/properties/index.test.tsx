@@ -6,79 +6,117 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-
 import { TimelineStatus } from '../../../../../common/types/timeline';
 import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
+  TestProviders,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
+import { SecurityPageName } from '../../../../app/types';
+import { setInsertTimeline } from '../../../store/timeline/actions';
+export { nextTick } from '../../../../../../../test_utils';
 
-jest.mock('../../../../common/lib/kibana');
+import { act } from 'react-dom/test-utils';
 
-let mockedWidth = 1000;
-jest.mock('../../../../common/components/utils');
-(useThrottledResizeObserver as jest.Mock).mockImplementation(() => ({
-  width: mockedWidth,
-}));
+jest.mock('../../../../common/components/link_to');
+
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            siem: {
+              crud: true,
+            },
+          },
+          navigateToApp: jest.fn(),
+        },
+      },
+    }),
+    useUiSetting$: jest.fn().mockReturnValue([]),
+    useGetUserSavedObjectPermissions: jest.fn(),
+  };
+});
+
+const mockDispatch = jest.fn();
+jest.mock('../../../../common/components/utils', () => {
+  return {
+    useThrottledResizeObserver: jest.fn(),
+  };
+});
 
 jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
+  const original = jest.requireActual('react-redux');
 
   return {
-    ...originalModule,
-    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1' }),
+    ...original,
+    useDispatch: () => mockDispatch,
+    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1', urlState: {} }),
   };
 });
+const mockHistoryPush = jest.fn();
 
 jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+  const original = jest.requireActual('react-router-dom');
 
   return {
-    ...originalModule,
-    useHistory: jest.fn(),
+    ...original,
+    useHistory: () => ({
+      push: mockHistoryPush,
+    }),
   };
 });
 
+jest.mock('./use_create_timeline', () => ({
+  useCreateTimelineButton: jest.fn().mockReturnValue({ getButton: jest.fn() }),
+}));
+const usersViewing = ['elastic'];
+const defaultProps = {
+  associateNote: jest.fn(),
+  createTimeline: jest.fn(),
+  isDataInTimeline: false,
+  isDatepickerLocked: false,
+  isFavorite: false,
+  title: '',
+  description: '',
+  getNotesByIds: jest.fn(),
+  noteIds: [],
+  status: TimelineStatus.active,
+  timelineId: 'abc',
+  toggleLock: jest.fn(),
+  updateDescription: jest.fn(),
+  updateIsFavorite: jest.fn(),
+  updateTitle: jest.fn(),
+  updateNote: jest.fn(),
+  usersViewing,
+};
 describe('Properties', () => {
-  const usersViewing = ['elastic'];
-
   const state: State = mockGlobalState;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let mockedWidth = 1000;
+
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
-    mockedWidth = 1000;
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: mockedWidth });
   });
 
   test('renders correctly', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...defaultProps} />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
@@ -87,31 +125,16 @@ describe('Properties', () => {
     expect(wrapper.find('button[data-test-subj="attach-timeline-case"]').prop('disabled')).toEqual(
       false
     );
+    expect(
+      wrapper.find('button[data-test-subj="attach-timeline-existing-case"]').prop('disabled')
+    ).toEqual(false);
   });
 
   test('renders correctly draft timeline', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.draft}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, status: TimelineStatus.draft }} />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
@@ -119,31 +142,16 @@ describe('Properties', () => {
     expect(wrapper.find('button[data-test-subj="attach-timeline-case"]').prop('disabled')).toEqual(
       true
     );
+    expect(
+      wrapper.find('button[data-test-subj="attach-timeline-existing-case"]').prop('disabled')
+    ).toEqual(true);
   });
 
   test('it renders an empty star icon when it is NOT a favorite', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...defaultProps} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').exists()).toEqual(true);
@@ -151,27 +159,9 @@ describe('Properties', () => {
 
   test('it renders a filled star icon when it is a favorite', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={true}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, isFavorite: true }} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="timeline-favorite-filled-star"]').exists()).toEqual(true);
@@ -181,27 +171,9 @@ describe('Properties', () => {
     const title = 'foozle';
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title={title}
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, title }} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="timeline-title"]').first().props().value).toEqual(title);
@@ -209,27 +181,9 @@ describe('Properties', () => {
 
   test('it renders the date picker with the lock icon', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...defaultProps} />
+      </TestProviders>
     );
 
     expect(
@@ -242,27 +196,9 @@ describe('Properties', () => {
 
   test('it renders the lock icon when isDatepickerLocked is true', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={true}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, isDatepickerLocked: true }} />
+      </TestProviders>
     );
     expect(
       wrapper
@@ -274,27 +210,9 @@ describe('Properties', () => {
 
   test('it renders the unlock icon when isDatepickerLocked is false', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...defaultProps} />
+      </TestProviders>
     );
     expect(
       wrapper
@@ -306,30 +224,14 @@ describe('Properties', () => {
 
   test('it renders a description on the left when the width is at least as wide as the threshold', () => {
     const description = 'strange';
-    mockedWidth = showDescriptionThreshold;
+
+    (useThrottledResizeObserver as jest.Mock).mockReset();
+    (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: showDescriptionThreshold });
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description={description}
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, description }} />
+      </TestProviders>
     );
 
     expect(
@@ -343,30 +245,16 @@ describe('Properties', () => {
 
   test('it does NOT render a description on the left when the width is less than the threshold', () => {
     const description = 'strange';
-    mockedWidth = showDescriptionThreshold - 1;
+
+    (useThrottledResizeObserver as jest.Mock).mockReset();
+    (useThrottledResizeObserver as jest.Mock).mockReturnValue({
+      width: showDescriptionThreshold - 1,
+    });
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description={description}
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, description }} />
+      </TestProviders>
     );
 
     expect(
@@ -381,27 +269,9 @@ describe('Properties', () => {
     mockedWidth = showNotesThreshold;
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...defaultProps} />
+      </TestProviders>
     );
 
     expect(
@@ -413,30 +283,15 @@ describe('Properties', () => {
   });
 
   test('it does NOT render a a notes button on the left when the width is less than the threshold', () => {
-    mockedWidth = showNotesThreshold - 1;
+    (useThrottledResizeObserver as jest.Mock).mockReset();
+    (useThrottledResizeObserver as jest.Mock).mockReturnValue({
+      width: showNotesThreshold - 1,
+    });
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...defaultProps} />
+      </TestProviders>
     );
 
     expect(
@@ -449,27 +304,9 @@ describe('Properties', () => {
 
   test('it renders a settings icon', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...defaultProps} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="settings-gear"]').exists()).toEqual(true);
@@ -479,27 +316,9 @@ describe('Properties', () => {
     const title = 'port scan';
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title={title}
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, title }} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="avatar"]').exists()).toEqual(true);
@@ -507,29 +326,45 @@ describe('Properties', () => {
 
   test('it does NOT render an avatar for the current user viewing the timeline when it does NOT have a title', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
-      </ReduxStoreProvider>
+      <TestProviders store={store}>
+        <Properties {...defaultProps} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="avatar"]').exists()).toEqual(false);
+  });
+
+  test('insert timeline - new case', async () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, title: 'coolness' }} />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="attach-timeline-case"]').first().simulate('click');
+
+    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SecurityPageName.case}/create` });
+    expect(mockDispatch).toBeCalledWith(
+      setInsertTimeline({
+        timelineId: defaultProps.timelineId,
+        timelineSavedObjectId: '1',
+        timelineTitle: 'coolness',
+      })
+    );
+  });
+
+  test('insert timeline - existing case', async () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, title: 'coolness' }} />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="attach-timeline-existing-case"]').first().simulate('click');
+
+    await act(async () => {
+      await Promise.resolve({});
+    });
+    expect(wrapper.find('[data-test-subj="all-cases-modal"]').exists()).toBeTruthy();
   });
 });

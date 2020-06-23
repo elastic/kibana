@@ -24,6 +24,7 @@ export const OpenClosedStats = React.memo<Props>(
           description: isLoading ? <EuiLoadingSpinner /> : caseCount ?? 'N/A',
         },
       ],
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [caseCount, caseStatus, isLoading, dataTestSubj]
     );
     return (

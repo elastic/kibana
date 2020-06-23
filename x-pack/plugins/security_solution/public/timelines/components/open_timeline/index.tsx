@@ -42,6 +42,7 @@ import {
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
+import { disableTemplate } from '../../../../common/constants';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -51,12 +52,6 @@ interface OwnProps<TCache = object> {
   hideActions?: ActionTimelineToShow[];
   onOpenTimeline?: (timeline: TimelineModel) => void;
 }
-
-/**
- * CreateTemplateTimelineBtn
- * Remove the comment here to enable template timeline
- */
-export const disableTemplate = true;
 
 export type OpenTimelineOwnProps = OwnProps &
   Pick<
@@ -114,18 +109,25 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const { timelineType, timelineTabs, timelineFilters } = useTimelineTypes();
     const { fetchAllTimeline, timelines, loading, totalCount } = useGetAllTimeline();
 
-    const refetch = useCallback(() => {
-      fetchAllTimeline({
-        pageInfo: {
-          pageIndex: pageIndex + 1,
-          pageSize,
-        },
-        search,
-        sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
-        onlyUserFavorite: onlyFavorites,
-        timelineType,
-      });
-    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineType, onlyFavorites]);
+    const refetch = useCallback(
+      () =>
+        fetchAllTimeline({
+          pageInfo: {
+            pageIndex: pageIndex + 1,
+            pageSize,
+          },
+          search,
+          sort: {
+            sortField: sortField as SortFieldTimeline,
+            sortOrder: sortDirection as Direction,
+          },
+          onlyUserFavorite: onlyFavorites,
+          timelineType,
+        }),
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [pageIndex, pageSize, search, sortField, sortDirection, timelineType, onlyFavorites]
+    );
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
@@ -177,6 +179,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
       async (timelineIds: string[]) => {
+        // The type for `deleteTimelines` is incorrect, it returns a Promise
         await deleteTimelines(timelineIds);
       },
       [deleteTimelines]
@@ -184,6 +187,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     /** Invoked when the user clicks the action to delete the selected timelines */
     const onDeleteSelected: OnDeleteSelected = useCallback(async () => {
+      // The type for `deleteTimelines` is incorrect, it returns a Promise
       await deleteTimelines(getSelectedTimelineIds(selectedItems));
 
       // NOTE: we clear the selection state below, but if the server fails to
@@ -191,6 +195,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       resetSelectionState();
 
       // TODO: the query must re-execute to show the results of the deletion
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedItems, deleteTimelines]);
 
     /** Invoked when the user selects (or de-selects) timelines */
@@ -244,6 +249,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           updateTimeline,
         });
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [apolloClient, updateIsLoading, updateTimeline]
     );
 
@@ -251,9 +257,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       focusInput();
     }, []);
 
-    useEffect(() => {
-      refetch();
-    }, [refetch]);
+    useEffect(() => refetch(), [refetch]);
 
     return !isModal ? (
       <OpenTimeline

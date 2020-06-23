@@ -31,10 +31,13 @@ export const SiemNavigationComponent: React.FC<
   flowTarget,
   state,
 }) => {
-  const { chrome } = useKibana().services;
+  const {
+    chrome,
+    application: { getUrlForApp },
+  } = useKibana().services;
 
   useEffect(() => {
-    if (pathName) {
+    if (pathName || pageName) {
       setBreadcrumbs(
         {
           query: urlState.query,
@@ -51,10 +54,12 @@ export const SiemNavigationComponent: React.FC<
           timeline: urlState.timeline,
           state,
         },
-        chrome
+        chrome,
+        getUrlForApp
       );
     }
-  }, [chrome, pathName, search, navTabs, urlState, state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
 
   return (
     <TabNavigation

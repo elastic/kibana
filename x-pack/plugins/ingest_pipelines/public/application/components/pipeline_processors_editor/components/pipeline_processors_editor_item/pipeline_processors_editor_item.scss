@@ -1,0 +1,17 @@
+.pipelineProcessorsEditor__item {
+  &__textContainer {
+    padding: 4px;
+    border-radius: 2px;
+
+    transition: border-color .3s;
+    border: 2px solid #FFF;
+
+    &:hover {
+      border: 2px solid $euiColorLightShade;
+    }
+  }
+  &__textInput {
+    height: 21px;
+    min-width: 100px;
+  }
+}

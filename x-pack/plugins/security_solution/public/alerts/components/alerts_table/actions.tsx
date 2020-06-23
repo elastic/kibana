@@ -54,6 +54,7 @@ export const updateAlertStatusAction = async ({
   query,
   alertIds,
   status,
+  selectedStatus,
   setEventsLoading,
   setEventsDeleted,
   onAlertStatusUpdateSuccess,
@@ -64,13 +65,13 @@ export const updateAlertStatusAction = async ({
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
 
-    const response = await updateAlertStatus({ query: queryObject, status });
+    const response = await updateAlertStatus({ query: queryObject, status: selectedStatus });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
-    onAlertStatusUpdateSuccess(response.updated, status);
+    onAlertStatusUpdateSuccess(response.updated, selectedStatus);
   } catch (error) {
-    onAlertStatusUpdateFailure(status, error);
+    onAlertStatusUpdateFailure(selectedStatus, error);
   } finally {
     setEventsLoading({ eventIds: alertIds, isLoading: false });
   }

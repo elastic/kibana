@@ -121,13 +121,17 @@ export const useAnomaliesTableData = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     influencersOrCriteriaToString(influencers),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     influencersOrCriteriaToString(criteriaFields),
     startDate,
     endDate,
     skip,
     userPermissions,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     siemJobIds.sort().join(),
   ]);
 

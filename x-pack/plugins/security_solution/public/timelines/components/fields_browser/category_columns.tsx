@@ -50,6 +50,7 @@ interface ToolTipProps {
 const ToolTip = React.memo<ToolTipProps>(
   ({ categoryId, browserFields, onUpdateColumns, timelineId }) => {
     const { getManageTimelineById } = useManageTimeline();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const { isLoading } = useMemo(() => getManageTimelineById(timelineId) ?? { isLoading: false }, [
       timelineId,
     ]);

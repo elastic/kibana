@@ -108,7 +108,7 @@ export const ColumnHeadersComponent = ({
   );
 
   const renderClone: DraggableChildrenFn = useCallback(
-    (dragProvided, dragSnapshot, rubric) => {
+    (dragProvided, _dragSnapshot, rubric) => {
       // TODO: Remove after github.com/DefinitelyTyped/DefinitelyTyped/pull/43057 is merged
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const index = (rubric as any).source.index;
@@ -151,6 +151,7 @@ export const ColumnHeadersComponent = ({
           sort={sort}
         />
       )),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       columnHeaders,
       timelineId,

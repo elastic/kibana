@@ -26,7 +26,7 @@ import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { HttpStart } from 'kibana/public';
 
 import { UrlPanelContent } from './url_panel_content';
-import { ShareMenuItem, ShareContextMenuPanelItem } from '../types';
+import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 
 interface Props {
   allowEmbed: boolean;
@@ -39,6 +39,7 @@ interface Props {
   onClose: () => void;
   basePath: string;
   post: HttpStart['post'];
+  embedUrlParamExtensions?: UrlParamExtension[];
 }
 
 export class ShareContextMenu extends Component<Props> {
@@ -100,6 +101,7 @@ export class ShareContextMenu extends Component<Props> {
             basePath={this.props.basePath}
             post={this.props.post}
             shareableUrl={this.props.shareableUrl}
+            urlParamExtensions={this.props.embedUrlParamExtensions}
           />
         ),
       };

@@ -125,6 +125,7 @@ export {
   ScopedHistory,
   LegacyApp,
   PublicLegacyAppInfo,
+  NavigateToAppOptions,
 } from './application';
 
 export {
@@ -190,6 +191,8 @@ export {
 } from './notifications';
 
 export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+
+export { URL_MAX_LENGTH } from './core_app';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle

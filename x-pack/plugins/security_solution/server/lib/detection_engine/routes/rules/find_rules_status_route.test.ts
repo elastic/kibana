@@ -66,7 +66,7 @@ describe('find_statuses', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('"id" is not allowed');
+      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "undefined" supplied to "ids"');
     });
   });
 });

@@ -17,6 +17,7 @@ import {
   cleanDraftTimelinesRequest,
   createTimelineWithTimelineId,
 } from './__mocks__/request_responses';
+import { draftTimelineDefaults } from '../default_timeline';
 
 describe('clean draft timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -81,7 +82,12 @@ describe('clean draft timelines', () => {
     });
 
     const response = await server.inject(cleanDraftTimelinesRequest(TimelineType.default), context);
+    const req = cleanDraftTimelinesRequest(TimelineType.default);
     expect(mockPersistTimeline).toHaveBeenCalled();
+    expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
+      ...draftTimelineDefaults,
+      timelineType: req.body.timelineType,
+    });
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
       data: {
@@ -100,8 +106,13 @@ describe('clean draft timelines', () => {
     mockGetTimeline.mockResolvedValue({ ...mockGetDraftTimelineValue });
 
     const response = await server.inject(cleanDraftTimelinesRequest(TimelineType.default), context);
+    const req = cleanDraftTimelinesRequest(TimelineType.default);
+
     expect(mockPersistTimeline).not.toHaveBeenCalled();
     expect(mockResetTimeline).toHaveBeenCalled();
+    expect(mockResetTimeline.mock.calls[0][1]).toEqual([mockGetDraftTimelineValue.savedObjectId]);
+    expect(mockResetTimeline.mock.calls[0][2]).toEqual(req.body.timelineType);
+
     expect(mockGetTimeline).toHaveBeenCalled();
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({

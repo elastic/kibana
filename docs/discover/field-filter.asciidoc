@@ -1,5 +1,5 @@
 [[field-filter]]
-== Filtering by field
+== Filter by field
 
 *Discover* offers
 various types of filters, so you can restrict your documents to the exact data you want.

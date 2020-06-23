@@ -90,6 +90,7 @@ const AlertDetailsOverviewComponent = memo(() => {
         history.push(locationObject);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [alertDetailsTabId]
   );
 

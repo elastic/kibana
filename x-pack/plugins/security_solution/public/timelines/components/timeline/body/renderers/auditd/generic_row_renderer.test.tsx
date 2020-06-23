@@ -19,6 +19,7 @@ import {
   createGenericFileRowRenderer,
 } from './generic_row_renderer';
 
+jest.mock('../../../../../../common/components/link_to');
 jest.mock('../../../../../../overview/components/events_by_dataset');
 
 describe('GenericRowRenderer', () => {

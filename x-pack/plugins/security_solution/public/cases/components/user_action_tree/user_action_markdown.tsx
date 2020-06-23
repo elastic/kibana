@@ -74,6 +74,7 @@ export const UserActionMarkdown = ({
         updateTimeline: dispatchUpdateTimeline(dispatch),
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [apolloClient]
   );
 
@@ -114,6 +115,7 @@ export const UserActionMarkdown = ({
         </EuiFlexGroup>
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [handleCancelAction, handleSaveAction]
   );
   return isEditable ? (

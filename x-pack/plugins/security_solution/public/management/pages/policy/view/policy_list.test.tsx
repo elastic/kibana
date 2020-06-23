@@ -23,17 +23,23 @@ describe('when on the policies page', () => {
     render = () => mockedContext.render(<PolicyList />);
   });
 
-  it('should show a table', async () => {
+  it('should show the empty state', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('policyTable');
+    const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
+  });
+
+  it('should display the onboarding steps', async () => {
+    const renderResult = render();
+    const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+    expect(onboardingSteps).not.toBeNull();
   });
 
   describe('when list data loads', () => {
     let firstPolicyID: string;
     beforeEach(() => {
       reactTestingLibrary.act(() => {
-        history.push('/management/policy');
+        history.push('/policy');
         reactTestingLibrary.act(() => {
           const policyListData = mockPolicyResultList({ total: 3 });
           firstPolicyID = policyListData.items[0].id;
@@ -50,11 +56,13 @@ describe('when on the policies page', () => {
         });
       });
     });
+
     it('should display rows in the table', async () => {
       const renderResult = render();
       const rows = await renderResult.findAllByRole('row');
       expect(rows).toHaveLength(4);
     });
+
     it('should display policy name value as a link', async () => {
       const renderResult = render();
       const policyNameLink = (await renderResult.findAllByTestId('policyNameLink'))[0];

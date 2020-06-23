@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
+import {
+  queryRulesSchema,
+  QueryRulesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
-import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
-import { DeleteRuleRequestParams } from '../../rules/types';
+import { transformError, buildSiemResponse } from '../utils';
 import { deleteNotifications } from '../../notifications/delete_notifications';
 import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
@@ -21,7 +25,9 @@ export const deleteRulesRoute = (router: IRouter) => {
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        query: buildRouteValidation<DeleteRuleRequestParams>(queryRulesSchema),
+        query: buildRouteValidation<typeof queryRulesSchema, QueryRulesSchemaDecoded>(
+          queryRulesSchema
+        ),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -29,6 +35,10 @@ export const deleteRulesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const validationErrors = queryRuleValidateTypeDependents(request.query);
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
 
       try {
         const { id, rule_id: ruleId } = request.query;

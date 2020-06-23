@@ -9,7 +9,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
   return {
     rootDir,
     roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins', '<rootDir>/legacy/server'],
-    moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+    moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
     moduleNameMapper: {
       '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
       '@elastic/eui/lib/(.*)?': `${kibanaDirectory}/node_modules/@elastic/eui/test-env/$1`,
@@ -58,7 +58,9 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
+    testEnvironment: 'jest-environment-jsdom-thirteen',
     testMatch: ['**/*.test.{js,ts,tsx}'],
+    testRunner: 'jest-circus/runner',
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
       '^.+\\.html?$': 'jest-raw-loader',

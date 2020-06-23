@@ -77,6 +77,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   // ActionsConnectorsContextProvider reloadConnectors prop expects a Promise<void>.
   // TODO: Fix it if reloadConnectors type change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';
@@ -89,6 +90,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     (isVisible: boolean) => {
       setAddFlyoutVisibility(isVisible);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentConfiguration, connectorId, closureType]
   );
 
@@ -96,6 +98,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     (isVisible: boolean) => {
       setEditFlyoutVisibility(isVisible);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentConfiguration, connectorId, closureType]
   );
 
@@ -113,6 +116,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         closureType,
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectorId, closureType, version]
   );
 
@@ -125,6 +129,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         closureType: type,
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectorId, closureType, version]
   );
 
@@ -141,6 +146,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     ) {
       setConnectorIsValid(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors, connectorId]);
 
   useEffect(() => {
@@ -149,6 +155,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         connectors.find((c) => c.id === connectorId) as ActionConnectorTableItem
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors, connectorId]);
 
   return (

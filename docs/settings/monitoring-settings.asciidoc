@@ -1,6 +1,6 @@
 [role="xpack"]
 [[monitoring-settings-kb]]
-=== Monitoring settings in Kibana
+=== Monitoring settings in {kib}
 ++++
 <titleabbrev>Monitoring settings</titleabbrev>
 ++++

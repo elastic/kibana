@@ -7,7 +7,7 @@ _Visualize_ enables you to create visualizations of the data from your {es} indi
 
 {kib} visualizations are based on {es} queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
-To begin, open *Visualize*, then click *Create new visualization*.
+To begin, open the menu, go to *Visualize*, then click *Create visualization*.
 
 [float]
 [[visualization-types]]
@@ -38,7 +38,7 @@ Quickly build several types of basic visualizations by simply dragging and dropp
 data sets.
 
 <<visualize-maps, Maps>>::
-* *<<maps,Elastic Maps>>* &mdash; Displays geospatial data in {kib}.
+* *<<maps,Maps>>* &mdash; Displays geospatial data in {kib}.
 
 * <<heat-map,Heat map>>:: Display shaded cells within a matrix.
 

@@ -12,11 +12,11 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiHorizontalRule,
-  EuiRadioGroup,
+  EuiRadio,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-// @ts-ignore
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternService } from '../../../kibana_services';
 // @ts-ignore
@@ -38,6 +38,7 @@ interface Props {
   onChange: (args: OnSourceChangeArgs) => void;
   scalingType: SCALING_TYPES;
   supportsClustering: boolean;
+  clusteringDisabledReason?: string | null;
   termFields: IFieldType[];
   topHitsSplitField?: string;
   topHitsSize: number;
@@ -88,7 +89,7 @@ export class ScalingForm extends Component<Props, State> {
     this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
-  _onTopHitsSplitFieldChange = (topHitsSplitField: string) => {
+  _onTopHitsSplitFieldChange = (topHitsSplitField?: string) => {
     this.props.onChange({ propName: 'topHitsSplitField', value: topHitsSplitField });
   };
 
@@ -149,32 +150,30 @@ export class ScalingForm extends Component<Props, State> {
     );
   }
 
-  render() {
-    const scalingOptions = [
-      {
-        id: SCALING_TYPES.LIMIT,
-        label: i18n.translate('xpack.maps.source.esSearch.limitScalingLabel', {
-          defaultMessage: 'Limit results to {maxResultWindow}.',
-          values: { maxResultWindow: this.state.maxResultWindow },
-        }),
-      },
-      {
-        id: SCALING_TYPES.TOP_HITS,
-        label: i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-          defaultMessage: 'Show top hits per entity.',
-        }),
-      },
-    ];
-    if (this.props.supportsClustering) {
-      scalingOptions.push({
-        id: SCALING_TYPES.CLUSTERS,
-        label: i18n.translate('xpack.maps.source.esSearch.clusterScalingLabel', {
+  _renderClusteringRadio() {
+    const clusteringRadio = (
+      <EuiRadio
+        id={SCALING_TYPES.CLUSTERS}
+        label={i18n.translate('xpack.maps.source.esSearch.clusterScalingLabel', {
           defaultMessage: 'Show clusters when results exceed {maxResultWindow}.',
           values: { maxResultWindow: this.state.maxResultWindow },
-        }),
-      });
-    }
+        })}
+        checked={this.props.scalingType === SCALING_TYPES.CLUSTERS}
+        onChange={() => this._onScalingTypeChange(SCALING_TYPES.CLUSTERS)}
+        disabled={!this.props.supportsClustering}
+      />
+    );
 
+    return this.props.clusteringDisabledReason ? (
+      <EuiToolTip position="left" content={this.props.clusteringDisabledReason}>
+        {clusteringRadio}
+      </EuiToolTip>
+    ) : (
+      clusteringRadio
+    );
+  }
+
+  render() {
     let filterByBoundsSwitch;
     if (this.props.scalingType !== SCALING_TYPES.CLUSTERS) {
       filterByBoundsSwitch = (
@@ -212,11 +211,26 @@ export class ScalingForm extends Component<Props, State> {
         <EuiSpacer size="m" />
 
         <EuiFormRow>
-          <EuiRadioGroup
-            options={scalingOptions}
-            idSelected={this.props.scalingType}
-            onChange={this._onScalingTypeChange}
-          />
+          <div>
+            <EuiRadio
+              id={SCALING_TYPES.LIMIT}
+              label={i18n.translate('xpack.maps.source.esSearch.limitScalingLabel', {
+                defaultMessage: 'Limit results to {maxResultWindow}.',
+                values: { maxResultWindow: this.state.maxResultWindow },
+              })}
+              checked={this.props.scalingType === SCALING_TYPES.LIMIT}
+              onChange={() => this._onScalingTypeChange(SCALING_TYPES.LIMIT)}
+            />
+            <EuiRadio
+              id={SCALING_TYPES.TOP_HITS}
+              label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
+                defaultMessage: 'Show top hits per entity.',
+              })}
+              checked={this.props.scalingType === SCALING_TYPES.TOP_HITS}
+              onChange={() => this._onScalingTypeChange(SCALING_TYPES.TOP_HITS)}
+            />
+            {this._renderClusteringRadio()}
+          </div>
         </EuiFormRow>
 
         {filterByBoundsSwitch}
