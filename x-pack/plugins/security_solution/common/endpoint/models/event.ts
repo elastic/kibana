@@ -53,6 +53,13 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
   return event.process.parent?.entity_id;
 }
 
+export function ancestryArray(event: ResolverEvent): string[] | undefined {
+  if (isLegacyEvent(event)) {
+    return undefined;
+  }
+  return event.process.Ext.ancestry;
+}
+
 /**
  * @param event The event to get the category for
  */
