@@ -27,9 +27,9 @@ export function KibanaServerProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const lifecycle = getService('lifecycle');
   const url = Url.format(config.get('servers.kibana'));
+  const ssl = config.get('servers.kibana').ssl;
   const defaults = config.get('uiSettings.defaults');
-
-  const kbn = new KbnClient(log, [url], defaults);
+  const kbn = new KbnClient(log, { url, ssl }, defaults);
 
   if (defaults) {
     lifecycle.beforeTests.add(async () => {

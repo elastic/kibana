@@ -10,8 +10,8 @@ import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionItem } from './';
-import { Operator } from '../../types';
-import { getExceptionItemMock } from '../../mocks';
+import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getCommentsMock } from '../../../../../../../lists/common/schemas/types/comments.mock';
 
 addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
@@ -19,14 +19,14 @@ addDecorator((storyFn) => (
 
 storiesOf('Components|ExceptionItem', module)
   .add('with os', () => {
-    const payload = getExceptionItemMock();
+    const payload = getExceptionListItemSchemaMock();
     payload.description = '';
     payload.comments = [];
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
         type: 'match',
-        operator: Operator.INCLUSION,
+        operator: 'included',
         value: 'Elastic, N.V.',
       },
     ];
@@ -42,14 +42,14 @@ storiesOf('Components|ExceptionItem', module)
     );
   })
   .add('with description', () => {
-    const payload = getExceptionItemMock();
+    const payload = getExceptionListItemSchemaMock();
     payload._tags = [];
     payload.comments = [];
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
         type: 'match',
-        operator: Operator.INCLUSION,
+        operator: 'included',
         value: 'Elastic, N.V.',
       },
     ];
@@ -65,14 +65,15 @@ storiesOf('Components|ExceptionItem', module)
     );
   })
   .add('with comments', () => {
-    const payload = getExceptionItemMock();
+    const payload = getExceptionListItemSchemaMock();
     payload._tags = [];
     payload.description = '';
+    payload.comments = getCommentsMock();
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
         type: 'match',
-        operator: Operator.INCLUSION,
+        operator: 'included',
         value: 'Elastic, N.V.',
       },
     ];
@@ -88,7 +89,7 @@ storiesOf('Components|ExceptionItem', module)
     );
   })
   .add('with nested entries', () => {
-    const payload = getExceptionItemMock();
+    const payload = getExceptionListItemSchemaMock();
     payload._tags = [];
     payload.description = '';
     payload.comments = [];
@@ -104,8 +105,8 @@ storiesOf('Components|ExceptionItem', module)
     );
   })
   .add('with everything', () => {
-    const payload = getExceptionItemMock();
-
+    const payload = getExceptionListItemSchemaMock();
+    payload.comments = getCommentsMock();
     return (
       <ExceptionItem
         loadingItemIds={[]}
@@ -117,7 +118,7 @@ storiesOf('Components|ExceptionItem', module)
     );
   })
   .add('with loadingItemIds', () => {
-    const { id, namespace_type, ...rest } = getExceptionItemMock();
+    const { id, namespace_type, ...rest } = getExceptionListItemSchemaMock();
 
     return (
       <ExceptionItem

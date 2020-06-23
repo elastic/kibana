@@ -7,7 +7,7 @@ exports[`OptInMessage renders as expected 1`] = `
     id="telemetry.telemetryBannerDescription"
     values={
       Object {
-        "privacyStatementLink": <ForwardRef
+        "privacyStatementLink": <EuiLink
           href="https://www.elastic.co/legal/privacy-statement"
           rel="noopener"
           target="_blank"
@@ -17,7 +17,7 @@ exports[`OptInMessage renders as expected 1`] = `
             id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
             values={Object {}}
           />
-        </ForwardRef>,
+        </EuiLink>,
       }
     }
   />
