@@ -13,7 +13,7 @@ import {
   USER_AGENT_NAME,
   TRANSACTION_DURATION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Options } from '.';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';

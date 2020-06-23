@@ -89,6 +89,7 @@ export const TreeNode: FunctionComponent<Props> = ({
           processors={processor.onFailure}
         />
         <AddProcessorButton
+          data-test-subj={stringSelector}
           onClick={() =>
             onAction({
               type: 'addProcessor',

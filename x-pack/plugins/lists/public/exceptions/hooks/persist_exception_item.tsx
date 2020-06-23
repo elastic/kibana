@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Dispatch, useEffect, useState } from 'react';
 
-import { addExceptionListItem as persistExceptionItem } from '../api';
+import { UpdateExceptionListItemSchema } from '../../../common/schemas';
+import { addExceptionListItem, updateExceptionListItem } from '../api';
 import { AddExceptionListItem, PersistHookProps } from '../types';
 
 interface PersistReturnExceptionItem {
@@ -33,6 +33,8 @@ export const usePersistExceptionItem = ({
   const [exceptionListItem, setExceptionItem] = useState<AddExceptionListItem | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isUpdateExceptionItem = (item: unknown): item is UpdateExceptionListItemSchema =>
+    Boolean(item && (item as UpdateExceptionListItemSchema).id != null);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -43,11 +45,20 @@ export const usePersistExceptionItem = ({
       if (exceptionListItem != null) {
         try {
           setIsLoading(true);
-          await persistExceptionItem({
-            http,
-            listItem: exceptionListItem,
-            signal: abortCtrl.signal,
-          });
+          if (isUpdateExceptionItem(exceptionListItem)) {
+            await updateExceptionListItem({
+              http,
+              listItem: exceptionListItem,
+              signal: abortCtrl.signal,
+            });
+          } else {
+            await addExceptionListItem({
+              http,
+              listItem: exceptionListItem,
+              signal: abortCtrl.signal,
+            });
+          }
+
           if (isSubscribed) {
             setIsSaved(true);
           }
