@@ -20,6 +20,7 @@ import { CoreSetup, Plugin, PluginInitializerContext, IUiSettingsClient } from '
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
+import { KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 
 /** @internal */
 export interface TimelionVisualizationDependencies extends LegacyDependenciesPluginSetup {
@@ -59,7 +60,9 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     dependencies.timelionPanels.set(timeChartPanel.name, timeChartPanel);
   }
 
-  public start() {}
+  public start(core: CoreStart, { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }) {
+    kibanaLegacy.loadFontAwesome();
+  }
 
   public stop(): void {}
 }
