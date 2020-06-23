@@ -5,7 +5,7 @@
  */
 
 import { debounce, pick } from 'lodash';
-import { Unit } from 'elastic-datemath';
+import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
@@ -210,7 +210,7 @@ export const Expressions: React.FC<Props> = (props) => {
         ...c,
         timeUnit: tu,
       }));
-      setTimeUnit(tu as TimeUnit);
+      setTimeUnit(tu as Unit);
       setAlertParams('criteria', criteria);
     },
     [alertParams.criteria, setAlertParams]

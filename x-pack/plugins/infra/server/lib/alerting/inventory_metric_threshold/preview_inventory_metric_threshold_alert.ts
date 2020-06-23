@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Unit } from 'elastic-datemath';
+import { Unit } from '@elastic/datemath';
 import { first } from 'lodash';
 import { InventoryMetricConditions } from './types';
 import { IScopedClusterClient } from '../../../../../../../src/core/server';

@@ -5,7 +5,7 @@
  */
 
 import { first, zip } from 'lodash';
-import { Unit } from 'elastic-datemath';
+import { Unit } from '@elastic/datemath';
 import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,

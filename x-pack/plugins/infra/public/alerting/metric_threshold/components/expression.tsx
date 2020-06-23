@@ -5,7 +5,7 @@
  */
 
 import { debounce, pick } from 'lodash';
-import { Unit } from 'elastic-datemath';
+import { Unit } from '@elastic/datemath';
 import * as rt from 'io-ts';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
