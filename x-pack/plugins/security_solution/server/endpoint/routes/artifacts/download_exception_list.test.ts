@@ -19,11 +19,15 @@ import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
+  loggingServiceMock,
 } from 'src/core/server/mocks';
 import { ExceptionsCache } from '../../lib/artifacts/cache';
 import { CompressExceptionList } from '../../lib/artifacts/lists';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadExceptionListRoute } from './download_exception_list';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { createMockAgentService } from '../../mocks';
+import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
 const expectedEndpointExceptions = {
@@ -54,6 +58,7 @@ describe('test alerts route', () => {
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let routeConfig: RouteConfig<unknown, unknown, unknown, never>;
   let routeHandler: RequestHandler<unknown, unknown, unknown>;
+  let endpointAppContextService: EndpointAppContextService;
   let cache: ExceptionsCache;
 
   beforeEach(() => {
@@ -63,9 +68,23 @@ describe('test alerts route', () => {
     mockResponse = httpServerMock.createResponseFactory();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
+    endpointAppContextService = new EndpointAppContextService();
     cache = new ExceptionsCache(10000); // TODO
 
-    registerDownloadExceptionListRoute(routerMock, cache);
+    endpointAppContextService.start({
+      agentService: createMockAgentService(),
+      manifestManager: undefined,
+    });
+
+    registerDownloadExceptionListRoute(
+      routerMock,
+      {
+        logFactory: loggingServiceMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+      },
+      cache
+    );
   });
 
   it('should serve the compressed artifact to download', async () => {
@@ -82,7 +101,7 @@ describe('test alerts route', () => {
       type: 'test',
       references: [],
       attributes: {
-        name: mockArtifactName,
+        identifier: mockArtifactName,
         schemaVersion: '1.0.0',
         sha256: '123456',
         encoding: 'xz',
@@ -125,35 +144,16 @@ describe('test alerts route', () => {
     expect(compressedArtifact).toEqual(mockCompressedArtifact);
   });
 
-  it('should handle a sha256 mismatch', async () => {
+  it('should handle fetching a non-existent artifact', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       path: `/api/endpoint/allowlist/download/${mockArtifactName}/123456`,
       method: 'get',
       params: { sha256: '789' },
     });
 
-    const mockCompressedArtifact = await CompressExceptionList(expectedEndpointExceptions);
-
-    const mockArtifact = {
-      id: '2468',
-      type: 'test',
-      references: [],
-      attributes: {
-        name: mockArtifactName,
-        schemaVersion: '1.0.0',
-        sha256: '123456',
-        encoding: 'xz',
-        created: Date.now(),
-        body: mockCompressedArtifact,
-        size: 100,
-      },
-    };
-
-    const soFindResp: SavedObject<unknown> = {
-      ...mockArtifact,
-    };
-
-    mockSavedObjectClient.get.mockImplementationOnce(() => Promise.resolve(soFindResp));
+    mockSavedObjectClient.get.mockImplementationOnce(() =>
+      Promise.reject({ output: { statusCode: 404 } })
+    );
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/allowlist/download')
@@ -178,7 +178,7 @@ describe('test alerts route', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       path: `/api/endpoint/allowlist/download/${mockArtifactName}/${mockSha}`,
       method: 'get',
-      params: { sha256: mockSha, artifactName: mockArtifactName },
+      params: { sha256: mockSha, identifier: mockArtifactName },
     });
 
     // Add to the download cache
