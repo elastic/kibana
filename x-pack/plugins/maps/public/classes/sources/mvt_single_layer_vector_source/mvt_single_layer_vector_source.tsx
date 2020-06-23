@@ -81,7 +81,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   getFieldByName(fieldName: string): IField | null {
-    return this.createField({ fieldName });
+    try {
+      return this.createField({ fieldName });
+    } catch (e) {
+      return null;
+    }
   }
 
   createField({ fieldName }: { fieldName: string }): IField {
