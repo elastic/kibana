@@ -56,7 +56,7 @@ describe('workspace_panel_wrapper', () => {
       />
     );
 
-    expect(renderToolbarMock).toHaveBeenCalledWith(expect.anything(), {
+    expect(renderToolbarMock).toHaveBeenCalledWith(expect.any(Element), {
       state: visState,
       frame: mockFrameAPI,
       setState: expect.anything(),

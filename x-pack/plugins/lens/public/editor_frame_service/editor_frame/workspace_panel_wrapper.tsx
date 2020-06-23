@@ -67,7 +67,7 @@ export function WorkspacePanelWrapper({
       )}
       <EuiFlexItem>
         <EuiPageContent className="lnsWorkspacePanelWrapper">
-          {!emptyExpression && (
+          {(!emptyExpression || title) && (
             <EuiPageContentHeader
               className={classNames('lnsWorkspacePanelWrapper__pageContentHeader', {
                 'lnsWorkspacePanelWrapper__pageContentHeader--unsaved': !title,
