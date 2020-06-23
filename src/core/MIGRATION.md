@@ -1722,7 +1722,7 @@ export class MyPlugin implements Plugin {
 ### Use HashRouter in migrated apps
 
 Kibana applications are meant to be leveraging the `ScopedHistory` provided in an app's `mount` function to wire their router. For react,
-this is done by using the `react-dom` `Router` component:
+this is done by using the `react-router-dom` `Router` component:
 
 ```typescript
 export const renderApp = async (element: HTMLElement, history: ScopedHistory) => {
@@ -1745,14 +1745,14 @@ export const renderApp = async (element: HTMLElement, history: ScopedHistory) =>
 };
 ```
 
-Some legacy apps were using react's `HashRouter` instead. Using `HashRouter` in a migrated application will cause some route change 
+Some legacy apps were using `react-router-dom`'s `HashRouter` instead. Using `HashRouter` in a migrated application will cause some route change 
 events to not be catched by the router, as the `BrowserHistory` used behind the provided scoped history does not emit 
 the `hashevent` that is required for the `HashRouter` to behave correctly.
 
 It is strictly recommended to migrate your application's routing to browser history, which is the only routing officially supported by the platform.
 
 However, during the transition period, it is possible to make the two histories cohabitate by manually emitting the required events from 
-the scoped to the hash history:
+the scoped to the hash history. You may use this workaround at your own risk. While we are not aware of any problems it currently creates, there may be edge cases that do not work properly.
 
 ```typescript
 export const renderApp = async (element: HTMLElement, history: ScopedHistory) => {
