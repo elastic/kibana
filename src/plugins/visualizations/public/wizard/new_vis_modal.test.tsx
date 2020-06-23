@@ -25,7 +25,6 @@ import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 
 describe('NewVisModal', () => {
-  const { location } = window;
   const defaultVisTypeParams = {
     hidden: false,
     visualization: class Controller {
@@ -66,12 +65,16 @@ describe('NewVisModal', () => {
   const settingsGet = jest.fn();
   const uiSettings: any = { get: settingsGet };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        assign: jest.fn(),
+      },
+    });
   });
 
-  afterAll(() => {
-    window.location = location;
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should render as expected', () => {
@@ -106,7 +109,6 @@ describe('NewVisModal', () => {
 
   describe('open editor', () => {
     it('should open the editor for visualizations without search', () => {
-      window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -124,7 +126,6 @@ describe('NewVisModal', () => {
     });
 
     it('passes through editor params to the editor URL', () => {
-      window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}

@@ -9,6 +9,7 @@ import { CoreSetup, Logger } from 'src/core/server';
 import { Params } from '../typings';
 import { BehaviorSubject } from 'rxjs';
 import { APMConfig } from '../..';
+import { LicensingPluginStart } from '../../../../licensing/server';
 
 const getCoreMock = () => {
   const get = jest.fn();
@@ -40,7 +41,7 @@ const getCoreMock = () => {
       logger: ({
         error: jest.fn(),
       } as unknown) as Logger,
-      plugins: {},
+      plugins: { licensing: {} as LicensingPluginStart },
     },
   };
 };

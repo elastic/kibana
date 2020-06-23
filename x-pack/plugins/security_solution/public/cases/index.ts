@@ -5,14 +5,14 @@
  */
 
 import { SecuritySubPlugin } from '../app/types';
-import { getCasesRoutes } from './routes';
+import { CasesRoutes } from './routes';
 
 export class Cases {
   public setup() {}
 
   public start(): SecuritySubPlugin {
     return {
-      routes: getCasesRoutes(),
+      SubPluginRoutes: CasesRoutes,
     };
   }
 }

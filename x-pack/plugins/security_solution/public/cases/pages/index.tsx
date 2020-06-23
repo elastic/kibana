@@ -7,13 +7,12 @@
 import React from 'react';
 
 import { Route, Switch } from 'react-router-dom';
-import { SiemPageName } from '../../app/types';
 import { CaseDetailsPage } from './case_details';
 import { CasesPage } from './case';
 import { CreateCasePage } from './create_case';
 import { ConfigureCasesPage } from './configure_cases';
 
-const casesPagePath = `/:pageName(${SiemPageName.case})`;
+const casesPagePath = '';
 const caseDetailsPagePath = `${casesPagePath}/:detailName`;
 const caseDetailsPagePathWithCommentId = `${casesPagePath}/:detailName/:commentId`;
 const createCasePagePath = `${casesPagePath}/create`;
@@ -21,20 +20,20 @@ const configureCasesPagePath = `${casesPagePath}/configure`;
 
 const CaseContainerComponent: React.FC = () => (
   <Switch>
-    <Route strict exact path={casesPagePath}>
-      <CasesPage />
-    </Route>
-    <Route strict exact path={createCasePagePath}>
+    <Route path={createCasePagePath}>
       <CreateCasePage />
     </Route>
-    <Route strict exact path={configureCasesPagePath}>
+    <Route path={configureCasesPagePath}>
       <ConfigureCasesPage />
     </Route>
-    <Route strict path={caseDetailsPagePathWithCommentId}>
+    <Route path={caseDetailsPagePathWithCommentId}>
       <CaseDetailsPage />
     </Route>
-    <Route strict path={caseDetailsPagePath}>
+    <Route path={caseDetailsPagePath}>
       <CaseDetailsPage />
+    </Route>
+    <Route strict exact path={casesPagePath}>
+      <CasesPage />
     </Route>
   </Switch>
 );
