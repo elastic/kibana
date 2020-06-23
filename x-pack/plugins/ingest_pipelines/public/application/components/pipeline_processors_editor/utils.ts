@@ -6,6 +6,8 @@
 
 import { ProcessorSelector } from './types';
 
+export const selectorToDataTestSubject = (selector: ProcessorSelector) => selector.join('>');
+
 type Path = string[];
 
 /**

@@ -10,7 +10,7 @@ import {
   EndpointEvent,
   Host,
   HostMetadata,
-  HostOS,
+  OSFields,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
   PolicyData,
@@ -18,6 +18,16 @@ import {
 import { factory as policyFactory } from './models/policy_config';
 
 export type Event = AlertEvent | EndpointEvent;
+/**
+ * This value indicates the limit for the size of the ancestry array. The endpoint currently saves up to 20 values
+ * in its messages. To simulate a limit on the array size I'm using 2 here so that we can't rely on there being a large
+ * number like 20. The ancestry array contains entity_ids for the ancestors of a particular process.
+ *
+ * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
+ * values towards the end of the array are more distant ancestors (grandparents). Therefore
+ * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
+ */
+export const ANCESTRY_LIMIT: number = 2;
 
 interface EventOptions {
   timestamp?: number;
@@ -26,40 +36,52 @@ interface EventOptions {
   eventType?: string;
   eventCategory?: string | string[];
   processName?: string;
+  ancestry?: string[];
+  pid?: number;
+  parentPid?: number;
+  extensions?: object;
 }
 
-const Windows: HostOS[] = [
+const Windows: OSFields[] = [
   {
     name: 'windows 10.0',
     full: 'Windows 10',
     version: '10.0',
-    variant: 'Windows Pro',
+    Ext: {
+      variant: 'Windows Pro',
+    },
   },
   {
     name: 'windows 10.0',
     full: 'Windows Server 2016',
     version: '10.0',
-    variant: 'Windows Server',
+    Ext: {
+      variant: 'Windows Server',
+    },
   },
   {
     name: 'windows 6.2',
     full: 'Windows Server 2012',
     version: '6.2',
-    variant: 'Windows Server',
+    Ext: {
+      variant: 'Windows Server',
+    },
   },
   {
     name: 'windows 6.3',
     full: 'Windows Server 2012R2',
     version: '6.3',
-    variant: 'Windows Server Release 2',
+    Ext: {
+      variant: 'Windows Server Release 2',
+    },
   },
 ];
 
-const Linux: HostOS[] = [];
+const Linux: OSFields[] = [];
 
-const Mac: HostOS[] = [];
+const Mac: OSFields[] = [];
 
-const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
+const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
 
 const APPLIED_POLICIES: Array<{
   name: string;
@@ -186,7 +208,7 @@ interface HostInfo {
     type: string;
   };
   host: Host;
-  endpoint: {
+  Endpoint: {
     policy: {
       applied: {
         id: string;
@@ -283,8 +305,8 @@ export class EndpointDocGenerator {
    * Creates new random policy id for the host to simulate new policy application
    */
   public updatePolicyId() {
-    this.commonInfo.endpoint.policy.applied.id = this.randomChoice(APPLIED_POLICIES).id;
-    this.commonInfo.endpoint.policy.applied.status = this.randomChoice([
+    this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    this.commonInfo.Endpoint.policy.applied.status = this.randomChoice([
       HostPolicyResponseActionStatus.success,
       HostPolicyResponseActionStatus.failure,
       HostPolicyResponseActionStatus.warning,
@@ -310,7 +332,7 @@ export class EndpointDocGenerator {
         mac: this.randomArray(3, () => this.randomMac()),
         os: this.randomChoice(OS),
       },
-      endpoint: {
+      Endpoint: {
         policy: {
           applied: this.randomChoice(APPLIED_POLICIES),
         },
@@ -341,7 +363,8 @@ export class EndpointDocGenerator {
   public generateAlert(
     ts = new Date().getTime(),
     entityID = this.randomString(10),
-    parentEntityID?: string
+    parentEntityID?: string,
+    ancestryArray: string[] = []
   ): AlertEvent {
     return {
       ...this.commonInfo,
@@ -371,77 +394,91 @@ export class EndpointDocGenerator {
           sha1: 'fake file sha1',
           sha256: 'fake file sha256',
         },
-        code_signature: {
-          trusted: false,
-          subject_name: 'bad signer',
+        Ext: {
+          code_signature: [
+            {
+              trusted: false,
+              subject_name: 'bad signer',
+            },
+          ],
+          malware_classification: {
+            identifier: 'endpointpe',
+            score: 1,
+            threshold: 0.66,
+            version: '3.0.33',
+          },
+          temp_file_path: 'C:/temp/fake_malware.exe',
         },
-        malware_classification: {
-          identifier: 'endpointpe',
-          score: 1,
-          threshold: 0.66,
-          version: '3.0.33',
-        },
-        temp_file_path: 'C:/temp/fake_malware.exe',
       },
       process: {
         pid: 2,
         name: 'malware writer',
         start: ts,
         uptime: 0,
-        user: 'SYSTEM',
         entity_id: entityID,
         executable: 'C:/malware.exe',
         parent: parentEntityID ? { entity_id: parentEntityID, pid: 1 } : undefined,
-        token: {
-          domain: 'NT AUTHORITY',
-          integrity_level: 16384,
-          integrity_level_name: 'system',
-          privileges: [
-            {
-              description: 'Replace a process level token',
-              enabled: false,
-              name: 'SeAssignPrimaryTokenPrivilege',
-            },
-          ],
-          sid: 'S-1-5-18',
-          type: 'tokenPrimary',
-          user: 'SYSTEM',
-        },
-        code_signature: {
-          trusted: false,
-          subject_name: 'bad signer',
-        },
         hash: {
           md5: 'fake md5',
           sha1: 'fake sha1',
           sha256: 'fake sha256',
+        },
+        Ext: {
+          // simulate a finite ancestry array size, the endpoint limits the ancestry array to 20 entries we'll use
+          // 2 so that the backend can handle that case
+          ancestry: ancestryArray.slice(0, ANCESTRY_LIMIT),
+          code_signature: [
+            {
+              trusted: false,
+              subject_name: 'bad signer',
+            },
+          ],
+          user: 'SYSTEM',
+          token: {
+            domain: 'NT AUTHORITY',
+            integrity_level: 16384,
+            integrity_level_name: 'system',
+            privileges: [
+              {
+                description: 'Replace a process level token',
+                enabled: false,
+                name: 'SeAssignPrimaryTokenPrivilege',
+              },
+            ],
+            sid: 'S-1-5-18',
+            type: 'tokenPrimary',
+            user: 'SYSTEM',
+          },
         },
       },
       dll: [
         {
           pe: {
             architecture: 'x64',
-            imphash: 'c30d230b81c734e82e86e2e2fe01cd01',
           },
           code_signature: {
             subject_name: 'Cybereason Inc',
             trusted: true,
           },
-          compile_time: 1534424710,
+
           hash: {
             md5: '1f2d082566b0fc5f2c238a5180db7451',
             sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
             sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
           },
-          malware_classification: {
-            identifier: 'Whitelisted',
-            score: 0,
-            threshold: 0,
-            version: '3.0.0',
-          },
-          mapped_address: 5362483200,
-          mapped_size: 0,
+
           path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
+          Ext: {
+            compile_time: 1534424710,
+            mapped_address: 5362483200,
+            mapped_size: 0,
+            malware_classification: {
+              identifier: 'Whitelisted',
+              score: 0,
+              threshold: 0,
+              version: '3.0.0',
+            },
+          },
         },
       ],
     };
@@ -452,12 +489,36 @@ export class EndpointDocGenerator {
    * @param options - Allows event field values to be specified
    */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
+    const processName = options.processName ? options.processName : randomProcessName();
+    const detailRecordForEventType =
+      options.extensions ||
+      ((eventCategory) => {
+        if (eventCategory === 'registry') {
+          return { registry: { key: `HKLM/Windows/Software/${this.randomString(5)}` } };
+        }
+        if (eventCategory === 'network') {
+          return {
+            network: {
+              direction: this.randomChoice(['inbound', 'outbound']),
+              forwarded_ip: `${this.randomIP()}`,
+            },
+          };
+        }
+        if (eventCategory === 'file') {
+          return { file: { path: 'C:\\My Documents\\business\\January\\processName' } };
+        }
+        if (eventCategory === 'dns') {
+          return { dns: { question: { name: `${this.randomIP()}` } } };
+        }
+        return {};
+      })(options.eventCategory);
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
         version: '1.4.0',
       },
+      ...detailRecordForEventType,
       event: {
         category: options.eventCategory ? options.eventCategory : 'process',
         kind: 'event',
@@ -466,9 +527,33 @@ export class EndpointDocGenerator {
       },
       host: this.commonInfo.host,
       process: {
+        pid:
+          'pid' in options && typeof options.pid !== 'undefined' ? options.pid : this.randomN(5000),
+        executable: `C:\\${processName}`,
+        args: `"C:\\${processName}" \\${this.randomString(3)}`,
+        code_signature: {
+          status: 'trusted',
+          subject_name: 'Microsoft',
+        },
+        hash: { md5: this.seededUUIDv4() },
         entity_id: options.entityID ? options.entityID : this.randomString(10),
-        parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
-        name: options.processName ? options.processName : randomProcessName(),
+        parent: options.parentEntityID
+          ? {
+              entity_id: options.parentEntityID,
+              pid:
+                'parentPid' in options && typeof options.parentPid !== 'undefined'
+                  ? options.parentPid
+                  : this.randomN(5000),
+            }
+          : undefined,
+        name: processName,
+        // simulate a finite ancestry array size, the endpoint limits the ancestry array to 20 entries we'll use
+        // 2 so that the backend can handle that case
+        Ext: { ancestry: options.ancestry?.slice(0, ANCESTRY_LIMIT) || [] },
+      },
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
       },
     };
   }
@@ -522,9 +607,6 @@ export class EndpointDocGenerator {
       throw Error(`could not find origin while building tree: ${alert.process.entity_id}`);
     }
 
-    // remove the origin node from the ancestry array
-    ancestryNodes.delete(alert.process.entity_id);
-
     const children = Array.from(
       this.descendantsTreeGenerator(
         alert,
@@ -561,28 +643,9 @@ export class EndpointDocGenerator {
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
-  public *alertsGenerator(
-    numAlerts: number,
-    alertAncestors?: number,
-    childGenerations?: number,
-    maxChildrenPerNode?: number,
-    relatedEventsPerNode?: number,
-    relatedAlertsPerNode?: number,
-    percentNodesWithRelated?: number,
-    percentTerminated?: number,
-    alwaysGenMaxChildrenPerNode?: boolean
-  ) {
+  public *alertsGenerator(numAlerts: number, options: TreeOptions = {}) {
     for (let i = 0; i < numAlerts; i++) {
-      yield* this.fullResolverTreeGenerator(
-        alertAncestors,
-        childGenerations,
-        maxChildrenPerNode,
-        relatedEventsPerNode,
-        relatedAlertsPerNode,
-        percentNodesWithRelated,
-        percentTerminated,
-        alwaysGenMaxChildrenPerNode
-      );
+      yield* this.fullResolverTreeGenerator(options);
     }
   }
 
@@ -600,21 +663,13 @@ export class EndpointDocGenerator {
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
-  public *fullResolverTreeGenerator(
-    alertAncestors?: number,
-    childGenerations?: number,
-    maxChildrenPerNode?: number,
-    relatedEventsPerNode?: RelatedEventInfo[] | number,
-    relatedAlertsPerNode?: number,
-    percentNodesWithRelated?: number,
-    percentTerminated?: number,
-    alwaysGenMaxChildrenPerNode?: boolean
-  ) {
+  public *fullResolverTreeGenerator(options: TreeOptions = {}) {
     const ancestry = this.createAlertEventAncestry(
-      alertAncestors,
-      relatedEventsPerNode,
-      percentNodesWithRelated,
-      percentTerminated
+      options.ancestors,
+      options.relatedEvents,
+      options.relatedAlerts,
+      options.percentWithRelated,
+      options.percentTerminated
     );
     for (let i = 0; i < ancestry.length; i++) {
       yield ancestry[i];
@@ -622,13 +677,13 @@ export class EndpointDocGenerator {
     // ancestry will always have at least 2 elements, and the last element will be the alert
     yield* this.descendantsTreeGenerator(
       ancestry[ancestry.length - 1],
-      childGenerations,
-      maxChildrenPerNode,
-      relatedEventsPerNode,
-      relatedAlertsPerNode,
-      percentNodesWithRelated,
-      percentTerminated,
-      alwaysGenMaxChildrenPerNode
+      options.generations,
+      options.children,
+      options.relatedEvents,
+      options.relatedAlerts,
+      options.percentWithRelated,
+      options.percentTerminated,
+      options.alwaysGenMaxChildrenPerNode
     );
   }
 
@@ -676,7 +731,7 @@ export class EndpointDocGenerator {
       }
     };
 
-    // generate related alerts for rootW
+    // generate related alerts for root
     const processDuration: number = 6 * 3600;
     if (this.randomN(100) < pctWithRelated) {
       addRelatedEvents(ancestor, processDuration, events);
@@ -701,6 +756,10 @@ export class EndpointDocGenerator {
       ancestor = this.generateEvent({
         timestamp,
         parentEntityID: ancestor.process.entity_id,
+        // add the parent to the ancestry array
+        ancestry: [ancestor.process.entity_id, ...ancestor.process.Ext.ancestry],
+        parentPid: ancestor.process.pid,
+        pid: this.randomN(5000),
       });
       events.push(ancestor);
       timestamp = timestamp + 1000;
@@ -714,6 +773,7 @@ export class EndpointDocGenerator {
             parentEntityID: ancestor.process.parent?.entity_id,
             eventCategory: 'process',
             eventType: 'end',
+            ancestry: ancestor.process.Ext.ancestry,
           })
         );
       }
@@ -732,7 +792,12 @@ export class EndpointDocGenerator {
       }
     }
     events.push(
-      this.generateAlert(timestamp, ancestor.process.entity_id, ancestor.process.parent?.entity_id)
+      this.generateAlert(
+        timestamp,
+        ancestor.process.entity_id,
+        ancestor.process.parent?.entity_id,
+        ancestor.process.Ext.ancestry
+      )
     );
     return events;
   }
@@ -787,6 +852,10 @@ export class EndpointDocGenerator {
       const child = this.generateEvent({
         timestamp,
         parentEntityID: currentState.event.process.entity_id,
+        ancestry: [
+          currentState.event.process.entity_id,
+          ...currentState.event.process.Ext.ancestry,
+        ],
       });
 
       maxChildren = this.randomN(maxChildrenPerNode + 1);
@@ -808,6 +877,7 @@ export class EndpointDocGenerator {
           parentEntityID: child.process.parent?.entity_id,
           eventCategory: 'process',
           eventType: 'end',
+          ancestry: child.process.Ext.ancestry,
         });
       }
       if (this.randomN(100) < percentNodesWithRelated) {
@@ -852,6 +922,7 @@ export class EndpointDocGenerator {
           parentEntityID: node.process.parent?.entity_id,
           eventCategory: eventInfo.category,
           eventType: eventInfo.creationType,
+          ancestry: node.process.Ext.ancestry,
         });
       }
     }
@@ -870,7 +941,12 @@ export class EndpointDocGenerator {
   ) {
     for (let i = 0; i < relatedAlerts; i++) {
       const ts = node['@timestamp'] + this.randomN(alertCreationTime) * 1000;
-      yield this.generateAlert(ts, node.process.entity_id, node.process.parent?.entity_id);
+      yield this.generateAlert(
+        ts,
+        node.process.entity_id,
+        node.process.parent?.entity_id,
+        node.process.Ext.ancestry
+      );
     }
   }
 
@@ -940,7 +1016,7 @@ export class EndpointDocGenerator {
       host: {
         id: this.commonInfo.host.id,
       },
-      endpoint: {
+      Endpoint: {
         policy: {
           applied: {
             actions: [
@@ -1045,7 +1121,7 @@ export class EndpointDocGenerator {
                 status: HostPolicyResponseActionStatus.success,
               },
             ],
-            id: this.commonInfo.endpoint.policy.applied.id,
+            id: this.commonInfo.Endpoint.policy.applied.id,
             response: {
               configurations: {
                 events: {
@@ -1086,9 +1162,9 @@ export class EndpointDocGenerator {
                 ],
               },
             },
-            status: this.commonInfo.endpoint.policy.applied.status,
+            status: this.commonInfo.Endpoint.policy.applied.status,
             version: policyVersion,
-            name: this.commonInfo.endpoint.policy.applied.name,
+            name: this.commonInfo.Endpoint.policy.applied.name,
           },
         },
       },
@@ -1126,7 +1202,7 @@ export class EndpointDocGenerator {
     return [...this.randomNGenerator(255, 6)].map((x) => x.toString(16)).join('-');
   }
 
-  private randomIP(): string {
+  public randomIP(): string {
     return [10, ...this.randomNGenerator(255, 3)].map((x) => x.toString()).join('.');
   }
 

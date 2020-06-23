@@ -15,6 +15,8 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
+jest.mock('../link_to');
+
 describe('EventDetails', () => {
   const mount = useMountAppended();
 

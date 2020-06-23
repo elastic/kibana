@@ -125,7 +125,6 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
               values={Object {}}
             />
             <EuiLink
-              href="https://www.elastic.co/legal/privacy-statement"
               rel="noopener"
               target="_blank"
             >
@@ -141,7 +140,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
               values={Object {}}
             />
             <EuiLink
-              href="rootapp/management/kibana/settings"
+              href="rootmanagement/kibana/settings"
             >
               <FormattedMessage
                 defaultMessage="disable usage data here."
@@ -224,7 +223,6 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
               values={Object {}}
             />
             <EuiLink
-              href="https://www.elastic.co/legal/privacy-statement"
               rel="noopener"
               target="_blank"
             >
@@ -240,7 +238,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
               values={Object {}}
             />
             <EuiLink
-              href="rootapp/management/kibana/settings"
+              href="rootmanagement/kibana/settings"
             >
               <FormattedMessage
                 defaultMessage="enable usage data here."
@@ -323,7 +321,6 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
               values={Object {}}
             />
             <EuiLink
-              href="https://www.elastic.co/legal/privacy-statement"
               rel="noopener"
               target="_blank"
             >
@@ -339,7 +336,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
               values={Object {}}
             />
             <EuiLink
-              href="rootapp/management/kibana/settings"
+              href="rootmanagement/kibana/settings"
             >
               <FormattedMessage
                 defaultMessage="disable usage data here."
