@@ -9,6 +9,19 @@ import { shallow } from 'enzyme';
 
 import { PrePackagedRulesPrompt } from './load_empty_prompt';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../../common/components/link_to');
+
 describe('PrePackagedRulesPrompt', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
