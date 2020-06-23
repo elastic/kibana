@@ -31,7 +31,7 @@ interface Series {
   color?: string;
 }
 
-interface FetchDataResponse {
+export interface FetchDataResponse {
   title: string;
   appLink: string;
 }
@@ -84,17 +84,3 @@ export interface ObservabilityFetchDataResponse {
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
 }
-
-interface FetchDataParams {
-  // The start timestamp in milliseconds of the queried time interval
-  startTime: string;
-  // The end timestamp in milliseconds of the queried time interval
-  endTime: string;
-  // The aggregation bucket size in milliseconds if applicable to the data source
-  bucketSize: string;
-}
-
-export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
-  fetchDataParams: FetchDataParams
-) => Promise<T>;
-type HasData = () => Promise<boolean>;
