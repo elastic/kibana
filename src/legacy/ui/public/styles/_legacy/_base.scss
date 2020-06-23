@@ -151,3 +151,9 @@ input[type='checkbox'],
 .text-monospace {
   font-family: $euiCodeFontFamily;
 }
+
+select {
+  color: $euiTextColor;
+  background-color: $euiColorEmptyShade;
+}
+
