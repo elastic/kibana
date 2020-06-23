@@ -98,41 +98,14 @@ function processPluginSearchPaths$(
   ): Observable<string | PluginDiscoveryError> {
     return from([ent]).pipe(
       mergeMap((entry) => {
-        return fsStat$(resolve(entry.dir, 'kibana.json')).pipe(
-          mergeMap((stats) => {
-            // `kibana.json` exists in given directory, we got a plugin
-            if (stats.isFile()) {
-              return [entry.dir];
-            }
+        return findManifestInFolder(entry.dir, () => {
+          if (entry.depth > maxScanDepth) {
             return [];
-          }),
-          catchError((manifestStatError) => {
-            // did not find manifest. recursively process sub directories until we reach max depth.
-            if (manifestStatError.code === 'ENOENT') {
-              if (entry.depth <= maxScanDepth) {
-                return fsReadDir$(entry.dir).pipe(
-                  mergeMap((subDirs: string[]) =>
-                    subDirs.map((subDir) => resolve(entry.dir, subDir))
-                  ),
-                  mergeMap((subDir) =>
-                    fsStat$(subDir).pipe(
-                      mergeMap((pathStat) =>
-                        pathStat.isDirectory()
-                          ? recursiveScanFolder({ dir: subDir, depth: entry.depth + 1 })
-                          : []
-                      ),
-                      catchError((subDirStatError) => [
-                        PluginDiscoveryError.invalidPluginPath(subDir, subDirStatError),
-                      ])
-                    )
-                  )
-                );
-              }
-              return [];
-            }
-            return [PluginDiscoveryError.invalidPluginPath(entry.dir, manifestStatError)];
-          })
-        );
+          }
+          return mapSubdirectories(entry.dir, (subDir) =>
+            recursiveScanFolder({ dir: subDir, depth: entry.depth + 1 })
+          );
+        });
       })
     );
   }
@@ -145,6 +118,57 @@ function processPluginSearchPaths$(
         catchError((err) => [PluginDiscoveryError.invalidSearchPath(entry.dir, err)])
       );
     })
+  );
+}
+
+/**
+ * Attempts to read manifest file in specified directory or calls `notFound` and returns results if not found. For any
+ * manifest files that cannot be read, a PluginDiscoveryError is added.
+ * @param dir
+ * @param notFound
+ */
+function findManifestInFolder(
+  dir: string,
+  notFound: () => never[] | Observable<string | PluginDiscoveryError>
+): string[] | Observable<string | PluginDiscoveryError> {
+  return fsStat$(resolve(dir, 'kibana.json')).pipe(
+    mergeMap((stats) => {
+      // `kibana.json` exists in given directory, we got a plugin
+      if (stats.isFile()) {
+        return [dir];
+      }
+      return [];
+    }),
+    catchError((manifestStatError) => {
+      // did not find manifest. recursively process sub directories until we reach max depth.
+      if (manifestStatError.code !== 'ENOENT') {
+        return [PluginDiscoveryError.invalidPluginPath(dir, manifestStatError)];
+      }
+      return notFound();
+    })
+  );
+}
+
+/**
+ * Finds all subdirectories in `dir` and executed `mapFunc` for each one. For any directories that cannot be read,
+ * a PluginDiscoveryError is added.
+ * @param dir
+ * @param mapFunc
+ */
+function mapSubdirectories(
+  dir: string,
+  mapFunc: (subDir: string) => Observable<string | PluginDiscoveryError>
+): Observable<string | PluginDiscoveryError> {
+  return fsReadDir$(dir).pipe(
+    mergeMap((subDirs: string[]) => subDirs.map((subDir) => resolve(dir, subDir))),
+    mergeMap((subDir) =>
+      fsStat$(subDir).pipe(
+        mergeMap((pathStat) => (pathStat.isDirectory() ? mapFunc(subDir) : [])),
+        catchError((subDirStatError) => [
+          PluginDiscoveryError.invalidPluginPath(subDir, subDirStatError),
+        ])
+      )
+    )
   );
 }
 

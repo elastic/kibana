@@ -43,6 +43,12 @@ const Plugins = {
     'kibana.json': JSON.stringify({ id: 'plugin', version: '1' }),
   }),
   missingManifest: () => ({}),
+  inaccessibleManifest: () => ({
+    'kibana.json': mockFs.file({
+      mode: 0, // 0000,
+      content: JSON.stringify({ id: 'plugin', version: '1' }),
+    }),
+  }),
   valid: (id: string) => ({
     'kibana.json': JSON.stringify({
       id,
@@ -230,6 +236,43 @@ describe('plugins discovery system', () => {
       expect.arrayContaining([
         `Error: EACCES, permission denied '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
         `Error: ENOENT, no such file or directory '${xpackPluginsPath}' (invalid-search-path, ${xpackPluginsPath})`,
+      ])
+    );
+  });
+
+  it('return an error when the manifest file is not accessible', async () => {
+    const { plugin$, error$ } = discover(new PluginsConfig(pluginConfig, env), coreContext);
+
+    mockFs(
+      {
+        [KIBANA_ROOT]: {
+          src: {
+            plugins: {
+              plugin_a: {
+                ...Plugins.inaccessibleManifest(),
+                nested_plugin: Plugins.valid('nestedPlugin'),
+              },
+            },
+          },
+        },
+      },
+      { createCwd: false }
+    );
+
+    const plugins = await plugin$.pipe(toArray()).toPromise();
+    expect(plugins).toHaveLength(0);
+
+    const errors = await error$
+      .pipe(
+        map((error) => error.toString()),
+        toArray()
+      )
+      .toPromise();
+
+    const errorPath = manifestPath('plugin_a');
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        `Error: EACCES, permission denied '${errorPath}' (missing-manifest, ${errorPath})`,
       ])
     );
   });
