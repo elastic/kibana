@@ -14,16 +14,17 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { getJoinAggKey, getSourceAggKey } from '../../../../common/get_agg_key';
+import { getJoinAggKey } from '../../../../common/get_agg_key';
 import {
+  AggDescriptor,
   ColorDynamicOptions,
   EMSFileSourceDescriptor,
   ESSearchSourceDescriptor,
-  JoinDescriptor,
 } from '../../../../common/descriptor_types';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../vector_layer/vector_layer';
 import { EMSFileSource } from '../../sources/ems_file_source';
+// @ts-ignore
 import { ESSearchSource } from '../../sources/es_search_source';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 
@@ -42,7 +43,7 @@ function createChoroplethLayerDescriptor({
   rightIndexPatternTitle: string;
   rightTermField: string;
 }) {
-  const metricsDescriptor = { type: AGG_TYPE.COUNT };
+  const metricsDescriptor: AggDescriptor = { type: AGG_TYPE.COUNT };
   const joinId = uuid();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,

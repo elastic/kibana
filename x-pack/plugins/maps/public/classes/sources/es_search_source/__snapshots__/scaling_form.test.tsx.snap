@@ -210,6 +210,7 @@ exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
     <SingleFieldSelect
       compressed={true}
       fields={Array []}
+      isClearable={false}
       onChange={[Function]}
       placeholder="Select entity field"
     />

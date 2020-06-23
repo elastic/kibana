@@ -22,7 +22,7 @@ interface Props {
 }
 
 interface State {
-  noGeoIndexPatternsExist: Array<EuiComboBoxOptionOption<string>>;
+  noGeoIndexPatternsExist: boolean;
 }
 
 export class GeoIndexPatternSelect extends Component<Props, State> {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FileLayer } from '@elastic/ems-client';
@@ -18,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
-import { RenderWizardArguments } from '../../layer_wizard_registry';
+import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
@@ -91,7 +91,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     this._isMounted = true;
   }
 
-  _loadRightFields = async (indexPatternId) => {
+  _loadRightFields = async (indexPatternId: string) => {
     this.setState({ rightTermsFields: [], rightIndexPatternTitle: null });
 
     let indexPattern;
@@ -140,7 +140,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
   _onLeftSourceChange = (optionId: string) => {
     this.setState(
-      { leftSource: optionId, leftJoinField: null, rightJoinField: null },
+      { leftSource: optionId as BOUNDARIES_SOURCE, leftJoinField: null, rightJoinField: null },
       this._previewLayer
     );
   };
@@ -158,17 +158,24 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
       () => {
         // make default geo field selection
         if (this.state.leftGeoFields.length) {
+          // @ts-expect-error - avoid wrong "Property 'name' does not exist on type 'never'." compile error
           this._onLeftGeoFieldSelect(this.state.leftGeoFields[0].name);
         }
       }
     );
   };
 
-  _onLeftGeoFieldSelect = (geoField: string) => {
+  _onLeftGeoFieldSelect = (geoField?: string) => {
+    if (!geoField) {
+      return;
+    }
     this.setState({ leftGeoField: geoField }, this._previewLayer);
   };
 
-  _onLeftJoinFieldSelect = (joinField: string) => {
+  _onLeftJoinFieldSelect = (joinField?: string) => {
+    if (!joinField) {
+      return;
+    }
     this.setState({ leftJoinField: joinField }, this._previewLayer);
   };
 
@@ -184,7 +191,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
       return;
     }
 
-    this.setState({ leftJoinField: selectedOptions[0].value }, this._previewLayer);
+    this.setState({ leftJoinField: selectedOptions[0].value! }, this._previewLayer);
   };
 
   _onRightIndexPatternChange = (indexPatternId: string) => {
@@ -204,7 +211,10 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     );
   };
 
-  _onRightJoinFieldSelect = (joinField: string) => {
+  _onRightJoinFieldSelect = (joinField?: string) => {
+    if (!joinField) {
+      return;
+    }
     this.setState({ rightJoinField: joinField }, this._previewLayer);
   };
 
@@ -231,19 +241,20 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     const layerDescriptor =
       this.state.leftSource === BOUNDARIES_SOURCE.ELASTICSEARCH
         ? createEsChoroplethLayerDescriptor({
-            leftIndexPatternId: this.state.leftIndexPattern.id,
-            leftGeoField: this.state.leftGeoField,
-            leftJoinField: this.state.leftJoinField,
-            rightIndexPatternId: this.state.rightIndexPatternId,
-            rightIndexPatternTitle: this.state.rightIndexPatternTitle,
-            rightTermField: this.state.rightJoinField,
+            // @ts-expect-error - avoid wrong "Property 'id' does not exist on type 'never'." compile error
+            leftIndexPatternId: this.state.leftIndexPattern!.id,
+            leftGeoField: this.state.leftGeoField!,
+            leftJoinField: this.state.leftJoinField!,
+            rightIndexPatternId: this.state.rightIndexPatternId!,
+            rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
+            rightTermField: this.state.rightJoinField!,
           })
         : createEmsChoroplethLayerDescriptor({
-            leftEmsFileId: this.state.leftEmsFileId,
-            leftEmsField: this.state.leftJoinField,
-            rightIndexPatternId: this.state.rightIndexPatternId,
-            rightIndexPatternTitle: this.state.rightIndexPatternTitle,
-            rightTermField: this.state.rightJoinField,
+            leftEmsFileId: this.state.leftEmsFileId!,
+            leftEmsField: this.state.leftJoinField!,
+            rightIndexPatternId: this.state.rightIndexPatternId!,
+            rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
+            rightTermField: this.state.rightJoinField!,
           });
 
     this.props.previewLayers([layerDescriptor]);
@@ -294,7 +305,8 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
       return (
         <>
           <GeoIndexPatternSelect
-            value={this.state.leftIndexPattern ? this.state.leftIndexPattern.id : ''}
+            // @ts-expect-error - avoid wrong "Property 'id' does not exist on type 'never'." compile error
+            value={this.state.leftIndexPattern ? this.state.leftIndexPattern!.id : ''}
             onChange={this._onLeftIndexPatternChange}
           />
           {geoFieldSelect}

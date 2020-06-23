@@ -5,12 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiPanel } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
-import { FileLayer } from '@elastic/ems-client';
-import { getEmsFileLayers } from '../../../meta';
-import { getEmsUnavailableMessage } from '../ems_unavailable_message';
+import { EuiPanel } from '@elastic/eui';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 
@@ -28,6 +23,7 @@ export class EMSFileCreateSourceEditor extends Component<Props, State> {
   };
 
   _onChange = (emsFileId: string) => {
+    this.setState({ emsFileId });
     this.props.onSourceConfigChange({ id: emsFileId });
   };
 
