@@ -220,4 +220,21 @@ describe('Field', function () {
     });
     expect(flatten(field)).toMatchSnapshot();
   });
+
+  it('spec snapshot', () => {
+    const field = new Field(
+      {
+        fieldFormatMap: {
+          name: { toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }) },
+        },
+      } as IndexPattern,
+      fieldValues,
+      false,
+      {
+        fieldFormats: {} as FieldFormatsStartCommon,
+        onNotification: () => {},
+      }
+    );
+    expect(field.toSpec()).toMatchSnapshot();
+  });
 });

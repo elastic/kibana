@@ -221,6 +221,7 @@ export class IndexPattern implements IIndexPattern {
     });
 
     this.initFields();
+    return this;
   }
 
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
@@ -309,7 +310,7 @@ export class IndexPattern implements IIndexPattern {
     return this;
   }
 
-  public toSpec() {
+  public toSpec(): IndexPatternSpec {
     return {
       id: this.id,
       version: this.version,
@@ -319,7 +320,7 @@ export class IndexPattern implements IIndexPattern {
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec(),
       typeMeta: this.typeMeta,
-    } as IndexPatternSpec;
+    };
   }
 
   // Get the source filtering configuration for that index.
