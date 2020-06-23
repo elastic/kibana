@@ -18,16 +18,16 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await createUsersAndRoles(es, supertest);
     });
 
-    // loadTestFile(require.resolve('./bulk_create'));
-    // loadTestFile(require.resolve('./bulk_get'));
-    // loadTestFile(require.resolve('./bulk_update'));
-    // loadTestFile(require.resolve('./create'));
-    // loadTestFile(require.resolve('./delete'));
-    // loadTestFile(require.resolve('./export'));
-    // loadTestFile(require.resolve('./find'));
-    // loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./bulk_create'));
+    loadTestFile(require.resolve('./bulk_get'));
+    loadTestFile(require.resolve('./bulk_update'));
+    loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./export'));
+    loadTestFile(require.resolve('./find'));
+    loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./import'));
     loadTestFile(require.resolve('./resolve_import_errors'));
-    // loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./update'));
   });
 }
