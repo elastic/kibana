@@ -91,7 +91,6 @@ export type KibanaTilemapSourceDescriptor = AbstractSourceDescriptor;
 
 export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
-  layers: string;
   styles: string;
   attributionText: string;
   attributionUrl: string;
@@ -123,11 +122,12 @@ export type TiledSingleLayerVectorSourceSettings = {
   maxSourceZoom: number;
 
   fields: MVTFieldDescriptor[];
-  tooltipProperties: string[];
 };
 
 export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
-  TiledSingleLayerVectorSourceSettings;
+  TiledSingleLayerVectorSourceSettings & {
+    tooltipProperties: string[];
+  };
 
 export type JoinDescriptor = {
   leftField: string;

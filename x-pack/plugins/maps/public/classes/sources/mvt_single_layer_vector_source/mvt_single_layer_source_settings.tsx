@@ -36,11 +36,6 @@ export interface Props {
 }
 
 export class MVTSingleLayerSourceSettings extends Component<Props, State> {
-  state = {
-    currentSettings: null,
-    prevSettings: null,
-  };
-
   static getDerivedStateFromProps(nextProps, prevState) {
     const newSettings = {
       layerName: nextProps.layerName,
@@ -64,20 +59,33 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
   }, 200);
 
   _handleLayerNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const layerName = e.target.value;
-    const currentSettings = { ...this.state.currentSettings, layerName };
+    const currentSettings = {
+      layerName: e.target.value,
+      minSourceZoom: this.state.currentSettings.minSourceZoom,
+      maxSourceZoom: this.state.currentSettings.maxSourceZoom,
+      fields: this.state.currentSettings.fields,
+    };
+
     this.setState({ currentSettings }, this._handleChange);
   };
 
   _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
-    const currentSettings = { ...this.state.currentSettings, fields };
+    const currentSettings = {
+      layerName: this.state.currentSettings.layerName,
+      minSourceZoom: this.state.currentSettings.minSourceZoom,
+      maxSourceZoom: this.state.currentSettings.maxSourceZoom,
+      fields,
+    };
     this.setState({ currentSettings }, this._handleChange);
   };
 
   _handleZoomRangeChange = (e: Value) => {
-    const minSourceZoom = parseInt(e[0] as string, 10);
-    const maxSourceZoom = parseInt(e[1] as string, 10);
-    const currentSettings = { ...this.state.currentSettings, minSourceZoom, maxSourceZoom };
+    const currentSettings = {
+      layerName: this.state.currentSettings.layerName,
+      fields: this.state.currentSettings.fields,
+      minSourceZoom: parseInt(e[0] as string, 10),
+      maxSourceZoom: parseInt(e[1] as string, 10),
+    };
     this.setState({ currentSettings }, this._handleChange);
   };
 

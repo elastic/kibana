@@ -66,7 +66,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
       .map((fieldName) => {
         return this.getFieldByName(fieldName);
       })
-      .filter((f) => f !== null);
+      .filter((f) => f !== null) as MVTField[];
   }
 
   async supportsFitToBounds() {
