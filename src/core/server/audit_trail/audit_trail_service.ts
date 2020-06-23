@@ -20,15 +20,9 @@ import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { KibanaRequest } from '../http';
-import {
-  AuditorFactory,
-  AuditableEvent,
-  InternalAuditTrailServiceSetup,
-  InternalAuditTrailServiceStart,
-} from './types';
+import { AuditorFactory, AuditableEvent, AuditTrailSetup, AuditTrailStart } from './types';
 
-export class AuditTrailService
-  implements CoreService<InternalAuditTrailServiceSetup, InternalAuditTrailServiceStart> {
+export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrailStart> {
   private readonly log: Logger;
   private readonly auditors: Set<AuditorFactory> = new Set();
 

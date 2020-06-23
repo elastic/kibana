@@ -62,7 +62,7 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
 import { MetricsServiceSetup } from './metrics';
 import { StatusServiceSetup } from './status';
-import { Auditor, AuditTrailSetup } from './audit_trail';
+import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
 
 export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
 export { bootstrap } from './bootstrap';
@@ -363,7 +363,7 @@ export interface RequestHandlerContext {
     uiSettings: {
       client: IUiSettingsClient;
     };
-    auditTrail: Auditor;
+    auditor: Auditor;
   };
 }
 
@@ -433,6 +433,8 @@ export interface CoreStart {
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
   uiSettings: UiSettingsServiceStart;
+  /** {@link AuditTrailSetup} */
+  auditTrail: AuditTrailStart;
 }
 
 export {
@@ -444,6 +446,7 @@ export {
   PluginsServiceStart,
   PluginOpaqueId,
   UuidServiceSetup,
+  AuditTrailStart,
 };
 
 /**

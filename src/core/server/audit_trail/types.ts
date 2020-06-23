@@ -38,10 +38,8 @@ export interface AuditorFactory {
   asScoped(request: KibanaRequest): Auditor;
 }
 
-export interface InternalAuditTrailServiceSetup {
+export interface AuditTrailSetup {
   register(auditor: AuditorFactory): void;
 }
 
-export type AuditTrailSetup = InternalAuditTrailServiceSetup;
-
-export type InternalAuditTrailServiceStart = AuditorFactory;
+export type AuditTrailStart = AuditorFactory;

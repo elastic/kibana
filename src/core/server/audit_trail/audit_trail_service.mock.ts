@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AuditTrailSetup, InternalAuditTrailServiceStart, Auditor } from './types';
+import { AuditTrailSetup, AuditTrailStart, Auditor } from './types';
 
 const createSetupContractMock = () => {
   const mocked: jest.Mocked<AuditTrailSetup> = {
@@ -27,7 +27,7 @@ const createSetupContractMock = () => {
 };
 
 const createStartContractMock = () => {
-  const mocked: jest.Mocked<InternalAuditTrailServiceStart> = {
+  const mocked: jest.Mocked<AuditTrailStart> = {
     asScoped: jest.fn(),
   };
   return mocked;

@@ -277,6 +277,7 @@ export class LegacyService implements CoreService {
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      auditTrail: startDeps.core.auditTrail,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);

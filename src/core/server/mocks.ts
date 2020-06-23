@@ -142,6 +142,7 @@ function createCoreSetupMock({
 
 function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
+    auditTrail: auditTrailServiceMock.createStartContract(),
     capabilities: capabilitiesServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
     http: httpServiceMock.createStartContract(),
@@ -196,7 +197,7 @@ function createCoreRequestHandlerContextMock() {
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),
     },
-    auditTrail: auditTrailServiceMock.createAuditor(),
+    auditor: auditTrailServiceMock.createAuditor(),
   };
 }
 
