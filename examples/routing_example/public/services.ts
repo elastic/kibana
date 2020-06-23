@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreStart, HttpFetchError } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import {
   RANDOM_NUMBER_ROUTE_PATH,
   RANDOM_NUMBER_BETWEEN_ROUTE_PATH,

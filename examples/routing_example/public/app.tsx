@@ -25,7 +25,6 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiText,
-  EuiLink,
   EuiHorizontalRule,
   EuiPageContentHeader,
   EuiListGroup,
