@@ -1,6 +1,6 @@
 # Theme Service
 
-The `theme` service offers utilities to interact with the kibana theme. EUI provides a light and dark theme object to suplement the Elastic-Charts `baseTheme`. However, every instance of a Chart would need to pass down this the correctly EUI theme depending on Kibana's light or dark mode. There are several ways you can use the `theme` service to get the correct shared `theme` and `baseTheme`.
+The `theme` service offers utilities to interact with the kibana theme. EUI provides a light and dark theme object to supplement the Elastic-Charts `baseTheme`. However, every instance of a Chart would need to pass down the correct EUI theme depending on Kibana's light or dark mode. There are several ways you can use the `theme` service to get the correct shared `theme` and `baseTheme`.
 
 > The current theme (light or dark) of Kibana is typically taken into account for the functions below.
 
@@ -89,4 +89,4 @@ export class YourComponent extends Component<YourComponentProps, YourComponentSt
 
 ## Why have `theme` and `baseTheme`?
 
-The `theme` prop is a recursive partial `Theme` that overrides properties from the `baseTheme`. This allows changes to the `Theme` type in `@elastic/charts` without having to update the `@elastic/eui` themes or every `<Chart />`.
+The `theme` prop is a recursive partial `Theme` that overrides properties from the `baseTheme`. This allows changes to the `Theme` TS type in `@elastic/charts` without having to update the `@elastic/eui` themes for every `<Chart />`.
