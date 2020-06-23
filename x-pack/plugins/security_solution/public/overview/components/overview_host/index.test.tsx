@@ -25,6 +25,7 @@ import { GetOverviewHostQuery } from '../../../graphql/types';
 import { wait } from '../../../common/lib/helpers';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/link_to');
 
 const startDate = 1579553397080;
 const endDate = 1579639797080;
