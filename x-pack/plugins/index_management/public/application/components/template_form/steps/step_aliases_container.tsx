@@ -6,11 +6,18 @@
 import React from 'react';
 
 import { Forms } from '../../../../shared_imports';
+import { documentationService } from '../../../services/documentation';
+import { StepAliases } from '../../shared';
 import { WizardContent } from '../template_form';
-import { StepAliases } from './step_aliases';
 
 export const StepAliasesContainer = () => {
   const { defaultValue, updateContent } = Forms.useContent<WizardContent>('aliases');
 
-  return <StepAliases defaultValue={defaultValue} onChange={updateContent} />;
+  return (
+    <StepAliases
+      defaultValue={defaultValue}
+      onChange={updateContent}
+      esDocsBase={documentationService.getEsDocsBase()}
+    />
+  );
 };
