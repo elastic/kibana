@@ -16,7 +16,7 @@ import { TiledSingleLayerVectorSourceSettings } from '../../../../common/descrip
 export const mvtVectorSourceWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   description: i18n.translate('xpack.maps.source.mvtVectorSourceWizard', {
-    defaultMessage: 'Vector source wizard',
+    defaultMessage: '.mvt vector tiles',
   }),
   icon: 'grid',
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
