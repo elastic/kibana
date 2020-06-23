@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../ftr_provider_context';
-import { setupRouteService, fleetSetupRouteService } from '../../../plugins/ingest_manager/common';
+import { fleetSetupRouteService } from '../../../plugins/ingest_manager/common';
 
 export function IngestManagerProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -12,14 +12,11 @@ export function IngestManagerProvider({ getService }: FtrProviderContext) {
     async setup() {
       const headers = { accept: 'application/json', 'kbn-xsrf': 'some-xsrf-token' };
 
-      const { body } = await supertest
-        .get(fleetSetupRouteService.getFleetSetupPath())
+      await supertest
+        .post(fleetSetupRouteService.postFleetSetupPath())
         .set(headers)
+        .send({ forceRecreate: true })
         .expect(200);
-
-      if (!body.isInitialized) {
-        await supertest.post(setupRouteService.getSetupPath()).set(headers).expect(200);
-      }
     },
   };
 }

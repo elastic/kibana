@@ -16,12 +16,16 @@ import {
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
 import {
+  fetchChartsData,
   getDataGridSchemasFromFieldTypes,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { ml } from '../../../../../services/ml_api_service';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import { DEFAULT_RESULTS_FIELD, FEATURE_INFLUENCE } from '../../../../common/constants';
@@ -75,6 +79,34 @@ export const useOutlierData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
+  const fetchColumnChartsData = async function () {
+    try {
+      if (jobConfig !== undefined) {
+        const columnChartsData = await fetchChartsData(
+          jobConfig.dest.index,
+          ml.esSearch,
+          searchQuery,
+          columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+        );
+        dataGrid.setColumnCharts(columnChartsData);
+      }
+    } catch (e) {
+      showDataGridColumnChartErrorMessageToast(e, getToastNotifications());
+    }
+  };
+
+  useEffect(() => {
+    if (dataGrid.chartsVisible) {
+      fetchColumnChartsData();
+    }
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dataGrid.chartsVisible,
+    jobConfig?.dest.index,
+    JSON.stringify([searchQuery, dataGrid.visibleColumns]),
+  ]);
+
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,
     COLOR_RANGE_SCALE.INFLUENCER,
@@ -115,7 +147,6 @@ export const useOutlierData = (
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };

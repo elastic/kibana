@@ -24,7 +24,9 @@ describe('only_false_allowed', () => {
     const decoded = OnlyFalseAllowed.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "true" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "true" supplied to "DefaultBooleanTrue"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -33,7 +35,9 @@ describe('only_false_allowed', () => {
     const decoded = OnlyFalseAllowed.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "DefaultBooleanTrue"',
+    ]);
     expect(message.schema).toEqual({});
   });
 

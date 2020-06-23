@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';
 import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +14,7 @@ import { KeyValueTable } from '../KeyValueTable';
 import { flattenObject } from '../../../utils/flattenObject';
 
 const VariablesContainer = styled.div`
-  background: ${theme.euiColorEmptyShade};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-radius: 0 0 ${borderRadius} ${borderRadius};
   padding: ${px(units.half)} ${px(unit)};
 `;
