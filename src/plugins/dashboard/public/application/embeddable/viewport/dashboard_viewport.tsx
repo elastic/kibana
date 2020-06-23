@@ -26,8 +26,8 @@ import { context } from '../../../../../kibana_react/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
-  renderEmpty?: () => React.ReactNode;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
+  renderEmpty?: () => React.ReactNode;
 }
 
 interface State {
