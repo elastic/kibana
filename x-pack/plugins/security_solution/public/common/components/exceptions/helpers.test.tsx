@@ -238,8 +238,8 @@ describe('Exception helpers', () => {
         {
           fieldName: 'host.name.host.name',
           isNested: true,
-          operator: 'exists',
-          value: null,
+          operator: 'is',
+          value: 'some host name',
         },
       ];
       expect(result).toEqual(expected);
