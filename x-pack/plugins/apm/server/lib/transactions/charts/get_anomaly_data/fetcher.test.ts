@@ -19,7 +19,11 @@ describe('anomalyAggsFetcher', () => {
         intervalString: 'myInterval',
         mlBucketSize: 10,
         setup: {
-          client: { search: clientSpy },
+          ml: {
+            mlSystem: {
+              mlAnomalySearch: clientSpy,
+            },
+          } as any,
           start: 100000,
           end: 200000,
         } as any,
@@ -42,7 +46,13 @@ describe('anomalyAggsFetcher', () => {
 
     return expect(
       anomalySeriesFetcher({
-        setup: { client: { search: failedRequestSpy } },
+        setup: {
+          ml: {
+            mlSystem: {
+              mlAnomalySearch: failedRequestSpy,
+            },
+          } as any,
+        },
       } as any)
     ).resolves.toEqual(undefined);
   });
@@ -53,7 +63,13 @@ describe('anomalyAggsFetcher', () => {
 
     return expect(
       anomalySeriesFetcher({
-        setup: { client: { search: failedRequestSpy } },
+        setup: {
+          ml: {
+            mlSystem: {
+              mlAnomalySearch: failedRequestSpy,
+            },
+          } as any,
+        },
       } as any)
     ).rejects.toThrow(otherError);
   });

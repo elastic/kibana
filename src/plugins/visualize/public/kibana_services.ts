@@ -34,8 +34,8 @@ import { DataPublicPluginStart } from '../../data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { SavedVisualizations } from './application/types';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { DashboardStart } from '../../dashboard/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
+import { EmbeddableStart } from '../../embeddable/public';
 
 export interface VisualizeKibanaServices {
   pluginInitializerContext: PluginInitializerContext;
@@ -52,7 +52,7 @@ export interface VisualizeKibanaServices {
   kibanaLegacy: KibanaLegacyStart;
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
-  dashboard: DashboardStart;
+  embeddable: EmbeddableStart;
   I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];

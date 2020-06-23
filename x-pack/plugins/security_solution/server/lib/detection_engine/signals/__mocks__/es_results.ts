@@ -391,7 +391,7 @@ export const exampleFindRuleStatusResponse: (
   total: 1,
   per_page: 6,
   page: 1,
-  saved_objects: mockStatuses,
+  saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
 export const mockLogger: Logger = loggingServiceMock.createLogger();

@@ -4,6 +4,7 @@
 
 # App
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-app
+/x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
@@ -66,11 +67,10 @@
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
-/x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
 /src/plugins/apm_oss/  @elastic/apm-ui
-/src/apm.js @watson
+/src/apm.js @watson @vigneshshanmugam
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats

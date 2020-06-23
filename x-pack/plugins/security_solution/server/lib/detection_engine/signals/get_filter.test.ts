@@ -462,6 +462,61 @@ describe('get_filter', () => {
         },
       });
     });
+
+    test('it should work with a nested object queries', () => {
+      const esQuery = getQueryFilter(
+        'category:{ name:Frank and trusted:true }',
+        'kuery',
+        [],
+        ['auditbeat-*'],
+        []
+      );
+      expect(esQuery).toEqual({
+        bool: {
+          must: [],
+          filter: [
+            {
+              nested: {
+                path: 'category',
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                'category.name': 'Frank',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                'category.trusted': true,
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+                score_mode: 'none',
+              },
+            },
+          ],
+          should: [],
+          must_not: [],
+        },
+      });
+    });
   });
 
   describe('getFilter', () => {

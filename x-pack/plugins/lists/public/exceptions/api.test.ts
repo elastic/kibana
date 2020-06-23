@@ -8,6 +8,15 @@ import { getExceptionListSchemaMock } from '../../common/schemas/response/except
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListSchemaMock } from '../../common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/request/create_exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../common/schemas/response/found_exception_list_item_schema.mock';
+import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
+import { getUpdateExceptionListSchemaMock } from '../../common/schemas/request/update_exception_list_schema.mock';
+import {
+  CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '../../common/schemas';
 
 import {
   addExceptionList,
@@ -17,7 +26,10 @@ import {
   fetchExceptionListById,
   fetchExceptionListItemById,
   fetchExceptionListItemsByListId,
+  updateExceptionList,
+  updateExceptionListItem,
 } from './api';
+import { ApiCallByIdProps, ApiCallByListIdProps } from './types';
 
 const abortCtrl = new AbortController();
 
@@ -44,36 +56,59 @@ describe('Exceptions Lists API', () => {
       fetchMock.mockResolvedValue(getExceptionListSchemaMock());
     });
 
-    test('it uses POST when "list.id" does not exist', async () => {
+    test('it invokes "addExceptionList" with expected url and body values', async () => {
+      const payload = getCreateExceptionListSchemaMock();
+      await addExceptionList({
+        http: mockKibanaHttpService(),
+        list: payload,
+        signal: abortCtrl.signal,
+      });
+      // TODO Would like to just use getExceptionListSchemaMock() here, but
+      // validation returns object in different order, making the strings not match
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
+        body: JSON.stringify(payload),
+        method: 'POST',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it returns expected exception list on success', async () => {
       const payload = getCreateExceptionListSchemaMock();
       const exceptionResponse = await addExceptionList({
         http: mockKibanaHttpService(),
         list: payload,
         signal: abortCtrl.signal,
       });
-
-      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
-        body: JSON.stringify(payload),
-        method: 'POST',
-        signal: abortCtrl.signal,
-      });
       expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
     });
 
-    test('it uses PUT when "list.id" exists', async () => {
-      const payload = getExceptionListSchemaMock();
-      const exceptionResponse = await addExceptionList({
-        http: mockKibanaHttpService(),
-        list: getExceptionListSchemaMock(),
-        signal: abortCtrl.signal,
-      });
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload: Omit<CreateExceptionListSchema, 'description'> & {
+        description?: string[];
+      } = { ...getCreateExceptionListSchemaMock(), description: ['123'] };
 
-      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
-        body: JSON.stringify(payload),
-        method: 'PUT',
-        signal: abortCtrl.signal,
-      });
-      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
+      await expect(
+        addExceptionList({
+          http: mockKibanaHttpService(),
+          list: (payload as unknown) as ExceptionListSchema,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "["123"]" supplied to "description"');
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const payload = getCreateExceptionListSchemaMock();
+      const badPayload = getExceptionListSchemaMock();
+      delete badPayload.id;
+      fetchMock.mockResolvedValue(badPayload);
+
+      await expect(
+        addExceptionList({
+          http: mockKibanaHttpService(),
+          list: payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
     });
   });
 
@@ -83,36 +118,181 @@ describe('Exceptions Lists API', () => {
       fetchMock.mockResolvedValue(getExceptionListItemSchemaMock());
     });
 
-    test('it uses POST when "listItem.id" does not exist', async () => {
+    test('it invokes "addExceptionListItem" with expected url and body values', async () => {
+      const payload = getCreateExceptionListItemSchemaMock();
+      await addExceptionListItem({
+        http: mockKibanaHttpService(),
+        listItem: payload,
+        signal: abortCtrl.signal,
+      });
+      // TODO Would like to just use getExceptionListSchemaMock() here, but
+      // validation returns object in different order, making the strings not match
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
+        body: JSON.stringify(payload),
+        method: 'POST',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it returns expected exception list on success', async () => {
       const payload = getCreateExceptionListItemSchemaMock();
       const exceptionResponse = await addExceptionListItem({
         http: mockKibanaHttpService(),
         listItem: payload,
         signal: abortCtrl.signal,
       });
+      expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
+    });
 
-      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload: Omit<CreateExceptionListItemSchema, 'description'> & {
+        description?: string[];
+      } = { ...getCreateExceptionListItemSchemaMock(), description: ['123'] };
+
+      await expect(
+        addExceptionListItem({
+          http: mockKibanaHttpService(),
+          listItem: (payload as unknown) as ExceptionListItemSchema,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "["123"]" supplied to "description"');
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const payload = getCreateExceptionListItemSchemaMock();
+      const badPayload = getExceptionListItemSchemaMock();
+      delete badPayload.id;
+      fetchMock.mockResolvedValue(badPayload);
+
+      await expect(
+        addExceptionListItem({
+          http: mockKibanaHttpService(),
+          listItem: payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+    });
+  });
+
+  describe('#updateExceptionList', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getExceptionListSchemaMock());
+    });
+
+    test('it invokes "updateExceptionList" with expected url and body values', async () => {
+      const payload = getUpdateExceptionListSchemaMock();
+      await updateExceptionList({
+        http: mockKibanaHttpService(),
+        list: payload,
+        signal: abortCtrl.signal,
+      });
+      // TODO Would like to just use getExceptionListSchemaMock() here, but
+      // validation returns object in different order, making the strings not match
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
         body: JSON.stringify(payload),
-        method: 'POST',
+        method: 'PUT',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it returns expected exception list on success', async () => {
+      const payload = getUpdateExceptionListSchemaMock();
+      const exceptionResponse = await updateExceptionList({
+        http: mockKibanaHttpService(),
+        list: payload,
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
+    });
+
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload = getUpdateExceptionListSchemaMock();
+      delete payload.description;
+
+      await expect(
+        updateExceptionList({
+          http: mockKibanaHttpService(),
+          list: payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "description"');
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const payload = getUpdateExceptionListSchemaMock();
+      const badPayload = getExceptionListSchemaMock();
+      delete badPayload.id;
+      fetchMock.mockResolvedValue(badPayload);
+
+      await expect(
+        updateExceptionList({
+          http: mockKibanaHttpService(),
+          list: payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+    });
+  });
+
+  describe('#updateExceptionListItem', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getExceptionListItemSchemaMock());
+    });
+
+    test('it invokes "updateExceptionListItem" with expected url and body values', async () => {
+      const payload = getUpdateExceptionListItemSchemaMock();
+      await updateExceptionListItem({
+        http: mockKibanaHttpService(),
+        listItem: payload,
+        signal: abortCtrl.signal,
+      });
+      // TODO Would like to just use getExceptionListSchemaMock() here, but
+      // validation returns object in different order, making the strings not match
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
+        body: JSON.stringify(payload),
+        method: 'PUT',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it returns expected exception list on success', async () => {
+      const payload = getUpdateExceptionListItemSchemaMock();
+      const exceptionResponse = await updateExceptionListItem({
+        http: mockKibanaHttpService(),
+        listItem: payload,
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
     });
 
-    test('check parameter url, body when "listItem.id" exists', async () => {
-      const payload = getExceptionListItemSchemaMock();
-      const exceptionResponse = await addExceptionListItem({
-        http: mockKibanaHttpService(),
-        listItem: getExceptionListItemSchemaMock(),
-        signal: abortCtrl.signal,
-      });
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload = getUpdateExceptionListItemSchemaMock();
+      delete payload.description;
 
-      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
-        body: JSON.stringify(payload),
-        method: 'PUT',
-        signal: abortCtrl.signal,
-      });
-      expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
+      await expect(
+        updateExceptionListItem({
+          http: mockKibanaHttpService(),
+          listItem: payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "description"');
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const payload = getUpdateExceptionListItemSchemaMock();
+      const badPayload = getExceptionListItemSchemaMock();
+      delete badPayload.id;
+      fetchMock.mockResolvedValue(badPayload);
+
+      await expect(
+        updateExceptionListItem({
+          http: mockKibanaHttpService(),
+          listItem: payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
     });
   });
 
@@ -148,12 +328,39 @@ describe('Exceptions Lists API', () => {
       });
       expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
     });
+
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload = ({
+        http: mockKibanaHttpService(),
+        id: 1,
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      } as unknown) as ApiCallByIdProps & { id: number };
+      await expect(fetchExceptionListById(payload)).rejects.toEqual(
+        'Invalid value "1" supplied to "id"'
+      );
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const badPayload = getExceptionListItemSchemaMock();
+      delete badPayload.id;
+      fetchMock.mockResolvedValue(badPayload);
+
+      await expect(
+        fetchExceptionListById({
+          http: mockKibanaHttpService(),
+          id: '1',
+          namespaceType: 'single',
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+    });
   });
 
   describe('#fetchExceptionListItemsByListId', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue([getExceptionListItemSchemaMock()]);
+      fetchMock.mockResolvedValue(getFoundExceptionListItemSchemaMock());
     });
 
     test('it invokes "fetchExceptionListItemsByListId" with expected url and body values', async () => {
@@ -161,6 +368,10 @@ describe('Exceptions Lists API', () => {
         http: mockKibanaHttpService(),
         listId: 'myList',
         namespaceType: 'single',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
         signal: abortCtrl.signal,
       });
 
@@ -169,8 +380,8 @@ describe('Exceptions Lists API', () => {
         query: {
           list_id: 'myList',
           namespace_type: 'single',
-          page: 1,
-          per_page: 20,
+          page: '1',
+          per_page: '20',
         },
         signal: abortCtrl.signal,
       });
@@ -185,6 +396,10 @@ describe('Exceptions Lists API', () => {
         http: mockKibanaHttpService(),
         listId: 'myList',
         namespaceType: 'single',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
         signal: abortCtrl.signal,
       });
 
@@ -194,8 +409,8 @@ describe('Exceptions Lists API', () => {
           filter: 'exception-list.attributes.entries.field:hello world*',
           list_id: 'myList',
           namespace_type: 'single',
-          page: 1,
-          per_page: 20,
+          page: '1',
+          per_page: '20',
         },
         signal: abortCtrl.signal,
       });
@@ -210,6 +425,10 @@ describe('Exceptions Lists API', () => {
         http: mockKibanaHttpService(),
         listId: 'myList',
         namespaceType: 'agnostic',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
         signal: abortCtrl.signal,
       });
 
@@ -219,8 +438,8 @@ describe('Exceptions Lists API', () => {
           filter: 'exception-list-agnostic.attributes.entries.field:hello world*',
           list_id: 'myList',
           namespace_type: 'agnostic',
-          page: 1,
-          per_page: 20,
+          page: '1',
+          per_page: '20',
         },
         signal: abortCtrl.signal,
       });
@@ -235,6 +454,10 @@ describe('Exceptions Lists API', () => {
         http: mockKibanaHttpService(),
         listId: 'myList',
         namespaceType: 'agnostic',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
         signal: abortCtrl.signal,
       });
 
@@ -244,8 +467,8 @@ describe('Exceptions Lists API', () => {
           filter: 'exception-list-agnostic.attributes.tags:malware',
           list_id: 'myList',
           namespace_type: 'agnostic',
-          page: 1,
-          per_page: 20,
+          page: '1',
+          per_page: '20',
         },
         signal: abortCtrl.signal,
       });
@@ -260,6 +483,10 @@ describe('Exceptions Lists API', () => {
         http: mockKibanaHttpService(),
         listId: 'myList',
         namespaceType: 'agnostic',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
         signal: abortCtrl.signal,
       });
 
@@ -270,8 +497,8 @@ describe('Exceptions Lists API', () => {
             'exception-list-agnostic.attributes.entries.field:host.name* AND exception-list-agnostic.attributes.tags:malware',
           list_id: 'myList',
           namespace_type: 'agnostic',
-          page: 1,
-          per_page: 20,
+          page: '1',
+          per_page: '20',
         },
         signal: abortCtrl.signal,
       });
@@ -282,16 +509,57 @@ describe('Exceptions Lists API', () => {
         http: mockKibanaHttpService(),
         listId: 'endpoint_list',
         namespaceType: 'single',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual([getExceptionListItemSchemaMock()]);
+      expect(exceptionResponse).toEqual(getFoundExceptionListItemSchemaMock());
+    });
+
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload = ({
+        http: mockKibanaHttpService(),
+        listId: '1',
+        namespaceType: 'not a namespace type',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
+        signal: abortCtrl.signal,
+      } as unknown) as ApiCallByListIdProps & { listId: number };
+      await expect(fetchExceptionListItemsByListId(payload)).rejects.toEqual(
+        'Invalid value "not a namespace type" supplied to "namespace_type"'
+      );
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const badPayload = getExceptionListItemSchemaMock();
+      delete badPayload.id;
+      fetchMock.mockResolvedValue(badPayload);
+
+      await expect(
+        fetchExceptionListItemsByListId({
+          http: mockKibanaHttpService(),
+          listId: 'myList',
+          namespaceType: 'single',
+          pagination: {
+            page: 1,
+            perPage: 20,
+          },
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual(
+        'Invalid value "undefined" supplied to "data",Invalid value "undefined" supplied to "page",Invalid value "undefined" supplied to "per_page",Invalid value "undefined" supplied to "total"'
+      );
     });
   });
 
   describe('#fetchExceptionListItemById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue([getExceptionListItemSchemaMock()]);
+      fetchMock.mockResolvedValue(getExceptionListItemSchemaMock());
     });
 
     test('it invokes "fetchExceptionListItemById" with expected url and body values', async () => {
@@ -318,7 +586,34 @@ describe('Exceptions Lists API', () => {
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual([getExceptionListItemSchemaMock()]);
+      expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
+    });
+
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload = ({
+        http: mockKibanaHttpService(),
+        id: '1',
+        namespaceType: 'not a namespace type',
+        signal: abortCtrl.signal,
+      } as unknown) as ApiCallByIdProps & { namespaceType: string };
+      await expect(fetchExceptionListItemById(payload)).rejects.toEqual(
+        'Invalid value "not a namespace type" supplied to "namespace_type"'
+      );
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const badPayload = getExceptionListItemSchemaMock();
+      delete badPayload.id;
+      fetchMock.mockResolvedValue(badPayload);
+
+      await expect(
+        fetchExceptionListItemById({
+          http: mockKibanaHttpService(),
+          id: '1',
+          namespaceType: 'single',
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
     });
   });
 
@@ -354,6 +649,33 @@ describe('Exceptions Lists API', () => {
       });
       expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
     });
+
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload = ({
+        http: mockKibanaHttpService(),
+        id: 1,
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      } as unknown) as ApiCallByIdProps & { id: number };
+      await expect(deleteExceptionListById(payload)).rejects.toEqual(
+        'Invalid value "1" supplied to "id"'
+      );
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const badPayload = getExceptionListSchemaMock();
+      delete badPayload.id;
+      fetchMock.mockResolvedValue(badPayload);
+
+      await expect(
+        deleteExceptionListById({
+          http: mockKibanaHttpService(),
+          id: '1',
+          namespaceType: 'single',
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+    });
   });
 
   describe('#deleteExceptionListItemById', () => {
@@ -387,6 +709,33 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
+    });
+
+    test('it returns error and does not make request if request payload fails decode', async () => {
+      const payload = ({
+        http: mockKibanaHttpService(),
+        id: 1,
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      } as unknown) as ApiCallByIdProps & { id: number };
+      await expect(deleteExceptionListItemById(payload)).rejects.toEqual(
+        'Invalid value "1" supplied to "id"'
+      );
+    });
+
+    test('it returns error if response payload fails decode', async () => {
+      const badPayload = getExceptionListItemSchemaMock();
+      delete badPayload.id;
+      fetchMock.mockResolvedValue(badPayload);
+
+      await expect(
+        deleteExceptionListItemById({
+          http: mockKibanaHttpService(),
+          id: '1',
+          namespaceType: 'single',
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
     });
   });
 });
