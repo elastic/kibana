@@ -66,7 +66,7 @@ export class Field implements IFieldType {
 
   constructor(
     indexPattern: IIndexPattern,
-    spec: FieldSpec | Field,
+    spec: FieldSpecExportFmt | FieldSpec | Field,
     shortDotsEnable: boolean,
     { fieldFormats, onNotification }: FieldDependencies
   ) {
