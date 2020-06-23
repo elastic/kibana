@@ -17,7 +17,7 @@ import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
 
 export type SourceEditorArgs = {
-  onChange: (args: OnSourceChangeArgs) => void;
+  onChange: (...args: OnSourceChangeArgs[]) => void;
 };
 
 export type ImmutableSourceProperty = {

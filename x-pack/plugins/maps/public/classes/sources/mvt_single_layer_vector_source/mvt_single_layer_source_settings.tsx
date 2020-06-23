@@ -27,7 +27,7 @@ export interface State {
 }
 
 export interface Props {
-  handleChange: (args: State) => void;
+  handleChange: (args: MVTSettings) => void;
   layerName: string;
   fields: MVTFieldDescriptor[];
   minSourceZoom: number;

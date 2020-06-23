@@ -107,7 +107,7 @@ export type MVTFieldDescriptor = {
   type: MVTFieldType;
 };
 
-export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & {
+export type TiledSingleLayerVectorSourceSettings = {
   urlTemplate: string;
   layerName: string;
 
@@ -125,6 +125,9 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & 
   fields: MVTFieldDescriptor[];
   tooltipProperties: string[];
 };
+
+export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
+  TiledSingleLayerVectorSourceSettings;
 
 export type JoinDescriptor = {
   leftField: string;

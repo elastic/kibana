@@ -8,17 +8,16 @@ import React, { Component, Fragment } from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-// @ts-ignore
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { MVTField } from '../../fields/mvt_field';
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
-import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
+import { MVTSettings, MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
 
 export interface Props {
-  tooltipFields: MVTFields[];
-  onChange: (...args: OnSourceChangeArgs) => void;
+  tooltipFields: MVTField[];
+  onChange: (...args: OnSourceChangeArgs[]) => void;
   source: MVTSingleLayerVectorSource;
 }
 
@@ -32,7 +31,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
     fields: null,
   };
 
-  readonly _isMounted: boolean;
+  private _isMounted: boolean = false;
 
   componentDidMount() {
     this._isMounted = true;
@@ -44,7 +43,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
   }
 
   async _loadFields() {
-    const fields = await this.props.source.getFields();
+    const fields: MVTField[] = (await this.props.source.getFields()) as MVTField[];
     if (this._isMounted) {
       this.setState({ fields });
     }
@@ -54,12 +53,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  _handleChange = (state: {
-    layerName: string;
-    fields: MVTFieldDescriptor[];
-    minSourceZoom: number;
-    maxSourceZoom: number;
-  }) => {
+  _handleChange = (state: MVTSettings) => {
     this.props.onChange(
       { propName: 'layerName', value: state.layerName },
       { propName: 'fields', value: state.fields },

@@ -8,11 +8,10 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry } from 'geojson';
-import { AbstractSource, ImmutableSourceProperty } from '../source';
+import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { BoundsFilters, GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import { FIELD_ORIGIN, MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
@@ -70,7 +69,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource
       .filter((f) => f !== null);
   }
 
-  renderSourceSettingsEditor({ onChange }) {
+  async supportsFitToBounds() {
+    return false;
+  }
+
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return (
       <UpdateSourceEditor onChange={onChange} tooltipFields={this._tooltipFields} source={this} />
     );
@@ -82,7 +85,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     });
   }
 
-  getFieldByName(fieldName: string): IField | null {
+  getFieldByName(fieldName: string): MVTField | null {
     try {
       return this.createField({ fieldName });
     } catch (e) {
@@ -90,7 +93,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     }
   }
 
-  createField({ fieldName }: { fieldName: string }): IField {
+  createField({ fieldName }: { fieldName: string }): MVTField {
     const field = this._descriptor.fields.find((f: MVTFieldDescriptor) => {
       return f.name === fieldName;
     });
@@ -114,7 +117,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     throw new Error('Does not implement getGeoJsonWithMeta');
   }
 
-  async getFields(): Promise<IField[]> {
+  async getFields(): Promise<MVTField[]> {
     return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
       return new MVTField({
         fieldName: field.name,
