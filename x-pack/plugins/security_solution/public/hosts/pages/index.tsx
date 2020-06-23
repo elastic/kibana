@@ -5,18 +5,18 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
+import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
 
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
 
+import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { GlobalTime } from '../../common/containers/global_time';
-import { SiemPageName } from '../../app/types';
 import { Hosts } from './hosts';
 import { hostsPagePath, hostDetailsPagePath } from './types';
 
-const getHostsTabPath = (pagePath: string) =>
-  `${pagePath}/:tabName(` +
+const getHostsTabPath = () =>
+  `/:tabName(` +
   `${HostsTableType.hosts}|` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
@@ -34,62 +34,75 @@ const getHostDetailsTabPath = (pagePath: string) =>
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const HostsContainer = React.memo<Props>(({ url }) => (
-  <GlobalTime>
-    {({ to, from, setQuery, deleteQuery, isInitializing }) => (
-      <Switch>
-        <Route
-          strict
-          exact
-          path={getHostsTabPath(hostsPagePath)}
-          render={() => (
-            <Hosts
-              hostsPagePath={hostsPagePath}
-              from={from}
-              to={to}
-              setQuery={setQuery}
-              isInitializing={isInitializing}
-              deleteQuery={deleteQuery}
-            />
-          )}
-        />
-        <Route
-          strict
-          path={getHostDetailsTabPath(hostsPagePath)}
-          render={({
-            match: {
-              params: { detailName },
-            },
-          }) => (
-            <HostDetails
-              hostDetailsPagePath={hostDetailsPagePath}
-              detailName={detailName}
-              from={from}
-              to={to}
-              setQuery={setQuery}
-              isInitializing={isInitializing}
-              deleteQuery={deleteQuery}
-            />
-          )}
-        />
-        <Route
-          path={hostDetailsPagePath}
-          render={({
-            match: {
-              params: { detailName },
-            },
-            location: { search = '' },
-          }) => <Redirect to={`${url}/${detailName}/${HostsTableType.authentications}${search}`} />}
-        />
-        <Route
-          path={`${hostsPagePath}/`}
-          render={({ location: { search = '' } }) => (
-            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.hosts}${search}`} />
-          )}
-        />
-      </Switch>
-    )}
-  </GlobalTime>
-));
+export const HostsContainer = React.memo<Props>(({ url }) => {
+  const history = useHistory();
+  return (
+    <GlobalTime>
+      {({ to, from, setQuery, deleteQuery, isInitializing }) => (
+        <Switch>
+          <Route
+            path="/ml-hosts"
+            render={({ location, match }) => (
+              <MlHostConditionalContainer location={location} url={match.url} />
+            )}
+          />
+          <Route
+            path={getHostsTabPath()}
+            render={() => (
+              <Hosts
+                hostsPagePath={hostsPagePath}
+                from={from}
+                to={to}
+                setQuery={setQuery}
+                isInitializing={isInitializing}
+                deleteQuery={deleteQuery}
+              />
+            )}
+          />
+          <Route
+            path={getHostDetailsTabPath(hostsPagePath)}
+            render={({
+              match: {
+                params: { detailName },
+              },
+            }) => (
+              <HostDetails
+                hostDetailsPagePath={hostDetailsPagePath}
+                detailName={detailName}
+                from={from}
+                to={to}
+                setQuery={setQuery}
+                isInitializing={isInitializing}
+                deleteQuery={deleteQuery}
+              />
+            )}
+          />
+          <Route
+            path={hostDetailsPagePath}
+            render={({
+              match: {
+                params: { detailName },
+              },
+              location: { search = '' },
+            }) => {
+              history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
+              return null;
+            }}
+          />
+
+          <Route
+            exact
+            strict
+            path=""
+            render={({ location: { search = '' } }) => {
+              history.replace(`${HostsTableType.hosts}${search}`);
+              return null;
+            }}
+          />
+        </Switch>
+      )}
+    </GlobalTime>
+  );
+});
 
 HostsContainer.displayName = 'HostsContainer';

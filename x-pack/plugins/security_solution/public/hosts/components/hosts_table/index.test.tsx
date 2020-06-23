@@ -33,6 +33,8 @@ jest.mock('../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 
+jest.mock('../../../common/components/link_to');
+
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;

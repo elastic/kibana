@@ -8,8 +8,9 @@ import { ApmRoute } from '@elastic/apm-rum-react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import styled from 'styled-components';
-import { EuiThemeProvider } from '../../../observability/public';
+import styled, { ThemeProvider, DefaultTheme } from 'styled-components';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { CoreStart, AppMountParameters } from '../../../../../src/core/public';
 import { ApmPluginSetupDeps } from '../plugin';
 import { ApmPluginContext } from '../context/ApmPluginContext';
@@ -23,7 +24,7 @@ import {
   KibanaContextProvider,
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
-import { px, unit, units } from '../style/variables';
+import { px, units } from '../style/variables';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
@@ -33,7 +34,6 @@ import { ConfigSchema } from '..';
 import 'react-vis/dist/style.css';
 
 const MainContainer = styled.div`
-  min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
   height: 100%;
 `;
@@ -42,7 +42,13 @@ const App = () => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
-    <EuiThemeProvider darkMode={darkMode}>
+    <ThemeProvider
+      theme={(outerTheme?: DefaultTheme) => ({
+        ...outerTheme,
+        eui: darkMode ? euiDarkVars : euiLightVars,
+        darkMode,
+      })}
+    >
       <MainContainer data-test-subj="apmMainContainer" role="main">
         <UpdateBreadcrumbs routes={routes} />
         <Route component={ScrollToTopOnPathChange} />
@@ -54,7 +60,7 @@ const App = () => {
           </Switch>
         </APMIndicesPermission>
       </MainContainer>
-    </EuiThemeProvider>
+    </ThemeProvider>
   );
 };
 

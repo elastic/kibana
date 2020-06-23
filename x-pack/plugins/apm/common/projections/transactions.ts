@@ -17,7 +17,7 @@ import {
   TRANSACTION_NAME,
 } from '../elasticsearch_fieldnames';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { rangeFilter } from '../../server/lib/helpers/range_filter';
+import { rangeFilter } from '../utils/range_filter';
 
 export function getTransactionsProjection({
   setup,

@@ -58,7 +58,7 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
-import { DETECTIONS } from '../urls/navigation';
+import { ALERTS_URL } from '../urls/navigation';
 
 describe('Detection rules, machine learning', () => {
   before(() => {
@@ -70,7 +70,7 @@ describe('Detection rules, machine learning', () => {
   });
 
   it('Creates and activates a new ml rule', () => {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertDetectionRules();
