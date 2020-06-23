@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react/pure';
-import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
 import { TEST_SUBJ_ACTION_FACTORY_ITEM, TEST_SUBJ_SELECTED_ACTION_FACTORY } from './action_wizard';
 import { dashboardFactory, dashboards, Demo, urlFactory } from './test_data';
 
