@@ -9,15 +9,20 @@ import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/publi
 import { alertTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/alert_type_registry.mock';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
-import { AlertContextMeta, MetricExpression } from '../types';
+import { AlertContextMeta } from '../types';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import React from 'react';
 import { Expressions, defaultExpression } from './expression';
 import { act } from 'react-dom/test-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
-import { MetricsExplorerResponse } from '../../../../common/http_api';
-import { validateMetricThreshold } from './validation';
+
+jest.mock('../../../containers/source/use_source_via_http', () => ({
+  useSourceViaHttp: (any) => ({
+    source: { id: 'default' },
+    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
+  }),
+}));
 
 describe('Expression', () => {
   async function setup(currentOptions: {
@@ -26,7 +31,9 @@ describe('Expression', () => {
     groupBy?: string;
   }) {
     const alertParams = {
-      criteria: [defaultExpression],
+      criteria: [],
+      groupBy: undefined,
+      filterQueryText: '',
     };
 
     const mocks = coreMock.createSetup();
@@ -55,14 +62,12 @@ describe('Expression', () => {
       },
     };
 
-    const validationResult = validateMetricThreshold([alertParams.criteria]);
-
     const wrapper = mountWithIntl(
       <Expressions
         alertsContext={context}
         alertInterval="1m"
         alertParams={alertParams}
-        errors={validationResult.errors}
+        errors={[]}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
         setAlertProperty={() => {}}
       />
@@ -83,7 +88,10 @@ describe('Expression', () => {
     const currentOptions = {
       groupBy: 'host.hostname',
       filterQuery: 'foo',
-      metrics: [{ aggregation: 'avg', field: 'system.load.1' }],
+      metrics: [
+        { aggregation: 'avg', field: 'system.load.1' },
+        { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
+      ] as MetricsExplorerMetric[],
     };
     const { alertParams } = await setup(currentOptions);
     expect(alertParams.groupBy).toBe('host.hostname');
@@ -93,9 +101,17 @@ describe('Expression', () => {
         metric: 'system.load.1',
         comparator: Comparator.GT,
         threshold: [],
-        timeSize,
-        timeUnit,
+        timeSize: 1,
+        timeUnit: 'm',
         aggType: 'avg',
+      },
+      {
+        metric: 'system.cpu.user.pct',
+        comparator: Comparator.GT,
+        threshold: [],
+        timeSize: 1,
+        timeUnit: 'm',
+        aggType: 'cardinality',
       },
     ]);
   });
