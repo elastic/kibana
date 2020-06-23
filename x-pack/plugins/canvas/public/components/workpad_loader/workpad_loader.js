@@ -19,7 +19,7 @@ import {
   EuiFilePicker,
   EuiLink,
 } from '@elastic/eui';
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Paginate } from '../paginate';
@@ -369,7 +369,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     if (!createPending && !isLoading) {
       const { workpads } = this.props.workpads;
-      sortedWorkpads = sortByOrder(workpads, [sortField, '@timestamp'], [sortDirection, 'desc']);
+      sortedWorkpads = orderBy(workpads, [sortField, '@timestamp'], [sortDirection, 'desc']);
     }
 
     return (

@@ -52,8 +52,8 @@ export function getAnomalyScoreDataPoints(
   bucketSizeInMillis: number
 ): RectCoordinate[] {
   const ANOMALY_THRESHOLD = 75;
-  const firstDate = first(timeSeriesDates);
-  const lastDate = last(timeSeriesDates);
+  const firstDate = first(timeSeriesDates) as number;
+  const lastDate = last(timeSeriesDates) as number;
 
   return buckets
     .filter(
@@ -88,8 +88,8 @@ export function replaceFirstAndLastBucket(
   buckets: IBucket[],
   timeSeriesDates: number[]
 ) {
-  const firstDate = first(timeSeriesDates);
-  const lastDate = last(timeSeriesDates);
+  const firstDate = first(timeSeriesDates) as number;
+  const lastDate = last(timeSeriesDates) as number;
 
   const preBucketWithValue = buckets
     .filter((p) => p.x <= firstDate)

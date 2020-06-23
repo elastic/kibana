@@ -6,23 +6,31 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj="mockCodeEditor"
-      onChange={(syntheticEvent: any) => {
-        props.onChange(syntheticEvent.jsonString);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
 
-jest.mock('lodash4', () => ({
-  ...jest.requireActual('lodash4'),
-  debounce: (fn: any) => fn,
-}));
+  return {
+    ...original,
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj="mockCodeEditor"
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.jsonString);
+        }}
+      />
+    ),
+  };
+});
+
+jest.mock('lodash4', () => {
+  const original = jest.requireActual('lodash4');
+
+  return {
+    ...original,
+    debounce: (fn: any) => fn,
+  };
+});
 
 import { registerTestBed, TestBed } from '../../../../../../../../test_utils';
 import { LoadMappingsProvider } from './load_mappings_provider';

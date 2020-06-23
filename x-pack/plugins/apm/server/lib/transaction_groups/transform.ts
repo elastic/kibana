@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 import { ESResponse } from './fetcher';
 
 function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
@@ -27,7 +27,7 @@ function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
 
 const getBuckets = (response: ESResponse) => {
   if (response.aggregations) {
-    return sortByOrder(
+    return orderBy(
       response.aggregations.transaction_groups.buckets,
       ['sum.value'],
       ['desc']

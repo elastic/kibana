@@ -38,7 +38,7 @@ export const getKibanaFrameworkAdapter = (
     INTEGRATED_SOLUTIONS
   );
 
-  const canSave = get(capabilities, 'uptime.save', false);
+  const canSave = get(capabilities, 'uptime.save', false) as boolean;
 
   const props: UptimeAppProps = {
     basePath: basePath.get(),

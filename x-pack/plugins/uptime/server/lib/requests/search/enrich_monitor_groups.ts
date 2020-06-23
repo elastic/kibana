@@ -249,13 +249,13 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const monitorIds: string[] = [];
   const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
-    const monitorId = get<string>(monitor, 'key.monitor_id');
+    const monitorId = get(monitor, 'key.monitor_id');
     monitorIds.push(monitorId);
     const state: any = monitor.state?.value;
     state.timestamp = state['@timestamp'];
     const { checks } = state;
     if (checks) {
-      state.checks = sortBy<SortChecks, Check>(checks, checksSortBy);
+      state.checks = sortBy(checks, checksSortBy);
       state.checks = state.checks.map((check: any) => ({
         ...check,
         timestamp: check['@timestamp'],
@@ -378,8 +378,4 @@ const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
   return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
 };
 
-type SortChecks = (check: Check) => string[];
-const checksSortBy = (check: Check) => [
-  get<string>(check, 'observer.geo.name'),
-  get<string>(check, 'monitor.ip'),
-];
+const checksSortBy = (check: Check) => [get(check, 'observer.geo.name'), get(check, 'monitor.ip')];

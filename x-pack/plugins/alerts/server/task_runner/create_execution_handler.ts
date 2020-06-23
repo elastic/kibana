@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pluck } from 'lodash';
+import { map } from 'lodash';
 import { AlertAction, State, Context, AlertType } from '../types';
 import { Logger } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
@@ -44,7 +44,7 @@ export function createExecutionHandler({
   alertType,
   eventLogger,
 }: CreateExecutionHandlerOptions) {
-  const alertTypeActionGroups = new Set(pluck(alertType.actionGroups, 'id'));
+  const alertTypeActionGroups = new Set(map(alertType.actionGroups, 'id'));
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);

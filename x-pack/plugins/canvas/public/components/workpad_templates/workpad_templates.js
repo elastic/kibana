@@ -15,7 +15,7 @@ import {
   EuiButtonEmpty,
   EuiSearchBar,
 } from '@elastic/eui';
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 import { Paginate } from '../paginate';
 import { TagList } from '../tag_list';
 import { getTagsFilter } from '../../lib/get_tags_filter';
@@ -144,7 +144,7 @@ export class WorkpadTemplates extends React.PureComponent {
   render() {
     const { templates } = this.props;
     const { sortField, sortDirection, searchTerm, filterTags } = this.state;
-    const sortedTemplates = sortByOrder(templates, [sortField, 'name'], [sortDirection, 'asc']);
+    const sortedTemplates = orderBy(templates, [sortField, 'name'], [sortDirection, 'asc']);
 
     const filteredTemplates = sortedTemplates.filter(({ name = '', help = '', tags = [] }) => {
       const tagMatch = filterTags.length

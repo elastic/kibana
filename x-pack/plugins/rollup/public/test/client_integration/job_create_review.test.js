@@ -10,7 +10,7 @@ import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash/function/debounce', () => (fn) => fn);
+jest.mock('lodash/debounce', () => (fn) => fn);
 
 jest.mock('../../kibana_services', () => {
   const services = require.requireActual('../../kibana_services');

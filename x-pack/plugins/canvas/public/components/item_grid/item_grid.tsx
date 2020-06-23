@@ -36,11 +36,11 @@ export const ItemGrid: ItemGridType = function ItemGridFunc<T>({
 }: Props<T>) {
   const reducedRows = items.reduce(
     (rows: Array<Array<ReactElement<any>>>, item: any) => {
-      if (last(rows).length >= itemsPerRow) {
+      if ((last(rows) as any).length >= itemsPerRow) {
         rows.push([]);
       }
 
-      last(rows).push(children(item));
+      (last(rows) as any).push(children(item));
 
       return rows;
     },

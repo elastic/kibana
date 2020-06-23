@@ -148,7 +148,7 @@ const getData = async (
   const { nodes } = await snapshot.getNodes(esClient, options);
 
   return nodes.reduce((acc, n) => {
-    const nodePathItem = last(n.path);
+    const nodePathItem = last(n.path) as any;
     acc[nodePathItem.label] = n.metric && n.metric.value;
     return acc;
   }, {} as Record<string, number | undefined | null>);

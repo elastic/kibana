@@ -25,7 +25,7 @@ export class Cluster {
 
   // generate Pipeline object from elasticsearch response
   static fromUpstreamJSON(upstreamCluster: Record<string, string>) {
-    const uuid = get<string>(upstreamCluster, 'cluster_uuid');
+    const uuid = get(upstreamCluster, 'cluster_uuid') as string;
     return new Cluster({ uuid });
   }
 }

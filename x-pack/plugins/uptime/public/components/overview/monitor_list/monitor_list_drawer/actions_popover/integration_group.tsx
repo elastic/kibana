@@ -36,10 +36,10 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
 
-  const domain = get<string>(summary, 'state.url.domain', '');
-  const podUid = get<string | undefined>(summary, 'state.checks[0].kubernetes.pod.uid', undefined);
-  const containerId = get<string | undefined>(summary, 'state.checks[0].container.id', undefined);
-  const ip = get<string | undefined>(summary, 'state.checks[0].monitor.ip', undefined);
+  const domain = get(summary, 'state.url.domain', '');
+  const podUid = get(summary, 'state.checks[0].kubernetes.pod.uid', undefined);
+  const containerId = get(summary, 'state.checks[0].container.id', undefined);
+  const ip = get(summary, 'state.checks[0].monitor.ip', undefined);
 
   return isApmAvailable || isInfraAvailable || isLogsAvailable ? (
     <EuiFlexGroup direction="column">

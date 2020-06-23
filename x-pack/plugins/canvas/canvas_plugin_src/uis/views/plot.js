@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, uniq } from 'lodash';
+import { map, uniqBy } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { legendOptions } from '../../../public/lib/legend_options';
 import { ViewStrings } from '../../../i18n';
@@ -72,6 +72,6 @@ export const plot = () => ({
     if (getState(context) !== 'ready') {
       return { labels: [] };
     }
-    return { labels: uniq(map(getValue(context).rows, 'color').filter((v) => v !== undefined)) };
+    return { labels: uniqBy(map(getValue(context).rows, 'color').filter((v) => v !== undefined)) };
   },
 });

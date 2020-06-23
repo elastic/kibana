@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 import Boom from 'boom';
-import { unique } from 'lodash';
+import { uniq } from 'lodash';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -159,7 +159,7 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
         ...body.service,
         name: path.serviceName,
       },
-      tags: unique(['apm'].concat(body.tags ?? [])),
+      tags: uniq(['apm'].concat(body.tags ?? [])),
     });
   },
 }));

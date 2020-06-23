@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
 import React, { Component } from 'react';
 import { Role } from '../../../../../../../common/model';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';

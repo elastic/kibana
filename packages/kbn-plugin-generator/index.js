@@ -23,7 +23,7 @@ const dedent = require('dedent');
 const sao = require('sao');
 const chalk = require('chalk');
 const getopts = require('getopts');
-const snakeCase = require('lodash.snakecase');
+const { snakeCase } = require('lodash');
 
 exports.run = function run(argv) {
   const options = getopts(argv, {
@@ -41,7 +41,7 @@ exports.run = function run(argv) {
   if (options.help) {
     console.log(
       dedent(chalk`
-        # {dim Usage:} 
+        # {dim Usage:}
         node scripts/generate-plugin {bold [name]}
         Generate a fresh Kibana plugin in the plugins/ directory
       `) + '\n'

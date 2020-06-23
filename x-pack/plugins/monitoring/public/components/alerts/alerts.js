@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Legacy } from '../../legacy_shims';
-import { capitalize, get } from 'lodash';
+import { upperFirst, get } from 'lodash';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
 import {
@@ -55,7 +55,7 @@ const getColumns = (timezone) => [
             data-test-subj="alertIcon"
             aria-label={severityIcon.title}
           >
-            {capitalize(severityIcon.value)}
+            {upperFirst(severityIcon.value)}
           </EuiHealth>
         </EuiToolTip>
       );

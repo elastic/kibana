@@ -31,7 +31,7 @@ function getVisualizationType(state: State): VisualizationType | 'mixed' {
     );
   }
   const visualizationType = visualizationTypes.find((t) => t.id === state.layers[0].seriesType);
-  const seriesTypes = _.unique(state.layers.map((l) => l.seriesType));
+  const seriesTypes = _.uniq(state.layers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }

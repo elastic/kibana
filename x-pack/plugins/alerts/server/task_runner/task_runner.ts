@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, mapValues, omit, without } from 'lodash';
+import { pickBy, mapValues, omit, without } from 'lodash';
 import { Logger, SavedObject, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
@@ -23,7 +23,6 @@ import {
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { AlertInstances } from '../alert_instance/alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
@@ -166,7 +165,7 @@ export class TaskRunner {
 
     const alertInstances = mapValues<RawAlertInstance, AlertInstance>(
       alertRawInstances,
-      (rawAlertInstance) => new AlertInstance(rawAlertInstance)
+      (rawAlertInstance) => new AlertInstance(rawAlertInstance as any)
     );
 
     const originalAlertInstanceIds = Object.keys(alertInstances);
@@ -193,7 +192,7 @@ export class TaskRunner {
         alertId,
         services: {
           ...services,
-          alertInstanceFactory: createAlertInstanceFactory(alertInstances),
+          alertInstanceFactory: createAlertInstanceFactory(alertInstances as any),
         },
         params,
         state: alertTypeState,
@@ -224,9 +223,8 @@ export class TaskRunner {
     eventLogger.logEvent(event);
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
-    const instancesWithScheduledActions = pick<AlertInstances, AlertInstances>(
-      alertInstances,
-      (alertInstance: AlertInstance) => alertInstance.hasScheduledActions()
+    const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
+      alertInstance.hasScheduledActions()
     );
     const currentAlertInstanceIds = Object.keys(instancesWithScheduledActions);
     generateNewAndResolvedInstanceEvents({
@@ -239,10 +237,7 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
-      const enabledAlertInstances = omit<AlertInstances, AlertInstances>(
-        instancesWithScheduledActions,
-        ...mutedInstanceIds
-      );
+      const enabledAlertInstances = omit(instancesWithScheduledActions, ...mutedInstanceIds);
 
       await Promise.all(
         Object.entries(enabledAlertInstances)
@@ -257,9 +252,8 @@ export class TaskRunner {
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
-      alertInstances: mapValues<AlertInstance, RawAlertInstance>(
-        instancesWithScheduledActions,
-        (alertInstance) => alertInstance.toRaw()
+      alertInstances: mapValues(instancesWithScheduledActions, (alertInstance: any) =>
+        alertInstance.toRaw()
       ),
     };
   }

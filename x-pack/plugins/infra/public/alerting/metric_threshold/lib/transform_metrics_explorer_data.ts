@@ -14,8 +14,8 @@ export const transformMetricsExplorerData = (
 ) => {
   const { criteria } = params;
   if (criteria && data) {
-    const firstSeries = first(data.series);
-    const series = firstSeries.rows.reduce((acc, row) => {
+    const firstSeries = first(data.series) as any;
+    const series = firstSeries.rows.reduce((acc: any, row: any) => {
       const { timestamp } = row;
       criteria.forEach((item, index) => {
         if (!acc[index]) {

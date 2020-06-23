@@ -12,11 +12,7 @@
     "cypress:run-as-ci": "node ../../../scripts/functional_tests --config ../../test/security_solution_cypress/config.ts",
     "test:generate": "ts-node --project scripts/endpoint/cli_tsconfig.json scripts/endpoint/resolver_generator.ts"
   },
-  "devDependencies": {
-    "@types/lodash": "^4.14.110"
-  },
   "dependencies": {
-    "lodash": "^4.17.15",
     "querystring": "^0.2.0",
     "redux-devtools-extension": "^2.13.8",
     "@types/seedrandom": ">=2.0.0 <4.0.0"
