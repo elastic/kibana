@@ -8,8 +8,12 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/e
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { useHistory } from 'react-router-dom';
+import { getCreateRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import * as i18n from './translations';
+import { LinkButton } from '../../../../common/components/links';
+import { SecurityPageName } from '../../../../app/types';
+import { useFormatUrl } from '../../../../common/components/link_to';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
@@ -28,9 +32,20 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   loading = false,
   userHasNoPermissions = true,
 }) => {
+  const history = useHistory();
   const handlePreBuiltCreation = useCallback(() => {
     createPrePackagedRules();
   }, [createPrePackagedRules]);
+  const { formatUrl } = useFormatUrl(SecurityPageName.alerts);
+
+  const goToCreateRule = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      history.push(getCreateRuleUrl());
+    },
+    [history]
+  );
+
   return (
     <EmptyPrompt
       iconType="securityAnalyticsApp"
@@ -51,13 +66,14 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <LinkButton
               isDisabled={userHasNoPermissions}
-              href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/create`}
+              onClick={goToCreateRule}
+              href={formatUrl(getCreateRuleUrl())}
               iconType="plusInCircle"
             >
               {i18n.CREATE_RULE_ACTION}
-            </EuiButton>
+            </LinkButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

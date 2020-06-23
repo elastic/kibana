@@ -6,19 +6,19 @@
 
 /* global jest */
 
-import { ReactWrapper } from 'enzyme';
+import React from 'react';
+import { ReactWrapper, mount, MountRendererProps } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import React from 'react';
 import { render, waitForElement } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
+import { EuiThemeProvider } from '../../../observability/public';
 import {
   ESFilter,
   ESSearchResponse,
@@ -181,3 +181,27 @@ export async function inspectSearchParams(
 }
 
 export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+
+export function renderWithTheme(
+  component: React.ReactNode,
+  params?: any,
+  { darkMode = false } = {}
+) {
+  return render(
+    <EuiThemeProvider darkMode={darkMode}>{component}</EuiThemeProvider>,
+    params
+  );
+}
+
+export function mountWithTheme(
+  tree: React.ReactElement<any>,
+  { darkMode = false } = {}
+) {
+  const WrappingThemeProvider = (props: any) => (
+    <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>
+  );
+
+  return mount(tree, {
+    wrappingComponent: WrappingThemeProvider,
+  } as MountRendererProps);
+}

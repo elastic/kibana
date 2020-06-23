@@ -60,7 +60,6 @@ export interface ManageRoutesSpyProps {
 }
 
 export type SpyRouteProps = RouteComponentProps<{
-  pageName: string | undefined;
   detailName: string | undefined;
   tabName: HostsTableType | undefined;
   search: string;

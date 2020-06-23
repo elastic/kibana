@@ -13,6 +13,7 @@ import { AllCases } from '../components/all_cases';
 
 import { savedObjectReadOnly, CaseCallOut } from '../components/callout';
 import { CaseSavedObjectNoPermissions } from './saved_object_no_permissions';
+import { SecurityPageName } from '../../app/types';
 
 export const CasesPage = React.memo(() => {
   const userPermissions = useGetUserSavedObjectPermissions();
@@ -28,7 +29,7 @@ export const CasesPage = React.memo(() => {
         )}
         <AllCases userCanCrud={userPermissions?.crud ?? false} />
       </WrapperPage>
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.case} />
     </>
   ) : (
     <CaseSavedObjectNoPermissions />

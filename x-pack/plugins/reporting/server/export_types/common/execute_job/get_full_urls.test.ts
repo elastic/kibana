@@ -5,12 +5,12 @@
  */
 
 import { ReportingConfig } from '../../../';
-import { JobDocPayloadPNG } from '../../png/types';
-import { JobDocPayloadPDF } from '../../printable_pdf/types';
+import { ScheduledTaskParamsPNG } from '../../png/types';
+import { ScheduledTaskParamsPDF } from '../../printable_pdf/types';
 import { getFullUrls } from './get_full_urls';
 
 interface FullUrlsOpts {
-  job: JobDocPayloadPNG & JobDocPayloadPDF;
+  job: ScheduledTaskParamsPNG & ScheduledTaskParamsPDF;
   config: ReportingConfig;
 }
 
@@ -35,7 +35,7 @@ beforeEach(() => {
   mockConfig = getMockConfig(mockConfigGet);
 });
 
-const getMockJob = (base: object) => base as JobDocPayloadPNG & JobDocPayloadPDF;
+const getMockJob = (base: object) => base as ScheduledTaskParamsPNG & ScheduledTaskParamsPDF;
 
 test(`fails if no URL is passed`, async () => {
   const fn = () => getFullUrls({ job: getMockJob({}), config: mockConfig } as FullUrlsOpts);
