@@ -24,9 +24,8 @@ import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../
 import { HttpStart } from '../../../http';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
-function isModifiedEvent(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-}
+export const isModifiedEvent = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
 interface Props {
   link: ChromeNavLink;
@@ -63,13 +62,15 @@ export function createEuiListItem({
     href,
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-      onClick();
+      if (!isModifiedEvent(event)) {
+        onClick();
+      }
+
       if (
         !legacyMode && // ignore when in legacy mode
         !legacy && // ignore links to legacy apps
-        !event.defaultPrevented && // onClick prevented default
         event.button === 0 && // ignore everything but left clicks
-        !isModifiedEvent(event) // ignore clicks with modifier keys
+        !isModifiedEvent(event)
       ) {
         event.preventDefault();
         navigateToApp(id);
