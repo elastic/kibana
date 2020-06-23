@@ -55,8 +55,8 @@ export class ExplorerService {
 
     const intervalSeconds = this.timeBuckets.getInterval().asSeconds();
 
-    // if the swimlane cell widths are too small they will not be visible
-    // calculate how many buckets will be drawn before the swimlanes are actually rendered
+    // if the swim lane cell widths are too small they will not be visible
+    // calculate how many buckets will be drawn before the swim lanes are actually rendered
     // and increase the interval to widen the cells if they're going to be smaller than 8px
     // this has to be done at this stage so all searches use the same interval
     const timerangeSeconds = (bounds.max!.valueOf() - bounds.min!.valueOf()) / 1000;
@@ -81,7 +81,7 @@ export class ExplorerService {
   }
 
   /**
-   * Loads overall swimlane data
+   * Loads overall swim lane data
    * @param selectedJobs
    * @param chartWidth
    */
@@ -97,13 +97,13 @@ export class ExplorerService {
 
     const bounds = this.getTimeBounds();
 
-    // Ensure the search bounds align to the bucketing interval used in the swimlane so
+    // Ensure the search bounds align to the bucketing interval used in the swim lane so
     // that the first and last buckets are complete.
     const searchBounds = getBoundsRoundedToInterval(bounds, interval, false);
     const selectedJobIds = selectedJobs.map((d) => d.id);
 
     // Load the overall bucket scores by time.
-    // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
+    // Pass the interval in seconds as the swim lane relies on a fixed number of seconds between buckets
     // which wouldn't be the case if e.g. '1M' was used.
     // Pass 'true' when obtaining bucket bounds due to the way the overall_buckets endpoint works
     // to ensure the search is inclusive of end time.
@@ -125,7 +125,7 @@ export class ExplorerService {
     );
 
     // eslint-disable-next-line no-console
-    console.log('Explorer overall swimlane data set:', overallSwimlaneData);
+    console.log('Explorer overall swim lane data set:', overallSwimlaneData);
 
     return overallSwimlaneData;
   }
@@ -158,7 +158,7 @@ export class ExplorerService {
 
     const selectedJobIds = selectedJobs.map((d) => d.id);
     // load scores by influencer/jobId value and time.
-    // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
+    // Pass the interval in seconds as the swim lane relies on a fixed number of seconds between buckets
     // which wouldn't be the case if e.g. '1M' was used.
 
     const interval = `${swimlaneBucketInterval.asSeconds()}s`;
@@ -199,7 +199,7 @@ export class ExplorerService {
       swimlaneBucketInterval.asSeconds()
     );
     // eslint-disable-next-line no-console
-    console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
+    console.log('Explorer view by swim lane data set:', viewBySwimlaneData);
 
     return viewBySwimlaneData;
   }
@@ -227,7 +227,7 @@ export class ExplorerService {
     };
 
     // Store the earliest and latest times of the data returned by the ES aggregations,
-    // These will be used for calculating the earliest and latest times for the swimlane charts.
+    // These will be used for calculating the earliest and latest times for the swim lane charts.
     Object.entries(scoresByTime).forEach(([timeMs, score]) => {
       const time = Number(timeMs) / 1000;
       dataset.points.push({
@@ -250,7 +250,7 @@ export class ExplorerService {
     viewBySwimlaneFieldName: string,
     interval: number
   ): OverallSwimlaneData {
-    // Processes the scores for the 'view by' swimlane.
+    // Processes the scores for the 'view by' swim lane.
     // Sorts the lanes according to the supplied array of lane
     // values in the order in which they should be displayed,
     // or pass an empty array to sort lanes according to max score over all time.
@@ -259,7 +259,7 @@ export class ExplorerService {
       points: [],
       laneLabels: [],
       interval,
-      // Set the earliest and latest to be the same as the overall swimlane.
+      // Set the earliest and latest to be the same as the overall swim lane.
       earliest: bounds.earliest,
       latest: bounds.latest,
     };
@@ -295,7 +295,7 @@ export class ExplorerService {
       });
     } else {
       // Sort lanes according to supplied order
-      // e.g. when a cell in the overall swimlane has been selected.
+      // e.g. when a cell in the overall swim lane has been selected.
       // Find the index of each lane label from the actual data set,
       // rather than using sortedLaneValues as-is, just in case they differ.
       dataset.laneLabels = dataset.laneLabels.sort((a, b) => {
