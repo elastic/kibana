@@ -5,7 +5,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { addDecorator, storiesOf } from '@storybook/react';
+import { storiesOf } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import { Cytoscape } from '../Cytoscape';
