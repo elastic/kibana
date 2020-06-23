@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './constants';
+export { UI_SETTINGS } from './constants';
