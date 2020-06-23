@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, useMemo, useState, useContext } from 'react';
+import React, { useCallback, useMemo, useState, useContext, ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import './discover_grid.scss';
 import { i18n } from '@kbn/i18n';
@@ -26,25 +26,39 @@ import {
   EuiDataGridCellValueElementProps,
   EuiIcon,
   EuiScreenReaderOnly,
+  EuiCheckbox,
   htmlIdGenerator,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getDefaultSort } from '../../angular/doc_table/lib/get_default_sort';
 import { CellPopover } from './discover_grid_popover';
-import { DiscoverGridFlyout } from './discover_grid_flyout';
 import {
   getSchemaDetectors,
   getEuiGridColumns,
   getPopoverContents,
   getVisibleColumns,
 } from './discover_grid_helpers';
+import { DiscoverGridFlyoutAdvancedGrid } from './discover_grid_flyout_advanced_grid';
+import { DiscoverGridFlyout } from './discover_grid_flyout';
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
 interface SortObj {
   id: string;
   direction: Direction;
+}
+interface GridContext {
+  viewed: number;
+  setViewed: (id: number) => void;
+  selected: number[];
+  setSelected: (ids: number[]) => void;
+  showSelected: boolean;
+  setShowSelected: (value: boolean) => void;
 }
 
 interface Props {
@@ -64,12 +78,28 @@ interface Props {
   onAddColumn: (column: string) => void;
   onSetColumns: (columns: string[]) => void;
 }
+
+const Selection = () => {
+  const { selected, showSelected, setShowSelected } = useContext<GridContext>(DiscoverGridContext);
+  return (
+    <EuiButtonEmpty
+      size="xs"
+      iconType="arrowDown"
+      color="primary"
+      className="euiDataGrid__controlBtn"
+      onClick={() => setShowSelected(!showSelected)}
+    >
+      {selected.length} {selected.length === 1 ? 'hit' : 'hits'} selected
+    </EuiButtonEmpty>
+  );
+};
 const toolbarVisibility = {
   showColumnSelector: {
     allowHide: false,
     allowReorder: true,
   },
   showStyleSelector: false,
+  additionalControls: <Selection />,
 };
 const gridStyle = {
   border: 'horizontal',
@@ -78,24 +108,139 @@ const gridStyle = {
 };
 const pageSizeArr = [25, 50, 100, 500];
 const defaultPageSize = 50;
-// @ts-ignore
-const DiscoverGridContext = React.createContext();
 
-export const SelectButton = ({ rowIndex }: { rowIndex: number }) => {
-  // @ts-ignore
-  const [flyoutRow, setFlyoutRow] = useContext(DiscoverGridContext);
+const DiscoverGridContext = React.createContext<GridContext>({
+  viewed: -1,
+  setViewed: () => void 0,
+  selected: [],
+  setSelected: () => void 0,
+  showSelected: false,
+  setShowSelected: () => void 0,
+});
+
+export const ViewButton = ({ rowIndex }: { rowIndex: number }) => {
+  const { viewed, setViewed } = useContext<GridContext>(DiscoverGridContext);
 
   return (
     <button
       aria-label={i18n.translate('discover.grid.viewDoc', {
         defaultMessage: 'Toggle dialog with details',
       })}
-      onClick={() => (flyoutRow === rowIndex ? setFlyoutRow(-1) : setFlyoutRow(rowIndex))}
+      onClick={() => setViewed(rowIndex)}
       className="dscTable__buttonToggle"
     >
-      <EuiIcon size="s" type={flyoutRow === rowIndex ? 'eyeClosed' : 'eye'} />
+      <EuiIcon size="s" type={viewed === rowIndex ? 'eyeClosed' : 'eye'} />
     </button>
   );
+};
+
+export const SelectButton = ({ col, rows }: { col: any; rows: ElasticSearchHit[] }) => {
+  const { selected, setSelected } = useContext<GridContext>(DiscoverGridContext);
+  const rowIndex = col.rowIndex;
+  const isChecked = selected.includes(rowIndex);
+
+  return (
+    <EuiCheckbox
+      id={`${rowIndex}`}
+      aria-label={`Select row ${rowIndex}, ${rows[rowIndex]._id}`}
+      checked={isChecked}
+      onChange={(e) => {
+        if (e.target.checked) {
+          setSelected([...selected, rowIndex]);
+        } else {
+          setSelected(selected.filter((idx: number) => idx !== rowIndex));
+        }
+      }}
+    />
+  );
+};
+
+const ValueWithFilter = ({
+  value,
+  columnId,
+  row,
+  indexPattern,
+  onFilter,
+}: {
+  value: ReactNode;
+  columnId: string;
+  row: ElasticSearchHit;
+  indexPattern: IndexPattern;
+  onFilter: DocViewFilterFn;
+}) => {
+  const [hover, setHover] = useState(false);
+  const createFilter = (type: '-' | '+') => {
+    return onFilter(
+      indexPattern.fields.getByName(columnId),
+      indexPattern.flattenHit(row)[columnId],
+      type
+    );
+  };
+  if (hover) {
+    return (
+      <EuiFlexGroup
+        direction={'row'}
+        onMouseLeave={() => setHover(false)}
+        onBlur={() => setHover(false)}
+        gutterSize="none"
+        alignItems="center"
+        responsive={false}
+        className="eui-textTruncate"
+      >
+        <EuiFlexItem className="eui-textTruncate">{value}</EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: '40px' }}>
+          <div>
+            <EuiButtonIcon
+              iconSize="s"
+              iconType="magnifyWithPlus"
+              aria-label={i18n.translate('discover.grid.ariaFilterOn', {
+                defaultMessage: 'Filter on {value}',
+                values: { value: '' },
+              })}
+              onClick={() => createFilter('+')}
+              style={{
+                padding: 0,
+                minHeight: 'auto',
+                minWidth: 'auto',
+                paddingRight: 2,
+                paddingLeft: 2,
+                paddingTop: 0,
+                paddingBottom: 0,
+              }}
+            />
+            <EuiButtonIcon
+              iconSize="s"
+              iconType="magnifyWithMinus"
+              aria-label={i18n.translate('discover.grid.ariaFilterOn', {
+                defaultMessage: 'Filter out {value}',
+                values: { value: '' },
+              })}
+              onClick={() => createFilter('-')}
+              style={{
+                padding: 0,
+                minHeight: 'auto',
+                minWidth: 'auto',
+                paddingRight: 2,
+                paddingLeft: 2,
+                paddingTop: 0,
+                paddingBottom: 0,
+              }}
+            />
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  } else {
+    return (
+      <div
+        className="eui-textTruncate"
+        onMouseOver={() => setHover(true)}
+        onFocus={() => setHover(true)}
+      >
+        {value}
+      </div>
+    );
+  }
 };
 
 export const EuiDataGridMemoized = React.memo((props: any) => <EuiDataGrid {...props} />);
@@ -118,8 +263,9 @@ export const DiscoverGrid = React.memo(
     showTimeCol,
     onSetColumns,
   }: Props) => {
-    const flyoutRowState = useState<number>(-1);
-    const [flyoutRow, setFlyoutRow] = flyoutRowState;
+    const [showSelected, setShowSelected] = useState(false);
+    const [selected, setSelected] = useState<number[]>([]);
+    const [viewed, setViewed] = useState<number>(-1);
     const timeString = useMemo(
       () =>
         i18n.translate('discover.timeLabel', {
@@ -127,6 +273,7 @@ export const DiscoverGrid = React.memo(
         }),
       []
     );
+
     /**
      * Pagination
      */
@@ -175,9 +322,8 @@ export const DiscoverGrid = React.memo(
         if (typeof row === 'undefined') {
           return '-';
         }
-
+        // TODO Field formatters need to be fixed
         const value = (
-          // TODO Field formatters need to be fixed
           // eslint-disable-next-line react/no-danger
           <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
         );
@@ -190,11 +336,22 @@ export const DiscoverGrid = React.memo(
               type
             );
           };
+
           return (
             <CellPopover
               value={value}
               onPositiveFilterClick={() => createFilter(columnId, '+')}
               onNegativeFilterClick={() => createFilter(columnId, '-')}
+            />
+          );
+        } else if (indexPattern.fields.getByName(columnId)?.filterable) {
+          return (
+            <ValueWithFilter
+              value={value}
+              columnId={columnId}
+              indexPattern={indexPattern}
+              row={row}
+              onFilter={onFilter}
             />
           );
         }
@@ -234,6 +391,20 @@ export const DiscoverGrid = React.memo(
     const lead = useMemo(() => {
       return [
         {
+          id: 'checkBox',
+          width: 31,
+          headerCellRender: () => (
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate('discover.selectColumnHeader', {
+                  defaultMessage: 'Select column',
+                })}
+              </span>
+            </EuiScreenReaderOnly>
+          ),
+          rowCellRender: (col: number) => <SelectButton col={col} rows={rows} />,
+        },
+        {
           id: 'openDetails',
           width: 31,
           headerCellRender: () => (
@@ -245,17 +416,19 @@ export const DiscoverGrid = React.memo(
               </span>
             </EuiScreenReaderOnly>
           ),
-          rowCellRender: SelectButton,
+          rowCellRender: ViewButton,
         },
       ];
-    }, []);
+    }, [rows]);
 
     if (!rowCount) {
       return null;
     }
 
     return (
-      <DiscoverGridContext.Provider value={flyoutRowState}>
+      <DiscoverGridContext.Provider
+        value={{ selected, setSelected, showSelected, setShowSelected, viewed, setViewed }}
+      >
         <>
           <EuiDataGridMemoized
             aria-labelledby={ariaLabelledBy}
@@ -304,16 +477,31 @@ export const DiscoverGrid = React.memo(
               </p>
             </EuiScreenReaderOnly>
           )}
-          {flyoutRow >= 0 && (
+          {viewed > -1 && rows[viewed] && (
             <DiscoverGridFlyout
               indexPattern={indexPattern}
               getContextAppHref={getContextAppHref}
-              hit={rows[flyoutRow]}
+              rows={rows}
+              hit={rows[viewed]}
               columns={columns}
               onFilter={onFilter}
               onRemoveColumn={onRemoveColumn}
               onAddColumn={onAddColumn}
-              onClose={() => setFlyoutRow(-1)}
+              onClose={() => {
+                setViewed(-1);
+              }}
+            />
+          )}
+          {showSelected && selected.length > 0 && (
+            <DiscoverGridFlyoutAdvancedGrid
+              indexPattern={indexPattern}
+              rows={rows}
+              selected={selected}
+              columns={columns}
+              onFilter={onFilter}
+              onRemoveColumn={onRemoveColumn}
+              onAddColumn={onAddColumn}
+              onClose={() => setShowSelected(false)}
             />
           )}
         </>

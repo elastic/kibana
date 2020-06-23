@@ -12,3 +12,16 @@
 div[data-rbd-draggable-id="Time"] {
   display: none;
 }
+
+
+.dscEuiDataGridRowCell .euiDataGridRowCell {
+  align-items: start;
+}
+
+.dscValue {
+  position: relative;
+}
+
+.dscValue .dscValueFilter{
+  background: $euiColorLightShade;
+}

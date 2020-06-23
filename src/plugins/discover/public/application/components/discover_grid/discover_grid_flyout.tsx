@@ -20,6 +20,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -33,11 +34,12 @@ import {
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { JsonCodeBlock } from '../json_code_block/json_code_block';
 
 interface Props {
+  hit: ElasticSearchHit;
   columns: string[];
   getContextAppHref: (id: string | number | Record<string, unknown>) => string;
-  hit: ElasticSearchHit;
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
   onClose: () => void;
