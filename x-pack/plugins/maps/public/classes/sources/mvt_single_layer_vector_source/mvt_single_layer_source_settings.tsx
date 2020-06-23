@@ -98,7 +98,38 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate(
-            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.layerNameMessage',
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeTopMessage',
+            {
+              defaultMessage: 'Available levels',
+            }
+          )}
+        >
+          <ValidatedDualRange
+            label=""
+            formRowDisplay="columnCompressed"
+            min={MIN_ZOOM}
+            max={MAX_ZOOM}
+            value={[
+              this.state.currentSettings.minSourceZoom,
+              this.state.currentSettings.maxSourceZoom,
+            ]}
+            showInput="inputWithPopover"
+            showRange
+            showLabels
+            onChange={this._handleZoomRangeChange}
+            allowEmptyRange={false}
+            compressed
+            prepend={i18n.translate(
+              'xpack.maps.source.MVTSingleLayerVectorSourceEditor.dataZoomRangeMessage',
+              {
+                defaultMessage: 'Zoom',
+              }
+            )}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage',
             {
               defaultMessage: 'Fields',
             }
@@ -109,28 +140,6 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
             onChange={this._handleFieldChange}
           />
         </EuiFormRow>
-        <ValidatedDualRange
-          label=""
-          formRowDisplay="columnCompressed"
-          min={MIN_ZOOM}
-          max={MAX_ZOOM}
-          value={[
-            this.state.currentSettings.minSourceZoom,
-            this.state.currentSettings.maxSourceZoom,
-          ]}
-          showInput="inputWithPopover"
-          showRange
-          showLabels
-          onChange={this._handleZoomRangeChange}
-          allowEmptyRange={false}
-          compressed
-          prepend={i18n.translate(
-            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.dataZoomRangeMessage',
-            {
-              defaultMessage: 'Zoom levels',
-            }
-          )}
-        />
       </Fragment>
     );
   }
