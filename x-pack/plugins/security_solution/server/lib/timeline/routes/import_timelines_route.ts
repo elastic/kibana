@@ -65,7 +65,6 @@ export const importTimelinesRoute = (
         const res = await importTimelines(
           file,
           config.maxTimelineImportExportSize,
-          response,
           frameworkRequest
         );
         if (typeof res !== 'string') return response.ok({ body: res ?? {} });

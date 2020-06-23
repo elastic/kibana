@@ -89,6 +89,15 @@ describe('add_prepackaged_rules_route', () => {
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
+    (installPrepackagedTimelines as jest.Mock).mockReset();
+    (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
+      success: true,
+      success_count: 0,
+      timelines_installed: 3,
+      timelines_updated: 0,
+      errors: [],
+    });
+
     addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup);
   });
 

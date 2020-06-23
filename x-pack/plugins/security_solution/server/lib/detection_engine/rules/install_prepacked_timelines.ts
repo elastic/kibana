@@ -9,13 +9,12 @@ import path, { join, resolve } from 'path';
 import { Readable } from 'stream';
 import { createListStream } from '../../../../../../../src/legacy/utils';
 import { importTimelines } from '../../timeline/routes/utils/import_timelines';
-import { KibanaResponseFactory } from '../../../../../../../src/core/server/';
 import { FrameworkRequest } from '../../framework';
 import { ImportTimelineResultSchema } from '../../timeline/routes/schemas/import_timelines_schema';
 
-const getReadables = (dataPath: string): Promise<Readable> =>
+export const getReadables = (dataPath: string): Promise<Readable> =>
   new Promise((resolved, reject) => {
-    const contents: Buffer[] = [];
+    const contents: string[] = [];
     const readable = fs.createReadStream(dataPath, { encoding: 'utf-8' });
 
     readable.on('data', (stream) => {
@@ -62,13 +61,14 @@ export const loadData = (
         timelines_updated: 0,
       });
     };
-    lineStream.on('close', onClose);
 
     const closeWithError = (err: Error) => {
       lineStream.removeListener('close', onClose);
       lineStream.close();
       reject(err);
     };
+
+    lineStream.on('close', onClose);
 
     lineStream.on('line', async (line) => {
       if (line.length === 0 || line.charAt(0) === '/' || line.charAt(0) === ' ') {
@@ -104,17 +104,32 @@ export const loadData = (
 
 export const installPrepackagedTimelines = async (
   maxTimelineImportExportSize: number,
-  response: KibanaResponseFactory,
   frameworkRequest: FrameworkRequest,
-  isImmutable: boolean
+  isImmutable: boolean,
+  filePath?: string,
+  fileName?: string
 ): Promise<ImportTimelineResultSchema | string> => {
-  const dir = resolve(join(__dirname, './prepackaged_timelines'));
-  const fileName = 'index.ndjson';
-  const dataPath = path.join(dir, fileName);
-
-  const readStream = await getReadables(dataPath);
+  let readStream;
+  const dir = resolve(join(__dirname, filePath ?? './prepackaged_timelines'));
+  const file = fileName ?? 'index.ndjson';
+  const dataPath = path.join(dir, file);
+  try {
+    readStream = await getReadables(dataPath);
+  } catch (err) {
+    return {
+      success: false,
+      success_count: 0,
+      timelines_installed: 0,
+      timelines_updated: 0,
+      errors: [
+        {
+          error: { message: `read prepackaged timelines error: ${err.message}`, status_code: 500 },
+        },
+      ],
+    };
+  }
 
   return loadData(readStream, maxTimelineImportExportSize, (docs) =>
-    importTimelines(docs, maxTimelineImportExportSize, response, frameworkRequest, isImmutable)
+    importTimelines(docs, maxTimelineImportExportSize, frameworkRequest, isImmutable)
   );
 };

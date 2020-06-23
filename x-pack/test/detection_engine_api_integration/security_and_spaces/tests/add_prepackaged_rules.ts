@@ -49,7 +49,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        expect(Object.keys(body)).to.eql(['rules_installed', 'rules_updated']);
+        expect(Object.keys(body)).to.eql([
+          'rules_installed',
+          'rules_updated',
+          'timelines_installed',
+          'timelines_updated',
+        ]);
       });
 
       it('should create the prepackaged rules and return a count greater than zero', async () => {

@@ -51,13 +51,11 @@ export const addPrepackedRulesRoute = (
         if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-
         const rulesFromFileSystem = getPrepackagedRules();
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
         const signalsIndex = siemClient.getSignalsIndex();
-
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
           const signalsIndexExists = await getIndexExists(
             clusterClient.callAsCurrentUser,
@@ -72,12 +70,7 @@ export const addPrepackedRulesRoute = (
         }
         const result = await Promise.all([
           installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex),
-          installPrepackagedTimelines(
-            config.maxTimelineImportExportSize,
-            response,
-            frameworkRequest,
-            true
-          ),
+          installPrepackagedTimelines(config.maxTimelineImportExportSize, frameworkRequest, true),
         ]);
         const prepackagedTimelinesResult =
           typeof result[1] !== 'string' ? result[1] : ({} as ImportTimelineResultSchema);

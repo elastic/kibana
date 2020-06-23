@@ -7,7 +7,6 @@
 import { has, chunk, omit } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import { KibanaResponseFactory } from 'src/core/server';
 import { TimelineType, TimelineStatus, SavedTimeline } from '../../../../../common/types/timeline';
 import { validate } from '../../../../../common/validate';
 import { NoteResult } from '../../../../graphql/types';
@@ -78,7 +77,6 @@ const CHUNK_PARSED_OBJECT_SIZE = 10;
 export const importTimelines = async (
   file: Readable,
   maxTimelineImportExportSize: number,
-  response: KibanaResponseFactory,
   frameworkRequest: FrameworkRequest,
   isImmutable?: boolean
 ): Promise<ImportTimelineResultSchema | string> => {
