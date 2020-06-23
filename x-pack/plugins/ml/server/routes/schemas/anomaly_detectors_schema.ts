@@ -178,10 +178,24 @@ export const getOverallBucketsSchema = schema.object({
 });
 
 export const getCategoriesSchema = schema.object({
-  /** Category id */
+  /** Category ID */
   categoryId: schema.string(),
-  /** Job id */
+  /** Job ID */
   jobId: schema.string(),
+});
+
+export const getModelSnapshotsSchema = schema.object({
+  /** Snapshot ID */
+  snapshotId: schema.maybe(schema.string()),
+  /** Job ID */
+  jobId: schema.string(),
+});
+
+export const updateModelSnapshotSchema = schema.object({
+  /** description */
+  description: schema.maybe(schema.string()),
+  /** retain */
+  retain: schema.maybe(schema.boolean()),
 });
 
 export const forecastAnomalyDetector = schema.object({ duration: schema.any() });

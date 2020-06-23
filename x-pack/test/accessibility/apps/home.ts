@@ -12,8 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const globalNav = getService('globalNav');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/66976
-  describe.skip('Kibana Home', () => {
+  describe('Kibana Home', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });
