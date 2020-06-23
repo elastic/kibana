@@ -28,7 +28,7 @@ import { ExprVis } from '../../../../../../plugins/visualizations/public/express
 
 // Replace with mock when converting to jest tests
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { seedColors } from '../../../../../../plugins/charts/public/services/colors/seed_colors';
+import { seedColors } from '../../../../../../plugins/charts/public/static/colors/seed_colors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BaseVisType } from '../../../../../../plugins/visualizations/public/vis_types/base_vis_type';
 // Will be replaced with new path when tests are moved

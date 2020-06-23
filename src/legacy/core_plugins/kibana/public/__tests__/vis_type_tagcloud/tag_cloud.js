@@ -27,7 +27,7 @@ import simpleloadPng from './simpleload.png';
 
 // Replace with mock when converting to jest tests
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { seedColors } from '../../../../../../plugins/charts/public/services/colors/seed_colors';
+import { seedColors } from '../../../../../../plugins/charts/public/static/colors/seed_colors';
 // Will be replaced with new path when tests are moved
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TagCloud } from '../../../../../../plugins/vis_type_tagcloud/public/components/tag_cloud';

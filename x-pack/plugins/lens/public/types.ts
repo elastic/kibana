@@ -387,12 +387,41 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: IconType;
 }
 
+export interface SeriesLayer {
+  name: string;
+  rankAtDepth: number;
+  totalSeriesAtDepth: number;
+  totalSeries: number;
+  maxDepth: number;
+}
+
+export interface ColorFunctionDefinition<T = unknown> {
+  id: string;
+  title: string;
+
+  getColor: (series: SeriesLayer[], state?: T) => string | null;
+
+  state?: T;
+  renderEditor?: (
+    domElement: Element,
+    props: { state?: T; setState: (newState: T) => void }
+  ) => void;
+  renderPreview?: (domElement: Element, props: { state?: T }) => void;
+}
+
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
 
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
+
+  globalPalette: {
+    colorFunction: ColorFunctionDefinition;
+    state: unknown;
+    setColorFunction: (id: string) => void;
+    setState: (newState: unknown) => void;
+  };
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;

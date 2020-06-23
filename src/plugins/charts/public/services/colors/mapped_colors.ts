@@ -23,7 +23,7 @@ import d3 from 'd3';
 import { CoreSetup } from 'kibana/public';
 
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { createColorPalette } from './color_palette';
+import { createColorPalette } from '../../static/colors';
 
 const standardizeColor = (color: string) => d3.rgb(color).toString();
 

@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export * from './color_maps';
-export * from './colors';
-export * from './components';
+export * from './color_palette';
+export * from './seed_colors';
