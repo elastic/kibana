@@ -8,6 +8,7 @@
 import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+import { merge } from 'lodash';
 
 import {
   notificationServiceMock,
@@ -51,8 +52,13 @@ export const setupEnvironment = () => {
   };
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <AppContextProvider value={appDependencies}>
-    <Comp {...props} />
-  </AppContextProvider>
-);
+export const WithAppDependencies = (Comp: any, overridingDependencies: any = {}) => (
+  props: any
+) => {
+  const dependencies = merge(appDependencies, overridingDependencies);
+  return (
+    <AppContextProvider value={appDependencies}>
+      <Comp {...props} />
+    </AppContextProvider>
+  );
+};

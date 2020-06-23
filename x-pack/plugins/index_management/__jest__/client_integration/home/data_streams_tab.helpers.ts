@@ -18,17 +18,6 @@ import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
-const testBedConfig: TestBedConfig = {
-  store: () => indexManagementStore(services as any),
-  memoryRouter: {
-    initialEntries: [`/indices`],
-    componentRoutePath: `/:section(indices|data_streams)`,
-  },
-  doMountAsync: true,
-};
-
-const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
-
 export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   actions: {
     goToDataStreamsList: () => void;
@@ -43,9 +32,23 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   findDeleteConfirmationModal: () => ReactWrapper;
   findDetailPanel: () => ReactWrapper;
   findDetailPanelTitle: () => string;
+  findEmptyPromptIndexTemplateLink: () => ReactWrapper;
 }
 
-export const setup = async (): Promise<DataStreamsTabTestBed> => {
+export const setup = async (overridingDependencies: any = {}): Promise<DataStreamsTabTestBed> => {
+  const testBedConfig: TestBedConfig = {
+    store: () => indexManagementStore(services as any),
+    memoryRouter: {
+      initialEntries: [`/indices`],
+      componentRoutePath: `/:section(indices|data_streams|templates)`,
+    },
+    doMountAsync: true,
+  };
+
+  const initTestBed = registerTestBed(
+    WithAppDependencies(IndexManagementHome, overridingDependencies),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   /**
@@ -56,15 +59,17 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
     testBed.find('data_streamsTab').simulate('click');
   };
 
-  const clickEmptyPromptIndexTemplateLink = async () => {
-    const { find, component, router } = testBed;
-
+  const findEmptyPromptIndexTemplateLink = () => {
+    const { find } = testBed;
     const templateLink = find('dataStreamsEmptyPromptTemplateLink');
+    return templateLink;
+  };
 
+  const clickEmptyPromptIndexTemplateLink = async () => {
+    const { component, router } = testBed;
     await act(async () => {
-      router.navigateTo(templateLink.props().href!);
+      router.navigateTo(findEmptyPromptIndexTemplateLink().props().href!);
     });
-
     component.update();
   };
 
@@ -148,6 +153,7 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
     findDeleteConfirmationModal,
     findDetailPanel,
     findDetailPanelTitle,
+    findEmptyPromptIndexTemplateLink,
   };
 };
 

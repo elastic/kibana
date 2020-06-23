@@ -19,62 +19,87 @@ describe('Data Streams tab', () => {
     server.restore();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadIndicesResponse([
-      {
-        health: '',
-        status: '',
-        primary: '',
-        replica: '',
-        documents: '',
-        documents_deleted: '',
-        size: '',
-        primary_size: '',
-        name: 'data-stream-index',
-        data_stream: 'dataStream1',
-      },
-      {
-        health: 'green',
-        status: 'open',
-        primary: 1,
-        replica: 1,
-        documents: 10000,
-        documents_deleted: 100,
-        size: '156kb',
-        primary_size: '156kb',
-        name: 'non-data-stream-index',
-      },
-    ]);
-
-    await act(async () => {
-      testBed = await setup();
-    });
-  });
-
   describe('when there are no data streams', () => {
     beforeEach(async () => {
-      const { actions, component } = testBed;
-
+      httpRequestsMockHelpers.setLoadIndicesResponse([]);
       httpRequestsMockHelpers.setLoadDataStreamsResponse([]);
-
-      await act(async () => {
-        actions.goToDataStreamsList();
-      });
-
-      component.update();
+      httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
     });
 
     test('displays an empty prompt', async () => {
-      const { exists } = testBed;
+      await act(async () => {
+        testBed = await setup();
+        testBed.actions.goToDataStreamsList();
+      });
+
+      const { exists, component } = testBed;
+      testBed.component.update();
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyPrompt')).toBe(true);
+    });
+
+    test('when Ingest Manager is disabled, goes to index templates tab when "Get started" link is clicked', async () => {
+      await act(async () => {
+        testBed = await setup({
+          plugins: {},
+        });
+        testBed.actions.goToDataStreamsList();
+      });
+
+      const { actions, exists, component } = testBed;
+      component.update();
+
+      await act(async () => {
+        actions.clickEmptyPromptIndexTemplateLink();
+      });
+
+      expect(exists('templateList')).toBe(true);
+    });
+
+    test('when Ingest Manager is enabled, links to Ingest Manager', async () => {
+      await act(async () => {
+        testBed = await setup({
+          plugins: { ingestManager: {} },
+        });
+        testBed.actions.goToDataStreamsList();
+      });
+
+      const { findEmptyPromptIndexTemplateLink, component } = testBed;
+      component.update();
+
+      // Assert against the text because the href won't be available, due to dependency upon our core mock.
+      expect(findEmptyPromptIndexTemplateLink().props().children).toBe('Ingest Manager');
     });
   });
 
   describe('when there are data streams', () => {
     beforeEach(async () => {
-      const { actions, component } = testBed;
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          health: '',
+          status: '',
+          primary: '',
+          replica: '',
+          documents: '',
+          documents_deleted: '',
+          size: '',
+          primary_size: '',
+          name: 'data-stream-index',
+          data_stream: 'dataStream1',
+        },
+        {
+          health: 'green',
+          status: 'open',
+          primary: 1,
+          replica: 1,
+          documents: 10000,
+          documents_deleted: 100,
+          size: '156kb',
+          primary_size: '156kb',
+          name: 'non-data-stream-index',
+        },
+      ]);
 
       httpRequestsMockHelpers.setLoadDataStreamsResponse([
         createDataStreamPayload('dataStream1'),
@@ -82,10 +107,11 @@ describe('Data Streams tab', () => {
       ]);
 
       await act(async () => {
-        actions.goToDataStreamsList();
+        testBed = await setup();
+        testBed.actions.goToDataStreamsList();
       });
 
-      component.update();
+      testBed.component.update();
     });
 
     test('lists them in the table', async () => {

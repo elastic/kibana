@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
+import { reactRouterNavigate } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
@@ -31,7 +32,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 }) => {
   const {
     core: { getUrlForApp },
+    plugins: { ingestManager },
   } = useAppContext();
+
   const { error, isLoading, data: dataStreams, sendRequest: reload } = useLoadDataStreams();
 
   let content;
@@ -73,20 +76,51 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           <p>
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsDescription"
-              defaultMessage="Data streams represent collections of time series indices. Get started with data streams in {link}."
-              values={{
-                link: (
-                  <EuiLink
-                    data-test-subj="dataStreamsEmptyPromptTemplateLink"
-                    href={getUrlForApp('ingestManager')}
-                  >
-                    {i18n.translate('xpack.idxMgmt.dataStreamList.emptyPrompt.getStartedLink', {
-                      defaultMessage: 'Ingest Manager',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
+              defaultMessage="Data streams represent collections of time series indices."
+            />{' '}
+            {ingestManager ? (
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
+                defaultMessage="Get started with data streams in {link}."
+                values={{
+                  link: (
+                    <EuiLink
+                      data-test-subj="dataStreamsEmptyPromptTemplateLink"
+                      href={getUrlForApp('ingestManager')}
+                    >
+                      {i18n.translate(
+                        'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerLink',
+                        {
+                          defaultMessage: 'Ingest Manager',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
+                defaultMessage="Get started with data streams by creating a {link}."
+                values={{
+                  link: (
+                    <EuiLink
+                      data-test-subj="dataStreamsEmptyPromptTemplateLink"
+                      {...reactRouterNavigate(history, {
+                        pathname: '/templates',
+                      })}
+                    >
+                      {i18n.translate(
+                        'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerLink',
+                        {
+                          defaultMessage: 'composable index template',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            )}
           </p>
         }
         data-test-subj="emptyPrompt"
