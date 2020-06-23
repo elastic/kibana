@@ -183,7 +183,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`doesn't show Index Patterns in management side-nav`, async () => {
         await PageObjects.settings.navigateTo();
         await testSubjects.existOrFail('kibana');
-        await testSubjects.missingOrFail('index_patterns');
+        await testSubjects.missingOrFail('indexPatterns');
       });
 
       it(`does not allow navigation to Index Patterns; redirects to management home`, async () => {
