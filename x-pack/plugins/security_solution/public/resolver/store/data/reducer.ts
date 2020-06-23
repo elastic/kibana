@@ -13,6 +13,7 @@ function initialState(): DataState {
     relatedEventsStats: new Map(),
     relatedEvents: new Map(),
     relatedEventsReady: new Map(),
+    lineageLimits: { children: null, ancestors: null },
     isLoading: false,
     hasError: false,
   };
@@ -24,7 +25,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       results: action.payload.events,
       relatedEventsStats: action.payload.stats,
-      limitReached: action.payload.limitReached,
+      lineageLimits: action.payload.lineageLimits,
       isLoading: false,
       hasError: false,
     };

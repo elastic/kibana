@@ -13,9 +13,9 @@ import {
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
   readonly payload: {
-    readonly events: ResolverEvent[];
-    readonly stats: Map<string, ResolverNodeStats>;
-    readonly limitReached: boolean;
+    readonly events: Readonly<ResolverEvent[]>;
+    readonly stats: Readonly<Map<string, ResolverNodeStats>>;
+    readonly lineageLimits: { readonly children: string | null; readonly ancestors: string | null };
   };
 }
 

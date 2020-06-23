@@ -77,7 +77,8 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
           }
           const nodeStats: Map<string, ResolverNodeStats> = new Map();
           nodeStats.set(entityId, stats);
-          const limitReached = children.nextChild !== null || ancestry.nextAncestor !== null;
+          const lineageLimits = { children: children.nextChild, ancestors: ancestry.nextAncestor };
+
           const events = [
             ...lifecycle,
             ...getLifecycleEventsAndStats(children.childNodes, nodeStats),
@@ -88,7 +89,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
             payload: {
               events,
               stats: nodeStats,
-              limitReached,
+              lineageLimits,
             },
           });
         } catch (error) {
