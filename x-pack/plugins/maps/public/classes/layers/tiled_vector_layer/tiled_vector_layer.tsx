@@ -13,7 +13,6 @@ import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer'
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
 import { DataRequestContext } from '../../../actions';
 import {
-  TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -105,7 +104,7 @@ export class TiledVectorLayer extends VectorLayer {
       return;
     }
 
-    const sourceMeta: TiledSingleLayerVectorSourceDescriptor | null = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+    const sourceMeta: MVTSingleLayerVectorSourceConfig | null = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
     if (!sourceMeta) {
       return;
     }
@@ -120,8 +119,8 @@ export class TiledVectorLayer extends VectorLayer {
     });
   }
 
-  ownsMbSourceId(mbSourceId): boolean {
-    return mbSourceId === this._getMbSourceId();
+  ownsMbSourceId(mbSourceId: string): boolean {
+    return this._getMbSourceId() === mbSourceId;
   }
 
   _syncStylePropertiesWithMb(mbMap: unknown) {
@@ -135,8 +134,7 @@ export class TiledVectorLayer extends VectorLayer {
     if (!sourceDataRequest) {
       return;
     }
-    const sourceMeta: TiledSingleLayerVectorSourceDescriptor = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-
+    const sourceMeta: MVTSingleLayerVectorSourceConfig = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
     if (sourceMeta.layerName === '') {
       return;
     }
@@ -156,7 +154,7 @@ export class TiledVectorLayer extends VectorLayer {
     if (!dataRequest) {
       return false;
     }
-    const tiledSourceMeta: TiledSingleLayerVectorSourceDescriptor | null = dataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+    const tiledSourceMeta: MVTSingleLayerVectorSourceConfig | null = dataRequest.getData() as MVTSingleLayerVectorSourceConfig;
 
     if (!tiledSourceMeta) {
       return false;
@@ -173,6 +171,7 @@ export class TiledVectorLayer extends VectorLayer {
 
     const layerIds = this.getMbLayerIds();
     for (let i = 0; i < layerIds.length; i++) {
+      // @ts-expect-error
       const mbLayer = mbMap.getLayer(layerIds[i]);
       if (mbLayer && mbLayer.sourceLayer !== tiledSourceMeta.layerName) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
@@ -202,10 +201,16 @@ export class TiledVectorLayer extends VectorLayer {
   getFeatureById(
     id: string | number | undefined,
     meta: { mbProperties: GeoJsonProperties }
-  ): Feature {
+  ): Feature | null {
+    const geometry = this._source.getFeatureGeometry(id, meta.mbProperties);
+    if (geometry === null) {
+      return null;
+    }
+
     return {
+      type: 'Feature',
       properties: this._source.getFeatureProperties(id, meta.mbProperties),
-      geometry: this._source.getFeatureGeometry(id, meta.mbProperties),
+      geometry,
       id,
     };
   }

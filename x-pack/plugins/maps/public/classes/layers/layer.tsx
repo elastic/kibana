@@ -339,15 +339,12 @@ export class AbstractLayer implements ILayer {
       const mbStyle = mbMap.getStyle();
       // @ts-expect-error
       mbStyle.layers.forEach((mbLayer) => {
-        // @ts-expect-error
         if (this.ownsMbLayerId(mbLayer.id)) {
           // @ts-expect-error
           mbMap.removeLayer(mbLayer.id);
         }
       });
-      // @ts-expect-error
       Object.keys(mbStyle.sources).some((mbSourceId) => {
-        // @ts-expect-error
         if (this.ownsMbSourceId(mbSourceId)) {
           // @ts-expect-error
           mbMap.removeSource(mbSourceId);
@@ -433,7 +430,7 @@ export class AbstractLayer implements ILayer {
     throw new Error('Should implement AbstractLayer#ownsMbLayerId');
   }
 
-  ownsMbSourceId(sourceId: string): boolean {
+  ownsMbSourceId(mbSourceId: string): boolean {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
   }
 

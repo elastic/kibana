@@ -40,14 +40,16 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     maxSourceZoom,
     fields,
     tooltipProperties,
-  }: TiledSingleLayerVectorSourceDescriptor) {
+  }: Partial<TiledSingleLayerVectorSourceDescriptor>) {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
       id: uuid(),
-      urlTemplate,
-      layerName,
-      minSourceZoom: Math.max(MIN_ZOOM, minSourceZoom),
-      maxSourceZoom: Math.min(MAX_ZOOM, maxSourceZoom),
+      urlTemplate: urlTemplate ? urlTemplate : '',
+      layerName: layerName ? layerName : '',
+      minSourceZoom:
+        typeof minSourceZoom === 'number' ? Math.max(MIN_ZOOM, minSourceZoom) : MIN_ZOOM,
+      maxSourceZoom:
+        typeof maxSourceZoom === 'number' ? Math.min(MAX_ZOOM, maxSourceZoom) : MAX_ZOOM,
       fields: fields ? fields : [],
       tooltipProperties: tooltipProperties ? tooltipProperties : [],
     };
@@ -193,13 +195,15 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   getFeatureProperties(
-    id: string | number,
+    id: string | number | undefined,
     mbProperties: GeoJsonProperties
   ): GeoJsonProperties | null {
-    // Just echo the properties back
     return mbProperties;
   }
-  getFeatureGeometry(id: string | number, mbProperties: GeoJsonProperties): Geometry | null {
+  getFeatureGeometry(
+    id: string | number | undefined,
+    mbProperties: GeoJsonProperties
+  ): Geometry | null {
     // Cannot get the raw geometry for a simple tiled service
     return null;
   }

@@ -36,7 +36,7 @@ export interface IVectorLayer extends ILayer {
   getFeatureById(
     id: string | number | undefined,
     meta: { mbProperties: GeoJsonProperties }
-  ): Feature;
+  ): Feature | null;
   getPropertiesForTooltip(
     properties: GeoJsonProperties,
     featureId?: string | number
@@ -88,7 +88,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getFeatureById(
     id: string | number | undefined,
     meta: { mbProperties: GeoJsonProperties }
-  ): Feature;
+  ): Feature | null;
   getPropertiesForTooltip(
     properties: GeoJsonProperties,
     featureId?: string | number

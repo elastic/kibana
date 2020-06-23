@@ -913,7 +913,7 @@ export class VectorLayer extends AbstractLayer {
   getFeatureById(id) {
     const featureCollection = this._getSourceFeatureCollection();
     if (!featureCollection) {
-      return;
+      return null;
     }
 
     return featureCollection.features.find((feature) => {

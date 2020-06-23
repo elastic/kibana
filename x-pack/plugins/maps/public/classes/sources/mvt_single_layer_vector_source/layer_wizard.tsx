@@ -11,7 +11,7 @@ import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vect
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { TiledVectorLayer } from '../../layers/tiled_vector_layer/tiled_vector_layer';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { MVTSingleLayerVectorSourceConfig } from './types';
+import { TiledSingleLayerVectorSourceSettings } from '../../../../common/descriptor_types';
 
 export const mvtVectorSourceWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
@@ -20,7 +20,7 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
   }),
   icon: 'grid',
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: MVTSingleLayerVectorSourceConfig) => {
+    const onSourceConfigChange = (sourceConfig: TiledSingleLayerVectorSourceSettings) => {
       const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
       const layerDescriptor = TiledVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayers([layerDescriptor]);

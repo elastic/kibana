@@ -89,4 +89,12 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLayerName(): string;
+  getFeatureProperties(
+    id: string | number | undefined,
+    mbProperties: GeoJsonProperties
+  ): GeoJsonProperties | null;
+  getFeatureGeometry(
+    id: string | number | undefined,
+    mbProperties: GeoJsonProperties
+  ): Geometry | null;
 }
