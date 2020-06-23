@@ -7,7 +7,7 @@ import { IClusterClient, IRouter, IScopedClusterClient } from 'kibana/server';
 import {
   elasticsearchServiceMock,
   httpServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from '../../../../../../../src/core/server/mocks';
 import { registerAlertRoutes } from '../routes';
 import { alertingIndexGetQuerySchema } from '../../../../common/endpoint_alerts/schema/alert_index';
@@ -34,7 +34,7 @@ describe('test alerts route', () => {
     });
 
     registerAlertRoutes(routerMock, {
-      logFactory: loggingServiceMock.create(),
+      logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
     });
