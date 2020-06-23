@@ -18,6 +18,7 @@ import { IJoin } from '../../joins/join';
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export type VectorLayerArguments = {
   source: IVectorSource;
@@ -36,7 +37,10 @@ export interface IVectorLayer extends ILayer {
     id: string | number | undefined,
     meta: { mbProperties: GeoJsonProperties }
   ): Feature;
-  getPropertiesForTooltip(properties: GeoJsonProperties, featureId?: string | number);
+  getPropertiesForTooltip(
+    properties: GeoJsonProperties,
+    featureId?: string | number
+  ): Promise<ITooltipProperty[]>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -81,4 +85,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _setMbLinePolygonProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   getSource(): IVectorSource;
   getStyle(): IVectorStyle;
+  getFeatureById(
+    id: string | number | undefined,
+    meta: { mbProperties: GeoJsonProperties }
+  ): Feature;
+  getPropertiesForTooltip(
+    properties: GeoJsonProperties,
+    featureId?: string | number
+  ): Promise<ITooltipProperty[]>;
 }

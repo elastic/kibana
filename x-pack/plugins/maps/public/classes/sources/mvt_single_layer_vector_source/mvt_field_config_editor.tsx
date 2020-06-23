@@ -62,7 +62,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   _addField = () => {
     const newFields = this.props.fields.slice();
     newFields.push({
-      type: MVTFieldType.String,
+      type: MVTFieldType.STRING,
       name: 'Foobar',
     });
     this.props.onChange(newFields);

@@ -36,7 +36,7 @@ export interface Props {
 }
 
 export class MVTSingleLayerSourceSettings extends Component<Props, State> {
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const newSettings = {
       layerName: nextProps.layerName,
       fields: nextProps.fields,
@@ -44,7 +44,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
       maxSourceZoom: nextProps.maxSourceZoom,
     };
 
-    if (_.isEqual(newSettings, prevState.prevSettings)) {
+    if (prevState && _.isEqual(newSettings, prevState.prevSettings)) {
       return null;
     }
 
