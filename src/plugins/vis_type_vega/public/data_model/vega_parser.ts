@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
-// @ts-ignore
 import hjson from 'hjson';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
