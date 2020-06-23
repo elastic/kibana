@@ -175,6 +175,9 @@ describe('when on the hosts page', () => {
           status: overallStatus,
         };
         policyResponse.Endpoint.policy.applied.actions.push(downloadModelAction);
+      } else {
+        // Else, make sure the status of the generated action matches what was passed in
+        downloadModelAction.status = overallStatus;
       }
 
       if (
@@ -249,7 +252,7 @@ describe('when on the hosts page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `#/management/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -265,7 +268,7 @@ describe('when on the hosts page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `/management/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -274,7 +277,7 @@ describe('when on the hosts page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '#/management/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
 
@@ -371,7 +374,7 @@ describe('when on the hosts page', () => {
       });
     });
 
-    describe.skip('when showing host Policy Response panel', () => {
+    describe('when showing host Policy Response panel', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
         coreStart.http.post.mockImplementation(async (requestOptions) => {
@@ -486,7 +489,7 @@ describe('when on the hosts page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '#/management/endpoints?page_index=0&page_size=10&selected_host=1'
+          '/endpoints?page_index=0&page_size=10&selected_host=1'
         );
       });
 

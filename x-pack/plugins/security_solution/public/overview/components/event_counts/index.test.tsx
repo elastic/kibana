@@ -13,6 +13,8 @@ import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { EventCounts } from '.';
 
+jest.mock('../../../common/components/link_to');
+
 describe('EventCounts', () => {
   const from = 1579553397080;
   const to = 1579639797080;
