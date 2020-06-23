@@ -5,7 +5,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import React from 'react';
-import { Stat } from '../../typings/data_handler';
+import { Stat } from '../../typings/fetch_data_response';
 
 interface Props {
   stats: Stat[];

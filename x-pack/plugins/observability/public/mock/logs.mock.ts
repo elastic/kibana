@@ -5,25 +5,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FetchDataResponse, FetchData } from '../typings/data_handler';
+import { LogsFetchDataResponse } from '../typings/fetch_data_response';
+import { FetchData } from '../data_handler';
 
-export const fetchLogsData: FetchData = () => {
+export const fetchLogsData: FetchData<LogsFetchDataResponse> = () => {
   return Promise.resolve(response);
 };
 
-const response: FetchDataResponse = {
+const response: LogsFetchDataResponse = {
   title: i18n.translate('xpack.logs.observabilityDashboard.title', {
     defaultMessage: 'Logs',
   }),
   appLink: '/app/logs',
-  stats: [
-    { label: 'unknown', value: 73777.20801439178 },
-    { label: 'kibana.log', value: 1018.4591611479029 },
-    { label: 'nginx.access', value: 5528.920109324083 },
-  ],
-  series: [
-    {
-      label: 'unknown',
+  stats: {
+    unknown: { label: 'Unknown', value: 73777 },
+    'kibana.log': { label: 'Kibana.log', value: 1018 },
+    'nginx.access': { label: 'Nginx.access', value: 5528 },
+  },
+  series: {
+    unknown: {
+      label: 'Unknwon',
       coordinates: [
         {
           x: 1588942800000,
@@ -63,8 +64,8 @@ const response: FetchDataResponse = {
         },
       ],
     },
-    {
-      label: 'kibana.log',
+    'kibana.log': {
+      label: 'Kibana.log',
       coordinates: [
         {
           x: 1588942800000,
@@ -104,8 +105,8 @@ const response: FetchDataResponse = {
         },
       ],
     },
-    {
-      label: 'nginx.access',
+    'nginx.access': {
+      label: 'Nginx.access',
       coordinates: [
         {
           x: 1588942800000,
@@ -145,182 +146,5 @@ const response: FetchDataResponse = {
         },
       ],
     },
-    {
-      label: 'nginx.error',
-      coordinates: [
-        {
-          x: 1588942800000,
-          y: 134.79365079365078,
-        },
-        {
-          x: 1589078700000,
-          y: 135.9205298013245,
-        },
-        {
-          x: 1589214600000,
-          y: 123.67549668874172,
-        },
-        {
-          x: 1589350500000,
-          y: 126.11920529801324,
-        },
-        {
-          x: 1589486400000,
-          y: 144.1523178807947,
-        },
-        {
-          x: 1589622300000,
-          y: 144.74834437086093,
-        },
-        {
-          x: 1589758200000,
-          y: 144.40397350993376,
-        },
-        {
-          x: 1589894100000,
-          y: 12.675496688741722,
-        },
-        {
-          x: 1590030000000,
-          y: 0,
-        },
-      ],
-    },
-    {
-      label: 'postgresql.log',
-      coordinates: [
-        {
-          x: 1588942800000,
-          y: 0.1935483870967742,
-        },
-        {
-          x: 1589078700000,
-          y: 0.4370860927152318,
-        },
-        {
-          x: 1589214600000,
-          y: 0.3973509933774834,
-        },
-        {
-          x: 1589350500000,
-          y: 0.33112582781456956,
-        },
-        {
-          x: 1589486400000,
-          y: 0.2980132450331126,
-        },
-        {
-          x: 1589622300000,
-          y: 0.3973509933774834,
-        },
-        {
-          x: 1589758200000,
-          y: 0.4768211920529801,
-        },
-        {
-          x: 1589894100000,
-          y: 0.09271523178807947,
-        },
-        {
-          x: 1590030000000,
-          y: 0,
-        },
-      ],
-    },
-    {
-      label: 'redis.log',
-      coordinates: [
-        {
-          x: 1588942800000,
-          y: 11.714285714285714,
-        },
-        {
-          x: 1589078700000,
-          y: 5.880794701986755,
-        },
-        {
-          x: 1589214600000,
-          y: 0.4304635761589404,
-        },
-        {
-          x: 1589350500000,
-          y: 0.4370860927152318,
-        },
-        {
-          x: 1589486400000,
-          y: 0.41721854304635764,
-        },
-        {
-          x: 1589622300000,
-          y: 0.423841059602649,
-        },
-        {
-          x: 1589758200000,
-          y: 0.271523178807947,
-        },
-        {
-          x: 1589894100000,
-          y: 0.3708609271523179,
-        },
-        {
-          x: 1590030000000,
-          y: 0,
-        },
-      ],
-    },
-    {
-      label: 'redis.slowlog',
-      coordinates: [
-        {
-          x: 1588942800000,
-          y: 11.714285714285714,
-        },
-        {
-          x: 1589078700000,
-          y: 5.880794701986755,
-        },
-        {
-          x: 1589214600000,
-          y: 0.4304635761589404,
-        },
-        {
-          x: 1589350500000,
-          y: 0.4370860927152318,
-        },
-        {
-          x: 1589486400000,
-          y: 0.41721854304635764,
-        },
-        {
-          x: 1589622300000,
-          y: 0.423841059602649,
-        },
-        {
-          x: 1589758200000,
-          y: 0.271523178807947,
-        },
-        {
-          x: 1589894100000,
-          y: 0.3973509933774834,
-        },
-        {
-          x: 1590030000000,
-          y: 0,
-        },
-      ],
-    },
-    {
-      label: 'haproxy.log',
-      coordinates: [
-        {
-          x: 1589894100000,
-          y: 0,
-        },
-        {
-          x: 1590030000000,
-          y: 0,
-        },
-      ],
-    },
-  ],
+  },
 };

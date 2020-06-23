@@ -3,27 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FetchDataResponse, FetchData } from '../typings/data_handler';
+import { UptimeFetchDataResponse } from '../typings/fetch_data_response';
+import { FetchData } from '../data_handler';
 
-export const fetchUptimeData: FetchData = () => {
+export const fetchUptimeData: FetchData<UptimeFetchDataResponse> = () => {
   return Promise.resolve(response);
 };
 
-const response: FetchDataResponse = {
+const response: UptimeFetchDataResponse = {
   title: 'Uptiome',
   appLink: '/app/uptime',
-  stats: [
-    {
-      label: 'Down',
-      value: 115,
-    },
-    {
-      label: 'Up',
-      value: 582,
-    },
-  ],
-  series: [
-    {
+  stats: {
+    monitors: { label: 'Monitors', value: 5 },
+    down: { label: 'Down', value: 115 },
+    up: { label: 'Up', value: 582 },
+  },
+  series: {
+    down: {
       label: 'Down',
       color: 'euiColorVis2',
       coordinates: [
@@ -93,7 +89,7 @@ const response: FetchDataResponse = {
         },
       ],
     },
-    {
+    up: {
       label: 'Up',
       color: 'euiColorLightShade',
       coordinates: [
@@ -163,5 +159,5 @@ const response: FetchDataResponse = {
         },
       ],
     },
-  ],
+  },
 };

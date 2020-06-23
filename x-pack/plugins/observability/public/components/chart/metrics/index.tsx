@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiProgress } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { ChartContainer } from '../container';
-import { FetchDataResponse } from '../../../typings/data_handler';
+import { FetchDataResponse } from '../../../typings/fetch_data_response';
 
 interface Props {
   data?: FetchDataResponse;

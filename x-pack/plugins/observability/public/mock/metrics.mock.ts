@@ -5,26 +5,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FetchDataResponse, FetchData } from '../typings/data_handler';
+import { MetricsFetchDataResponse } from '../typings/fetch_data_response';
+import { FetchData } from '../data_handler';
 
-export const fetchMetricsData: FetchData = () => {
+export const fetchMetricsData: FetchData<MetricsFetchDataResponse> = () => {
   return Promise.resolve(response);
 };
 
-const response: FetchDataResponse = {
+const response: MetricsFetchDataResponse = {
   title: i18n.translate('metrics.observabilityDashboard.title', {
     defaultMessage: 'Metrics',
   }),
   appLink: '/app/apm',
-  stats: [
-    { label: 'Hosts', value: 11 },
-    { label: 'CPU usage', value: 80 },
-    { label: 'Memory Usage', value: 36.2 },
-    { label: 'Disk Usage', value: 32.4 },
-  ],
-  series: [
-    {
-      label: 'Outbount trafic',
+  stats: {
+    hosts: { label: 'Hosts', value: 11 },
+    cpu: { label: 'CPU usage', pct: 80 },
+    memory: { label: 'Memory Usage', pct: 36.2 },
+    disk: { label: 'Disk Usage', pct: 32.4 },
+    inboundTraffic: { label: 'Inbount traffic', bytes: 1024 },
+    outboundTraffic: { label: 'Outbount traffic', bytes: 1024 },
+  },
+  series: {
+    outboundTraffic: {
+      label: 'Outbount traffic',
       coordinates: [
         {
           x: 1589805437549,
@@ -68,8 +71,8 @@ const response: FetchDataResponse = {
         },
       ],
     },
-    {
-      label: 'Inbound trafic',
+    inboundTraffic: {
+      label: 'Inbound traffic',
       coordinates: [
         {
           x: 1589805437549,
@@ -113,5 +116,5 @@ const response: FetchDataResponse = {
         },
       ],
     },
-  ],
+  },
 };
