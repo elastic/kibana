@@ -4,7 +4,7 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
-  node('linux && immutable') {
+  workers.base(bootstrapped: false, size: 's', ramDisk: false) {
     runbld("time", "test")
     runbld.junit()
   }
