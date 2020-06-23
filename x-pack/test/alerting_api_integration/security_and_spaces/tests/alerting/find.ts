@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { chunk, omit } from 'lodash';
+import uuid from 'uuid';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -279,13 +280,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         });
 
         it('should handle find alert request with fields appropriately', async () => {
+          const myTag = uuid.v4();
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 enabled: false,
-                tags: ['myTag'],
+                tags: [myTag],
                 alertTypeId: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
@@ -293,13 +295,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
-          // creat another type with same tag
+          // create another type with same tag
           const { body: createdSecondAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                tags: ['myTag'],
+                tags: [myTag],
                 alertTypeId: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
@@ -311,7 +313,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/api/alerts/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]`
+              )}/api/alerts/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -340,12 +342,12 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchFirst, 'updatedAt')).to.eql({
                 id: createdAlert.id,
                 actions: [],
-                tags: ['myTag'],
+                tags: [myTag],
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
-                tags: ['myTag'],
+                tags: [myTag],
               });
               break;
             default:
