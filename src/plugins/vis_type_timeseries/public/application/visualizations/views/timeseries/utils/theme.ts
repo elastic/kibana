@@ -94,9 +94,15 @@ function isValidColor(color: string | null | undefined): color is string {
   }
 }
 
-export function getTheme(darkMode: boolean, bgColor?: string | null): Theme {
+/**
+ * compute base chart theme based on the background color
+ *
+ * @param baseTheme
+ * @param bgColor
+ */
+export function getBaseTheme(baseTheme: Theme, bgColor?: string | null): Theme {
   if (!isValidColor(bgColor)) {
-    return darkMode ? DARK_THEME : LIGHT_THEME;
+    return baseTheme;
   }
 
   const bgLuminosity = computeRelativeLuminosity(bgColor);

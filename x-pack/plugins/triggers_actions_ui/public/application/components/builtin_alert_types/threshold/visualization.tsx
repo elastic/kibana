@@ -160,7 +160,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         setLoadingState(LoadingStateType.Idle);
       }
     })();
-    /* eslint-disable react-hooks/exhaustive-deps */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     index,
     timeField,
@@ -175,12 +175,10 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     threshold,
     startVisualizationAt,
   ]);
-  /* eslint-enable react-hooks/exhaustive-deps */
 
   if (!charts || !uiSettings || !dataFieldsFormats) {
     return null;
   }
-  const chartsTheme = charts.theme.useChartsTheme();
 
   const domain = getDomain(alertInterval, startVisualizationAt);
   const visualizeOptions = {
@@ -260,7 +258,8 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         {alertVisualizationDataKeys.length ? (
           <Chart size={['100%', 200]} renderer="canvas">
             <Settings
-              theme={[customTheme(), chartsTheme]}
+              theme={[customTheme(), charts.theme.useChartsTheme()]}
+              baseTheme={charts.theme.useChartsBaseTheme()}
               xDomain={domain}
               showLegend={!!termField}
               showLegendExtra
