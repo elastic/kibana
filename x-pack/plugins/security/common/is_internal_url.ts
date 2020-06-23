@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, URL } from 'url';
+import { parse } from 'url';
 
 export function isInternalURL(url: string, basePath = '') {
   const { protocol, hostname, port, pathname } = parse(
