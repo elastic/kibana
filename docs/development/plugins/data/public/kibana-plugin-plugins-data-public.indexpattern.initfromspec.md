@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-initFromSpec(spec: IndexPatternSpec): void;
+initFromSpec(spec: IndexPatternSpec): this;
 ```
 
 ## Parameters
@@ -18,5 +18,5 @@ initFromSpec(spec: IndexPatternSpec): void;
 
 <b>Returns:</b>
 
-`void`
+`this`
 
