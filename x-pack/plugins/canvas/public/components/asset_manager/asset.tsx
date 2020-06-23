@@ -7,7 +7,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore (elastic/eui#1262) EuiImage is not exported yet
   EuiImage,
   EuiPanel,
   EuiSpacer,
