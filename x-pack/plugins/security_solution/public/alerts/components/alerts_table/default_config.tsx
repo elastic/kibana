@@ -311,7 +311,20 @@ export const getAlertActions = ({
         // TODO: ruleExceptionLists should come from data or ecsData
         openAddExceptionModal({
           ruleName: ruleNameValue ? ruleNameValue[0] : '',
-          ruleExceptionLists: [],
+          ruleExceptionLists: [
+            {
+              id: '7a9d6910-b57c-11ea-823e-03a250049b55',
+              list_id: '20381031-1189-4aaa-be74-b9d2896eff52',
+              type: 'endpoint',
+              namespace_type: 'agnostic',
+            },
+            {
+              id: '1ad4d770-b57c-11ea-823e-03a250049b55',
+              list_id: 'c364ada6-e259-4eba-b3b8-3c29bd0341dc',
+              type: 'detection',
+              namespace_type: 'single',
+            },
+          ],
           exceptionListType: 'endpoint',
           alertData: data,
         });
@@ -331,7 +344,20 @@ export const getAlertActions = ({
         // TODO: ruleExceptionLists should come from data or ecsData
         openAddExceptionModal({
           ruleName: ruleNameValue ? ruleNameValue[0] : '',
-          ruleExceptionLists: [],
+          ruleExceptionLists: [
+            {
+              id: '7a9d6910-b57c-11ea-823e-03a250049b55',
+              list_id: '20381031-1189-4aaa-be74-b9d2896eff52',
+              type: 'endpoint',
+              namespace_type: 'agnostic',
+            },
+            {
+              id: '1ad4d770-b57c-11ea-823e-03a250049b55',
+              list_id: 'c364ada6-e259-4eba-b3b8-3c29bd0341dc',
+              type: 'detection',
+              namespace_type: 'single',
+            },
+          ],
           exceptionListType: 'detection',
           alertData: data,
         });

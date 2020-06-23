@@ -28,7 +28,7 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
-import { useKibana } from '../../../lib/kibana';
+import { useKibana, useCurrentUser } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../../exception_builder';
 import { ExceptionItem } from '../../exception_builder/types';
@@ -97,13 +97,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
-  const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionItem[]>([]);
+  const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [exceptionList, setExceptionList] = useState<ExceptionListSchema | null>(null);
   const [createListError, setCreateListError] = useState(false);
   const [, dispatchToaster] = useStateToaster();
   const { addExceptionList } = useApi(http);
+  const currentUser = useCurrentUser();
+
   const onError = useCallback(
-    (error) => {
+    (error: Error) => {
       errorToToaster({ title: i18n.ADD_EXCEPTION_ERROR, error, dispatchToaster });
       onCancel();
     },
@@ -170,13 +172,23 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldCloseAlert]
   );
 
+  const formatComment = useCallback(() => {
+    return {
+      comment,
+      created_at: new Date().toDateString(),
+      created_by: currentUser?.username ?? '',
+    };
+  }, [comment, currentUser]);
+
   const enrichExceptionItems = useCallback(() => {
-    let enriched = [];
-    // TODO: only add new comment if it's not empty
-    enriched = enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }]);
+    let enriched: ExceptionListItemSchema[] = [];
+    enriched =
+      comment !== ''
+        ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [formatComment()])
+        : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
       // TODO: dont hardcode 'windows'
-      enriched = enrichExceptionItemsWithOS(enriched, 'windows');
+      enriched = enrichExceptionItemsWithOS(enriched, ['windows']);
     }
 
     // TODO: delete this. Namespace should be handled by the builder
@@ -184,7 +196,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       enriched,
       exceptionListType === 'endpoint' ? 'agnostic' : 'single'
     );
-  }, [exceptionItemsToAdd, exceptionListType, comment]);
+  }, [comment, exceptionItemsToAdd, formatComment, exceptionListType]);
 
   const onAddExceptionConfirm = useCallback(() => {
     console.log(enrichExceptionItems());

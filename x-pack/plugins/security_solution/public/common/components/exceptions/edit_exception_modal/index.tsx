@@ -24,7 +24,7 @@ import {
   ExceptionListSchema,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
-import { useKibana } from '../../../lib/kibana';
+import { useKibana, useCurrentUser } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../../exception_builder';
 import { useAddException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
@@ -79,6 +79,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [, dispatchToaster] = useStateToaster();
+  const currentUser = useCurrentUser();
+
   const onError = useCallback(
     (error) => {
       errorToToaster({ title: i18n.EDIT_EXCEPTION_ERROR, error, dispatchToaster });
@@ -111,21 +113,36 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     [setShouldCloseAlert]
   );
 
+  const formatComment = useCallback(() => {
+    return {
+      comment,
+      created_at: new Date().toDateString(),
+      created_by: currentUser?.username ?? '',
+    };
+  }, [comment, currentUser]);
+
   const enrichExceptionItems = useCallback(() => {
     let enriched = [];
     // TODO: only add new comment if it's not empty
     enriched = enrichExceptionItemsWithComments(exceptionItemsToAdd, [
       ...exceptionItem.comments,
-      { comment },
+      ...(comment !== '' ? [formatComment()] : []),
     ]);
     if (exceptionListType === 'endpoint') {
       // TODO: dont hardcode 'windows'
-      enriched = enrichExceptionItemsWithOS(enriched, 'windows');
+      enriched = enrichExceptionItemsWithOS(enriched, ['windows']);
     }
 
     // TODO: delete this. Namespace should be handled by the builder
     return enrichExceptionItemsWithNamespace(enriched, exceptionItem.namespace_type);
-  }, [exceptionItemsToAdd, exceptionListType, exceptionItem, comment]);
+  }, [
+    exceptionItemsToAdd,
+    exceptionItem.comments,
+    exceptionItem.namespace_type,
+    comment,
+    formatComment,
+    exceptionListType,
+  ]);
 
   const onEditExceptionConfirm = useCallback(() => {
     console.log(enrichExceptionItems());

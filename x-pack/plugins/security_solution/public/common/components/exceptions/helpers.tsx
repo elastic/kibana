@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
-import { capitalize } from 'lodash';
+import { capitalize, union } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid';
 
@@ -156,7 +156,7 @@ export const formatEntry = ({
 export const getOperatingSystems = (tags: string[]): string => {
   const osMatches = tags
     .filter((tag) => tag.startsWith('os:'))
-    .map((os) => capitalize(os.substring(3).trim()))
+    .map((os) => capitalize(os.substring(3).trim())) // TODO: needs to change for macOS i believe
     .join(', ');
 
   return osMatches;
@@ -346,7 +346,6 @@ export const enrichExceptionItemsWithComments = (
   exceptionItems: ExceptionListItemSchema[],
   comments: Comment[]
 ): ExceptionListItemSchema[] => {
-  // TODO: need to update types to use
   return exceptionItems.map((item: ExceptionListItemSchema) => {
     return {
       ...item,
@@ -357,12 +356,11 @@ export const enrichExceptionItemsWithComments = (
 
 export const enrichExceptionItemsWithOS = (
   exceptionItems: ExceptionListItemSchema[],
-  os: string
+  osTypes: string[]
 ): ExceptionListItemSchema[] => {
+  const osTags = osTypes.map((os) => `os:${os}`);
   return exceptionItems.map((item: ExceptionListItemSchema) => {
-    // TODO: don't add the same OS tag if it's already there
-    const osTag = `os:${os}`;
-    const newTags = item._tags ? [...item._tags, osTag] : [osTag];
+    const newTags = item._tags ? union(item._tags, osTags) : [...osTags];
     return {
       ...item,
       _tags: newTags,
@@ -451,7 +449,7 @@ export const defaultEndpointExceptionItems = (alertData: TimelineNonEcsData[]): 
           field: 'event.category',
           operator: 'included',
           type: 'match_any',
-          value: getMappedNonEcsValue({ data: alertData, fieldName: 'event.category' }) ?? [],
+          value: getMappedNonEcsValue({ data: alertData, fieldName: 'event.category' }) ?? '',
         },
       ],
     },
