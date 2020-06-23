@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, noop } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -86,15 +86,14 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   const dispatch = useDispatch();
   const apolloClient = useApolloClient();
   const [, dispatchToaster] = useStateToaster();
-  const [allTimelines, setAllTimelines] = useState<AllTimelinesArgs>({
-    fetchAllTimeline: noop,
+  const [allTimelines, setAllTimelines] = useState<Omit<AllTimelinesArgs, 'fetchAllTimeline'>>({
     loading: false,
     totalCount: 0,
     timelines: [],
   });
 
   const fetchAllTimeline = useCallback(
-    async ({ onlyUserFavorite, pageInfo, search, sort, timelineType }: AllTimelinesVariables) => {
+    ({ onlyUserFavorite, pageInfo, search, sort, timelineType }: AllTimelinesVariables) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
 
@@ -139,7 +138,6 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
                 })
               );
               setAllTimelines({
-                fetchAllTimeline,
                 loading: false,
                 totalCount,
                 timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
@@ -154,7 +152,6 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
               dispatchToaster,
             });
             setAllTimelines({
-              fetchAllTimeline,
               loading: false,
               totalCount: 0,
               timelines: [],
@@ -168,8 +165,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
         abortCtrl.abort();
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apolloClient, allTimelines]
+    [apolloClient, allTimelines, dispatch, dispatchToaster]
   );
 
   useEffect(() => {

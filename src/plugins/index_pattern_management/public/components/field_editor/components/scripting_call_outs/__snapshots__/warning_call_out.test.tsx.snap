@@ -60,7 +60,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
               id="indexPatternManagement.warningCallOutLabel.callOutDetail"
               values={
                 Object {
-                  "scripFields": <ForwardRef
+                  "scripFields": <EuiLink
                     href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html"
                     target="_blank"
                   >
@@ -73,8 +73,8 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                     <EuiIcon
                       type="link"
                     />
-                  </ForwardRef>,
-                  "scriptsInAggregation": <ForwardRef
+                  </EuiLink>,
+                  "scriptsInAggregation": <EuiLink
                     href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source"
                     target="_blank"
                   >
@@ -87,7 +87,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                     <EuiIcon
                       type="link"
                     />
-                  </ForwardRef>,
+                  </EuiLink>,
                 }
               }
             >
