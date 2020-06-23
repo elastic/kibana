@@ -20,7 +20,7 @@
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
 
 describe('get_data_telemetry', () => {
-  describe('buildIngestSolutionsPayload', () => {
+  describe('buildDataTelemetryPayload', () => {
     test('return the base object when no indices provided', () => {
       expect(buildDataTelemetryPayload([])).toStrictEqual([]);
     });
