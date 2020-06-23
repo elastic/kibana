@@ -142,9 +142,10 @@ export const findMatchingIndexPatterns = ({
   siemDefaultIndices: string[];
 }): IndexPatternSavedObject[] => {
   try {
-    return kibanaIndexPatterns.filter((kip) =>
-      siemDefaultIndices.some((sdi) => minimatch(sdi, kip.attributes.title))
-    );
+    return kibanaIndexPatterns.filter((kip) => {
+      const pattern = kip.attributes.title;
+      return pattern !== '*' && siemDefaultIndices.some((sdi) => minimatch(sdi, pattern));
+    });
   } catch {
     return [];
   }

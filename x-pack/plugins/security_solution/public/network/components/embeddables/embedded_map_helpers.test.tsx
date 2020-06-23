@@ -106,12 +106,12 @@ describe('embedded_map_helpers', () => {
       ]);
     });
 
-    test('finds glob-only index patterns ', () => {
+    test('excludes glob-only index patterns', () => {
       const matchingIndexPatterns = findMatchingIndexPatterns({
         kibanaIndexPatterns: [mockGlobIndexPattern, mockFilebeatIndexPattern],
         siemDefaultIndices,
       });
-      expect(matchingIndexPatterns).toEqual([mockGlobIndexPattern, mockFilebeatIndexPattern]);
+      expect(matchingIndexPatterns).toEqual([mockFilebeatIndexPattern]);
     });
   });
 });
