@@ -5,9 +5,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useKibana } from '../lib/kibana';
-import { createUseKibanaMock } from '../mock/kibana_react';
-import { useMessagesStorage, UseMessagesStorage } from './use_local_storage';
+import { useKibana } from '../../lib/kibana';
+import { createUseKibanaMock } from '../../mock/kibana_react';
+import { useMessagesStorage, UseMessagesStorage } from './use_messages_storage';
 
 jest.mock('../lib/kibana');
 const useKibanaMock = useKibana as jest.Mock;

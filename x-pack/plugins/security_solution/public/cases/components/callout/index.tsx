@@ -7,7 +7,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
 
-import { useMessagesStorage } from '../../../common/containers/use_local_storage';
+import { useMessagesStorage } from '../../../common/containers/local_storage/use_messages_storage';
 import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';

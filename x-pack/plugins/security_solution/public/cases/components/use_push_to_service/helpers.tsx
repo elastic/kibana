@@ -49,7 +49,7 @@ export const getKibanaConfigError = () => ({
 });
 
 export const getActionLicenseError = (actionLicense: ActionLicense | null): ErrorMessage[] => {
-  let errors: Array<{ title: string; description: JSX.Element }> = [];
+  let errors: ErrorMessage[] = [];
   if (actionLicense != null && !actionLicense.enabledInLicense) {
     errors = [...errors, getLicenseError()];
   }
