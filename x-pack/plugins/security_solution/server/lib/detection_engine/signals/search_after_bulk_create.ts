@@ -6,7 +6,6 @@
 /* eslint-disable complexity */
 
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
 
 import { ListAndOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertServices } from '../../../../../alerts/server';

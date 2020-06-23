@@ -15,7 +15,6 @@ import { ListArrayOrUndefined } from '../../../../common/detection_engine/schema
 import { hasListsFeature } from '../feature_flags';
 import { BulkResponse, BulkResponseErrorAggregation } from './types';
 import { Logger } from '../../../../../../../src/core/server';
-import { RuleTypeParams } from '../types';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
