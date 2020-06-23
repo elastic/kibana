@@ -5,6 +5,7 @@
  */
 
 import { debounce, pick } from 'lodash';
+import { Unit } from 'elastic-datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
@@ -88,8 +89,6 @@ interface Props {
   setAlertProperty(key: string, value: any): void;
 }
 
-type TimeUnit = 's' | 'm' | 'h' | 'd';
-
 const defaultExpression = {
   metric: 'cpu' as SnapshotMetricType,
   comparator: Comparator.GT,
@@ -107,7 +106,7 @@ export const Expressions: React.FC<Props> = (props) => {
     toastWarning: alertsContext.toastNotifications.addWarning,
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
+  const [timeUnit, setTimeUnit] = useState<Unit>('m');
 
   const [previewLookbackInterval, setPreviewLookbackInterval] = useState<string>('h');
   const [isPreviewLoading, setIsPreviewLoading] = useState<boolean>(false);
@@ -126,11 +125,12 @@ export const Expressions: React.FC<Props> = (props) => {
   }, [previewLookbackInterval, alertInterval]);
 
   const isPreviewDisabled = useMemo(() => {
+    if (previewIntervalError) return true;
     const validationResult = validateMetricThreshold({ criteria: alertParams.criteria } as any);
     const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
       Object.values(result).some((arr) => Array.isArray(arr) && arr.length)
     );
-    return hasValidationErrors || previewIntervalError;
+    return hasValidationErrors;
   }, [alertParams.criteria, previewIntervalError]);
 
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
@@ -268,7 +268,7 @@ export const Expressions: React.FC<Props> = (props) => {
         params: {
           ...pick(alertParams, 'criteria', 'nodeType'),
           sourceId: alertParams.sourceId,
-          lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
+          lookback: previewLookbackInterval as Unit,
           alertInterval,
         },
       });

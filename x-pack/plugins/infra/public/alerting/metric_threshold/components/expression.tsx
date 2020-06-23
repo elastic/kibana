@@ -5,6 +5,7 @@
  */
 
 import { debounce, pick } from 'lodash';
+import { Unit } from 'elastic-datemath';
 import * as rt from 'io-ts';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
@@ -261,7 +262,7 @@ export const Expressions: React.FC<Props> = (props) => {
         params: {
           ...pick(alertParams, 'criteria', 'groupBy', 'filterQuery'),
           sourceId: alertParams.sourceId,
-          lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
+          lookback: previewLookbackInterval as Unit,
           alertInterval,
         },
       });
@@ -305,11 +306,12 @@ export const Expressions: React.FC<Props> = (props) => {
   }, [previewLookbackInterval, alertInterval]);
 
   const isPreviewDisabled = useMemo(() => {
+    if (previewIntervalError) return true;
     const validationResult = validateMetricThreshold({ criteria: alertParams.criteria } as any);
     const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
       Object.values(result).some((arr) => Array.isArray(arr) && arr.length)
     );
-    return hasValidationErrors || previewIntervalError;
+    return hasValidationErrors;
   }, [alertParams.criteria, previewIntervalError]);
 
   return (
