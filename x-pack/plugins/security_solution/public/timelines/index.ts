@@ -5,7 +5,7 @@
  */
 
 import { SecuritySubPluginWithStore } from '../app/types';
-import { getTimelinesRoutes } from './routes';
+import { TimelinesRoutes } from './routes';
 import { initialTimelineState, timelineReducer } from './store/timeline/reducer';
 import { TimelineState } from './store/timeline/types';
 
@@ -14,7 +14,7 @@ export class Timelines {
 
   public start(): SecuritySubPluginWithStore<'timeline', TimelineState> {
     return {
-      routes: getTimelinesRoutes(),
+      SubPluginRoutes: TimelinesRoutes,
       store: {
         initialState: { timeline: initialTimelineState },
         reducer: { timeline: timelineReducer },

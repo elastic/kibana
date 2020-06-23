@@ -267,44 +267,6 @@ describe('SIEM Super Date Picker', () => {
       });
     });
 
-    describe('Pick Absolute Date', () => {
-      let wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <SuperDatePicker id="global" />
-        </ReduxStoreProvider>
-      );
-      beforeEach(() => {
-        wrapper = mount(
-          <ReduxStoreProvider store={store}>
-            <SuperDatePicker id="global" />
-          </ReduxStoreProvider>
-        );
-        wrapper.find('[data-test-subj="superDatePickerShowDatesButton"]').first().simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="superDatePickerstartDatePopoverButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        wrapper.find('[data-test-subj="superDatePickerAbsoluteTab"]').first().simulate('click');
-        wrapper.update();
-
-        wrapper.find('button.react-datepicker__navigation--previous').first().simulate('click');
-        wrapper.update();
-
-        wrapper.find('div.react-datepicker__day').at(1).simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('button[data-test-subj="superDatePickerApplyTimeButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-      });
-    });
-
     describe('#makeMapStateToProps', () => {
       test('it should return the same shallow references given the same input twice', () => {
         const mapStateToProps = makeMapStateToProps();

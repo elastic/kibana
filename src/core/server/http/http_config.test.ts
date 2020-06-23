@@ -24,10 +24,14 @@ import { CspConfig } from '../csp';
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
 
-jest.mock('os', () => ({
-  ...jest.requireActual('os'),
-  hostname: () => 'kibana-hostname',
-}));
+jest.mock('os', () => {
+  const original = jest.requireActual('os');
+
+  return {
+    ...original,
+    hostname: () => 'kibana-hostname',
+  };
+});
 
 test('has defaults for config', () => {
   const httpSchema = config.schema;

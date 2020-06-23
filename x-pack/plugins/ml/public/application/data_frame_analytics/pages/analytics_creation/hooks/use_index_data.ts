@@ -6,10 +6,16 @@
 
 import { useEffect } from 'react';
 
+import { EuiDataGridColumn } from '@elastic/eui';
+
+import { CoreSetup } from 'src/core/public';
+
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import {
+  fetchChartsData,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   EsSorting,
@@ -22,15 +28,19 @@ import { ml } from '../../../../services/ml_api_service';
 
 type IndexSearchResponse = SearchResponse7;
 
-export const useIndexData = (indexPattern: IndexPattern, query: any): UseIndexDataReturnType => {
+export const useIndexData = (
+  indexPattern: IndexPattern,
+  query: any,
+  toastNotifications: CoreSetup['notifications']['toasts']
+): UseIndexDataReturnType => {
   const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
   // EuiDataGrid State
-  const columns = [
+  const columns: EuiDataGridColumn[] = [
     ...indexPatternFields.map((id) => {
       const field = indexPattern.fields.getByName(id);
       const schema = getDataGridSchemaFromKibanaFieldType(field);
-      return { id, schema };
+      return { id, schema, isExpandable: schema !== 'boolean' };
     }),
   ];
 
@@ -93,11 +103,36 @@ export const useIndexData = (indexPattern: IndexPattern, query: any): UseIndexDa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
+  const fetchColumnChartsData = async function () {
+    try {
+      const columnChartsData = await fetchChartsData(
+        indexPattern.title,
+        ml.esSearch,
+        query,
+        columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+      );
+      dataGrid.setColumnCharts(columnChartsData);
+    } catch (e) {
+      showDataGridColumnChartErrorMessageToast(e, toastNotifications);
+    }
+  };
+
+  useEffect(() => {
+    if (dataGrid.chartsVisible) {
+      fetchColumnChartsData();
+    }
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dataGrid.chartsVisible,
+    indexPattern.title,
+    JSON.stringify([query, dataGrid.visibleColumns]),
+  ]);
+
   const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };

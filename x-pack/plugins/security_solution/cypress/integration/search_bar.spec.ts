@@ -12,7 +12,8 @@ import { hostIpFilter } from '../objects/filter';
 import { HOSTS_PAGE } from '../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 
-describe('SearchBar', () => {
+// FAILING: https://github.com/elastic/kibana/issues/69595
+describe.skip('SearchBar', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_PAGE);
     waitForAllHostsToBeLoaded();

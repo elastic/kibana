@@ -14,7 +14,7 @@ import introspectionQueryResultData from '../../../graphql/introspection.json';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
-export function compose(core: CoreStart): AppFrontendLibs {
+export function composeLibs(core: CoreStart): AppFrontendLibs {
   const cache = new InMemoryCache({
     dataIdFromObject: () => null,
     fragmentMatcher: new IntrospectionFragmentMatcher({

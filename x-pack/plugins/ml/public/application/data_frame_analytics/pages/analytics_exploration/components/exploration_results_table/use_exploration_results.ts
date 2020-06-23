@@ -8,15 +8,20 @@ import { useEffect } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
+import { CoreSetup } from 'src/core/public';
+
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
+  fetchChartsData,
   getDataGridSchemasFromFieldTypes,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { ml } from '../../../../../services/ml_api_service';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import {
@@ -29,7 +34,8 @@ import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fi
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: SavedSearchQuery
+  searchQuery: SavedSearchQuery,
+  toastNotifications: CoreSetup['notifications']['toasts']
 ): UseIndexDataReturnType => {
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
@@ -66,6 +72,34 @@ export const useExplorationResults = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
+  const fetchColumnChartsData = async function () {
+    try {
+      if (jobConfig !== undefined) {
+        const columnChartsData = await fetchChartsData(
+          jobConfig.dest.index,
+          ml.esSearch,
+          searchQuery,
+          columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+        );
+        dataGrid.setColumnCharts(columnChartsData);
+      }
+    } catch (e) {
+      showDataGridColumnChartErrorMessageToast(e, toastNotifications);
+    }
+  };
+
+  useEffect(() => {
+    if (dataGrid.chartsVisible) {
+      fetchColumnChartsData();
+    }
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dataGrid.chartsVisible,
+    jobConfig?.dest.index,
+    JSON.stringify([searchQuery, dataGrid.visibleColumns]),
+  ]);
+
   const renderCellValue = useRenderCellValue(
     indexPattern,
     dataGrid.pagination,
@@ -75,7 +109,6 @@ export const useExplorationResults = (
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };
