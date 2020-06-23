@@ -2293,6 +2293,7 @@ describe('find()', () => {
               consumer: 'myApp',
               tags: ['myTag'],
             },
+            score: 1,
             references: [],
           },
         ],
