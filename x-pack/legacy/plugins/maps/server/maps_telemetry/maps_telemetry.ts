@@ -183,9 +183,5 @@ export async function getMapsTelemetry(
   const settings: SavedObjectAttribute = {
     showMapVisualizationTypes: config().get('xpack.maps.showMapVisualizationTypes'),
   };
-  const mapsTelemetry = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
-  return await savedObjectsClient.create(TELEMETRY_TYPE, mapsTelemetry, {
-    id: TELEMETRY_TYPE,
-    overwrite: true,
-  });
+  return buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
 }
