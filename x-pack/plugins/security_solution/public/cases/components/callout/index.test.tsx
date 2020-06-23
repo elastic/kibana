@@ -175,4 +175,48 @@ describe('CaseCallOut ', () => {
 
     expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
   });
+
+  it('do not persist a callout of type warning', () => {
+    const props = {
+      ...defaultProps,
+      messages: [
+        {
+          id: 'message-one',
+          title: 'title one',
+          description: <p>{'we have two messages'}</p>,
+          errorType: 'warning' as 'primary' | 'success' | 'warning' | 'danger',
+        },
+      ],
+    };
+
+    mount(
+      <TestProviders>
+        <CaseCallOut {...props} />
+      </TestProviders>
+    );
+
+    expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
+  });
+
+  it('do not persist a callout of type success', () => {
+    const props = {
+      ...defaultProps,
+      messages: [
+        {
+          id: 'message-one',
+          title: 'title one',
+          description: <p>{'we have two messages'}</p>,
+          errorType: 'success' as 'primary' | 'success' | 'warning' | 'danger',
+        },
+      ],
+    };
+
+    mount(
+      <TestProviders>
+        <CaseCallOut {...props} />
+      </TestProviders>
+    );
+
+    expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
+  });
 });

@@ -45,7 +45,7 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
   const handleCallOut = useCallback(
     (id, type) => {
       setCalloutVisibility((prevState) => ({ ...prevState, [id]: false }));
-      if (type !== 'danger') {
+      if (type === 'primary') {
         addMessage('case', id);
       }
     },
