@@ -78,8 +78,7 @@ import {
 } from './rum_client';
 import {
   observabilityDashboardHasDataRoute,
-  observabilityDashboardServiceCountRoute,
-  observabilityDashboardTransactionsRoute,
+  observabilityDashboardDataRoute,
 } from './observability_dashboard';
 
 const createApmApi = () => {
@@ -169,8 +168,7 @@ const createApmApi = () => {
 
     // Observability dashboard
     .add(observabilityDashboardHasDataRoute)
-    .add(observabilityDashboardServiceCountRoute)
-    .add(observabilityDashboardTransactionsRoute);
+    .add(observabilityDashboardDataRoute);
 
   return api;
 };

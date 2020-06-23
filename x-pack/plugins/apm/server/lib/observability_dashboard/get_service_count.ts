@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { rangeFilter } from '../helpers/range_filter';
 
 export async function getServiceCount({
   setup,

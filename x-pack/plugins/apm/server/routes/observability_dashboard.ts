@@ -19,27 +19,20 @@ export const observabilityDashboardHasDataRoute = createRoute(() => ({
   },
 }));
 
-export const observabilityDashboardServiceCountRoute = createRoute(() => ({
-  path: '/api/apm/observability-dashboard/service-count',
-  params: {
-    query: t.intersection([rangeRt, t.type({ bucketSize: t.string })]),
-  },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    return await getServiceCount({ setup });
-  },
-}));
-export const observabilityDashboardTransactionsRoute = createRoute(() => ({
-  path: '/api/apm/observability-dashboard/transactions',
+export const observabilityDashboardDataRoute = createRoute(() => ({
+  path: '/api/apm/observability-dashboard',
   params: {
     query: t.intersection([rangeRt, t.type({ bucketSize: t.string })]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { bucketSize } = context.params.query;
-    return await getTransactionCoordinates({
+    const serviceCount = await getServiceCount({ setup });
+    const transactionCoordinates = await getTransactionCoordinates({
       setup,
       bucketSize,
     });
+
+    return { serviceCount, transactionCoordinates };
   },
 }));

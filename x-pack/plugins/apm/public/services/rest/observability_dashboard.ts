@@ -5,46 +5,48 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FetchData } from '../../../../observability/public/typings/data_handler';
+import { sum } from 'lodash';
+import {
+  ApmFetchDataResponse,
+  FetchData,
+} from '../../../../observability/public/typings/data_handler';
 import { callApmApi } from './createCallApmApi';
 
-export const fetchData: FetchData = async ({
+export const fetchData: FetchData<ApmFetchDataResponse> = async ({
   startTime,
   endTime,
   bucketSize,
 }) => {
-  const serviceCountPromise = callApmApi({
-    pathname: '/api/apm/observability-dashboard/service-count',
+  const data = await callApmApi({
+    pathname: '/api/apm/observability-dashboard',
     params: { query: { start: startTime, end: endTime, bucketSize } },
   });
 
-  const transactionCoordinatesPromise = callApmApi({
-    pathname: '/api/apm/observability-dashboard/transactions',
-    params: { query: { start: startTime, end: endTime, bucketSize } },
-  });
-
-  const [serviceCount, transactionCoordinates] = await Promise.all([
-    serviceCountPromise,
-    transactionCoordinatesPromise,
-  ]);
+  const { serviceCount, transactionCoordinates } = data;
 
   return {
     title: i18n.translate('xpack.apm.observabilityDashboard.title', {
       defaultMessage: 'APM',
     }),
     appLink: '/app/apm',
-    stats: [
-      {
+    stats: {
+      services: {
         label: i18n.translate(
           'xpack.apm.observabilityDashboard.stats.services',
           { defaultMessage: 'Services' }
         ),
         value: serviceCount,
       },
-    ],
-    series: [
-      {
-        key: 'transactions',
+      transactions: {
+        label: i18n.translate(
+          'xpack.apm.observabilityDashboard.stats.transactions',
+          { defaultMessage: 'Transactions' }
+        ),
+        value: sum(transactionCoordinates.map((coordinates) => coordinates.y)),
+      },
+    },
+    series: {
+      transactions: {
         label: i18n.translate(
           'xpack.apm.observabilityDashboard.chart.transactions',
           { defaultMessage: 'Transactions' }
@@ -52,7 +54,7 @@ export const fetchData: FetchData = async ({
         color: 'euiColorVis1',
         coordinates: transactionCoordinates,
       },
-    ],
+    },
   };
 };
 
