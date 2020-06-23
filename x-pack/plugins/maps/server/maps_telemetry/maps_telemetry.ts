@@ -11,12 +11,7 @@ import {
   SavedObjectAttribute,
 } from 'kibana/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
-import {
-  SOURCE_TYPES,
-  ES_GEO_FIELD_TYPE,
-  MAP_SAVED_OBJECT_TYPE,
-  TELEMETRY_TYPE,
-} from '../../common/constants';
+import { SOURCE_TYPES, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
@@ -186,9 +181,5 @@ export async function getMapsTelemetry(config: MapsConfigType) {
   const settings: SavedObjectAttribute = {
     showMapVisualizationTypes: config.showMapVisualizationTypes,
   };
-  const mapsTelemetry = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
-  return await savedObjectsClient.create(TELEMETRY_TYPE, mapsTelemetry, {
-    id: TELEMETRY_TYPE,
-    overwrite: true,
-  });
+  return buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
 }
