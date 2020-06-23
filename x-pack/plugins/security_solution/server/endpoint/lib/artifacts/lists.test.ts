@@ -24,17 +24,20 @@ describe('buildEventTypeSignal', () => {
         {
           entries: [
             {
-              entry: { exact_caseless: 'Elastic, N.V.' },
-              field: 'actingProcess.file.signer',
+              field: 'some.not.nested.field',
               operator: 'included',
-            },
-            {
-              entry: { exact_caseless_any: ['process', 'malware'] },
-              field: 'event.category',
-              operator: 'included',
+              type: 'exact_cased',
+              value: 'some value',
             },
           ],
-          type: 'simple',
+          field: 'some.field',
+          type: 'nested',
+        },
+        {
+          field: 'some.not.nested.field',
+          operator: 'included',
+          type: 'exact_cased',
+          value: 'some value',
         },
       ],
     };
@@ -62,6 +65,6 @@ describe('buildEventTypeSignal', () => {
       .mockReturnValueOnce(second)
       .mockReturnValueOnce(third);
     const resp = await GetFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
-    expect(resp.exceptions_list.length).toEqual(3);
+    expect(resp.exceptions_list.length).toEqual(6);
   });
 });

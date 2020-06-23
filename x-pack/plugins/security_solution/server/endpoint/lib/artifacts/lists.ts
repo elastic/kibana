@@ -7,44 +7,51 @@
 import { createHash } from 'crypto';
 
 import lzma from 'lzma-native';
+import {
+  Entry,
+  EntryNested,
+  EntryMatch,
+  EntryMatchAny,
+} from '../../../../../lists/common/schemas/types/entries';
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
   TranslatedExceptionList,
-  TranslatedEntryNested,
+  TranslatedEntry,
   TranslatedEntryMatch,
   TranslatedEntryMatchAny,
+  TranslatedEntryNested,
+  FinalTranslatedExceptionList,
 } from '../../schemas';
-import { ArtifactConstants } from './common';
 
-export async function buildArtifact(
-  exceptionListClient: ExceptionListClient,
-  os: string,
-  schemaVersion: string
-): InternalArtifactSchema {
-  const exceptions = await GetFullEndpointExceptionList(exceptionListClient, os, schemaVersion);
-  const compressedExceptions: Buffer = await CompressExceptionList(exceptions);
+// export async function buildArtifact(
+//   exceptionListClient: ExceptionListClient,
+//   os: string,
+//   schemaVersion: string
+// ): InternalArtifactSchema {
+//   const exceptions = await GetFullEndpointExceptionList(exceptionListClient, os, schemaVersion);
+//   const compressedExceptions: Buffer = await CompressExceptionList(exceptions);
 
-  const sha256 = createHash('sha256')
-    .update(compressedExceptions.toString('utf8'), 'utf8')
-    .digest('hex');
+//   const sha256 = createHash('sha256')
+//     .update(compressedExceptions.toString('utf8'), 'utf8')
+//     .digest('hex');
 
-  return {
-    identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
-    sha256,
-    encoding: 'xz',
-    created: Date.now(),
-    body: compressedExceptions.toString('binary'),
-    size: Buffer.from(JSON.stringify(exceptions)).byteLength,
-  };
-}
+//   return {
+//     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
+//     sha256,
+//     encoding: 'xz',
+//     created: Date.now(),
+//     body: compressedExceptions.toString('binary'),
+//     size: Buffer.from(JSON.stringify(exceptions)).byteLength,
+//   };
+// }
 
-async function GetFullEndpointExceptionList(
+export async function GetFullEndpointExceptionList(
   eClient: ExceptionListClient,
   os: string, // TODO: make type
   schemaVersion: string
-): Promise<EndpointExceptionList> {
-  const exceptions: EndpointExceptionList = { exceptions_list: [] };
+): Promise<FinalTranslatedExceptionList> {
+  const exceptions: FinalTranslatedExceptionList = { exceptions_list: [] }; // todo type
   let numResponses = 0;
   let page = 1;
 
@@ -75,26 +82,6 @@ async function GetFullEndpointExceptionList(
   return exceptions;
 }
 
-function translateEntry(schemaVersion: string, entry: ExceptionListItemSchema) {
-  const type = entry.type;
-  const translatedEntry: TranslatedEntry = {
-    field: entry.field,
-    type: entry.type,
-  };
-  if (entry.type === 'nested') {
-    translatedEntry.entries = [];
-    entry.entries.forEach((nestedEntry) => {
-      translatedEntry.entries.push(translateEntry(schemaVersion, nestedEntry));
-    });
-  } else if (entry.type === 'match') {
-    // TODO: sync with pedro, when to use cased/caseless
-  } else if (entry.type === 'match_any') {
-    // TODO: sync with pedro, when to use cased/caseless
-  } else {
-    // TODO: log and return
-  }
-}
-
 /**
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exc
@@ -102,18 +89,15 @@ function translateEntry(schemaVersion: string, entry: ExceptionListItemSchema) {
 function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
-): TranslatedExceptionList {
-  const translatedList: TranslatedExceptionList = {
-    type: exc.type,
-    entries: [],
-  };
+): TranslatedEntry[] {
+  const translatedList: TranslatedEntry[] = [];
 
   if (schemaVersion === '1.0.0') {
     // Transform to endpoint format
     exc.data.forEach((list) => {
       list.entries.forEach((entry) => {
         // TODO case sensitive?
-        translatedList.entries.push(translateEntry(entry));
+        translatedList.push(translateEntry(schemaVersion, entry));
       });
     });
   } else {
@@ -123,6 +107,41 @@ function translateToEndpointExceptions(
   // TODO: validate
 
   return translatedList;
+}
+
+function translateEntry(schemaVersion: string, entry: Entry | EntryNested): TranslatedEntry {
+  let translatedEntry: TranslatedEntry;
+  if (entry.type === 'nested') {
+    const e = (entry as unknown) as EntryNested;
+    const nestedEntries: TranslatedEntry[] = [];
+    e.entries.forEach((nestedEntry) => {
+      nestedEntries.push(translateEntry(schemaVersion, nestedEntry));
+    });
+    translatedEntry = {
+      entries: nestedEntries,
+      field: e.field,
+      type: 'nested',
+    } as TranslatedEntryNested;
+  } else if (entry.type === 'match') {
+    const e = (entry as unknown) as EntryMatch;
+    translatedEntry = {
+      field: e.field,
+      operator: e.operator,
+      type: 'exact_cased', // todo
+      value: e.value,
+    } as TranslatedEntryMatch;
+  } else if (entry.type === 'match_any') {
+    const e = (entry as unknown) as EntryMatchAny;
+    translatedEntry = {
+      field: e.field,
+      operator: e.operator,
+      type: 'exact_cased_any', // todo
+      value: e.value,
+    } as TranslatedEntryMatchAny;
+  } else {
+    throw new Error();
+  }
+  return translatedEntry;
 }
 
 /**

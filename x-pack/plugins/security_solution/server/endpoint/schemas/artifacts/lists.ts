@@ -57,3 +57,10 @@ export const translatedExceptionList = t.exact(
   })
 );
 export type TranslatedExceptionList = t.TypeOf<typeof translatedExceptionList>;
+
+export const finalExceptionList = t.exact(
+  t.type({
+    exceptions_list: t.array(translatedEntry),
+  })
+);
+export type FinalTranslatedExceptionList = t.TypeOf<typeof finalExceptionList>;
