@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { ExportApp } from '../export_app';
 
 jest.mock('style-it', () => ({
