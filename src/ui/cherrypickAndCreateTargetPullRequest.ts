@@ -8,15 +8,15 @@ import { exec } from '../services/child-process-promisified';
 import { getRepoPath } from '../services/env';
 import {
   cherrypick,
-  createFeatureBranch,
-  deleteFeatureBranch,
-  pushFeatureBranch,
-  getRemoteName,
+  createBackportBranch,
+  deleteBackportBranch,
+  pushBackportBranch,
   setCommitAuthor,
   getUnmergedFiles,
   addUnstagedFiles,
   finalizeCherrypick,
   getFilesWithConflicts,
+  getFullBackportBranch,
 } from '../services/git';
 import { getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
@@ -36,21 +36,19 @@ export async function cherrypickAndCreateTargetPullRequest({
   commits: CommitSelected[];
   targetBranch: string;
 }) {
-  const featureBranch = getFeatureBranchName(targetBranch, commits);
+  const backportBranch = getBackportBranch(targetBranch, commits);
   consoleLog(`\n${chalk.bold(`Backporting to ${targetBranch}:`)}`);
 
-  await createFeatureBranch(options, targetBranch, featureBranch);
+  await createBackportBranch({ options, targetBranch, backportBranch });
   await sequentially(commits, (commit) => waitForCherrypick(options, commit));
 
   if (options.resetAuthor) {
     await setCommitAuthor(options, options.username);
   }
 
-  const headBranchName = getHeadBranchName(options, featureBranch);
-
   const spinner = ora().start();
-  await pushFeatureBranch({ options, featureBranch, headBranchName });
-  await deleteFeatureBranch(options, featureBranch);
+  await pushBackportBranch({ options, backportBranch });
+  await deleteBackportBranch({ options, backportBranch });
   spinner.stop();
 
   const payload = getPullRequestPayload(options, targetBranch, commits);
@@ -101,7 +99,15 @@ export async function cherrypickAndCreateTargetPullRequest({
   return targetPullRequest;
 }
 
-function getFeatureBranchName(targetBranch: string, commits: CommitSelected[]) {
+/*
+ * Returns the name of the backport brancha
+ *
+ * Examples:
+ * For a single PR: `backport/7.x/pr-1234`
+ * For a single commit: `backport/7.x/commit-abcdef`
+ * For multiple: `backport/7.x/pr-1234_commit-abcdef`
+ */
+function getBackportBranch(targetBranch: string, commits: CommitSelected[]) {
   const refValues = commits
     .map((commit) =>
       commit.pullNumber
@@ -117,9 +123,15 @@ async function waitForCherrypick(
   options: BackportOptions,
   commit: CommitSelected
 ) {
-  const cherrypickSpinner = ora(
-    `Cherry-picking: ${chalk.greenBright(commit.formattedMessage)}`
-  ).start();
+  const spinnerText = `Cherry-picking: ${chalk.greenBright(
+    commit.formattedMessage
+  )}`;
+  const cherrypickSpinner = ora(spinnerText).start();
+
+  if (options.dryRun) {
+    cherrypickSpinner.succeed(`Dry run: ${spinnerText}`);
+    return;
+  }
 
   try {
     const { needsResolving } = await cherrypick(options, commit);
@@ -145,7 +157,7 @@ async function waitForCherrypick(
 
     const filesWithConflicts = await getFilesWithConflicts(options);
     const repoPath = getRepoPath(options);
-    const didAutoFix = options.autoFixConflicts({
+    const didAutoFix = await options.autoFixConflicts({
       files: filesWithConflicts,
       directory: repoPath,
       logger,
@@ -262,18 +274,13 @@ function getPullRequestTitle(
     .slice(0, 240);
 }
 
-function getHeadBranchName(options: BackportOptions, featureBranch: string) {
-  const remoteName = getRemoteName(options);
-  return `${remoteName}:${featureBranch}`;
-}
-
 function getPullRequestPayload(
   options: BackportOptions,
   targetBranch: string,
   commits: CommitSelected[]
 ) {
   const { prDescription, prTitle } = options;
-  const featureBranch = getFeatureBranchName(targetBranch, commits);
+  const backportBranch = getBackportBranch(targetBranch, commits);
   const commitMessages = commits
     .map((commit) => ` - ${commit.formattedMessage}`)
     .join('\n');
@@ -282,7 +289,7 @@ function getPullRequestPayload(
   return {
     title: getPullRequestTitle(targetBranch, commits, prTitle),
     body: `Backports the following commits to ${targetBranch}:\n${commitMessages}${bodySuffix}`,
-    head: getHeadBranchName(options, featureBranch),
+    head: getFullBackportBranch(options, backportBranch),
     base: targetBranch,
   };
 }

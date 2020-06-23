@@ -14,7 +14,7 @@ type AutoFixConflictsHandler = ({
   files: string[];
   directory: string;
   logger: Logger;
-}) => boolean;
+}) => boolean | Promise<boolean>;
 
 export interface ConfigOptions {
   accessToken?: string;

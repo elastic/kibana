@@ -1,6 +1,7 @@
 import { BranchChoice } from '../options/ConfigOptions';
 import { BackportOptions } from '../options/options';
 import * as prompts from '../services/prompts';
+import { CommitSelected } from '../types/Commit';
 import { SpyHelper } from '../types/SpyHelper';
 import { getTargetBranches } from './getTargetBranches';
 
@@ -113,14 +114,23 @@ describe('getTargetBranches', () => {
     let branches: ReturnType<typeof getTargetBranches>;
 
     beforeEach(async () => {
-      branches = await getTargetBranches(
-        ({
-          targetBranches: [],
-          targetBranchChoices: [{ name: 'branchA' }, { name: 'branchB' }],
-          multipleBranches: false,
-        } as unknown) as BackportOptions,
-        []
-      );
+      const options = ({
+        targetBranches: [],
+        targetBranchChoices: [{ name: 'branchA' }, { name: 'branchB' }],
+        multipleBranches: false,
+      } as unknown) as BackportOptions;
+
+      const commits: CommitSelected[] = [
+        {
+          formattedMessage: 'hey',
+          selectedTargetBranches: [],
+          sha: 'abcd',
+          sourceBranch: '7.x',
+          pullNumber: 1337,
+        },
+      ];
+
+      branches = await getTargetBranches(options, commits);
     });
 
     it('should return branches from prompt', () => {

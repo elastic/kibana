@@ -107,7 +107,9 @@ export async function fetchCommitsByAuthor(
     }
   `;
 
-  const spinner = ora('Loading commits...').start();
+  const spinner = ora(
+    `Loading commits from branch "${sourceBranch}"...`
+  ).start();
   let res: DataResponse;
   try {
     const authorId = await fetchAuthorId(options);
@@ -132,7 +134,7 @@ export async function fetchCommitsByAuthor(
 
   if (res.repository.ref === null) {
     throw new HandledError(
-      `The upstream branch "${sourceBranch}" does not exist. Try specifying a different branch with "--sourceBranch <your-branch>"`
+      `The upstream branch "${sourceBranch}" does not exist. Try specifying a different branch with "--source-branch <your-branch>"`
     );
   }
 

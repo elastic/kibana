@@ -227,16 +227,24 @@ export async function addUnstagedFiles(options: BackportOptions) {
   return exec(`git add --update`, { cwd: getRepoPath(options) });
 }
 
-export async function createFeatureBranch(
-  options: BackportOptions,
-  targetBranch: string,
-  featureBranch: string
-) {
+// How the commit flows:
+// ${sourceBranch} -> ${backportBranch} -> ${targetBranch}
+// Example:
+// master -> backport/7.x/pr-1234 -> 7.x
+export async function createBackportBranch({
+  options,
+  targetBranch,
+  backportBranch,
+}: {
+  options: BackportOptions;
+  targetBranch: string;
+  backportBranch: string;
+}) {
   const spinner = ora('Pulling latest changes').start();
 
   try {
     const res = await exec(
-      `git reset --hard && git clean -d --force && git fetch ${options.repoOwner} ${targetBranch} && git checkout -B ${featureBranch} ${options.repoOwner}/${targetBranch} --no-track`,
+      `git reset --hard && git clean -d --force && git fetch ${options.repoOwner} ${targetBranch} && git checkout -B ${backportBranch} ${options.repoOwner}/${targetBranch} --no-track`,
       { cwd: getRepoPath(options) }
     );
     spinner.succeed();
@@ -258,12 +266,15 @@ export async function createFeatureBranch(
   }
 }
 
-export function deleteFeatureBranch(
-  options: BackportOptions,
-  featureBranch: string
-) {
+export function deleteBackportBranch({
+  options,
+  backportBranch,
+}: {
+  options: BackportOptions;
+  backportBranch: string;
+}) {
   return exec(
-    `git checkout ${options.sourceBranch} && git branch -D ${featureBranch}`,
+    `git checkout ${options.sourceBranch} && git branch -D ${backportBranch}`,
     { cwd: getRepoPath(options) }
   );
 }
@@ -272,26 +283,39 @@ export function getRemoteName(options: BackportOptions) {
   return options.fork ? options.username : options.repoOwner;
 }
 
-export async function pushFeatureBranch({
+/*
+ * Returns the full name of the backport branch, which includes the upstream
+ *
+ * Example: `sqren:backport/7.x/pr-1234`
+ */
+export function getFullBackportBranch(
+  options: BackportOptions,
+  backportBranch: string
+) {
+  const remoteName = getRemoteName(options);
+  return `${remoteName}:${backportBranch}`;
+}
+
+export async function pushBackportBranch({
   options,
-  featureBranch,
-  headBranchName,
+  backportBranch,
 }: {
   options: BackportOptions;
-  featureBranch: string;
-  headBranchName: string;
+  backportBranch: string;
 }) {
-  const spinner = ora(`Pushing branch "${headBranchName}"`).start();
+  const fullBackportBranch = getFullBackportBranch(options, backportBranch);
+  const spinnerText = `Pushing branch "${fullBackportBranch}"`;
+  const spinner = ora(spinnerText).start();
 
   if (options.dryRun) {
-    spinner.succeed(`Dry run: Pushing branch "${headBranchName}"`);
-    return exec('true', { cwd: getRepoPath(options) });
+    spinner.succeed(`Dry run: ${spinnerText}`);
+    return;
   }
 
   try {
     const remoteName = getRemoteName(options);
     const res = await exec(
-      `git push ${remoteName} ${featureBranch}:${featureBranch} --force`,
+      `git push ${remoteName} ${backportBranch}:${backportBranch} --force`,
       { cwd: getRepoPath(options) }
     );
     spinner.succeed();

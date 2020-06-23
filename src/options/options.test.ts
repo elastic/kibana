@@ -81,7 +81,7 @@ describe('getOptions', () => {
 
   it('should merge config options and module options', async () => {
     setupSpy({ defaultBranch: 'my-default-branch' });
-    const myFn = () => true;
+    const myFn = async () => true;
     const options = await getOptions(defaultArgs, { autoFixConflicts: myFn });
     expect(options.autoFixConflicts).toBe(myFn);
   });

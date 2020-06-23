@@ -5,9 +5,9 @@ import {
   getUnmergedFiles,
   finalizeCherrypick,
   deleteRemote,
-  createFeatureBranch,
   cherrypick,
   getFilesWithConflicts,
+  createBackportBranch,
 } from '../services/git';
 import { ExecError } from '../test/ExecError';
 
@@ -79,7 +79,7 @@ describe('createFeatureBranch', () => {
   } as BackportOptions;
 
   const targetBranch = '4.x';
-  const featureBranch = 'backport/4.x/commit-72f94e76';
+  const backportBranch = 'backport/4.x/commit-72f94e76';
 
   it('should throw HandledError', async () => {
     expect.assertions(1);
@@ -95,7 +95,7 @@ describe('createFeatureBranch', () => {
 
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
     await expect(
-      createFeatureBranch(options, targetBranch, featureBranch)
+      createBackportBranch({ options, targetBranch, backportBranch })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The branch \\"4.x\\" is invalid or doesn't exist"`
     );
@@ -108,7 +108,7 @@ describe('createFeatureBranch', () => {
     expect.assertions(1);
 
     await expect(
-      createFeatureBranch(options, targetBranch, featureBranch)
+      createBackportBranch({ options, targetBranch, backportBranch })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"just a normal error"`);
   });
 });

@@ -21,11 +21,16 @@ export function getTargetBranches(
     (commit) => commit.selectedTargetBranches
   ).filter(filterEmpty);
 
+  // sourceBranch should be the same for all commits, so picking `sourceBranch` from the first commit should be fine 🤞
+  // this is specifically needed when backporting a PR like `backport --pr 123` and the source PR is merged to a non-default (aka non-master) branch.
+  const { sourceBranch } = commits[0];
+
   // list the target branch choices (in contrast to automatically backporting to specific branches)
   return promptForTargetBranches({
     targetBranchChoices: getTargetBranchChoices(
       options,
-      selectedTargetBranches
+      selectedTargetBranches,
+      sourceBranch
     ),
     isMultipleChoice: options.multipleBranches,
   });
@@ -33,11 +38,12 @@ export function getTargetBranches(
 
 function getTargetBranchChoices(
   options: BackportOptions,
-  selectedTargetBranches: string[]
+  selectedTargetBranches: string[],
+  sourceBranch: string
 ) {
   // exclude sourceBranch from targetBranchChoices
   const targetBranchChoices = options.targetBranchChoices?.filter(
-    (choice) => choice.name !== options.sourceBranch
+    (choice) => choice.name !== sourceBranch
   );
 
   if (!targetBranchChoices || isEmpty(targetBranchChoices)) {
