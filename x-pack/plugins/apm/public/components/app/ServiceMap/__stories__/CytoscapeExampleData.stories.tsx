@@ -6,23 +6,24 @@
 /* eslint-disable no-console */
 
 import {
+  EuiButton,
+  EuiCodeEditor,
+  EuiFieldNumber,
+  EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiForm,
-  EuiFieldNumber,
-  EuiToolTip,
-  EuiCodeEditor,
   EuiSpacer,
-  EuiFilePicker,
+  EuiToolTip,
 } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { EuiThemeProvider } from '../../../../../../observability/public';
 import { Cytoscape } from '../Cytoscape';
-import { generateServiceMapElements } from './generate_service_map_elements';
-import exampleResponseOpbeansBeats from './example_response_opbeans_beats.json';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';
+import exampleResponseOpbeansBeats from './example_response_opbeans_beats.json';
 import exampleResponseTodo from './example_response_todo.json';
+import { generateServiceMapElements } from './generate_service_map_elements';
 
 const STORYBOOK_PATH = 'app/ServiceMap/Cytoscape/Example data';
 
@@ -34,67 +35,69 @@ function setSessionJson(json: string) {
   window.sessionStorage.setItem(SESSION_STORAGE_KEY, json);
 }
 
-storiesOf(STORYBOOK_PATH, module).add(
-  'Generate map',
-  () => {
-    const [size, setSize] = useState<number>(10);
-    const [json, setJson] = useState<string>('');
-    const [elements, setElements] = useState<any[]>(
-      generateServiceMapElements(size)
-    );
+storiesOf(STORYBOOK_PATH, module)
+  .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+  .add(
+    'Generate map',
+    () => {
+      const [size, setSize] = useState<number>(10);
+      const [json, setJson] = useState<string>('');
+      const [elements, setElements] = useState<any[]>(
+        generateServiceMapElements(size)
+      );
 
-    return (
-      <div>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiButton
-              onClick={() => {
-                setElements(generateServiceMapElements(size));
-                setJson('');
-              }}
-            >
-              Generate service map
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiToolTip position="right" content="Number of services">
-              <EuiFieldNumber
-                placeholder="Size"
-                value={size}
-                onChange={(e) => setSize(e.target.valueAsNumber)}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton
-              onClick={() => {
-                setJson(JSON.stringify({ elements }, null, 2));
-              }}
-            >
-              Get JSON
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      return (
+        <div>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiButton
+                onClick={() => {
+                  setElements(generateServiceMapElements(size));
+                  setJson('');
+                }}
+              >
+                Generate service map
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiToolTip position="right" content="Number of services">
+                <EuiFieldNumber
+                  placeholder="Size"
+                  value={size}
+                  onChange={(e) => setSize(e.target.valueAsNumber)}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                onClick={() => {
+                  setJson(JSON.stringify({ elements }, null, 2));
+                }}
+              >
+                Get JSON
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <Cytoscape elements={elements} height={600} width={1340} />
+          <Cytoscape elements={elements} height={600} width={1340} />
 
-        {json && (
-          <EuiCodeEditor
-            mode="json"
-            theme="github"
-            width="100%"
-            value={json}
-            setOptions={{ fontSize: '12px' }}
-            isReadOnly
-          />
-        )}
-      </div>
-    );
-  },
-  {
-    info: { propTables: false, source: false },
-  }
-);
+          {json && (
+            <EuiCodeEditor
+              mode="json"
+              theme="github"
+              width="100%"
+              value={json}
+              setOptions={{ fontSize: '12px' }}
+              isReadOnly
+            />
+          )}
+        </div>
+      );
+    },
+    {
+      info: { propTables: false, source: false },
+    }
+  );
 
 storiesOf(STORYBOOK_PATH, module).add(
   'Map from JSON',
