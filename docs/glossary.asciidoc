@@ -42,47 +42,80 @@ A UI for editing the settings that control the appearance and behavior
 For more information, see {kibana-ref}/advanced-options.html[Advanced Settings].
 // end::advanced-settings-def[]
 
-[[glossary-auto-follow-pattern]] auto-follow pattern ::
-+
---
-include::{es-repo-dir}/glossary.asciidoc[tag=auto-follow-pattern-def]
---
-
 [float]
 [[b_glos]]
 == B
+
+[[glossary-basemap]] basemap ::
+// tag::basemap-def[]
+The background detail necessary to orient the location of a map.
+// end::basemap-def[]
+
+[[glossary-blocklist]] block list ::
+// tag::blocklist-def[]
+A filtering rule that excludes one or more members from a set.
+// end::blocklist-def[]
 
 
 [float]
 [[c_glos]]
 == C
 
-[[glossary-cluster]] cluster ::
-+
---
-include::{es-repo-dir}/glossary.asciidoc[tag=cluster-def]
---
+[[glossary-certainty-map]] certainty ::
+// tag::certainty-def[]
+Specifies how many documents must contain a pair of terms before it is considered
+to be a useful connection in a graph.
+// end::certainty-def[]
 
-[[glossary-ccr]] {ccr} (CCR)::
-+
---
-include::{es-repo-dir}/glossary.asciidoc[tag=ccr-def]
---
-
-[[glossary-ccs]] {ccs} (CCS)::
-+
---
-include::{es-repo-dir}/glossary.asciidoc[tag=ccs-def]
---
+[[glossary-choropleth-map]] choropleth map ::
+// tag::choropleth-map-def[]
+A map that shade areas in proportion to metric values that represent an aggregate summary
+of a geographic characteristic (e.g. a map showing age or political
+affiliation across geopolitical boundaries).
+// end::choropleth-map-def[]
 
 
 [float]
 [[d_glos]]
 == D
 
+[glossary-data-source]] data source ::
+// tag::data-source-def[]
+The data source for a map, Canvas element, and visualizations.
+// end::data-source-def[]
+
+[glossary-data-source]] diversity field ::
+// tag::data-source-def[]
+A field for which only a certain number of documents will be accepted in your
+graph to avoid bias. For example, if you select "nationality" as a
+diversity field, a limited number of documents will be accepted per nationality
+in your sample.
+// end::data-source-def[]
+
+[glossary-drilldown]] drilldown ::
+// tag::drilldown-def[]
+Custom navigation paths between apps. Refer to {kibana-ref}/drilldowns.html[Use drilldowns for dashboard actions].
+// end::drilldown-def[]
+
+
+
 [float]
 [[e_glos]]
 == E
+
+[[glossary-edge]] edge ::
+// tag::edge-def[]
+In network diagrams, the links (often lines) between nodes that denote a relationship.
+The width of the edges represents the strength of the relationship.
+// end::edge-def[]
+
+
+[[glossary-ems]] Elastic Maps Service (EMS) ::
+// tag::ems-def[]
+A service that serves basemap tiles, shape files, and other key features
+that are essential for visualizing geospatial data.
+// end::ems-def[]
+
 
 [float]
 [[f_glos]]
@@ -92,9 +125,21 @@ include::{es-repo-dir}/glossary.asciidoc[tag=ccs-def]
 [[g_glos]]
 == G
 
+[[glossary-GeoJSON]] GeoJSON ::
+// tag::GeoJSON-def[]
+An open-standard file format for storing geospatial vector data.
+// end::GeoJSON-def[]
+
+
 [float]
 [[h_glos]]
 == H
+
+[[glossary-heat map]] heat map ::
+// tag::GeoJSON-def[]
+A geographic visualization in which point data is clustered to show locations with higher densities.
+// end::GeoJSON-def[]
+
 
 [float]
 [[i_glos]]
@@ -108,13 +153,47 @@ include::{es-repo-dir}/glossary.asciidoc[tag=ccs-def]
 [[k_glos]]
 == K
 
+[[glossary-kql]] {kib} Query Language (KQL) ::
+// tag::kql-def[]
+The default language for querying in {kib}. The {kib} Query Language provides
+support for scripted fields.
+// end::kql-def[]
+
+
 [float]
 [[l_glos]]
 == L
 
+[[glossary-lucene]] Lucene query syntax ::
+// tag::lucene-def[]
+The query syntax for {kib}’s legacy query language. The Lucene query
+syntax is available under the options menu in the query bar and from the
+<<glossary-advanced-settings,Advanced Settings UI>>.
+// end::lucene-def[]
+
 [float]
 [[m_glos]]
 == M
+
+[[glossary-map]] map ::
+// tag::map-def[]
+A series of layers, drawn in a particular order.
+Refer to {kibana-ref}/maps.html[Maps].
+// end::map-def[]
+
+
+[[glossary-map-layer]] map layer ::
+// tag::map-layer-def[]
+A representation of geographic data using symbols and labels. Refer to <<glossary-map,map>>.
+// end::map-layer-def[]
+
+[[glossary-maps]] Maps ::
+// tag::maps-def[]
+An app for visual exploration and analysis of geospatial data.  Supports multiple layers
+and data sources, mapping of individual geo points and shapes, and dynamic client-side styling.
+Refer to {kibana-ref}/maps.html[Maps].
+// end::maps-def[]
+
 
 [float]
 [[n_glos]]
@@ -132,19 +211,38 @@ include::{es-repo-dir}/glossary.asciidoc[tag=ccs-def]
 [[q_glos]]
 == Q
 
+[[glossary-query-bar]] space ::
+// tag::query-bar-def[]
+A text field that enables you to submit a query expression that specifies what
+information you want to retrieve and interact with.
+// end::query-bar-def[]
+
+
 [float]
 [[r_glos]]
 == R
 
-[[glossary-reindex]] reindex ::
-+
---
-include::{es-repo-dir}/glossary.asciidoc[tag=reindex-def]
---
-
 [float]
 [[s_glos]]
 == S
+
+[[glossary-saved-object]] saved object ::
+// tag::saved-object-def[]
+An object that stores data for later use. A saved object can be a
+dashboard, visualization, map, index pattern, or Canvas workpad.
+// end::saved-object-def[]
+
+[[glossary-saved-search]] saved search ::
+// tag::saved-search-def[]
+The query text, filters, and time filter that make up a search,
+saved for later retrieval and reuse.
+// end::saved-search-def[]
+
+[[glossary-scripted-field]] scripted field ::
+// tag::scripted-field-def[]
+A field that computes data on the fly from the data in your {es} indices.
+Scripted field data is shown in Discover and you can use them in your visualizations.
+// end::scripted-field-def[]
 
 [[glossary-space]] space ::
 // tag::space-def[]
@@ -152,9 +250,9 @@ A place for organizing dashboards, visualizations, and other saved objects by ca
 For example, you might create a space based on a team, use case, or individual.
 // end::space-def[]
 
-[[glossary-feature-space]] Space ::
+[[glossary-feature-space]] Spaces ::
 // tag::space-feature-def[]
-A feature in {kib} that allows you to organize your dashboards, visualizations, and
+A feature allows you to organize your dashboards, visualizations, and
 other saved objects into meaningful categories. Refer to
 {kibana-ref}/xpack-spaces.html[Spaces].
 // end::space-feature-def[]
@@ -172,6 +270,25 @@ and route that data to the monitoring cluster. Refer to
 [[t_glos]]
 == T
 
+[[glossary-term-join]] term join ::
+// tag::term-join-def[]
+A shared key that combines vector features with the results of an
+{es} terms aggregation. Term joins augment vector features with
+properties for data-driven styling and rich tooltip content in maps.
+// end::term-join-def[]
+
+[[glossary-time-filter]] time filter ::
+// tag::time-filter-def[]
+A control that constrains the search results to a particular time period.
+// end::time-filter-def[]
+
+[[glossary-time-series-data]] time series data ::
+// tag::time-series-data[]
+A control that constrains the search results to a particular time period.
+// end::time-series-data[]
+
+
+
 [float]
 [[u_glos]]
 == U
@@ -180,7 +297,7 @@ and route that data to the monitoring cluster. Refer to
 // tag::upgrade-assistant-def[]
 A feature that helps prepare you for an upgrade to the next major version of
 {es}. The assistant identifies the deprecated settings in your cluster and
-indices and guides you through resolving issues, including reindexing. For more information, refer to
+indices and guides you through resolving issues, including reindexing. Refer to
 {kibana-ref}/upgrade-assistant.html[Upgrade Assistant].
 // end::upgrade-assistant-def[]
 
@@ -188,6 +305,11 @@ indices and guides you through resolving issues, including reindexing. For more 
 [float]
 [[v_glos]]
 == V
+
+[[glossary-vector]] vector ::
+// tag::vector-def[]
+Points, lines, and polygons used to represent a map.
+// end::vector-def[]
 
 [[glossary-visualzation]] visualization ::
 // tag::visualzation-def[]
@@ -202,6 +324,6 @@ A graphical representation of query results (e.g., a histogram, line graph, pie 
 [[glossary-watcher]] Watcher ::
 // tag::watcher-def[]
 The original suite of alerting features.
-For more information, refer to
+Refer to
 {kibana-ref}/watcher.html[Watcher].
 // end::watcher-def[]
