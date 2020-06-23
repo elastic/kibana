@@ -13,12 +13,12 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
-import { rangeFilter } from '../helpers/range_filter';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import { rangeFilter } from '../../../common/utils/range_filter';
 
 export async function getErrorRate({
   serviceName,

@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { ESFilter } from '../../../typings/elasticsearch';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
@@ -14,10 +17,7 @@ import {
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { ESFilter } from '../../../typings/elasticsearch';
 import { getErrorRate } from '../errors/get_error_rate';
-import { rangeFilter } from '../helpers/range_filter';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
 
 interface Options {

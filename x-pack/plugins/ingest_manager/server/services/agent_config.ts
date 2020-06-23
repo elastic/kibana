@@ -65,8 +65,6 @@ class AgentConfigService {
       updated_by: user ? user.username : 'system',
     });
 
-    await this.triggerAgentConfigUpdatedEvent(soClient, 'updated', id);
-
     return (await this.get(soClient, id)) as AgentConfig;
   }
 
