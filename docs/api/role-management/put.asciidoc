@@ -17,6 +17,7 @@ experimental[] Create a new {kib} role, or update the attributes of an existing 
 
 To use the create or update role API, you must have the `manage_security` cluster privilege.
 
+[role="child_attributes"]
 [[role-management-api-response-body]]
 ==== Request body
 
@@ -29,8 +30,11 @@ To use the create or update role API, you must have the `manage_security` cluste
   {ref}/defining-roles.html[Defining roles].
 
 `kibana`::
-  (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role:
-
+  (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role.
++
+.Properties of `kibana`
+[%collapsible%open]
+=====
 `base` :::
   (Optional, list) A base privilege. When specified, the base must be `["all"]` or `["read"]`.
   When the `base` privilege is specified, you are unable to use the `feature` section.
@@ -45,6 +49,7 @@ To use the create or update role API, you must have the `manage_security` cluste
 `spaces` :::
   (list) The spaces to apply the privileges to.
   To grant access to all spaces, set to `["*"]`, or omit the value.
+=====
 
 [[role-management-api-put-response-codes]]
 ==== Response code
@@ -52,7 +57,7 @@ To use the create or update role API, you must have the `manage_security` cluste
 `204`::
   Indicates a successful call.
 
-===== Examples
+==== Examples
 
 Grant access to various features in all spaces:
 

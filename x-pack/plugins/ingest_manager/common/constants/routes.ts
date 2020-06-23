@@ -5,21 +5,28 @@
  */
 // Base API paths
 export const API_ROOT = `/api/ingest_manager`;
+export const EPM_API_ROOT = `${API_ROOT}/epm`;
+export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const DATASOURCE_API_ROOT = `${API_ROOT}/datasources`;
 export const AGENT_CONFIG_API_ROOT = `${API_ROOT}/agent_configs`;
-export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
 
 // EPM API routes
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
 const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgkey}`;
+const EPM_PACKAGES_FILE = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}`;
 export const EPM_API_ROUTES = {
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INFO_PATTERN: EPM_PACKAGES_ONE,
   INSTALL_PATTERN: EPM_PACKAGES_ONE,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
-  FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
+  FILEPATH_PATTERN: `${EPM_PACKAGES_FILE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
+};
+
+// Data stream API routes
+export const DATA_STREAM_API_ROUTES = {
+  LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
 };
 
 // Datasource API routes
@@ -37,8 +44,28 @@ export const AGENT_CONFIG_API_ROUTES = {
   INFO_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}`,
   CREATE_PATTERN: `${AGENT_CONFIG_API_ROOT}`,
   UPDATE_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}`,
+  COPY_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/copy`,
   DELETE_PATTERN: `${AGENT_CONFIG_API_ROOT}/delete`,
   FULL_INFO_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/full`,
+  FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/download`,
+};
+
+// Output API routes
+export const OUTPUT_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/outputs`,
+  INFO_PATTERN: `${API_ROOT}/outputs/{outputId}`,
+  UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
+};
+
+// Settings API routes
+export const SETTINGS_API_ROUTES = {
+  INFO_PATTERN: `${API_ROOT}/settings`,
+  UPDATE_PATTERN: `${API_ROOT}/settings`,
+};
+
+// App API routes
+export const APP_API_ROUTES = {
+  CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
 };
 
 // Agent API routes
@@ -52,7 +79,8 @@ export const AGENT_API_ROUTES = {
   ACKS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/actions`,
   ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
-  UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/unenroll`,
+  UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/unenroll`,
+  REASSIGN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/reassign`,
   STATUS_PATTERN: `${FLEET_API_ROOT}/agent-status`,
 };
 

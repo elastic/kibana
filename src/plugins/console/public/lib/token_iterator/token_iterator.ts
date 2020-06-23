@@ -33,7 +33,7 @@ export class TokenIterator {
 
   constructor(private readonly provider: TokensProvider, startPosition: Position) {
     this.tokensLineCache = this.provider.getTokens(startPosition.lineNumber) || [];
-    const tokenIdx = this.tokensLineCache.findIndex(token =>
+    const tokenIdx = this.tokensLineCache.findIndex((token) =>
       isColumnInTokenRange(startPosition.column, token)
     );
     if (tokenIdx > -1) {

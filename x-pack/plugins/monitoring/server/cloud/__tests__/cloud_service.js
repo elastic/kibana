@@ -113,7 +113,7 @@ describe('CloudService', () => {
     });
 
     it('expects unusable bodies', async () => {
-      const parseBody = parsedBody => {
+      const parseBody = (parsedBody) => {
         expect(parsedBody).to.eql(body);
 
         return null;
@@ -125,7 +125,7 @@ describe('CloudService', () => {
 
     it('uses parsed object to create response', async () => {
       const serviceResponse = new CloudServiceResponse('a123', true, { id: 'xyz' });
-      const parseBody = parsedBody => {
+      const parseBody = (parsedBody) => {
         expect(parsedBody).to.eql(body);
 
         return serviceResponse;

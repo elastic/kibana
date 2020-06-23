@@ -15,13 +15,6 @@ import { UIActions } from './ui';
  * by the various `checkPrivilegesWithRequest` derivatives
  */
 export class Actions {
-  /**
-   * The allHack action is used to differentiate the `all` privilege from the `read` privilege
-   * for those applications which register the same set of actions for both privileges. This is a
-   * temporary hack until we remove this assumption in the role management UI
-   */
-  public readonly allHack = 'allHack:';
-
   public readonly api = new ApiActions(this.versionNumber);
 
   public readonly app = new AppActions(this.versionNumber);

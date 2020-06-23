@@ -68,8 +68,8 @@ export async function getLogstashPipelineIds(
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return get(response, 'aggregations.nest.id.buckets', []).map(bucket => ({
+  return get(response, 'aggregations.nest.id.buckets', []).map((bucket) => ({
     id: bucket.key,
-    nodeIds: get(bucket, 'unnest.nodes.buckets', []).map(item => item.key),
+    nodeIds: get(bucket, 'unnest.nodes.buckets', []).map((item) => item.key),
   }));
 }

@@ -20,8 +20,9 @@ export interface ChromeNavLink
 |  [category](./kibana-plugin-core-public.chromenavlink.category.md) | <code>AppCategory</code> | The category the app lives in |
 |  [disabled](./kibana-plugin-core-public.chromenavlink.disabled.md) | <code>boolean</code> | Disables a link from being clickable. |
 |  [disableSubUrlTracking](./kibana-plugin-core-public.chromenavlink.disablesuburltracking.md) | <code>boolean</code> | A flag that tells legacy chrome to ignore the link when tracking sub-urls |
-|  [euiIconType](./kibana-plugin-core-public.chromenavlink.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precendence over the <code>icon</code> property. |
+|  [euiIconType](./kibana-plugin-core-public.chromenavlink.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precedence over the <code>icon</code> property. |
 |  [hidden](./kibana-plugin-core-public.chromenavlink.hidden.md) | <code>boolean</code> | Hides a link from the navigation. |
+|  [href](./kibana-plugin-core-public.chromenavlink.href.md) | <code>string</code> | Settled state between <code>url</code>, <code>baseUrl</code>, and <code>active</code> |
 |  [icon](./kibana-plugin-core-public.chromenavlink.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
 |  [id](./kibana-plugin-core-public.chromenavlink.id.md) | <code>string</code> | A unique identifier for looking up links. |
 |  [linkToLastSubUrl](./kibana-plugin-core-public.chromenavlink.linktolastsuburl.md) | <code>boolean</code> | Whether or not the subUrl feature should be enabled. |
@@ -29,5 +30,5 @@ export interface ChromeNavLink
 |  [subUrlBase](./kibana-plugin-core-public.chromenavlink.suburlbase.md) | <code>string</code> | A url base that legacy apps can set to match deep URLs to an application. |
 |  [title](./kibana-plugin-core-public.chromenavlink.title.md) | <code>string</code> | The title of the application. |
 |  [tooltip](./kibana-plugin-core-public.chromenavlink.tooltip.md) | <code>string</code> | A tooltip shown when hovering over an app link. |
-|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | <code>string</code> | A url that legacy apps can set to deep link into their applications. |
+|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | <code>string</code> | The route used to open the [default path](./kibana-plugin-core-public.appbase.defaultpath.md) of an application. If unset, <code>baseUrl</code> will be used instead. |
 

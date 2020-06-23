@@ -304,7 +304,7 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
       // Contexts source created
       ...(this.contextNamesBySource.get(pluginId) || []),
       // Contexts sources's dependencies created
-      ...flatten(pluginDeps.map(p => this.contextNamesBySource.get(p) || [])),
+      ...flatten(pluginDeps.map((p) => this.contextNamesBySource.get(p) || [])),
     ]);
   }
 }

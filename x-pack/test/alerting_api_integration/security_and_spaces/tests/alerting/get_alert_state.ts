@@ -24,14 +24,14 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
       describe(scenario.id, () => {
         it('should handle getAlertState alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/state`)
+            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/state`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -57,14 +57,14 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
 
         it(`shouldn't getAlertState for an alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/alert/${createdAlert.id}/state`)
+            .get(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}/state`)
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -93,7 +93,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
 
         it(`should handle getAlertState request appropriately when alert doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alert/1/state`)
+            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/1/state`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {

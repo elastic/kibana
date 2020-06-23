@@ -6,21 +6,51 @@
 import { fetchClusters } from './fetch_clusters';
 
 describe('fetchClusters', () => {
+  const clusterUuid = '1sdfds734';
+  const clusterName = 'monitoring';
+
   it('return a list of clusters', async () => {
     const callCluster = jest.fn().mockImplementation(() => ({
-      aggregations: {
-        clusters: {
-          buckets: [
-            {
-              key: 'clusterA',
+      hits: {
+        hits: [
+          {
+            _source: {
+              cluster_uuid: clusterUuid,
+              cluster_name: clusterName,
             },
-          ],
-        },
+          },
+        ],
       },
     }));
     const index = '.monitoring-es-*';
     const result = await fetchClusters(callCluster, index);
-    expect(result).toEqual([{ clusterUuid: 'clusterA' }]);
+    expect(result).toEqual([{ clusterUuid, clusterName }]);
+  });
+
+  it('return the metadata name if available', async () => {
+    const metadataName = 'custom-monitoring';
+    const callCluster = jest.fn().mockImplementation(() => ({
+      hits: {
+        hits: [
+          {
+            _source: {
+              cluster_uuid: clusterUuid,
+              cluster_name: clusterName,
+              cluster_settings: {
+                cluster: {
+                  metadata: {
+                    display_name: metadataName,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    }));
+    const index = '.monitoring-es-*';
+    const result = await fetchClusters(callCluster, index);
+    expect(result).toEqual([{ clusterUuid, clusterName: metadataName }]);
   });
 
   it('should limit the time period in the query', async () => {

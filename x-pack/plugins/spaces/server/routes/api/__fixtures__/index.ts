@@ -5,6 +5,11 @@
  */
 
 export { createSpaces } from './create_spaces';
-export { createLegacyAPI } from './create_legacy_api';
 export { createMockSavedObjectsRepository } from './create_mock_so_repository';
+export { createMockSavedObjectsService } from './create_mock_so_service';
 export { mockRouteContext, mockRouteContextWithInvalidLicense } from './route_contexts';
+export {
+  createExportSavedObjectsToStreamMock,
+  createImportSavedObjectsFromStreamMock,
+  createResolveSavedObjectsImportErrorsMock,
+} from './create_copy_to_space_mocks';

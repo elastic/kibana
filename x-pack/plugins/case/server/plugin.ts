@@ -21,7 +21,7 @@ import {
 import { CaseConfigureService, CaseService, CaseUserActionService } from './services';
 
 function createConfig$(context: PluginInitializerContext) {
-  return context.config.create<ConfigType>().pipe(map(config => config));
+  return context.config.create<ConfigType>().pipe(map((config) => config));
 }
 
 export interface PluginsSetup {
@@ -36,9 +36,7 @@ export class CasePlugin {
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = await createConfig$(this.initializerContext)
-      .pipe(first())
-      .toPromise();
+    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
 
     if (!config.enabled) {
       return;
@@ -60,7 +58,7 @@ export class CasePlugin {
     );
 
     const caseService = await caseServicePlugin.setup({
-      authentication: plugins.security.authc,
+      authentication: plugins.security != null ? plugins.security.authc : null,
     });
     const caseConfigureService = await caseConfigureServicePlugin.setup();
     const userActionService = await userActionServicePlugin.setup();

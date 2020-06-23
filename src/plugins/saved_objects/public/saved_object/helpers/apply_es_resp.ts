@@ -17,10 +17,14 @@
  * under the License.
  */
 import _ from 'lodash';
-import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
-import { parseSearchSource } from './parse_search_source';
-import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { IndexPattern } from '../../../../data/public';
+import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
+import { SavedObjectNotFound } from '../../../../kibana_utils/public';
+import {
+  IndexPattern,
+  injectSearchSourceReferences,
+  parseSearchSourceJSON,
+  expandShorthand,
+} from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -29,13 +33,13 @@ import { IndexPattern } from '../../../../data/public';
 export async function applyESResp(
   resp: EsResponse,
   savedObject: SavedObject,
-  config: SavedObjectConfig
+  config: SavedObjectConfig,
+  dependencies: SavedObjectKibanaServices
 ) {
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
   savedObject._source = _.cloneDeep(resp._source);
   const injectReferences = config.injectReferences;
-  const hydrateIndexPattern = savedObject.hydrateIndexPattern!;
   if (typeof resp.found === 'boolean' && !resp.found) {
     throw new SavedObjectNotFound(esType, savedObject.id || '');
   }
@@ -64,13 +68,46 @@ export async function applyESResp(
   _.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
-  await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
-  await hydrateIndexPattern();
+  if (meta.searchSourceJSON) {
+    try {
+      let searchSourceValues = parseSearchSourceJSON(meta.searchSourceJSON);
+
+      if (config.searchSource) {
+        searchSourceValues = injectSearchSourceReferences(
+          searchSourceValues as any,
+          resp.references
+        );
+        savedObject.searchSource = await dependencies.search.searchSource.create(
+          searchSourceValues
+        );
+      } else {
+        savedObject.searchSourceFields = searchSourceValues;
+      }
+    } catch (error) {
+      if (
+        error.constructor.name === 'SavedObjectNotFound' &&
+        error.savedObjectType === 'index-pattern'
+      ) {
+        // if parsing the search source fails because the index pattern wasn't found,
+        // remember the reference - this is required for error handling on legacy imports
+        savedObject.unresolvedIndexPatternReference = {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          id: JSON.parse(meta.searchSourceJSON).index,
+          type: 'index-pattern',
+        };
+      }
+
+      throw error;
+    }
+  }
+
   if (injectReferences && resp.references && resp.references.length > 0) {
     injectReferences(savedObject, resp.references);
   }
+
   if (typeof config.afterESResp === 'function') {
     savedObject = await config.afterESResp(savedObject);
   }
+
   return savedObject;
 }

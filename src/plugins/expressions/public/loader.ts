@@ -19,12 +19,13 @@
 
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { Adapters, InspectorSession } from '../../inspector/public';
-import { ExpressionRenderHandler } from './render';
+import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
-import { getInspector, getExpressionsService } from './services';
 import { ExecutionContract } from '../common/execution/execution_contract';
+
+import { ExpressionRenderHandler } from './render';
+import { getExpressionsService } from './services';
 
 type Data = any;
 
@@ -55,7 +56,7 @@ export class ExpressionLoader {
     // as loading$ could emit straight away in the constructor
     // and we want to notify subscribers about it, but all subscriptions will happen later
     this.loading$ = this.loadingSubject.asObservable().pipe(
-      filter(_ => _ === true),
+      filter((_) => _ === true),
       map(() => void 0)
     );
 
@@ -66,14 +67,14 @@ export class ExpressionLoader {
     this.update$ = this.renderHandler.update$;
     this.events$ = this.renderHandler.events$;
 
-    this.update$.subscribe(value => {
+    this.update$.subscribe((value) => {
       if (value) {
         const { newExpression, newParams } = value;
         this.update(newExpression, newParams);
       }
     });
 
-    this.data$.subscribe(data => {
+    this.data$.subscribe((data) => {
       this.render(data);
     });
 
@@ -118,15 +119,6 @@ export class ExpressionLoader {
 
   getElement(): HTMLElement {
     return this.renderHandler.getElement();
-  }
-
-  openInspector(title: string): InspectorSession | undefined {
-    const inspector = this.inspect();
-    if (inspector) {
-      return getInspector().open(inspector, {
-        title,
-      });
-    }
   }
 
   inspect(): Adapters | undefined {

@@ -6,16 +6,10 @@
 
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-
 import { HttpSetup } from 'src/core/public';
+import { JobId, SourceJob } from '../../common/types';
+import { API_BASE_GENERATE, API_LIST_URL, REPORTING_MANAGEMENT_HOME } from '../../constants';
 import { add } from './job_completion_notifications';
-import {
-  API_LIST_URL,
-  API_BASE_URL,
-  API_BASE_GENERATE,
-  REPORTING_MANAGEMENT_HOME,
-} from '../../constants';
-import { JobId, SourceJob } from '../..';
 
 export interface JobQueueEntry {
   _id: string;
@@ -129,12 +123,17 @@ export class ReportingAPIClient {
     });
   };
 
+  /*
+   * Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
+   */
   public getReportingJobPath = (exportType: string, jobParams: JobParams) => {
     const params = stringify({ jobParams: rison.encode(jobParams) });
-
-    return `${this.http.basePath.prepend(API_BASE_URL)}/${exportType}?${params}`;
+    return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
   };
 
+  /*
+   * Sends a request to queue a job, with the job params in the POST body
+   */
   public createReportingJob = async (exportType: string, jobParams: any) => {
     const jobParamsRison = rison.encode(jobParams);
     const resp = await this.http.post(`${API_BASE_GENERATE}/${exportType}`, {
@@ -154,5 +153,8 @@ export class ReportingAPIClient {
   public getDownloadLink = (jobId: JobId) =>
     this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
 
-  public getBasePath = () => this.http.basePath.get();
+  /*
+   * provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
+   */
+  public getServerBasePath = () => this.http.basePath.serverBasePath;
 }

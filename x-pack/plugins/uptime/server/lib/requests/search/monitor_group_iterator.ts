@@ -6,7 +6,7 @@
 
 import { QueryContext } from './query_context';
 import { fetchChunk } from './fetch_chunk';
-import { CursorDirection } from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { CursorDirection } from '../../../../common/runtime_types';
 import { MonitorGroups } from './fetch_page';
 import { CursorPagination } from './types';
 
@@ -90,7 +90,7 @@ export class MonitorGroupIterator {
     }
 
     while (true) {
-      const result = await this.attemptBufferMore(CHUNK_SIZE);
+      const result = await this.attemptBufferMore(size);
       if (result.gotHit || !result.hasMore) {
         return;
       }

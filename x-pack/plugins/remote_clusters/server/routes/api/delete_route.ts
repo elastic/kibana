@@ -14,7 +14,7 @@ import { serializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 
 const paramsValidation = schema.object({
   nameOrNames: schema.string(),
@@ -29,13 +29,15 @@ export const register = (deps: RouteDependencies): void => {
     response
   ) => {
     try {
-      const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+      const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
 
       const { nameOrNames } = request.params;
       const names = nameOrNames.split(',');
 
       const itemsDeleted: any[] = [];
       const errors: any[] = [];
+
+      const clusterSettings = await callAsCurrentUser('cluster.getSettings');
 
       // Validator that returns an error if the remote cluster does not exist.
       const validateClusterDoesExist = async (name: string) => {
@@ -60,9 +62,12 @@ export const register = (deps: RouteDependencies): void => {
       };
 
       // Send the request to delete the cluster and return an error if it could not be deleted.
-      const sendRequestToDeleteCluster = async (name: string) => {
+      const sendRequestToDeleteCluster = async (
+        name: string,
+        hasDeprecatedProxySetting: boolean
+      ) => {
         try {
-          const body = serializeCluster({ name });
+          const body = serializeCluster({ name, hasDeprecatedProxySetting });
           const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', { body });
           const acknowledged = get(updateClusterResponse, 'acknowledged');
           const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
@@ -98,8 +103,12 @@ export const register = (deps: RouteDependencies): void => {
         let error: any = await validateClusterDoesExist(clusterName);
 
         if (!error) {
+          // Check if cluster contains deprecated proxy setting
+          const hasDeprecatedProxySetting = Boolean(
+            get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
+          );
           // Delete the cluster.
-          error = await sendRequestToDeleteCluster(clusterName);
+          error = await sendRequestToDeleteCluster(clusterName, hasDeprecatedProxySetting);
         }
 
         if (error) {

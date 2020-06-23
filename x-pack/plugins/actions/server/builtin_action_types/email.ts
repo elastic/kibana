@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 
-import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
+import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
@@ -30,10 +30,10 @@ const ConfigSchema = schema.object(ConfigSchemaProps);
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
-  configObject: any
+  configObject: unknown
 ): string | void {
   // avoids circular reference ...
-  const config: ActionTypeConfigType = configObject;
+  const config = configObject as ActionTypeConfigType;
 
   // Make sure service is set, or if not, both host/port must be set.
   // If service is set, host/port are ignored, when the email is sent.
@@ -95,9 +95,9 @@ const ParamsSchema = schema.object(
   }
 );
 
-function validateParams(paramsObject: any): string | void {
+function validateParams(paramsObject: unknown): string | void {
   // avoids circular reference ...
-  const params: ActionParamsType = paramsObject;
+  const params = paramsObject as ActionParamsType;
 
   const { to, cc, bcc } = params;
   const addrs = to.length + cc.length + bcc.length;
@@ -143,7 +143,7 @@ async function executor(
   const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
 
-  const transport: any = {};
+  const transport: Transport = {};
 
   if (secrets.user != null) {
     transport.user = secrets.user;
@@ -155,12 +155,13 @@ async function executor(
   if (config.service !== null) {
     transport.service = config.service;
   } else {
-    transport.host = config.host;
-    transport.port = config.port;
+    // already validated service or host/port is not null ...
+    transport.host = config.host!;
+    transport.port = config.port!;
     transport.secure = getSecureValue(config.secure, config.port);
   }
 
-  const sendEmailOptions = {
+  const sendEmailOptions: SendEmailOptions = {
     transport,
     routing: {
       from: config.from,

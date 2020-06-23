@@ -1,0 +1,21 @@
+{
+  "extends": "../../../../../tsconfig",
+  "compilerOptions": {
+    "module": "commonjs",
+    "lib": ["es2018", "dom"],
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "layout/*": ["aeroelastic/*"]
+    },
+    "types": ["@kbn/x-pack/plugins/canvas/public/lib/aeroelastic"]
+  },
+  "exclude": ["node_modules", "**/*.spec.ts", "node_modules/@types/mocha"]
+}

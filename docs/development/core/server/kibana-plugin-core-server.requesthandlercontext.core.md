@@ -8,14 +8,14 @@
 
 ```typescript
 core: {
-        rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
-            dataClient: IScopedClusterClient;
-            adminClient: IScopedClusterClient;
+            legacy: {
+                client: IScopedClusterClient;
+            };
         };
         uiSettings: {
             client: IUiSettingsClient;

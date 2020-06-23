@@ -152,11 +152,26 @@ export const TSVBMetricModelSeriesAggRT = rt.type({
   type: rt.literal('series_agg'),
 });
 
+export const TSVBPercentileItemRT = rt.type({
+  id: rt.string,
+  value: rt.number,
+});
+
+export const TSVBMetricModePercentileAggRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    type: rt.literal('percentile'),
+    percentiles: rt.array(TSVBPercentileItemRT),
+  }),
+  rt.partial({ field: rt.string }),
+]);
+
 export const TSVBMetricRT = rt.union([
   TSVBMetricModelCountRT,
   TSVBMetricModelBasicMetricRT,
   TSVBMetricModelBucketScriptRT,
   TSVBMetricModelDerivativeRT,
+  TSVBMetricModePercentileAggRT,
   TSVBMetricModelSeriesAggRT,
 ]);
 export type TSVBMetric = rt.TypeOf<typeof TSVBMetricRT>;

@@ -10,22 +10,22 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../../common/model/space';
 import { SectionPanel } from '../section_panel';
 import { EnabledFeatures } from './enabled_features';
-import { Feature } from '../../../../../features/public';
+import { FeatureConfig } from '../../../../../features/public';
 
-const features: Feature[] = [
+const features: FeatureConfig[] = [
   {
     id: 'feature-1',
     name: 'Feature 1',
     icon: 'spacesApp',
     app: [],
-    privileges: {},
+    privileges: null,
   },
   {
     id: 'feature-2',
     name: 'Feature 2',
     icon: 'spacesApp',
     app: [],
-    privileges: {},
+    privileges: null,
   },
 ];
 
@@ -36,6 +36,8 @@ const space: Space = {
 };
 
 describe('EnabledFeatures', () => {
+  const getUrlForApp = (appId: string) => appId;
+
   it(`renders as expected`, () => {
     expect(
       shallowWithIntl<EnabledFeatures>(
@@ -44,6 +46,7 @@ describe('EnabledFeatures', () => {
           space={space}
           securityEnabled={true}
           onChange={jest.fn()}
+          getUrlForApp={getUrlForApp}
         />
       )
     ).toMatchSnapshot();
@@ -58,20 +61,15 @@ describe('EnabledFeatures', () => {
         space={space}
         securityEnabled={true}
         onChange={changeHandler}
+        getUrlForApp={getUrlForApp}
       />
     );
 
     // expand section panel
-    wrapper
-      .find(SectionPanel)
-      .find(EuiLink)
-      .simulate('click');
+    wrapper.find(SectionPanel).find(EuiLink).simulate('click');
 
     // Click the "Change all" link
-    wrapper
-      .find('.spcToggleAllFeatures__changeAllLink')
-      .first()
-      .simulate('click');
+    wrapper.find('.spcToggleAllFeatures__changeAllLink').first().simulate('click');
 
     // Ask to show all features
     wrapper.find('button[data-test-subj="spc-toggle-all-features-show"]').simulate('click');
@@ -92,20 +90,15 @@ describe('EnabledFeatures', () => {
         space={space}
         securityEnabled={true}
         onChange={changeHandler}
+        getUrlForApp={getUrlForApp}
       />
     );
 
     // expand section panel
-    wrapper
-      .find(SectionPanel)
-      .find(EuiLink)
-      .simulate('click');
+    wrapper.find(SectionPanel).find(EuiLink).simulate('click');
 
     // Click the "Change all" link
-    wrapper
-      .find('.spcToggleAllFeatures__changeAllLink')
-      .first()
-      .simulate('click');
+    wrapper.find('.spcToggleAllFeatures__changeAllLink').first().simulate('click');
 
     // Ask to hide all features
     wrapper.find('button[data-test-subj="spc-toggle-all-features-hide"]').simulate('click');

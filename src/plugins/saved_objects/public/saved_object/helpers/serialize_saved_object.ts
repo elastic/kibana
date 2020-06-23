@@ -17,9 +17,8 @@
  * under the License.
  */
 import _ from 'lodash';
-import angular from 'angular';
 import { SavedObject, SavedObjectConfig } from '../../types';
-import { expandShorthand } from '../../../../kibana_utils/public';
+import { extractSearchSourceReferences, expandShorthand } from '../../../../data/public';
 
 export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
   // mapping definition for the fields that this object will expose
@@ -41,57 +40,25 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
   });
 
   if (savedObject.searchSource) {
-    let searchSourceFields: Record<string, any> = _.omit(savedObject.searchSource.getFields(), [
-      'sort',
-      'size',
-    ]);
-    if (searchSourceFields.index) {
-      // searchSourceFields.index will normally be an IndexPattern, but can be a string in two scenarios:
-      // (1) `init()` (and by extension `hydrateIndexPattern()`) hasn't been called on  Saved Object
-      // (2) The IndexPattern doesn't exist, so we fail to resolve it in `hydrateIndexPattern()`
-      const indexId =
-        typeof searchSourceFields.index === 'string'
-          ? searchSourceFields.index
-          : searchSourceFields.index.id;
-      const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-      references.push({
-        name: refName,
-        type: 'index-pattern',
-        id: indexId,
-      });
-      searchSourceFields = {
-        ...searchSourceFields,
-        indexRefName: refName,
-        index: undefined,
-      };
-    }
-    if (searchSourceFields.filter) {
-      searchSourceFields = {
-        ...searchSourceFields,
-        filter: searchSourceFields.filter.map((filterRow: any, i: number) => {
-          if (!filterRow.meta || !filterRow.meta.index) {
-            return filterRow;
-          }
-          const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
-          references.push({
-            name: refName,
-            type: 'index-pattern',
-            id: filterRow.meta.index,
-          });
-          return {
-            ...filterRow,
-            meta: {
-              ...filterRow.meta,
-              indexRefName: refName,
-              index: undefined,
-            },
-          };
-        }),
-      };
-    }
-    attributes.kibanaSavedObjectMeta = {
-      searchSourceJSON: angular.toJson(searchSourceFields),
-    };
+    const {
+      searchSourceJSON,
+      references: searchSourceReferences,
+    } = savedObject.searchSource.serialize();
+    attributes.kibanaSavedObjectMeta = { searchSourceJSON };
+    references.push(...searchSourceReferences);
+  }
+
+  if (savedObject.searchSourceFields) {
+    const [searchSourceFields, searchSourceReferences] = extractSearchSourceReferences(
+      savedObject.searchSourceFields
+    );
+    const searchSourceJSON = JSON.stringify(searchSourceFields);
+    attributes.kibanaSavedObjectMeta = { searchSourceJSON };
+    references.push(...searchSourceReferences);
+  }
+
+  if (savedObject.unresolvedIndexPatternReference) {
+    references.push(savedObject.unresolvedIndexPatternReference);
   }
 
   return { attributes, references };

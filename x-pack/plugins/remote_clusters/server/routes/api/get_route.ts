@@ -10,13 +10,13 @@ import { RequestHandler } from 'src/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
 export const register = (deps: RouteDependencies): void => {
   const allHandler: RequestHandler<unknown, unknown, unknown> = async (ctx, request, response) => {
     try {
-      const callAsCurrentUser = await ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+      const callAsCurrentUser = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
       const clusterSettings = await callAsCurrentUser('cluster.getSettings');
 
       const transientClusterNames = Object.keys(
@@ -33,6 +33,7 @@ export const register = (deps: RouteDependencies): void => {
         const cluster = clustersByName[clusterName];
         const isTransient = transientClusterNames.includes(clusterName);
         const isPersistent = persistentClusterNames.includes(clusterName);
+        const { config } = deps;
 
         // If the cluster hasn't been stored in the cluster state, then it's defined by the
         // node's config file.
@@ -46,7 +47,12 @@ export const register = (deps: RouteDependencies): void => {
           : undefined;
 
         return {
-          ...deserializeCluster(clusterName, cluster, deprecatedProxyAddress),
+          ...deserializeCluster(
+            clusterName,
+            cluster,
+            deprecatedProxyAddress,
+            config.isCloudEnabled
+          ),
           isConfiguredByNode,
         };
       });

@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PercentFormatEditor should render normally 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <span>
+        <EuiLink
+          href="https://adamwdraper.github.io/Numeral-js/"
+          target="_blank"
+        >
+          <FormattedMessage
+            defaultMessage="Documentation"
+            id="indexPatternManagement.number.documentationLabel"
+            values={Object {}}
+          />
+           
+          <EuiIcon
+            type="link"
+          />
+        </EuiLink>
+      </span>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
+        id="indexPatternManagement.number.numeralLabel"
+        values={
+          Object {
+            "defaultPattern": <EuiCode>
+              0,0.[000]%
+            </EuiCode>,
+          }
+        }
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldText
+      isInvalid={false}
+      onChange={[Function]}
+      placeholder="0,0.[000]%"
+      value=""
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": 0.1,
+          "output": 0.2,
+        },
+        Object {
+          "input": 0.99999,
+          "output": 1.99998,
+        },
+        Object {
+          "input": 1,
+          "output": 2,
+        },
+        Object {
+          "input": 100,
+          "output": 200,
+        },
+        Object {
+          "input": 1000,
+          "output": 2000,
+        },
+      ]
+    }
+  />
+</Fragment>
+`;

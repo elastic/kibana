@@ -1,5 +1,10 @@
+[role="xpack"]
 [[filters]]
 === Filters
+
+++++
+<titleabbrev>Filter data</titleabbrev>
+++++
 
 APM provides two different ways you can filter your data within the APM App:
 
@@ -42,7 +47,7 @@ It allows you to view only relevant data, and is especially useful for separatin
 By default, all environments are displayed. If there are no environment options, you'll see "not defined".
 
 Service environments are defined when configuring your APM agents.
-It's very important to be consistent when naming environments in your agents.
+It's vital to be consistent when naming environments in your agents.
 See the documentation for each agent you're using to learn how to configure service environments:
 
 * *Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONMENT`]
@@ -62,9 +67,9 @@ but only where they are applicable -- they are typically most useful in their or
 As an example, if you select a host on the Services overview, then select a transaction group,
 the host filter will still be applied.
 
-These filters are very useful for quickly and easily removing noise from your data. 
+These filters are very useful for quickly and easily removing noise from your data.
 With just a click, you can filter your transactions by the transaction result,
-host, container ID, and more. 
+host, container ID, and more.
 
 [role="screenshot"]
 image::apm/images/local-filter.png[Local filters available in the APM app in Kibana]

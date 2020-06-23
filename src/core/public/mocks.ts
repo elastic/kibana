@@ -48,14 +48,24 @@ export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { scopedHistoryMock } from './application/scoped_history.mock';
+export { applicationServiceMock } from './application/application_service.mock';
 
-function createCoreSetupMock({ basePath = '' } = {}) {
+function createCoreSetupMock({
+  basePath = '',
+  pluginStartDeps = {},
+  pluginStartContract,
+}: {
+  basePath?: string;
+  pluginStartDeps?: object;
+  pluginStartContract?: any;
+} = {}) {
   const mock = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-    getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>(() =>
-      Promise.resolve([createCoreStartMock({ basePath }), {}])
+    getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, any, any]>, []>(() =>
+      Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])
     ),
     http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),

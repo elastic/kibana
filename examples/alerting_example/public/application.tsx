@@ -25,7 +25,9 @@ import {
   AppMountParameters,
   CoreStart,
   IUiSettingsClient,
+  DocLinksStart,
   ToastsSetup,
+  ApplicationStart,
 } from '../../../src/core/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { ChartsPluginStart } from '../../../src/plugins/charts/public';
@@ -45,7 +47,9 @@ export interface AlertingExampleComponentParams {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
@@ -88,7 +92,7 @@ const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
 };
 
 export const renderApp = (
-  { application, notifications, http, uiSettings }: CoreStart,
+  { application, notifications, http, uiSettings, docLinks }: CoreStart,
   deps: AlertingExamplePublicStartDeps,
   { appBasePath, element }: AppMountParameters
 ) => {
@@ -99,6 +103,8 @@ export const renderApp = (
       toastNotifications={notifications.toasts}
       http={http}
       uiSettings={uiSettings}
+      docLinks={docLinks}
+      capabilities={application.capabilities}
       {...deps}
     />,
     element

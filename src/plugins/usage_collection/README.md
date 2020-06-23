@@ -83,14 +83,14 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CoreSetup, CoreStart } from 'kibana/server';
 
 class Plugin {
-  private savedObjectsClient?: ISavedObjectsRepository;
+  private savedObjectsRepository?: ISavedObjectsRepository;
 
   public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
-    registerMyPluginUsageCollector(() => this.savedObjectsClient, plugins.usageCollection);
+    registerMyPluginUsageCollector(() => this.savedObjectsRepository, plugins.usageCollection);
   }
 
   public start(core: CoreStart) {
-    this.savedObjectsClient = core.savedObjects.client
+    this.savedObjectsRepository = core.savedObjects.createInternalRepository();
   }
 }
 ```
@@ -101,7 +101,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ISavedObjectsRepository } from 'kibana/server';
 
 export function registerMyPluginUsageCollector(
-  getSavedObjectsClient: () => ISavedObjectsRepository | undefined,
+  getSavedObjectsRepository: () => ISavedObjectsRepository | undefined,
   usageCollection?: UsageCollectionSetup
   ): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
@@ -112,9 +112,9 @@ export function registerMyPluginUsageCollector(
   // create usage collector
   const myCollector = usageCollection.makeUsageCollector({
     type: MY_USAGE_TYPE,
-    isReady: () => typeof getSavedObjectsClient() !== 'undefined',
+    isReady: () => typeof getSavedObjectsRepository() !== 'undefined',
     fetch: async () => {
-      const savedObjectsClient = getSavedObjectsClient()!;
+      const savedObjectsRepository = getSavedObjectsRepository()!;
       // get something from the savedObjects
 
       return { my_objects };
@@ -123,41 +123,6 @@ export function registerMyPluginUsageCollector(
 
   // register usage collector
   usageCollection.registerCollector(myCollector);
-}
-```
-
-### Migrating to NP from Legacy Plugins
-
-Pass `usageCollection` to the setup NP plugin setup function under plugins. Inside the `setup` function call the `registerCollector` like what you'd do in the NP example above.
-
-```js
-// index.js
-export const myPlugin = (kibana: any) => {
-  return new kibana.Plugin({
-    init: async function (server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      const plugins = {
-        usageCollection,
-      };
-      plugin(initializerContext).setup(core, plugins);
-    }
-  });
-}
-```
-
-### Legacy Plugins
-
-Typically, a plugin will create the collector object and register it with the Telemetry service from the `init` method of the plugin definition, or a helper module called from `init`.
-
-```js
-// index.js
-export const myPlugin = (kibana: any) => {
-  return new kibana.Plugin({
-    init: async function (server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      registerMyPluginUsageCollector(usageCollection);
-    }
-  });
 }
 ```
 
@@ -238,15 +203,6 @@ To track a user interaction, use the `reportUiStats` method exposed by the plugi
       }
     }
     ```
-
-Alternatively, in the Legacy world you can still import the `createUiStatsReporter` helper function from UI Metric app:
-
-```js
-import { createUiStatsReporter, METRIC_TYPE } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
-const trackMetric = createUiStatsReporter(`<AppName>`);
-trackMetric(METRIC_TYPE.CLICK, `<EventName>`);
-trackMetric('click', `<EventName>`);
-```
 
 Metric Types:
 

@@ -44,8 +44,8 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
 
         if ('center' in payload) {
           entriesPerHighlightTerm = await Promise.all(
-            highlightTerms.map(highlightTerm =>
-              logEntries.getLogEntriesAround__new(requestContext, sourceId, {
+            highlightTerms.map((highlightTerm) =>
+              logEntries.getLogEntriesAround(requestContext, sourceId, {
                 startTimestamp,
                 endTimestamp,
                 query: parseFilterQuery(query),
@@ -64,7 +64,7 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
           }
 
           entriesPerHighlightTerm = await Promise.all(
-            highlightTerms.map(highlightTerm =>
+            highlightTerms.map((highlightTerm) =>
               logEntries.getLogEntries(requestContext, sourceId, {
                 startTimestamp,
                 endTimestamp,
@@ -79,11 +79,21 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
 
         return response.ok({
           body: logEntriesHighlightsResponseRT.encode({
-            data: entriesPerHighlightTerm.map(entries => ({
-              entries,
-              topCursor: entries[0].cursor,
-              bottomCursor: entries[entries.length - 1].cursor,
-            })),
+            data: entriesPerHighlightTerm.map((entries) => {
+              if (entries.length > 0) {
+                return {
+                  entries,
+                  topCursor: entries[0].cursor,
+                  bottomCursor: entries[entries.length - 1].cursor,
+                };
+              } else {
+                return {
+                  entries,
+                  topCursor: null,
+                  bottomCursor: null,
+                };
+              }
+            }),
           }),
         });
       } catch (error) {

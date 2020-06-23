@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useReducer, useState, useEffect } from 'react';
+import { isObject } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -24,6 +25,8 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
+import { HealthCheck } from '../../components/health_check';
+import { PLUGIN } from '../../constants/plugin';
 
 interface AlertAddProps {
   consumer: string;
@@ -57,6 +60,9 @@ export const AlertAdd = ({
   const setAlert = (value: any) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
+  const setAlertProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
+  };
 
   const {
     reloadAlerts,
@@ -64,7 +70,12 @@ export const AlertAdd = ({
     toastNotifications,
     alertTypeRegistry,
     actionTypeRegistry,
+    docLinks,
   } = useAlertsContext();
+
+  useEffect(() => {
+    setAlertProperty('alertTypeId', alertTypeId);
+  }, [alertTypeId]);
 
   const closeFlyout = useCallback(() => {
     setAddFlyoutVisibility(false);
@@ -80,7 +91,7 @@ export const AlertAdd = ({
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = parseErrors(errors);
 
   const actionsErrors: Array<{
     errors: IErrorObject;
@@ -92,7 +103,7 @@ export const AlertAdd = ({
     actionsErrors.find(
       (errorObj: { errors: IErrorObject }) =>
         errorObj &&
-        !!Object.keys(errorObj.errors).find(errorKey => errorObj.errors[errorKey].length >= 1)
+        !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
     ) !== undefined;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
@@ -109,12 +120,10 @@ export const AlertAdd = ({
       return newAlert;
     } catch (errorRes) {
       toastNotifications.addDanger(
-        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
-          defaultMessage: 'Failed to save alert: {message}',
-          values: {
-            message: errorRes.body?.message ?? '',
-          },
-        })
+        errorRes.body?.message ??
+          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
+            defaultMessage: 'Cannot create alert.',
+          })
       );
     }
   }
@@ -132,7 +141,7 @@ export const AlertAdd = ({
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create Alert"
+                defaultMessage="Create alert"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
               &emsp;
@@ -141,60 +150,75 @@ export const AlertAdd = ({
                 tooltipContent={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
                   {
-                    defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                    defaultMessage:
+                      '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                    values: {
+                      pluginName: PLUGIN.getI18nName(i18n),
+                    },
                   }
                 )}
               />
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <AlertForm
-            alert={alert}
-            dispatch={dispatch}
-            errors={errors}
-            canChangeTrigger={canChangeTrigger}
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
-                {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="secondary"
-                data-test-subj="saveAlertButton"
-                type="submit"
-                iconType="check"
-                isDisabled={hasErrors || hasActionErrors}
-                isLoading={isSaving}
-                onClick={async () => {
-                  setIsSaving(true);
-                  const savedAlert = await onSaveAlert();
-                  setIsSaving(false);
-                  if (savedAlert) {
-                    closeFlyout();
-                    if (reloadAlerts) {
-                      reloadAlerts();
+        <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
+          <EuiFlyoutBody>
+            <AlertForm
+              alert={alert}
+              dispatch={dispatch}
+              errors={errors}
+              canChangeTrigger={canChangeTrigger}
+            />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
+                  {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="secondary"
+                  data-test-subj="saveAlertButton"
+                  type="submit"
+                  iconType="check"
+                  isDisabled={hasErrors || hasActionErrors}
+                  isLoading={isSaving}
+                  onClick={async () => {
+                    setIsSaving(true);
+                    const savedAlert = await onSaveAlert();
+                    setIsSaving(false);
+                    if (savedAlert) {
+                      closeFlyout();
+                      if (reloadAlerts) {
+                        reloadAlerts();
+                      }
                     }
-                  }
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </HealthCheck>
       </EuiFlyout>
     </EuiPortal>
   );
 };
+
+const parseErrors: (errors: IErrorObject) => boolean = (errors) =>
+  !!Object.values(errors).find((errorList) => {
+    if (isObject(errorList)) return parseErrors(errorList as IErrorObject);
+    return errorList.length >= 1;
+  });
+
+// eslint-disable-next-line import/no-default-export
+export { AlertAdd as default };

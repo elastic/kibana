@@ -16,9 +16,12 @@ import { useResolver } from '../../use_resolver';
 
 import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license';
-import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
+import {
+  checkGetJobsCapabilitiesResolver,
+  checkPermission,
+} from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import { Settings } from '../../../settings';
+import { AnomalyDetectionSettingsContext, Settings } from '../../../settings';
 import { ML_BREADCRUMB, SETTINGS } from '../../breadcrumbs';
 
 const breadcrumbs = [ML_BREADCRUMB, SETTINGS];
@@ -32,18 +35,24 @@ export const settingsRoute: MlRoute = {
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
-    checkGetJobsPrivilege,
+    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
     getMlNodeCount,
   });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const canGetFilters = checkPermission('canGetFilters');
+  const canCreateFilter = checkPermission('canCreateFilter');
   const canGetCalendars = checkPermission('canGetCalendars');
+  const canCreateCalendar = checkPermission('canCreateCalendar');
 
   return (
     <PageLoader context={context}>
-      <Settings canGetCalendars={canGetCalendars} canGetFilters={canGetFilters} />
+      <AnomalyDetectionSettingsContext.Provider
+        value={{ canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar }}
+      >
+        <Settings />
+      </AnomalyDetectionSettingsContext.Provider>
     </PageLoader>
   );
 };

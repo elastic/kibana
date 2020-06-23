@@ -34,10 +34,7 @@ describe('dev/build/lib/version_info', () => {
       expect(versionInfo)
         .to.have.property('buildSha')
         .match(/^[0-9a-f]{40}$/);
-      expect(versionInfo)
-        .to.have.property('buildNumber')
-        .a('number')
-        .greaterThan(1000);
+      expect(versionInfo).to.have.property('buildNumber').a('number').greaterThan(1000);
     });
   });
   describe('isRelease = false', () => {
@@ -54,10 +51,7 @@ describe('dev/build/lib/version_info', () => {
       expect(versionInfo)
         .to.have.property('buildSha')
         .match(/^[0-9a-f]{40}$/);
-      expect(versionInfo)
-        .to.have.property('buildNumber')
-        .a('number')
-        .greaterThan(1000);
+      expect(versionInfo).to.have.property('buildNumber').a('number').greaterThan(1000);
     });
   });
 

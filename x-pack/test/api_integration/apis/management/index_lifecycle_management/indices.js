@@ -11,7 +11,7 @@ import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 import { initElasticsearchHelpers, getRandomString } from './lib';
 import { getPolicyPayload } from './fixtures';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -29,7 +29,7 @@ export default function({ getService }) {
     describe('policies', () => {
       it('should add a lifecycle policy to the index', async () => {
         // Create a policy
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('indices-test-policy');
         const { name: policyName } = policy;
         await createPolicy(policy);
 
@@ -52,7 +52,7 @@ export default function({ getService }) {
 
       it('should remove a lifecycle policy from an index', async () => {
         // Create a policy
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('remove-test-policy');
         const { name: policyName } = policy;
         await createPolicy(policy);
 
@@ -77,7 +77,7 @@ export default function({ getService }) {
     describe('index management extension', () => {
       it('should have an endpoint to retry a policy for an index that is in the ERROR step', async () => {
         // Create a policy
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('extension-test-policy');
         const { name: policyName } = policy;
         await createPolicy(policy);
 

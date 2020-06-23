@@ -28,8 +28,10 @@ export interface KibanaUsageStats {
   };
   kibana_stats: {
     os: {
-      platform: string;
-      platformRelease: string;
+      // These should be provided
+      platform: string | undefined;
+      platformRelease: string | undefined;
+      // The ones below are really optional
       distro?: string;
       distroRelease?: string;
     };
@@ -55,6 +57,10 @@ export function handleKibanaStats(
     ...kibanaStats.os,
   };
   const formattedOsStats = Object.entries(os).reduce((acc, [key, value]) => {
+    if (typeof value !== 'string') {
+      // There are new fields reported now from the "os" property like "load", "memory", etc. They are objects.
+      return acc;
+    }
     return {
       ...acc,
       [`${key}s`]: [{ [key]: value, count: 1 }],

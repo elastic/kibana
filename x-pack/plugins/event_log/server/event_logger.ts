@@ -19,6 +19,7 @@ import {
   ECS_VERSION,
   EventSchema,
 } from './types';
+import { SAVED_OBJECT_REL_PRIMARY } from './types';
 
 type SystemLogger = Plugin['systemLogger'];
 
@@ -118,6 +119,8 @@ const RequiredEventSchema = schema.object({
   action: schema.string({ minLength: 1 }),
 });
 
+const ValidSavedObjectRels = new Set([undefined, SAVED_OBJECT_REL_PRIMARY]);
+
 function validateEvent(eventLogService: IEventLogService, event: IEvent): IValidatedEvent {
   if (event?.event == null) {
     throw new Error(`no "event" property`);
@@ -137,7 +140,17 @@ function validateEvent(eventLogService: IEventLogService, event: IEvent): IValid
   }
 
   // could throw an error
-  return EventSchema.validate(event);
+  const result = EventSchema.validate(event);
+
+  if (result?.kibana?.saved_objects?.length) {
+    for (const so of result?.kibana?.saved_objects) {
+      if (!ValidSavedObjectRels.has(so.rel)) {
+        throw new Error(`invalid rel property in saved_objects: "${so.rel}"`);
+      }
+    }
+  }
+
+  return result;
 }
 
 export const EVENT_LOGGED_PREFIX = `event logged: `;
@@ -168,7 +181,7 @@ function indexEventDoc(esContext: EsContext, doc: Doc): void {
 }
 
 // whew, the thing that actually writes the event log document!
-async function indexLogEventDoc(esContext: EsContext, doc: any) {
+async function indexLogEventDoc(esContext: EsContext, doc: unknown) {
   esContext.logger.debug(`writing to event log: ${JSON.stringify(doc)}`);
   await esContext.waitTillReady();
   await esContext.esAdapter.indexDocument(doc);
@@ -176,6 +189,6 @@ async function indexLogEventDoc(esContext: EsContext, doc: any) {
 }
 
 // TODO: write log entry to a bounded queue buffer
-function writeLogEventDocOnError(esContext: EsContext, doc: any) {
+function writeLogEventDocOnError(esContext: EsContext, doc: unknown) {
   esContext.logger.warn(`unable to write event doc: ${JSON.stringify(doc)}`);
 }

@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useReducer, useState, useEffect } from 'react';
+import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
 
 import { WIZARD_STEPS } from '../components/step_types';
 
@@ -42,14 +43,14 @@ export const Wizard: FC<Props> = ({
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number, action: any) => number>(
-    s => s + 1,
+    (s) => s + 1,
     0
   );
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
 
   const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<
     (s: number, action: any) => number
-  >(s => s + 1, 0);
+  >((s) => s + 1, 0);
 
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,
@@ -119,6 +120,8 @@ export const Wizard: FC<Props> = ({
       setHighestStep(currentStep);
     }
   }, [currentStep]);
+
+  useModelMemoryEstimator(jobCreator, jobValidator, jobCreatorUpdate, jobCreatorUpdated);
 
   return (
     <JobCreatorContext.Provider value={jobCreatorContext}>

@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { FieldFormat } from './field_format';
-export { FieldFormat };
+import { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public **/
 export type FieldFormatsContentType = 'html' | 'text';
@@ -82,10 +81,12 @@ export type IFieldFormat = PublicMethodsOf<FieldFormat>;
  */
 export type FieldFormatId = FIELD_FORMAT_IDS | string;
 
-export type IFieldFormatType = (new (
+/** @internal **/
+export type FieldFormatInstanceType = (new (
   params?: any,
   getConfig?: FieldFormatsGetConfigFn
 ) => FieldFormat) & {
+  // Static properties:
   id: FieldFormatId;
   title: string;
   fieldType: string | string[];
@@ -99,3 +100,5 @@ export interface IFieldFormatMetaParams {
     basePath?: string;
   };
 }
+
+export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' & 'register'>;

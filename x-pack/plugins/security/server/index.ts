@@ -23,9 +23,11 @@ export {
   CreateAPIKeyResult,
   InvalidateAPIKeyParams,
   InvalidateAPIKeyResult,
+  GrantAPIKeyResult,
   SAMLLogin,
   OIDCLogin,
 } from './authentication';
+export { AuditLogger } from './audit';
 export { SecurityPluginSetup };
 export { AuthenticatedUser } from '../common/model';
 
@@ -52,7 +54,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
         }
 
         return Object.values(providers?.[providerType] || {}).some(
-          provider => (provider as { enabled: boolean | undefined })?.enabled !== false
+          (provider) => (provider as { enabled: boolean | undefined })?.enabled !== false
         );
       };
 

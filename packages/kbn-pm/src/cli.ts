@@ -17,46 +17,58 @@
  * under the License.
  */
 
-import chalk from 'chalk';
 import dedent from 'dedent';
 import getopts from 'getopts';
 import { resolve } from 'path';
+import { pickLevelFromFlags } from '@kbn/dev-utils/tooling_log';
 
 import { commands } from './commands';
 import { runCommand } from './run';
 import { log } from './utils/log';
 
 function help() {
-  const availableCommands = Object.keys(commands)
-    .map(commandName => commands[commandName])
-    .map(command => `${command.name} - ${command.description}`);
+  log.info(
+    dedent`
+      usage: kbn <command> [<args>]
 
-  log.write(dedent`
-    usage: kbn <command> [<args>]
+      By default commands are run for Kibana itself, all packages in the 'packages/'
+      folder and for all plugins in './plugins' and '../kibana-extra'.
 
-    By default commands are run for Kibana itself, all packages in the 'packages/'
-    folder and for all plugins in './plugins' and '../kibana-extra'.
+      Available commands:
 
-    Available commands:
+        ${Object.values(commands)
+          .map((command) => `${command.name} - ${command.description}`)
+          .join('\n        ')}
 
-       ${availableCommands.join('\n       ')}
+      Global options:
 
-    Global options:
-
-       -e, --exclude          Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
-       -i, --include          Include only specified projects. If left unspecified, it defaults to including all projects.
-       --oss                  Do not include the x-pack when running command.
-       --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
-       --no-cache             Disable the bootstrap cache
-  `);
+        -e, --exclude           Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+        -i, --include           Include only specified projects. If left unspecified, it defaults to including all projects.
+        --oss                   Do not include the x-pack when running command.
+        --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
+        --no-cache              Disable the bootstrap cache
+        --verbose               Set log level to verbose
+        --debug                 Set log level to debug
+        --quiet                 Set log level to error
+        --silent                Disable log output
+    ` + '\n'
+  );
 }
 
 export async function run(argv: string[]) {
+  log.setLogLevel(
+    pickLevelFromFlags(
+      getopts(argv, {
+        boolean: ['verbose', 'debug', 'quiet', 'silent'],
+      })
+    )
+  );
+
   // We can simplify this setup (and remove this extra handling) once Yarn
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
   if (argv.includes('--')) {
-    log.write(chalk.red(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`));
+    log.error(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`);
     process.exit(1);
   }
 
@@ -90,7 +102,7 @@ export async function run(argv: string[]) {
 
   const command = commands[commandName];
   if (command === undefined) {
-    log.write(chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`));
+    log.error(`[${commandName}] is not a valid command, see 'kbn --help'`);
     process.exit(1);
   }
 

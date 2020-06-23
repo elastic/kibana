@@ -32,6 +32,9 @@ export abstract class Type<V> {
   // sets the value to `null` while still keeping the type.
   public readonly type: V = null! as V;
 
+  // used for the `isConfigSchema` typeguard
+  public readonly __isKbnConfigSchemaType = true;
+
   /**
    * Internal "schema" backed by Joi.
    * @type {Schema}

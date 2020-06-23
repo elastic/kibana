@@ -22,6 +22,8 @@ export declare class SavedObjectTypeRegistry
 |  [getType(type)](./kibana-plugin-core-server.savedobjecttyperegistry.gettype.md) |  | Return the [type](./kibana-plugin-core-server.savedobjectstype.md) definition for given type name. |
 |  [isHidden(type)](./kibana-plugin-core-server.savedobjecttyperegistry.ishidden.md) |  | Returns the <code>hidden</code> property for given type, or <code>false</code> if the type is not registered. |
 |  [isImportableAndExportable(type)](./kibana-plugin-core-server.savedobjecttyperegistry.isimportableandexportable.md) |  | Returns the <code>management.importableAndExportable</code> property for given type, or <code>false</code> if the type is not registered or does not define a management section. |
-|  [isNamespaceAgnostic(type)](./kibana-plugin-core-server.savedobjecttyperegistry.isnamespaceagnostic.md) |  | Returns the <code>namespaceAgnostic</code> property for given type, or <code>false</code> if the type is not registered. |
+|  [isMultiNamespace(type)](./kibana-plugin-core-server.savedobjecttyperegistry.ismultinamespace.md) |  | Returns whether the type is multi-namespace (shareable); resolves to <code>false</code> if the type is not registered |
+|  [isNamespaceAgnostic(type)](./kibana-plugin-core-server.savedobjecttyperegistry.isnamespaceagnostic.md) |  | Returns whether the type is namespace-agnostic (global); resolves to <code>false</code> if the type is not registered |
+|  [isSingleNamespace(type)](./kibana-plugin-core-server.savedobjecttyperegistry.issinglenamespace.md) |  | Returns whether the type is single-namespace (isolated); resolves to <code>true</code> if the type is not registered |
 |  [registerType(type)](./kibana-plugin-core-server.savedobjecttyperegistry.registertype.md) |  | Register a [type](./kibana-plugin-core-server.savedobjectstype.md) inside the registry. A type can only be registered once. subsequent calls with the same type name will throw an error. |
 

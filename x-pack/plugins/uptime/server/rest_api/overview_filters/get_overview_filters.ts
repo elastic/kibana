@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { objectValuesToArrays } from '../../lib/helper';
-import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 
 const arrayOrStringType = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -27,10 +27,6 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       ports: arrayOrStringType,
       tags: arrayOrStringType,
     }),
-  },
-
-  options: {
-    tags: ['access:uptime-read'],
   },
   handler: async ({ callES, dynamicSettings }, _context, request, response) => {
     const { dateRangeStart, dateRangeEnd, locations, schemes, search, ports, tags } = request.query;

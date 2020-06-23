@@ -22,7 +22,7 @@ import {
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
 } from './agg_types_registry';
-import { BucketAggType } from './buckets/_bucket_agg_type';
+import { BucketAggType } from './buckets/bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';
 
 const bucketType = { name: 'terms', type: 'bucket' } as BucketAggType<any>;

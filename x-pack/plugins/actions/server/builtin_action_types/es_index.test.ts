@@ -10,18 +10,13 @@ jest.mock('./lib/send_email', () => ({
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
 import { ActionParamsType, ActionTypeConfigType } from './es_index';
+import { actionsMock } from '../mocks';
 
 const ACTION_TYPE_ID = '.index';
-const NO_OP_FN = () => {};
 
-const services = {
-  log: NO_OP_FN,
-  callCluster: jest.fn(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services = actionsMock.createServices();
 
 let actionType: ActionType;
 
@@ -43,7 +38,7 @@ describe('actionTypeRegistry.get() works', () => {
 
 describe('config validation', () => {
   test('config validation succeeds when config is valid', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, unknown> = {
       index: 'testing-123',
       refresh: false,
     };
@@ -52,6 +47,7 @@ describe('config validation', () => {
       ...config,
       index: 'testing-123',
       refresh: false,
+      executionTimeField: null,
     });
 
     config.executionTimeField = 'field-123';
@@ -60,6 +56,14 @@ describe('config validation', () => {
       index: 'testing-123',
       refresh: false,
       executionTimeField: 'field-123',
+    });
+
+    config.executionTimeField = null;
+    expect(validateConfig(actionType, config)).toEqual({
+      ...config,
+      index: 'testing-123',
+      refresh: false,
+      executionTimeField: null,
     });
 
     delete config.index;
@@ -73,9 +77,11 @@ describe('config validation', () => {
 
     expect(() => {
       validateConfig(actionType, { index: 'testing-123', executionTimeField: true });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [executionTimeField]: expected value of type [string] but got [boolean]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+"error validating action type config: [executionTimeField]: types that failed validation:
+- [executionTimeField.0]: expected value of type [string] but got [boolean]
+- [executionTimeField.1]: expected value to equal [null]"
+`);
 
     delete config.refresh;
     expect(() => {
@@ -86,7 +92,7 @@ describe('config validation', () => {
   });
 
   test('config validation fails when config is not valid', () => {
-    const baseConfig: Record<string, any> = {
+    const baseConfig: Record<string, unknown> = {
       indeX: 'bob',
     };
 
@@ -100,7 +106,7 @@ describe('config validation', () => {
 
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       documents: [{ rando: 'thing' }],
     };
     expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
@@ -138,12 +144,12 @@ describe('params validation', () => {
 describe('execute()', () => {
   test('ensure parameters are as expected', async () => {
     const secrets = {};
-    let config: ActionTypeConfigType;
+    let config: Partial<ActionTypeConfigType>;
     let params: ActionParamsType;
     let executorOptions: ActionTypeExecutorOptions;
 
     // minimal params
-    config = { index: 'index-value', refresh: false, executionTimeField: undefined };
+    config = { index: 'index-value', refresh: false };
     params = {
       documents: [{ jim: 'bob' }],
     };
@@ -185,9 +191,9 @@ describe('execute()', () => {
     await actionType.executor(executorOptions);
 
     const calls = services.callCluster.mock.calls;
-    const timeValue = calls[0][1].body[1].field_to_use_for_time;
+    const timeValue = calls[0][1]?.body[1].field_to_use_for_time;
     expect(timeValue).toBeInstanceOf(Date);
-    delete calls[0][1].body[1].field_to_use_for_time;
+    delete calls[0][1]?.body[1].field_to_use_for_time;
     expect(calls).toMatchInlineSnapshot(`
         Array [
           Array [

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { useState, useEffect } from 'react';
 import { HttpSetup } from 'src/core/public';
 import {
   SendRequestConfig,
@@ -34,4 +35,69 @@ export const useRequest = <D = any>(config: UseRequestConfig) => {
     throw new Error('sendRequest has no http client set');
   }
   return _useRequest<D>(httpClient, config);
+};
+
+export type SendConditionalRequestConfig =
+  | (SendRequestConfig & { shouldSendRequest: true })
+  | (Partial<SendRequestConfig> & { shouldSendRequest: false });
+
+export const useConditionalRequest = <D = any>(config: SendConditionalRequestConfig) => {
+  const [state, setState] = useState<{
+    error: Error | null;
+    data: D | null;
+    isLoading: boolean;
+  }>({
+    error: null,
+    data: null,
+    isLoading: false,
+  });
+
+  const { path, method, shouldSendRequest, query, body } = config;
+
+  async function sendGetOneEnrollmentAPIKeyRequest() {
+    if (!config.shouldSendRequest) {
+      setState({
+        data: null,
+        isLoading: false,
+        error: null,
+      });
+      return;
+    }
+
+    try {
+      setState({
+        data: null,
+        isLoading: true,
+        error: null,
+      });
+      const res = await sendRequest<D>({
+        method: config.method,
+        path: config.path,
+        query: config.query,
+        body: config.body,
+      });
+      if (res.error) {
+        throw res.error;
+      }
+      setState({
+        data: res.data,
+        isLoading: false,
+        error: null,
+      });
+      return res;
+    } catch (error) {
+      setState({
+        data: null,
+        isLoading: false,
+        error,
+      });
+    }
+  }
+
+  useEffect(() => {
+    sendGetOneEnrollmentAPIKeyRequest();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, method, shouldSendRequest, JSON.stringify(query), JSON.stringify(body)]);
+
+  return { ...state, sendRequest: sendGetOneEnrollmentAPIKeyRequest };
 };

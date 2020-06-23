@@ -13,12 +13,15 @@
     "home",
     "licensing",
     "usageCollection",
-    "share"
+    "share",
+    "embeddable",
+    "uiActions"
   ],
   "optionalPlugins": [
     "security",
     "spaces",
-    "management"
+    "management",
+    "licenseManagement"
   ],
   "server": true,
   "ui": true

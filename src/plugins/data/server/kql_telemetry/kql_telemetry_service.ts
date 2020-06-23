@@ -22,14 +22,16 @@ import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerKqlTelemetryRoute } from './route';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { makeKQLUsageCollector } from './usage_collector';
+import { kqlTelemetry } from '../saved_objects';
 
 export class KqlTelemetryService implements Plugin<void> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(
-    { http, getStartServices }: CoreSetup,
+    { http, getStartServices, savedObjects }: CoreSetup,
     { usageCollection }: { usageCollection?: UsageCollectionSetup }
   ) {
+    savedObjects.registerType(kqlTelemetry);
     registerKqlTelemetryRoute(
       http.createRouter(),
       getStartServices,
@@ -40,8 +42,8 @@ export class KqlTelemetryService implements Plugin<void> {
       this.initializerContext.config.legacy.globalConfig$
         .pipe(first())
         .toPromise()
-        .then(config => makeKQLUsageCollector(usageCollection, config.kibana.index))
-        .catch(e => {
+        .then((config) => makeKQLUsageCollector(usageCollection, config.kibana.index))
+        .catch((e) => {
           this.initializerContext.logger
             .get('kql-telemetry')
             .warn(`Registering KQL telemetry collector failed: ${e}`);

@@ -44,6 +44,7 @@ import {
   ObjectType,
   ObjectTypeOptions,
   Props,
+  NullableProps,
   RecordOfOptions,
   RecordOfType,
   StringOptions,
@@ -57,9 +58,10 @@ import {
   StreamType,
 } from './types';
 
-export { ObjectType, TypeOf, Type };
+export { ObjectType, TypeOf, Type, Props, NullableProps };
 export { ByteSizeValue } from './byte_size_value';
 export { SchemaTypeError, ValidationError } from './errors';
+export { isConfigSchema } from './typeguards';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);

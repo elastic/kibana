@@ -5,34 +5,33 @@
  */
 import React from 'react';
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import { PAGE_ROUTING_PATHS } from '../../constants';
 import { Loading } from '../../components';
-import { useConfig, useCore, useRequest } from '../../hooks';
+import { useConfig, useCore, useFleetStatus, useBreadcrumbs } from '../../hooks';
 import { AgentListPage } from './agent_list_page';
 import { SetupPage } from './setup_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
-import { fleetSetupRouteService } from '../../services';
+import { EnrollmentTokenListPage } from './enrollment_token_list_page';
+import { ListLayout } from './components/list_layout';
 
 export const FleetApp: React.FunctionComponent = () => {
+  useBreadcrumbs('fleet');
   const core = useCore();
   const { fleet } = useConfig();
 
-  const setupRequest = useRequest({
-    method: 'get',
-    path: fleetSetupRouteService.getFleetSetupPath(),
-  });
+  const fleetStatus = useFleetStatus();
 
   if (!fleet.enabled) return null;
-  if (setupRequest.isLoading) {
+  if (fleetStatus.isLoading) {
     return <Loading />;
   }
 
-  if (setupRequest.data.isInitialized === false) {
+  if (fleetStatus.isReady === false) {
     return (
       <SetupPage
-        refresh={async () => {
-          await setupRequest.sendRequest();
-        }}
+        missingRequirements={fleetStatus.missingRequirements || []}
+        refresh={fleetStatus.refresh}
       />
     );
   }
@@ -43,12 +42,23 @@ export const FleetApp: React.FunctionComponent = () => {
   return (
     <Router>
       <Switch>
-        <Route path="/fleet" exact={true} render={() => <Redirect to="/fleet/agents" />} />
-        <Route path="/fleet/agents/:agentId">
+        <Route
+          path={PAGE_ROUTING_PATHS.fleet}
+          exact={true}
+          render={() => <Redirect to={PAGE_ROUTING_PATHS.fleet_agent_list} />}
+        />
+        <Route path={PAGE_ROUTING_PATHS.fleet_agent_details}>
           <AgentDetailsPage />
         </Route>
-        <Route path="/fleet/agents">
-          <AgentListPage />
+        <Route path={PAGE_ROUTING_PATHS.fleet_agent_list}>
+          <ListLayout>
+            <AgentListPage />
+          </ListLayout>
+        </Route>
+        <Route path={PAGE_ROUTING_PATHS.fleet_enrollment_tokens}>
+          <ListLayout>
+            <EnrollmentTokenListPage />
+          </ListLayout>
         </Route>
       </Switch>
     </Router>

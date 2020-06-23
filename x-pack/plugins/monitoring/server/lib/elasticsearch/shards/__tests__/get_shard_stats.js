@@ -50,7 +50,7 @@ describe('getShardStats handler', () => {
     });
 
     it('for yellow cluster status - has unassigned replica', () => {
-      const climateBucket = resp.aggregations.indices.buckets.find(b => b.key === 'climate');
+      const climateBucket = resp.aggregations.indices.buckets.find((b) => b.key === 'climate');
       climateBucket.states.buckets = [
         {
           key: 'STARTED',
@@ -99,7 +99,7 @@ describe('getShardStats handler', () => {
     });
 
     it('for red cluster status - has unassigned primary', () => {
-      const climateBucket = resp.aggregations.indices.buckets.find(b => b.key === 'climate');
+      const climateBucket = resp.aggregations.indices.buckets.find((b) => b.key === 'climate');
       climateBucket.states.buckets = [
         {
           key: 'STARTED',

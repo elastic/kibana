@@ -48,7 +48,7 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
 
         let entries;
         if ('center' in payload) {
-          entries = await logEntries.getLogEntriesAround__new(requestContext, sourceId, {
+          entries = await logEntries.getLogEntriesAround(requestContext, sourceId, {
             startTimestamp,
             endTimestamp,
             query: parseFilterQuery(query),

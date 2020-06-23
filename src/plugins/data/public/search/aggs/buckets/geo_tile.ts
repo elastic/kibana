@@ -20,53 +20,68 @@
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { IBucketAggConfig } from './_bucket_agg_type';
 import { METRIC_TYPES } from '../metrics/metric_agg_types';
+import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
+
+export interface GeoTitleBucketAggDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
 
 const geotileGridTitle = i18n.translate('data.search.aggs.buckets.geotileGridTitle', {
   defaultMessage: 'Geotile',
 });
 
-export const geoTileBucketAgg = new BucketAggType({
-  name: BUCKET_TYPES.GEOTILE_GRID,
-  title: geotileGridTitle,
-  params: [
-    {
-      name: 'field',
-      type: 'field',
-      filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
-    },
-    {
-      name: 'useGeocentroid',
-      default: true,
-      write: noop,
-    },
-    {
-      name: 'precision',
-      default: 0,
-    },
-  ],
-  getRequestAggs(agg) {
-    const aggs = [];
-    const useGeocentroid = agg.getParam('useGeocentroid');
+export interface AggParamsGeoTile extends BaseAggParams {
+  field: string;
+  useGeocentroid?: boolean;
+  precision?: number;
+}
 
-    aggs.push(agg);
-
-    if (useGeocentroid) {
-      const aggConfig = {
-        type: METRIC_TYPES.GEO_CENTROID,
-        enabled: true,
-        params: {
-          field: agg.getField(),
+export const getGeoTitleBucketAgg = ({ getInternalStartServices }: GeoTitleBucketAggDependencies) =>
+  new BucketAggType(
+    {
+      name: BUCKET_TYPES.GEOTILE_GRID,
+      title: geotileGridTitle,
+      params: [
+        {
+          name: 'field',
+          type: 'field',
+          filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
         },
-      };
+        {
+          name: 'useGeocentroid',
+          default: true,
+          write: noop,
+        },
+        {
+          name: 'precision',
+          default: 0,
+        },
+      ],
+      getRequestAggs(agg) {
+        const aggs = [];
+        const useGeocentroid = agg.getParam('useGeocentroid');
 
-      aggs.push(agg.aggConfigs.createAggConfig(aggConfig, { addToAggConfigs: false }));
-    }
+        aggs.push(agg);
 
-    return aggs as IBucketAggConfig[];
-  },
-});
+        if (useGeocentroid) {
+          const aggConfig = {
+            type: METRIC_TYPES.GEO_CENTROID,
+            enabled: true,
+            params: {
+              field: agg.getField(),
+            },
+          };
+
+          aggs.push(agg.aggConfigs.createAggConfig(aggConfig, { addToAggConfigs: false }));
+        }
+
+        return aggs as IBucketAggConfig[];
+      },
+    },
+    { getInternalStartServices }
+  );

@@ -1,7 +1,7 @@
 {
   "id": "siem_auditbeat_auth",
   "title": "SIEM Auditbeat Authentication",
-  "description": "Detect suspicious authentication events in Auditbeat data (beta)",
+  "description": "Detect suspicious authentication events in Auditbeat data (beta).",
   "type": "Auditbeat data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*",

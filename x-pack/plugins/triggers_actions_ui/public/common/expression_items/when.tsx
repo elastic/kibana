@@ -6,9 +6,11 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelect } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiExpression, EuiPopover, EuiSelect } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
+import { ClosablePopoverTitle } from './components';
 
 interface WhenExpressionProps {
   aggType: string;
@@ -27,12 +29,14 @@ interface WhenExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const WhenExpression = ({
   aggType,
   customAggTypesOptions,
   onChangeSelectedAggType,
+  display = 'inline',
   popupPosition,
 }: WhenExpressionProps) => {
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
@@ -50,6 +54,7 @@ export const WhenExpression = ({
           )}
           value={aggregationTypes[aggType].text}
           isActive={aggTypePopoverOpen}
+          display={display === 'inline' ? 'inline' : 'columns'}
           onClick={() => {
             setAggTypePopoverOpen(true);
           }}
@@ -60,20 +65,22 @@ export const WhenExpression = ({
         setAggTypePopoverOpen(false);
       }}
       ownFocus
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle', {
-            defaultMessage: 'when',
-          })}
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle"
+            defaultMessage="when"
+          />
+        </ClosablePopoverTitle>
         <EuiSelect
           data-test-subj="whenExpressionSelect"
           value={aggType}
           fullWidth
-          onChange={e => {
+          onChange={(e) => {
             onChangeSelectedAggType(e.target.value);
             setAggTypePopoverOpen(false);
           }}

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DATASOURCE_SAVED_OBJECT_TYPE = 'datasources';
+export const DATASOURCE_SAVED_OBJECT_TYPE = 'ingest-datasources';

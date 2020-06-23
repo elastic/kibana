@@ -90,11 +90,11 @@ export async function getAlertData(
 
     const [loadedAlertType, loadedActionTypes] = await Promise.all<AlertType, ActionType[]>([
       loadAlertTypes()
-        .then(types => types.find(type => type.id === loadedAlert.alertTypeId))
+        .then((types) => types.find((type) => type.id === loadedAlert.alertTypeId))
         .then(throwIfAbsent(`Invalid Alert Type: ${loadedAlert.alertTypeId}`)),
       loadActionTypes().then(
         throwIfIsntContained(
-          new Set(loadedAlert.actions.map(action => action.actionTypeId)),
+          new Set(loadedAlert.actions.map((action) => action.actionTypeId)),
           (requiredActionType: string) => `Invalid Action Type: ${requiredActionType}`,
           (action: ActionType) => action.id
         )
@@ -118,6 +118,6 @@ export async function getAlertData(
   }
 }
 
-export const AlertDetailsRouteWithApi = withActionOperations(
-  withBulkAlertOperations(AlertDetailsRoute)
-);
+const AlertDetailsRouteWithApi = withActionOperations(withBulkAlertOperations(AlertDetailsRoute));
+// eslint-disable-next-line import/no-default-export
+export { AlertDetailsRouteWithApi as default };

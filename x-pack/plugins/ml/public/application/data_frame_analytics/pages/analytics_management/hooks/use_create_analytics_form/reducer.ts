@@ -11,6 +11,8 @@ import numeral from '@elastic/numeral';
 import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
+import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State } from './state';
 import {
@@ -29,9 +31,14 @@ import {
 } from '../../../../../../../common/constants/validation';
 import {
   getDependentVar,
+  getNumTopFeatureImportanceValues,
+  getTrainingPercent,
   isRegressionAnalysis,
   isClassificationAnalysis,
   ANALYSIS_CONFIG_TYPE,
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
+  TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -95,6 +102,19 @@ const getSourceIndexString = (state: State) => {
   return '';
 };
 
+/**
+ * Validates num_top_feature_importance_values. Must be an integer >= 0.
+ */
+export const validateNumTopFeatureImportanceValues = (
+  numTopFeatureImportanceValues: any
+): boolean => {
+  return (
+    typeof numTopFeatureImportanceValues === 'number' &&
+    numTopFeatureImportanceValues >= NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN &&
+    Number.isInteger(numTopFeatureImportanceValues)
+  );
+};
+
 export const validateAdvancedEditor = (state: State): State => {
   const {
     jobIdEmpty,
@@ -104,6 +124,7 @@ export const validateAdvancedEditor = (state: State): State => {
     createIndexPattern,
     excludes,
     maxDistinctValuesError,
+    requiredFieldsError,
   } = state.form;
   const { jobConfig } = state;
 
@@ -123,7 +144,7 @@ export const validateAdvancedEditor = (state: State): State => {
       sourceIndexNameValid = !sourceIndex.includes(',');
     }
     if (Array.isArray(sourceIndex)) {
-      sourceIndexNameValid = !sourceIndex.some(d => d?.includes(','));
+      sourceIndexNameValid = !sourceIndex.some((d) => d?.includes(','));
     }
   }
 
@@ -141,6 +162,8 @@ export const validateAdvancedEditor = (state: State): State => {
 
   let dependentVariableEmpty = false;
   let excludesValid = true;
+  let trainingPercentValid = true;
+  let numTopFeatureImportanceValuesValid = true;
 
   if (
     jobConfig.analysis === undefined &&
@@ -168,6 +191,53 @@ export const validateAdvancedEditor = (state: State): State => {
         ),
         message: '',
       });
+    }
+
+    const trainingPercent = getTrainingPercent(jobConfig.analysis);
+    if (
+      trainingPercent !== undefined &&
+      (isNaN(trainingPercent) ||
+        typeof trainingPercent !== 'number' ||
+        trainingPercent < TRAINING_PERCENT_MIN ||
+        trainingPercent > TRAINING_PERCENT_MAX)
+    ) {
+      trainingPercentValid = false;
+
+      state.advancedEditorMessages.push({
+        error: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.trainingPercentInvalid',
+          {
+            defaultMessage: 'The training percent must be a number between {min} and {max}.',
+            values: {
+              min: TRAINING_PERCENT_MIN,
+              max: TRAINING_PERCENT_MAX,
+            },
+          }
+        ),
+        message: '',
+      });
+    }
+
+    const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
+    if (numTopFeatureImportanceValues !== undefined) {
+      numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+        numTopFeatureImportanceValues
+      );
+      if (numTopFeatureImportanceValuesValid === false) {
+        state.advancedEditorMessages.push({
+          error: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.advancedEditorMessage.numTopFeatureImportanceValuesInvalid',
+            {
+              defaultMessage:
+                'The value for num_top_feature_importance_values must be an integer of {min} or higher.',
+              values: {
+                min: 0,
+              },
+            }
+          ),
+          message: '',
+        });
+      }
     }
   }
 
@@ -199,6 +269,17 @@ export const validateAdvancedEditor = (state: State): State => {
         'xpack.ml.dataframe.analytics.create.advancedEditorMessage.destinationIndexNameEmpty',
         {
           defaultMessage: 'The destination index name must not be empty.',
+        }
+      ),
+      message: '',
+    });
+  } else if (destinationIndexPatternTitleExists && !createIndexPattern) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.destinationIndexNameExistsWarn',
+        {
+          defaultMessage:
+            'An index with this destination index name already exists. Be aware that running this analytics job will modify this destination index.',
         }
       ),
       message: '',
@@ -246,9 +327,13 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  state.form.destinationIndexPatternTitleExists = destinationIndexPatternTitleExists;
+
   state.isValid =
     maxDistinctValuesError === undefined &&
+    requiredFieldsError === undefined &&
     excludesValid &&
+    trainingPercentValid &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
@@ -259,6 +344,7 @@ export const validateAdvancedEditor = (state: State): State => {
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
     !modelMemoryLimitEmpty &&
+    numTopFeatureImportanceValuesValid &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -312,6 +398,8 @@ const validateForm = (state: State): State => {
     dependentVariable,
     maxDistinctValuesError,
     modelMemoryLimit,
+    numTopFeatureImportanceValuesValid,
+    requiredFieldsError,
   } = state.form;
   const { estimatedModelMemoryLimit } = state;
 
@@ -327,6 +415,7 @@ const validateForm = (state: State): State => {
 
   state.isValid =
     maxDistinctValuesError === undefined &&
+    requiredFieldsError === undefined &&
     !jobTypeEmpty &&
     !mmlValidationResult &&
     !jobIdEmpty &&
@@ -337,6 +426,7 @@ const validateForm = (state: State): State => {
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
+    numTopFeatureImportanceValuesValid &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -352,12 +442,6 @@ export function reducer(state: State, action: Action): State {
     case ACTION.RESET_REQUEST_MESSAGES:
       return { ...state, requestMessages: [] };
 
-    case ACTION.CLOSE_MODAL:
-      return { ...state, isModalVisible: false };
-
-    case ACTION.OPEN_MODAL:
-      return { ...state, isModalVisible: true };
-
     case ACTION.RESET_ADVANCED_EDITOR_MESSAGES:
       return { ...state, advancedEditorMessages: [] };
 
@@ -365,7 +449,23 @@ export function reducer(state: State, action: Action): State {
       return getInitialState();
 
     case ACTION.SET_ADVANCED_EDITOR_RAW_STRING:
-      return { ...state, advancedEditorRawString: action.advancedEditorRawString };
+      let resultJobConfig;
+      try {
+        resultJobConfig = JSON.parse(collapseLiteralStrings(action.advancedEditorRawString));
+      } catch (e) {
+        return {
+          ...state,
+          advancedEditorRawString: action.advancedEditorRawString,
+          isAdvancedEditorValidJson: false,
+          advancedEditorMessages: [],
+        };
+      }
+
+      return {
+        ...validateAdvancedEditor({ ...state, jobConfig: resultJobConfig }),
+        advancedEditorRawString: action.advancedEditorRawString,
+        isAdvancedEditorValidJson: true,
+      };
 
     case ACTION.SET_FORM_STATE:
       const newFormState = { ...state.form, ...action.payload };
@@ -373,7 +473,7 @@ export function reducer(state: State, action: Action): State {
       // update state attributes which are derived from other state attributes.
       if (action.payload.destinationIndex !== undefined) {
         newFormState.destinationIndexNameExists = state.indexNames.some(
-          name => newFormState.destinationIndex === name
+          (name) => newFormState.destinationIndex === name
         );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
@@ -382,7 +482,7 @@ export function reducer(state: State, action: Action): State {
       }
 
       if (action.payload.jobId !== undefined) {
-        newFormState.jobIdExists = state.jobIds.some(id => newFormState.jobId === id);
+        newFormState.jobIdExists = state.jobIds.some((id) => newFormState.jobId === id);
         newFormState.jobIdEmpty = newFormState.jobId === '';
         newFormState.jobIdValid = isJobIdValid(newFormState.jobId);
         newFormState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(
@@ -396,6 +496,12 @@ export function reducer(state: State, action: Action): State {
         newFormState.sourceIndexNameValid = Object.keys(validationMessages).length === 0;
       }
 
+      if (action.payload.numTopFeatureImportanceValues !== undefined) {
+        newFormState.numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+          newFormState?.numTopFeatureImportanceValues
+        );
+      }
+
       return state.isAdvancedEditorEnabled
         ? validateAdvancedEditor({ ...state, form: newFormState })
         : validateForm({ ...state, form: newFormState });
@@ -403,7 +509,7 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SET_INDEX_NAMES: {
       const newState = { ...state, indexNames: action.indexNames };
       newState.form.destinationIndexNameExists = newState.indexNames.some(
-        name => newState.form.destinationIndex === name
+        (name) => newState.form.destinationIndex === name
       );
       return newState;
     }
@@ -424,18 +530,12 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SET_IS_JOB_STARTED:
       return { ...state, isJobStarted: action.isJobStarted };
 
-    case ACTION.SET_IS_MODAL_BUTTON_DISABLED:
-      return { ...state, isModalButtonDisabled: action.isModalButtonDisabled };
-
-    case ACTION.SET_IS_MODAL_VISIBLE:
-      return { ...state, isModalVisible: action.isModalVisible };
-
     case ACTION.SET_JOB_CONFIG:
       return validateAdvancedEditor({ ...state, jobConfig: action.payload });
 
     case ACTION.SET_JOB_IDS: {
       const newState = { ...state, jobIds: action.jobIds };
-      newState.form.jobIdExists = newState.jobIds.some(id => newState.form.jobId === id);
+      newState.form.jobIdExists = newState.jobIds.some((id) => newState.form.jobId === id);
       return newState;
     }
 

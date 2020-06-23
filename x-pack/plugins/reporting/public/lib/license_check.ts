@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LicenseCheckResults } from '../..';
-import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../licensing/public';
+
+import { LicenseCheck } from '../../../licensing/public';
+import { LicenseCheckResults } from '../../common/types';
 
 export const checkLicense = (checkResults: LicenseCheck): LicenseCheckResults => {
   switch (checkResults.state) {
-    case LICENSE_CHECK_STATE.Valid: {
+    case 'valid': {
       return {
         showLinks: true,
         enableLinks: true,
@@ -16,7 +17,7 @@ export const checkLicense = (checkResults: LicenseCheck): LicenseCheckResults =>
       };
     }
 
-    case LICENSE_CHECK_STATE.Invalid: {
+    case 'invalid': {
       return {
         showLinks: false,
         enableLinks: false,
@@ -24,7 +25,7 @@ export const checkLicense = (checkResults: LicenseCheck): LicenseCheckResults =>
       };
     }
 
-    case LICENSE_CHECK_STATE.Unavailable: {
+    case 'unavailable': {
       return {
         showLinks: true,
         enableLinks: false,
@@ -33,7 +34,7 @@ export const checkLicense = (checkResults: LicenseCheck): LicenseCheckResults =>
       };
     }
 
-    case LICENSE_CHECK_STATE.Expired: {
+    case 'expired': {
       return {
         showLinks: true,
         enableLinks: false,

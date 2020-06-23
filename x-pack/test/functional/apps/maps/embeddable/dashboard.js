@@ -5,20 +5,22 @@
  */
 
 import expect from '@kbn/expect';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   describe('embed in dashboard', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
-        'courier:ignoreFilterIfFieldNotInIndex': true,
+        [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
@@ -26,7 +28,7 @@ export default function({ getPageObjects, getService }) {
 
     after(async () => {
       await kibanaServer.uiSettings.replace({
-        'courier:ignoreFilterIfFieldNotInIndex': false,
+        [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: false,
       });
     });
 
@@ -110,6 +112,16 @@ export default function({ getPageObjects, getService }) {
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const afterRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+    });
+
+    // see https://github.com/elastic/kibana/issues/61596 on why it is specific to maps
+    it("dashboard's back button should navigate to previous page", async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
+      await PageObjects.dashboard.waitForRenderComplete();
+      await browser.goBack();
+      expect(await PageObjects.dashboard.onDashboardLandingPage()).to.be(true);
     });
   });
 }

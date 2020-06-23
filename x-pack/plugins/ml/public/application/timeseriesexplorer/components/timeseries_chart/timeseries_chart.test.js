@@ -13,7 +13,7 @@ import React from 'react';
 import { TimeseriesChart } from './timeseries_chart';
 
 jest.mock('../../../util/time_buckets', () => ({
-  TimeBuckets: function() {
+  TimeBuckets: function () {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
     this.getScaledDateFormat = jest.fn();

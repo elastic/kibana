@@ -25,7 +25,7 @@ const KIBANA_INSTALL_DIR =
   process.env.KIBANA_INSTALL_DIR ||
   `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   function createKbnServerTask({ runBuild, flags = [] }) {
     return {
       options: {
@@ -43,7 +43,7 @@ module.exports = function(grunt) {
         ...flags,
 
         // allow the user to override/inject flags by defining cli args starting with `--kbnServer.`
-        ...grunt.option.flags().reduce(function(flags, flag) {
+        ...grunt.option.flags().reduce(function (flags, flag) {
           if (flag.startsWith('--kbnServer.')) {
             flags.push(`--${flag.slice(12)}`);
           }
@@ -58,6 +58,7 @@ module.exports = function(grunt) {
     '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
+    '--optimize.validateSyntaxOfNodeModules=false',
     '--server.port=5610',
     '--migrations.skip=true',
   ];
@@ -237,6 +238,8 @@ module.exports = function(grunt) {
         'test/server_integration/http/ssl/config.js',
         '--config',
         'test/server_integration/http/ssl_redirect/config.js',
+        '--config',
+        'test/server_integration/http/cache/config.js',
         '--bail',
         '--debug',
         '--kibana-install-dir',

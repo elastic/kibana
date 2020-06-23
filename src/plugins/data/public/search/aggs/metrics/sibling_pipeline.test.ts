@@ -17,30 +17,51 @@
  * under the License.
  */
 
-import { bucketSumMetricAgg } from './bucket_sum';
-import { bucketAvgMetricAgg } from './bucket_avg';
-import { bucketMinMetricAgg } from './bucket_min';
-import { bucketMaxMetricAgg } from './bucket_max';
+import { getBucketSumMetricAgg } from './bucket_sum';
+import { getBucketAvgMetricAgg } from './bucket_avg';
+import { getBucketMinMetricAgg } from './bucket_min';
+import { getBucketMaxMetricAgg } from './bucket_max';
 
 import { AggConfigs } from '../agg_configs';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test_helpers';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { GetInternalStartServicesFn, InternalStartServices } from '../../../types';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('sibling pipeline aggs', () => {
-  beforeEach(() => {
-    mockDataServices();
-  });
+  const getInternalStartServices: GetInternalStartServicesFn = () =>
+    (({
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      notifications: notificationServiceMock.createStartContract(),
+    } as unknown) as InternalStartServices);
 
   const typesRegistry = mockAggTypesRegistry();
 
   const metrics = [
-    { name: 'sum_bucket', title: 'Overall Sum', provider: bucketSumMetricAgg },
-    { name: 'avg_bucket', title: 'Overall Average', provider: bucketAvgMetricAgg },
-    { name: 'min_bucket', title: 'Overall Min', provider: bucketMinMetricAgg },
-    { name: 'max_bucket', title: 'Overall Max', provider: bucketMaxMetricAgg },
+    {
+      name: 'sum_bucket',
+      title: 'Overall Sum',
+      provider: getBucketSumMetricAgg({ getInternalStartServices }),
+    },
+    {
+      name: 'avg_bucket',
+      title: 'Overall Average',
+      provider: getBucketAvgMetricAgg({ getInternalStartServices }),
+    },
+    {
+      name: 'min_bucket',
+      title: 'Overall Min',
+      provider: getBucketMinMetricAgg({ getInternalStartServices }),
+    },
+    {
+      name: 'max_bucket',
+      title: 'Overall Max',
+      provider: getBucketMaxMetricAgg({ getInternalStartServices }),
+    },
   ];
 
-  metrics.forEach(metric => {
+  metrics.forEach((metric) => {
     describe(`${metric.title} metric`, () => {
       let aggDsl: Record<string, any>;
       let metricAgg: MetricAggType;
@@ -91,7 +112,7 @@ describe('sibling pipeline aggs', () => {
               },
             },
           ],
-          { typesRegistry }
+          { typesRegistry, fieldFormats: getInternalStartServices().fieldFormats }
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -106,7 +127,7 @@ describe('sibling pipeline aggs', () => {
         expect(metricAgg.makeLabel(aggConfig)).toEqual(`${metric.title} of Count`);
       });
 
-      it('should set parent aggs', function() {
+      it('should set parent aggs', function () {
         init();
 
         expect(aggDsl[metric.name].buckets_path).toBe('2-bucket>_count');
@@ -165,7 +186,7 @@ describe('sibling pipeline aggs', () => {
         customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
         customBucket.type.params[0].modifyAggConfigOnSearchRequestStart = customBucketSpy;
 
-        aggConfig.type.params.forEach(param => {
+        aggConfig.type.params.forEach((param) => {
           param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
         });
 

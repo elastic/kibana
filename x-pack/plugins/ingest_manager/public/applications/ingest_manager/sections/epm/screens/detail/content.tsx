@@ -15,6 +15,7 @@ import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
 import { SideNavLinks } from './side_nav_links';
 import { DataSourcesPanel } from './data_sources_panel';
+import { SettingsPanel } from './settings_panel';
 
 type ContentProps = PackageInfo & Pick<DetailParams, 'panel'> & { hasIconPanel: boolean };
 export function Content(props: ContentProps) {
@@ -49,8 +50,19 @@ export function Content(props: ContentProps) {
 
 type ContentPanelProps = PackageInfo & Pick<DetailParams, 'panel'>;
 export function ContentPanel(props: ContentPanelProps) {
-  const { panel, name, version } = props;
+  const { panel, name, version, assets, title, removable, latestVersion } = props;
   switch (panel) {
+    case 'settings':
+      return (
+        <SettingsPanel
+          name={name}
+          version={version}
+          assets={assets}
+          title={title}
+          removable={removable}
+          latestVersion={latestVersion}
+        />
+      );
     case 'data-sources':
       return <DataSourcesPanel name={name} version={version} />;
     case 'overview':

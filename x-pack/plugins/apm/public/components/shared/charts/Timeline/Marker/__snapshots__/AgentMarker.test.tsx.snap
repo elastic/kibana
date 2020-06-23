@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AgentMarker renders 1`] = `
+<ThemeProvider
+  theme={[Function]}
+>
+  <AgentMarker
+    mark={
+      Object {
+        "id": "agent",
+        "offset": 1000,
+        "type": "agentMark",
+        "verticalLine": true,
+      }
+    }
+  />
+</ThemeProvider>
+`;

@@ -13,7 +13,7 @@ export const PermissionDenied = () => (
       <EuiEmptyPrompt
         iconType="securityApp"
         title={
-          <h2>
+          <h2 data-test-subj="apiKeysPermissionDeniedMessage">
             <FormattedMessage
               id="xpack.security.management.apiKeys.deniedPermissionTitle"
               defaultMessage="You need permission to manage API keys"

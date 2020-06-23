@@ -174,6 +174,10 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         name: 'master_timeout',
         type: 'duration',
       },
+      active: {
+        name: 'active',
+        type: 'boolean',
+      },
     },
     url: {
       fmt: '/_watcher/watch/<%=id%>',

@@ -10,6 +10,7 @@ import { ApiKey, ApiKeyToInvalidate } from '../../../common/model';
 interface CheckPrivilegesResponse {
   areApiKeysEnabled: boolean;
   isAdmin: boolean;
+  canManage: boolean;
 }
 
 interface InvalidateApiKeysResponse {

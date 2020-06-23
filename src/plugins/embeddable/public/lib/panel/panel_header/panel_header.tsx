@@ -39,13 +39,13 @@ export interface PanelHeaderProps {
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
+  notifications: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
-  eventCount?: number;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
-  return badges.map(badge => (
+  return badges.map((badge) => (
     <EuiBadge
       key={badge.id}
       className="embPanel__headerBadge"
@@ -56,6 +56,40 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
       {badge.getDisplayName({ embeddable })}
     </EuiBadge>
   ));
+}
+
+function renderNotifications(
+  notifications: Array<Action<EmbeddableContext>>,
+  embeddable: IEmbeddable
+) {
+  return notifications.map((notification) => {
+    const context = { embeddable };
+
+    let badge = (
+      <EuiNotificationBadge
+        data-test-subj={`embeddablePanelNotification-${notification.id}`}
+        key={notification.id}
+        style={{ marginTop: '4px', marginRight: '4px' }}
+        onClick={() => notification.execute(context)}
+      >
+        {notification.getDisplayName(context)}
+      </EuiNotificationBadge>
+    );
+
+    if (notification.getDisplayNameTooltip) {
+      const tooltip = notification.getDisplayNameTooltip(context);
+
+      if (tooltip) {
+        badge = (
+          <EuiToolTip position="top" delay="regular" content={tooltip} key={notification.id}>
+            {badge}
+          </EuiToolTip>
+        );
+      }
+    }
+
+    return badge;
+  });
 }
 
 function renderTooltip(description: string) {
@@ -90,9 +124,9 @@ export function PanelHeader({
   getActionContextMenuPanel,
   closeContextMenu,
   badges,
+  notifications,
   embeddable,
   headerId,
-  eventCount,
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
   const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
@@ -150,11 +184,7 @@ export function PanelHeader({
         )}
         {renderBadges(badges, embeddable)}
       </h2>
-      {!isViewMode && !!eventCount && (
-        <EuiNotificationBadge style={{ marginTop: '4px', marginRight: '4px' }}>
-          {eventCount}
-        </EuiNotificationBadge>
-      )}
+      {renderNotifications(notifications, embeddable)}
       <PanelOptionsMenu
         isViewMode={isViewMode}
         getActionContextMenuPanel={getActionContextMenuPanel}

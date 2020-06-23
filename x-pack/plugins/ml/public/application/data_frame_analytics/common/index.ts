@@ -17,6 +17,7 @@ export {
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
   ANALYSIS_CONFIG_TYPE,
+  OUTLIER_ANALYSIS_METHOD,
   RegressionEvaluateResponse,
   getValuesFromResponse,
   loadEvalData,
@@ -30,19 +31,16 @@ export {
 } from './analytics';
 
 export {
-  getDefaultSelectableFields,
-  getDefaultRegressionFields,
-  getDefaultClassificationFields,
   getDefaultFieldsFromJobCaps,
-  getFlattenedFields,
-  sortColumns,
-  sortRegressionResultsColumns,
-  sortRegressionResultsFields,
-  toggleSelectedField,
-  toggleSelectedFieldSimple,
+  sortExplorationResultsFields,
   EsId,
   EsDoc,
   EsDocSource,
   EsFieldName,
   MAX_COLUMNS,
 } from './fields';
+
+export { getIndexData } from './get_index_data';
+export { getIndexFields } from './get_index_fields';
+
+export { useResultsViewConfig } from './use_results_view_config';

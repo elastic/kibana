@@ -12,3 +12,4 @@ export * from './datasource';
 export * from './epm';
 export * from './output';
 export * from './enrollment_api_key';
+export * from './settings';

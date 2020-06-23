@@ -1,8 +1,7 @@
 {
-  "id": "file_upload",
+  "id": "fileUpload",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "file_upload"],
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "usageCollection"]

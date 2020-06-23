@@ -23,7 +23,7 @@ import { visualizationSavedObjectTypeMigrations } from './visualization_migratio
 export const visualizationSavedObjectType: SavedObjectsType = {
   name: 'visualization',
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   management: {
     icon: 'visualizeApp',
     defaultSearchField: 'title',
@@ -36,7 +36,7 @@ export const visualizationSavedObjectType: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/visualize/edit/${encodeURIComponent(obj.id)}`,
+        path: `/app/visualize#/edit/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'visualize.show',
       };
     },

@@ -18,5 +18,5 @@
 ## Example
 
 ```js
-GET /api/ingest_manager/fleet/agents?kuery=agents.last_checkin:2019-10-01T13:42:54.323Z
+GET /api/ingest_manager/fleet/agents?kuery=fleet-agents.last_checkin:2019-10-01T13:42:54.323Z
 ```

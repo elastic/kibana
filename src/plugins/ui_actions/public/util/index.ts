@@ -18,4 +18,3 @@
  */
 
 export * from './presentable';
-export * from './configurable';

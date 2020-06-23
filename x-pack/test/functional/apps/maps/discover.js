@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'maps', 'timePicker']);
 
@@ -17,7 +17,6 @@ export default function({ getService, getPageObjects }) {
 
     it('should link geo_shape fields to Maps application', async () => {
       await PageObjects.discover.selectIndexPattern('geo_shapes*');
-      await PageObjects.discover.clickFieldListItem('geometry');
       await PageObjects.discover.clickFieldListItemVisualize('geometry');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.maps.waitForLayersToLoad();
@@ -37,7 +36,6 @@ export default function({ getService, getPageObjects }) {
       await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.discover.clickFieldListItem('geo.coordinates');
       await PageObjects.discover.clickFieldListItemVisualize('geo.coordinates');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.maps.waitForLayersToLoad();

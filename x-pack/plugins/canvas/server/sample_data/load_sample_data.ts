@@ -19,7 +19,7 @@ export function loadSampleData(
   // @ts-ignore: Untyped local
   function updateCanvasWorkpadTimestamps(savedObjects) {
     // @ts-ignore: Untyped local
-    return savedObjects.map(savedObject => {
+    return savedObjects.map((savedObject) => {
       if (savedObject.type === 'canvas-workpad') {
         savedObject.attributes['@timestamp'] = nowTimestamp;
         savedObject.attributes['@created'] = nowTimestamp;

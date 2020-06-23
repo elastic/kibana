@@ -6,16 +6,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
+import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { AuthenticationServiceSetup } from '../../authentication';
 import { PluginStartDependencies } from '../../plugin';
-import { RolesAPIClient } from '../roles';
-import { UserAPIClient } from './user_api_client';
-import { UsersGridPage } from './users_grid';
-import { EditUserPage } from './edit_user';
 
 interface CreateParams {
   authc: AuthenticationServiceSetup;
@@ -29,14 +25,28 @@ export const usersManagementApp = Object.freeze({
       id: this.id,
       order: 10,
       title: i18n.translate('xpack.security.management.usersTitle', { defaultMessage: 'Users' }),
-      async mount({ basePath, element, setBreadcrumbs }) {
-        const [{ http, notifications, i18n: i18nStart }] = await getStartServices();
+      async mount({ element, setBreadcrumbs, history }) {
+        const [coreStart] = await getStartServices();
         const usersBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.users.breadcrumb', { defaultMessage: 'Users' }),
-            href: `#${basePath}`,
+            href: `/`,
           },
         ];
+
+        const [
+          [{ http, notifications, i18n: i18nStart }],
+          { UsersGridPage },
+          { EditUserPage },
+          { UserAPIClient },
+          { RolesAPIClient },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./users_grid'),
+          import('./edit_user'),
+          import('./user_api_client'),
+          import('../roles'),
+        ]);
 
         const userAPIClient = new UserAPIClient(http);
         const rolesAPIClient = new RolesAPIClient(http);
@@ -47,6 +57,8 @@ export const usersManagementApp = Object.freeze({
               notifications={notifications}
               userAPIClient={userAPIClient}
               rolesAPIClient={rolesAPIClient}
+              history={history}
+              navigateToApp={coreStart.application.navigateToApp}
             />
           );
         };
@@ -57,7 +69,7 @@ export const usersManagementApp = Object.freeze({
           setBreadcrumbs([
             ...usersBreadcrumbs,
             username
-              ? { text: username, href: `#${basePath}/edit/${encodeURIComponent(username)}` }
+              ? { text: username, href: `/edit/${encodeURIComponent(username)}` }
               : {
                   text: i18n.translate('xpack.security.users.createBreadcrumb', {
                     defaultMessage: 'Create',
@@ -72,15 +84,16 @@ export const usersManagementApp = Object.freeze({
               rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}
               username={username}
+              history={history}
             />
           );
         };
 
         render(
           <i18nStart.Context>
-            <Router basename={basePath}>
+            <Router history={history}>
               <Switch>
-                <Route path="/" exact>
+                <Route path={['/', '']} exact>
                   <UsersGridPageWithBreadcrumbs />
                 </Route>
                 <Route path="/edit/:username?">

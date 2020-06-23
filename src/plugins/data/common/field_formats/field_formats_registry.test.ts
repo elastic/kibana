@@ -18,7 +18,7 @@
  */
 import { FieldFormatsRegistry } from './field_formats_registry';
 import { BoolFormat, PercentFormat, StringFormat } from './converters';
-import { FieldFormatsGetConfigFn, IFieldFormatType } from './types';
+import { FieldFormatsGetConfigFn, FieldFormatInstanceType } from './types';
 import { KBN_FIELD_TYPES } from '../../common';
 
 const getValueOfPrivateField = (instance: any, field: string) => instance[field];
@@ -75,10 +75,10 @@ describe('FieldFormatsRegistry', () => {
     test('should register field formats', () => {
       fieldFormatsRegistry.register([StringFormat, BoolFormat]);
 
-      const registeredFieldFormatters: Map<string, IFieldFormatType> = getValueOfPrivateField(
-        fieldFormatsRegistry,
-        'fieldFormats'
-      );
+      const registeredFieldFormatters: Map<
+        string,
+        FieldFormatInstanceType
+      > = getValueOfPrivateField(fieldFormatsRegistry, 'fieldFormats');
 
       expect(registeredFieldFormatters.size).toBe(2);
 

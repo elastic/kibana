@@ -7,11 +7,10 @@
 import React, { Fragment, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonToggle, EuiBadge, EuiHealth } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padLeft, difference, chunk } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { Alert, AlertTaskState, RawAlertInstance, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
@@ -80,40 +79,19 @@ export const alertInstancesTableColumns = (
     field: '',
     align: RIGHT_ALIGNMENT,
     name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.actions',
-      { defaultMessage: 'Actions' }
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.mute',
+      { defaultMessage: 'Mute' }
     ),
     render: (alertInstance: AlertInstanceListItem) => {
       return (
         <Fragment>
-          {alertInstance.isMuted ? (
-            <EuiBadge data-test-subj={`mutedAlertInstanceLabel_${alertInstance.instance}`}>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.mutedAlert"
-                defaultMessage="Muted"
-              />
-            </EuiBadge>
-          ) : (
-            <Fragment />
-          )}
-          <EuiButtonToggle
-            label={
-              alertInstance.isMuted
-                ? i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.actions.unmute',
-                    { defaultMessage: 'Unmute' }
-                  )
-                : i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.actions.mute',
-                    { defaultMessage: 'Mute' }
-                  )
-            }
+          <EuiSwitch
+            label="mute"
+            showLabel={false}
+            compressed={true}
+            checked={alertInstance.isMuted}
             data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
-            iconType={alertInstance.isMuted ? 'eyeClosed' : 'eye'}
             onChange={() => onMuteAction(alertInstance)}
-            isSelected={alertInstance.isMuted}
-            isEmpty
-            isIconOnly
           />
         </Fragment>
       );
@@ -125,7 +103,7 @@ export const alertInstancesTableColumns = (
 
 function durationAsString(duration: Duration): string {
   return [duration.hours(), duration.minutes(), duration.seconds()]
-    .map(value => padLeft(`${value}`, 2, '0'))
+    .map((value) => padLeft(`${value}`, 2, '0'))
     .join(':');
 }
 
@@ -146,7 +124,7 @@ export function AlertInstances({
     ...Object.entries(alertInstances).map(([instanceId, instance]) =>
       alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
     ),
-    ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
+    ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map((instanceId) =>
       alertInstanceToListItem(durationEpoch, alert, instanceId)
     ),
   ];
@@ -161,6 +139,7 @@ export function AlertInstances({
 
   return (
     <Fragment>
+      <EuiSpacer size="xl" />
       <input
         type="hidden"
         data-test-subj="alertInstancesDurationEpoch"
@@ -226,7 +205,7 @@ export function alertInstanceToListItem(
   instanceId: string,
   instance?: RawAlertInstance
 ): AlertInstanceListItem {
-  const isMuted = alert.mutedInstanceIds.findIndex(muted => muted === instanceId) >= 0;
+  const isMuted = alert.mutedInstanceIds.findIndex((muted) => muted === instanceId) >= 0;
   return {
     instance: instanceId,
     status: instance

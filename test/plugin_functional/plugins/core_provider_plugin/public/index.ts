@@ -16,13 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npSetup, npStart } from 'ui/new_platform';
+import { Plugin, CoreSetup, CoreStart } from 'kibana/public';
 import '../types';
 
-window.__coreProvider = {
-  setup: npSetup,
-  start: npStart,
-  testUtils: {
-    delay: (ms: number) => new Promise(res => setTimeout(res, ms)),
-  },
-};
+export const plugin = () => new CoreProviderPlugin();
+
+class CoreProviderPlugin implements Plugin {
+  private setupDeps?: { core: CoreSetup; plugins: Record<string, any> };
+  public setup(core: CoreSetup, plugins: Record<string, any>) {
+    this.setupDeps = {
+      core,
+      plugins,
+    };
+  }
+
+  public start(core: CoreStart, plugins: Record<string, any>) {
+    window.__coreProvider = {
+      setup: this.setupDeps!,
+      start: {
+        core,
+        plugins,
+      },
+      testUtils: {
+        delay: (ms: number) => new Promise((res) => setTimeout(res, ms)),
+      },
+    };
+  }
+  public stop() {}
+}

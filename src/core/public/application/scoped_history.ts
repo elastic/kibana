@@ -197,7 +197,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
     prompt?: boolean | string | TransitionPromptHook<HistoryLocationState>
   ): UnregisterCallback => {
     throw new Error(
-      `history.block is not supported. Please use the AppMountParams.onAppLeave API.`
+      `history.block is not supported. Please use the AppMountParameters.onAppLeave API.`
     );
   };
 
@@ -219,11 +219,26 @@ export class ScopedHistory<HistoryLocationState = unknown>
 
   /**
    * Creates an href (string) to the location.
+   * If `prependBasePath` is true (default), it will prepend the location's path with the scoped history basePath.
    *
    * @param location
+   * @param prependBasePath
    */
-  public createHref = (location: LocationDescriptorObject<HistoryLocationState>): Href => {
+  public createHref = (
+    location: LocationDescriptorObject<HistoryLocationState>,
+    { prependBasePath = true }: { prependBasePath?: boolean } = {}
+  ): Href => {
     this.verifyActive();
+    if (prependBasePath) {
+      location = this.prependBasePath(location);
+      if (location.pathname === undefined) {
+        // we always want to create an url relative to the basePath
+        // so if pathname is not present, we use the history's basePath as default
+        // we are doing that here because `prependBasePath` should not
+        // alter pathname for other method calls
+        location.pathname = this.basePath;
+      }
+    }
     return this.parentHistory.createHref(location);
   };
 
@@ -254,8 +269,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * Prepends the base path to string.
    */
   private prependBasePathToString(path: string): string {
-    path = path.startsWith('/') ? path.slice(1) : path;
-    return path.length ? `${this.basePath}/${path}` : this.basePath;
+    return path.length ? `${this.basePath}/${path}`.replace(/\/{2,}/g, '/') : this.basePath;
   }
 
   /**
@@ -310,7 +324,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
         throw new Error(`Unrecognized history action: ${action}`);
       }
 
-      [...this.listeners].forEach(listener => {
+      [...this.listeners].forEach((listener) => {
         listener(this.stripBasePath(location), action);
       });
     });

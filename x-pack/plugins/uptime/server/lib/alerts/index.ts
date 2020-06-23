@@ -6,5 +6,9 @@
 
 import { UptimeAlertTypeFactory } from './types';
 import { statusCheckAlertFactory } from './status_check';
+import { tlsAlertFactory } from './tls';
 
-export const uptimeAlertTypeFactories: UptimeAlertTypeFactory[] = [statusCheckAlertFactory];
+export const uptimeAlertTypeFactories: UptimeAlertTypeFactory[] = [
+  statusCheckAlertFactory,
+  tlsAlertFactory,
+];

@@ -18,6 +18,7 @@
  */
 
 export { ACTION_GLOBAL_APPLY_FILTER, createFilterAction } from './apply_filter_action';
-export { createFiltersFromEvent } from './filters/create_filters_from_event';
+export { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
+export { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 export { selectRangeAction } from './select_range_action';
 export { valueClickAction } from './value_click_action';

@@ -33,8 +33,10 @@ export const CreateAlert = ({
   triggers_actions_ui,
   charts,
   uiSettings,
+  docLinks,
   data,
   toastNotifications,
+  capabilities,
 }: AlertingExampleComponentParams) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
@@ -56,8 +58,10 @@ export const CreateAlert = ({
             alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
             toastNotifications,
             uiSettings,
+            docLinks,
             charts,
             dataFieldsFormats: data.fieldFormats,
+            capabilities,
           }}
         >
           <AlertAdd

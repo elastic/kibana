@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import '../../../es_ui_shared/console_lang/mocks';
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
@@ -72,7 +71,7 @@ describe('<WatchStatus />', () => {
         const { find } = testBed;
 
         expect(find('tab').length).toBe(2);
-        expect(find('tab').map(t => t.text())).toEqual(['Execution history', 'Action statuses']);
+        expect(find('tab').map((t) => t.text())).toEqual(['Execution history', 'Action statuses']);
       });
 
       test('should navigate to the "Action statuses" tab', () => {
@@ -269,7 +268,7 @@ describe('<WatchStatus />', () => {
 
         const { tableCellsValues } = table.getMetaData('watchActionStatusTable');
 
-        tableCellsValues.forEach(row => {
+        tableCellsValues.forEach((row) => {
           expect(row).toEqual([ACTION_ID, ACTION_STATES.ACKNOWLEDGED, '']);
         });
       });

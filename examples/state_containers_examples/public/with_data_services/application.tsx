@@ -19,7 +19,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createBrowserHistory } from 'history';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginDependencies } from './types';
 import { StateDemoApp } from './components/app';
@@ -28,9 +27,8 @@ import { createKbnUrlStateStorage } from '../../../../src/plugins/kibana_utils/p
 export const renderApp = (
   { notifications, http }: CoreStart,
   { navigation, data }: AppPluginDependencies,
-  { appBasePath, element }: AppMountParameters
+  { element, history }: AppMountParameters
 ) => {
-  const history = createBrowserHistory({ basename: appBasePath });
   const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 
   ReactDOM.render(

@@ -13,14 +13,14 @@ import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common/analytics';
-import { DATA_FRAME_TASK_STATE } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { ML_BREADCRUMB } from '../../breadcrumbs';
+import { ML_BREADCRUMB, DATA_FRAME_ANALYTICS_BREADCRUMB } from '../../breadcrumbs';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
+  DATA_FRAME_ANALYTICS_BREADCRUMB,
   {
     text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameExplorationLabel', {
-      defaultMessage: 'Data Frame Analytics',
+      defaultMessage: 'Exploration',
     }),
     href: '',
   },
@@ -46,11 +46,10 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   }
   const jobId: string = globalState.ml.jobId;
   const analysisType: ANALYSIS_CONFIG_TYPE = globalState.ml.analysisType;
-  const jobStatus: DATA_FRAME_TASK_STATE = globalState.ml.jobStatus;
 
   return (
     <PageLoader context={context}>
-      <Page {...{ jobId, analysisType, jobStatus }} />
+      <Page {...{ jobId, analysisType }} />
     </PageLoader>
   );
 };

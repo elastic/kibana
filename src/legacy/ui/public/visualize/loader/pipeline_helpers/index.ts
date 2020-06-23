@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { buildPipeline } from '../../../../../core_plugins/visualizations/public/np_ready/public/legacy/build_pipeline';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export { buildPipeline } from '../../../../../../plugins/visualizations/public/legacy/build_pipeline';

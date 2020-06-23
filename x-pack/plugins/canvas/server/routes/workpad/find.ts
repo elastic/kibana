@@ -7,10 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectAttributes } from 'src/core/server';
 import { RouteInitializerDeps } from '../';
-import {
-  CANVAS_TYPE,
-  API_ROUTE_WORKPAD,
-} from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
 export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
@@ -44,7 +41,7 @@ export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
         return response.ok({
           body: {
             total: workpads.total,
-            workpads: workpads.saved_objects.map(hit => ({ id: hit.id, ...hit.attributes })),
+            workpads: workpads.saved_objects.map((hit) => ({ id: hit.id, ...hit.attributes })),
           },
         });
       } catch (error) {

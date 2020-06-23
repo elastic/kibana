@@ -57,6 +57,49 @@ const bytesProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest-circle-processor.html
+const circleProcessorDefinition = {
+  circle: {
+    __template: {
+      field: '',
+      error_distance: '',
+      shape_type: '',
+    },
+    field: '',
+    target_field: '',
+    error_distance: '',
+    shape_type: {
+      __one_of: ['geo_shape', 'shape'],
+    },
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/csv-processor.html
+const csvProcessorDefinition = {
+  csv: {
+    __template: {
+      field: '',
+      target_fields: [''],
+    },
+    field: '',
+    target_fields: [''],
+    separator: '',
+    quote: '',
+    empty_value: '',
+    trim: {
+      __one_of: [true, false],
+    },
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/convert-processor.html
 const convertProcessorDefinition = {
   convert: {
@@ -174,6 +217,25 @@ const foreachProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/geoip-processor.html
+const geoipProcessorDefinition = {
+  geoip: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    database_file: '',
+    properties: [''],
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    first_only: {
+      __one_of: [false, true],
+    },
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/grok-processor.html
 const grokProcessorDefinition = {
   grok: {
@@ -205,6 +267,37 @@ const gsubProcessorDefinition = {
     field: '',
     pattern: '',
     replacement: '',
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/htmlstrip-processor.html
+const htmlStripProcessorDefinition = {
+  html_strip: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/inference-processor.html
+const inferenceProcessorDefinition = {
+  inference: {
+    __template: {
+      model_id: '',
+      field_map: {},
+      inference_config: {},
+    },
+    model_id: '',
+    field_map: {},
+    inference_config: {},
+    target_field: '',
     ...commonPipelineParams,
   },
 };
@@ -338,6 +431,18 @@ const setProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest-node-set-security-user-processor.html
+const setSecurityUserProcessorDefinition = {
+  set_security_user: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    properties: [''],
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/split-processor.html
 const splitProcessorDefinition = {
   split: {
@@ -394,10 +499,43 @@ const uppercaseProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/urldecode-processor.html
+const urlDecodeProcessorDefinition = {
+  urldecode: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/user-agent-processor.html
+const userAgentProcessorDefinition = {
+  user_agent: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    regex_file: '',
+    properties: [''],
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+  },
+};
+
 const processorDefinition = {
   __one_of: [
     appendProcessorDefinition,
     bytesProcessorDefinition,
+    csvProcessorDefinition,
+    circleProcessorDefinition,
     convertProcessorDefinition,
     dateProcessorDefinition,
     dateIndexNameProcessorDefinition,
@@ -406,8 +544,11 @@ const processorDefinition = {
     dropProcessorDefinition,
     failProcessorDefinition,
     foreachProcessorDefinition,
+    geoipProcessorDefinition,
     grokProcessorDefinition,
     gsubProcessorDefinition,
+    htmlStripProcessorDefinition,
+    inferenceProcessorDefinition,
     joinProcessorDefinition,
     jsonProcessorDefinition,
     kvProcessorDefinition,
@@ -417,10 +558,13 @@ const processorDefinition = {
     renameProcessorDefinition,
     scriptProcessorDefinition,
     setProcessorDefinition,
+    setSecurityUserProcessorDefinition,
     splitProcessorDefinition,
     sortProcessorDefinition,
     trimProcessorDefinition,
     uppercaseProcessorDefinition,
+    urlDecodeProcessorDefinition,
+    userAgentProcessorDefinition,
   ],
 };
 

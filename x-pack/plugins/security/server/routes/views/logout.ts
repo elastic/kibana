@@ -9,18 +9,9 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for the Logout out view.
  */
-export function defineLogoutRoutes({ router, csp }: RouteDefinitionParams) {
-  router.get(
-    {
-      path: '/logout',
-      validate: false,
-      options: { authRequired: false },
-    },
-    async (context, request, response) => {
-      return response.ok({
-        body: await context.core.rendering.render({ includeUserSettings: false }),
-        headers: { 'content-security-policy': csp.header },
-      });
-    }
+export function defineLogoutRoutes({ httpResources }: RouteDefinitionParams) {
+  httpResources.register(
+    { path: '/logout', validate: false, options: { authRequired: false } },
+    (context, request, response) => response.renderAnonymousCoreApp()
   );
 }

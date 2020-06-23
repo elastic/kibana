@@ -11,14 +11,9 @@ import {
   httpServerMock,
   loggingServiceMock,
 } from 'src/core/server/mocks';
-import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeCreateWorkpadRoute } from './create';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 
 const mockRouteContext = ({
   core: {
@@ -43,7 +38,7 @@ describe('POST workpad', () => {
 
     const httpService = httpServiceMock.createSetupContract();
 
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
     initializeCreateWorkpadRoute({
       router,
       logger: loggingServiceMock.create().get(),

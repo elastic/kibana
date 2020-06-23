@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBucketAggConfig } from './_bucket_agg_type';
+import { IBucketAggConfig } from './bucket_agg_type';
 
 export const intervalOptions = [
   {
@@ -52,31 +52,31 @@ export const intervalOptions = [
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.hourlyDisplayName', {
-      defaultMessage: 'Hourly',
+      defaultMessage: 'Hour',
     }),
     val: 'h',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.dailyDisplayName', {
-      defaultMessage: 'Daily',
+      defaultMessage: 'Day',
     }),
     val: 'd',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.weeklyDisplayName', {
-      defaultMessage: 'Weekly',
+      defaultMessage: 'Week',
     }),
     val: 'w',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.monthlyDisplayName', {
-      defaultMessage: 'Monthly',
+      defaultMessage: 'Month',
     }),
     val: 'M',
   },
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.yearlyDisplayName', {
-      defaultMessage: 'Yearly',
+      defaultMessage: 'Year',
     }),
     val: 'y',
   },

@@ -31,24 +31,25 @@ export class ListContainer extends Container<{}, ContainerInput> {
   public readonly type = LIST_CONTAINER;
   private node?: HTMLElement;
 
-  constructor(
-    input: ContainerInput,
-    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
-  ) {
-    super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
+  constructor(input: ContainerInput, private embeddableServices: EmbeddableStart) {
+    super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
   }
 
-  // This container has no input itself.
-  getInheritedInput(id: string) {
-    return {};
+  getInheritedInput() {
+    return {
+      viewMode: this.input.viewMode,
+    };
   }
 
   public render(node: HTMLElement) {
-    this.node = node;
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
-    ReactDOM.render(<ListContainerComponent embeddable={this} />, node);
+    this.node = node;
+    ReactDOM.render(
+      <ListContainerComponent embeddable={this} embeddableServices={this.embeddableServices} />,
+      node
+    );
   }
 
   public destroy() {

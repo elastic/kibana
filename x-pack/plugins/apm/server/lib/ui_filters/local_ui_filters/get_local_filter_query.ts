@@ -16,7 +16,7 @@ export const getLocalFilterQuery = ({
   indexPattern,
   uiFilters,
   projection,
-  localUIFilterName
+  localUIFilterName,
 }: {
   indexPattern: IIndexPattern | undefined;
   uiFilters: UIFilters;
@@ -33,10 +33,10 @@ export const getLocalFilterQuery = ({
             cardinality: {
               field:
                 projection.body.aggs[Object.keys(projection.body.aggs)[0]].terms
-                  .field
-            }
-          }
-        }
+                  .field,
+            },
+          },
+        },
       }
     : {};
 
@@ -45,20 +45,20 @@ export const getLocalFilterQuery = ({
       size: 0,
       query: {
         bool: {
-          filter: filter.concat(projection.body.query?.bool?.filter || [])
-        }
+          filter: filter.concat(projection.body.query?.bool?.filter || []),
+        },
       },
       aggs: {
         by_terms: {
           terms: {
             field: field.fieldName,
             order: {
-              _count: 'desc'
-            }
+              _count: 'desc',
+            },
           },
-          ...bucketCountAggregation
-        }
-      }
-    }
+          ...bucketCountAggregation,
+        },
+      },
+    },
   });
 };

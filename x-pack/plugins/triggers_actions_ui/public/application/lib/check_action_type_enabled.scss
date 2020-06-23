@@ -7,3 +7,10 @@
     box-shadow: none;
   }
 }
+
+.actConnectorsListGrid {
+  .euiToolTipAnchor,
+  .euiCard {
+    height: 100%;
+  }
+}

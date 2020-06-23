@@ -16,7 +16,7 @@ export class Detectors extends Component {
   constructor(props) {
     super(props);
 
-    this.detectors = mlJobService.getJobGroups().map(g => ({ label: g.id }));
+    this.detectors = mlJobService.getJobGroups().map((g) => ({ label: g.id }));
 
     this.state = {
       detectors: [],
@@ -47,7 +47,7 @@ export class Detectors extends Component {
         <EuiForm>
           {detectorDescriptions.map((d, i) => (
             <EuiFormRow label={detectorToString(detectors[i])} key={i}>
-              <EuiFieldText value={d} onChange={e => this.onDescriptionChange(e, i)} />
+              <EuiFieldText value={d} onChange={(e) => this.onDescriptionChange(e, i)} />
             </EuiFormRow>
           ))}
         </EuiForm>

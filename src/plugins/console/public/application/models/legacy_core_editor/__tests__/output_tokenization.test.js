@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const $ = require('jquery');
+import '../legacy_core_editor.test.mocks';
+import $ from 'jquery';
 import RowParser from '../../../../lib/row_parser';
 import ace from 'brace';
 import { createReadOnlyAceEditor } from '../create_readonly';
@@ -56,8 +57,8 @@ describe('Output Tokenization', () => {
       data = JSON.stringify(data, null, 3);
     }
 
-    test('Token test ' + testCount++, async function(done) {
-      output.update(data, function() {
+    test('Token test ' + testCount++, async function (done) {
+      output.update(data, function () {
         const tokens = tokensAsList();
         const normTokenList = [];
         for (let i = 0; i < tokenList.length; i++) {

@@ -25,7 +25,7 @@ export async function exportDashboards(req) {
   const config = req.server.config();
 
   const savedObjectsClient = req.getSavedObjectsClient();
-  const objectsToExport = ids.map(id => ({ id, type: 'dashboard' }));
+  const objectsToExport = ids.map((id) => ({ id, type: 'dashboard' }));
 
   const objects = await collectReferencesDeep(savedObjectsClient, objectsToExport);
   return {

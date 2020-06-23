@@ -19,23 +19,24 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover']);
 
   describe('errors', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('invalid_scripted_field');
       await PageObjects.common.navigateToApp('discover');
     });
 
-    after(async function() {
+    after(async function () {
       await esArchiver.unload('invalid_scripted_field');
     });
 
-    describe('invalid scripted field error', () => {
+    // https://github.com/elastic/kibana/issues/61366
+    describe.skip('invalid scripted field error', () => {
       it('is rendered', async () => {
         const isFetchErrorVisible = await testSubjects.exists('discoverFetchError');
         expect(isFetchErrorVisible).to.be(true);

@@ -12,7 +12,7 @@ import { createTokens, getStateAndNonce } from '../../fixtures/oidc_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -40,7 +40,7 @@ export default function({ getService }: FtrProviderContext) {
             // JSDOM doesn't support changing of `window.location` and throws an exception if script
             // tries to do that and we have to workaround this behaviour. We also need to wait until our
             // script is loaded and executed, __isScriptExecuted__ is used exactly for that.
-            (window as Record<string, any>).__isScriptExecuted__ = new Promise(resolve => {
+            (window as Record<string, any>).__isScriptExecuted__ = new Promise((resolve) => {
               Object.defineProperty(window, 'location', {
                 value: {
                   href:
@@ -59,7 +59,9 @@ export default function({ getService }: FtrProviderContext) {
 
         // Check that proxy page is returned with proper headers.
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
-        expect(response.headers['cache-control']).to.be('private, no-cache, no-store');
+        expect(response.headers['cache-control']).to.be(
+          'private, no-cache, no-store, must-revalidate'
+        );
         expect(response.headers['content-security-policy']).to.be(
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );

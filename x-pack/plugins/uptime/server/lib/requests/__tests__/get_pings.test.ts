@@ -6,7 +6,7 @@
 
 import { getPings } from '../get_pings';
 import { set } from 'lodash';
-import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;
@@ -17,16 +17,34 @@ describe('getAll', () => {
       {
         _source: {
           '@timestamp': '2018-10-30T18:51:59.792Z',
+          monitor: {
+            duration: { us: 2134 },
+            id: 'foo',
+            status: 'up',
+            type: 'http',
+          },
         },
       },
       {
         _source: {
           '@timestamp': '2018-10-30T18:53:59.792Z',
+          monitor: {
+            duration: { us: 2131 },
+            id: 'foo',
+            status: 'up',
+            type: 'http',
+          },
         },
       },
       {
         _source: {
           '@timestamp': '2018-10-30T18:55:59.792Z',
+          monitor: {
+            duration: { us: 2132 },
+            id: 'foo',
+            status: 'up',
+            type: 'http',
+          },
         },
       },
     ];
@@ -44,11 +62,11 @@ describe('getAll', () => {
       },
     };
     expectedGetAllParams = {
-      index: defaultDynamicSettings.heartbeatIndices,
+      index: DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices,
       body: {
         query: {
           bool: {
-            filter: [{ range: { '@timestamp': { gte: 'now-1h', lte: 'now' } } }],
+            filter: [{ range: { timestamp: { gte: 'now-1h', lte: 'now' } } }],
           },
         },
         aggregations: {
@@ -60,8 +78,7 @@ describe('getAll', () => {
             },
           },
         },
-        sort: [{ '@timestamp': { order: 'desc' } }],
-        size: 12,
+        sort: [{ timestamp: { order: 'desc' } }],
       },
     };
   });
@@ -71,9 +88,8 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     const result = await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
     });
@@ -94,16 +110,55 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
     });
-    set(expectedGetAllParams, 'body.sort[0]', { '@timestamp': { order: 'asc' } });
+    set(expectedGetAllParams, 'body.sort[0]', { timestamp: { order: 'asc' } });
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 12,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "asc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 
   it('omits the sort param when no sort passed', async () => {
@@ -111,13 +166,53 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      dateRange: { from: 'now-1h', to: 'now' },
       size: 12,
     });
 
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 12,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 
   it('omits the size param when no size passed', async () => {
@@ -125,15 +220,53 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      dateRange: { from: 'now-1h', to: 'now' },
       sort: 'desc',
     });
-    delete expectedGetAllParams.body.size;
-    set(expectedGetAllParams, 'body.sort[0].@timestamp.order', 'desc');
 
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 25,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 
   it('adds a filter for monitor ID', async () => {
@@ -141,15 +274,58 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      dateRange: { from: 'now-1h', to: 'now' },
       monitorId: 'testmonitorid',
     });
-    delete expectedGetAllParams.body.size;
-    expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.id': 'testmonitorid' } });
 
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "monitor.id": "testmonitorid",
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 25,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 
   it('adds a filter for monitor status', async () => {
@@ -157,14 +333,57 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      dateRange: { from: 'now-1h', to: 'now' },
       status: 'down',
     });
-    delete expectedGetAllParams.body.size;
-    expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.status': 'down' } });
 
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "monitor.status": "down",
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 25,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 });

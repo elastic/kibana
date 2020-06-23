@@ -60,8 +60,8 @@ export class AdvancedSettingsVoiceAnnouncement extends Component<Props> {
   };
 
   render() {
-    const filteredSections = Object.values(this.props.settings).map(setting =>
-      setting.map(option => option.ariaName)
+    const filteredSections = Object.values(this.props.settings).map((setting) =>
+      setting.map((option) => option.ariaName)
     );
     const filteredOptions = [...filteredSections];
     return (

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -32,7 +32,7 @@ export default function({ getService }) {
         .get('/api/index_patterns/_fields_for_time_pattern')
         .query({ look_back: 1 })
         .expect(400)
-        .then(resp => {
+        .then((resp) => {
           expect(resp.body.message).to.contain(
             '[request query.pattern]: expected value of type [string] but got [undefined]'
           );
@@ -43,7 +43,7 @@ export default function({ getService }) {
         .get('/api/index_patterns/_fields_for_time_pattern')
         .query({ pattern: 'pattern-*' })
         .expect(400)
-        .then(resp => {
+        .then((resp) => {
           expect(resp.body.message).to.contain(
             '[request query.look_back]: expected value of type [number] but got [undefined]'
           );
@@ -77,7 +77,7 @@ export default function({ getService }) {
           look_back: 'foo',
         })
         .expect(400)
-        .then(resp => {
+        .then((resp) => {
           expect(resp.body.message).to.contain(
             '[request query.look_back]: expected value of type [number] but got [string]'
           );
@@ -91,7 +91,7 @@ export default function({ getService }) {
           look_back: 0,
         })
         .expect(400)
-        .then(resp => {
+        .then((resp) => {
           expect(resp.body.message).to.contain(
             '[request query.look_back]: Value must be equal to or greater than [1].'
           );

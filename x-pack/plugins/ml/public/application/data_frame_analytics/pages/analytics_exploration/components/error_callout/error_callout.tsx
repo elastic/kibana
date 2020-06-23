@@ -15,7 +15,7 @@ interface Props {
 export const ErrorCallout: FC<Props> = ({ error }) => {
   let errorCallout = (
     <EuiCallOut
-      title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.generalError', {
+      title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.generalErrorTitle', {
         defaultMessage: 'An error occurred loading the data.',
       })}
       color="danger"
@@ -28,14 +28,14 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
   if (error.includes('index_not_found')) {
     errorCallout = (
       <EuiCallOut
-        title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.evaluateError', {
+        title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.evaluateErrorTitle', {
           defaultMessage: 'An error occurred loading the data.',
         })}
         color="danger"
         iconType="cross"
       >
         <p>
-          {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.noIndexCalloutBody', {
+          {i18n.translate('xpack.ml.dataframe.analytics.errorCallout.noIndexCalloutBody', {
             defaultMessage:
               'The query for the index returned no results. Please make sure the destination index exists and contains documents.',
           })}
@@ -46,16 +46,13 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
     // Job was started but no results have been written yet
     errorCallout = (
       <EuiCallOut
-        title={i18n.translate(
-          'xpack.ml.dataframe.analytics.regressionExploration.noDataCalloutTitle',
-          {
-            defaultMessage: 'Empty index query result.',
-          }
-        )}
+        title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.noDataCalloutTitle', {
+          defaultMessage: 'Empty index query result.',
+        })}
         color="primary"
       >
         <p>
-          {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.noDataCalloutBody', {
+          {i18n.translate('xpack.ml.dataframe.analytics.errorCallout.noDataCalloutBody', {
             defaultMessage:
               'The query for the index returned no results. Please make sure the job has completed and the index contains documents.',
           })}
@@ -66,22 +63,16 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
     // query bar syntax is incorrect
     errorCallout = (
       <EuiCallOut
-        title={i18n.translate(
-          'xpack.ml.dataframe.analytics.regressionExploration.queryParsingErrorMessage',
-          {
-            defaultMessage: 'Unable to parse query.',
-          }
-        )}
+        title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.queryParsingErrorTitle', {
+          defaultMessage: 'Unable to parse query.',
+        })}
         color="primary"
       >
         <p>
-          {i18n.translate(
-            'xpack.ml.dataframe.analytics.regressionExploration.queryParsingErrorBody',
-            {
-              defaultMessage:
-                'The query syntax is invalid and returned no results. Please check the query syntax and try again.',
-            }
-          )}
+          {i18n.translate('xpack.ml.dataframe.analytics.errorCallout.queryParsingErrorBody', {
+            defaultMessage:
+              'The query syntax is invalid and returned no results. Please check the query syntax and try again.',
+          })}
         </p>
       </EuiCallOut>
     );

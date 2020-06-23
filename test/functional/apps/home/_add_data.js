@@ -19,13 +19,13 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
   describe('add data tutorials', function describeIndexTests() {
     it('directory should display registered tutorials', async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory');
+      await PageObjects.common.navigateToUrl('home', 'tutorial_directory', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const tutorialExists = await PageObjects.home.doesSynopsisExist('netflow');

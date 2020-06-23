@@ -27,7 +27,7 @@
       "custom_urls": [
         {
           "url_name": "Raw data",
-          "url_value": "kibana#/discover?_g=(refreshInterval:(pause:!t,value:0),time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(language:kuery,query:''),sort:!('@timestamp',desc))"
+          "url_value": "discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(language:kuery,query:''),sort:!('@timestamp',desc))"
         }
       ]
     }

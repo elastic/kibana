@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { APICaller } from 'kibana/server';
+import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 
@@ -15,6 +16,19 @@ import { initCardinalityFieldsCache } from './fields_aggs_cache';
  */
 export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
   const fieldsAggsCache = initCardinalityFieldsCache();
+
+  /**
+   * Caps the time range to the last 90 days if necessary
+   */
+  function getSafeTimeRange(earliestMs: number, latestMs: number): { start: number; end: number } {
+    const capOffsetMs = duration(3, 'months').asMilliseconds();
+    const capRangeStart = latestMs - capOffsetMs;
+
+    return {
+      start: Math.max(earliestMs, capRangeStart),
+      end: latestMs,
+    };
+  }
 
   /**
    * Gets aggregatable fields.
@@ -28,7 +42,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       fields: fieldNames,
     });
     const aggregatableFields: string[] = [];
-    fieldNames.forEach(fieldName => {
+    fieldNames.forEach((fieldName) => {
       const fieldInfo = fieldCapsResp.fields[fieldName];
       const typeKeys = fieldInfo !== undefined ? Object.keys(fieldInfo) : [];
       if (typeKeys.length > 0) {
@@ -61,18 +75,20 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       return {};
     }
 
+    const { start, end } = getSafeTimeRange(earliestMs, latestMs);
+
     const cachedValues =
       fieldsAggsCache.getValues(
         index,
         timeFieldName,
-        earliestMs,
-        latestMs,
+        start,
+        end,
         'overallCardinality',
         fieldNames
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;
@@ -84,8 +100,8 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       {
         range: {
           [timeFieldName]: {
-            gte: earliestMs,
-            lte: latestMs,
+            gte: start,
+            lte: end,
             format: 'epoch_millis',
           },
         },
@@ -130,7 +146,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       return obj;
     }, {} as { [field: string]: number });
 
-    fieldsAggsCache.updateValues(index, timeFieldName, earliestMs, latestMs, {
+    fieldsAggsCache.updateValues(index, timeFieldName, start, end, {
       overallCardinality: aggResult,
     });
 
@@ -185,15 +201,16 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
   }
 
   /**
-   * Caps provided time boundaries based on the interval.
-   * @param earliestMs
-   * @param latestMs
-   * @param interval
+   * Caps provided time boundaries based on the interval
    */
-  function getSafeTimeRange(
+  function getSafeTimeRangeForInterval(
+    interval: string,
+    ...timeRange: number[]
+  ): { start: number; end: number };
+  function getSafeTimeRangeForInterval(
+    interval: string,
     earliestMs: number,
-    latestMs: number,
-    interval: string
+    latestMs: number
   ): { start: number; end: number } {
     const maxNumberOfBuckets = 1000;
     const end = latestMs;
@@ -234,7 +251,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     interval: string | undefined
   ): Promise<{ [key: string]: number }> {
     if (!interval) {
-      throw new Error('Interval is required to retrieve max bucket cardinalities.');
+      throw Boom.badRequest('Interval is required to retrieve max bucket cardinalities.');
     }
 
     const aggregatableFields = await getAggregatableFields(index, fieldNames);
@@ -243,24 +260,27 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       return {};
     }
 
+    const { start, end } = getSafeTimeRangeForInterval(
+      interval,
+      ...Object.values(getSafeTimeRange(earliestMs, latestMs))
+    );
+
     const cachedValues =
       fieldsAggsCache.getValues(
         index,
         timeFieldName,
-        earliestMs,
-        latestMs,
+        start,
+        end,
         'maxBucketCardinality',
         fieldNames
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;
     }
-
-    const { start, end } = getSafeTimeRange(earliestMs, latestMs, interval);
 
     const mustCriteria = [
       {
@@ -333,6 +353,10 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
       return obj;
     }, {} as { [field: string]: number });
+
+    fieldsAggsCache.updateValues(index, timeFieldName, start, end, {
+      maxBucketCardinality: aggResult,
+    });
 
     return {
       ...cachedValues,

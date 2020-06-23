@@ -31,7 +31,7 @@ export const reportingPDFPNGProvider = ({
   let disabled = true;
   let hasPDFPNGReporting = false;
 
-  license$.subscribe(license => {
+  license$.subscribe((license) => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
 
     toolTipContent = message;
@@ -58,9 +58,10 @@ export const reportingPDFPNGProvider = ({
     }
 
     const getReportingJobParams = () => {
+      // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
       // Replace hashes with original RISON values.
       const relativeUrl = shareableUrl.replace(
-        window.location.origin + apiClient.getBasePath(),
+        window.location.origin + apiClient.getServerBasePath(),
         ''
       );
 
@@ -80,7 +81,7 @@ export const reportingPDFPNGProvider = ({
     const getPngJobParams = () => {
       // Replace hashes with original RISON values.
       const relativeUrl = shareableUrl.replace(
-        window.location.origin + apiClient.getBasePath(),
+        window.location.origin + apiClient.getServerBasePath(),
         ''
       );
 

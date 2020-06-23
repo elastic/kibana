@@ -4,42 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsLegacyService,
-  SavedObject,
-} from 'src/core/server';
+import { SavedObject, KibanaRequest, CoreStart } from 'src/core/server';
 import { Readable } from 'stream';
-import { SavedObjectsClientProviderOptions } from 'src/core/server';
+import {
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+} from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, CopyResponse } from './types';
 import { getEligibleTypes } from './lib/get_eligible_types';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
-
-export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
-  excludedWrappers: ['spaces'],
-};
+import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
 
 export function copySavedObjectsToSpacesFactory(
-  savedObjectsClient: SavedObjectsClientContract,
-  savedObjectsService: SavedObjectsLegacyService
+  savedObjects: CoreStart['savedObjects'],
+  getImportExportObjectLimit: () => number,
+  request: KibanaRequest
 ) {
-  const { importExport, types, schema } = savedObjectsService;
-  const eligibleTypes = getEligibleTypes({ types, schema });
+  const { getTypeRegistry, getScopedClient } = savedObjects;
+
+  const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
+
+  const eligibleTypes = getEligibleTypes(getTypeRegistry());
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
     options: Pick<CopyOptions, 'includeReferences' | 'objects'>
   ) => {
-    const objectStream = await importExport.getSortedObjectsForExport({
+    const objectStream = await exportSavedObjectsToStream({
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
       excludeExportDetails: true,
       objects: options.objects,
       savedObjectsClient,
-      exportSizeLimit: importExport.objectLimit,
+      exportSizeLimit: getImportExportObjectLimit(),
     });
 
     return readStreamToCompletion<SavedObject>(objectStream);
@@ -51,9 +51,9 @@ export function copySavedObjectsToSpacesFactory(
     options: CopyOptions
   ) => {
     try {
-      const importResponse = await importExport.importSavedObjects({
+      const importResponse = await importSavedObjectsFromStream({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: importExport.objectLimit,
+        objectLimit: getImportExportObjectLimit(),
         overwrite: options.overwrite,
         savedObjectsClient,
         supportedTypes: eligibleTypes,

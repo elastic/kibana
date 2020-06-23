@@ -46,15 +46,15 @@ class DocumentationLinksService {
   }
 
   public getSnapshotDocUrl() {
-    return `${this.esDocBasePath}modules-snapshots.html#snapshots-take-snapshot`;
+    return `${this.esDocBasePath}snapshots-take-snapshot.html`;
   }
 
   public getRestoreDocUrl() {
-    return `${this.esDocBasePath}modules-snapshots.html#restore-snapshot`;
+    return `${this.esDocBasePath}snapshots-restore-snapshot.html`;
   }
 
   public getRestoreIndexSettingsUrl() {
-    return `${this.esDocBasePath}modules-snapshots.html#_changing_index_settings_during_restore`;
+    return `${this.esDocBasePath}snapshots-restore-snapshot.html#_changing_index_settings_during_restore`;
   }
 
   public getIndexSettingsUrl() {

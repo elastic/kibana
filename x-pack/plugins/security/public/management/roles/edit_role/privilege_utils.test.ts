@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { hasAssignedFeaturePrivileges, isGlobalPrivilegeDefinition } from './privilege_utils';
+import { isGlobalPrivilegeDefinition } from './privilege_utils';
 
 describe('isGlobalPrivilegeDefinition', () => {
   it('returns true if no spaces are defined', () => {
@@ -45,41 +45,5 @@ describe('isGlobalPrivilegeDefinition', () => {
         feature: {},
       })
     ).toEqual(false);
-  });
-});
-
-describe('hasAssignedFeaturePrivileges', () => {
-  it('returns false if no feature privileges are defined', () => {
-    expect(
-      hasAssignedFeaturePrivileges({
-        spaces: [],
-        base: [],
-        feature: {},
-      })
-    ).toEqual(false);
-  });
-
-  it('returns false if feature privileges are defined but not assigned', () => {
-    expect(
-      hasAssignedFeaturePrivileges({
-        spaces: [],
-        base: [],
-        feature: {
-          foo: [],
-        },
-      })
-    ).toEqual(false);
-  });
-
-  it('returns true if feature privileges are defined and assigned', () => {
-    expect(
-      hasAssignedFeaturePrivileges({
-        spaces: [],
-        base: [],
-        feature: {
-          foo: ['all'],
-        },
-      })
-    ).toEqual(true);
   });
 });

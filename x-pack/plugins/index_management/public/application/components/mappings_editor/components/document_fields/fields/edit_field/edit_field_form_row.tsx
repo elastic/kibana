@@ -42,6 +42,7 @@ interface Props {
   children?: React.ReactNode | ChildrenFunc;
   withToggle?: boolean;
   configPath?: ParameterName;
+  'data-test-subj'?: string;
 }
 
 export const EditFieldFormRow = React.memo(
@@ -54,6 +55,7 @@ export const EditFieldFormRow = React.memo(
     children,
     withToggle = true,
     configPath,
+    'data-test-subj': dataTestSubj,
   }: Props) => {
     const form = useFormContext();
 
@@ -87,7 +89,7 @@ export const EditFieldFormRow = React.memo(
           label={title}
           checked={isContentVisible}
           onChange={onToggle}
-          data-test-subj="input"
+          data-test-subj="formRowToggle"
           showLabel={false}
         />
       ) : (
@@ -98,8 +100,18 @@ export const EditFieldFormRow = React.memo(
             defaultValue: initialVisibleState,
           }}
         >
-          {field => {
-            return <ToggleField field={field} euiFieldProps={{ label: title, showLabel: false }} />;
+          {(field) => {
+            return (
+              <ToggleField
+                field={field}
+                data-test-subj="abc"
+                euiFieldProps={{
+                  label: title,
+                  showLabel: false,
+                  'data-test-subj': 'formRowToggle',
+                }}
+              />
+            );
           }}
         </UseField>
       );
@@ -165,7 +177,7 @@ export const EditFieldFormRow = React.memo(
       );
 
       return (
-        <EuiFlexGroup className="mappingsEditor__editField__formRow">
+        <EuiFlexGroup className="mappingsEditor__editField__formRow" data-test-subj={dataTestSubj}>
           {toggle}
 
           <EuiFlexItem>
@@ -180,7 +192,7 @@ export const EditFieldFormRow = React.memo(
 
     return formFieldPath ? (
       <FormDataProvider pathsToWatch={formFieldPath}>
-        {formData => {
+        {(formData) => {
           setIsContentVisible(formData[formFieldPath]);
           return renderContent();
         }}

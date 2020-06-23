@@ -56,7 +56,7 @@ if (securityPluginSetup) {
       }
 
       return {
-        response: interceptorFactory(response => response),
+        response: interceptorFactory((response) => response),
         responseError: interceptorFactory($q.reject),
       };
     });

@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeatureKibanaPrivileges, FeatureKibanaPrivilegesSet } from './feature_kibana_privileges';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+import { SubFeatureConfig, SubFeature } from './sub_feature';
+import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
 
 /**
  * Interface for registering a feature.
  * Feature registration allows plugins to hide their applications with spaces,
  * and secure access when configured for security.
  */
-export interface Feature<
-  TPrivileges extends Partial<FeatureKibanaPrivilegesSet> = FeatureKibanaPrivilegesSet
-> {
+export interface FeatureConfig {
   /**
    * Unique identifier for this feature.
    * This identifier is also used when generating UI Capabilities.
@@ -27,6 +28,11 @@ export interface Feature<
    * This will be displayed to end-users, so a translatable string is advised for i18n.
    */
   name: string;
+
+  /**
+   * An ordinal used to sort features relative to one another for display.
+   */
+  order?: number;
 
   /**
    * Whether or not this feature should be excluded from the base privileges.
@@ -98,7 +104,15 @@ export interface Feature<
    * ```
    * @see FeatureKibanaPrivileges
    */
-  privileges: TPrivileges;
+  privileges: {
+    all: FeatureKibanaPrivileges;
+    read: FeatureKibanaPrivileges;
+  } | null;
+
+  /**
+   * Optional sub-feature privilege definitions. This can only be specified if `privileges` are are also defined.
+   */
+  subFeatures?: SubFeatureConfig[];
 
   /**
    * Optional message to display on the Role Management screen when configuring permissions for this feature.
@@ -109,12 +123,69 @@ export interface Feature<
    * @private
    */
   reserved?: {
-    privilege: FeatureKibanaPrivileges;
     description: string;
+    privileges: ReservedKibanaPrivilege[];
   };
 }
 
-export type FeatureWithAllOrReadPrivileges = Feature<{
-  all?: FeatureKibanaPrivileges;
-  read?: FeatureKibanaPrivileges;
-}>;
+export class Feature {
+  public readonly subFeatures: SubFeature[];
+
+  constructor(protected readonly config: RecursiveReadonly<FeatureConfig>) {
+    this.subFeatures = (config.subFeatures ?? []).map(
+      (subFeatureConfig) => new SubFeature(subFeatureConfig)
+    );
+  }
+
+  public get id() {
+    return this.config.id;
+  }
+
+  public get name() {
+    return this.config.name;
+  }
+
+  public get order() {
+    return this.config.order;
+  }
+
+  public get navLinkId() {
+    return this.config.navLinkId;
+  }
+
+  public get app() {
+    return this.config.app;
+  }
+
+  public get catalogue() {
+    return this.config.catalogue;
+  }
+
+  public get management() {
+    return this.config.management;
+  }
+
+  public get icon() {
+    return this.config.icon;
+  }
+
+  public get validLicenses() {
+    return this.config.validLicenses;
+  }
+
+  public get privileges() {
+    return this.config.privileges;
+  }
+
+  public get excludeFromBasePrivileges() {
+    return this.config.excludeFromBasePrivileges ?? false;
+  }
+
+  public get reserved() {
+    return this.config.reserved;
+  }
+
+  public toRaw() {
+    return { ...this.config } as FeatureConfig;
+  }
+}

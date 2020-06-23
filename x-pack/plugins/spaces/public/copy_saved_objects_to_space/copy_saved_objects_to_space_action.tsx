@@ -9,7 +9,7 @@ import { NotificationsStart } from 'src/core/public';
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
-} from '../../../../../src/legacy/core_plugins/management/public';
+} from '../../../../../src/plugins/saved_objects_management/public';
 import { CopySavedObjectsToSpaceFlyout } from './components';
 import { SpacesManager } from '../spaces_manager';
 

@@ -62,7 +62,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/uptime_monitors/screenshot.png',
+    previewImagePath: '/plugins/home/assets/uptime_monitors/screenshot.png',
     onPrem: onPremInstructions([], context),
     elasticCloud: cloudInstructions(),
     onPremElasticCloud: onPremCloudInstructions(),

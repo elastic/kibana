@@ -57,7 +57,7 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
 
   return (
     <div data-test-subj={`mlInfluencerEntry field-${influencerFieldName}`}>
-      <div className="field-label">
+      <div className="field-label" data-test-subj="mlInfluencerEntryFieldLabel">
         {influencerFieldName !== 'mlcategory' ? (
           <EntityCell
             entityName={influencerFieldName}
@@ -103,7 +103,7 @@ Influencer.propTypes = {
 };
 
 function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues }) {
-  const influencerValues = fieldValues.map(valueData => (
+  const influencerValues = fieldValues.map((valueData) => (
     <Influencer
       key={valueData.influencerFieldValue}
       influencerFieldName={influencerFieldName}
@@ -147,7 +147,7 @@ export function InfluencersList({ influencers, influencerFilter }) {
     );
   }
 
-  const influencersByName = Object.keys(influencers).map(influencerFieldName => (
+  const influencersByName = Object.keys(influencers).map((influencerFieldName) => (
     <InfluencersByName
       key={influencerFieldName}
       influencerFieldName={influencerFieldName}

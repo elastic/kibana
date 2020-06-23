@@ -14,13 +14,13 @@ import { AuthenticationStatePage } from '../components';
 
 interface Props {
   basePath: IBasePath;
-  authc: AuthenticationServiceSetup;
+  authc: Pick<AuthenticationServiceSetup, 'getCurrentUser'>;
 }
 
 export function OverwrittenSessionPage({ authc, basePath }: Props) {
   const [username, setUsername] = useState<string | null>(null);
   useEffect(() => {
-    authc.getCurrentUser().then(user => setUsername(user.username));
+    authc.getCurrentUser().then((user) => setUsername(user.username));
   }, [authc]);
 
   if (username == null) {

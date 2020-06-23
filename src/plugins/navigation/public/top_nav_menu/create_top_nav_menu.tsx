@@ -30,7 +30,7 @@ export function createTopNav(
 ) {
   return (props: TopNavMenuProps) => {
     const relevantConfig = extraConfig.filter(
-      dataItem => dataItem.appName === undefined || dataItem.appName === props.appName
+      (dataItem) => dataItem.appName === undefined || dataItem.appName === props.appName
     );
     const config = (props.config || []).concat(relevantConfig);
 

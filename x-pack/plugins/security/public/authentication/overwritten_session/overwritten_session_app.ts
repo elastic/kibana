@@ -10,7 +10,7 @@ import { AuthenticationServiceSetup } from '../authentication_service';
 
 interface CreateDeps {
   application: ApplicationSetup;
-  authc: AuthenticationServiceSetup;
+  authc: Pick<AuthenticationServiceSetup, 'getCurrentUser'>;
   getStartServices: StartServicesAccessor;
 }
 

@@ -7,3 +7,4 @@
 export { useMlKibana, StartServices, MlKibanaReactContextValue } from './kibana_context';
 export { useUiSettings } from './use_ui_settings_context';
 export { useTimefilter } from './use_timefilter';
+export { useNotifications } from './use_notifications_context';

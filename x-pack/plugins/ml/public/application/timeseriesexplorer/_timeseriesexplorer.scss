@@ -1,6 +1,4 @@
 .ml-time-series-explorer {
-  width: 100%;
-  display: inline-block;
   color: $euiColorDarkShade;
 
   .no-results-container {
@@ -31,8 +29,6 @@
   }
 
   .results-container {
-    padding: $euiSize;
-
     .panel-title {
       font-size: $euiFontSizeM;
       font-weight: 400;
@@ -46,8 +42,6 @@
   }
 
   .series-controls {
-    padding: $euiSize $euiSize 0px $euiSize;
-
     div.entity-controls {
       display: inline-block;
       padding-left: $euiSize;

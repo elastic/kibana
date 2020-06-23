@@ -39,7 +39,7 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
         );
 
         const { configuration } = await libs.sources.getSourceConfiguration(
-          requestContext,
+          requestContext.core.savedObjects.client,
           sourceId
         );
         const awsMetadata = await getCloudMetadata(

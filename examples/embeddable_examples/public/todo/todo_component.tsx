@@ -51,12 +51,12 @@ function wrapSearchTerms(task: string, search?: string) {
 
 export function TodoEmbeddableComponentInner({ input: { icon, title, task, search } }: Props) {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
         {icon ? <EuiIcon type={icon} size="l" /> : <EuiAvatar name={title || task} size="l" />}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGrid columns={1}>
+        <EuiFlexGrid columns={1} gutterSize="none">
           <EuiFlexItem>
             <EuiText data-test-subj="todoEmbeddableTitle">
               <h3>{wrapSearchTerms(title || '', search)}</h3>
@@ -71,4 +71,8 @@ export function TodoEmbeddableComponentInner({ input: { icon, title, task, searc
   );
 }
 
-export const TodoEmbeddableComponent = withEmbeddableSubscription(TodoEmbeddableComponentInner);
+export const TodoEmbeddableComponent = withEmbeddableSubscription<
+  TodoInput,
+  EmbeddableOutput,
+  TodoEmbeddable
+>(TodoEmbeddableComponentInner);

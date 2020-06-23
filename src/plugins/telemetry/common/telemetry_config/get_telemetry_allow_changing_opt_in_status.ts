@@ -32,9 +32,9 @@ export function getTelemetryAllowChangingOptInStatus({
     return configTelemetryAllowChangingOptInStatus;
   }
 
-  if (typeof telemetrySavedObject.telemetryAllowChangingOptInStatus === 'undefined') {
+  if (typeof telemetrySavedObject.allowChangingOptInStatus === 'undefined') {
     return configTelemetryAllowChangingOptInStatus;
   }
 
-  return telemetrySavedObject.telemetryAllowChangingOptInStatus;
+  return telemetrySavedObject.allowChangingOptInStatus;
 }

@@ -21,6 +21,7 @@ import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES } from '../aggs';
 import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
 import { TabbedResponseWriterOptions } from './types';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('TabbedAggResponseWriter class', () => {
   beforeEach(() => {
@@ -30,6 +31,7 @@ describe('TabbedAggResponseWriter class', () => {
   let responseWriter: TabbedAggResponseWriter;
 
   const typesRegistry = mockAggTypesRegistry();
+  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
   const splitAggConfig = [
     {
@@ -74,6 +76,7 @@ describe('TabbedAggResponseWriter class', () => {
     return new TabbedAggResponseWriter(
       new AggConfigs(indexPattern, aggs, {
         typesRegistry,
+        fieldFormats,
       }),
       {
         metricsAtAllLevels: false,
@@ -106,19 +109,34 @@ describe('TabbedAggResponseWriter class', () => {
       });
 
       test('adds the row to the array', () => {
-        responseWriter.bucketBuffer = [{ id: 'col-0', value: 'US' }];
-        responseWriter.metricBuffer = [{ id: 'col-1', value: 5 }];
+        responseWriter.bucketBuffer = [{ id: 'col-0-1', value: 'US' }];
+        responseWriter.metricBuffer = [{ id: 'col-1-2', value: 5 }];
 
         responseWriter.row();
 
         expect(responseWriter.rows.length).toEqual(1);
-        expect(responseWriter.rows[0]).toEqual({ 'col-0': 'US', 'col-1': 5 });
+        expect(responseWriter.rows[0]).toEqual({ 'col-0-1': 'US', 'col-1-2': 5 });
       });
 
       test("doesn't add an empty row", () => {
         responseWriter.row();
 
         expect(responseWriter.rows.length).toEqual(0);
+      });
+
+      test('doesnt add a partial row', () => {
+        responseWriter.bucketBuffer = [{ id: 'col-0-1', value: 'US' }];
+        responseWriter.row();
+
+        expect(responseWriter.rows.length).toEqual(0);
+      });
+
+      test('adds partial row if partialRows is set to true', () => {
+        responseWriter = createResponseWritter(splitAggConfig, { partialRows: true });
+        responseWriter.bucketBuffer = [{ id: 'col-0-1', value: 'US' }];
+        responseWriter.row();
+
+        expect(responseWriter.rows.length).toEqual(1);
       });
     });
 

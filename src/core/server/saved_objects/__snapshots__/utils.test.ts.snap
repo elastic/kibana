@@ -16,7 +16,7 @@ Array [
     },
     "migrations": Object {},
     "name": "typeA",
-    "namespaceAgnostic": false,
+    "namespaceType": "single",
   },
   Object {
     "convertToAliasScript": undefined,
@@ -32,7 +32,7 @@ Array [
     },
     "migrations": Object {},
     "name": "typeB",
-    "namespaceAgnostic": false,
+    "namespaceType": "single",
   },
   Object {
     "convertToAliasScript": undefined,
@@ -48,7 +48,7 @@ Array [
     },
     "migrations": Object {},
     "name": "typeC",
-    "namespaceAgnostic": false,
+    "namespaceType": "single",
   },
 ]
 `;
@@ -72,7 +72,7 @@ Array [
       "2.0.4": [Function],
     },
     "name": "typeA",
-    "namespaceAgnostic": true,
+    "namespaceType": "agnostic",
   },
   Object {
     "convertToAliasScript": "some alias script",
@@ -91,7 +91,7 @@ Array [
     },
     "migrations": Object {},
     "name": "typeB",
-    "namespaceAgnostic": false,
+    "namespaceType": "single",
   },
   Object {
     "convertToAliasScript": undefined,
@@ -109,7 +109,7 @@ Array [
       "1.5.3": [Function],
     },
     "name": "typeC",
-    "namespaceAgnostic": false,
+    "namespaceType": "single",
   },
 ]
 `;
@@ -130,7 +130,23 @@ Array [
     },
     "migrations": Object {},
     "name": "typeA",
-    "namespaceAgnostic": true,
+    "namespaceType": "agnostic",
+  },
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": false,
+    "indexPattern": "barBaz",
+    "management": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "fieldB": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeB",
+    "namespaceType": "multiple",
   },
   Object {
     "convertToAliasScript": undefined,
@@ -146,7 +162,23 @@ Array [
     },
     "migrations": Object {},
     "name": "typeC",
-    "namespaceAgnostic": false,
+    "namespaceType": "single",
+  },
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": false,
+    "indexPattern": "bazQux",
+    "management": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "fieldD": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeD",
+    "namespaceType": "agnostic",
   },
 ]
 `;

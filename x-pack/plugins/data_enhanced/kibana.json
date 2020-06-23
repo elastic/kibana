@@ -3,11 +3,12 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": [
-    "xpack"
+    "xpack", "data_enhanced"
   ],
   "requiredPlugins": [
     "data"
   ],
+  "optionalPlugins": ["kibanaReact", "kibanaUtils"],
   "server": true,
   "ui": true
 }

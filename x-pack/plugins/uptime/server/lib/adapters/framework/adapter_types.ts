@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphQLSchema } from 'graphql';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { IRouter, CallAPIOptions, SavedObjectsClientContract } from 'src/core/server';
+import {
+  IRouter,
+  CallAPIOptions,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+} from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
-import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { DynamicSettings } from '../../../../common/runtime_types';
 
-type APICaller = (
+export type APICaller = (
   endpoint: string,
   clientParams: Record<string, any>,
   options?: CallAPIOptions
@@ -19,25 +23,24 @@ type APICaller = (
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: { callES: APICaller; dynamicSettings: DynamicSettings } & P
-) => Promise<R> | R;
+) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
-  client: SavedObjectsClientContract,
+  client: SavedObjectsClientContract | ISavedObjectsRepository,
   params?: P
 ) => Promise<T> | T;
 
 export interface UptimeCoreSetup {
-  route: IRouter;
+  router: IRouter;
 }
 
 export interface UptimeCorePlugins {
   features: PluginSetupContract;
-  alerting: any;
+  alerts: any;
   elasticsearch: any;
   usageCollection: UsageCollectionSetup;
 }
 
 export interface UMBackendFrameworkAdapter {
   registerRoute(route: UMKibanaRoute): void;
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
 }

@@ -7,11 +7,13 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
-import { decodePath, getTemplateDetailsLink } from '../../services/routing';
-import { Template } from '../../../../common/types';
+import { decodePathFromReactRouter, getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
+import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
 
 interface MatchParams {
   name: string;
@@ -21,17 +23,20 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   match: {
     params: { name },
   },
+  location,
   history,
 }) => {
-  const decodedTemplateName = decodePath(name);
+  const decodedTemplateName = decodePathFromReactRouter(name);
+  const isLegacy = getIsLegacyFromQueryParams(location);
+
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
-
   const { error: templateToCloneError, data: templateToClone, isLoading } = useLoadIndexTemplate(
-    decodedTemplateName
+    decodedTemplateName,
+    isLegacy
   );
 
-  const onSave = async (template: Template) => {
+  const onSave = async (template: TemplateDeserialized) => {
     setIsSaving(true);
     setSaveError(null);
 
@@ -46,7 +51,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(getTemplateDetailsLink(newTemplateName));
+    history.push(getTemplateDetailsLink(newTemplateName, template._kbnMeta.isLegacy));
   };
 
   const clearSaveError = () => {
@@ -85,7 +90,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
     const templateData = {
       ...templateToClone,
       name: `${decodedTemplateName}-copy`,
-    } as Template;
+    } as TemplateDeserialized;
 
     content = (
       <TemplateForm

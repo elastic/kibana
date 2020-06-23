@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
@@ -17,11 +17,11 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
 
   const params = {
     index: indices.apmAgentConfigurationIndex,
-    size: 200
+    size: 200,
   };
 
   const resp = await internalClient.search<AgentConfiguration>(params);
   return resp.hits.hits
     .map(convertConfigSettingsToString)
-    .map(hit => hit._source);
+    .map((hit) => hit._source);
 }

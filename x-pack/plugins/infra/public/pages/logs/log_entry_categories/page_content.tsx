@@ -17,7 +17,7 @@ import {
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
-import { useSourceContext } from '../../../containers/source';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
@@ -25,11 +25,11 @@ import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_m
 export const LogEntryCategoriesPageContent = () => {
   const {
     hasFailedLoadingSource,
-    isLoadingSource,
+    isLoading,
     isUninitialized,
     loadSource,
     loadSourceFailureMessage,
-  } = useSourceContext();
+  } = useLogSourceContext();
 
   const {
     hasLogAnalysisCapabilites,
@@ -37,20 +37,15 @@ export const LogEntryCategoriesPageContent = () => {
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const {
-    fetchJobStatus,
-    fetchModuleDefinition,
-    setupStatus,
-  } = useLogEntryCategoriesModuleContext();
+  const { fetchJobStatus, setupStatus } = useLogEntryCategoriesModuleContext();
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
-      fetchModuleDefinition();
       fetchJobStatus();
     }
-  }, [fetchJobStatus, fetchModuleDefinition, hasLogAnalysisReadCapabilities]);
+  }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
-  if (isLoadingSource || isUninitialized) {
+  if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoadingSource) {
     return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
@@ -58,7 +53,7 @@ export const LogEntryCategoriesPageContent = () => {
     return <MlUnavailablePrompt />;
   } else if (!hasLogAnalysisReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
-  } else if (setupStatus === 'initializing') {
+  } else if (setupStatus.type === 'initializing') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
@@ -66,7 +61,7 @@ export const LogEntryCategoriesPageContent = () => {
         })}
       />
     );
-  } else if (setupStatus === 'unknown') {
+  } else if (setupStatus.type === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isSetupStatusWithResults(setupStatus)) {
     return <LogEntryCategoriesResultsContent />;

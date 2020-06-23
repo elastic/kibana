@@ -66,7 +66,7 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/aws_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/aws_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

@@ -49,7 +49,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
   };
 
   const btn = props.emphasize ? (
-    <EuiButton {...commonButtonProps} size="s" fill style={{ fontSize: 'smaller' }}>
+    <EuiButton {...commonButtonProps} size="s" fill>
       {capitalize(props.label || props.id!)}
     </EuiButton>
   ) : (

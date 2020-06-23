@@ -8,22 +8,24 @@ import { SavedObjectsClientContract, SavedObject, KibanaRequest } from 'src/core
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
 import { createAPIKey } from './security';
+import { escapeSearchQueryPhrase } from '../saved_object';
 
+export { invalidateAPIKey } from './security';
 export * from './enrollment_api_key';
 
 export async function generateOutputApiKey(
   soClient: SavedObjectsClientContract,
   outputId: string,
   agentId: string
-): Promise<string> {
+): Promise<{ key: string; id: string }> {
   const name = `${agentId}:${outputId}`;
   const key = await createAPIKey(soClient, name, {
     'fleet-output': {
       cluster: ['monitor'],
       index: [
         {
-          names: ['logs-*', 'metrics-*', 'events-*', 'metricbeat*'],
-          privileges: ['write', 'create_index'],
+          names: ['logs-*', 'metrics-*', 'events-*', '.ds-logs-*', '.ds-metrics-*', '.ds-events-*'],
+          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],
     },
@@ -33,7 +35,7 @@ export async function generateOutputApiKey(
     throw new Error('Unable to create an output api key');
   }
 
-  return `${key.id}:${key.api_key}`;
+  return { key: `${key.id}:${key.api_key}`, id: key.id };
 }
 
 export async function generateAccessApiKey(
@@ -70,14 +72,18 @@ export async function getEnrollmentAPIKeyById(
     await soClient.find<EnrollmentAPIKeySOAttributes>({
       type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
       searchFields: ['api_key_id'],
-      search: apiKeyId,
+      search: escapeSearchQueryPhrase(apiKeyId),
     })
   ).saved_objects.map(_savedObjectToEnrollmentApiKey);
+
+  if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
+    throw new Error('find enrollmentKeyById returned an incorrect key');
+  }
 
   return enrollmentAPIKey;
 }
 
-export function parseApiKey(headers: KibanaRequest['headers']) {
+export function parseApiKeyFromHeaders(headers: KibanaRequest['headers']) {
   const authorizationHeader = headers.authorization;
 
   if (!authorizationHeader) {
@@ -93,12 +99,12 @@ export function parseApiKey(headers: KibanaRequest['headers']) {
   }
 
   const apiKey = authorizationHeader.split(' ')[1];
-  if (!apiKey) {
-    throw new Error('Authorization header is malformed');
-  }
-  const apiKeyId = Buffer.from(apiKey, 'base64')
-    .toString('utf8')
-    .split(':')[0];
+
+  return parseApiKey(apiKey);
+}
+
+export function parseApiKey(apiKey: string) {
+  const apiKeyId = Buffer.from(apiKey, 'base64').toString('utf8').split(':')[0];
 
   return {
     apiKey,

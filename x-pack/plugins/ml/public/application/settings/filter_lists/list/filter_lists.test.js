@@ -12,12 +12,12 @@ import { FilterLists } from './filter_lists';
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
-jest.mock('../../../privilege/check_privilege', () => ({
+jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 
 jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: node => {
+  withKibana: (node) => {
     return node;
   },
 }));

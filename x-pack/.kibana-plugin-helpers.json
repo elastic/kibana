@@ -13,8 +13,8 @@
     "index.js",
     ".i18nrc.json",
     "plugins/**/*",
-    "legacy/plugins/reporting/.phantom/*",
-    "legacy/plugins/reporting/.chromium/*",
+    "plugins/reporting/.phantom/*",
+    "plugins/reporting/.chromium/*",
     "legacy/common/**/*",
     "legacy/plugins/**/*",
     "legacy/server/**/*",
@@ -29,8 +29,8 @@
     "!legacy/plugins/**/__snapshots__",
     "!legacy/plugins/**/__snapshots__/*",
     "!legacy/plugins/**/__mocks__/*",
-    "!legacy/plugins/canvas/shareable_runtime/test",
-    "!legacy/plugins/canvas/shareable_runtime/test/**/*"
+    "!plugins/canvas/shareable_runtime/test",
+    "!plugins/canvas/shareable_runtime/test/**/*"
   ],
   "skipInstallDependencies": true
 }

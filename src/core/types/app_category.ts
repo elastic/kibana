@@ -25,7 +25,12 @@
  */
 export interface AppCategory {
   /**
-   * Label used for cateogry name.
+   * Unique identifier for the categories
+   */
+  id: string;
+
+  /**
+   * Label used for category name.
    * Also used as aria-label if one isn't set.
    */
   label: string;

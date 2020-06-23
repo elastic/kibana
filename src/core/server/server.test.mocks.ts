@@ -85,3 +85,9 @@ export const mockMetricsService = metricsServiceMock.create();
 jest.doMock('./metrics/metrics_service', () => ({
   MetricsService: jest.fn(() => mockMetricsService),
 }));
+
+import { statusServiceMock } from './status/status_service.mock';
+export const mockStatusService = statusServiceMock.create();
+jest.doMock('./status/status_service', () => ({
+  StatusService: jest.fn(() => mockStatusService),
+}));

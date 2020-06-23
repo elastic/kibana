@@ -27,7 +27,6 @@ export type UiActionsSetup = Pick<
   | 'attachAction'
   | 'detachAction'
   | 'registerAction'
-  | 'registerActionFactory'
   | 'registerTrigger'
   | 'unregisterAction'
 >;

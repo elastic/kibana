@@ -28,9 +28,7 @@ export const markdownRenderers = {
     <EuiText grow={true}>{children}</EuiText>
   ),
   table: ({ children }: { children: React.ReactNode[] }) => (
-    <table className="euiTable euiTable--responsive" style={{ tableLayout: 'auto' }}>
-      {children}
-    </table>
+    <table className="euiTable euiTable--responsive">{children}</table>
   ),
   tableRow: ({ children }: { children: React.ReactNode[] }) => (
     <EuiTableRow>{children}</EuiTableRow>

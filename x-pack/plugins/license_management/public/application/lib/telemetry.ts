@@ -6,7 +6,7 @@
 
 import { TelemetryPluginSetup } from '../../../../../../src/plugins/telemetry/public';
 
-export { OptInExampleFlyout } from '../../../../../../src/plugins/telemetry_management_section/public/components';
+export { OptInExampleFlyout } from '../../../../../../src/plugins/telemetry_management_section/public/';
 export { PRIVACY_STATEMENT_URL } from '../../../../../../src/plugins/telemetry/common/constants';
 export { TelemetryPluginSetup, shouldShowTelemetryOptIn };
 

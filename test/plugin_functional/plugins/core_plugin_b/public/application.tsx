@@ -102,7 +102,7 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
           {
             id: 'home',
             name: 'Home',
-            onClick: () => navigateToApp('bar', { path: '/' }),
+            onClick: () => navigateToApp('bar', { path: '' }),
             'data-test-subj': 'barNavHome',
           },
           {

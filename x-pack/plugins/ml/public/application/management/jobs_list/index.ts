@@ -6,13 +6,36 @@
 
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-import { CoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
+import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public/';
+import { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
+import { getJobsListBreadcrumbs } from '../breadcrumbs';
+import { setDependencyCache, clearCache } from '../../util/dependency_cache';
 
-export const renderApp = (element: HTMLElement, coreStart: CoreStart) => {
+const renderApp = (element: HTMLElement, coreStart: CoreStart) => {
   const I18nContext = coreStart.i18n.Context;
   ReactDOM.render(React.createElement(JobsListPage, { I18nContext }), element);
   return () => {
     unmountComponentAtNode(element);
+    clearCache();
   };
 };
+
+export async function mountApp(
+  core: CoreSetup<MlStartDependencies>,
+  params: ManagementAppMountParams
+) {
+  const [coreStart] = await core.getStartServices();
+
+  setDependencyCache({
+    docLinks: coreStart.docLinks!,
+    basePath: coreStart.http.basePath,
+    http: coreStart.http,
+    i18n: coreStart.i18n,
+  });
+
+  params.setBreadcrumbs(getJobsListBreadcrumbs());
+
+  return renderApp(params.element, coreStart);
+}

@@ -69,7 +69,7 @@ describe('Create Query', () => {
       const options = {}; // missing metric object
       return createQuery(options);
     }
-    expect(callCreateQuery).to.throwException(e => {
+    expect(callCreateQuery).to.throwException((e) => {
       expect(e).to.be.a(MissingRequiredError);
     });
   });
@@ -80,7 +80,7 @@ describe('Create Query', () => {
       delete options.metric.uuidField;
       return createQuery(options);
     }
-    expect(callCreateQuery).to.throwException(e => {
+    expect(callCreateQuery).to.throwException((e) => {
       expect(e).to.be.a(MissingRequiredError);
     });
   });

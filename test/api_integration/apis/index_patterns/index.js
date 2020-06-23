@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function({ loadTestFile }) {
+export default function ({ loadTestFile }) {
   describe('index_patterns', () => {
     loadTestFile(require.resolve('./es_errors'));
     loadTestFile(require.resolve('./fields_for_time_pattern_route'));

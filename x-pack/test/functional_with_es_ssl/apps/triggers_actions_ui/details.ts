@@ -17,31 +17,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const alerting = getService('alerting');
   const retry = getService('retry');
+  const find = getService('find');
 
-  describe('Alert Details', function() {
-    describe('Header', function() {
+  describe('Alert Details', function () {
+    describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
 
         const actions = await Promise.all([
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${0}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${0}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${1}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${1}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
         ]);
 
         const alert = await alerting.alerts.createAlwaysFiringWithActions(
           `test-alert-${testRunUuid}`,
-          actions.map(action => ({
+          actions.map((action) => ({
             id: action.id,
             group: 'default',
             params: {
@@ -70,29 +75,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const alertType = await pageObjects.alertDetailsUI.getAlertType();
         expect(alertType).to.be(`Always Firing`);
 
-        const { actionType, actionCount } = await pageObjects.alertDetailsUI.getActionsLabels();
-        expect(actionType).to.be(`Server log`);
-        expect(actionCount).to.be(`+1`);
+        const { actionType } = await pageObjects.alertDetailsUI.getActionsLabels();
+        expect(actionType).to.be(`Slack`);
       });
 
       it('should disable the alert', async () => {
-        const enableSwitch = await testSubjects.find('enableSwitch');
+        const disableSwitch = await testSubjects.find('disableSwitch');
 
-        const isChecked = await enableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('true');
+        const isChecked = await disableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('false');
 
-        await enableSwitch.click();
+        await disableSwitch.click();
 
-        const enabledSwitchAfterDisabling = await testSubjects.find('enableSwitch');
-        const isCheckedAfterDisabling = await enabledSwitchAfterDisabling.getAttribute(
+        const disableSwitchAfterDisabling = await testSubjects.find('disableSwitch');
+        const isCheckedAfterDisabling = await disableSwitchAfterDisabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('false');
+        expect(isCheckedAfterDisabling).to.eql('true');
       });
 
       it('shouldnt allow you to mute a disabled alert', async () => {
-        const disabledEnableSwitch = await testSubjects.find('enableSwitch');
-        expect(await disabledEnableSwitch.getAttribute('aria-checked')).to.eql('false');
+        const disabledDisableSwitch = await testSubjects.find('disableSwitch');
+        expect(await disabledDisableSwitch.getAttribute('aria-checked')).to.eql('true');
 
         const muteSwitch = await testSubjects.find('muteSwitch');
         expect(await muteSwitch.getAttribute('aria-checked')).to.eql('false');
@@ -107,18 +111,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the alert', async () => {
-        const enableSwitch = await testSubjects.find('enableSwitch');
+        const disableSwitch = await testSubjects.find('disableSwitch');
 
-        const isChecked = await enableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('false');
+        const isChecked = await disableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('true');
 
-        await enableSwitch.click();
+        await disableSwitch.click();
 
-        const enabledSwitchAfterReenabling = await testSubjects.find('enableSwitch');
-        const isCheckedAfterDisabling = await enabledSwitchAfterReenabling.getAttribute(
+        const disableSwitchAfterReenabling = await testSubjects.find('disableSwitch');
+        const isCheckedAfterDisabling = await disableSwitchAfterReenabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('true');
+        expect(isCheckedAfterDisabling).to.eql('false');
       });
 
       it('should mute the alert', async () => {
@@ -148,7 +152,112 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('View In App', function() {
+    describe('Edit alert button', function () {
+      const testRunUuid = uuid.v4();
+
+      it('should open edit alert flyout', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const params = {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        };
+        const alert = await alerting.alerts.createAlertWithActions(
+          testRunUuid,
+          '.index-threshold',
+          params,
+          [
+            {
+              group: 'threshold met',
+              id: 'my-server-log',
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+          ]
+        );
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
+
+        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
+        await testSubjects.setValue('alertNameInput', updatedAlertName, {
+          clearWithKeyboard: true,
+        });
+
+        await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
+
+        const headingText = await pageObjects.alertDetailsUI.getHeadingText();
+        expect(headingText).to.be(updatedAlertName);
+      });
+
+      it('should reset alert when canceling an edit', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const params = {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        };
+        const alert = await alerting.alerts.createAlertWithActions(
+          testRunUuid,
+          '.index-threshold',
+          params
+        );
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+
+        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
+        await testSubjects.setValue('alertNameInput', updatedAlertName, {
+          clearWithKeyboard: true,
+        });
+
+        await testSubjects.click('cancelSaveEditedAlertButton');
+        await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
+
+        await editButton.click();
+
+        const nameInputAfterCancel = await testSubjects.find('alertNameInput');
+        const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
+        expect(textAfterCancel).to.eql(alert.name);
+      });
+    });
+
+    describe('View In App', function () {
       const testRunUuid = uuid.v4();
 
       beforeEach(async () => {
@@ -197,7 +306,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Alert Instances', function() {
+    describe('Alert Instances', function () {
       const testRunUuid = uuid.v4();
       let alert: any;
 
@@ -206,23 +315,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const actions = await Promise.all([
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${0}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${0}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${1}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${1}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
         ]);
 
         const instances = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
         alert = await alerting.alerts.createAlwaysFiringWithActions(
           `test-alert-${testRunUuid}`,
-          actions.map(action => ({
+          actions.map((action) => ({
             id: action.id,
             group: 'default',
             params: {
@@ -278,7 +391,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
-        expect(instancesList.map(instance => omit(instance, 'duration'))).to.eql([
+        expect(instancesList.map((instance) => omit(instance, 'duration'))).to.eql([
           {
             instance: 'us-central',
             status: 'Active',
@@ -311,7 +424,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const durationFromInstanceInApiUntilPageLoad = mapValues(
           dateOnAllInstancesFromApiResponse,
           // time from Alert Instance until pageload (AKA durationEpoch)
-          date => {
+          (date) => {
             const durationFromApiResuiltToEpoch = moment.duration(
               durationEpoch.diff(moment(date).utc())
             );
@@ -325,7 +438,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         instancesList
-          .map(alertInstance => ({
+          .map((alertInstance) => ({
             id: alertInstance.instance,
             // time from Alert Instance used to render the list until pageload (AKA durationEpoch)
             duration: moment.duration(alertInstance.duration),
@@ -353,7 +466,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await browser.refresh();
 
         const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
-        expect(instancesList.filter(alertInstance => alertInstance.instance === 'eu-east')).to.eql([
+        expect(
+          instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
+        ).to.eql([
           {
             instance: 'eu-east',
             status: 'Inactive',
@@ -409,7 +524,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Alert Instance Pagination', function() {
+    describe('Alert Instance Pagination', function () {
       const testRunUuid = uuid.v4();
       let alert: any;
 
@@ -418,21 +533,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const actions = await Promise.all([
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${0}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${0}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${1}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${1}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
         ]);
 
         const instances = flatten(
-          range(10).map(index => [
+          range(10).map((index) => [
             { id: `us-central-${index}` },
             { id: `us-east-${index}` },
             { id: `us-west-${index}` },
@@ -440,7 +559,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         alert = await alerting.alerts.createAlwaysFiringWithActions(
           `test-alert-${testRunUuid}`,
-          actions.map(action => ({
+          actions.map((action) => ({
             id: action.id,
             group: 'default',
             params: {
@@ -453,6 +572,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         );
 
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+          expect(Object.keys(alertInstances).length).to.eql(instances.length);
+        });
+
         // refresh to see alert
         await browser.refresh();
 
@@ -463,12 +588,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // click on first alert
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
-
-        // await first run to complete so we have an initial state
-        await retry.try(async () => {
-          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
-          expect(Object.keys(alertInstances).length).to.eql(instances.length);
-        });
       });
 
       const PAGE_SIZE = 10;

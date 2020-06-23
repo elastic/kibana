@@ -12,7 +12,7 @@ describe('Reporting Config Schema', () => {
       capture: {
         browser: {
           autoDownload: true,
-          chromium: { disableSandbox: false, proxy: { enabled: false } },
+          chromium: { proxy: { enabled: false } },
           type: 'chromium',
         },
         loadDelay: 3000,
@@ -54,12 +54,16 @@ describe('Reporting Config Schema', () => {
       roles: { allow: ['reporting_user'] },
     });
   });
+
   it(`context {"dev":false,"dist":true} produces correct config`, () => {
     expect(ConfigSchema.validate({}, { dev: false, dist: true })).toMatchObject({
       capture: {
         browser: {
           autoDownload: false,
-          chromium: { disableSandbox: false, inspect: false, proxy: { enabled: false } },
+          chromium: {
+            inspect: false,
+            proxy: { enabled: false },
+          },
           type: 'chromium',
         },
         loadDelay: 3000,
@@ -99,5 +103,32 @@ describe('Reporting Config Schema', () => {
       },
       roles: { allow: ['reporting_user'] },
     });
+  });
+
+  it(`allows optional settings`, () => {
+    // encryption key
+    expect(
+      ConfigSchema.validate({ encryptionKey: 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' })
+        .encryptionKey
+    ).toBe('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
+
+    // disableSandbox
+    expect(
+      ConfigSchema.validate({ capture: { browser: { chromium: { disableSandbox: true } } } })
+        .capture.browser.chromium
+    ).toMatchObject({ disableSandbox: true, proxy: { enabled: false } });
+
+    // kibanaServer
+    expect(
+      ConfigSchema.validate({ kibanaServer: { hostname: 'Frodo' } }).kibanaServer
+    ).toMatchObject({ hostname: 'Frodo' });
+  });
+
+  it(`logs the proper validation messages`, () => {
+    // kibanaServer
+    const throwValidationErr = () => ConfigSchema.validate({ kibanaServer: { hostname: '0' } });
+    expect(throwValidationErr).toThrowError(
+      `[kibanaServer.hostname]: must not be "0" for the headless browser to correctly resolve the host`
+    );
   });
 });

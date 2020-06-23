@@ -26,7 +26,7 @@ export class ProxyConfigCollection {
   private configs: ProxyConfig[];
 
   constructor(configs: Array<{ match: any; timeout: number }> = []) {
-    this.configs = configs.map(settings => new ProxyConfig(settings));
+    this.configs = configs.map((settings) => new ProxyConfig(settings));
   }
 
   hasConfig() {
@@ -35,7 +35,7 @@ export class ProxyConfigCollection {
 
   configForUri(uri: string): object {
     const parsedUri = parseUrl(uri);
-    const settings = this.configs.map(config => config.getForParsedUri(parsedUri as any));
+    const settings = this.configs.map((config) => config.getForParsedUri(parsedUri as any));
     return defaultsDeep({}, ...settings);
   }
 }

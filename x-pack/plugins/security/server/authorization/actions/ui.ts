@@ -14,22 +14,6 @@ export class UIActions {
     this.prefix = `ui:${versionNumber}:`;
   }
 
-  public get all(): string {
-    return `${this.prefix}*`;
-  }
-
-  public get allNavLinks(): string {
-    return `${this.prefix}navLinks/*`;
-  }
-
-  public get allCatalogueEntries(): string {
-    return `${this.prefix}catalogue/*`;
-  }
-
-  public get allManagementLinks(): string {
-    return `${this.prefix}management/*`;
-  }
-
   public get(featureId: keyof UICapabilities, ...uiCapabilityParts: string[]) {
     if (!featureId || !isString(featureId)) {
       throw new Error('featureId is required and must be a string');
@@ -42,7 +26,7 @@ export class UIActions {
     if (
       uiCapabilityParts.length === 0 ||
       uiCapabilityParts.findIndex(
-        part => !part || !isString(part) || !uiCapabilitiesRegex.test(part)
+        (part) => !part || !isString(part) || !uiCapabilitiesRegex.test(part)
       ) >= 0
     ) {
       throw new Error(

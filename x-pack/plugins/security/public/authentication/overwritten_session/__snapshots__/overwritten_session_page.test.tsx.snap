@@ -11,7 +11,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
   }
 >
   <div
-    className="secAuthenticationStatePage"
+    className="secAuthenticationStatePage "
   >
     <header
       className="secAuthenticationStatePage__header"
@@ -31,10 +31,10 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
         >
           <EuiIcon
             size="xxl"
-            type="logoKibana"
+            type="logoElastic"
           >
             <div
-              data-euiicon-type="logoKibana"
+              data-euiicon-type="logoElastic"
               size="xxl"
             />
           </EuiIcon>

@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getting index patterns 1`] = `
+Array [
+  Object {
+    "default": true,
+    "id": "test",
+    "sort": "0test name",
+    "tags": undefined,
+    "title": "test name",
+  },
+  Object {
+    "default": false,
+    "id": "test1",
+    "sort": "1test name 1",
+    "tags": undefined,
+    "title": "test name 1",
+  },
+]
+`;

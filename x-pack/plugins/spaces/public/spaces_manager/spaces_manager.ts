@@ -6,7 +6,7 @@
 import { Observable, BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
-import { SavedObjectsManagementRecord } from 'src/legacy/core_plugins/management/public';
+import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';

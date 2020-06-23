@@ -17,7 +17,7 @@ import { useResolver } from '../../use_resolver';
 import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
 import { checkBasicLicense } from '../../../license';
-import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';
+import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
 import { loadIndexPatterns } from '../../../util/index_utils';
 
 import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
@@ -43,7 +43,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { context } = useResolver('', undefined, deps.config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
-    checkFindFileStructurePrivilege,
+    checkFindFileStructurePrivilege: checkFindFileStructurePrivilegeResolver,
   });
   return (
     <PageLoader context={context}>

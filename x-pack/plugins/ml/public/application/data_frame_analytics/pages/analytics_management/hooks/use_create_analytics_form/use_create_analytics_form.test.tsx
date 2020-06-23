@@ -10,7 +10,8 @@ import { mountHook } from 'test_utils/enzyme_helpers';
 import { MlContext } from '../../../../../contexts/ml';
 import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
 
-import { getErrorMessage, useCreateAnalyticsForm } from './use_create_analytics_form';
+import { useCreateAnalyticsForm } from './use_create_analytics_form';
+import { getErrorMessage } from '../../../../../../../common/util/errors';
 
 const getMountedHook = () =>
   mountHook(
@@ -45,37 +46,11 @@ describe('getErrorMessage()', () => {
 describe('useCreateAnalyticsForm()', () => {
   test('initialization', () => {
     const { getLastHookValue } = getMountedHook();
-    const { state, actions } = getLastHookValue();
+    const { actions } = getLastHookValue();
 
-    expect(state.isModalVisible).toBe(false);
-    expect(typeof actions.closeModal).toBe('function');
     expect(typeof actions.createAnalyticsJob).toBe('function');
-    expect(typeof actions.openModal).toBe('function');
     expect(typeof actions.startAnalyticsJob).toBe('function');
     expect(typeof actions.setFormState).toBe('function');
-  });
-
-  test('open/close modal', () => {
-    const { act, getLastHookValue } = getMountedHook();
-    const { state, actions } = getLastHookValue();
-
-    expect(state.isModalVisible).toBe(false);
-
-    act(() => {
-      // this should be actions.openModal(), but that doesn't work yet because act() doesn't support async yet.
-      // we need to wait for an update to React 16.9
-      actions.setIsModalVisible(true);
-    });
-    const { state: stateModalOpen } = getLastHookValue();
-    expect(stateModalOpen.isModalVisible).toBe(true);
-
-    act(() => {
-      // this should be actions.closeModal(), but that doesn't work yet because act() doesn't support async yet.
-      // we need to wait for an update to React 16.9
-      actions.setIsModalVisible(false);
-    });
-    const { state: stateModalClosed } = getLastHookValue();
-    expect(stateModalClosed.isModalVisible).toBe(false);
   });
 
   // TODO

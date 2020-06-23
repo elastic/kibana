@@ -32,7 +32,9 @@ To start tracking the real-time percentage of CPU, enter the following in the *T
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct')
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
 ----------------------------------
 
 [role="screenshot"]
@@ -50,10 +52,10 @@ To compare the two data sets, add another series with data from the previous hou
 .es(index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct'),
-  .es(offset=-1h,             <1>
-      index=metricbeat-*,
-      timefield='@timestamp',
-      metric='avg:system.cpu.user.pct')
+.es(offset=-1h,             <1>
+    index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
 ----------------------------------
 
 <1> `offset` offsets the data retrieval by a date expression. In this example, `-1h` offsets the data back by one hour.
@@ -70,7 +72,12 @@ To easily distinguish between the two data sets, add the label names:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour'), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour') <1>
+.es(offset=-1h,index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct').label('last hour'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct').label('current hour') <1>
 ----------------------------------
 
 <1> `.label()` adds custom labels to the visualization.
@@ -119,11 +126,11 @@ To differentiate between the current hour data and the last hour data, change th
     metric='avg:system.cpu.user.pct')
   .label('last hour')
   .lines(fill=1,width=0.5), <1>
-  .es(index=metricbeat-*,
-      timefield='@timestamp',
-      metric='avg:system.cpu.user.pct')
-    .label('current hour')
-    .title('CPU usage over time')
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('current hour')
+  .title('CPU usage over time')
 ----------------------------------
 
 <1> `.lines()` changes the appearance of the chart lines. In this example, `.lines(fill=1,width=0.5)` sets the fill level to `1`, and the border width to `0.5`.
@@ -169,7 +176,20 @@ Change the position and style of the legend:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF).legend(columns=2, position=nw) <1>
+.es(offset=-1h,
+    index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('last hour')
+  .lines(fill=1,width=0.5)
+  .color(gray),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('current hour')
+  .title('CPU usage over time')
+  .color(#1E90FF)
+  .legend(columns=2, position=nw) <1>
 ----------------------------------
 
 <1> `.legend()` sets the position and style of the legend. In this example, `.legend(columns=2, position=nw)` places the legend in the north west position of the visualization with two columns.
@@ -192,7 +212,9 @@ To start tracking the inbound and outbound network traffic, enter the following 
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes)
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.in.bytes)
 ----------------------------------
 
 [role="screenshot"]
@@ -207,7 +229,10 @@ Change how the data is displayed so that you can easily monitor the inbound traf
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative() <1>
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.in.bytes)
+  .derivative() <1>
 ----------------------------------
 
 <1> `.derivative` plots the change in values over time.
@@ -220,7 +245,15 @@ Add a similar calculation for outbound traffic:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative(), .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1) <1>
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.in.bytes)
+  .derivative(),
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.out.bytes)
+  .derivative()
+  .multiply(-1) <1>
 ----------------------------------
 
 <1> `.multiply()` multiplies the data series by a number, the result of a data series, or a list of data series. For this example, `.multiply(-1)` converts the outbound network traffic to a negative value since the outbound network traffic is leaving your machine.
@@ -237,7 +270,17 @@ To make the visualization easier to analyze, change the data metric from bytes t
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative().divide(1048576), .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1).divide(1048576) <1>
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.in.bytes)
+  .derivative()
+  .divide(1048576),
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.out.bytes)
+  .derivative()
+  .multiply(-1)
+  .divide(1048576) <1>
 ----------------------------------
 
 <1> `.divide()` accepts the same input as `.multiply()`, then divides the data series by the defined divisor.
@@ -271,8 +314,8 @@ Customize and format the visualization using functions:
   .divide(1048576)
   .lines(fill=2, width=1)           <3>
   .color(blue)                      <4>
-    .label("Outbound traffic")
-    .legend(columns=2, position=nw) <5>
+  .label("Outbound traffic")
+  .legend(columns=2, position=nw) <5>
 ----------------------------------
 
 <1> `.label()` adds custom labels to the visualization.
@@ -309,7 +352,9 @@ To chart the maximum value of `system.memory.actual.used.bytes`, enter the follo
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes')
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
 ----------------------------------
 
 [role="screenshot"]
@@ -338,17 +383,17 @@ To track the amount of memory used, create two thresholds:
       null)
     .label('warning')
     .color('#FFCC11'),
-  .es(index=metricbeat-*,
-      timefield='@timestamp',
-      metric='max:system.memory.actual.used.bytes')
-    .if(gt,
-        11375000000,
-        .es(index=metricbeat-*,
-            timefield='@timestamp',
-            metric='max:system.memory.actual.used.bytes'),
-        null)
-      .label('severe')
-      .color('red')
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,
+      11375000000,
+      .es(index=metricbeat-*,
+          timefield='@timestamp',
+          metric='max:system.memory.actual.used.bytes'),
+      null)
+  .label('severe')
+  .color('red')
 ----------------------------------
 
 <1> Timelion conditional logic for the _greater than_ operator. In this example, the warning threshold is 11.3GB (`11300000000`), and the severe threshold is 11.375GB (`11375000000`). If the threshold values are too high or low for your machine, adjust the values accordingly.
@@ -366,7 +411,33 @@ To determine the trend, create a new data series:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,11300000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning').color('#FFCC11'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,11375000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe').color('red'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').mvavg(10) <1>
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,11300000000,
+      .es(index=metricbeat-*,
+          timefield='@timestamp',
+          metric='max:system.memory.actual.used.bytes'),
+      null)
+      .label('warning')
+      .color('#FFCC11'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,11375000000,
+      .es(index=metricbeat-*,
+          timefield='@timestamp',
+          metric='max:system.memory.actual.used.bytes'),
+      null).
+      label('severe')
+      .color('red'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .mvavg(10) <1>
 ----------------------------------
 
 <1> `mvavg()` calculates the moving average over a specified period of time. In this example, `.mvavg(10)` creates a moving average with a window of 10 data points.
@@ -396,30 +467,30 @@ Customize and format the visualization using functions:
       .es(index=metricbeat-*,
           timefield='@timestamp',
           metric='max:system.memory.actual.used.bytes'),
-          null)
-        .label('warning')
-        .color('#FFCC11')                 <3>
-        .lines(width=5),                  <4>
+      null)
+    .label('warning')
+    .color('#FFCC11')                 <3>
+    .lines(width=5),                  <4>
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,
+      11375000000,
       .es(index=metricbeat-*,
           timefield='@timestamp',
-          metric='max:system.memory.actual.used.bytes')
-        .if(gt,
-          11375000000,
-          .es(index=metricbeat-*,
-              timefield='@timestamp',
-              metric='max:system.memory.actual.used.bytes'),
-          null)
-        .label('severe')
-        .color('red')
-        .lines(width=5),
-      .es(index=metricbeat-*,
-          timefield='@timestamp',
-          metric='max:system.memory.actual.used.bytes')
-        .mvavg(10)
-        .label('mvavg')
-        .lines(width=2)
-        .color(#5E5E5E)
-        .legend(columns=4, position=nw)    <5>
+          metric='max:system.memory.actual.used.bytes'),
+      null)
+    .label('severe')
+    .color('red')
+    .lines(width=5),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .mvavg(10)
+  .label('mvavg')
+  .lines(width=2)
+  .color(#5E5E5E)
+  .legend(columns=4, position=nw)    <5>
 ----------------------------------
 
 <1> `.label()` adds custom labels to the visualization.

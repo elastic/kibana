@@ -23,7 +23,7 @@ import { searchSavedObjectTypeMigrations } from './search_migrations';
 export const searchSavedObjectType: SavedObjectsType = {
   name: 'search',
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   management: {
     icon: 'discoverApp',
     defaultSearchField: 'title',
@@ -36,7 +36,7 @@ export const searchSavedObjectType: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
+        path: `/app/discover#/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'discover.show',
       };
     },

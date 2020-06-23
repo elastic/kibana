@@ -18,8 +18,8 @@
  */
 
 export interface DateRangeKey {
-  from: number;
-  to: number;
+  from: number | string;
+  to: number | string;
 }
 
 export function convertDateRangeToString({ from, to }: DateRangeKey, format: (val: any) => string) {

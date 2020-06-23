@@ -31,6 +31,14 @@ test('has expected display name', () => {
   expect(action.getDisplayName({} as any)).toMatchInlineSnapshot(`"Apply filter to current view"`);
 });
 
+describe('getIconType()', () => {
+  test('returns "filter" icon', async () => {
+    const action = createFilterAction();
+    const result = action.getIconType({} as any);
+    expect(result).toBe('filter');
+  });
+});
+
 describe('isCompatible()', () => {
   test('when embeddable filters and filters exist, returns true', async () => {
     const action = createFilterAction();

@@ -7,5 +7,5 @@
 export const APP_ICON = 'graphApp';
 
 export function createWorkspacePath(id: string) {
-  return `/app/graph/#/workspace/${id}`;
+  return `/app/graph#/workspace/${id}`;
 }

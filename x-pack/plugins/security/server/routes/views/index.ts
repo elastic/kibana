@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defineAccessAgreementRoutes } from './access_agreement';
 import { defineAccountManagementRoutes } from './account_management';
 import { defineLoggedOutRoutes } from './logged_out';
 import { defineLoginRoutes } from './login';
@@ -20,6 +21,7 @@ export function defineViewRoutes(params: RouteDefinitionParams) {
     defineLoginRoutes(params);
   }
 
+  defineAccessAgreementRoutes(params);
   defineAccountManagementRoutes(params);
   defineLoggedOutRoutes(params);
   defineLogoutRoutes(params);

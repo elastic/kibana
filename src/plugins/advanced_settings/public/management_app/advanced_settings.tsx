@@ -125,7 +125,7 @@ export class AdvancedSettingsComponent extends Component<
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     return Object.entries(all)
-      .map(setting => {
+      .map((setting) => {
         return toEditableConfig({
           def: setting[1],
           name: setting[0],
@@ -134,7 +134,7 @@ export class AdvancedSettingsComponent extends Component<
           isOverridden: config.isOverridden(setting[0]),
         });
       })
-      .filter(c => !c.readonly)
+      .filter((c) => !c.readonly)
       .sort(Comparators.property('name', Comparators.default('asc')));
   }
 

@@ -14,7 +14,7 @@ import {
 } from 'kibana/server';
 
 import {
-  CaseRequest,
+  CasePostRequest,
   CaseResponse,
   CasesFindResponse,
   CaseAttributes,
@@ -26,34 +26,38 @@ import {
 import { SortFieldCase, TotalCommentByCase } from './types';
 
 export const transformNewCase = ({
+  connectorId,
   createdDate,
   email,
   full_name,
   newCase,
   username,
 }: {
+  connectorId: string;
   createdDate: string;
-  email?: string;
-  full_name?: string;
-  newCase: CaseRequest;
-  username: string;
+  email?: string | null;
+  full_name?: string | null;
+  newCase: CasePostRequest;
+  username?: string | null;
 }): CaseAttributes => ({
+  ...newCase,
   closed_at: null,
   closed_by: null,
+  connector_id: connectorId,
   created_at: createdDate,
   created_by: { email, full_name, username },
   external_service: null,
+  status: 'open',
   updated_at: null,
   updated_by: null,
-  ...newCase,
 });
 
 interface NewCommentArgs {
   comment: string;
   createdDate: string;
-  email?: string;
-  full_name?: string;
-  username: string;
+  email?: string | null;
+  full_name?: string | null;
+  username?: string | null;
 }
 export const transformNewComment = ({
   comment,
@@ -85,41 +89,51 @@ export const transformCases = (
   cases: SavedObjectsFindResponse<CaseAttributes>,
   countOpenCases: number,
   countClosedCases: number,
-  totalCommentByCase: TotalCommentByCase[]
+  totalCommentByCase: TotalCommentByCase[],
+  caseConfigureConnectorId: string = 'none'
 ): CasesFindResponse => ({
   page: cases.page,
   per_page: cases.per_page,
   total: cases.total,
-  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase),
+  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase, caseConfigureConnectorId),
   count_open_cases: countOpenCases,
   count_closed_cases: countClosedCases,
 });
 
 export const flattenCaseSavedObjects = (
-  savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects'],
-  totalCommentByCase: TotalCommentByCase[]
+  savedObjects: Array<SavedObject<CaseAttributes>>,
+  totalCommentByCase: TotalCommentByCase[],
+  caseConfigureConnectorId: string = 'none'
 ): CaseResponse[] =>
   savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<CaseAttributes>) => {
     return [
       ...acc,
-      flattenCaseSavedObject(
+      flattenCaseSavedObject({
         savedObject,
-        [],
-        totalCommentByCase.find(tc => tc.caseId === savedObject.id)?.totalComments ?? 0
-      ),
+        totalComment:
+          totalCommentByCase.find((tc) => tc.caseId === savedObject.id)?.totalComments ?? 0,
+        caseConfigureConnectorId,
+      }),
     ];
   }, []);
 
-export const flattenCaseSavedObject = (
-  savedObject: SavedObject<CaseAttributes>,
-  comments: Array<SavedObject<CommentAttributes>> = [],
-  totalComment: number = 0
-): CaseResponse => ({
+export const flattenCaseSavedObject = ({
+  savedObject,
+  comments = [],
+  totalComment = 0,
+  caseConfigureConnectorId = 'none',
+}: {
+  savedObject: SavedObject<CaseAttributes>;
+  comments?: Array<SavedObject<CommentAttributes>>;
+  totalComment?: number;
+  caseConfigureConnectorId?: string;
+}): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
   ...savedObject.attributes,
+  connector_id: savedObject.attributes.connector_id ?? caseConfigureConnectorId,
 });
 
 export const transformComments = (
@@ -132,7 +146,7 @@ export const transformComments = (
 });
 
 export const flattenCommentSavedObjects = (
-  savedObjects: SavedObjectsFindResponse<CommentAttributes>['saved_objects']
+  savedObjects: Array<SavedObject<CommentAttributes>>
 ): CommentResponse[] =>
   savedObjects.reduce((acc: CommentResponse[], savedObject: SavedObject<CommentAttributes>) => {
     return [...acc, flattenCommentSavedObject(savedObject)];

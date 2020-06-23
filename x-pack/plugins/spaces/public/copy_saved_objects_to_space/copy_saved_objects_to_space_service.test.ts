@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ManagementSetup } from 'src/legacy/core_plugins/management/public';
 import { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { CopySavedObjectsToSpaceService } from '.';
 import { notificationServiceMock } from 'src/core/public/mocks';
+import { savedObjectsManagementPluginMock } from '../../../../../src/plugins/saved_objects_management/public/mocks';
 
 describe('CopySavedObjectsToSpaceService', () => {
   describe('#setup', () => {
@@ -16,22 +16,14 @@ describe('CopySavedObjectsToSpaceService', () => {
       const deps = {
         spacesManager: spacesManagerMock.create(),
         notificationsSetup: notificationServiceMock.createSetupContract(),
-        // we don't have a proper NP mock for this yet
-        managementSetup: ({
-          savedObjects: {
-            registry: {
-              has: jest.fn().mockReturnValue(false),
-              register: jest.fn(),
-            },
-          },
-        } as unknown) as ManagementSetup,
+        savedObjectsManagementSetup: savedObjectsManagementPluginMock.createSetupContract(),
       };
 
       const service = new CopySavedObjectsToSpaceService();
       service.setup(deps);
 
-      expect(deps.managementSetup.savedObjects.registry.register).toHaveBeenCalledTimes(1);
-      expect(deps.managementSetup.savedObjects.registry.register).toHaveBeenCalledWith(
+      expect(deps.savedObjectsManagementSetup.actions.register).toHaveBeenCalledTimes(1);
+      expect(deps.savedObjectsManagementSetup.actions.register).toHaveBeenCalledWith(
         expect.any(CopyToSpaceSavedObjectsManagementAction)
       );
     });

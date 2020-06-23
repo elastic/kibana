@@ -5,7 +5,7 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
-import { savedObjectsServiceMock } from 'src/core/server/saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from 'src/core/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 

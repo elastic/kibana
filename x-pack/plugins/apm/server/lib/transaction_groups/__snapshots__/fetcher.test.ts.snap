@@ -16,6 +16,9 @@ Array [
               "p95": Object {
                 "percentiles": Object {
                   "field": "transaction.duration.us",
+                  "hdr": Object {
+                    "number_of_significant_value_digits": 2,
+                  },
                   "percents": Array [
                     95,
                   ],
@@ -126,6 +129,9 @@ Array [
               "p95": Object {
                 "percentiles": Object {
                   "field": "transaction.duration.us",
+                  "hdr": Object {
+                    "number_of_significant_value_digits": 2,
+                  },
                   "percents": Array [
                     95,
                   ],

@@ -5,7 +5,6 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPopoverTitle } from '@elastic/eui';
 import { ThresholdExpression } from './threshold';
 
 describe('threshold expression', () => {
@@ -64,6 +63,6 @@ describe('threshold expression', () => {
         onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
       />
     );
-    expect(wrapper.contains(<EuiPopoverTitle>Is between</EuiPopoverTitle>)).toBeTruthy();
+    expect(wrapper.contains('Is between')).toBeTruthy();
   });
 });

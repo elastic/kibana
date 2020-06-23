@@ -784,6 +784,20 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  other: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.otherDescription', {
+      defaultMessage: 'Other',
+    }),
+    value: 'other',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.otherLongDescription"
+          defaultMessage="Specify type parameters in JSON."
+        />
+      </p>
+    ),
+  },
 };
 
 export const MAIN_TYPES: MainType[] = [
@@ -811,6 +825,7 @@ export const MAIN_TYPES: MainType[] = [
   'shape',
   'text',
   'token_count',
+  'other',
 ];
 
 export const MAIN_DATA_TYPE_DEFINITION: {
@@ -837,7 +852,7 @@ export const MAIN_DATA_TYPE_DEFINITION: {
 export const SUB_TYPE_MAP_TO_MAIN = Object.entries(MAIN_DATA_TYPE_DEFINITION).reduce(
   (acc, [type, definition]) => {
     if ({}.hasOwnProperty.call(definition, 'subTypes')) {
-      definition.subTypes!.types.forEach(subType => {
+      definition.subTypes!.types.forEach((subType) => {
         acc[subType] = type;
       });
     }

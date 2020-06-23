@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import '../../../es_ui_shared/console_lang/mocks';
 
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
@@ -132,7 +131,7 @@ describe('<WatchList />', () => {
 
           expect(findTestSubject(idColumn, `watchIdColumn-${watch1.id}`).length).toBe(1);
           expect(findTestSubject(idColumn, `watchIdColumn-${watch1.id}`).props().href).toEqual(
-            `#/management/elasticsearch/watcher/watches/watch/${watch1.id}/status`
+            `/watches/watch/${watch1.id}/status`
           );
         });
 
@@ -159,14 +158,10 @@ describe('<WatchList />', () => {
                 .getAttribute('disabled')
             ).toEqual('');
             expect(
-              findTestSubject(lastColumn, 'editWatchButton')
-                .getDOMNode()
-                .getAttribute('disabled')
+              findTestSubject(lastColumn, 'editWatchButton').getDOMNode().getAttribute('disabled')
             ).toEqual('');
             expect(
-              findTestSubject(lastColumn, 'deleteWatchButton')
-                .getDOMNode()
-                .getAttribute('disabled')
+              findTestSubject(lastColumn, 'deleteWatchButton').getDOMNode().getAttribute('disabled')
             ).toEqual('');
           });
         });

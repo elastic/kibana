@@ -20,7 +20,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
     it('should handle create action request appropriately', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -33,10 +33,11 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           },
         });
 
-      expect(response.statusCode).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'action');
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'action', 'actions');
       expect(response.body).to.eql({
         id: response.body.id,
+        isPreconfigured: false,
         name: 'My action',
         actionTypeId: 'test.index-record',
         config: {

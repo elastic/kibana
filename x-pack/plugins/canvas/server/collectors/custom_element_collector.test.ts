@@ -10,7 +10,7 @@ import { TelemetryCustomElementDocument } from '../../types';
 function mockCustomElement(...nodeExpressions: string[]): TelemetryCustomElementDocument {
   return {
     content: JSON.stringify({
-      selectedNodes: nodeExpressions.map(expression => ({
+      selectedNodes: nodeExpressions.map((expression) => ({
         expression,
       })),
     }),

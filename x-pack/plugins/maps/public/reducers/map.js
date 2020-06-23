@@ -6,7 +6,6 @@
 
 import {
   SET_SELECTED_LAYER,
-  SET_TRANSIENT_LAYER,
   UPDATE_LAYER_ORDER,
   LAYER_DATA_LOAD_STARTED,
   LAYER_DATA_LOAD_ENDED,
@@ -46,10 +45,15 @@ import {
   HIDE_LAYER_CONTROL,
   HIDE_VIEW_CONTROL,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
-} from '../actions/map_actions';
+  SET_MAP_SETTINGS,
+  ROLLBACK_MAP_SETTINGS,
+  TRACK_MAP_SETTINGS,
+  UPDATE_MAP_SETTING,
+} from '../actions';
 
+import { getDefaultMapSettings } from './default_map_settings';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { SOURCE_DATA_REQUEST_ID } from '../../common/constants';
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
 
@@ -57,8 +61,13 @@ const updateLayerInList = (state, layerId, attribute, newValue) => {
   if (!layerId) {
     return state;
   }
+
   const { layerList } = state;
   const layerIdx = getLayerIndex(layerList, layerId);
+  if (layerIdx === -1) {
+    return state;
+  }
+
   const updatedLayer = {
     ...layerList[layerIdx],
     // Update layer w/ new value. If no value provided, toggle boolean value
@@ -74,7 +83,7 @@ const updateLayerInList = (state, layerId, attribute, newValue) => {
   return { ...state, layerList: updatedList };
 };
 
-const updateLayerSourceDescriptorProp = (state, layerId, propName, value, newLayerType) => {
+const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
   const { layerList } = state;
   const layerIdx = getLayerIndex(layerList, layerId);
   const updatedLayer = {
@@ -84,9 +93,6 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value, newLay
       [propName]: value,
     },
   };
-  if (newLayerType) {
-    updatedLayer.type = newLayerType;
-  }
   const updatedList = [
     ...layerList.slice(0, layerIdx),
     updatedLayer,
@@ -95,7 +101,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value, newLay
   return { ...state, layerList: updatedList };
 };
 
-const INITIAL_STATE = {
+export const DEFAULT_MAP_STATE = {
   ready: false,
   mapInitError: null,
   goto: null,
@@ -119,12 +125,13 @@ const INITIAL_STATE = {
     hideViewControl: false,
   },
   selectedLayerId: null,
-  __transientLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],
+  settings: getDefaultMapSettings(),
+  __rollbackSettings: null,
 };
 
-export function map(state = INITIAL_STATE, action) {
+export function map(state = DEFAULT_MAP_STATE, action) {
   switch (action.type) {
     case UPDATE_DRAW_STATE:
       return {
@@ -176,6 +183,32 @@ export function map(state = INITIAL_STATE, action) {
       return {
         ...state,
         goto: null,
+      };
+    case SET_MAP_SETTINGS:
+      return {
+        ...state,
+        settings: { ...getDefaultMapSettings(), ...action.settings },
+      };
+    case ROLLBACK_MAP_SETTINGS:
+      return state.__rollbackSettings
+        ? {
+            ...state,
+            settings: { ...state.__rollbackSettings },
+            __rollbackSettings: null,
+          }
+        : state;
+    case TRACK_MAP_SETTINGS:
+      return {
+        ...state,
+        __rollbackSettings: state.settings,
+      };
+    case UPDATE_MAP_SETTING:
+      return {
+        ...state,
+        settings: {
+          ...(state.settings ? state.settings : {}),
+          [action.settingKey]: action.settingValue,
+        },
       };
     case SET_LAYER_ERROR_STATUS:
       const { layerList } = state;
@@ -248,34 +281,25 @@ export function map(state = INITIAL_STATE, action) {
         },
       };
     case SET_SELECTED_LAYER:
-      const selectedMatch = state.layerList.find(layer => layer.id === action.selectedLayerId);
+      const selectedMatch = state.layerList.find((layer) => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };
-    case SET_TRANSIENT_LAYER:
-      const transientMatch = state.layerList.find(layer => layer.id === action.transientLayerId);
-      return { ...state, __transientLayerId: transientMatch ? action.transientLayerId : null };
     case UPDATE_LAYER_ORDER:
       return {
         ...state,
-        layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]),
+        layerList: action.newLayerOrder.map((layerNumber) => state.layerList[layerNumber]),
       };
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
     case UPDATE_SOURCE_PROP:
-      return updateLayerSourceDescriptorProp(
-        state,
-        action.layerId,
-        action.propName,
-        action.value,
-        action.newLayerType
-      );
+      return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
       const layerDescriptor = state.layerList.find(
-        descriptor => descriptor.id === action.layer.getId()
+        (descriptor) => descriptor.id === action.layer.getId()
       );
       if (layerDescriptor) {
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
         const index = state.layerList.findIndex(
-          descriptor => descriptor.id === action.layer.getId()
+          (descriptor) => descriptor.id === action.layer.getId()
         );
         const newLayerList = state.layerList.slice();
         newLayerList[index] = newLayerDescriptor;
@@ -374,7 +398,7 @@ export function map(state = INITIAL_STATE, action) {
     case SET_WAITING_FOR_READY_HIDDEN_LAYERS:
       return {
         ...state,
-        waitingForMapReadyLayerList: state.waitingForMapReadyLayerList.map(layer => ({
+        waitingForMapReadyLayerList: state.waitingForMapReadyLayerList.map((layer) => ({
           ...layer,
           visible: !action.hiddenLayerIds.includes(layer.id),
         })),
@@ -389,7 +413,7 @@ function findDataRequest(layerDescriptor, dataRequestAction) {
     return;
   }
 
-  return layerDescriptor.__dataRequests.find(dataRequest => {
+  return layerDescriptor.__dataRequests.find((dataRequest) => {
     return dataRequest.dataId === dataRequestAction.dataId;
   });
 }
@@ -418,8 +442,8 @@ function updateSourceDataRequest(state, action) {
   if (!layerDescriptor) {
     return state;
   }
-  const dataRequest = layerDescriptor.__dataRequests.find(dataRequest => {
-    return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
+  const dataRequest = layerDescriptor.__dataRequests.find((dataRequest) => {
+    return dataRequest.dataId === SOURCE_DATA_REQUEST_ID;
   });
   if (!dataRequest) {
     return state;
@@ -488,7 +512,7 @@ function getValidDataRequest(state, action, checkRequestToken = true) {
 }
 
 function findLayerById(state, id) {
-  return state.layerList.find(layer => layer.id === id);
+  return state.layerList.find((layer) => layer.id === id);
 }
 
 function trackCurrentLayerState(state, layerId) {

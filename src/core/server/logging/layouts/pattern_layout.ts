@@ -37,7 +37,7 @@ import {
 const DEFAULT_PATTERN = `[%date][%level][%logger]%meta %message`;
 
 export const patternSchema = schema.string({
-  validate: string => {
+  validate: (string) => {
     DateConversion.validate!(string);
   },
 });

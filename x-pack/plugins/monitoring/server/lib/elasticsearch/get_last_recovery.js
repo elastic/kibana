@@ -21,7 +21,7 @@ import { ElasticsearchMetric } from '../metrics';
  * @returns {boolean} true to keep
  */
 export function filterOldShardActivity(startMs) {
-  return activity => {
+  return (activity) => {
     // either it's still going and there is no stop time, or the stop time happened after we started looking for one
     return !_.isNumber(activity.stop_time_in_millis) || activity.stop_time_in_millis >= startMs;
   };
@@ -67,7 +67,7 @@ export function getLastRecovery(req, esIndexPattern) {
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then(resp => {
+  return callWithRequest(req, 'search', params).then((resp) => {
     return handleLastRecoveries(resp, start);
   });
 }

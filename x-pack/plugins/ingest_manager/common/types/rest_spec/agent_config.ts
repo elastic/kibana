@@ -49,16 +49,25 @@ export interface UpdateAgentConfigResponse {
   success: boolean;
 }
 
-export interface DeleteAgentConfigsRequest {
+export interface CopyAgentConfigRequest {
+  body: Pick<AgentConfig, 'name' | 'description'>;
+}
+
+export interface CopyAgentConfigResponse {
+  item: AgentConfig;
+  success: boolean;
+}
+
+export interface DeleteAgentConfigRequest {
   body: {
-    agentConfigIds: string[];
+    agentConfigId: string;
   };
 }
 
-export type DeleteAgentConfigsResponse = Array<{
+export interface DeleteAgentConfigResponse {
   id: string;
   success: boolean;
-}>;
+}
 
 export interface GetFullAgentConfigRequest {
   params: {

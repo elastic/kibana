@@ -21,6 +21,17 @@ import expect from '@kbn/expect';
 import { ExpressionValue } from 'src/plugins/expressions';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
+declare global {
+  interface Window {
+    runPipeline: (
+      expressions: string,
+      context?: ExpressionValue,
+      initialContext?: ExpressionValue
+    ) => any;
+    renderPipelineResponse: (context?: ExpressionValue) => Promise<any>;
+  }
+}
+
 export type ExpressionResult = any;
 
 export type ExpectExpression = (
@@ -99,13 +110,13 @@ export function expectExpressionProvider({
         stepContext: ExpressionValue = context
       ): Promise<ExpressionResult> => {
         log.debug(`running expression ${step || expression}`);
-        return browser.executeAsync<ExpressionResult>(
-          (
-            _expression: string,
-            _currentContext: ExpressionValue & { type: string },
-            _initialContext: ExpressionValue,
-            done: (expressionResult: ExpressionResult) => void
-          ) => {
+        return browser.executeAsync<
+          ExpressionResult,
+          string,
+          ExpressionValue & { type: string },
+          ExpressionValue
+        >(
+          (_expression, _currentContext, _initialContext, done) => {
             if (!_currentContext) _currentContext = { type: 'null' };
             if (!_currentContext.type) _currentContext.type = 'null';
             return window
@@ -165,7 +176,7 @@ export function expectExpressionProvider({
         log.debug('starting to render');
         const result = await browser.executeAsync<any>(
           (_context: ExpressionResult, done: (renderResult: any) => void) =>
-            window.renderPipelineResponse(_context).then(renderResult => {
+            window.renderPipelineResponse(_context).then((renderResult: any) => {
               done(renderResult);
               return renderResult;
             }),

@@ -20,7 +20,7 @@
 import { AppMountParameters } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { createHashHistory, createBrowserHistory } from 'history';
+import { createHashHistory } from 'history';
 import { TodoAppPage } from './todo';
 
 export interface AppOptions {
@@ -35,13 +35,10 @@ export enum History {
 }
 
 export const renderApp = (
-  { appBasePath, element }: AppMountParameters,
+  { appBasePath, element, history: platformHistory }: AppMountParameters,
   { appInstanceId, appTitle, historyType }: AppOptions
 ) => {
-  const history =
-    historyType === History.Browser
-      ? createBrowserHistory({ basename: appBasePath })
-      : createHashHistory();
+  const history = historyType === History.Browser ? platformHistory : createHashHistory();
   ReactDOM.render(
     <TodoAppPage
       history={history}
@@ -54,8 +51,7 @@ export const renderApp = (
         const currentAppUrl = stripTrailingSlash(history.createHref(history.location));
         if (historyType === History.Browser) {
           // browser history
-          const basePath = stripTrailingSlash(appBasePath);
-          return currentAppUrl === basePath && !history.location.search && !history.location.hash;
+          return currentAppUrl === '' && !history.location.search && !history.location.hash;
         } else {
           // hashed history
           return currentAppUrl === '#' && !history.location.search;

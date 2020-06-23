@@ -74,7 +74,7 @@ export const Template: FunctionComponent<Props> = ({
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>Elastic Kibana</title>
+        <title>Elastic</title>
         <Fonts url={uiPublicUrl} />
         {/* Favicons (generated from http://realfavicongenerator.net/) */}
         <link
@@ -104,6 +104,10 @@ export const Template: FunctionComponent<Props> = ({
         <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
         <meta name="theme-color" content="#ffffff" />
         <Styles darkMode={darkMode} />
+
+        {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
+        <meta name="add-styles-here" />
+        <meta name="add-scripts-here" />
       </head>
       <body>
         {createElement('kbn-csp', {
@@ -122,10 +126,10 @@ export const Template: FunctionComponent<Props> = ({
               className="kbnWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
                 defaultMessage:
-                  'Elastic Kibana did not load properly. Check the server output for more information.',
+                  'Elastic did not load properly. Check the server output for more information.',
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic Kibana' })}
+              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
             </div>
             <div className="kbnProgress" />
           </div>
@@ -142,7 +146,7 @@ export const Template: FunctionComponent<Props> = ({
           <div className="kbnWelcomeText">
             {i18n('core.ui.legacyBrowserMessage', {
               defaultMessage:
-                'This Kibana installation has strict security requirements enabled that your current browser does not meet.',
+                'This Elastic installation has strict security requirements enabled that your current browser does not meet.',
             })}
           </div>
         </div>

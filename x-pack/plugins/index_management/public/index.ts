@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import './index.scss';
-import { IndexMgmtUIPlugin, IndexMgmtSetup } from './plugin';
+import { IndexMgmtUIPlugin, IndexManagementPluginSetup } from './plugin';
 
 /** @public */
 export const plugin = () => {
   return new IndexMgmtUIPlugin();
 };
 
-export { IndexMgmtSetup };
+export { IndexManagementPluginSetup };
 
 export { getIndexListUri } from './application/services/navigation';

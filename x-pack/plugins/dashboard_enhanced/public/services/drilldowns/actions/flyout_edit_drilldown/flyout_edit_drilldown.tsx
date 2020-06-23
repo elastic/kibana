@@ -5,22 +5,22 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'src/core/public';
 import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   reactToUiComponent,
   toMountPoint,
 } from '../../../../../../../../src/plugins/kibana_react/public';
 import { EmbeddableContext, ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-import { DrilldownsStart } from '../../../../../../drilldowns/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
+import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
+import { StartDependencies } from '../../../../plugin';
+import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
 export interface FlyoutEditDrilldownParams {
-  overlays: () => Promise<CoreStart['overlays']>;
-  drilldowns: () => Promise<DrilldownsStart>;
+  start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
 
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
@@ -42,29 +42,31 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
 
   public async isCompatible({ embeddable }: EmbeddableContext) {
     if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
-    if (!embeddable.dynamicActions) return false;
-    return embeddable.dynamicActions.state.get().events.length > 0;
+    if (!isEnhancedEmbeddable(embeddable)) return false;
+    return embeddable.enhancements.dynamicActions.state.get().events.length > 0;
   }
 
   public async execute(context: EmbeddableContext) {
-    const overlays = await this.params.overlays();
-    const drilldowns = await this.params.drilldowns();
-    const dynamicActionManager = context.embeddable.dynamicActions;
-    if (!dynamicActionManager) {
-      throw new Error(`Can't execute FlyoutEditDrilldownAction without dynamicActionsManager`);
+    const { core, plugins } = this.params.start();
+    const { embeddable } = context;
+
+    if (!isEnhancedEmbeddable(embeddable)) {
+      throw new Error(
+        'Need embeddable to be EnhancedEmbeddable to execute FlyoutEditDrilldownAction.'
+      );
     }
 
-    const handle = overlays.openFlyout(
+    const handle = core.overlays.openFlyout(
       toMountPoint(
-        <drilldowns.FlyoutManageDrilldowns
+        <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
           onClose={() => handle.close()}
-          placeContext={context}
           viewMode={'manage'}
-          dynamicActionManager={dynamicActionManager}
+          dynamicActionManager={embeddable.enhancements.dynamicActions}
         />
       ),
       {
         ownFocus: true,
+        'data-test-subj': 'editDrilldownFlyout',
       }
     );
   }

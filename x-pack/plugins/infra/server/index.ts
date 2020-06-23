@@ -6,9 +6,8 @@
 
 import { PluginInitializerContext } from 'src/core/server';
 import { config, InfraConfig, InfraServerPlugin, InfraPluginSetup } from './plugin';
-import { savedObjectMappings } from './saved_objects';
 
-export { config, InfraConfig, savedObjectMappings, InfraPluginSetup };
+export { config, InfraConfig, InfraPluginSetup };
 
 export function plugin(context: PluginInitializerContext) {
   return new InfraServerPlugin(context);

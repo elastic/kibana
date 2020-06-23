@@ -30,8 +30,8 @@ export function analyzeWithAxe(context, options, callback) {
       return false;
     })
     .then(
-      result => callback({ result }),
-      error => callback({ error })
+      (result) => callback({ result }),
+      (error) => callback({ error })
     );
 }
 

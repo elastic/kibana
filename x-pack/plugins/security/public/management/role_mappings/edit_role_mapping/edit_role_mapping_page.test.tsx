@@ -12,6 +12,7 @@ import { findTestSubject } from 'test_utils/find_test_subject';
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
 import 'test_utils/stub_web_worker';
+import { ScopedHistory } from 'kibana/public';
 
 import { EditRoleMappingPage } from '.';
 import { NoCompatibleRealms, SectionLoading, PermissionDenied } from '../components';
@@ -21,13 +22,15 @@ import { RolesAPIClient } from '../../roles';
 import { Role } from '../../../../common/model';
 import { DocumentationLinksService } from '../documentation_links';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
 import { RoleComboBox } from '../../role_combo_box';
 
 describe('EditRoleMappingPage', () => {
+  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;
+
   beforeEach(() => {
     rolesAPI = rolesAPIClientMock.create();
     (rolesAPI as jest.Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
@@ -54,6 +57,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -64,10 +68,7 @@ describe('EditRoleMappingPage', () => {
       target: { value: 'my-role-mapping' },
     });
 
-    wrapper
-      .find(RoleComboBox)
-      .props()
-      .onChange(['foo_role']);
+    wrapper.find(RoleComboBox).props().onChange(['foo_role']);
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
 
@@ -119,6 +120,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -127,10 +129,7 @@ describe('EditRoleMappingPage', () => {
 
     findTestSubject(wrapper, 'switchToRolesButton').simulate('click');
 
-    wrapper
-      .find(RoleComboBox)
-      .props()
-      .onChange(['foo_role']);
+    wrapper.find(RoleComboBox).props().onChange(['foo_role']);
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
     wrapper.find('button[id="addRuleOption"]').simulate('click');
@@ -169,6 +168,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -196,6 +196,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -233,6 +234,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -273,6 +275,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -315,6 +318,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -369,6 +373,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -424,6 +429,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 

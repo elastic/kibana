@@ -32,6 +32,7 @@ export class PopulationJobCreator extends JobCreator {
   ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
+    this._wizardInitialized$.next(true);
   }
 
   // add a by field to a specific detector
@@ -77,7 +78,7 @@ export class PopulationJobCreator extends JobCreator {
 
   // remove over field from all detectors
   public removeSplitField() {
-    this._detectors.forEach(d => {
+    this._detectors.forEach((d) => {
       delete d.over_field_name;
     });
   }

@@ -341,8 +341,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         },
       };
 
-      const { statusCode, body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+      const { status, body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: params.name,
@@ -369,10 +369,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
       // will print the error body, if an error occurred
       // if (statusCode !== 200) console.log(createdAlert);
 
-      expect(statusCode).to.be(200);
+      expect(status).to.be(200);
 
       const alertId = createdAlert.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert');
+      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       return alertId;
     }
@@ -381,7 +381,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
 async function createAction(supertest: any, objectRemover: ObjectRemover): Promise<string> {
   const { statusCode, body: createdAction } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'index action for index threshold FT',
@@ -398,7 +398,7 @@ async function createAction(supertest: any, objectRemover: ObjectRemover): Promi
   expect(statusCode).to.be(200);
 
   const actionId = createdAction.id;
-  objectRemover.add(Spaces.space1.id, actionId, 'action');
+  objectRemover.add(Spaces.space1.id, actionId, 'action', 'actions');
 
   return actionId;
 }

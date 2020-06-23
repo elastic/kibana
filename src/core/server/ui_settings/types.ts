@@ -84,11 +84,6 @@ export interface InternalUiSettingsServiceSetup {
    * @param settings
    */
   register(settings: Record<string, UiSettingsParams>): void;
-  /**
-   * Creates uiSettings client with provided *scoped* saved objects client {@link IUiSettingsClient}
-   * @param savedObjectsClient
-   */
-  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }
 
 /** @public */

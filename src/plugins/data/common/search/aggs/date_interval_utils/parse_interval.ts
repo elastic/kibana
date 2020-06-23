@@ -25,9 +25,7 @@ import dateMath from '@elastic/datemath';
 const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + dateMath.units.join('|') + ')$');
 
 export function parseInterval(interval: string): moment.Duration | null {
-  const matches = String(interval)
-    .trim()
-    .match(INTERVAL_STRING_RE);
+  const matches = String(interval).trim().match(INTERVAL_STRING_RE);
 
   if (!matches) return null;
 
@@ -46,8 +44,15 @@ export function parseInterval(interval: string): moment.Duration | null {
     // a duration corresponding to 0.5 hours, we return a duration corresponding to 12 hours.
     const selectedUnit = find(
       dateMath.units,
-      u => Math.abs(duration.as(u)) >= 1
+      (u) => Math.abs(duration.as(u)) >= 1
     ) as unitOfTime.Base;
+
+    // however if we do this fhe other way around it will also fail
+    // go from 500m to hours as this will result in infinite number (dividing 500/60 = 8.3*)
+    // so we can only do this if we are changing to smaller units
+    if (dateMath.units.indexOf(selectedUnit as any) < dateMath.units.indexOf(unit as any)) {
+      return duration;
+    }
 
     return moment.duration(duration.as(selectedUnit), selectedUnit);
   } catch (e) {

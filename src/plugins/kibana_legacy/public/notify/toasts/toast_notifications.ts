@@ -25,7 +25,7 @@ export class ToastNotifications {
   private onChangeCallback?: () => void;
 
   constructor(private readonly toasts: NotificationsSetup['toasts']) {
-    toasts.get$().subscribe(list => {
+    toasts.get$().subscribe((list) => {
       this.list = list;
 
       if (this.onChangeCallback) {

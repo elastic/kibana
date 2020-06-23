@@ -17,23 +17,14 @@
  * under the License.
  */
 
-import { FieldFormat, IFieldFormatsRegistry } from '.';
-
-const fieldFormatMock = ({
-  convert: jest.fn(),
-  getConverterFor: jest.fn(),
-  getParamDefaults: jest.fn(),
-  param: jest.fn(),
-  params: jest.fn(),
-  toJSON: jest.fn(),
-  type: jest.fn(),
-  setupContentType: jest.fn(),
-} as unknown) as FieldFormat;
+import { IFieldFormatsRegistry } from '.';
 
 export const fieldFormatsMock: IFieldFormatsRegistry = {
   getByFieldType: jest.fn(),
   getDefaultConfig: jest.fn(),
-  getDefaultInstance: jest.fn().mockImplementation(() => fieldFormatMock) as any,
+  getDefaultInstance: jest.fn().mockImplementation(() => ({
+    getConverterFor: jest.fn().mockImplementation(() => (t: string) => t),
+  })) as any,
   getDefaultInstanceCacheResolver: jest.fn(),
   getDefaultInstancePlain: jest.fn(),
   getDefaultType: jest.fn(),

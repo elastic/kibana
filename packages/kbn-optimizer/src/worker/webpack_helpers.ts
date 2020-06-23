@@ -18,7 +18,6 @@
  */
 
 import webpack from 'webpack';
-import { defaults } from 'lodash';
 // @ts-ignore
 import Stats from 'webpack/lib/Stats';
 
@@ -55,12 +54,14 @@ const STATS_WARNINGS_FILTER = new RegExp(
 );
 
 export function failedStatsToErrorMessage(stats: webpack.Stats) {
-  const details = stats.toString(
-    defaults(
-      { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
-      Stats.presetToOptions('minimal')
-    )
-  );
+  const details = stats.toString({
+    ...Stats.presetToOptions('minimal'),
+    colors: true,
+    warningsFilter: STATS_WARNINGS_FILTER,
+    errors: true,
+    errorDetails: true,
+    moduleTrace: true,
+  });
 
   return `Optimizations failure.\n${details.split('\n').join('\n    ')}`;
 }

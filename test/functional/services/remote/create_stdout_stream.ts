@@ -27,7 +27,7 @@ export async function createStdoutSocket() {
   const cleanup$ = new Rx.ReplaySubject(1);
 
   const server = Net.createServer();
-  server.on('connection', socket => {
+  server.on('connection', (socket) => {
     const data$ = Rx.fromEvent<Buffer>(socket, 'data');
     const end$ = Rx.fromEvent(socket, 'end');
     const error$ = Rx.fromEvent<Error>(socket, 'error');
@@ -58,7 +58,7 @@ export async function createStdoutSocket() {
   const readyPromise = Rx.race(
     Rx.fromEvent<void>(server, 'listening').pipe(take(1)),
     Rx.fromEvent<Error>(server, 'error').pipe(
-      map(error => {
+      map((error) => {
         throw error;
       })
     )
@@ -77,9 +77,7 @@ export async function createStdoutSocket() {
   }
 
   const input = Net.createConnection(addressInfo.port, addressInfo.address);
-  await Rx.fromEvent<void>(input, 'connect')
-    .pipe(take(1))
-    .toPromise();
+  await Rx.fromEvent<void>(input, 'connect').pipe(take(1)).toPromise();
 
   return {
     input,

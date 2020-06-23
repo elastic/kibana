@@ -4,16 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Datasource, NewDatasource } from '../models';
-import { ListWithKuery } from './common';
 
 export interface GetDatasourcesRequest {
-  query: ListWithKuery;
+  query: {
+    page: number;
+    perPage: number;
+    kuery?: string;
+  };
+}
+
+export interface GetDatasourcesResponse {
+  items: Datasource[];
+  total: number;
+  page: number;
+  perPage: number;
+  success: boolean;
 }
 
 export interface GetOneDatasourceRequest {
   params: {
     datasourceId: string;
   };
+}
+
+export interface GetOneDatasourceResponse {
+  item: Datasource;
+  success: boolean;
 }
 
 export interface CreateDatasourceRequest {
@@ -28,6 +44,8 @@ export interface CreateDatasourceResponse {
 export type UpdateDatasourceRequest = GetOneDatasourceRequest & {
   body: NewDatasource;
 };
+
+export type UpdateDatasourceResponse = CreateDatasourceResponse;
 
 export interface DeleteDatasourcesRequest {
   body: {

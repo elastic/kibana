@@ -9,6 +9,6 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeUIBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
-    return privilegeDefinition.ui.map(ui => this.actions.ui.get(feature.id, ui));
+    return privilegeDefinition.ui.map((ui) => this.actions.ui.get(feature.id, ui));
   }
 }

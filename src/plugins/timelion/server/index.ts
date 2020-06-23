@@ -16,20 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PluginInitializerContext } from 'src/core/server';
+import { TimelionPlugin } from './plugin';
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { configSchema } from '../config';
-import { Plugin } from './plugin';
-
-export { PluginSetupContract } from './plugin';
-
-export const config = {
-  schema: configSchema,
-  exposeToBrowser: {
-    ui: {
-      enabled: true,
-    },
-  },
-};
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+export const plugin = (context: PluginInitializerContext) => new TimelionPlugin(context);

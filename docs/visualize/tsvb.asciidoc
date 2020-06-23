@@ -44,18 +44,6 @@ Table:: Display data from multiple time series by defining the field group to sh
 image:images/tsvb-table.png["Table visualization"]
 
 [float]
-[[tsvb-aggregation]]
-=== Supported aggregations
-
-TSVB supports the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-
-* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
-
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-
-[float]
 [[create-tsvb-visualization]]
 === Create TSVB visualizations
 
@@ -134,3 +122,17 @@ Edit the source for the Markdown visualization.
 . To insert the mustache template variable into the editor, click the variable name.
 +
 The http://mustache.github.io/mustache.5.html[mustache syntax] uses the Handlebar.js processor, which is an extended version of the Mustache template language.
+
+[float]
+[[tsvb-style-markdown]]
+==== Style Markdown text
+
+Style your Markdown visualization using http://lesscss.org/features/[less syntax].
+
+. Select *Markdown*.
+
+. Select *Panel options*.
+
+. Enter styling rules in *Custom CSS* section
++
+Less in TSVB does not support custom plugins or inline JavaScript.

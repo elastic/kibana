@@ -8,7 +8,7 @@ import { Coordinate } from '../../../../typings/timeseries';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../helpers/setup_request';
 import { fetcher } from './fetcher';
 import { transformer } from './transformer';

@@ -58,7 +58,7 @@ describe('src/dev/build/tasks/nodejs/verify_existing_node_builds_task', () => {
       }
     );
 
-    sandbox.stub(FsNS, 'getFileHash').callsFake(path => {
+    sandbox.stub(FsNS, 'getFileHash').callsFake((path) => {
       switch (path) {
         case 'foo:downloadPath':
           return 'foo:sha256';

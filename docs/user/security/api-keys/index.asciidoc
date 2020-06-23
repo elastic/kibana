@@ -3,19 +3,19 @@
 === API Keys
 
 
-API keys enable you to create secondary credentials so that you can send 
-requests on behalf of the user. Secondary credentials have 
-the same or lower access rights.  
+API keys enable you to create secondary credentials so that you can send
+requests on behalf of the user. Secondary credentials have
+the same or lower access rights.
 
 For example, if you extract data from an {es} cluster on a daily
-basis, you might create an API key tied to your credentials, 
-configure it with minimum access, 
+basis, you might create an API key tied to your credentials,
+configure it with minimum access,
 and then put the API credentials into a cron job.
-Or, you might create API keys to automate ingestion of new data from 
-remote sources, without a live user interaction. 
+Or, you might create API keys to automate ingestion of new data from
+remote sources, without a live user interaction.
 
 You can create API keys from the {kib} Console. To view and invalidate 
-API keys, use *Management > Security > API Keys*.
+API keys, open the menu, then go to *Stack Management > Security > API Keys*.
 
 [role="screenshot"]
 image:user/security/api-keys/images/api-keys.png["API Keys UI"]
@@ -24,14 +24,14 @@ image:user/security/api-keys/images/api-keys.png["API Keys UI"]
 [[api-keys-service]]
 === {es} API key service
 
-The {es} API key service is automatically enabled when you configure 
-{ref}/configuring-tls.html#tls-http[TLS on the HTTP interface]. 
+The {es} API key service is automatically enabled when you configure
+{ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
 This ensures that clients are unable to send API keys in clear-text.
 
-When HTTPS connections are not enabled between {kib} and {es}, 
+When HTTPS connections are not enabled between {kib} and {es},
 you cannot create or manage API keys, and you get an error message.
-For more information, see the 
-{ref}/security-api-create-api-key.html[{es} API key documentation], 
+For more information, see the
+{ref}/security-api-create-api-key.html[{es} API key documentation],
 or contact your system administrator.
 
 [float]
@@ -39,48 +39,65 @@ or contact your system administrator.
 === Security privileges
 
 You must have the `manage_security`, `manage_api_key`, or the `manage_own_api_key` 
-cluster privileges to use API keys in {kib}. You can manage roles in 
-*Management > Security > Roles*, or use the <<role-management-api, {kib} Role Management API>>. 
+cluster privileges to use API keys in {kib}. To manage roles, open the menu, then go to 
+*Stack Management > Security > Roles*, or use the <<role-management-api, {kib} Role Management API>>. 
 
 
 [float]
 [[create-api-key]]
 === Create an API key
-You can {ref}/security-api-create-api-key.html[create an API key] from 
-the Kibana Console. For example:
+You can {ref}/security-api-create-api-key.html[create an API key] from
+the {kib} Console. This example shows how to create an API key
+to authenticate to a <<api, Kibana API>>.
 
 [source,js]
 POST /_security/api_key
 {
-  "name": "my_api_key",
-  "expiration": "1d"
+  "name": "kibana_api_key",
 }
 
-This creates an API key with the name `my_api_key` that 
-expires after one day. API key names must be globally unique. 
-An expiration date is optional and follows {ref}/common-options.html#time-units[{es} time unit format]. 
+This creates an API key with the
+name `kibana_api_key`. API key
+names must be globally unique.
+An expiration date is optional and follows
+{ref}/common-options.html#time-units[{es} time unit format].
 When an expiration is not provided, the API key does not expire.
+
+The response should look something like this:
+
+[source,js]
+{
+  "id" : "XFcbCnIBnbwqt2o79G4q",
+  "name" : "kibana_api_key",
+  "api_key" : "FD6P5UA4QCWlZZQhYF3YGw"
+}
+
+Now, you can use the API key to request {kib} roles. You will need
+to base64-encode the `id` and `api_key` provided in the response
+and add it to your request as an authorization header. For example:
+
+[source,js]
+curl --location --request GET 'http://localhost:5601/api/security/role' \
+--header 'Content-Type: application/json;charset=UTF-8' \
+--header 'kbn-xsrf: true' \
+--header 'Authorization: ApiKey aVZlLUMzSUJuYndxdDJvN0k1bU46aGxlYUpNS2lTa2FKeVZua1FnY1VEdw==' \
 
 [float]
 [[view-api-keys]]
 === View and invalidate API keys
-The *API Keys* UI lists your API keys, including the name, date created, 
+The *API Keys* feature in Kibana lists your API keys, including the name, date created,
 and expiration date. If an API key expires, its status changes from `Active` to `Expired`.
 
-If you have `manage_security` or `manage_api_key` permissions, 
-you can view the API keys of all users, and see which API key was 
+If you have `manage_security` or `manage_api_key` permissions,
+you can view the API keys of all users, and see which API key was
 created by which user in which realm.
 If you have only the `manage_own_api_key` permission, you see only a list of your own keys.
 
-You can invalidate API keys individually or in bulk. 
+You can invalidate API keys individually or in bulk.
 Invalidated keys are deleted in batch after seven days.
 
 [role="screenshot"]
 image:user/security/api-keys/images/api-key-invalidate.png["API Keys invalidate"]
 
-You cannot modify an API key. If you need additional privileges, 
+You cannot modify an API key. If you need additional privileges,
 you must create a new key with the desired configuration and invalidate the old key.
-
-
-
-

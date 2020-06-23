@@ -34,17 +34,14 @@ const disableCollection = {
   },
 };
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
   describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
-      await esSupertest
-        .put('/_cluster/settings')
-        .send(disableCollection)
-        .expect(200);
-      await new Promise(r => setTimeout(r, 1000));
+      await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
+      await new Promise((r) => setTimeout(r, 1000));
     });
 
     it('should pull local stats and validate data types', async () => {
@@ -63,7 +60,7 @@ export default function({ getService }) {
       const stats = body[0];
 
       expect(stats.collection).to.be('local');
-      expect(stats.license.issuer).to.be('elasticsearch');
+      expect(stats.license.issuer).to.be.a('string');
       expect(stats.license.status).to.be('active');
 
       expect(stats.stack_stats.kibana.count).to.be(1);
@@ -182,7 +179,7 @@ export default function({ getService }) {
         'version',
       ];
 
-      expect(expected.every(m => actual.includes(m))).to.be.ok();
+      expect(expected.every((m) => actual.includes(m))).to.be.ok();
     });
   });
 }

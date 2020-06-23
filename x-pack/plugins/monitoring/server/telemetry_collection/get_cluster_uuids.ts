@@ -62,7 +62,7 @@ export function fetchClusterUuids(
 export function handleClusterUuidsResponse(response: any): ClusterDetails[] {
   const uuidBuckets: any[] = get(response, 'aggregations.cluster_uuids.buckets', []);
 
-  return uuidBuckets.map(uuidBucket => ({
+  return uuidBuckets.map((uuidBucket) => ({
     clusterUuid: uuidBucket.key as string,
   }));
 }

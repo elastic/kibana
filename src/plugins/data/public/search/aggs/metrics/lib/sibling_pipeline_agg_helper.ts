@@ -43,14 +43,14 @@ const metricAggFilter: string[] = [
 ];
 const bucketAggFilter: string[] = [];
 
-const siblingPipelineType = i18n.translate(
+export const siblingPipelineType = i18n.translate(
   'data.search.aggs.metrics.siblingPipelineAggregationsSubtypeTitle',
   {
     defaultMessage: 'Sibling pipeline aggregations',
   }
 );
 
-const siblingPipelineAggHelper = {
+export const siblingPipelineAggHelper = {
   subtype: siblingPipelineType,
   params() {
     return [
@@ -59,11 +59,9 @@ const siblingPipelineAggHelper = {
         type: 'agg',
         allowedAggs: bucketAggFilter,
         default: null,
-        makeAgg(agg: IMetricAggConfig, state: any) {
-          state = state || { type: 'date_histogram' };
+        makeAgg(agg: IMetricAggConfig, state = { type: 'date_histogram' }) {
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-bucket';
-
           return orderAgg;
         },
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
@@ -76,11 +74,9 @@ const siblingPipelineAggHelper = {
         type: 'agg',
         allowedAggs: metricAggFilter,
         default: null,
-        makeAgg(agg: IMetricAggConfig, state: any) {
-          state = state || { type: 'count' };
+        makeAgg(agg: IMetricAggConfig, state = { type: 'count' }) {
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-metric';
-
           return orderAgg;
         },
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
@@ -98,5 +94,3 @@ const siblingPipelineAggHelper = {
       : new (FieldFormat.from(identity))();
   },
 };
-
-export { siblingPipelineAggHelper, siblingPipelineType };

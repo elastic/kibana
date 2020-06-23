@@ -1,9 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true,
-    "resolveJsonModule": true
+    "outDir": "./target"
   },
   "include": [
     "index.ts",

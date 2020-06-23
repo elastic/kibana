@@ -28,10 +28,7 @@ exports[`ReportInfoButton opens flyout with fetch error info 1`] = `
 Array [
   <EuiFlyout
     aria-labelledby="flyoutTitle"
-    closeButtonAriaLabel="Closes this dialog"
     data-test-subj="reportInfoFlyout"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
     ownFocus={true}
     size="s"
@@ -136,7 +133,7 @@ Array [
                         tabindex="0"
                       >
                         <button
-                          aria-label="Closes this dialog"
+                          aria-label="Close this dialog"
                           class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                           data-test-subj="euiFlyoutCloseButton"
                           type="button"
@@ -196,7 +193,7 @@ Array [
                           tabindex="0"
                         >
                           <button
-                            aria-label="Closes this dialog"
+                            aria-label="Close this dialog"
                             class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                             data-test-subj="euiFlyoutCloseButton"
                             type="button"
@@ -249,36 +246,41 @@ Array [
                   role="dialog"
                   tabIndex={0}
                 >
-                  <EuiButtonIcon
-                    aria-label="Closes this dialog"
-                    className="euiFlyout__closeButton"
-                    color="text"
-                    data-test-subj="euiFlyoutCloseButton"
-                    iconType="cross"
-                    onClick={[Function]}
+                  <EuiI18n
+                    default="Close this dialog"
+                    token="euiFlyout.closeAriaLabel"
                   >
-                    <button
-                      aria-label="Closes this dialog"
-                      className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                    <EuiButtonIcon
+                      aria-label="Close this dialog"
+                      className="euiFlyout__closeButton"
+                      color="text"
                       data-test-subj="euiFlyoutCloseButton"
+                      iconType="cross"
                       onClick={[Function]}
-                      type="button"
                     >
-                      <EuiIcon
-                        aria-hidden="true"
-                        className="euiButtonIcon__icon"
-                        size="m"
-                        type="cross"
+                      <button
+                        aria-label="Close this dialog"
+                        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                        data-test-subj="euiFlyoutCloseButton"
+                        onClick={[Function]}
+                        type="button"
                       >
-                        <div
+                        <EuiIcon
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
-                          data-euiicon-type="cross"
                           size="m"
-                        />
-                      </EuiIcon>
-                    </button>
-                  </EuiButtonIcon>
+                          type="cross"
+                        >
+                          <div
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            data-euiicon-type="cross"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
+                  </EuiI18n>
                   <EuiFlyoutHeader
                     hasBorder={true}
                   >
@@ -348,36 +350,41 @@ Array [
     role="dialog"
     tabIndex={0}
   >
-    <EuiButtonIcon
-      aria-label="Closes this dialog"
-      className="euiFlyout__closeButton"
-      color="text"
-      data-test-subj="euiFlyoutCloseButton"
-      iconType="cross"
-      onClick={[Function]}
+    <EuiI18n
+      default="Close this dialog"
+      token="euiFlyout.closeAriaLabel"
     >
-      <button
-        aria-label="Closes this dialog"
-        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+      <EuiButtonIcon
+        aria-label="Close this dialog"
+        className="euiFlyout__closeButton"
+        color="text"
         data-test-subj="euiFlyoutCloseButton"
+        iconType="cross"
         onClick={[Function]}
-        type="button"
       >
-        <EuiIcon
-          aria-hidden="true"
-          className="euiButtonIcon__icon"
-          size="m"
-          type="cross"
+        <button
+          aria-label="Close this dialog"
+          className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+          data-test-subj="euiFlyoutCloseButton"
+          onClick={[Function]}
+          type="button"
         >
-          <div
+          <EuiIcon
             aria-hidden="true"
             className="euiButtonIcon__icon"
-            data-euiicon-type="cross"
             size="m"
-          />
-        </EuiIcon>
-      </button>
-    </EuiButtonIcon>
+            type="cross"
+          >
+            <div
+              aria-hidden="true"
+              className="euiButtonIcon__icon"
+              data-euiicon-type="cross"
+              size="m"
+            />
+          </EuiIcon>
+        </button>
+      </EuiButtonIcon>
+    </EuiI18n>
     <EuiFlyoutHeader
       hasBorder={true}
     >
@@ -425,10 +432,7 @@ exports[`ReportInfoButton opens flyout with info 1`] = `
 Array [
   <EuiFlyout
     aria-labelledby="flyoutTitle"
-    closeButtonAriaLabel="Closes this dialog"
     data-test-subj="reportInfoFlyout"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
     ownFocus={true}
     size="s"
@@ -533,7 +537,7 @@ Array [
                         tabindex="0"
                       >
                         <button
-                          aria-label="Closes this dialog"
+                          aria-label="Close this dialog"
                           class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                           data-test-subj="euiFlyoutCloseButton"
                           type="button"
@@ -591,7 +595,7 @@ Array [
                           tabindex="0"
                         >
                           <button
-                            aria-label="Closes this dialog"
+                            aria-label="Close this dialog"
                             class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                             data-test-subj="euiFlyoutCloseButton"
                             type="button"
@@ -642,36 +646,41 @@ Array [
                   role="dialog"
                   tabIndex={0}
                 >
-                  <EuiButtonIcon
-                    aria-label="Closes this dialog"
-                    className="euiFlyout__closeButton"
-                    color="text"
-                    data-test-subj="euiFlyoutCloseButton"
-                    iconType="cross"
-                    onClick={[Function]}
+                  <EuiI18n
+                    default="Close this dialog"
+                    token="euiFlyout.closeAriaLabel"
                   >
-                    <button
-                      aria-label="Closes this dialog"
-                      className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                    <EuiButtonIcon
+                      aria-label="Close this dialog"
+                      className="euiFlyout__closeButton"
+                      color="text"
                       data-test-subj="euiFlyoutCloseButton"
+                      iconType="cross"
                       onClick={[Function]}
-                      type="button"
                     >
-                      <EuiIcon
-                        aria-hidden="true"
-                        className="euiButtonIcon__icon"
-                        size="m"
-                        type="cross"
+                      <button
+                        aria-label="Close this dialog"
+                        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                        data-test-subj="euiFlyoutCloseButton"
+                        onClick={[Function]}
+                        type="button"
                       >
-                        <div
+                        <EuiIcon
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
-                          data-euiicon-type="cross"
                           size="m"
-                        />
-                      </EuiIcon>
-                    </button>
-                  </EuiButtonIcon>
+                          type="cross"
+                        >
+                          <div
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            data-euiicon-type="cross"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
+                  </EuiI18n>
                   <EuiFlyoutHeader
                     hasBorder={true}
                   >
@@ -739,36 +748,41 @@ Array [
     role="dialog"
     tabIndex={0}
   >
-    <EuiButtonIcon
-      aria-label="Closes this dialog"
-      className="euiFlyout__closeButton"
-      color="text"
-      data-test-subj="euiFlyoutCloseButton"
-      iconType="cross"
-      onClick={[Function]}
+    <EuiI18n
+      default="Close this dialog"
+      token="euiFlyout.closeAriaLabel"
     >
-      <button
-        aria-label="Closes this dialog"
-        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+      <EuiButtonIcon
+        aria-label="Close this dialog"
+        className="euiFlyout__closeButton"
+        color="text"
         data-test-subj="euiFlyoutCloseButton"
+        iconType="cross"
         onClick={[Function]}
-        type="button"
       >
-        <EuiIcon
-          aria-hidden="true"
-          className="euiButtonIcon__icon"
-          size="m"
-          type="cross"
+        <button
+          aria-label="Close this dialog"
+          className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+          data-test-subj="euiFlyoutCloseButton"
+          onClick={[Function]}
+          type="button"
         >
-          <div
+          <EuiIcon
             aria-hidden="true"
             className="euiButtonIcon__icon"
-            data-euiicon-type="cross"
             size="m"
-          />
-        </EuiIcon>
-      </button>
-    </EuiButtonIcon>
+            type="cross"
+          >
+            <div
+              aria-hidden="true"
+              className="euiButtonIcon__icon"
+              data-euiicon-type="cross"
+              size="m"
+            />
+          </EuiIcon>
+        </button>
+      </EuiButtonIcon>
+    </EuiI18n>
     <EuiFlyoutHeader
       hasBorder={true}
     >

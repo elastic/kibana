@@ -45,6 +45,8 @@ export class AdvancedJobCreator extends JobCreator {
     super(indexPattern, savedSearch, query);
 
     this._queryString = JSON.stringify(this._datafeed_config.query);
+
+    this._wizardInitialized$.next(true);
   }
 
   public addDetector(
@@ -191,7 +193,7 @@ export class AdvancedJobCreator extends JobCreator {
     const detectors = getRichDetectors(job, datafeed, this.additionalFields, true);
 
     // keep track of the custom rules for each detector
-    const customRules = this._detectors.map(d => d.custom_rules);
+    const customRules = this._detectors.map((d) => d.custom_rules);
 
     this.removeAllDetectors();
     this._richDetectors.length = 0;

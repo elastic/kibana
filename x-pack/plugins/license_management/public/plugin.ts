@@ -7,7 +7,7 @@ import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { TelemetryPluginSetup } from '../../../../src/plugins/telemetry/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../../plugins/licensing/public';
 import { PLUGIN } from '../common/constants';
 import { ClientConfigType } from './types';
@@ -20,27 +20,35 @@ interface PluginsDependencies {
   telemetry?: TelemetryPluginSetup;
 }
 
-export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
+export interface LicenseManagementUIPluginSetup {
+  enabled: boolean;
+}
+export type LicenseManagementUIPluginStart = void;
+
+export class LicenseManagementUIPlugin
+  implements Plugin<LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart, any, any> {
   private breadcrumbService = new BreadcrumbService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup, plugins: PluginsDependencies) {
+  setup(coreSetup: CoreSetup, plugins: PluginsDependencies): LicenseManagementUIPluginSetup {
     const config = this.initializerContext.config.get<ClientConfigType>();
 
     if (!config.ui.enabled) {
       // No need to go any further
-      return;
+      return {
+        enabled: false,
+      };
     }
 
     const { getStartServices } = coreSetup;
     const { management, telemetry, licensing } = plugins;
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection(ManagementSectionId.Stack).registerApp({
       id: PLUGIN.id,
       title: PLUGIN.title,
-      order: 99,
-      mount: async ({ element, setBreadcrumbs }) => {
+      order: 0,
+      mount: async ({ element, setBreadcrumbs, history }) => {
         const [core] = await getStartServices();
         const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
 
@@ -64,6 +72,7 @@ export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
           },
           services: {
             breadcrumbService: this.breadcrumbService,
+            history,
           },
           store: {
             initialLicense,
@@ -76,8 +85,12 @@ export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
         return renderApp(element, appDependencies);
       },
     });
+
+    return {
+      enabled: true,
+    };
   }
 
-  start() {}
+  start(): LicenseManagementUIPluginStart {}
   stop() {}
 }

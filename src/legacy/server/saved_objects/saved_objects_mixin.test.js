@@ -88,7 +88,7 @@ const savedObjectTypes = convertLegacyTypes(
 );
 
 const typeRegistry = new SavedObjectTypeRegistry();
-savedObjectTypes.forEach(type => typeRegistry.registerType(type));
+savedObjectTypes.forEach((type) => typeRegistry.registerType(type));
 
 const migrator = mockKibanaMigrator.create({
   types: savedObjectTypes,
@@ -103,7 +103,7 @@ describe('Saved Objects Mixin', () => {
     'kibana.index': 'kibana.index',
     'savedObjects.maxImportExportSize': 10000,
   };
-  const stubConfig = jest.fn(key => {
+  const stubConfig = jest.fn((key) => {
     return config[key];
   });
 
@@ -118,11 +118,6 @@ describe('Saved Objects Mixin', () => {
           get: stubConfig,
         };
       },
-      indexPatternsServiceFactory: () => {
-        return {
-          getFieldsForWildcard: jest.fn(),
-        };
-      },
       plugins: {
         elasticsearch: {
           getCluster: () => {
@@ -132,13 +127,6 @@ describe('Saved Objects Mixin', () => {
             };
           },
           waitUntilReady: jest.fn(),
-        },
-      },
-      newPlatform: {
-        __internals: {
-          elasticsearch: {
-            adminClient: { callAsInternalUser: mockCallCluster },
-          },
         },
       },
     };
@@ -183,7 +171,7 @@ describe('Saved Objects Mixin', () => {
         'kibanaMigrator',
         expect.any(Object)
       );
-      expect(mockServer.decorate).toHaveBeenCalledTimes(2);
+      expect(mockServer.decorate).toHaveBeenCalledTimes(1);
       expect(mockServer.route).not.toHaveBeenCalled();
     });
   });

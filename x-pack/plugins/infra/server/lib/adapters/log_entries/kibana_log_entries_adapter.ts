@@ -112,7 +112,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     );
 
     const hits = sortDirection === 'asc' ? esResult.hits.hits : esResult.hits.hits.reverse();
-    return mapHitsToLogEntryDocuments(hits, sourceConfiguration.fields.timestamp, fields);
+    return mapHitsToLogEntryDocuments(hits, fields);
   }
 
   public async getContainedLogSummaryBuckets(
@@ -139,7 +139,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
             date_range: {
               field: sourceConfiguration.fields.timestamp,
               format: TIMESTAMP_FORMAT,
-              ranges: bucketIntervalStarts.map(bucketIntervalStart => ({
+              ranges: bucketIntervalStarts.map((bucketIntervalStart) => ({
                 from: bucketIntervalStart.getTime(),
                 to: bucketIntervalStart.getTime() + bucketSize,
               })),
@@ -183,7 +183,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
     return pipe(
       LogSummaryResponseRuntimeType.decode(response),
-      map(logSummaryResponse =>
+      map((logSummaryResponse) =>
         logSummaryResponse.aggregations.count_by_date.buckets.map(
           convertDateRangeBucketToSummaryBucket
         )
@@ -226,12 +226,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 }
 
-function mapHitsToLogEntryDocuments(
-  hits: SortedSearchHit[],
-  timestampField: string,
-  fields: string[]
-): LogEntryDocument[] {
-  return hits.map(hit => {
+function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): LogEntryDocument[] {
+  return hits.map((hit) => {
     const logFields = fields.reduce<{ [fieldName: string]: JsonValue }>(
       (flattenedFields, field) => {
         if (has(hit._source, field)) {
@@ -243,10 +239,8 @@ function mapHitsToLogEntryDocuments(
     );
 
     return {
-      gid: hit._id,
-      // timestamp: hit._source[timestampField],
-      // FIXME s/key/cursor/g
-      key: { time: hit.sort[0], tiebreaker: hit.sort[1] },
+      id: hit._id,
+      cursor: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,
       highlights: hit.highlight || {},
     };
@@ -259,7 +253,7 @@ const convertDateRangeBucketToSummaryBucket = (
   entriesCount: bucket.doc_count,
   start: bucket.from || 0,
   end: bucket.to || 0,
-  topEntryKeys: bucket.top_hits_by_key.hits.hits.map(hit => ({
+  topEntryKeys: bucket.top_hits_by_key.hits.hits.map((hit) => ({
     tiebreaker: hit.sort[1],
     time: hit.sort[0],
   })),

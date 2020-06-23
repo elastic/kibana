@@ -8,18 +8,9 @@ Ready to try out {kib} and see what it can do? To quickest way to get started wi
 
 [float]
 [[cloud-set-up]]
-== Set up on Cloud
+== Set up on cloud
 
-To access {kib} in a single click, run our hosted Elasticsearch Service on Elastic Cloud.
-
-. Log into the link:https://cloud.elastic.co/[Elasticsearch Service Console].
-If you need an account, register for a link:https://www.elastic.co/cloud/elasticsearch-service/signup[free 14-day trial].
-
-. Click *Create deployment*, then give your deployment a name.
-
-. To use the default options, click *Create deployment*. You can modify the other deployment options, but the default options are great to get started.
-
-Be sure to copy down the password for the `elastic` user and Cloud ID information. You'll need that later.
+include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 
 [float]
 [[get-data-in]]
@@ -38,14 +29,14 @@ such as cost, revenue, and price.
 
 To use the sample data sets:
 
-. Go to the {kib} home page.
+. Go to the home page.
 
 . Click *Load a data set and a {kib} dashboard*.
 
 . Click *View data* and view the prepackaged dashboards, maps, and more.
 
 [role="screenshot"]
-image::images/add-sample-data.png[]
+image::getting-started/images/add-sample-data.png[]
 
 NOTE: The timestamps in the sample data sets are relative to when they are installed.
 If you uninstall and reinstall a data set, the timestamps change to reflect the most recent installation.

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './_explorer_chart_label.scss';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -35,7 +36,7 @@ export function ExplorerChartLabel({
       <React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>
     );
 
-  const entityFieldBadges = entityFields.map(entity => (
+  const entityFieldBadges = entityFields.map((entity) => (
     <ExplorerChartLabelBadge entity={entity} key={`${entity.fieldName} ${entity.fieldValue}`} />
   ));
 

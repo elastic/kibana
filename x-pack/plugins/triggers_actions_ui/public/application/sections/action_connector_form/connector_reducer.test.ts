@@ -15,6 +15,7 @@ describe('connector reducer', () => {
       actionTypeId: 'test-action-type-id',
       name: 'action-connector',
       referencedByCount: 0,
+      isPreconfigured: false,
       config: {},
     };
   });

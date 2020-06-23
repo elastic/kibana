@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { initElasticsearchHelpers } from './lib';
 import { registerHelpers } from './indices.helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -48,7 +48,7 @@ export default function({ getService }) {
       });
     });
 
-    describe('close', function() {
+    describe('close', function () {
       // The Cloud backend disallows users from closing indices.
       this.tags(['skipCloud']);
 
@@ -67,7 +67,7 @@ export default function({ getService }) {
       });
     });
 
-    describe('open', function() {
+    describe('open', function () {
       // The Cloud backend disallows users from closing indices, so there's no point testing
       // the open behavior.
       this.tags(['skipCloud']);
@@ -94,12 +94,12 @@ export default function({ getService }) {
         const index = await createIndex();
 
         const indices1 = await catIndex(undefined, 'i');
-        expect(indices1.map(index => index.i)).to.contain(index);
+        expect(indices1.map((index) => index.i)).to.contain(index);
 
         await deleteIndex([index]).expect(200);
 
         const indices2 = await catIndex(undefined, 'i');
-        expect(indices2.map(index => index.i)).not.to.contain(index);
+        expect(indices2.map((index) => index.i)).not.to.contain(index);
       });
 
       it('should require index or indices to be provided', async () => {
@@ -177,13 +177,14 @@ export default function({ getService }) {
       });
     });
 
-    describe('list', function() {
+    describe('list', function () {
       this.tags(['skipCloud']);
 
-      it('should list all the indices with the expected properties and data enrichers', async function() {
+      it('should list all the indices with the expected properties and data enrichers', async function () {
         const { body } = await list().expect(200);
         const expectedKeys = [
           'health',
+          'hidden',
           'status',
           'name',
           'uuid',
@@ -193,23 +194,28 @@ export default function({ getService }) {
           'size',
           'isFrozen',
           'aliases',
-          'ilm', // data enricher
-          'isRollupIndex', // data enricher
           // Cloud disables CCR, so wouldn't expect follower indices.
           'isFollowerIndex', // data enricher
+          'ilm', // data enricher
+          'isRollupIndex', // data enricher
         ];
-        expect(Object.keys(body[0])).to.eql(expectedKeys);
+        // We need to sort the keys before comparing then, because race conditions
+        // can cause enrichers to register in non-deterministic order.
+        const sortedExpectedKeys = expectedKeys.sort();
+        const sortedReceivedKeys = Object.keys(body[0]).sort();
+        expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
       });
     });
 
-    describe('reload', function() {
-      describe('(not on Cloud)', function() {
+    describe('reload', function () {
+      describe('(not on Cloud)', function () {
         this.tags(['skipCloud']);
 
-        it('should list all the indices with the expected properties and data enrichers', async function() {
+        it('should list all the indices with the expected properties and data enrichers', async function () {
           const { body } = await reload().expect(200);
           const expectedKeys = [
             'health',
+            'hidden',
             'status',
             'name',
             'uuid',
@@ -219,12 +225,16 @@ export default function({ getService }) {
             'size',
             'isFrozen',
             'aliases',
-            'ilm', // data enricher
-            'isRollupIndex', // data enricher
             // Cloud disables CCR, so wouldn't expect follower indices.
             'isFollowerIndex', // data enricher
+            'ilm', // data enricher
+            'isRollupIndex', // data enricher
           ];
-          expect(Object.keys(body[0])).to.eql(expectedKeys);
+          // We need to sort the keys before comparing then, because race conditions
+          // can cause enrichers to register in non-deterministic order.
+          const sortedExpectedKeys = expectedKeys.sort();
+          const sortedReceivedKeys = Object.keys(body[0]).sort();
+          expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
           expect(body.length > 1).to.be(true); // to contrast it with the next test
         });
       });

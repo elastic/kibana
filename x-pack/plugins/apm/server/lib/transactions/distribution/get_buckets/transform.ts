@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../../typings/common';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { bucketFetcher } from './fetcher';
 
@@ -20,14 +20,14 @@ function getBucket(
   const samples = bucket.samples.items.hits.hits.map(
     ({ _source }: { _source: Transaction }) => ({
       traceId: _source.trace.id,
-      transactionId: _source.transaction.id
+      transactionId: _source.transaction.id,
     })
   );
 
   return {
     key: bucket.key,
     count: bucket.doc_count,
-    samples
+    samples,
   };
 }
 
@@ -37,6 +37,6 @@ export function bucketTransformer(response: DistributionBucketResponse) {
 
   return {
     noHits: response.hits.total.value === 0,
-    buckets
+    buckets,
   };
 }

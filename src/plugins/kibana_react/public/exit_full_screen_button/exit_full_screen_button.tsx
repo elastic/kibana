@@ -20,11 +20,13 @@
 import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
-import { EuiIcon, EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
 }
+
+import './index.scss';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   public onKeyDown = (e: KeyboardEvent) => {
@@ -69,17 +71,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="exitFullScreenModeText">
                 <div>
-                  <EuiTitle size="xxxs" className="dshExitFullScreenButton__title">
-                    <p>
-                      {i18n.translate(
-                        'kibana-react.exitFullScreenButton.exitFullScreenModeButtonTitle',
-                        {
-                          defaultMessage: 'Elastic Kibana',
-                        }
-                      )}
-                    </p>
-                  </EuiTitle>
-                  <EuiText size="xs" className="dshExitFullScreenButton__text">
+                  <EuiText size="s" className="dshExitFullScreenButton__text">
                     <p>
                       {i18n.translate(
                         'kibana-react.exitFullScreenButton.exitFullScreenModeButtonText',

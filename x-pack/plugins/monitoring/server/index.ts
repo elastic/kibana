@@ -10,8 +10,14 @@ import { Plugin } from './plugin';
 import { configSchema } from './config';
 import { deprecations } from './deprecations';
 
+export { MonitoringConfig } from './config';
 export const plugin = (initContext: PluginInitializerContext) => new Plugin(initContext);
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
   deprecations,
+  exposeToBrowser: {
+    enabled: true,
+    ui: true,
+    kibana: true,
+  },
 };

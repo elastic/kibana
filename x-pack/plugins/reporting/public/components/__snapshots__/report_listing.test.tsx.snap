@@ -2,525 +2,6 @@
 
 exports[`ReportListing Report job listing with some items 1`] = `
 Array [
-  <EuiInMemoryTable
-    columns={
-      Array [
-        Object {
-          "field": "object_title",
-          "name": "Report",
-          "render": [Function],
-        },
-        Object {
-          "field": "created_at",
-          "name": "Created at",
-          "render": [Function],
-        },
-        Object {
-          "field": "status",
-          "name": "Status",
-          "render": [Function],
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "render": [Function],
-            },
-          ],
-          "name": "Actions",
-        },
-      ]
-    }
-    data-test-subj="reportJobListing"
-    isSelectable={true}
-    itemId="id"
-    items={Array []}
-    loading={true}
-    message="Loading reports"
-    onChange={[Function]}
-    pagination={
-      Object {
-        "hidePerPageOptions": true,
-        "pageIndex": 0,
-        "pageSize": 10,
-        "totalItemCount": 0,
-      }
-    }
-    responsive={true}
-    search={
-      Object {
-        "toolsRight": undefined,
-      }
-    }
-    selection={
-      Object {
-        "itemId": "id",
-        "onSelectionChange": [Function],
-      }
-    }
-    tableLayout="fixed"
-  >
-    <div>
-      <EuiSearchBar
-        onChange={[Function]}
-      >
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="m"
-          wrap={true}
-        >
-          <div
-            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
-          >
-            <EuiFlexItem
-              className="euiSearchBar__searchHolder"
-              grow={true}
-            >
-              <div
-                className="euiFlexItem euiSearchBar__searchHolder"
-              >
-                <EuiSearchBox
-                  incremental={false}
-                  isInvalid={false}
-                  onSearch={[Function]}
-                  placeholder="Search..."
-                  query=""
-                >
-                  <EuiFieldSearch
-                    aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."
-                    compressed={false}
-                    defaultValue=""
-                    fullWidth={true}
-                    incremental={false}
-                    inputRef={[Function]}
-                    isClearable={true}
-                    isInvalid={false}
-                    isLoading={false}
-                    onSearch={[Function]}
-                    placeholder="Search..."
-                  >
-                    <EuiFormControlLayout
-                      compressed={false}
-                      fullWidth={true}
-                      icon="search"
-                      isLoading={false}
-                    >
-                      <div
-                        className="euiFormControlLayout euiFormControlLayout--fullWidth"
-                      >
-                        <div
-                          className="euiFormControlLayout__childrenWrapper"
-                        >
-                          <EuiValidatableControl
-                            isInvalid={false}
-                          >
-                            <input
-                              aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."
-                              className="euiFieldSearch euiFieldSearch--fullWidth"
-                              defaultValue=""
-                              onKeyUp={[Function]}
-                              placeholder="Search..."
-                              type="search"
-                            />
-                          </EuiValidatableControl>
-                          <EuiFormControlLayoutIcons
-                            icon="search"
-                            isLoading={false}
-                          >
-                            <div
-                              className="euiFormControlLayoutIcons"
-                            >
-                              <EuiFormControlLayoutCustomIcon
-                                type="search"
-                              >
-                                <span
-                                  className="euiFormControlLayoutCustomIcon"
-                                >
-                                  <EuiIcon
-                                    aria-hidden="true"
-                                    className="euiFormControlLayoutCustomIcon__icon"
-                                    type="search"
-                                  >
-                                    <div
-                                      aria-hidden="true"
-                                      className="euiFormControlLayoutCustomIcon__icon"
-                                      data-euiicon-type="search"
-                                    />
-                                  </EuiIcon>
-                                </span>
-                              </EuiFormControlLayoutCustomIcon>
-                            </div>
-                          </EuiFormControlLayoutIcons>
-                        </div>
-                      </div>
-                    </EuiFormControlLayout>
-                  </EuiFieldSearch>
-                </EuiSearchBox>
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiFlexGroup>
-      </EuiSearchBar>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
-      <EuiBasicTable
-        columns={
-          Array [
-            Object {
-              "field": "object_title",
-              "name": "Report",
-              "render": [Function],
-            },
-            Object {
-              "field": "created_at",
-              "name": "Created at",
-              "render": [Function],
-            },
-            Object {
-              "field": "status",
-              "name": "Status",
-              "render": [Function],
-            },
-            Object {
-              "actions": Array [
-                Object {
-                  "render": [Function],
-                },
-              ],
-              "name": "Actions",
-            },
-          ]
-        }
-        data-test-subj="reportJobListing"
-        isSelectable={true}
-        itemId="id"
-        items={Array []}
-        loading={true}
-        noItemsMessage="Loading reports"
-        onChange={[Function]}
-        pagination={
-          Object {
-            "hidePerPageOptions": true,
-            "pageIndex": 0,
-            "pageSize": 10,
-            "pageSizeOptions": Array [
-              10,
-              25,
-              50,
-            ],
-            "totalItemCount": 0,
-          }
-        }
-        responsive={true}
-        selection={
-          Object {
-            "itemId": "id",
-            "onSelectionChange": [Function],
-          }
-        }
-        tableLayout="fixed"
-      >
-        <div
-          className="euiBasicTable euiBasicTable-loading"
-          data-test-subj="reportJobListing"
-        >
-          <div>
-            <EuiTableHeaderMobile>
-              <div
-                className="euiTableHeaderMobile"
-              >
-                <EuiFlexGroup
-                  alignItems="baseline"
-                  justifyContent="spaceBetween"
-                  responsive={false}
-                >
-                  <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-                  >
-                    <EuiFlexItem
-                      grow={false}
-                    >
-                      <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
-                      >
-                        <EuiI18n
-                          default="Select all rows"
-                          token="euiBasicTable.selectAllRows"
-                        >
-                          <EuiCheckbox
-                            aria-label="Select all rows"
-                            checked={false}
-                            compressed={false}
-                            disabled={true}
-                            id="_selection_column-checkbox_generated-id"
-                            indeterminate={false}
-                            label="Select all rows"
-                            onChange={[Function]}
-                          >
-                            <div
-                              className="euiCheckbox"
-                            >
-                              <input
-                                aria-label="Select all rows"
-                                checked={false}
-                                className="euiCheckbox__input"
-                                disabled={true}
-                                id="_selection_column-checkbox_generated-id"
-                                onChange={[Function]}
-                                type="checkbox"
-                              />
-                              <div
-                                className="euiCheckbox__square"
-                              />
-                              <label
-                                className="euiCheckbox__label"
-                                htmlFor="_selection_column-checkbox_generated-id"
-                              >
-                                Select all rows
-                              </label>
-                            </div>
-                          </EuiCheckbox>
-                        </EuiI18n>
-                      </div>
-                    </EuiFlexItem>
-                    <EuiFlexItem
-                      grow={false}
-                    >
-                      <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
-                      />
-                    </EuiFlexItem>
-                  </div>
-                </EuiFlexGroup>
-              </div>
-            </EuiTableHeaderMobile>
-            <EuiTable
-              responsive={true}
-              tableLayout="fixed"
-            >
-              <table
-                className="euiTable euiTable--responsive"
-              >
-                <EuiScreenReaderOnly>
-                  <caption
-                    className="euiScreenReaderOnly euiTableCaption"
-                  >
-                    <EuiDelayRender
-                      delay={500}
-                    />
-                  </caption>
-                </EuiScreenReaderOnly>
-                <EuiTableHeader>
-                  <thead>
-                    <tr>
-                      <EuiTableHeaderCellCheckbox
-                        key="_selection_column_h"
-                      >
-                        <th
-                          className="euiTableHeaderCellCheckbox"
-                          scope="col"
-                          style={
-                            Object {
-                              "width": undefined,
-                            }
-                          }
-                        >
-                          <div
-                            className="euiTableCellContent"
-                          >
-                            <EuiI18n
-                              default="Select all rows"
-                              token="euiBasicTable.selectAllRows"
-                            >
-                              <EuiCheckbox
-                                aria-label="Select all rows"
-                                checked={false}
-                                compressed={false}
-                                data-test-subj="checkboxSelectAll"
-                                disabled={true}
-                                id="_selection_column-checkbox_generated-id"
-                                indeterminate={false}
-                                label={null}
-                                onChange={[Function]}
-                                type="inList"
-                              >
-                                <div
-                                  className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
-                                >
-                                  <input
-                                    aria-label="Select all rows"
-                                    checked={false}
-                                    className="euiCheckbox__input"
-                                    data-test-subj="checkboxSelectAll"
-                                    disabled={true}
-                                    id="_selection_column-checkbox_generated-id"
-                                    onChange={[Function]}
-                                    type="checkbox"
-                                  />
-                                  <div
-                                    className="euiCheckbox__square"
-                                  />
-                                </div>
-                              </EuiCheckbox>
-                            </EuiI18n>
-                          </div>
-                        </th>
-                      </EuiTableHeaderCellCheckbox>
-                      <EuiTableHeaderCell
-                        align="left"
-                        data-test-subj="tableHeaderCell_object_title_0"
-                        key="_data_h_object_title_0"
-                      >
-                        <th
-                          className="euiTableHeaderCell"
-                          data-test-subj="tableHeaderCell_object_title_0"
-                          role="columnheader"
-                          scope="col"
-                          style={
-                            Object {
-                              "width": undefined,
-                            }
-                          }
-                        >
-                          <div
-                            className="euiTableCellContent"
-                          >
-                            <span
-                              className="euiTableCellContent__text"
-                            >
-                              Report
-                            </span>
-                          </div>
-                        </th>
-                      </EuiTableHeaderCell>
-                      <EuiTableHeaderCell
-                        align="left"
-                        data-test-subj="tableHeaderCell_created_at_1"
-                        key="_data_h_created_at_1"
-                      >
-                        <th
-                          className="euiTableHeaderCell"
-                          data-test-subj="tableHeaderCell_created_at_1"
-                          role="columnheader"
-                          scope="col"
-                          style={
-                            Object {
-                              "width": undefined,
-                            }
-                          }
-                        >
-                          <div
-                            className="euiTableCellContent"
-                          >
-                            <span
-                              className="euiTableCellContent__text"
-                            >
-                              Created at
-                            </span>
-                          </div>
-                        </th>
-                      </EuiTableHeaderCell>
-                      <EuiTableHeaderCell
-                        align="left"
-                        data-test-subj="tableHeaderCell_status_2"
-                        key="_data_h_status_2"
-                      >
-                        <th
-                          className="euiTableHeaderCell"
-                          data-test-subj="tableHeaderCell_status_2"
-                          role="columnheader"
-                          scope="col"
-                          style={
-                            Object {
-                              "width": undefined,
-                            }
-                          }
-                        >
-                          <div
-                            className="euiTableCellContent"
-                          >
-                            <span
-                              className="euiTableCellContent__text"
-                            >
-                              Status
-                            </span>
-                          </div>
-                        </th>
-                      </EuiTableHeaderCell>
-                      <EuiTableHeaderCell
-                        align="right"
-                        key="_actions_h_3"
-                      >
-                        <th
-                          className="euiTableHeaderCell"
-                          role="columnheader"
-                          scope="col"
-                          style={
-                            Object {
-                              "width": undefined,
-                            }
-                          }
-                        >
-                          <div
-                            className="euiTableCellContent euiTableCellContent--alignRight"
-                          >
-                            <span
-                              className="euiTableCellContent__text"
-                            >
-                              Actions
-                            </span>
-                          </div>
-                        </th>
-                      </EuiTableHeaderCell>
-                    </tr>
-                  </thead>
-                </EuiTableHeader>
-                <EuiTableBody>
-                  <tbody>
-                    <EuiTableRow>
-                      <tr
-                        className="euiTableRow"
-                      >
-                        <EuiTableRowCell
-                          align="center"
-                          colSpan={5}
-                          isMobileFullWidth={true}
-                        >
-                          <td
-                            className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                            colSpan={5}
-                            style={
-                              Object {
-                                "width": undefined,
-                              }
-                            }
-                          >
-                            <div
-                              className="euiTableCellContent euiTableCellContent--alignCenter"
-                            >
-                              <span
-                                className="euiTableCellContent__text"
-                              >
-                                Loading reports
-                              </span>
-                            </div>
-                          </td>
-                        </EuiTableRowCell>
-                      </tr>
-                    </EuiTableRow>
-                  </tbody>
-                </EuiTableBody>
-              </table>
-            </EuiTable>
-          </div>
-        </div>
-      </EuiBasicTable>
-    </div>
-  </EuiInMemoryTable>,
   <EuiBasicTable
     columns={
       Array [
@@ -561,11 +42,6 @@ Array [
         "hidePerPageOptions": true,
         "pageIndex": 0,
         "pageSize": 10,
-        "pageSizeOptions": Array [
-          10,
-          25,
-          50,
-        ],
         "totalItemCount": 0,
       }
     }
@@ -743,11 +219,14 @@ Array [
                       <div
                         className="euiTableCellContent"
                       >
-                        <span
-                          className="euiTableCellContent__text"
-                        >
-                          Report
-                        </span>
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Report"
+                          >
+                            Report
+                          </span>
+                        </EuiInnerText>
                       </div>
                     </th>
                   </EuiTableHeaderCell>
@@ -770,11 +249,14 @@ Array [
                       <div
                         className="euiTableCellContent"
                       >
-                        <span
-                          className="euiTableCellContent__text"
-                        >
-                          Created at
-                        </span>
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Created at"
+                          >
+                            Created at
+                          </span>
+                        </EuiInnerText>
                       </div>
                     </th>
                   </EuiTableHeaderCell>
@@ -797,11 +279,14 @@ Array [
                       <div
                         className="euiTableCellContent"
                       >
-                        <span
-                          className="euiTableCellContent__text"
-                        >
-                          Status
-                        </span>
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Status"
+                          >
+                            Status
+                          </span>
+                        </EuiInnerText>
                       </div>
                     </th>
                   </EuiTableHeaderCell>
@@ -822,11 +307,14 @@ Array [
                       <div
                         className="euiTableCellContent euiTableCellContent--alignRight"
                       >
-                        <span
-                          className="euiTableCellContent__text"
-                        >
-                          Actions
-                        </span>
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Actions"
+                          >
+                            Actions
+                          </span>
+                        </EuiInnerText>
                       </div>
                     </th>
                   </EuiTableHeaderCell>
@@ -1038,11 +526,14 @@ Array [
                     <div
                       className="euiTableCellContent"
                     >
-                      <span
-                        className="euiTableCellContent__text"
-                      >
-                        Report
-                      </span>
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Report"
+                        >
+                          Report
+                        </span>
+                      </EuiInnerText>
                     </div>
                   </th>
                 </EuiTableHeaderCell>
@@ -1065,11 +556,14 @@ Array [
                     <div
                       className="euiTableCellContent"
                     >
-                      <span
-                        className="euiTableCellContent__text"
-                      >
-                        Created at
-                      </span>
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Created at"
+                        >
+                          Created at
+                        </span>
+                      </EuiInnerText>
                     </div>
                   </th>
                 </EuiTableHeaderCell>
@@ -1092,11 +586,14 @@ Array [
                     <div
                       className="euiTableCellContent"
                     >
-                      <span
-                        className="euiTableCellContent__text"
-                      >
-                        Status
-                      </span>
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Status"
+                        >
+                          Status
+                        </span>
+                      </EuiInnerText>
                     </div>
                   </th>
                 </EuiTableHeaderCell>
@@ -1117,11 +614,14 @@ Array [
                     <div
                       className="euiTableCellContent euiTableCellContent--alignRight"
                     >
-                      <span
-                        className="euiTableCellContent__text"
-                      >
-                        Actions
-                      </span>
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Actions"
+                        >
+                          Actions
+                        </span>
+                      </EuiInnerText>
                     </div>
                   </th>
                 </EuiTableHeaderCell>

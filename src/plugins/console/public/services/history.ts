@@ -34,7 +34,7 @@ export class History {
   }
 
   getHistory() {
-    return this.getHistoryKeys().map(key => this.storage.get(key));
+    return this.getHistoryKeys().map((key) => this.storage.get(key));
   }
 
   // This is used as an optimization mechanism so that different components
@@ -50,7 +50,7 @@ export class History {
   addToHistory(endpoint: string, method: string, data: any) {
     const keys = this.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
-    keys.forEach(key => {
+    keys.forEach((key) => {
       this.storage.delete(key);
     });
 
@@ -89,7 +89,7 @@ export class History {
   }
 
   clearHistory() {
-    this.getHistoryKeys().forEach(key => this.storage.delete(key));
+    this.getHistoryKeys().forEach((key) => this.storage.delete(key));
   }
 }
 

@@ -37,9 +37,9 @@ export async function isValidTimeField(callAsCurrentUser: APICaller, job: Combin
     fields: [timeField],
   });
 
-  let fieldType = fieldCaps.fields[timeField]?.date?.type;
+  let fieldType = fieldCaps?.fields[timeField]?.date?.type;
   if (fieldType === undefined) {
-    fieldType = fieldCaps.fields[timeField]?.date_nanos?.type;
+    fieldType = fieldCaps?.fields[timeField]?.date_nanos?.type;
   }
   return fieldType === ES_FIELD_TYPES.DATE || fieldType === ES_FIELD_TYPES.DATE_NANOS;
 }
@@ -47,7 +47,7 @@ export async function isValidTimeField(callAsCurrentUser: APICaller, job: Combin
 export async function validateTimeRange(
   callAsCurrentUser: APICaller,
   job: CombinedJob,
-  timeRange: TimeRange | undefined
+  timeRange?: Partial<TimeRange>
 ) {
   const messages: ValidateTimeRangeMessage[] = [];
 

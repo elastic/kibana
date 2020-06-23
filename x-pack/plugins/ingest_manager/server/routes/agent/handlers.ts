@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler, KibanaRequest } from 'src/core/server';
+import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import { AbortController } from 'abort-controller';
 import {
   GetAgentsResponse,
   GetOneAgentResponse,
@@ -14,6 +15,7 @@ import {
   PostAgentEnrollResponse,
   PostAgentUnenrollResponse,
   GetAgentStatusResponse,
+  PutAgentReassignResponse,
 } from '../../../common/types';
 import {
   GetAgentsRequestSchema,
@@ -25,17 +27,11 @@ import {
   PostAgentEnrollRequestSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
+  PutAgentReassignRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
-
-export function getInternalUserSOClient(request: KibanaRequest) {
-  // soClient as kibana internal users, be carefull on how you use it, security is not enabled
-  return appContextService.getSavedObjects().getScopedClient(request, {
-    excludedWrappers: ['security'],
-  });
-}
 
 export const getAgentHandler: RequestHandler<TypeOf<
   typeof GetOneAgentRequestSchema.params
@@ -174,37 +170,52 @@ export const postAgentCheckinHandler: RequestHandler<
   TypeOf<typeof PostAgentCheckinRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = getInternalUserSOClient(request);
-    const res = APIKeyService.parseApiKey(request.headers);
+    const soClient = appContextService.getInternalUserSOClient(request);
+    const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId);
+    const abortController = new AbortController();
+    request.events.aborted$.subscribe(() => {
+      abortController.abort();
+    });
+    const signal = abortController.signal;
     const { actions } = await AgentService.agentCheckin(
       soClient,
       agent,
       request.body.events || [],
-      request.body.local_metadata
+      request.body.local_metadata,
+      { signal }
     );
     const body: PostAgentCheckinResponse = {
       action: 'checkin',
       success: true,
-      actions: actions.map(a => ({
+      actions: actions.map((a) => ({
+        agent_id: agent.id,
         type: a.type,
-        data: a.data ? JSON.parse(a.data) : a.data,
+        data: a.data,
         id: a.id,
         created_at: a.created_at,
       })),
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Agent ${request.params.agentId} not found` },
+  } catch (err) {
+    const logger = appContextService.getLogger();
+    if (err.isBoom) {
+      if (err.output.statusCode >= 500) {
+        logger.error(err);
+      }
+
+      return response.customError({
+        statusCode: err.output.statusCode,
+        body: { message: err.output.payload.message },
       });
     }
 
+    logger.error(err);
+
     return response.customError({
       statusCode: 500,
-      body: { message: e.message },
+      body: { message: err.message },
     });
   }
 };
@@ -215,8 +226,8 @@ export const postAgentEnrollHandler: RequestHandler<
   TypeOf<typeof PostAgentEnrollRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = getInternalUserSOClient(request);
-    const { apiKeyId } = APIKeyService.parseApiKey(request.headers);
+    const soClient = appContextService.getInternalUserSOClient(request);
+    const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(soClient, apiKeyId);
 
     if (!enrollmentAPIKey || !enrollmentAPIKey.active) {
@@ -274,7 +285,7 @@ export const getAgentsHandler: RequestHandler<
     });
 
     const body: GetAgentsResponse = {
-      list: agents.map(agent => ({
+      list: agents.map((agent) => ({
         ...agent,
         status: AgentService.getAgentStatus(agent),
       })),
@@ -292,60 +303,36 @@ export const getAgentsHandler: RequestHandler<
   }
 };
 
-export const postAgentsUnenrollHandler: RequestHandler<
+export const postAgentsUnenrollHandler: RequestHandler<TypeOf<
+  typeof PostAgentUnenrollRequestSchema.params
+>> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    await AgentService.unenrollAgent(soClient, request.params.agentId);
+
+    const body: PostAgentUnenrollResponse = {
+      success: true,
+    };
+    return response.ok({ body });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const putAgentsReassignHandler: RequestHandler<
+  TypeOf<typeof PutAgentReassignRequestSchema.params>,
   undefined,
-  undefined,
-  TypeOf<typeof PostAgentUnenrollRequestSchema.body>
+  TypeOf<typeof PutAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const kuery = (request.body as { kuery: string }).kuery;
-    let toUnenrollIds: string[] = (request.body as { ids: string[] }).ids || [];
+    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.config_id);
 
-    if (kuery) {
-      let hasMore = true;
-      let page = 1;
-      while (hasMore) {
-        const { agents } = await AgentService.listAgents(soClient, {
-          page: page++,
-          perPage: 100,
-          kuery,
-          showInactive: true,
-        });
-        if (agents.length === 0) {
-          hasMore = false;
-        }
-        const agentIds = agents.filter(a => a.active).map(a => a.id);
-        toUnenrollIds = toUnenrollIds.concat(agentIds);
-      }
-    }
-    const results = (await AgentService.unenrollAgents(soClient, toUnenrollIds)).map(
-      ({
-        success,
-        id,
-        error,
-      }): {
-        success: boolean;
-        id: string;
-        action: 'unenrolled';
-        error?: {
-          message: string;
-        };
-      } => {
-        return {
-          success,
-          id,
-          action: 'unenrolled',
-          error: error && {
-            message: error.message,
-          },
-        };
-      }
-    );
-
-    const body: PostAgentUnenrollResponse = {
-      results,
-      success: results.every(result => result.success),
+    const body: PutAgentReassignResponse = {
+      success: true,
     };
     return response.ok({ body });
   } catch (e) {

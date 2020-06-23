@@ -7,5 +7,6 @@
 import { PluginInitializerContext } from 'kibana/server';
 import { MlServerPlugin } from './plugin';
 export { MlPluginSetup, MlPluginStart } from './plugin';
+export * from './shared';
 
 export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);

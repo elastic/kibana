@@ -36,6 +36,7 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.muninMetrics.nameTitle', {
       defaultMessage: 'Munin metrics',
     }),
+    euiIconType: '/plugins/home/assets/logos/munin.svg',
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.muninMetrics.shortDescription', {
@@ -54,7 +55,7 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
         label: i18n.translate('home.tutorials.muninMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NextStep renders correctly against snapshot 1`] = `
+<Fragment>
+  <EuiHorizontalRule
+    margin="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    justifyContent="flexEnd"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-test-subj="nextStep-continue"
+        fill={true}
+        isDisabled={false}
+        onClick={[MockFunction]}
+      >
+        Continue
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

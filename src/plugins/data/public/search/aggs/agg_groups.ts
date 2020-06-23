@@ -25,15 +25,17 @@ export const AggGroupNames = Object.freeze({
   Metrics: 'metrics' as 'metrics',
   None: 'none' as 'none',
 });
-export type IAggGroupNames = $Values<typeof AggGroupNames>;
 
-type IAggGroupNamesMap = () => Record<'buckets' | 'metrics', string>;
+export type AggGroupName = $Values<typeof AggGroupNames>;
 
-export const aggGroupNamesMap: IAggGroupNamesMap = () => ({
-  [AggGroupNames.Metrics]: i18n.translate('data.search.aggs.aggGroups.metricsText', {
-    defaultMessage: 'Metrics',
-  }),
+export const AggGroupLabels = {
   [AggGroupNames.Buckets]: i18n.translate('data.search.aggs.aggGroups.bucketsText', {
     defaultMessage: 'Buckets',
   }),
-});
+  [AggGroupNames.Metrics]: i18n.translate('data.search.aggs.aggGroups.metricsText', {
+    defaultMessage: 'Metrics',
+  }),
+  [AggGroupNames.None]: i18n.translate('data.search.aggs.aggGroups.noneText', {
+    defaultMessage: 'None',
+  }),
+};

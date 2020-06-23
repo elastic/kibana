@@ -32,7 +32,7 @@ function one(str) {
 }
 
 function each(items, src, dest) {
-  return items.map(item => {
+  return items.map((item) => {
     const _item = item;
     _item[dest] = one(_item[src]);
     return _item;

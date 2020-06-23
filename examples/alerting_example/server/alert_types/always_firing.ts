@@ -19,8 +19,8 @@
 
 import uuid from 'uuid';
 import { range } from 'lodash';
-import { AlertType } from '../../../../x-pack/plugins/alerting/server';
-import { DEFAULT_INSTANCES_TO_GENERATE } from '../../common/constants';
+import { AlertType } from '../../../../x-pack/plugins/alerts/server';
+import { DEFAULT_INSTANCES_TO_GENERATE, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 export const alertType: AlertType = {
   id: 'example.always-firing',
@@ -43,4 +43,5 @@ export const alertType: AlertType = {
       count,
     };
   },
+  producer: ALERTING_EXAMPLE_APP_ID,
 };

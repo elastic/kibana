@@ -6,19 +6,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LayoutPropsWithTheme } from '../../../../public/pages/metrics/types';
+import { LayoutPropsWithTheme } from '../../../../public/pages/metrics/metric_detail/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Section } from '../../../../public/pages/metrics/components/section';
+import { Section } from '../../../../public/pages/metrics/metric_detail/components/section';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SubSection } from '../../../../public/pages/metrics/components/sub_section';
+import { SubSection } from '../../../../public/pages/metrics/metric_detail/components/sub_section';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { GaugesSectionVis } from '../../../../public/pages/metrics/components/gauges_section_vis';
+import { GaugesSectionVis } from '../../../../public/pages/metrics/metric_detail/components/gauges_section_vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ChartSectionVis } from '../../../../public/pages/metrics/components/chart_section_vis';
+import { ChartSectionVis } from '../../../../public/pages/metrics/metric_detail/components/chart_section_vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { withTheme } from '../../../../../observability/public';
 
-export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <Section
       navLabel="AWS"
@@ -29,6 +29,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
         }
       )}
       metrics={metrics}
+      onChangeRangeTime={onChangeRangeTime}
     >
       <SubSection id="awsOverview">
         <GaugesSectionVis

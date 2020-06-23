@@ -12,9 +12,6 @@ import { MonitoringConfig } from '../../config';
  * If so, get email from kibana.yml
  */
 export async function getDefaultAdminEmail(config: MonitoringConfig) {
-  if (!config.cluster_alerts.email_notifications.enabled) {
-    return null;
-  }
   return config.cluster_alerts.email_notifications.email_address || null;
 }
 

@@ -7,11 +7,11 @@
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaAPITestsConfig = await readConfigFile(
     require.resolve('../../../test/api_integration/config.js')
   );
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const idpPath = resolve(__dirname, '../../test/saml_api_integration/fixtures/idp_metadata.xml');
@@ -50,7 +50,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
-        '--server.xsrf.whitelist=["/api/security/saml/callback"]',
         `--xpack.security.authc.providers=${JSON.stringify(['saml', 'basic'])}`,
         '--xpack.security.authc.saml.realm=saml1',
         '--xpack.security.authc.saml.maxRedirectURLSize=100b',

@@ -25,6 +25,8 @@ import {
 
 import 'brace/theme/textmate';
 
+import { SectionError, Error } from '../../../../../shared_imports';
+
 import { useServices } from '../../../../app_context';
 import { documentationLinksService } from '../../../../services/documentation';
 import {
@@ -35,7 +37,8 @@ import {
 import { textService } from '../../../../services/text';
 import { linkToSnapshots, linkToEditRepository } from '../../../../services/navigation';
 
-import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../../../common';
+
 import {
   Repository,
   RepositoryVerification,
@@ -43,12 +46,12 @@ import {
 } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
-  SectionError,
   SectionLoading,
   RepositoryVerificationBadge,
-  Error,
 } from '../../../../components';
 import { TypeDetails } from './type_details';
+
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   repositoryName: Repository['name'];
@@ -61,7 +64,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   onClose,
   onRepositoryDeleted,
 }) => {
-  const { i18n } = useServices();
+  const { i18n, history } = useServices();
   const { error, data: repositoryDetails } = useLoadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
   const [cleanup, setCleanup] = useState<RepositoryCleanup | undefined>(undefined);
@@ -161,7 +164,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       );
     }
     return (
-      <EuiLink href={linkToSnapshots(repositoryName)}>
+      <EuiLink {...reactRouterNavigate(history, linkToSnapshots(repositoryName))}>
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.snapshotsDescription"
           defaultMessage="{count} {count, plural, one {snapshot} other {snapshots}} found"
@@ -405,7 +408,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <RepositoryDeleteProvider>
-                  {deleteRepositoryPrompt => {
+                  {(deleteRepositoryPrompt) => {
                     return (
                       <EuiButtonEmpty
                         color="danger"
@@ -436,7 +439,11 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButton href={linkToEditRepository(repositoryName)} fill color="primary">
+                <EuiButton
+                  {...reactRouterNavigate(history, linkToEditRepository(repositoryName))}
+                  fill
+                  color="primary"
+                >
                   <FormattedMessage
                     id="xpack.snapshotRestore.repositoryDetails.editButtonLabel"
                     defaultMessage="Edit"

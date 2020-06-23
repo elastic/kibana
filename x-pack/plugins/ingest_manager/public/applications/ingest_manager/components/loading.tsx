@@ -5,11 +5,12 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loading_spinner';
 
-export const Loading: React.FunctionComponent<{}> = () => (
+export const Loading: React.FunctionComponent<{ size?: EuiLoadingSpinnerSize }> = ({ size }) => (
   <EuiFlexGroup justifyContent="spaceAround">
     <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="xl" />
+      <EuiLoadingSpinner size={size || 'xl'} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

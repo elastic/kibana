@@ -17,7 +17,10 @@ import { useResolver } from '../../use_resolver';
 
 import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license';
-import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
+import {
+  checkGetJobsCapabilitiesResolver,
+  checkPermission,
+} from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { NewCalendar } from '../../../settings/calendars';
 import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
@@ -74,7 +77,7 @@ const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
 
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
-    checkGetJobsPrivilege,
+    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
     checkMlNodesAvailable,
   });
 

@@ -10,7 +10,7 @@
 fieldFormats: {
     FieldFormat: typeof FieldFormat;
     FieldFormatsRegistry: typeof FieldFormatsRegistry;
-    serialize: (agg: import("./search").AggConfig) => import("../../expressions/common").SerializedFieldFormat<object>;
+    serialize: (agg: import("./search").AggConfig) => import("../../expressions").SerializedFieldFormat<object>;
     DEFAULT_CONVERTER_COLOR: {
         range: string;
         regex: string;

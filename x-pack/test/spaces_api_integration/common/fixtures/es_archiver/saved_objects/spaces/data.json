@@ -376,3 +376,123 @@
     "type": "_doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:default_space_only",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in the default space"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:space_1_only",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in the space_1 space"
+      },
+      "type": "sharedtype",
+      "namespaces": ["space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:space_2_only",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in the space_2 space"
+      },
+      "type": "sharedtype",
+      "namespaces": ["space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:default_and_space_1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in the default and space_1 spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:default_and_space_2",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in the default and space_2 spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:space_1_and_space_2",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in the space_1 and space_2 spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:all_spaces",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in the default, space_1, and space_2 spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+

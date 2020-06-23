@@ -18,7 +18,7 @@ import {
 import { getSAMLRequestId, getSAMLResponse } from '../../saml_api_integration/fixtures/saml_tools';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');

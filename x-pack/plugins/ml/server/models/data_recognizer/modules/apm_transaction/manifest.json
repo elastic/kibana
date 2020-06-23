@@ -1,7 +1,7 @@
 {
   "id": "apm_transaction",
   "title": "APM",
-  "description": "Detect anomalies in high mean of transaction duration (ECS)",
+  "description": "Detect anomalies in high mean of transaction duration (ECS).",
   "type": "Transaction data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "apm-*",

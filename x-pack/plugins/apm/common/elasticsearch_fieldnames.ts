@@ -60,6 +60,7 @@ export const ERROR_LOG_LEVEL = 'error.log.level';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
 export const ERROR_EXC_MESSAGE = 'error.exception.message'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_HANDLED = 'error.exception.handled'; // only to be used in es queries, since error.exception is now an array
+export const ERROR_EXC_TYPE = 'error.exception.type';
 export const ERROR_PAGE_URL = 'error.page.url';
 
 // METRICS
@@ -86,3 +87,9 @@ export const CONTAINER_ID = 'container.id';
 export const POD_NAME = 'kubernetes.pod.name';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
+
+// RUM Labels
+export const TRANSACTION_URL = 'transaction.page.url';
+export const CLIENT_GEO = 'client.geo';
+export const USER_AGENT_DEVICE = 'user_agent.device.name';
+export const USER_AGENT_OS = 'user_agent.os.name';

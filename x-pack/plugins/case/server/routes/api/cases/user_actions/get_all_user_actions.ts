@@ -10,11 +10,12 @@ import { CaseUserActionsResponseRt } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../../saved_object_types';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_USER_ACTIONS_URL } from '../../../../../common/constants';
 
 export function initGetAllUserActionsApi({ userActionService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{case_id}/user_actions',
+      path: CASE_USER_ACTIONS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -30,11 +31,12 @@ export function initGetAllUserActionsApi({ userActionService, router }: RouteDep
         });
         return response.ok({
           body: CaseUserActionsResponseRt.encode(
-            userActions.saved_objects.map(ua => ({
+            userActions.saved_objects.map((ua) => ({
               ...ua.attributes,
               action_id: ua.id,
-              case_id: ua.references.find(r => r.type === CASE_SAVED_OBJECT)?.id ?? '',
-              comment_id: ua.references.find(r => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
+              case_id: ua.references.find((r) => r.type === CASE_SAVED_OBJECT)?.id ?? '',
+              comment_id:
+                ua.references.find((r) => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
             }))
           ),
         });

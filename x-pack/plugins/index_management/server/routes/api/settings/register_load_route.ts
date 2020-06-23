@@ -33,7 +33,7 @@ export function registerLoadRoute({ router, license, lib }: RouteDependencies) {
       };
 
       try {
-        const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+        const hit = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
           'indices.getSettings',
           params
         );

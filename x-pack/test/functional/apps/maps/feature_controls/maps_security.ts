@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps']);
@@ -57,16 +57,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_maps_all_role'),
           security.user.delete('global_maps_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows maps navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Maps', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Maps');
       });
 
       it(`allows a map to be created`, async () => {
@@ -152,8 +152,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Maps navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Maps', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Maps');
       });
 
       it(`does not show create new button`, async () => {
@@ -247,8 +247,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not show Maps navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`returns a 404`, async () => {

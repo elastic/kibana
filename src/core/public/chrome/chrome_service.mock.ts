@@ -23,7 +23,8 @@ import {
   ChromeBreadcrumb,
   ChromeService,
   InternalChromeStart,
-} from './chrome_service';
+  NavType,
+} from './';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
@@ -72,6 +73,7 @@ const createStartContractMock = () => {
     setHelpExtension: jest.fn(),
     setHelpSupportUrl: jest.fn(),
     getIsNavDrawerLocked$: jest.fn(),
+    getNavType$: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getBrand$.mockReturnValue(new BehaviorSubject({} as ChromeBrand));
@@ -81,6 +83,7 @@ const createStartContractMock = () => {
   startContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
+  startContract.getNavType$.mockReturnValue(new BehaviorSubject('modern' as NavType));
   return startContract;
 };
 

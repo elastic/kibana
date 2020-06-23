@@ -18,11 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ApplicationStart } from 'kibana/public';
 import { Action } from 'src/plugins/ui_actions/public';
+import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
-import { IEmbeddable } from '../embeddables';
 import { EmbeddableStart } from '../../plugin';
+import { IEmbeddable, EmbeddableOriginatingAppState, EmbeddableStateTransfer } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -30,12 +32,29 @@ interface ActionContext {
   embeddable: IEmbeddable;
 }
 
+interface NavigationContext {
+  app: string;
+  path: string;
+  state?: EmbeddableOriginatingAppState;
+}
+
 export class EditPanelAction implements Action<ActionContext> {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
   public order = 50;
+  public currentAppId: string | undefined;
 
-  constructor(private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']) {}
+  constructor(
+    private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
+    private readonly application: ApplicationStart,
+    private readonly stateTransfer?: EmbeddableStateTransfer
+  ) {
+    if (this.application?.currentAppId$) {
+      this.application.currentAppId$
+        .pipe(take(1))
+        .subscribe((appId: string | undefined) => (this.currentAppId = appId));
+    }
+  }
 
   public getDisplayName({ embeddable }: ActionContext) {
     const factory = this.getEmbeddableFactory(embeddable.type);
@@ -56,17 +75,46 @@ export class EditPanelAction implements Action<ActionContext> {
 
   public async isCompatible({ embeddable }: ActionContext) {
     const canEditEmbeddable = Boolean(
-      embeddable && embeddable.getOutput().editable && embeddable.getOutput().editUrl
+      embeddable &&
+        embeddable.getOutput().editable &&
+        (embeddable.getOutput().editUrl ||
+          (embeddable.getOutput().editApp && embeddable.getOutput().editPath))
     );
     const inDashboardEditMode = embeddable.getInput().viewMode === ViewMode.EDIT;
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
-  public async execute() {
-    return;
+  public async execute(context: ActionContext) {
+    const appTarget = this.getAppTarget(context);
+    if (appTarget) {
+      if (this.stateTransfer && appTarget.state) {
+        await this.stateTransfer.navigateToWithOriginatingApp(appTarget.app, {
+          path: appTarget.path,
+          state: appTarget.state,
+        });
+      } else {
+        await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
+      }
+      return;
+    }
+
+    const href = await this.getHref(context);
+    if (href) {
+      window.location.href = href;
+      return;
+    }
   }
 
-  public getHref({ embeddable }: ActionContext): string {
+  public getAppTarget({ embeddable }: ActionContext): NavigationContext | undefined {
+    const app = embeddable ? embeddable.getOutput().editApp : undefined;
+    const path = embeddable ? embeddable.getOutput().editPath : undefined;
+    if (app && path) {
+      const state = this.currentAppId ? { originatingApp: this.currentAppId } : undefined;
+      return { app, path, state };
+    }
+  }
+
+  public async getHref({ embeddable }: ActionContext): Promise<string> {
     const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     return editUrl ? editUrl : '';
   }

@@ -16,7 +16,7 @@ import {
   getIndexStatusByIndexName,
 } from '../../../../../store/selectors';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const indexName = getDetailPanelIndexName(state);
   return {
     error: getDetailPanelError(state),

@@ -29,6 +29,7 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
   const savedSearches = createSavedSearchesLoader({
     savedObjectsClient,
     indexPatterns,
+    search: appDeps.data.search,
     chrome: appDeps.chrome,
     overlays: appDeps.overlays,
   });

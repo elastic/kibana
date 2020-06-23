@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { useGetAgentStatus, AgentStatusRefreshContext } from './use_agent_status';
-export { ConfigRefreshContext } from './use_config';
+export { ConfigRefreshContext, useConfigRefresh } from './use_config';

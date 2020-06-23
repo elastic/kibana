@@ -23,7 +23,10 @@ export async function getAgentEvents(
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
     filter:
       kuery && kuery !== ''
-        ? kuery.replace(/agent_events\./g, 'agent_events.attributes.')
+        ? kuery.replace(
+            new RegExp(`${AGENT_EVENT_SAVED_OBJECT_TYPE}\.`, 'g'),
+            `${AGENT_EVENT_SAVED_OBJECT_TYPE}.attributes.`
+          )
         : undefined,
     perPage,
     page,
@@ -34,8 +37,9 @@ export async function getAgentEvents(
     searchFields: ['agent_id'],
   });
 
-  const items: AgentEvent[] = saved_objects.map(so => {
+  const items: AgentEvent[] = saved_objects.map((so) => {
     return {
+      id: so.id,
       ...so.attributes,
       payload: so.attributes.payload ? JSON.parse(so.attributes.payload) : undefined,
     };

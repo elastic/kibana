@@ -185,7 +185,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
           );
         }
       })
-      .catch(resp => {
+      .catch((resp) => {
         const toastNotifications = getToastNotifications();
         if (typeof annotation._id === 'undefined') {
           toastNotifications.addDanger(
@@ -339,7 +339,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   }
 }
 
-export const AnnotationFlyout: FC<any> = props => {
+export const AnnotationFlyout: FC<any> = (props) => {
   const annotationProp = useObservable(annotation$);
 
   if (annotationProp === undefined) {

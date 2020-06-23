@@ -166,7 +166,7 @@ take a look at the source code of this library to know how encryption is perform
 parameters are used, but in short it's AES Encryption with AES-256-GCM that uses random initialization vector and salt.
 
 As with encryption key for Kibana's session cookie, master encryption key used by `encrypted_saved_objects` plugin can be
-defined as a configuration value (`xpack.encrypted_saved_objects.encryptionKey`) via `kibana.yml`, but it's **highly 
+defined as a configuration value (`xpack.encryptedSavedObjects.encryptionKey`) via `kibana.yml`, but it's **highly 
 recommended** to define this key in the [Kibana Keystore](https://www.elastic.co/guide/en/kibana/current/secure-settings.html)
 instead. The master key should be cryptographically safe and be equal or greater than 32 bytes.
 

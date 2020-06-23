@@ -18,6 +18,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getConfigPath } from '../../../core/server/path';
 import { ENDPOINT_VERSION } from '../common/constants';
 
 export const configSchema = schema.object({
@@ -31,11 +33,11 @@ export const configSchema = schema.object({
     { defaultValue: true }
   ),
   // `config` is used internally and not intended to be set
-  // config: Joi.string().default(getConfigPath()), TODO: Get it in some other way
+  config: schema.string({ defaultValue: getConfigPath() }),
   banner: schema.boolean({ defaultValue: true }),
   url: schema.conditional(
-    schema.contextRef('dev'),
-    schema.literal(true),
+    schema.contextRef('dist'),
+    schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
       defaultValue: `https://telemetry-staging.elastic.co/xpack/${ENDPOINT_VERSION}/send`,
     }),
@@ -44,8 +46,8 @@ export const configSchema = schema.object({
     })
   ),
   optInStatusUrl: schema.conditional(
-    schema.contextRef('dev'),
-    schema.literal(true),
+    schema.contextRef('dist'),
+    schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
       defaultValue: `https://telemetry-staging.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`,
     }),
@@ -54,7 +56,7 @@ export const configSchema = schema.object({
     })
   ),
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
-    defaultValue: 'browser',
+    defaultValue: 'server',
   }),
 });
 

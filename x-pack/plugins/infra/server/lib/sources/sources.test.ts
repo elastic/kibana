@@ -29,7 +29,9 @@ describe('the InfraSources lib', () => {
         },
       });
 
-      expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
+      expect(
+        await sourcesLib.getSourceConfiguration(request.core.savedObjects.client, 'TEST_ID')
+      ).toMatchObject({
         id: 'TEST_ID',
         version: 'foo',
         updatedAt: 946684800000,
@@ -74,7 +76,9 @@ describe('the InfraSources lib', () => {
         },
       });
 
-      expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
+      expect(
+        await sourcesLib.getSourceConfiguration(request.core.savedObjects.client, 'TEST_ID')
+      ).toMatchObject({
         id: 'TEST_ID',
         version: 'foo',
         updatedAt: 946684800000,
@@ -104,7 +108,9 @@ describe('the InfraSources lib', () => {
         attributes: {},
       });
 
-      expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
+      expect(
+        await sourcesLib.getSourceConfiguration(request.core.savedObjects.client, 'TEST_ID')
+      ).toMatchObject({
         id: 'TEST_ID',
         version: 'foo',
         updatedAt: 946684800000,

@@ -3,29 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { FilterOptions } from '../../../../common/custom_link_filter_options';
+import * as t from 'io-ts';
+import {
+  CustomLink,
+  CustomLinkES,
+} from '../../../../common/custom_link/custom_link_types';
 import { Setup } from '../../helpers/setup_request';
-import { CustomLink } from './custom_link_types';
+import { fromESFormat } from './helper';
+import { filterOptionsRt } from './custom_link_types';
 
 export async function listCustomLinks({
   setup,
-  filters = {}
+  filters = {},
 }: {
   setup: Setup;
-  filters?: FilterOptions;
-}) {
+  filters?: t.TypeOf<typeof filterOptionsRt>;
+}): Promise<CustomLink[]> {
   const { internalClient, indices } = setup;
-
   const esFilters = Object.entries(filters).map(([key, value]) => {
     return {
       bool: {
         minimum_should_match: 1,
         should: [
           { term: { [key]: value } },
-          { bool: { must_not: [{ exists: { field: key } }] } }
-        ]
-      }
+          { bool: { must_not: [{ exists: { field: key } }] } },
+        ],
+      },
     };
   });
 
@@ -35,21 +38,24 @@ export async function listCustomLinks({
     body: {
       query: {
         bool: {
-          filter: esFilters
-        }
+          filter: esFilters,
+        },
       },
       sort: [
         {
           'label.keyword': {
-            order: 'asc'
-          }
-        }
-      ]
-    }
+            order: 'asc',
+          },
+        },
+      ],
+    },
   };
-  const resp = await internalClient.search<CustomLink>(params);
-  return resp.hits.hits.map(item => ({
-    id: item._id,
-    ...item._source
-  }));
+  const resp = await internalClient.search<CustomLinkES>(params);
+  const customLinks = resp.hits.hits.map((item) =>
+    fromESFormat({
+      id: item._id,
+      ...item._source,
+    })
+  );
+  return customLinks;
 }

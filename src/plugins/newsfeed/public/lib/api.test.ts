@@ -22,8 +22,11 @@ import { interval, race } from 'rxjs';
 import sinon, { stub } from 'sinon';
 import moment from 'moment';
 import { HttpSetup } from 'src/core/public';
-import { NEWSFEED_HASH_SET_STORAGE_KEY, NEWSFEED_LAST_FETCH_STORAGE_KEY } from '../../constants';
-import { ApiItem, NewsfeedItem, NewsfeedPluginInjectedConfig } from '../../types';
+import {
+  NEWSFEED_HASH_SET_STORAGE_KEY,
+  NEWSFEED_LAST_FETCH_STORAGE_KEY,
+} from '../../common/constants';
+import { ApiItem, NewsfeedItem, NewsfeedPluginBrowserConfig } from '../types';
 import { NewsfeedApiDriver, getApi } from './api';
 
 const localStorageGet = sinon.stub();
@@ -458,7 +461,7 @@ describe('getApi', () => {
     }
     return Promise.reject('wrong args!');
   };
-  let configMock: NewsfeedPluginInjectedConfig;
+  let configMock: NewsfeedPluginBrowserConfig;
 
   afterEach(() => {
     jest.resetAllMocks();
@@ -466,24 +469,21 @@ describe('getApi', () => {
 
   beforeEach(() => {
     configMock = {
-      newsfeed: {
-        service: {
-          urlRoot: 'http://fakenews.co',
-          pathTemplate: '/kibana-test/v{VERSION}.json',
-        },
-        defaultLanguage: 'en',
-        mainInterval: 86400000,
-        fetchInterval: 86400000,
+      service: {
+        urlRoot: 'http://fakenews.co',
+        pathTemplate: '/kibana-test/v{VERSION}.json',
       },
+      mainInterval: moment.duration(86400000),
+      fetchInterval: moment.duration(86400000),
     };
     httpMock = ({
       fetch: mockHttpGet,
     } as unknown) as HttpSetup;
   });
 
-  it('creates a result', done => {
+  it('creates a result', (done) => {
     mockHttpGet.mockImplementationOnce(() => Promise.resolve({ items: [] }));
-    getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
+    getApi(httpMock, configMock, '6.8.2').subscribe((result) => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "error": null,
@@ -496,7 +496,7 @@ describe('getApi', () => {
     });
   });
 
-  it('hasNew is true when the service returns hashes not in the cache', done => {
+  it('hasNew is true when the service returns hashes not in the cache', (done) => {
     const mockApiItems: ApiItem[] = [
       {
         title: {
@@ -528,7 +528,7 @@ describe('getApi', () => {
 
     mockHttpGet.mockImplementationOnce(getHttpMockWithItems(mockApiItems));
 
-    getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
+    getApi(httpMock, configMock, '6.8.2').subscribe((result) => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "error": null,
@@ -552,7 +552,7 @@ describe('getApi', () => {
     });
   });
 
-  it('hasNew is false when service returns hashes that are all stored', done => {
+  it('hasNew is false when service returns hashes that are all stored', (done) => {
     localStorageGet.throws('Wrong key passed!');
     localStorageGet.withArgs(NEWSFEED_HASH_SET_STORAGE_KEY).returns('happyness');
     const mockApiItems: ApiItem[] = [
@@ -568,7 +568,7 @@ describe('getApi', () => {
       },
     ];
     mockHttpGet.mockImplementationOnce(getHttpMockWithItems(mockApiItems));
-    getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
+    getApi(httpMock, configMock, '6.8.2').subscribe((result) => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "error": null,
@@ -592,10 +592,10 @@ describe('getApi', () => {
     });
   });
 
-  it('forwards an error', done => {
+  it('forwards an error', (done) => {
     mockHttpGet.mockImplementationOnce((arg1, arg2) => Promise.reject('sorry, try again later!'));
 
-    getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
+    getApi(httpMock, configMock, '6.8.2').subscribe((result) => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "error": "sorry, try again later!",
@@ -622,17 +622,17 @@ describe('getApi', () => {
       },
     ];
 
-    it("retries until fetch doesn't error", done => {
-      configMock.newsfeed.mainInterval = 10; // fast retry for testing
+    it("retries until fetch doesn't error", (done) => {
+      configMock.mainInterval = moment.duration(10); // fast retry for testing
       mockHttpGet
         .mockImplementationOnce(() => Promise.reject('Sorry, try again later!'))
         .mockImplementationOnce(() => Promise.reject('Sorry, internal server error!'))
         .mockImplementationOnce(() => Promise.reject("Sorry, it's too cold to go outside!"))
         .mockImplementationOnce(getHttpMockWithItems(successItems));
 
-      getApi(httpMock, configMock.newsfeed, '6.8.2')
+      getApi(httpMock, configMock, '6.8.2')
         .pipe(take(4), toArray())
-        .subscribe(result => {
+        .subscribe((result) => {
           expect(result).toMatchInlineSnapshot(`
             Array [
               Object {
@@ -676,14 +676,14 @@ describe('getApi', () => {
         });
     });
 
-    it("doesn't retry if fetch succeeds", done => {
-      configMock.newsfeed.mainInterval = 10; // fast retry for testing
+    it("doesn't retry if fetch succeeds", (done) => {
+      configMock.mainInterval = moment.duration(10); // fast retry for testing
       mockHttpGet.mockImplementation(getHttpMockWithItems(successItems));
 
       const timeout$ = interval(1000); // lets us capture some results after a short time
       let timesFetched = 0;
 
-      const get$ = getApi(httpMock, configMock.newsfeed, '6.8.2').pipe(
+      const get$ = getApi(httpMock, configMock, '6.8.2').pipe(
         tap(() => {
           timesFetched++;
         })

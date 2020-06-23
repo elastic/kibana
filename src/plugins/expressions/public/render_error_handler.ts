@@ -18,15 +18,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RenderErrorHandlerFnType, RenderError } from './types';
+import { RenderErrorHandlerFnType, ExpressionRenderError } from './types';
 import { getNotifications } from './services';
 import { IInterpreterRenderHandlers } from '../common';
 
 export const renderErrorHandler: RenderErrorHandlerFnType = (
   element: HTMLElement,
-  error: RenderError,
+  error: ExpressionRenderError,
   handlers: IInterpreterRenderHandlers
 ) => {
+  if (error.name === 'AbortError') {
+    handlers.done();
+    return;
+  }
+
   getNotifications().toasts.addError(error, {
     title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
       defaultMessage: 'Error in visualisation',

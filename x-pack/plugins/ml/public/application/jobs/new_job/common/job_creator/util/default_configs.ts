@@ -7,6 +7,7 @@
 import { IndexPatternTitle } from '../../../../../../../common/types/kibana';
 import { Field, Aggregation, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
+import { splitIndexPatternNames } from '../../../../../../../common/util/job_utils';
 
 export function createEmptyJob(): Job {
   return {
@@ -28,7 +29,7 @@ export function createEmptyDatafeed(indexPatternTitle: IndexPatternTitle): Dataf
   return {
     datafeed_id: '',
     job_id: '',
-    indices: [indexPatternTitle],
+    indices: splitIndexPatternNames(indexPatternTitle),
     query: {},
   };
 }

@@ -5,11 +5,11 @@
  */
 
 import React, { useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,10 +18,12 @@ import {
 } from '@elastic/eui';
 import { builtInGroupByTypes } from '../constants';
 import { GroupByType } from '../types';
+import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
 interface GroupByExpressionProps {
   groupBy: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
   onChangeSelectedTermField: (selectedTermField?: string) => void;
   onChangeSelectedGroupBy: (selectedGroupBy?: string) => void;
@@ -44,6 +46,7 @@ interface GroupByExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const GroupByExpression = ({
@@ -52,6 +55,7 @@ export const GroupByExpression = ({
   onChangeSelectedTermSize,
   onChangeSelectedTermField,
   onChangeSelectedGroupBy,
+  display = 'inline',
   fields,
   termSize,
   termField,
@@ -100,7 +104,8 @@ export const GroupByExpression = ({
           onClick={() => {
             setGroupByPopoverOpen(true);
           }}
-          color={groupBy === 'all' || (termSize && termField) ? 'secondary' : 'danger'}
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={!(groupBy === 'all' || (termSize && termField))}
         />
       }
       isOpen={groupByPopoverOpen}
@@ -109,23 +114,22 @@ export const GroupByExpression = ({
       }}
       ownFocus
       withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
     >
       <div>
-        <EuiPopoverTitle>
-          {i18n.translate(
-            'xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel',
-            {
-              defaultMessage: 'over',
-            }
-          )}
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setGroupByPopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel"
+            defaultMessage="over"
+          />
+        </ClosablePopoverTitle>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiSelect
               data-test-subj="overExpressionSelect"
               value={groupBy}
-              onChange={e => {
+              onChange={(e) => {
                 if (groupByTypes[e.target.value].sizeRequired) {
                   onChangeSelectedTermSize(MIN_TERM_SIZE);
                   onChangeSelectedTermField('');
@@ -147,16 +151,13 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <Fragment>
               <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  isInvalid={errors.termSize.length > 0 && termSize !== undefined}
-                  error={errors.termSize}
-                >
+                <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
-                    isInvalid={errors.termSize.length > 0 && termSize !== undefined}
-                    value={termSize}
-                    onChange={e => {
+                    isInvalid={errors.termSize.length > 0}
+                    value={termSize || ''}
+                    onChange={(e) => {
                       const { value } = e.target;
-                      const termSizeVal = value !== '' ? parseFloat(value) : MIN_TERM_SIZE;
+                      const termSizeVal = value !== '' ? parseFloat(value) : undefined;
                       onChangeSelectedTermSize(termSizeVal);
                     }}
                     min={MIN_TERM_SIZE}
@@ -173,7 +174,7 @@ export const GroupByExpression = ({
                     data-test-subj="fieldsExpressionSelect"
                     value={termField}
                     isInvalid={errors.termField.length > 0 && termField !== undefined}
-                    onChange={e => {
+                    onChange={(e) => {
                       onChangeSelectedTermField(e.target.value);
                     }}
                     options={fields.reduce(

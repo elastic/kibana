@@ -89,7 +89,7 @@ export class ConfigService {
     const flatPath = pathToString(path);
     this.deprecations.next([
       ...this.deprecations.value,
-      ...provider(configDeprecationFactory).map(deprecation => ({
+      ...provider(configDeprecationFactory).map((deprecation) => ({
         deprecation,
         path: flatPath,
       })),
@@ -104,9 +104,7 @@ export class ConfigService {
   public async validate() {
     const namespaces = [...this.schemas.keys()];
     for (let i = 0; i < namespaces.length; i++) {
-      await this.validateConfigAtPath(namespaces[i])
-        .pipe(first())
-        .toPromise();
+      await this.validateConfigAtPath(namespaces[i]).pipe(first()).toPromise();
     }
 
     await this.logDeprecation();
@@ -138,7 +136,7 @@ export class ConfigService {
    */
   public optionalAtPath<TSchema>(path: ConfigPath) {
     return this.getDistinctConfig(path).pipe(
-      map(config => {
+      map((config) => {
         if (config === undefined) return undefined;
         return this.validateAtPath(path, config) as TSchema;
       })
@@ -149,9 +147,7 @@ export class ConfigService {
     const namespace = pathToString(path);
 
     const validatedConfig = this.schemas.has(namespace)
-      ? await this.atPath<{ enabled?: boolean }>(path)
-          .pipe(first())
-          .toPromise()
+      ? await this.atPath<{ enabled?: boolean }>(path).pipe(first()).toPromise()
       : undefined;
 
     const enabledPath = createPluginEnabledPath(path);
@@ -186,26 +182,23 @@ export class ConfigService {
     const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
-    return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
+    return config.getFlattenedPaths().filter((path) => !isPathHandled(path, handledPaths));
   }
 
   public async getUsedPaths() {
     const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
-    return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
+    return config.getFlattenedPaths().filter((path) => isPathHandled(path, handledPaths));
   }
 
   private async logDeprecation() {
-    const rawConfig = await this.rawConfigProvider
-      .getConfig$()
-      .pipe(take(1))
-      .toPromise();
+    const rawConfig = await this.rawConfigProvider.getConfig$().pipe(take(1)).toPromise();
     const deprecations = await this.deprecations.pipe(take(1)).toPromise();
     const deprecationMessages: string[] = [];
     const logger = (msg: string) => deprecationMessages.push(msg);
     applyDeprecations(rawConfig, deprecations, logger);
-    deprecationMessages.forEach(msg => {
+    deprecationMessages.forEach((msg) => {
       this.deprecationLog.warn(msg);
     });
   }
@@ -228,14 +221,14 @@ export class ConfigService {
   }
 
   private validateConfigAtPath(path: ConfigPath) {
-    return this.getDistinctConfig(path).pipe(map(config => this.validateAtPath(path, config)));
+    return this.getDistinctConfig(path).pipe(map((config) => this.validateAtPath(path, config)));
   }
 
   private getDistinctConfig(path: ConfigPath) {
     this.markAsHandled(path);
 
     return this.config$.pipe(
-      map(config => config.get(path)),
+      map((config) => config.get(path)),
       distinctUntilChanged(isEqual)
     );
   }
@@ -260,4 +253,4 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  * handled paths.
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
-  handledPaths.some(handledPath => hasConfigPathIntersection(path, handledPath));
+  handledPaths.some((handledPath) => hasConfigPathIntersection(path, handledPath));

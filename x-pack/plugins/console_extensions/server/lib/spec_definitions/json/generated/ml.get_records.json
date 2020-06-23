@@ -1,0 +1,22 @@
+{
+  "ml.get_records": {
+    "url_params": {
+      "exclude_interim": "__flag__",
+      "from": 0,
+      "size": 0,
+      "start": "",
+      "end": "",
+      "record_score": 0,
+      "sort": "",
+      "desc": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/results/records"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-record.html"
+  }
+}

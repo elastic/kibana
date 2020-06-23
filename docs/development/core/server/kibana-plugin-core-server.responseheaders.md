@@ -9,9 +9,5 @@ Http response headers to set.
 <b>Signature:</b>
 
 ```typescript
-export declare type ResponseHeaders = {
-    [header in KnownHeaders]?: string | string[];
-} & {
-    [header: string]: string | string[];
-};
+export declare type ResponseHeaders = Record<KnownHeaders, string | string[]> | Record<string, string | string[]>;
 ```

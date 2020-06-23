@@ -193,7 +193,7 @@ export const WatchVisualization = () => {
     const actualThreshold = getThreshold(watch);
     let maxY = actualThreshold[actualThreshold.length - 1];
 
-    (Object.values(watchVisualizationData) as number[][][]).forEach(watchData => {
+    (Object.values(watchVisualizationData) as number[][][]).forEach((watchData) => {
       watchData.forEach(([, y]) => {
         if (y > maxY) {
           maxY = y;

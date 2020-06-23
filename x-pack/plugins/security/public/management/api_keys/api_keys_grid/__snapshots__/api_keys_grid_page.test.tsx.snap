@@ -61,7 +61,7 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
             id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorDescription"
             values={
               Object {
-                "link": <ForwardRef
+                "link": <EuiLink
                   href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
                   target="_blank"
                 >
@@ -70,7 +70,7 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
                     id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           >
@@ -135,7 +135,9 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
               }
               iconType="securityApp"
               title={
-                <h2>
+                <h2
+                  data-test-subj="apiKeysPermissionDeniedMessage"
+                >
                   <FormattedMessage
                     defaultMessage="You need permission to manage API keys"
                     id="xpack.security.management.apiKeys.deniedPermissionTitle"
@@ -174,6 +176,7 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
                     <EuiTitle>
                       <h2
                         className="euiTitle euiTitle--medium"
+                        data-test-subj="apiKeysPermissionDeniedMessage"
                       >
                         <FormattedMessage
                           defaultMessage="You need permission to manage API keys"

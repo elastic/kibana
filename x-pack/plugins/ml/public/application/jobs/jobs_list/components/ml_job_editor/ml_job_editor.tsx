@@ -7,10 +7,9 @@
 import React, { FC } from 'react';
 
 import { EuiCodeEditor, EuiCodeEditorProps } from '@elastic/eui';
-import { expandLiteralStrings } from '../../../../../../shared_imports';
-import { xJsonMode } from '../../../../components/custom_hooks';
+import { expandLiteralStrings, XJsonMode } from '../../../../../../shared_imports';
 
-export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: xJsonMode };
+export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
 interface MlJobEditorProps {
   value: string;

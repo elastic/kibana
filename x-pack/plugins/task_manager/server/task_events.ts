@@ -68,16 +68,18 @@ export function asTaskRunRequestEvent(
 }
 
 export function isTaskMarkRunningEvent(
-  taskEvent: TaskEvent<any, any>
+  taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskMarkRunning {
   return taskEvent.type === TaskEventType.TASK_MARK_RUNNING;
 }
-export function isTaskRunEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskRun {
+export function isTaskRunEvent(taskEvent: TaskEvent<unknown, unknown>): taskEvent is TaskRun {
   return taskEvent.type === TaskEventType.TASK_RUN;
 }
-export function isTaskClaimEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskClaim {
+export function isTaskClaimEvent(taskEvent: TaskEvent<unknown, unknown>): taskEvent is TaskClaim {
   return taskEvent.type === TaskEventType.TASK_CLAIM;
 }
-export function isTaskRunRequestEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskRunRequest {
+export function isTaskRunRequestEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskRunRequest {
   return taskEvent.type === TaskEventType.TASK_RUN_REQUEST;
 }

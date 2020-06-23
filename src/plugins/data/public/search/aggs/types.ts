@@ -19,21 +19,48 @@
 
 import { IndexPattern } from '../../index_patterns';
 import {
-  AggType,
+  AggConfigSerialized,
+  AggConfigs,
+  AggParamsRange,
+  AggParamsIpRange,
+  AggParamsDateRange,
+  AggParamsFilter,
+  AggParamsFilters,
+  AggParamsSignificantTerms,
+  AggParamsGeoTile,
+  AggParamsGeoHash,
+  AggParamsTerms,
+  AggParamsAvg,
+  AggParamsCardinality,
+  AggParamsGeoBounds,
+  AggParamsGeoCentroid,
+  AggParamsMax,
+  AggParamsMedian,
+  AggParamsMin,
+  AggParamsStdDeviation,
+  AggParamsSum,
+  AggParamsBucketAvg,
+  AggParamsBucketMax,
+  AggParamsBucketMin,
+  AggParamsBucketSum,
+  AggParamsCumulativeSum,
+  AggParamsDerivative,
+  AggParamsMovingAvg,
+  AggParamsPercentileRanks,
+  AggParamsPercentiles,
+  AggParamsSerialDiff,
+  AggParamsTopHit,
+  AggParamsHistogram,
+  AggParamsDateHistogram,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
-  AggConfig,
-  AggConfigs,
   CreateAggConfigParams,
-  FieldParamType,
   getCalculateAutoTimeExpression,
-  MetricAggType,
-  aggTypeFieldFilters,
-  parentPipelineAggHelper,
-  siblingPipelineAggHelper,
+  METRIC_TYPES,
+  BUCKET_TYPES,
 } from './';
 
-export { IAggConfig } from './agg_config';
+export { IAggConfig, AggConfigSerialized } from './agg_config';
 export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
 export { IAggType } from './agg_type';
 export { AggParam, AggParamOption } from './agg_params';
@@ -41,23 +68,12 @@ export { IFieldParamType } from './param_types';
 export { IMetricAggType } from './metrics/metric_agg_type';
 export { DateRangeKey } from './buckets/lib/date_range';
 export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
+export { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */
 export interface SearchAggsSetup {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   types: AggTypesRegistrySetup;
-}
-
-/** @internal */
-export interface SearchAggsStartLegacy {
-  AggConfig: typeof AggConfig;
-  AggType: typeof AggType;
-  aggTypeFieldFilters: typeof aggTypeFieldFilters;
-  FieldParamType: typeof FieldParamType;
-  MetricAggType: typeof MetricAggType;
-  parentPipelineAggHelper: typeof parentPipelineAggHelper;
-  siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
 }
 
 /** @internal */
@@ -69,4 +85,63 @@ export interface SearchAggsStart {
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;
   types: AggTypesRegistryStart;
+}
+
+/** @internal */
+export interface BaseAggParams {
+  json?: string;
+  customLabel?: string;
+}
+
+/** @internal */
+export interface AggExpressionType {
+  type: 'agg_type';
+  value: AggConfigSerialized;
+}
+
+/** @internal */
+export type AggExpressionFunctionArgs<
+  Name extends keyof AggParamsMapping
+> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+
+/**
+ * A global list of the param interfaces for each agg type.
+ * For now this is internal, but eventually we will probably
+ * want to make it public.
+ *
+ * @internal
+ */
+export interface AggParamsMapping {
+  [BUCKET_TYPES.RANGE]: AggParamsRange;
+  [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
+  [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
+  [BUCKET_TYPES.FILTER]: AggParamsFilter;
+  [BUCKET_TYPES.FILTERS]: AggParamsFilters;
+  [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
+  [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
+  [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
+  [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
+  [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
+  [BUCKET_TYPES.TERMS]: AggParamsTerms;
+  [METRIC_TYPES.AVG]: AggParamsAvg;
+  [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
+  [METRIC_TYPES.COUNT]: BaseAggParams;
+  [METRIC_TYPES.GEO_BOUNDS]: AggParamsGeoBounds;
+  [METRIC_TYPES.GEO_CENTROID]: AggParamsGeoCentroid;
+  [METRIC_TYPES.MAX]: AggParamsMax;
+  [METRIC_TYPES.MEDIAN]: AggParamsMedian;
+  [METRIC_TYPES.MIN]: AggParamsMin;
+  [METRIC_TYPES.STD_DEV]: AggParamsStdDeviation;
+  [METRIC_TYPES.SUM]: AggParamsSum;
+  [METRIC_TYPES.AVG_BUCKET]: AggParamsBucketAvg;
+  [METRIC_TYPES.MAX_BUCKET]: AggParamsBucketMax;
+  [METRIC_TYPES.MIN_BUCKET]: AggParamsBucketMin;
+  [METRIC_TYPES.SUM_BUCKET]: AggParamsBucketSum;
+  [METRIC_TYPES.CUMULATIVE_SUM]: AggParamsCumulativeSum;
+  [METRIC_TYPES.DERIVATIVE]: AggParamsDerivative;
+  [METRIC_TYPES.MOVING_FN]: AggParamsMovingAvg;
+  [METRIC_TYPES.PERCENTILE_RANKS]: AggParamsPercentileRanks;
+  [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
+  [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiff;
+  [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
 }

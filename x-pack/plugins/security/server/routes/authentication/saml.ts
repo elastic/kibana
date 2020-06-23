@@ -7,14 +7,19 @@
 import { schema } from '@kbn/config-schema';
 import { SAMLLogin } from '../../authentication';
 import { SAMLAuthenticationProvider } from '../../authentication/providers';
-import { createCustomResourceResponse } from '.';
 import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
-  router.get(
+export function defineSAMLRoutes({
+  router,
+  httpResources,
+  logger,
+  authc,
+  basePath,
+}: RouteDefinitionParams) {
+  httpResources.register(
     {
       path: '/internal/security/saml/capture-url-fragment',
       validate: false,
@@ -22,39 +27,30 @@ export function defineSAMLRoutes({ router, logger, authc, csp, basePath }: Route
     },
     (context, request, response) => {
       // We're also preventing `favicon.ico` request since it can cause new SAML handshake.
-      return response.custom(
-        createCustomResourceResponse(
-          `
+      return response.renderHtml({
+        body: `
           <!DOCTYPE html>
           <title>Kibana SAML Login</title>
           <link rel="icon" href="data:,">
           <script src="${basePath.serverBasePath}/internal/security/saml/capture-url-fragment.js"></script>
         `,
-          'text/html',
-          csp.header
-        )
-      );
+      });
     }
   );
-
-  router.get(
+  httpResources.register(
     {
       path: '/internal/security/saml/capture-url-fragment.js',
       validate: false,
       options: { authRequired: false },
     },
     (context, request, response) => {
-      return response.custom(
-        createCustomResourceResponse(
-          `
+      return response.renderJs({
+        body: `
           window.location.replace(
             '${basePath.serverBasePath}/internal/security/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
           );
         `,
-          'text/javascript',
-          csp.header
-        )
-      );
+      });
     }
   );
 

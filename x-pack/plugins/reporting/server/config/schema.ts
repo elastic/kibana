@@ -28,7 +28,7 @@ const KibanaServerSchema = schema.object({
       },
     })
   ),
-});
+}); // default values are all dynamic in createConfig$
 
 const QueueSchema = schema.object({
   indexInterval: schema.string({ defaultValue: 'week' }),
@@ -85,7 +85,7 @@ const CaptureSchema = schema.object({
         schema.boolean({ defaultValue: false }),
         schema.maybe(schema.never())
       ),
-      disableSandbox: schema.boolean({ defaultValue: false }),
+      disableSandbox: schema.maybe(schema.boolean()), // default value is dynamic in createConfig$
       proxy: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
         server: schema.conditional(
@@ -101,7 +101,6 @@ const CaptureSchema = schema.object({
           schema.maybe(schema.never())
         ),
       }),
-      userDataDir: schema.maybe(schema.string()), // FIXME unused?
     }),
     type: schema.string({ defaultValue: 'chromium' }),
   }),
@@ -115,10 +114,12 @@ const CaptureSchema = schema.object({
 
 const CsvSchema = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
+  escapeFormulaValues: schema.boolean({ defaultValue: false }),
   enablePanelActionDownload: schema.boolean({ defaultValue: true }),
   maxSizeBytes: schema.number({
     defaultValue: 1024 * 1024 * 10, // 10MB
   }), // TODO: use schema.byteSize
+  useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
     duration: schema.string({
       defaultValue: '30s',
@@ -135,7 +136,7 @@ const CsvSchema = schema.object({
 const EncryptionKeySchema = schema.conditional(
   schema.contextRef('dist'),
   true,
-  schema.maybe(schema.string({ minLength: 32 })),
+  schema.maybe(schema.string({ minLength: 32 })), // default value is dynamic in createConfig$
   schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
 );
 
@@ -161,6 +162,7 @@ const PollSchema = schema.object({
 });
 
 export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
   kibanaServer: KibanaServerSchema,
   queue: QueueSchema,
   capture: CaptureSchema,
@@ -171,4 +173,4 @@ export const ConfigSchema = schema.object({
   poll: PollSchema,
 });
 
-export type ConfigType = TypeOf<typeof ConfigSchema>;
+export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

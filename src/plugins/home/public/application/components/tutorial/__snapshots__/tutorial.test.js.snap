@@ -74,10 +74,12 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
               options={
                 Array [
                   Object {
+                    "data-test-subj": "selfManagedTutorial",
                     "id": "onPrem",
                     "label": "Self managed",
                   },
                   Object {
+                    "data-test-subj": "onCloudTutorial",
                     "id": "onPremElasticCloud",
                     "label": "Elastic Cloud",
                   },

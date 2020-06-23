@@ -7,6 +7,7 @@
 import { getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
 import { i18n } from '@kbn/i18n';
+import { getErrorMessage } from '../../../../../common/util/errors';
 
 export async function deleteCalendars(calendarsToDelete, callback) {
   if (calendarsToDelete === undefined || calendarsToDelete.length === 0) {
@@ -36,17 +37,18 @@ export async function deleteCalendars(calendarsToDelete, callback) {
       await ml.deleteCalendar({ calendarId });
     } catch (error) {
       console.log('Error deleting calendar:', error);
-      const errorMessage = i18n.translate(
-        'xpack.ml.calendarsList.deleteCalendars.deletingCalendarErrorMessage',
-        {
-          defaultMessage: 'An error occurred deleting calendar {calendarId}{errorMessage}',
-          values: {
-            calendarId: calendar.calendar_id,
-            errorMessage: error.message ? ` : ${error.message}` : '',
-          },
-        }
-      );
-      toastNotifications.addDanger(errorMessage);
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.ml.calendarsList.deleteCalendars.deletingCalendarErrorMessage',
+          {
+            defaultMessage: 'An error occurred deleting calendar {calendarId}',
+            values: {
+              calendarId: calendar.calendar_id,
+            },
+          }
+        ),
+        text: getErrorMessage(error),
+      });
     }
   }
 

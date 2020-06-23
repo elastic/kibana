@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './_classification_exploration.scss';
+
 import React, { FC, useState, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -12,7 +14,6 @@ import {
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiIconTip,
   EuiPanel,
   EuiSpacer,
@@ -39,14 +40,54 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 import { LoadingPanel } from '../loading_panel';
-import { getColumnData, ACTUAL_CLASS_ID } from './column_data';
-
-const defaultPanelWidth = 500;
+import {
+  getColumnData,
+  ACTUAL_CLASS_ID,
+  MAX_COLUMNS,
+  getTrailingControlColumns,
+} from './column_data';
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus: DATA_FRAME_TASK_STATE;
+  jobStatus?: DATA_FRAME_TASK_STATE;
   searchQuery: ResultsSearchQuery;
+}
+
+enum SUBSET_TITLE {
+  TRAINING = 'training',
+  TESTING = 'testing',
+  ENTIRE = 'entire',
+}
+
+const entireDatasetHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixEntireHelpText',
+  {
+    defaultMessage: 'Normalized confusion matrix for entire dataset',
+  }
+);
+
+const testingDatasetHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTestingHelpText',
+  {
+    defaultMessage: 'Normalized confusion matrix for testing dataset',
+  }
+);
+
+const trainingDatasetHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTrainingHelpText',
+  {
+    defaultMessage: 'Normalized confusion matrix for training dataset',
+  }
+);
+
+function getHelpText(dataSubsetTitle: string) {
+  let helpText = entireDatasetHelpText;
+  if (dataSubsetTitle === SUBSET_TITLE.TESTING) {
+    helpText = testingDatasetHelpText;
+  } else if (dataSubsetTitle === SUBSET_TITLE.TRAINING) {
+    helpText = trainingDatasetHelpText;
+  }
+  return helpText;
 }
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
@@ -57,10 +98,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
   const [columns, setColumns] = useState<any>([]);
   const [columnsData, setColumnsData] = useState<any>([]);
+  const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
   const [popoverContents, setPopoverContents] = useState<any>([]);
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
-  const [panelWidth, setPanelWidth] = useState<number>(defaultPanelWidth);
+  const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(() =>
     columns.map(({ id }: { id: string }) => id)
@@ -73,13 +115,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const resultsField = jobConfig.dest.results_field;
   let requiresKeyword = false;
 
-  const loadData = async ({
-    isTrainingClause,
-    ignoreDefaultQuery = true,
-  }: {
-    isTrainingClause: { query: string; operator: string };
-    ignoreDefaultQuery?: boolean;
-  }) => {
+  const loadData = async ({ isTraining }: { isTraining: boolean | undefined }) => {
     setIsLoading(true);
 
     try {
@@ -90,19 +126,18 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     }
 
     const evalData = await loadEvalData({
-      isTraining: false,
+      isTraining,
       index,
       dependentVariable,
       resultsField,
       predictionFieldName,
       searchQuery,
-      ignoreDefaultQuery,
       jobType: ANALYSIS_CONFIG_TYPE.CLASSIFICATION,
       requiresKeyword,
     });
 
     const docsCountResp = await loadDocsCount({
-      isTraining: false,
+      isTraining,
       searchQuery,
       resultsField,
       destIndex: jobConfig.dest.index,
@@ -131,24 +166,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     }
   };
 
-  const resizeHandler = () => {
-    const tablePanelWidth: number =
-      document.getElementById('mlDataFrameAnalyticsTableResultsPanel')?.clientWidth ||
-      defaultPanelWidth;
-    // Keep the evaluate panel width slightly smaller than the results table
-    // to ensure results table can resize correctly. Temporary workaround DataGrid issue with flex
-    const newWidth = tablePanelWidth - 8;
-    setPanelWidth(newWidth);
-  };
-
-  useEffect(() => {
-    window.addEventListener('resize', resizeHandler);
-    resizeHandler();
-    return () => {
-      window.removeEventListener('resize', resizeHandler);
-    };
-  }, []);
-
   useEffect(() => {
     if (confusionMatrixData.length > 0) {
       const { columns: derivedColumns, columnData } = getColumnData(confusionMatrixData);
@@ -168,8 +185,9 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
           const colId = children?.props?.columnId;
           const gridItem = columnData[rowIndex];
 
-          if (gridItem !== undefined) {
-            const count = colId === gridItem.actual_class ? gridItem.count : gridItem.error_count;
+          if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
+            // @ts-ignore
+            const count = gridItem[colId];
             return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
           }
 
@@ -180,17 +198,46 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }, [confusionMatrixData]);
 
   useEffect(() => {
-    const hasIsTrainingClause =
-      isResultsSearchBoolQuery(searchQuery) &&
-      searchQuery.bool.must.filter(
-        (clause: any) => clause.match && clause.match[`${resultsField}.is_training`] !== undefined
-      );
-    const isTrainingClause =
-      hasIsTrainingClause &&
-      hasIsTrainingClause[0] &&
-      hasIsTrainingClause[0].match[`${resultsField}.is_training`];
+    let isTraining: boolean | undefined;
+    const query =
+      isResultsSearchBoolQuery(searchQuery) && (searchQuery.bool.should || searchQuery.bool.filter);
 
-    loadData({ isTrainingClause });
+    if (query !== undefined && query !== false) {
+      for (let i = 0; i < query.length; i++) {
+        const clause = query[i];
+
+        if (clause.match && clause.match[`${resultsField}.is_training`] !== undefined) {
+          isTraining = clause.match[`${resultsField}.is_training`];
+          break;
+        } else if (
+          clause.bool &&
+          (clause.bool.should !== undefined || clause.bool.filter !== undefined)
+        ) {
+          const innerQuery = clause.bool.should || clause.bool.filter;
+          if (innerQuery !== undefined) {
+            for (let j = 0; j < innerQuery.length; j++) {
+              const innerClause = innerQuery[j];
+              if (
+                innerClause.match &&
+                innerClause.match[`${resultsField}.is_training`] !== undefined
+              ) {
+                isTraining = innerClause.match[`${resultsField}.is_training`];
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+    if (isTraining === undefined) {
+      setDataSubsetTitle(SUBSET_TITLE.ENTIRE);
+    } else {
+      setDataSubsetTitle(
+        isTraining && isTraining === true ? SUBSET_TITLE.TRAINING : SUBSET_TITLE.TESTING
+      );
+    }
+
+    loadData({ isTraining });
   }, [JSON.stringify(searchQuery)]);
 
   const renderCellValue = ({
@@ -203,19 +250,26 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setCellProps: any;
   }) => {
     const cellValue = columnsData[rowIndex][columnId];
+    const actualCount = columnsData[rowIndex] && columnsData[rowIndex].actual_class_doc_count;
+    let accuracy: number | string = '0%';
+
+    if (columnId !== ACTUAL_CLASS_ID && actualCount) {
+      accuracy = cellValue / actualCount;
+      // round to 2 decimal places without converting to string;
+      accuracy = Math.round(accuracy * 100) / 100;
+      accuracy = `${Math.round(accuracy * 100)}%`;
+    }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       if (columnId !== ACTUAL_CLASS_ID) {
         setCellProps({
           style: {
-            backgroundColor: `rgba(0, 179, 164, ${cellValue})`,
+            backgroundColor: `rgba(0, 179, 164, ${accuracy})`,
           },
         });
       }
     }, [rowIndex, columnId, setCellProps]);
-    return (
-      <span>{typeof cellValue === 'number' ? `${Math.round(cellValue * 100)}%` : cellValue}</span>
-    );
+    return <span>{columnId === ACTUAL_CLASS_ID ? cellValue : accuracy}</span>;
   };
 
   if (isLoading === true) {
@@ -224,151 +278,147 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
+  const showTrailingColumns = columnsData.length > MAX_COLUMNS;
+  const extraColumns = columnsData.length - MAX_COLUMNS;
+  const shownColumns =
+    showTrailingColumns === true && showFullColumns === false
+      ? columns.slice(0, MAX_COLUMNS + 1)
+      : columns;
+  const rowCount =
+    showTrailingColumns === true && showFullColumns === false ? MAX_COLUMNS : columnsData.length;
+
   return (
     <EuiPanel
       data-test-subj="mlDFAnalyticsClassificationExplorationEvaluatePanel"
-      style={{ width: `${panelWidth}px` }}
+      className="mlDataFrameAnalyticsClassification"
     >
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <span>
-                  {i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateJobIdTitle',
-                    {
-                      defaultMessage: 'Evaluation of classification job ID {jobId}',
-                      values: { jobId: jobConfig.id },
-                    }
-                  )}
-                </span>
-              </EuiTitle>
-            </EuiFlexItem>
+      <div>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <span>
+                {i18n.translate(
+                  'xpack.ml.dataframe.analytics.classificationExploration.evaluateJobIdTitle',
+                  {
+                    defaultMessage: 'Evaluation of classification job ID {jobId}',
+                    values: { jobId: jobConfig.id },
+                  }
+                )}
+              </span>
+            </EuiTitle>
+          </EuiFlexItem>
+          {jobStatus !== undefined && (
             <EuiFlexItem grow={false}>
               <span>{getTaskStateBadge(jobStatus)}</span>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSpacer />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                target="_blank"
-                iconType="help"
-                iconSide="left"
-                color="primary"
-                href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-classification`}
-              >
-                {i18n.translate(
-                  'xpack.ml.dataframe.analytics.classificationExploration.classificationDocsLink',
-                  {
-                    defaultMessage: 'Classification evaluation docs ',
-                  }
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {error !== null && (
+          )}
+          <EuiFlexItem />
           <EuiFlexItem grow={false}>
-            <ErrorCallout error={error} />
+            <EuiButtonEmpty
+              target="_blank"
+              iconType="help"
+              iconSide="left"
+              color="primary"
+              href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-classification`}
+            >
+              {i18n.translate(
+                'xpack.ml.dataframe.analytics.classificationExploration.classificationDocsLink',
+                {
+                  defaultMessage: 'Classification evaluation docs ',
+                }
+              )}
+            </EuiButtonEmpty>
           </EuiFlexItem>
-        )}
-        {error === null && (
-          <Fragment>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs">
-                <EuiTitle size="xxs">
-                  <span>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixHelpText',
-                      {
-                        defaultMessage: 'Normalized confusion matrix',
-                      }
-                    )}
-                  </span>
-                </EuiTitle>
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                    content={i18n.translate(
-                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip',
-                      {
-                        defaultMessage:
-                          'The multi-class confusion matrix contains the number of occurrences where the analysis classified data points correctly with their actual class as well as the number of occurrences where it misclassified them with another class',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {docsCount !== null && (
+        </EuiFlexGroup>
+      </div>
+      {error !== null && <ErrorCallout error={error} />}
+      {error === null && (
+        <Fragment>
+          <div>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiTitle size="xxs">
+                <span>{getHelpText(dataSubsetTitle)}</span>
+              </EuiTitle>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="xpack.ml.dataframe.analytics.classificationExploration.generalizationDocsCount"
-                    defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
-                    values={{ docsCount }}
-                  />
-                </EuiText>
+                <EuiIconTip
+                  anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
+                  content={i18n.translate(
+                    'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip',
+                    {
+                      defaultMessage:
+                        'The multi-class confusion matrix contains the number of occurrences where the analysis classified data points correctly with their actual class as well as the number of occurrences where it misclassified them with another class',
+                    }
+                  )}
+                />
               </EuiFlexItem>
-            )}
-            {/* BEGIN TABLE ELEMENTS */}
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" style={{ paddingLeft: '10%', paddingRight: '10%' }}>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow
-                    className="mlDataFrameAnalyticsClassification__actualLabel"
-                    helpText={i18n.translate(
-                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel',
+            </EuiFlexGroup>
+          </div>
+          {docsCount !== null && (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.classificationExploration.generalizationDocsCount"
+                defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
+                values={{ docsCount }}
+              />
+            </EuiText>
+          )}
+          {/* BEGIN TABLE ELEMENTS */}
+          <EuiSpacer size="m" />
+          <div className="mlDataFrameAnalyticsClassification__confusionMatrix">
+            <div className="mlDataFrameAnalyticsClassification__actualLabel">
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel"
+                  defaultMessage="Actual label"
+                />
+              </EuiText>
+            </div>
+            <div className="mlDataFrameAnalyticsClassification__dataGridMinWidth">
+              {columns.length > 0 && columnsData.length > 0 && (
+                <>
+                  <div>
+                    <EuiText size="xs" color="subdued">
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel"
+                        defaultMessage="Predicted label"
+                      />
+                    </EuiText>
+                  </div>
+                  <EuiSpacer size="s" />
+                  <EuiDataGrid
+                    data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
+                    aria-label={i18n.translate(
+                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixLabel',
                       {
-                        defaultMessage: 'Actual label',
+                        defaultMessage: 'Classification confusion matrix',
                       }
                     )}
-                  >
-                    <Fragment />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {columns.length > 0 && columnsData.length > 0 && (
-                    <Fragment>
-                      <EuiFlexGroup direction="column" justifyContent="center" gutterSize="s">
-                        <EuiFlexItem grow={false}>
-                          <EuiFormRow
-                            helpText={i18n.translate(
-                              'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel',
-                              {
-                                defaultMessage: 'Predicted label',
-                              }
-                            )}
-                          >
-                            <Fragment />
-                          </EuiFormRow>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false} style={{ width: '90%' }}>
-                          <EuiDataGrid
-                            data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
-                            aria-label="Classification confusion matrix"
-                            columns={columns}
-                            columnVisibility={{ visibleColumns, setVisibleColumns }}
-                            rowCount={columnsData.length}
-                            renderCellValue={renderCellValue}
-                            inMemory={{ level: 'sorting' }}
-                            toolbarVisibility={false}
-                            popoverContents={popoverContents}
-                            gridStyle={{ rowHover: 'none' }}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </Fragment>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </Fragment>
-        )}
-        {/* END TABLE ELEMENTS */}
-      </EuiFlexGroup>
+                    columns={shownColumns}
+                    columnVisibility={{ visibleColumns, setVisibleColumns }}
+                    rowCount={rowCount}
+                    renderCellValue={renderCellValue}
+                    inMemory={{ level: 'sorting' }}
+                    toolbarVisibility={{
+                      showColumnSelector: true,
+                      showStyleSelector: false,
+                      showFullScreenSelector: false,
+                      showSortSelector: false,
+                    }}
+                    popoverContents={popoverContents}
+                    gridStyle={{ rowHover: 'none' }}
+                    trailingControlColumns={
+                      showTrailingColumns === true && showFullColumns === false
+                        ? getTrailingControlColumns(extraColumns, setShowFullColumns)
+                        : undefined
+                    }
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        </Fragment>
+      )}
+      {/* END TABLE ELEMENTS */}
     </EuiPanel>
   );
 };

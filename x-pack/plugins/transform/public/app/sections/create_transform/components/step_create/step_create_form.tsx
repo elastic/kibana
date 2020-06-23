@@ -32,6 +32,8 @@ import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_reac
 
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
+import { getErrorMessage } from '../../../../../shared_imports';
+
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
@@ -57,11 +59,12 @@ interface Props {
   transformId: string;
   transformConfig: any;
   overrides: StepDetailsExposedState;
+  timeFieldName?: string | undefined;
   onChange(s: StepDetailsExposedState): void;
 }
 
 export const StepCreateForm: FC<Props> = React.memo(
-  ({ createIndexPattern, transformConfig, transformId, onChange, overrides }) => {
+  ({ createIndexPattern, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
     const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
@@ -116,7 +119,9 @@ export const StepCreateForm: FC<Props> = React.memo(
             defaultMessage: 'An error occurred creating the transform {transformId}:',
             values: { transformId },
           }),
-          text: toMountPoint(<ToastNotificationText text={e} />),
+          text: toMountPoint(
+            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+          ),
         });
         setCreated(false);
         setLoading(false);
@@ -157,7 +162,9 @@ export const StepCreateForm: FC<Props> = React.memo(
             defaultMessage: 'An error occurred starting the transform {transformId}:',
             values: { transformId },
           }),
-          text: toMountPoint(<ToastNotificationText text={e} />),
+          text: toMountPoint(
+            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+          ),
         });
         setStarted(false);
         setLoading(false);
@@ -181,9 +188,11 @@ export const StepCreateForm: FC<Props> = React.memo(
         Object.assign(newIndexPattern, {
           id: '',
           title: indexPatternName,
+          timeFieldName,
         });
-
         const id = await newIndexPattern.create();
+
+        await indexPatterns.clearCache();
 
         // id returns false if there's a duplicate index pattern.
         if (id === false) {
@@ -221,7 +230,9 @@ export const StepCreateForm: FC<Props> = React.memo(
               'An error occurred creating the Kibana index pattern {indexPatternName}:',
             values: { indexPatternName },
           }),
-          text: toMountPoint(<ToastNotificationText text={e} />),
+          text: toMountPoint(
+            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+          ),
         });
         setLoading(false);
         return false;
@@ -258,7 +269,9 @@ export const StepCreateForm: FC<Props> = React.memo(
               title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
                 defaultMessage: 'An error occurred getting the progress percentage:',
               }),
-              text: toMountPoint(<ToastNotificationText text={e} />),
+              text: toMountPoint(
+                <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              ),
             });
             clearInterval(interval);
           }

@@ -1,5 +1,5 @@
 [[document-data]]
-== Viewing document data
+== View document data
 
 When you submit a search query in *Discover*, the most recent documents that match the query
 are listed in the documents table.
@@ -26,7 +26,7 @@ and click image:images/sort-icon.png[].
 The first click sorts by ascending order, the second click sorts by descending order, and the third
 click removes the field from the sorted fields.
 
-Move a field column:: Hover over the column header and click the move left (<<) or move right icon (>>).
+Move a field column:: Hover over the column header and click the (<<) or (>>) icons.
 Remove&nbsp;a&nbsp;field&nbsp;column&nbsp;:: Hover over the list of *Specified fields*
 and then click *remove*.
 Or, use the (x) control in the column header.

@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 
 const Page = styled(EuiPage)`
-  background: ${props => props.theme.eui.euiColorEmptyShade};
+  background: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
 interface Props {

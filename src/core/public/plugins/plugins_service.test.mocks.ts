@@ -19,16 +19,16 @@
 
 import { PluginName } from 'kibana/server';
 import { Plugin } from './plugin';
-import { loadPluginBundleMock } from './plugin_loader.mock';
 
 export type MockedPluginInitializer = jest.Mock<Plugin<unknown, Record<string, unknown>>, any>;
 
 export const mockPluginInitializerProvider: jest.Mock<
   MockedPluginInitializer,
   [PluginName]
-> = jest.fn().mockRejectedValue(new Error('No provider specified'));
+> = jest.fn().mockImplementation(() => () => {
+  throw new Error('No provider specified');
+});
 
-export const mockLoadPluginBundle = loadPluginBundleMock.create(mockPluginInitializerProvider);
-jest.mock('./plugin_loader', () => ({
-  loadPluginBundle: mockLoadPluginBundle,
+jest.mock('./plugin_reader', () => ({
+  read: mockPluginInitializerProvider,
 }));

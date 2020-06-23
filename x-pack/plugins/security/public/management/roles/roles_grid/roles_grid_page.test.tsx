@@ -12,10 +12,11 @@ import { RolesAPIClient } from '../roles_api_client';
 import { PermissionDenied } from './permission_denied';
 import { RolesGridPage } from './roles_grid_page';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { rolesAPIClientMock } from '../index.mock';
 import { ReservedBadge, DisabledBadge } from '../../badges';
 import { findTestSubject } from 'test_utils/find_test_subject';
+import { ScopedHistory } from 'kibana/public';
 
 const mock403 = () => ({ body: { statusCode: 403 } });
 
@@ -41,7 +42,10 @@ const waitForRender = async (
 
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
+  let history: ScopedHistory;
+
   beforeEach(() => {
+    history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
     apiClientMock = rolesAPIClientMock.create();
     apiClientMock.getRoles.mockResolvedValue([
       {
@@ -68,12 +72,13 @@ describe('<RolesGridPage />', () => {
     const wrapper = mountWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
+        history={history}
         notifications={coreMock.createStart().notifications}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 
@@ -85,12 +90,13 @@ describe('<RolesGridPage />', () => {
     const wrapper = mountWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
+        history={history}
         notifications={coreMock.createStart().notifications}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 
@@ -104,10 +110,11 @@ describe('<RolesGridPage />', () => {
     const wrapper = mountWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
+        history={history}
         notifications={coreMock.createStart().notifications}
       />
     );
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
     expect(wrapper.find(PermissionDenied)).toMatchSnapshot();
@@ -117,12 +124,13 @@ describe('<RolesGridPage />', () => {
     const wrapper = mountWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
+        history={history}
         notifications={coreMock.createStart().notifications}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 
@@ -146,12 +154,13 @@ describe('<RolesGridPage />', () => {
     const wrapper = mountWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
+        history={history}
         notifications={coreMock.createStart().notifications}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 

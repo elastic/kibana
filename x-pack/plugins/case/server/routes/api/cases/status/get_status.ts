@@ -9,11 +9,12 @@ import { wrapError } from '../../utils';
 
 import { CasesStatusResponseRt } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
+import { CASE_STATUS_URL } from '../../../../../common/constants';
 
 export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/status',
+      path: CASE_STATUS_URL,
       validate: {},
     },
     async (context, request, response) => {

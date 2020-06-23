@@ -9,7 +9,7 @@
  */
 export function calculateIndicesTotals(indices) {
   // create datasets for each index
-  const metrics = Object.keys(indices).map(i => {
+  const metrics = Object.keys(indices).map((i) => {
     const index = indices[i];
     return {
       primary: index.primary,

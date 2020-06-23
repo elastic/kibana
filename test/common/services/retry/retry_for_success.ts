@@ -20,7 +20,7 @@
 import { ToolingLog } from '@kbn/dev-utils';
 import { inspect } from 'util';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const returnTrue = () => true;
 

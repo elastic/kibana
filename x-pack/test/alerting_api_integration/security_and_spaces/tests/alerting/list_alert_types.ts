@@ -19,7 +19,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should return 200 with list of alert types', async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alert/types`)
+            .get(`${getUrlPrefix(space.id)}/api/alerts/list_alert_types`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -48,6 +48,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
                   state: [],
                   context: [],
                 },
+                producer: 'alerting',
               });
               break;
             default:

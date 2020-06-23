@@ -10,7 +10,8 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { Repository } from '../../../../../common/types';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { SectionError, Error } from '../../../../shared_imports';
+import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useServices } from '../../../app_context';
 import { useLoadRepositories } from '../../../services/http';
@@ -18,6 +19,8 @@ import { linkToAddRepository, linkToRepository } from '../../../services/navigat
 
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
+
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface MatchParams {
   repositoryName?: Repository['name'];
@@ -112,7 +115,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         }
         actions={
           <EuiButton
-            href={linkToAddRepository()}
+            {...reactRouterNavigate(history, linkToAddRepository())}
             fill
             iconType="plusInCircle"
             data-test-subj="registerRepositoryButton"

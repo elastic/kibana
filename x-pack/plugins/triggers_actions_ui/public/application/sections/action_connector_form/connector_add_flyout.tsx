@@ -19,9 +19,9 @@ import {
   EuiFlyoutBody,
   EuiBetaBadge,
   EuiCallOut,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
@@ -31,6 +31,7 @@ import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { PLUGIN } from '../../constants/plugin';
 
 export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
@@ -50,9 +51,10 @@ export const ConnectorAddFlyout = ({
     capabilities,
     actionTypeRegistry,
     reloadConnectors,
+    docLinks,
   } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
-  const [hasActionsDisabledByLicense, setHasActionsDisabledByLicense] = useState<boolean>(false);
+  const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
   // hooks
   const initialConnector = {
@@ -94,7 +96,7 @@ export const ConnectorAddFlyout = ({
       <ActionTypeMenu
         onActionTypeChange={onActionTypeChange}
         actionTypes={actionTypes}
-        setHasActionsDisabledByLicense={setHasActionsDisabledByLicense}
+        setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
       />
     );
   } else {
@@ -104,7 +106,7 @@ export const ConnectorAddFlyout = ({
       ...actionTypeModel?.validateConnector(connector).errors,
       ...validateBaseProperties(connector).errors,
     } as IErrorObject;
-    hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+    hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
     currentForm = (
       <ActionConnectorForm
@@ -114,13 +116,14 @@ export const ConnectorAddFlyout = ({
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
         http={http}
+        docLinks={docLinks}
       />
     );
   }
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
-      .then(savedConnector => {
+      .then((savedConnector) => {
         if (toastNotifications) {
           toastNotifications.addSuccess(
             i18n.translate(
@@ -136,17 +139,13 @@ export const ConnectorAddFlyout = ({
         }
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',
-            {
-              defaultMessage: 'Failed to create connector: {message}',
-              values: {
-                message: errorRes.body?.message ?? '',
-              },
-            }
-          )
+          errorRes.body?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',
+              { defaultMessage: 'Cannot create a connector.' }
+            )
         );
         return undefined;
       });
@@ -179,7 +178,10 @@ export const ConnectorAddFlyout = ({
                         'xpack.triggersActionsUI.sections.addConnectorForm.betaBadgeTooltipContent',
                         {
                           defaultMessage:
-                            'This module is not GA. Please help us by reporting any bugs.',
+                            '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                          values: {
+                            pluginName: PLUGIN.getI18nName(i18n),
+                          },
                         }
                       )}
                     />
@@ -203,7 +205,10 @@ export const ConnectorAddFlyout = ({
                       'xpack.triggersActionsUI.sections.addFlyout.betaBadgeTooltipContent',
                       {
                         defaultMessage:
-                          'This module is not GA. Please help us by reporting any bugs.',
+                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                        values: {
+                          pluginName: PLUGIN.getI18nName(i18n),
+                        },
                       }
                     )}
                   />
@@ -214,7 +219,13 @@ export const ConnectorAddFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
-        banner={!actionType && hasActionsDisabledByLicense && upgradeYourLicenseCallOut}
+        banner={
+          !actionType && hasActionsUpgradeableByTrial ? (
+            <UpgradeYourLicenseCallOut http={http} />
+          ) : (
+            <Fragment />
+          )
+        }
       >
         {currentForm}
       </EuiFlyoutBody>
@@ -266,23 +277,47 @@ export const ConnectorAddFlyout = ({
   );
 };
 
-const upgradeYourLicenseCallOut = (
+const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
   <EuiCallOut
     title={i18n.translate(
       'xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerTitle',
-      { defaultMessage: 'Upgrade your plan to access more connector types' }
+      { defaultMessage: 'Upgrade your license to access all connectors' }
     )}
   >
     <FormattedMessage
       id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerMessage"
-      defaultMessage="With an upgraded license, you have the option to connect to more 3rd party services."
+      defaultMessage="Upgrade your license or start a 30-day free trial for immediate access to all third-party connectors."
     />
-    <EuiSpacer size="xs" />
-    <EuiLink href={VIEW_LICENSE_OPTIONS_LINK} target="_blank">
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerLinkTitle"
-        defaultMessage="Upgrade now"
-      />
-    </EuiLink>
+    <EuiSpacer size="s" />
+    <EuiFlexGroup gutterSize="s" wrap={true}>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          href={`${http.basePath.get()}/app/management/stack/license_management`}
+          iconType="gear"
+          target="_blank"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionConnectorAdd.manageLicensePlanBannerLinkTitle"
+            defaultMessage="Manage license"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          href={VIEW_LICENSE_OPTIONS_LINK}
+          iconType="popout"
+          iconSide="right"
+          target="_blank"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerLinkTitle"
+            defaultMessage="Subscription plans"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiCallOut>
 );
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorAddFlyout as default };

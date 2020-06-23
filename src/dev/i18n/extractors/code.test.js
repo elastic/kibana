@@ -94,11 +94,11 @@ describe('isIntlFormatMessageFunction', () => {
   test('detects intl.formatMessage call expression', () => {
     const callExpressionNodes = [
       ...traverseNodes(parse(intlFormatMessageSource).program.body),
-    ].filter(node => isCallExpression(node));
+    ].filter((node) => isCallExpression(node));
 
     expect(callExpressionNodes).toHaveLength(4);
     expect(
-      callExpressionNodes.every(callExpressionNode =>
+      callExpressionNodes.every((callExpressionNode) =>
         isIntlFormatMessageFunction(callExpressionNode)
       )
     ).toBe(true);
@@ -108,7 +108,7 @@ describe('isIntlFormatMessageFunction', () => {
 describe('isFormattedMessageElement', () => {
   test('detects FormattedMessage jsx element', () => {
     const AST = parse(formattedMessageSource, { plugins: ['jsx'] });
-    const jsxOpeningElementNode = [...traverseNodes(AST.program.body)].find(node =>
+    const jsxOpeningElementNode = [...traverseNodes(AST.program.body)].find((node) =>
       isJSXOpeningElement(node)
     );
 

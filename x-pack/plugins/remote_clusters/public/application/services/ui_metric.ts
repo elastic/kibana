@@ -3,17 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { UiStatsMetricType, METRIC_TYPE } from '@kbn/analytics';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { UiStatsMetricType } from '@kbn/analytics';
 import { UIM_APP_NAME } from '../constants';
 
-export let trackUiMetric: (metricType: UiStatsMetricType, eventName: string) => void;
-export let METRIC_TYPE: UsageCollectionSetup['METRIC_TYPE'];
+export { METRIC_TYPE };
 
-export function init(usageCollection: UsageCollectionSetup): void {
-  trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, UIM_APP_NAME);
-  METRIC_TYPE = usageCollection.METRIC_TYPE;
+export let usageCollection: UsageCollectionSetup | undefined;
+
+export function init(_usageCollection: UsageCollectionSetup): void {
+  usageCollection = _usageCollection;
+}
+
+export function trackUiMetric(metricType: UiStatsMetricType, name: string) {
+  if (!usageCollection) {
+    return;
+  }
+  const { reportUiStats } = usageCollection;
+  reportUiStats(UIM_APP_NAME, metricType, name);
 }
 
 /**

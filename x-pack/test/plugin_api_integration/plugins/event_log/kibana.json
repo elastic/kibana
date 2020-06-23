@@ -1,0 +1,9 @@
+{
+  "id": "event_log_fixture",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack"],
+  "requiredPlugins": ["eventLog"],
+  "server": true,
+  "ui": false
+}

@@ -5,7 +5,7 @@
  */
 
 import * as jsts from 'jsts';
-import rewind from 'geojson-rewind';
+import rewind from '@mapbox/geojson-rewind';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
 const geoJSONWriter = new jsts.io.GeoJSONWriter();

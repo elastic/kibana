@@ -35,7 +35,7 @@ export class Search extends PureComponent<SearchProps> {
   constructor(props: SearchProps) {
     super(props);
     const { categories } = props;
-    this.categories = categories.map(category => {
+    this.categories = categories.map((category) => {
       return {
         value: category,
         name: getCategoryName(category),

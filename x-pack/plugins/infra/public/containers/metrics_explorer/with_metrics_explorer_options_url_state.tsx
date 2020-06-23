@@ -17,7 +17,7 @@ import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
   MetricsExplorerChartOptions,
-} from './use_metrics_explorer_options';
+} from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 interface MetricsExplorerUrlState {
   timerange?: MetricsExplorerTimeOptions;
@@ -81,7 +81,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
     field: t.string,
     rate: t.boolean,
     color: t.keyof(
-      Object.fromEntries(values(MetricsExplorerColor).map(c => [c, null])) as Record<string, null>
+      Object.fromEntries(values(MetricsExplorerColor).map((c) => [c, null])) as Record<string, null>
     ),
     label: t.string,
   });
@@ -114,13 +114,13 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
 function isMetricExplorerChartOptions(subject: any): subject is MetricsExplorerChartOptions {
   const ChartOptions = t.type({
     yAxisMode: t.keyof(
-      Object.fromEntries(values(MetricsExplorerYAxisMode).map(v => [v, null])) as Record<
+      Object.fromEntries(values(MetricsExplorerYAxisMode).map((v) => [v, null])) as Record<
         string,
         null
       >
     ),
     type: t.keyof(
-      Object.fromEntries(values(MetricsExplorerChartType).map(v => [v, null])) as Record<
+      Object.fromEntries(values(MetricsExplorerChartType).map((v) => [v, null])) as Record<
         string,
         null
       >

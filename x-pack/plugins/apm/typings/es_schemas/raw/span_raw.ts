@@ -52,4 +52,5 @@ export interface SpanRaw extends APMBaseDoc {
     id: string;
   };
   observer?: Observer;
+  child?: { id: string[] };
 }

@@ -7,11 +7,12 @@
 import { UsersRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_REPORTERS_URL } from '../../../../../common/constants';
 
 export function initGetReportersApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/reporters',
+      path: CASE_REPORTERS_URL,
       validate: {},
     },
     async (context, request, response) => {

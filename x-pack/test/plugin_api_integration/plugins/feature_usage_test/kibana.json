@@ -1,0 +1,9 @@
+{
+  "id": "feature_usage_test",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "feature_usage_test"],
+  "requiredPlugins": ["licensing"],
+  "server": true,
+  "ui": false
+}

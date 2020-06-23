@@ -9,8 +9,9 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import { SectionError, Error } from '../../../shared_imports';
 import { BASE_PATH } from '../../constants';
-import { SectionError, SectionLoading, RestoreSnapshotForm, Error } from '../../components';
+import { SectionLoading, RestoreSnapshotForm } from '../../components';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { useLoadSnapshot, executeRestore } from '../../services/http';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpServerMock } from '../../../../../src/core/server/http/http_server.mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 
 import { canRedirectRequest } from './can_redirect_request';
 

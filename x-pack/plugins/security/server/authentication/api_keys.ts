@@ -126,6 +126,35 @@ export class APIKeys {
   }
 
   /**
+   * Determines if API Keys are enabled in Elasticsearch.
+   */
+  async areAPIKeysEnabled(): Promise<boolean> {
+    if (!this.license.isEnabled()) {
+      return false;
+    }
+
+    const id = `kibana-api-key-service-test`;
+
+    this.logger.debug(
+      `Testing if API Keys are enabled by attempting to invalidate a non-existant key: ${id}`
+    );
+
+    try {
+      await this.clusterClient.callAsInternalUser('shield.invalidateAPIKey', {
+        body: {
+          id,
+        },
+      });
+      return true;
+    } catch (e) {
+      if (this.doesErrorIndicateAPIKeysAreDisabled(e)) {
+        return false;
+      }
+      throw e;
+    }
+  }
+
+  /**
    * Tries to create an API key for the current user.
    * @param request Request instance.
    * @param params The params to create an API key
@@ -245,6 +274,11 @@ export class APIKeys {
     }
 
     return result;
+  }
+
+  private doesErrorIndicateAPIKeysAreDisabled(e: Record<string, any>) {
+    const disabledFeature = e.body?.error?.['disabled.feature'];
+    return disabledFeature === 'api_keys';
   }
 
   private getGrantParams(authorizationHeader: HTTPAuthorizationHeader): GrantAPIKeyParams {

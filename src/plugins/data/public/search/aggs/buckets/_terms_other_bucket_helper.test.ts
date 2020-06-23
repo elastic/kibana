@@ -24,8 +24,9 @@ import {
 } from './_terms_other_bucket_helper';
 import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { IBucketAggConfig } from './_bucket_agg_type';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
+import { IBucketAggConfig } from './bucket_agg_type';
+import { mockAggTypesRegistry } from '../test_helpers';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 
 const indexPattern = {
   id: '1234',
@@ -219,13 +220,11 @@ const nestedOtherResponse = {
 
 describe('Terms Agg Other bucket helper', () => {
   const typesRegistry = mockAggTypesRegistry();
-  const getAggConfigs = (aggs: CreateAggConfigParams[] = []) => {
-    return new AggConfigs(indexPattern, [...aggs], { typesRegistry });
-  };
+  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
-  beforeEach(() => {
-    mockDataServices();
-  });
+  const getAggConfigs = (aggs: CreateAggConfigParams[] = []) => {
+    return new AggConfigs(indexPattern, [...aggs], { typesRegistry, fieldFormats });
+  };
 
   describe('buildOtherBucketAgg', () => {
     test('returns a function', () => {

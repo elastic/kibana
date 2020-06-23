@@ -49,7 +49,7 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-traefik.html',
       },
     }),
-    // euiIconType: 'logoTraefik',
+    euiIconType: '/plugins/home/assets/logos/traefik.svg',
     artifacts: {
       dashboards: [
         {
@@ -65,7 +65,7 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/traefik_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/traefik_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

@@ -28,8 +28,8 @@ const pluginSpec = {
 };
 
 expect.addSnapshotSerializer({
-  test: value => typeof value === 'string' && value.startsWith(dir),
-  print: value => value.replace(dir, '<absolute>').replace(/\\/g, '/'),
+  test: (value) => typeof value === 'string' && value.startsWith(dir),
+  print: (value) => value.replace(dir, '<absolute>').replace(/\\/g, '/'),
 });
 
 describe('uiExports.styleSheetPaths', () => {

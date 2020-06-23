@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
-import { assertNever } from '../../../../../src/core/utils';
-import { ILicense, LICENSE_CHECK_STATE } from '../../../licensing/common/types';
+import { assertNever } from '../../../../../src/core/server';
+import { ILicense } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { ActionType } from '../types';
 import { ActionTypeDisabledError } from './errors';
@@ -52,13 +52,13 @@ export class LicenseState {
     const check = this.license.check(actionType.id, actionType.minimumLicenseRequired);
 
     switch (check.state) {
-      case LICENSE_CHECK_STATE.Expired:
+      case 'expired':
         return { isValid: false, reason: 'expired' };
-      case LICENSE_CHECK_STATE.Invalid:
+      case 'invalid':
         return { isValid: false, reason: 'invalid' };
-      case LICENSE_CHECK_STATE.Unavailable:
+      case 'unavailable':
         return { isValid: false, reason: 'unavailable' };
-      case LICENSE_CHECK_STATE.Valid:
+      case 'valid':
         return { isValid: true };
       default:
         return assertNever(check.state);
@@ -125,20 +125,20 @@ export class LicenseState {
     const check = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
 
     switch (check.state) {
-      case LICENSE_CHECK_STATE.Expired:
+      case 'expired':
         return {
           showAppLink: true,
           enableAppLink: false,
           message: check.message || '',
         };
-      case LICENSE_CHECK_STATE.Invalid:
-      case LICENSE_CHECK_STATE.Unavailable:
+      case 'invalid':
+      case 'unavailable':
         return {
           showAppLink: false,
           enableAppLink: false,
           message: check.message || '',
         };
-      case LICENSE_CHECK_STATE.Valid:
+      case 'valid':
         return {
           showAppLink: true,
           enableAppLink: true,

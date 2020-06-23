@@ -10,12 +10,14 @@ import {
   KibanaRequest,
   LoggerFactory,
 } from '../../../../../src/core/server';
+import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
+import { SecurityAuditLogger } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
-import { SecurityLicense } from '../../common/licensing';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
@@ -27,6 +29,7 @@ export {
   InvalidateAPIKeyResult,
   CreateAPIKeyParams,
   InvalidateAPIKeyParams,
+  GrantAPIKeyResult,
 } from './api_keys';
 export {
   BasicHTTPAuthorizationHeaderCredentials,
@@ -34,6 +37,8 @@ export {
 } from './http_authentication';
 
 interface SetupAuthenticationParams {
+  auditLogger: SecurityAuditLogger;
+  getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   http: CoreSetup['http'];
   clusterClient: IClusterClient;
   config: ConfigType;
@@ -44,6 +49,8 @@ interface SetupAuthenticationParams {
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
 
 export async function setupAuthentication({
+  auditLogger,
+  getFeatureUsageService,
   http,
   clusterClient,
   config,
@@ -81,14 +88,19 @@ export async function setupAuthentication({
   };
 
   const authenticator = new Authenticator({
+    auditLogger,
+    getFeatureUsageService,
+    getCurrentUser,
     clusterClient,
     basePath: http.basePath,
     config: { session: config.session, authc: config.authc },
+    license,
     loggers,
     sessionStorageFactory: await http.createCookieSessionStorageFactory({
       encryptionKey: config.encryptionKey,
       isSecure: config.secureCookies,
       name: config.cookieName,
+      sameSite: config.sameSiteCookies,
       validate: (session: ProviderSession | ProviderSession[]) => {
         const array: ProviderSession[] = Array.isArray(session) ? session : [session];
         for (const sess of array) {
@@ -170,7 +182,9 @@ export async function setupAuthentication({
     logout: authenticator.logout.bind(authenticator),
     getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
     isProviderTypeEnabled: authenticator.isProviderTypeEnabled.bind(authenticator),
+    acknowledgeAccessAgreement: authenticator.acknowledgeAccessAgreement.bind(authenticator),
     getCurrentUser,
+    areAPIKeysEnabled: () => apiKeys.areAPIKeysEnabled(),
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
     grantAPIKeyAsInternalUser: (request: KibanaRequest) => apiKeys.grantAsInternalUser(request),

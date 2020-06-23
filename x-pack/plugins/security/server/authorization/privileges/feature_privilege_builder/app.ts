@@ -9,12 +9,12 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeAppBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
-    const appIds = privilegeDefinition.app || feature.app;
+    const appIds = privilegeDefinition.app;
 
     if (!appIds) {
       return [];
     }
 
-    return appIds.map(appId => this.actions.app.get(appId));
+    return appIds.map((appId) => this.actions.app.get(appId));
   }
 }

@@ -5,6 +5,8 @@
  */
 
 import React, { memo, useRef, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 import { Editor as AceEditor } from 'brace';
 
 import { initializeEditor } from './init_editor';
@@ -31,6 +33,8 @@ const createEditorShim = (aceEditor: AceEditor) => {
   };
 };
 
+const EDITOR_INPUT_ID = 'SearchProfilerTextArea';
+
 export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null as any);
   const editorInstanceRef = useRef<AceEditor>(null as any);
@@ -43,10 +47,25 @@ export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Pro
     const divEl = containerRef.current;
     editorInstanceRef.current = initializeEditor({ el: divEl, licenseEnabled });
     editorInstanceRef.current.setValue(initialValue, 1);
+    const textarea = divEl.querySelector<HTMLTextAreaElement>('textarea');
+    if (textarea) {
+      textarea.setAttribute('id', EDITOR_INPUT_ID);
+    }
     setTextArea(licenseEnabled ? containerRef.current!.querySelector('textarea') : null);
 
     onEditorReady(createEditorShim(editorInstanceRef.current));
   }, [initialValue, onEditorReady, licenseEnabled]);
 
-  return <div data-test-subj="searchProfilerEditor" ref={containerRef} />;
+  return (
+    <>
+      <EuiScreenReaderOnly>
+        <label htmlFor={EDITOR_INPUT_ID}>
+          {i18n.translate('xpack.searchProfiler.editorElementLabel', {
+            defaultMessage: 'Dev Tools Search Profiler editor',
+          })}
+        </label>
+      </EuiScreenReaderOnly>
+      <div data-test-subj="searchProfilerEditor" ref={containerRef} />
+    </>
+  );
 });

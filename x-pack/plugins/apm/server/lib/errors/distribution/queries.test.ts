@@ -7,8 +7,8 @@
 import { getErrorDistribution } from './get_distribution';
 import {
   SearchParamsMock,
-  inspectSearchParams
-} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+  inspectSearchParams,
+} from '../../../../public/utils/testHelpers';
 
 describe('error distribution queries', () => {
   let mock: SearchParamsMock;
@@ -18,10 +18,10 @@ describe('error distribution queries', () => {
   });
 
   it('fetches an error distribution', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getErrorDistribution({
         serviceName: 'serviceName',
-        setup
+        setup,
       })
     );
 
@@ -29,11 +29,11 @@ describe('error distribution queries', () => {
   });
 
   it('fetches an error distribution with a group id', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getErrorDistribution({
         serviceName: 'serviceName',
         groupId: 'foo',
-        setup
+        setup,
       })
     );
 

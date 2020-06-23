@@ -9,10 +9,3 @@ export const WeightedCreateDatasourceSteps = [
   'configure',
   'review',
 ];
-
-export const CREATE_DATASOURCE_STEP_PATHS = {
-  selectConfig: '/select-config',
-  selectPackage: '/select-package',
-  configure: '/configure',
-  review: '/review',
-};

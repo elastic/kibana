@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/SavedElementsModal/ElementControls has two buttons 1`] = `
+<div
+  style={
+    Object {
+      "width": "50px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive canvasElementCard__controls"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiToolTipAnchor"
+        onKeyUp={[Function]}
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <button
+          aria-label="Edit element"
+          className="euiButtonIcon euiButtonIcon--primary"
+          data-test-subj="canvasElementCard__editButton"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          type="button"
+        >
+          <div
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="pencil"
+            size="m"
+          />
+        </button>
+      </span>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiToolTipAnchor"
+        onKeyUp={[Function]}
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <button
+          aria-label="Delete element"
+          className="euiButtonIcon euiButtonIcon--danger"
+          data-test-subj="canvasElementCard__deleteButton"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          type="button"
+        >
+          <div
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="trash"
+            size="m"
+          />
+        </button>
+      </span>
+    </div>
+  </div>
+</div>
+`;

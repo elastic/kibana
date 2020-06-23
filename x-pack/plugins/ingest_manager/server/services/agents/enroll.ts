@@ -32,10 +32,9 @@ export async function enroll(
     config_id: configId,
     type,
     enrolled_at: enrolledAt,
-    user_provided_metadata: JSON.stringify(metadata?.userProvided ?? {}),
-    local_metadata: JSON.stringify(metadata?.local ?? {}),
+    user_provided_metadata: metadata?.userProvided ?? {},
+    local_metadata: metadata?.local ?? {},
     current_error_events: undefined,
-    actions: [],
     access_api_key_id: undefined,
     last_checkin: undefined,
     default_api_key: undefined,
@@ -43,7 +42,9 @@ export async function enroll(
 
   let agent;
   if (existingAgent) {
-    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, existingAgent.id, agentData);
+    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, existingAgent.id, agentData, {
+      refresh: false,
+    });
     agent = {
       ...existingAgent,
       ...agentData,
@@ -53,7 +54,9 @@ export async function enroll(
     } as Agent;
   } else {
     agent = savedObjectToAgent(
-      await soClient.create<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentData)
+      await soClient.create<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentData, {
+        refresh: false,
+      })
     );
   }
 

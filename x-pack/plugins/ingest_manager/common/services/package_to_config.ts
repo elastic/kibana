@@ -28,7 +28,7 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
   // Create datasource input property
   if (packageDatasource?.inputs?.length) {
     // Map each package datasource input to agent config datasource input
-    packageDatasource.inputs.forEach(packageInput => {
+    packageDatasource.inputs.forEach((packageInput) => {
       // Reduces registry var def into config object entry
       const varsReducer = (
         configObject: DatasourceConfigRecord,
@@ -46,14 +46,14 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
 
       // Map each package input stream into datasource input stream
       const streams: DatasourceInputStream[] = packageInput.streams
-        ? packageInput.streams.map(packageStream => {
+        ? packageInput.streams.map((packageStream) => {
             const stream: DatasourceInputStream = {
               id: `${packageInput.type}-${packageStream.dataset}`,
               enabled: packageStream.enabled === false ? false : true,
               dataset: packageStream.dataset,
             };
             if (packageStream.vars && packageStream.vars.length) {
-              stream.config = packageStream.vars.reduce(varsReducer, {});
+              stream.vars = packageStream.vars.reduce(varsReducer, {});
             }
             return stream;
           })
@@ -61,12 +61,12 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
 
       const input: DatasourceInput = {
         type: packageInput.type,
-        enabled: streams.length ? !!streams.find(stream => stream.enabled) : true,
+        enabled: streams.length ? !!streams.find((stream) => stream.enabled) : true,
         streams,
       };
 
       if (packageInput.vars && packageInput.vars.length) {
-        input.config = packageInput.vars.reduce(varsReducer, {});
+        input.vars = packageInput.vars.reduce(varsReducer, {});
       }
 
       inputs.push(input);

@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { render, wait } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
 
 import { I18nProvider } from '@kbn/i18n/react';
 
@@ -24,7 +23,8 @@ import {
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
-import { StepDefineForm, getAggNameConflictToastMessages } from './step_define_form';
+import { getAggNameConflictToastMessages } from './common';
+import { StepDefineForm } from './step_define_form';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
@@ -48,7 +48,7 @@ const createMockStorage = () => ({
 
 describe('Transform: <DefinePivotForm />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async done => {
+  test('Minimal initialization', async (done) => {
     // Arrange
     const searchItems = {
       indexPattern: {

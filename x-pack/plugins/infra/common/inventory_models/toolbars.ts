@@ -11,7 +11,7 @@ import { HostToolbarItems } from './host/toolbar_items';
 import { ContainerToolbarItems } from './container/toolbar_items';
 import { PodToolbarItems } from './pod/toolbar_items';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../public/components/inventory/toolbars/toolbar';
+import { ToolbarProps } from '../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
 import { AwsEC2ToolbarItems } from './aws_ec2/toolbar_items';
 import { AwsS3ToolbarItems } from './aws_s3/toolbar_items';
 import { AwsRDSToolbarItems } from './aws_rds/toolbar_items';

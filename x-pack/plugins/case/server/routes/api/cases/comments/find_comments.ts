@@ -18,11 +18,12 @@ import {
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{case_id}/comments/_find',
+      path: `${CASE_COMMENTS_URL}/_find`,
       validate: {
         params: schema.object({
           case_id: schema.string(),

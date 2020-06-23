@@ -8,9 +8,8 @@ import { parse, stringify } from 'query-string';
 import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
+import { useHistory } from 'react-router-dom';
 import { url } from '../../../../../src/plugins/kibana_utils/public';
-
-import { useHistory } from './history_context';
 
 export const useUrlState = <State>({
   defaultState,

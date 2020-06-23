@@ -12,7 +12,6 @@ import {
   RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
-import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
 import { defineBasicRoutes } from './basic';
 
@@ -29,11 +28,11 @@ describe('Basic authentication routes', () => {
     router = routeParamsMock.router;
 
     authc = routeParamsMock.authc;
-    authc.isProviderTypeEnabled.mockImplementation(provider => provider === 'basic');
+    authc.isProviderTypeEnabled.mockImplementation((provider) => provider === 'basic');
 
     mockContext = ({
       licensing: {
-        license: { check: jest.fn().mockReturnValue({ check: LICENSE_CHECK_STATE.Valid }) },
+        license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
     } as unknown) as RequestHandlerContext;
 
@@ -157,7 +156,7 @@ describe('Basic authentication routes', () => {
       it('prefers `token` authentication provider if it is enabled', async () => {
         authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
         authc.isProviderTypeEnabled.mockImplementation(
-          provider => provider === 'token' || provider === 'basic'
+          (provider) => provider === 'token' || provider === 'basic'
         );
 
         const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);

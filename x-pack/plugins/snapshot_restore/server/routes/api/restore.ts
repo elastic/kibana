@@ -30,14 +30,14 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
         });
 
         // Filter to snapshot-recovered shards only
-        Object.keys(recoveryByIndexName).forEach(index => {
+        Object.keys(recoveryByIndexName).forEach((index) => {
           const recovery = recoveryByIndexName[index];
           let latestActivityTimeInMillis: number = 0;
           let latestEndTimeInMillis: number | null = null;
           const snapshotShards = (recovery.shards || [])
-            .filter(shard => shard.type === 'SNAPSHOT')
+            .filter((shard) => shard.type === 'SNAPSHOT')
             .sort((a, b) => a.id - b.id)
-            .map(shard => {
+            .map((shard) => {
               const deserializedShard = deserializeRestoreShard(shard);
               const { startTimeInMillis, stopTimeInMillis } = deserializedShard;
 

@@ -11,7 +11,7 @@ export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
 export const caseConfigureSavedObjectType: SavedObjectsType = {
   name: CASE_CONFIGURE_SAVED_OBJECT,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       created_at: {

@@ -23,7 +23,11 @@ import { OverlayStart } from 'kibana/public';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { IContainer, EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
+import {
+  IContainer,
+  EmbeddableFactoryDefinition,
+  EmbeddableFactory,
+} from '../../../../src/plugins/embeddable/public';
 import { TodoEmbeddable, TODO_EMBEDDABLE, TodoInput, TodoOutput } from './todo_embeddable';
 
 function TaskInput({ onSave }: { onSave: (task: string) => void }) {
@@ -34,7 +38,7 @@ function TaskInput({ onSave }: { onSave: (task: string) => void }) {
         data-test-subj="taskInputField"
         value={task}
         placeholder="Enter task here"
-        onChange={e => setTask(e.target.value)}
+        onChange={(e) => setTask(e.target.value)}
       />
       <EuiButton data-test-subj="createTodoEmbeddable" onClick={() => onSave(task)}>
         Save
@@ -47,16 +51,13 @@ interface StartServices {
   openModal: OverlayStart['openModal'];
 }
 
-export class TodoEmbeddableFactory extends EmbeddableFactory<
-  TodoInput,
-  TodoOutput,
-  TodoEmbeddable
-> {
+export type TodoEmbeddableFactory = EmbeddableFactory<TodoInput, TodoOutput, TodoEmbeddable>;
+
+export class TodoEmbeddableFactoryDefinition
+  implements EmbeddableFactoryDefinition<TodoInput, TodoOutput, TodoEmbeddable> {
   public readonly type = TODO_EMBEDDABLE;
 
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
     return true;
@@ -72,9 +73,9 @@ export class TodoEmbeddableFactory extends EmbeddableFactory<
    * used to collect specific embeddable input that the container will not provide, like
    * in this case, the task string.
    */
-  public async getExplicitInput() {
+  public getExplicitInput = async () => {
     const { openModal } = await this.getStartServices();
-    return new Promise<{ task: string }>(resolve => {
+    return new Promise<{ task: string }>((resolve) => {
       const onSave = (task: string) => resolve({ task });
       const overlay = openModal(
         toMountPoint(
@@ -87,7 +88,7 @@ export class TodoEmbeddableFactory extends EmbeddableFactory<
         )
       );
     });
-  }
+  };
 
   public getDisplayName() {
     return i18n.translate('embeddableExamples.todo.displayName', {

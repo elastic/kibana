@@ -23,10 +23,10 @@ import { SavedObjectsType } from '../../types';
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
       migrations: {},
@@ -41,7 +41,7 @@ test('mappings without index pattern goes to default index', () => {
     kibanaIndexName: '.kibana',
     registry: createRegistry({
       name: 'type1',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
     }),
     indexMap: {
       type1: {
@@ -73,7 +73,7 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
     kibanaIndexName: '.kibana',
     registry: createRegistry({
       name: 'type1',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       indexPattern: '.other_kibana',
     }),
     indexMap: {
@@ -106,7 +106,7 @@ test('creating a script gets added to the index pattern', () => {
     kibanaIndexName: '.kibana',
     registry: createRegistry({
       name: 'type1',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       indexPattern: '.other_kibana',
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     }),
@@ -141,12 +141,12 @@ test('throws when two scripts are defined for an index pattern', () => {
   const registry = createRegistry(
     {
       name: 'type1',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     },
     {
       name: 'type2',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     }
   );

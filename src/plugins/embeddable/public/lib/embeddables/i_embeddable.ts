@@ -18,23 +18,32 @@
  */
 
 import { Observable } from 'rxjs';
-import { UiActionsDynamicActionManager } from '../../../../../plugins/ui_actions/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
 
+export interface EmbeddableError {
+  name: string;
+  message: string;
+}
+
 export interface EmbeddableInput {
   viewMode?: ViewMode;
   title?: string;
+  /**
+   * Note this is not a saved object id. It is used to uniquely identify this
+   * Embeddable instance from others (e.g. inside a container).  It's possible to
+   * have two Embeddables where everything else is the same but the id.
+   */
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
 
   /**
-   * Reserved key for `ui_actions` events.
+   * Reserved key for enhancements added by other plugins.
    */
-  events?: Array<{ eventId: string }>;
+  enhancements?: unknown;
 
   /**
    * List of action IDs that this embeddable should not render.
@@ -45,10 +54,18 @@ export interface EmbeddableInput {
    * Whether this embeddable should not execute triggers.
    */
   disableTriggers?: boolean;
+
+  [key: string]: unknown;
 }
 
 export interface EmbeddableOutput {
+  // Whether the embeddable is actively loading.
+  loading?: boolean;
+  // Whether the embeddable finshed loading with an error.
+  error?: EmbeddableError;
   editUrl?: string;
+  editApp?: string;
+  editPath?: string;
   defaultTitle?: string;
   title?: string;
   editable?: boolean;
@@ -92,9 +109,9 @@ export interface IEmbeddable<
   readonly runtimeId?: number;
 
   /**
-   * Default implementation of dynamic action API for embeddables.
+   * Extra abilities added to Embeddable by `*_enhanced` plugins.
    */
-  dynamicActions?: UiActionsDynamicActionManager;
+  enhancements?: object;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to

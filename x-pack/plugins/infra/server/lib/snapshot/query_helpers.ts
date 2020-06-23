@@ -35,7 +35,7 @@ export const getFieldByNodeType = (options: InfraSnapshotRequestOptions) => {
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
   const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
-  const sources: GroupBySource[] = options.groupBy.map(gb => {
+  const sources: GroupBySource[] = options.groupBy.map((gb) => {
     return { [`${gb.field}`]: { terms: { field: gb.field } } };
   });
   sources.push({
@@ -87,8 +87,7 @@ export const getMetricsAggregations = (options: InfraSnapshotRequestOptions): Sn
   return aggregation;
 };
 
-export const getDateHistogramOffset = (options: InfraSnapshotRequestOptions): string => {
-  const { from, interval } = options.timerange;
+export const getDateHistogramOffset = (from: number, interval: string): string => {
   const fromInSeconds = Math.floor(from / 1000);
   const bucketSizeInSeconds = getIntervalInSeconds(interval);
 

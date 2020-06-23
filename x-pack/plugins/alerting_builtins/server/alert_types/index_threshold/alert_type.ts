@@ -22,7 +22,7 @@ export function getAlertType(service: Service): AlertType {
   const { logger } = service;
 
   const alertTypeName = i18n.translate('xpack.alertingBuiltins.indexThreshold.alertTypeTitle', {
-    defaultMessage: 'Index Threshold',
+    defaultMessage: 'Index threshold',
   });
 
   const actionGroupName = i18n.translate(
@@ -85,6 +85,7 @@ export function getAlertType(service: Service): AlertType {
       ],
     },
     executor,
+    producer: 'alerting',
   };
 
   async function executor(options: AlertExecutorOptions) {

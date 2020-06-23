@@ -13,7 +13,7 @@ import {
   LICENSE_TYPE_BASIC,
 } from '../../../common/constants';
 
-describe('check_license', function() {
+describe('check_license', function () {
   const pluginName = 'Foo';
   const minimumLicenseRequired = LICENSE_TYPE_BASIC;
   let mockLicenseInfo;

@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { Component, createRef } from 'react';
 import { EuiFormRow, EuiDualRange } from '@elastic/eui';
 import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
 import { EuiDualRangeProps } from '@elastic/eui/src/components/form/range/dual_range';
@@ -35,8 +35,8 @@ interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange' | 'min' | '
   label?: string;
   formRowDisplay?: EuiFormRowDisplayKeys;
   onChange?: (val: [string, string]) => void;
-  min?: ValueMember;
-  max?: ValueMember;
+  min?: number;
+  max?: number;
 }
 
 interface State {
@@ -72,6 +72,18 @@ export class ValidatedDualRange extends Component<Props> {
     return null;
   }
 
+  // Can remove after eui#3412 is resolved
+  componentDidMount() {
+    if (this.trackRef.current) {
+      const track = this.trackRef.current.querySelector('.euiRangeTrack');
+      if (track) {
+        track.setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+
+  trackRef = createRef<HTMLDivElement>();
+
   // @ts-ignore state populated by getDerivedStateFromProps
   state: State = {};
 
@@ -103,29 +115,38 @@ export class ValidatedDualRange extends Component<Props> {
       value, // eslint-disable-line no-unused-vars
       onChange, // eslint-disable-line no-unused-vars
       allowEmptyRange, // eslint-disable-line no-unused-vars
-      // @ts-ignore
       ...rest // TODO: Consider alternatives for spread operator in component
     } = this.props;
 
     return (
-      <EuiFormRow
-        compressed={compressed}
-        fullWidth={fullWidth}
-        isInvalid={!this.state.isValid}
-        error={this.state.errorMessage ? [this.state.errorMessage] : []}
-        label={label}
-        display={formRowDisplay}
-      >
-        <EuiDualRange
+      <div ref={this.trackRef}>
+        <EuiFormRow
           compressed={compressed}
           fullWidth={fullWidth}
-          value={this.state.value}
-          onChange={this._onChange}
-          // @ts-ignore
-          focusable={false} // remove when #59039 is fixed
-          {...rest}
-        />
-      </EuiFormRow>
+          isInvalid={!this.state.isValid}
+          error={this.state.errorMessage ? [this.state.errorMessage] : []}
+          label={label}
+          display={formRowDisplay}
+        >
+          <EuiDualRange
+            compressed={compressed}
+            fullWidth={fullWidth}
+            value={this.state.value}
+            onChange={this._onChange}
+            minInputProps={{
+              'aria-label': i18n.translate('kibana-react.dualRangeControl.minInputAriaLabel', {
+                defaultMessage: 'Range minimum',
+              }),
+            }}
+            maxInputProps={{
+              'aria-label': i18n.translate('kibana-react.dualRangeControl.maxInputAriaLabel', {
+                defaultMessage: 'Range maximum',
+              }),
+            }}
+            {...rest}
+          />
+        </EuiFormRow>
+      </div>
     );
   }
 }

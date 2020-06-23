@@ -6,15 +6,12 @@
 
 import React from 'react';
 import { EuiNotificationBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
+import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { EnhancedEmbeddableContext } from '../../../../../../embeddable_enhanced/public';
 import { txtDisplayName } from './i18n';
-import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/common';
 
-export const MenuItem: React.FC<{ context: EmbeddableContext }> = ({ context }) => {
-  if (!context.embeddable.dynamicActions)
-    throw new Error('Flyout edit drillldown context menu item requires `dynamicActions`');
-
-  const { events } = useContainerState(context.embeddable.dynamicActions.state);
+export const MenuItem: React.FC<{ context: EnhancedEmbeddableContext }> = ({ context }) => {
+  const { events } = useContainerState(context.embeddable.enhancements.dynamicActions.state);
   const count = events.length;
 
   return (

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "types": [
       "node",
-      "mocha"
+      "mocha",
+      "flot"
     ],
     "lib": [
       "esnext",
@@ -18,6 +19,7 @@
     "typings/**/*"
   ],
   "exclude": [
-    "plugin_functional/plugins/**/*"
+    "plugin_functional/plugins/**/*",
+    "interpreter_functional/plugins/**/*"
   ]
 }

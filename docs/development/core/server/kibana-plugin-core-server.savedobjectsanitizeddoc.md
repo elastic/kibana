@@ -4,9 +4,10 @@
 
 ## SavedObjectSanitizedDoc type
 
+Describes Saved Object documents that have passed through the migration framework and are guaranteed to have a `references` root property.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+export declare type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;
 ```

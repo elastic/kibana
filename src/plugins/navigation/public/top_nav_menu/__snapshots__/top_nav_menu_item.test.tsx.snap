@@ -8,11 +8,6 @@ exports[`TopNavMenu Should render emphasized item which should be clickable 1`] 
   isDisabled={false}
   onClick={[Function]}
   size="s"
-  style={
-    Object {
-      "fontSize": "smaller",
-    }
-  }
 >
   Test
 </EuiButton>

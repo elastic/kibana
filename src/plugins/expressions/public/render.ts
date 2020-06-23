@@ -20,10 +20,11 @@
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { RenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
-import { getRenderersRegistry } from './services';
+import { ExpressionRenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
 import { IInterpreterRenderHandlers, ExpressionAstExpression } from '../common';
+
+import { getRenderersRegistry } from './services';
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
@@ -31,7 +32,7 @@ export interface ExpressionRenderHandlerParams {
   onRenderError: RenderErrorHandlerFnType;
 }
 
-interface Event {
+export interface ExpressionRendererEvent {
   name: string;
   data: any;
 }
@@ -44,7 +45,7 @@ interface UpdateValue {
 export class ExpressionRenderHandler {
   render$: Observable<number>;
   update$: Observable<UpdateValue | null>;
-  events$: Observable<Event>;
+  events$: Observable<ExpressionRendererEvent>;
 
   private element: HTMLElement;
   private destroyFn?: any;
@@ -62,12 +63,12 @@ export class ExpressionRenderHandler {
     this.element = element;
 
     this.eventsSubject = new Rx.Subject();
-    this.events$ = this.eventsSubject.asObservable() as Observable<Event>;
+    this.events$ = this.eventsSubject.asObservable() as Observable<ExpressionRendererEvent>;
 
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
     this.renderSubject = new Rx.BehaviorSubject(null as any | null);
-    this.render$ = this.renderSubject.asObservable().pipe(filter(_ => _ !== null)) as Observable<
+    this.render$ = this.renderSubject.asObservable().pipe(filter((_) => _ !== null)) as Observable<
       any
     >;
 
@@ -85,10 +86,10 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
-      update: params => {
+      update: (params) => {
         this.updateSubject.next(params);
       },
-      event: data => {
+      event: (data) => {
         this.eventsSubject.next(data);
       },
     };
@@ -139,7 +140,7 @@ export class ExpressionRenderHandler {
     return this.element;
   };
 
-  handleRenderError = (error: RenderError) => {
+  handleRenderError = (error: ExpressionRenderError) => {
     this.onRenderError(this.element, error, this.handlers);
   };
 }

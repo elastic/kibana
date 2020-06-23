@@ -14,6 +14,7 @@ import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
+import { customElementType, workpadType } from './saved_objects';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
@@ -29,15 +30,21 @@ export class CanvasPlugin implements Plugin {
   }
 
   public async setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+    coreSetup.savedObjects.registerType(customElementType);
+    coreSetup.savedObjects.registerType(workpadType);
+
     plugins.features.registerFeature({
       id: 'canvas',
       name: 'Canvas',
+      order: 400,
       icon: 'canvasApp',
       navLinkId: 'canvas',
       app: ['canvas', 'kibana'],
       catalogue: ['canvas'],
       privileges: {
         all: {
+          app: ['canvas', 'kibana'],
+          catalogue: ['canvas'],
           savedObject: {
             all: ['canvas-workpad', 'canvas-element'],
             read: ['index-pattern'],
@@ -45,6 +52,8 @@ export class CanvasPlugin implements Plugin {
           ui: ['save', 'show'],
         },
         read: {
+          app: ['canvas', 'kibana'],
+          catalogue: ['canvas'],
           savedObject: {
             all: [],
             read: ['index-pattern', 'canvas-workpad', 'canvas-element'],

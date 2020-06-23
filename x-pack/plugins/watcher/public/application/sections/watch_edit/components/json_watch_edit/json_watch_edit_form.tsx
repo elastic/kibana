@@ -23,13 +23,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
+import { useXJsonMode } from '../../../../shared_imports';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { goToWatchList } from '../../../../lib/navigation';
 import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
-
-import { useXJsonMode } from './use_x_json_mode';
 
 export const JsonWatchEditForm = () => {
   const {
@@ -41,7 +40,7 @@ export const JsonWatchEditForm = () => {
   const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(watch.watchString);
 
   const { errors } = watch.validate();
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);

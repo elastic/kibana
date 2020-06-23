@@ -52,7 +52,7 @@ The *Stack Monitoring* page in {kib} is empty.
 . Confirm that {kib} is seeking monitoring data from the appropriate {es} URL.
 By default, data is retrieved from the cluster specified in the 
 `elasticsearch.hosts` setting in the `kibana.yml` file. If you want to retrieve it
-from a different monitoring cluster, set `xpack.monitoring.elasticsearch.hosts`.
+from a different monitoring cluster, set `monitoring.ui.elasticsearch.hosts`.
 See <<monitoring-settings-kb>>.
 
 . Confirm that there is monitoring data available at that URL. It is stored in

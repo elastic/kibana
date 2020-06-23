@@ -88,6 +88,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     size="xl"
   />
   <EuiSwitch
+    disabled={false}
     label={
       <FormattedMessage
         defaultMessage="Apply calendar to all jobs"
@@ -149,7 +150,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        data-test-subj="ml_save_calendar_button"
+        data-test-subj="mlSaveCalendarButton"
         fill={true}
         isDisabled={true}
         onClick={[MockFunction]}

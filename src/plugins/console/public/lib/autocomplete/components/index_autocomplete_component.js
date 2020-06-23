@@ -17,14 +17,14 @@
  * under the License.
  */
 import _ from 'lodash';
-import mappings from '../../mappings/mappings';
+import { getIndices } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
 function nonValidIndexType(token) {
   return !(token === '_all' || token[0] !== '_');
 }
 export class IndexAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
-    super(name, mappings.getIndices, parent, multiValued);
+    super(name, getIndices, parent, multiValued);
   }
   validateTokens(tokens) {
     if (!this.multiValued && tokens.length > 1) {

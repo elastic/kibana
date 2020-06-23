@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,10 +18,12 @@ import {
 } from '@elastic/eui';
 import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
+import { IErrorObject } from '../../types';
+import { ClosablePopoverTitle } from './components';
 
 interface ThresholdExpressionProps {
   thresholdComparator: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedThresholdComparator: (selectedThresholdComparator?: string) => void;
   onChangeSelectedThreshold: (selectedThreshold?: number[]) => void;
   customComparators?: {
@@ -42,6 +43,7 @@ interface ThresholdExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const ThresholdExpression = ({
@@ -50,6 +52,7 @@ export const ThresholdExpression = ({
   onChangeSelectedThresholdComparator,
   onChangeSelectedThreshold,
   customComparators,
+  display = 'inline',
   threshold = [],
   popupPosition,
 }: ThresholdExpressionProps) => {
@@ -80,11 +83,12 @@ export const ThresholdExpression = ({
           onClick={() => {
             setAlertThresholdPopoverOpen(true);
           }}
-          color={
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={
             (errors.threshold0 && errors.threshold0.length) ||
-            (errors.threshold1 && errors.threshold1.length)
-              ? 'danger'
-              : 'secondary'
+            (errors.threshold1 && errors.threshold1.length) > 0
+              ? true
+              : false
           }
         />
       }
@@ -94,16 +98,19 @@ export const ThresholdExpression = ({
       }}
       ownFocus
       withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>{comparators[thresholdComparator].text}</EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAlertThresholdPopoverOpen(false)}>
+          <>{comparators[thresholdComparator].text}</>
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSelect
               data-test-subj="comparatorOptionsComboBox"
               value={thresholdComparator}
-              onChange={e => {
+              onChange={(e) => {
                 onChangeSelectedThresholdComparator(e.target.value);
                 const thresholdValues = threshold.slice(
                   0,
@@ -137,7 +144,7 @@ export const ThresholdExpression = ({
                       min={0}
                       value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
                       isInvalid={errors[`threshold${i}`].length > 0 || !threshold[i]}
-                      onChange={e => {
+                      onChange={(e) => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;
                         const newThreshold = [...threshold];

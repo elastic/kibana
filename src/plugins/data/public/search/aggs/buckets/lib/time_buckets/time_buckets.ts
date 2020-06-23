@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import moment from 'moment';
+import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
+import moment, { Moment } from 'moment';
 
-import { IUiSettingsClient } from 'src/core/public';
 import { parseInterval } from '../../../../../../common';
+import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
@@ -29,37 +29,30 @@ import {
   EsInterval,
 } from './calc_es_interval';
 
-interface Bounds {
-  min: Date | number | null;
-  max: Date | number | null;
-}
-
 interface TimeBucketsInterval extends moment.Duration {
   // TODO double-check whether all of these are needed
   description: string;
   esValue: EsInterval['value'];
   esUnit: EsInterval['unit'];
   expression: EsInterval['expression'];
-  overflow: moment.Duration | boolean;
-  preScaled?: moment.Duration;
+  preScaled?: TimeBucketsInterval;
   scale?: number;
   scaled?: boolean;
 }
 
 function isObject(o: any): o is Record<string, any> {
-  return _.isObject(o);
-}
-
-function isString(s: any): s is string {
-  return _.isString(s);
+  return isObjectLodash(o);
 }
 
 function isValidMoment(m: any): boolean {
   return m && 'isValid' in m && m.isValid();
 }
 
-interface TimeBucketsConfig {
-  uiSettings: IUiSettingsClient;
+export interface TimeBucketsConfig {
+  'histogram:maxBars': number;
+  'histogram:barTarget': number;
+  dateFormat: string;
+  'dateFormat:scaled': string[][];
 }
 
 /**
@@ -70,108 +63,17 @@ interface TimeBucketsConfig {
  * @param {[type]} display [description]
  */
 export class TimeBuckets {
-  private getConfig: (key: string) => any;
-
-  private _lb: Bounds['min'] = null;
-  private _ub: Bounds['max'] = null;
+  private _timeBucketConfig: TimeBucketsConfig;
+  private _lb: TimeRangeBounds['min'];
+  private _ub: TimeRangeBounds['max'];
   private _originalInterval: string | null = null;
   private _i?: moment.Duration | 'auto';
 
   // because other parts of Kibana arbitrarily add properties
   [key: string]: any;
 
-  static __cached__(self: TimeBuckets) {
-    let cache: any = {};
-    const sameMoment = same(moment.isMoment);
-    const sameDuration = same(moment.isDuration);
-
-    const desc: Record<string, any> = {
-      __cached__: {
-        value: self,
-      },
-    };
-
-    const breakers: Record<string, string> = {
-      setBounds: 'bounds',
-      clearBounds: 'bounds',
-      setInterval: 'interval',
-    };
-
-    const resources: Record<string, any> = {
-      bounds: {
-        setup() {
-          return [self._lb, self._ub];
-        },
-        changes(prev: any) {
-          return !sameMoment(prev[0], self._lb) || !sameMoment(prev[1], self._ub);
-        },
-      },
-      interval: {
-        setup() {
-          return self._i;
-        },
-        changes(prev: any) {
-          return !sameDuration(prev, self._i);
-        },
-      },
-    };
-
-    function cachedGetter(prop: string) {
-      return {
-        value: (...rest: any) => {
-          if (cache.hasOwnProperty(prop)) {
-            return cache[prop];
-          }
-
-          return (cache[prop] = self[prop](...rest));
-        },
-      };
-    }
-
-    function cacheBreaker(prop: string) {
-      const resource = resources[breakers[prop]];
-      const setup = resource.setup;
-      const changes = resource.changes;
-      const fn = self[prop];
-
-      return {
-        value: (...args: any) => {
-          const prev = setup.call(self);
-          const ret = fn.apply(self, ...args);
-
-          if (changes.call(self, prev)) {
-            cache = {};
-          }
-
-          return ret;
-        },
-      };
-    }
-
-    function same(checkType: any) {
-      return function(a: any, b: any) {
-        if (a === b) return true;
-        if (checkType(a) === checkType(b)) return +a === +b;
-        return false;
-      };
-    }
-
-    _.forOwn(TimeBuckets.prototype, (fn, prop) => {
-      if (!prop || prop[0] === '_') return;
-
-      if (breakers.hasOwnProperty(prop)) {
-        desc[prop] = cacheBreaker(prop);
-      } else {
-        desc[prop] = cachedGetter(prop);
-      }
-    });
-
-    return Object.create(self, desc);
-  }
-
-  constructor({ uiSettings }: TimeBucketsConfig) {
-    this.getConfig = (key: string) => uiSettings.get(key);
-    return TimeBuckets.__cached__(this);
+  constructor(timeBucketConfig: TimeBucketsConfig) {
+    this._timeBucketConfig = timeBucketConfig;
   }
 
   /**
@@ -182,10 +84,10 @@ export class TimeBuckets {
    * @return {moment.duration|undefined}
    */
   private getDuration(): moment.Duration | undefined {
-    if (this._ub === null || this._lb === null || !this.hasBounds()) {
+    if (this._ub === undefined || this._lb === undefined || !this.hasBounds()) {
       return;
     }
-    const difference = (this._ub as number) - (this._lb as number);
+    const difference = this._ub.valueOf() - this._lb.valueOf();
     return moment.duration(difference, 'ms');
   }
 
@@ -200,22 +102,20 @@ export class TimeBuckets {
    *
    * @returns {undefined}
    */
-  setBounds(input?: Bounds | Bounds[]) {
+  setBounds(input?: TimeRangeBounds | TimeRangeBounds[]) {
     if (!input) return this.clearBounds();
 
     let bounds;
-    if (_.isPlainObject(input) && !Array.isArray(input)) {
+    if (isPlainObject(input) && !Array.isArray(input)) {
       // accept the response from timefilter.getActiveBounds()
       bounds = [input.min, input.max];
     } else {
       bounds = Array.isArray(input) ? input : [];
     }
 
-    const moments = _(bounds)
-      .map(_.ary(moment, 1))
-      .sortBy(Number);
+    const moments: Moment[] = sortBy(bounds, Number);
 
-    const valid = moments.size() === 2 && moments.every(isValidMoment);
+    const valid = moments.length === 2 && moments.every(isValidMoment);
     if (!valid) {
       this.clearBounds();
       throw new Error('invalid bounds set: ' + input);
@@ -236,7 +136,7 @@ export class TimeBuckets {
    * @return {undefined}
    */
   clearBounds() {
-    this._lb = this._ub = null;
+    this._lb = this._ub = undefined;
   }
 
   /**
@@ -262,7 +162,7 @@ export class TimeBuckets {
    *                      object
    *
    */
-  getBounds(): Bounds | undefined {
+  getBounds(): TimeRangeBounds | undefined {
     if (!this.hasBounds()) return;
     return {
       min: this._lb,
@@ -278,11 +178,10 @@ export class TimeBuckets {
    *  - Any object from src/legacy/ui/agg_types.js
    *  - "auto"
    *  - Pass a valid moment unit
-   *  - a moment.duration object.
    *
    * @param {object|string|moment.duration} input - see desc
    */
-  setInterval(input: null | string | Record<string, any> | moment.Duration) {
+  setInterval(input: null | string | Record<string, any>) {
     let interval = input;
 
     // selection object -> val
@@ -351,7 +250,7 @@ export class TimeBuckets {
     const readInterval = () => {
       const interval = this._i;
       if (moment.isDuration(interval)) return interval;
-      return calcAutoIntervalNear(this.getConfig('histogram:barTarget'), Number(duration));
+      return calcAutoIntervalNear(this._timeBucketConfig['histogram:barTarget'], Number(duration));
     };
 
     const parsedInterval = readInterval();
@@ -362,7 +261,7 @@ export class TimeBuckets {
         return interval;
       }
 
-      const maxLength: number = this.getConfig('histogram:maxBars');
+      const maxLength: number = this._timeBucketConfig['histogram:maxBars'];
       const approxLen = Number(duration) / Number(interval);
 
       let scaled;
@@ -396,10 +295,6 @@ export class TimeBuckets {
         esValue: esInterval.value,
         esUnit: esInterval.unit,
         expression: esInterval.expression,
-        overflow:
-          Number(duration) > Number(interval)
-            ? moment.duration(Number(interval) - Number(duration))
-            : false,
       });
     };
 
@@ -423,7 +318,7 @@ export class TimeBuckets {
    */
   getScaledDateFormat() {
     const interval = this.getInterval();
-    const rules = this.getConfig('dateFormat:scaled');
+    const rules = this._timeBucketConfig['dateFormat:scaled'];
 
     for (let i = rules.length - 1; i >= 0; i--) {
       const rule = rules[i];
@@ -432,6 +327,6 @@ export class TimeBuckets {
       }
     }
 
-    return this.getConfig('dateFormat');
+    return this._timeBucketConfig.dateFormat;
   }
 }

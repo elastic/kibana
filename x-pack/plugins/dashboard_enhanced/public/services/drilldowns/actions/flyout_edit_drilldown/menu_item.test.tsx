@@ -7,10 +7,9 @@
 import React from 'react';
 import { render, cleanup, act } from '@testing-library/react/pure';
 import { MenuItem } from './menu_item';
-import { createStateContainer } from '../../../../../../../../src/plugins/kibana_utils/common';
-import { DynamicActionManager } from '../../../../../../../../src/plugins/ui_actions/public';
-import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public/lib/embeddables';
-import '@testing-library/jest-dom';
+import { createStateContainer } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '../../../../../../ui_actions_enhanced/public';
+import { EnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
 
 afterEach(cleanup);
 
@@ -20,8 +19,10 @@ test('<MenuItem/>', () => {
     <MenuItem
       context={{
         embeddable: ({
-          dynamicActions: ({ state } as unknown) as DynamicActionManager,
-        } as unknown) as IEmbeddable,
+          enhancements: {
+            dynamicActions: ({ state } as unknown) as DynamicActionManager,
+          },
+        } as unknown) as EnhancedEmbeddable,
       }}
     />
   );

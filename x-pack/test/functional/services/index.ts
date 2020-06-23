@@ -49,6 +49,11 @@ import { InfraSourceConfigurationFormProvider } from './infra_source_configurati
 import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
+import {
+  DashboardDrilldownPanelActionsProvider,
+  DashboardDrilldownsManageProvider,
+  DashboardPanelTimeRangeProvider,
+} from './dashboard';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -91,4 +96,7 @@ export const services = {
   logsUi: LogsUiProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
+  dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
+  dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
+  dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
 };

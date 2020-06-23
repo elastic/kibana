@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-fields: IFieldList;
+fields: IIndexPatternFieldList;
 ```

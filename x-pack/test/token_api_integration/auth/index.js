@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('token-based auth', function() {
+export default function ({ loadTestFile }) {
+  describe('token-based auth', function () {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./login'));
     loadTestFile(require.resolve('./logout'));

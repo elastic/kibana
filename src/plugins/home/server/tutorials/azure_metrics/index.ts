@@ -36,7 +36,7 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.azureMetrics.nameTitle', {
       defaultMessage: 'Azure metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.azureMetrics.shortDescription', {
       defaultMessage: 'Fetch Azure Monitor metrics.',
@@ -51,18 +51,21 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
     }),
     euiIconType: 'logoAzure',
     artifacts: {
-      application: {
-        label: i18n.translate('home.tutorials.azureMetrics.artifacts.application.label', {
-          defaultMessage: 'Discover',
-        }),
-        path: '/app/kibana#/discover',
-      },
-      dashboards: [],
+      dashboards: [
+        {
+          id: 'eb3f05f0-ea9a-11e9-90ec-112a988266d5',
+          linkLabel: i18n.translate('home.tutorials.azureMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Azure metrics dashboard',
+          }),
+          isOverview: true,
+        },
+      ],
       exportedFields: {
         documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-azure.html',
       },
     },
     completionTimeMinutes: 10,
+    previewImagePath: '/plugins/home/assets/azure_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

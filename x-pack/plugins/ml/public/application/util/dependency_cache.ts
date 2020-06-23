@@ -39,7 +39,7 @@ export interface DependencyCache {
   savedObjectsClient: SavedObjectsClientContract | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
-  security: SecurityPluginSetup | null;
+  security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;
 }
@@ -204,7 +204,7 @@ export function getGetUrlGenerator() {
 
 export function clearCache() {
   console.log('clearing dependency cache'); // eslint-disable-line no-console
-  Object.keys(cache).forEach(k => {
+  Object.keys(cache).forEach((k) => {
     cache[k as keyof DependencyCache] = null;
   });
 }

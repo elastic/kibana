@@ -12,7 +12,7 @@ import { useResolver } from '../../use_resolver';
 import { Page } from '../../../datavisualizer/index_based';
 
 import { checkBasicLicense } from '../../../license';
-import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
+import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
@@ -39,7 +39,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { context } = useResolver(index, savedSearchId, deps.config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
-    checkGetJobsPrivilege,
+    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
     checkMlNodesAvailable,
   });
 

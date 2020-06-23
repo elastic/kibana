@@ -51,7 +51,7 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
 
   let fields: string[] = [];
   for (const field of searchFields) {
-    fields = fields.concat(types.map(prefix => `${prefix}.${field}`));
+    fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
   }
 
   return { fields };
@@ -66,18 +66,26 @@ function getClauseForType(
   namespace: string | undefined,
   type: string
 ) {
-  if (namespace && !registry.isNamespaceAgnostic(type)) {
+  if (registry.isMultiNamespace(type)) {
+    return {
+      bool: {
+        must: [{ term: { type } }, { term: { namespaces: namespace ?? 'default' } }],
+        must_not: [{ exists: { field: 'namespace' } }],
+      },
+    };
+  } else if (namespace && registry.isSingleNamespace(type)) {
     return {
       bool: {
         must: [{ term: { type } }, { term: { namespace } }],
+        must_not: [{ exists: { field: 'namespaces' } }],
       },
     };
   }
-
+  // isSingleNamespace in the default namespace, or isNamespaceAgnostic
   return {
     bool: {
       must: [{ term: { type } }],
-      must_not: [{ exists: { field: 'namespace' } }],
+      must_not: [{ exists: { field: 'namespace' } }, { exists: { field: 'namespaces' } }],
     },
   };
 }
@@ -144,7 +152,7 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map(shouldType => getClauseForType(registry, namespace, shouldType)),
+          should: types.map((shouldType) => getClauseForType(registry, namespace, shouldType)),
           minimum_should_match: 1,
         },
       },

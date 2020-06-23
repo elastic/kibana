@@ -13,7 +13,7 @@ Setup interface exposed to the legacy platform via the `ui/new_platform` module.
 <b>Signature:</b>
 
 ```typescript
-export interface LegacyCoreSetup extends CoreSetup<any> 
+export interface LegacyCoreSetup extends CoreSetup<any, any> 
 ```
 
 ## Remarks

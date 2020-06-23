@@ -21,6 +21,16 @@ import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
+import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
+
+export interface AggParamsGeoCentroid extends BaseAggParams {
+  field: string;
+}
+
+export interface GeoCentroidMetricAggDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
 
 const geoCentroidTitle = i18n.translate('data.search.aggs.metrics.geoCentroidTitle', {
   defaultMessage: 'Geo Centroid',
@@ -30,18 +40,27 @@ const geoCentroidLabel = i18n.translate('data.search.aggs.metrics.geoCentroidLab
   defaultMessage: 'Geo Centroid',
 });
 
-export const geoCentroidMetricAgg = new MetricAggType({
-  name: METRIC_TYPES.GEO_CENTROID,
-  title: geoCentroidTitle,
-  makeLabel: () => geoCentroidLabel,
-  params: [
+export const getGeoCentroidMetricAgg = ({
+  getInternalStartServices,
+}: GeoCentroidMetricAggDependencies) => {
+  return new MetricAggType(
     {
-      name: 'field',
-      type: 'field',
-      filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
+      name: METRIC_TYPES.GEO_CENTROID,
+      title: geoCentroidTitle,
+      makeLabel: () => geoCentroidLabel,
+      params: [
+        {
+          name: 'field',
+          type: 'field',
+          filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
+        },
+      ],
+      getValue(agg, bucket) {
+        return bucket[agg.id] && bucket[agg.id].location;
+      },
     },
-  ],
-  getValue(agg, bucket) {
-    return bucket[agg.id] && bucket[agg.id].location;
-  },
-});
+    {
+      getInternalStartServices,
+    }
+  );
+};

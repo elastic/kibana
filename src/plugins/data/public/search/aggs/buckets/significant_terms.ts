@@ -18,59 +18,80 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
+import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const significantTermsTitle = i18n.translate('data.search.aggs.buckets.significantTermsTitle', {
   defaultMessage: 'Significant Terms',
 });
 
-export const significantTermsBucketAgg = new BucketAggType({
-  name: BUCKET_TYPES.SIGNIFICANT_TERMS,
-  title: significantTermsTitle,
-  makeLabel(aggConfig) {
-    return i18n.translate('data.search.aggs.buckets.significantTermsLabel', {
-      defaultMessage: 'Top {size} unusual terms in {fieldName}',
-      values: {
-        size: aggConfig.params.size,
-        fieldName: aggConfig.getFieldDisplayName(),
+export interface SignificantTermsBucketAggDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export interface AggParamsSignificantTerms extends BaseAggParams {
+  field: string;
+  size?: number;
+  exclude?: string;
+  include?: string;
+}
+
+export const getSignificantTermsBucketAgg = ({
+  getInternalStartServices,
+}: SignificantTermsBucketAggDependencies) =>
+  new BucketAggType(
+    {
+      name: BUCKET_TYPES.SIGNIFICANT_TERMS,
+      title: significantTermsTitle,
+      makeLabel(aggConfig) {
+        return i18n.translate('data.search.aggs.buckets.significantTermsLabel', {
+          defaultMessage: 'Top {size} unusual terms in {fieldName}',
+          values: {
+            size: aggConfig.params.size,
+            fieldName: aggConfig.getFieldDisplayName(),
+          },
+        });
       },
-    });
-  },
-  createFilter: createFilterTerms,
-  params: [
-    {
-      name: 'field',
-      type: 'field',
-      scriptable: false,
-      filterFieldTypes: KBN_FIELD_TYPES.STRING,
+      createFilter: createFilterTerms,
+      params: [
+        {
+          name: 'field',
+          type: 'field',
+          scriptable: false,
+          filterFieldTypes: KBN_FIELD_TYPES.STRING,
+        },
+        {
+          name: 'size',
+          default: '',
+        },
+        {
+          name: 'exclude',
+          displayName: i18n.translate('data.search.aggs.buckets.significantTerms.excludeLabel', {
+            defaultMessage: 'Exclude',
+          }),
+          type: 'string',
+          advanced: true,
+          shouldShow: isStringType,
+          ...migrateIncludeExcludeFormat,
+        },
+        {
+          name: 'include',
+          displayName: i18n.translate('data.search.aggs.buckets.significantTerms.includeLabel', {
+            defaultMessage: 'Include',
+          }),
+          type: 'string',
+          advanced: true,
+          shouldShow: isStringType,
+          ...migrateIncludeExcludeFormat,
+        },
+      ],
     },
     {
-      name: 'size',
-      default: '',
-    },
-    {
-      name: 'exclude',
-      displayName: i18n.translate('data.search.aggs.buckets.significantTerms.excludeLabel', {
-        defaultMessage: 'Exclude',
-      }),
-      type: 'string',
-      advanced: true,
-      shouldShow: isStringType,
-      ...migrateIncludeExcludeFormat,
-    },
-    {
-      name: 'include',
-      displayName: i18n.translate('data.search.aggs.buckets.significantTerms.includeLabel', {
-        defaultMessage: 'Include',
-      }),
-      type: 'string',
-      advanced: true,
-      shouldShow: isStringType,
-      ...migrateIncludeExcludeFormat,
-    },
-  ],
-});
+      getInternalStartServices,
+    }
+  );

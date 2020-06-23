@@ -1,0 +1,104 @@
+.visEditor--default {
+  flex: 1 1 auto;
+  display: flex;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    flex-direction: column;
+  }
+}
+
+/**
+ * Collapsible sidebar container
+ */
+
+.visEditor__collapsibleSidebar {
+  background: $euiColorLightestShade;
+  min-width: $vis-editor-sidebar-min-width;
+  max-width: 100%;
+  position: relative;
+  flex-shrink: 0;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    // If we are on a small screen we force the editor to take 100% width.
+    width: 100% !important;
+  }
+
+  @include euiBreakpoint('l', 'xl') {
+    max-width: 75%;
+  }
+}
+
+// !importants on width are required to override resizable panel inline widths
+.visEditor__collapsibleSidebar-isClosed {
+  min-width: 0;
+  width: $euiSizeXL !important; // Just enough room for the collapse button
+
+  .visEditorSidebar {
+    display: none;
+  }
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    height: $euiSizeXXL; // Just enough room for the collapse button
+    width: 100% !important;
+  }
+}
+
+.visEditor__collapsibleSidebarButton {
+  position: absolute;
+  right: $euiSizeXS;
+  top: $euiSizeS;
+}
+
+/**
+ * Resizer
+ */
+
+.visEditor__resizer {
+  @include kbnResizer($euiSizeM);
+  @include euiBreakpoint('xs', 's', 'm') {
+    display: none;
+  }
+}
+
+.visEditor__resizer-isHidden {
+  display: none;
+}
+
+/**
+ * Canvas area
+ */
+
+.visEditor__visualization {
+  display: flex;
+  flex: 1 1 auto; // Fixes IE bug: the editor overflows a visualization on small screens
+  overflow: hidden;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    // If we are on a small screen we force the visualization to take 100% width.
+    width: 100% !important;
+  }
+}
+
+.visEditor__canvas {
+  background-color: $euiColorEmptyShade;
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+  flex-shrink: 1;
+  flex-basis: 100%;
+
+  &.embedded {
+    flex-shrink: 1;
+    flex-basis: 100%;
+  }
+
+  .visualize {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 100%;
+  }
+
+  .visChart {
+    position: relative;
+  }
+}

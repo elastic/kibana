@@ -28,6 +28,6 @@ import { words } from 'lodash';
  */
 export function getAriaName(name?: string) {
   return words(name || '')
-    .map(word => word.toLowerCase())
+    .map((word) => word.toLowerCase())
     .join(' ');
 }

@@ -30,14 +30,14 @@ export function createTimeSeriesQueryRoute(service: Service, router: IRouter, ba
   );
   async function handler(
     ctx: RequestHandlerContext,
-    req: KibanaRequest<any, any, TimeSeriesQuery, any>,
+    req: KibanaRequest<unknown, unknown, TimeSeriesQuery>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     service.logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
     const result = await service.indexThreshold.timeSeriesQuery({
       logger: service.logger,
-      callCluster: ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+      callCluster: ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
       query: req.body,
     });
 

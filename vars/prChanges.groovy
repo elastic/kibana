@@ -1,12 +1,14 @@
 import groovy.transform.Field
 
-public static @Field PR_CHANGES_CACHE = null
+public static @Field PR_CHANGES_CACHE = []
 
 def getSkippablePaths() {
   return [
     /^docs\//,
     /^rfcs\//,
     /^.ci\/.+\.yml$/,
+    /^.ci\/es-snapshots\//,
+    /^.ci\/pipeline-library\//,
     /^\.github\//,
     /\.md$/,
   ]
@@ -41,7 +43,10 @@ def areChangesSkippable() {
 def getChanges() {
   if (!PR_CHANGES_CACHE && env.ghprbPullId) {
     withGithubCredentials {
-      PR_CHANGES_CACHE = githubPrs.getChanges(env.ghprbPullId)
+      def changes = githubPrs.getChanges(env.ghprbPullId)
+      if (changes) {
+        PR_CHANGES_CACHE.addAll(changes)
+      }
     }
   }
 

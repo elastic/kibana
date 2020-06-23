@@ -95,7 +95,7 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
           {
             id: 'home',
             name: 'Home',
-            onClick: () => history.push('/'),
+            onClick: () => history.push(''),
             'data-test-subj': 'fooNavHome',
           },
           {

@@ -43,18 +43,25 @@ export function migrateFilter(filter: Filter, indexPattern?: IIndexPattern) {
   if (isDeprecatedMatchPhraseFilter(filter)) {
     const fieldName = Object.keys(filter.query.match)[0];
     const params: Record<string, any> = get(filter, ['query', 'match', fieldName]);
+    let query = params.query;
     if (indexPattern) {
-      const field = indexPattern.fields.find(f => f.name === fieldName);
+      const field = indexPattern.fields.find((f) => f.name === fieldName);
 
       if (field) {
-        params.query = getConvertedValueForField(field, params.query);
+        query = getConvertedValueForField(field, params.query);
       }
     }
     return {
       ...filter,
       query: {
         match_phrase: {
-          [fieldName]: omit(params, 'type'),
+          [fieldName]: omit(
+            {
+              ...params,
+              query,
+            },
+            'type'
+          ),
         },
       },
     };

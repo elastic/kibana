@@ -19,7 +19,7 @@
 import { Type } from '@kbn/config-schema';
 import pkg from '../../../../package.json';
 
-export const createTestEntryTemplate = defaultUiSettings => bundle => `
+export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
 /**
  * Test entry file
  *
@@ -135,7 +135,16 @@ const coreSystem = new CoreSystem({
     },
   },
   rootDomElement,
-  useLegacyTestHarness: true,
+  requireLegacyBootstrapModule: () => {
+    // wrapped in NODE_ENV check so the 'ui/test_harness' module	
+    // is not included in the distributable
+    if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true') {	
+      return require('ui/test_harness');	
+    }	
+
+    throw new Error('tests bundle is not available in the distributable');
+  },
+  requireNewPlatformShimModule: () => require('ui/new_platform'),
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }

@@ -49,7 +49,8 @@ export default async (kbnServer, kibanaHapiServer, config) => {
     config.get('optimize.watchPort'),
     config.get('server.basePath'),
     watchOptimizer,
-    getNpUiPluginPublicDirs(kbnServer)
+    getNpUiPluginPublicDirs(kbnServer),
+    kbnServer.newPlatform.env.packageInfo.buildNum.toString()
   );
 
   watchOptimizer.status$.subscribe({
@@ -70,7 +71,7 @@ export default async (kbnServer, kibanaHapiServer, config) => {
     process.send(['WORKER_BROADCAST', { optimizeReady: ready }]);
   };
 
-  process.on('message', msg => {
+  process.on('message', (msg) => {
     if (msg && msg.optimizeReady === '?') sendReady();
   });
 

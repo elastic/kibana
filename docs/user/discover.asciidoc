@@ -21,10 +21,11 @@ image::images/Discover-Start.png[Discover]
 
 
 [float]
+[[select-pattern]]
 === Set up your index pattern
 
 The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>, which
-defines the data you want to explore and visualize. The current index pattern is in the upper left.
+defines the data you want to explore and visualize.
 If you haven't yet created an index pattern, you can add a <<add-sample-data, sample data set>>,
 which has a pre-built index pattern.
 
@@ -33,7 +34,7 @@ which has a pre-built index pattern.
 
 By default, *Discover* shows data for the last 15 minutes.
 If you have a time-based index, and no data displays,
-you might need to increase the time range. Using the <<set-time-filter, time filter>> in the upper right,
+you might need to increase the time range. Using the <<set-time-filter, time filter>>,
 you can specify a common or recently-used time range, a relative time
 from now, or an absolute time range.
 
@@ -69,7 +70,7 @@ image::images/filter-field.png[height=317]
 The sortable documents table
 lists the documents that match your search.
 By default, the table includes columns for the time field and the document `_source`.
-To zero in on a specific field, click *add* next to the field name in the left sidebar.
+To zero in on a specific field, click *add* next to the field name.
 For example, if you add the `currency`, `customer_last_name`, and `day_of_week` fields,
 the document table includes columns for those three fields.
 

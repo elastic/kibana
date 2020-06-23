@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');
@@ -35,13 +35,11 @@ export default function({ getService, getPageObjects }) {
 
     it('shows example pipelines', async () => {
       const rows = await pipelineList.readRows();
-      const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
+      const rowsWithoutTime = rows.map((row) => omit(row, 'lastModified'));
 
-      for (const time of rows.map(row => row.lastModified)) {
+      for (const time of rows.map((row) => row.lastModified)) {
         // last modified is a relative time string. Check for 'ago' suffix
-        expect(time)
-          .to.be.a('string')
-          .match(/ ago$/);
+        expect(time).to.be.a('string').match(/ ago$/);
       }
 
       const expectedRows = [
@@ -137,13 +135,11 @@ export default function({ getService, getPageObjects }) {
       it('takes user to the second page', async () => {
         await pipelineList.clickNextPage();
         const rows = await pipelineList.readRows();
-        const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
+        const rowsWithoutTime = rows.map((row) => omit(row, 'lastModified'));
 
-        for (const time of rows.map(row => row.lastModified)) {
+        for (const time of rows.map((row) => row.lastModified)) {
           // last modified is a relative time string. Check for 'ago' suffix
-          expect(time)
-            .to.be.a('string')
-            .match(/ ago$/);
+          expect(time).to.be.a('string').match(/ ago$/);
         }
 
         expect(rowsWithoutTime).to.eql([

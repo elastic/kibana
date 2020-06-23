@@ -20,7 +20,7 @@
 if (process.noProcessWarnings !== true) {
   var ignore = ['MaxListenersExceededWarning'];
 
-  process.on('warning', function(warn) {
+  process.on('warning', function (warn) {
     if (ignore.includes(warn.name)) return;
 
     if (process.traceProcessWarnings === true) {
@@ -39,7 +39,7 @@ if (process.noProcessWarnings !== true) {
   // While the above warning listener would also be called on
   // unhandledRejection warnings, we can give a better error message if we
   // handle them separately:
-  process.on('unhandledRejection', function(reason) {
+  process.on('unhandledRejection', function (reason) {
     console.error('Unhandled Promise rejection detected:');
     console.error();
     console.error(reason);

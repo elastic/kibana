@@ -17,29 +17,51 @@
  * under the License.
  */
 
-import { derivativeMetricAgg } from './derivative';
-import { cumulativeSumMetricAgg } from './cumulative_sum';
-import { movingAvgMetricAgg } from './moving_avg';
-import { serialDiffMetricAgg } from './serial_diff';
+import { getDerivativeMetricAgg } from './derivative';
+import { getCumulativeSumMetricAgg } from './cumulative_sum';
+import { getMovingAvgMetricAgg } from './moving_avg';
+import { getSerialDiffMetricAgg } from './serial_diff';
 import { AggConfigs } from '../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { GetInternalStartServicesFn, InternalStartServices } from '../../../types';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
-describe('parent pipeline aggs', function() {
-  beforeEach(() => {
-    mockDataServices();
-  });
+describe('parent pipeline aggs', function () {
+  const getInternalStartServices: GetInternalStartServicesFn = () =>
+    (({
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      notifications: notificationServiceMock.createStartContract(),
+    } as unknown) as InternalStartServices);
 
   const typesRegistry = mockAggTypesRegistry();
 
   const metrics = [
-    { name: 'derivative', title: 'Derivative', provider: derivativeMetricAgg },
-    { name: 'cumulative_sum', title: 'Cumulative Sum', provider: cumulativeSumMetricAgg },
-    { name: 'moving_avg', title: 'Moving Avg', provider: movingAvgMetricAgg, dslName: 'moving_fn' },
-    { name: 'serial_diff', title: 'Serial Diff', provider: serialDiffMetricAgg },
+    {
+      name: 'derivative',
+      title: 'Derivative',
+      provider: getDerivativeMetricAgg({ getInternalStartServices }),
+    },
+    {
+      name: 'cumulative_sum',
+      title: 'Cumulative Sum',
+      provider: getCumulativeSumMetricAgg({ getInternalStartServices }),
+    },
+    {
+      name: 'moving_avg',
+      title: 'Moving Avg',
+      provider: getMovingAvgMetricAgg({ getInternalStartServices }),
+      dslName: 'moving_fn',
+    },
+    {
+      name: 'serial_diff',
+      title: 'Serial Diff',
+      provider: getSerialDiffMetricAgg({ getInternalStartServices }),
+    },
   ];
 
-  metrics.forEach(metric => {
+  metrics.forEach((metric) => {
     describe(`${metric.title} metric`, () => {
       let aggDsl: Record<string, any>;
       let metricAgg: MetricAggType;
@@ -89,7 +111,7 @@ describe('parent pipeline aggs', function() {
               schema: 'metric',
             },
           ],
-          { typesRegistry }
+          { typesRegistry, fieldFormats: getInternalStartServices().fieldFormats }
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -221,7 +243,7 @@ describe('parent pipeline aggs', function() {
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
         customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
 
-        aggConfig.type.params.forEach(param => {
+        aggConfig.type.params.forEach((param) => {
           param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
         });
         expect(customMetricSpy.mock.calls[0]).toEqual([customMetric, searchSource, {}]);

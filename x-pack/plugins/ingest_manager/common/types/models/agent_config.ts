@@ -3,14 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { SavedObjectAttributes } from 'src/core/public';
-import {
-  Datasource,
-  DatasourcePackage,
-  DatasourceInput,
-  DatasourceInputStream,
-} from './datasource';
+import { Datasource, DatasourcePackage, DatasourceInputStream } from './datasource';
 import { Output } from './output';
 
 export enum AgentConfigStatus {
@@ -23,31 +16,35 @@ export interface NewAgentConfig {
   namespace?: string;
   description?: string;
   is_default?: boolean;
+  monitoring_enabled?: Array<'logs' | 'metrics'>;
 }
 
-export interface AgentConfig extends NewAgentConfig, SavedObjectAttributes {
+export interface AgentConfig extends NewAgentConfig {
   id: string;
   status: AgentConfigStatus;
   datasources: string[] | Datasource[];
-  updated_on: string;
+  updated_at: string;
   updated_by: string;
   revision: number;
 }
 
-export type FullAgentConfigDatasource = Pick<Datasource, 'namespace' | 'enabled'> & {
-  id: string;
-  package?: Pick<DatasourcePackage, 'name' | 'version'>;
-  use_output: string;
-  inputs: Array<
-    Omit<DatasourceInput, 'streams'> & {
-      streams: Array<
-        Omit<DatasourceInputStream, 'config'> & {
-          [key: string]: any;
-        }
-      >;
-    }
-  >;
+export type AgentConfigSOAttributes = Omit<AgentConfig, 'id'>;
+
+export type FullAgentConfigInputStream = Pick<DatasourceInputStream, 'id' | 'processors'> & {
+  dataset: { name: string };
+  [key: string]: any;
 };
+
+export interface FullAgentConfigInput {
+  id: string;
+  name: string;
+  type: string;
+  dataset: { namespace: string };
+  use_output: string;
+  package?: Pick<DatasourcePackage, 'name' | 'version'>;
+  streams: FullAgentConfigInputStream[];
+  [key: string]: any;
+}
 
 export interface FullAgentConfig {
   id: string;
@@ -56,6 +53,14 @@ export interface FullAgentConfig {
       [key: string]: any;
     };
   };
-  datasources: FullAgentConfigDatasource[];
+  inputs: FullAgentConfigInput[];
   revision?: number;
+  settings?: {
+    monitoring: {
+      use_output?: string;
+      enabled: boolean;
+      metrics: boolean;
+      logs: boolean;
+    };
+  };
 }

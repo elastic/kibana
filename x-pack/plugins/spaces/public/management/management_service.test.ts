@@ -10,6 +10,8 @@ import { spacesManagerMock } from '../spaces_manager/mocks';
 import { managementPluginMock } from '../../../../../src/plugins/management/public/mocks';
 import { ManagementSection } from 'src/plugins/management/public';
 import { Capabilities } from 'kibana/public';
+import { PluginsStart } from '../plugin';
+import { CoreSetup } from 'src/core/public';
 
 describe('ManagementService', () => {
   describe('#setup', () => {
@@ -19,7 +21,9 @@ describe('ManagementService', () => {
       } as unknown) as ManagementSection;
       const deps = {
         management: managementPluginMock.createSetupContract(),
-        getStartServices: coreMock.createSetup().getStartServices,
+        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
+          PluginsStart
+        >['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
@@ -35,7 +39,7 @@ describe('ManagementService', () => {
       expect(mockKibanaSection.registerApp).toHaveBeenCalledWith({
         id: 'spaces',
         title: 'Spaces',
-        order: 10,
+        order: 2,
         mount: expect.any(Function),
       });
     });
@@ -43,7 +47,9 @@ describe('ManagementService', () => {
     it('will not crash if the kibana section is missing', () => {
       const deps = {
         management: managementPluginMock.createSetupContract(),
-        getStartServices: coreMock.createSetup().getStartServices,
+        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
+          PluginsStart
+        >['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
@@ -61,11 +67,13 @@ describe('ManagementService', () => {
 
       const deps = {
         management: managementPluginMock.createSetupContract(),
-        getStartServices: coreMock.createSetup().getStartServices,
+        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
+          PluginsStart
+        >['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
-      deps.management.sections.getSection.mockImplementation(id => {
+      deps.management.sections.getSection.mockImplementation((id) => {
         if (id === 'kibana') return mockKibanaSection;
         throw new Error(`unexpected getSection call: ${id}`);
       });
@@ -88,11 +96,13 @@ describe('ManagementService', () => {
 
       const deps = {
         management: managementPluginMock.createSetupContract(),
-        getStartServices: coreMock.createSetup().getStartServices,
+        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
+          PluginsStart
+        >['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
-      deps.management.sections.getSection.mockImplementation(id => {
+      deps.management.sections.getSection.mockImplementation((id) => {
         if (id === 'kibana') return mockKibanaSection;
         throw new Error(`unexpected getSection call: ${id}`);
       });
@@ -117,11 +127,13 @@ describe('ManagementService', () => {
 
       const deps = {
         management: managementPluginMock.createSetupContract(),
-        getStartServices: coreMock.createSetup().getStartServices,
+        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
+          PluginsStart
+        >['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
-      deps.management.sections.getSection.mockImplementation(id => {
+      deps.management.sections.getSection.mockImplementation((id) => {
         if (id === 'kibana') return mockKibanaSection;
         throw new Error(`unexpected getSection call: ${id}`);
       });

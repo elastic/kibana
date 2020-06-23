@@ -11,8 +11,8 @@ jest.mock('../../services/job_service.js', () => 'mlJobService');
 // The mock is hoisted to the top, so need to prefix the mock function
 // with 'mock' so it can be used lazily.
 const mockCheckPermission = jest.fn(() => true);
-jest.mock('../../privilege/check_privilege', () => ({
-  checkPermission: privilege => mockCheckPermission(privilege),
+jest.mock('../../capabilities/check_capabilities', () => ({
+  checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';

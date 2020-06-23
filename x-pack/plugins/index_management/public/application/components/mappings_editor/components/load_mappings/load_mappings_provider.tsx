@@ -134,7 +134,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
   const i18nTexts = getTexts(view, state.errors?.length);
 
-  const onJsonUpdate: OnJsonEditorUpdateHandler = jsonUpdateData => {
+  const onJsonUpdate: OnJsonEditorUpdateHandler = (jsonUpdateData) => {
     jsonContent.current = jsonUpdateData;
   };
 

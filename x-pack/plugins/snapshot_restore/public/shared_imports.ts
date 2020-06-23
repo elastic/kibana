@@ -5,14 +5,17 @@
  */
 
 export {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig,
-  sendRequest,
-  useRequest,
-} from '../../../../src/plugins/es_ui_shared/public';
-
-export {
+  AuthorizationProvider,
   CronEditor,
   DAY,
-} from '../../../../src/plugins/es_ui_shared/public/components/cron_editor';
+  Error,
+  NotAuthorizedSection,
+  SectionError,
+  sendRequest,
+  SendRequestConfig,
+  SendRequestResponse,
+  useAuthorizationContext,
+  useRequest,
+  UseRequestConfig,
+  WithPrivileges,
+} from '../../../../src/plugins/es_ui_shared/public';

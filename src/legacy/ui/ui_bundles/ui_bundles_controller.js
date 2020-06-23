@@ -56,7 +56,7 @@ function stableCloneAppExtensions(appExtensions) {
     Object.entries(appExtensions).map(([extensionType, moduleIds]) => [
       extensionType,
       moduleIds
-        .map(moduleId => {
+        .map((moduleId) => {
           if (isAbsolute(moduleId)) {
             moduleId = `absolute:${relative(REPO_ROOT, moduleId)}`;
           }
@@ -73,6 +73,7 @@ export class UiBundlesController {
 
     this._workingDir = config.get('optimize.bundleDir');
     this._env = config.get('env.name');
+    this._validateSyntaxOfNodeModules = config.get('optimize.validateSyntaxOfNodeModules');
     this._context = {
       env: config.get('env.name'),
       sourceMaps: config.get('optimize.sourceMaps'),
@@ -97,13 +98,6 @@ export class UiBundlesController {
     this._webpackNoParseRules = uiExports.webpackNoParseRules;
     this._postLoaders = [];
     this._bundles = [];
-
-    // create a bundle for core-only with no modules
-    this.add({
-      id: 'core',
-      modules: [],
-      template: appEntryTemplate,
-    });
 
     // create a bundle for each uiApp
     for (const uiApp of uiApps) {
@@ -133,6 +127,10 @@ export class UiBundlesController {
 
   isDevMode() {
     return this._env === 'development';
+  }
+
+  shouldValidateSyntaxOfNodeModules() {
+    return !!this._validateSyntaxOfNodeModules;
   }
 
   getWebpackPluginProviders() {
@@ -248,7 +246,7 @@ export class UiBundlesController {
   }
 
   getIds() {
-    return this._bundles.map(bundle => bundle.getId());
+    return this._bundles.map((bundle) => bundle.getId());
   }
 
   getExtendedConfig(webpackConfig) {

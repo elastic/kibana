@@ -22,7 +22,7 @@ const KIBANA_ROOT = path.resolve(__dirname, '../../..');
 
 function checkModuleNameNode(context, mappings, node) {
   const mapping = mappings.find(
-    mapping => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
+    (mapping) => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
   );
 
   if (!mapping) {
@@ -105,7 +105,7 @@ module.exports = {
       },
     ],
   },
-  create: context => {
+  create: (context) => {
     const mappings = context.options[0];
 
     return {

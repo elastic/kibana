@@ -61,7 +61,7 @@ const defaultGlobalState: GlobalState = { text: '' };
 const globalStateContainer = createStateContainer<GlobalState, GlobalStateAction>(
   defaultGlobalState,
   {
-    setText: state => text => ({ ...state, text }),
+    setText: (state) => (text) => ({ ...state, text }),
   }
 );
 
@@ -81,7 +81,7 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
   const { text } = GlobalStateHelpers.useState();
   const { edit: editTodo, delete: deleteTodo, add: addTodo } = useTransitions();
   const todos = useState().todos;
-  const filteredTodos = todos.filter(todo => {
+  const filteredTodos = todos.filter((todo) => {
     if (!filter) return true;
     if (filter === 'completed') return todo.completed;
     if (filter === 'not-completed') return !todo.completed;
@@ -91,36 +91,40 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
   return (
     <>
       <div>
-        <Link to={{ ...location, pathname: '/' }}>
+        <Link to={{ ...location, pathname: '/' }} data-test-subj={'filterLinkAll'}>
           <EuiButton size={'s'} color={!filter ? 'primary' : 'secondary'}>
             All
           </EuiButton>
         </Link>
-        <Link to={{ ...location, pathname: '/completed' }}>
+        <Link to={{ ...location, pathname: '/completed' }} data-test-subj={'filterLinkCompleted'}>
           <EuiButton size={'s'} color={filter === 'completed' ? 'primary' : 'secondary'}>
             Completed
           </EuiButton>
         </Link>
-        <Link to={{ ...location, pathname: '/not-completed' }}>
+        <Link
+          to={{ ...location, pathname: '/not-completed' }}
+          data-test-subj={'filterLinkNotCompleted'}
+        >
           <EuiButton size={'s'} color={filter === 'not-completed' ? 'primary' : 'secondary'}>
             Not Completed
           </EuiButton>
         </Link>
       </div>
       <ul>
-        {filteredTodos.map(todo => (
+        {filteredTodos.map((todo) => (
           <li key={todo.id} style={{ display: 'flex', alignItems: 'center', margin: '16px 0px' }}>
             <EuiCheckbox
               id={todo.id + ''}
               key={todo.id}
               checked={todo.completed}
-              onChange={e => {
+              onChange={(e) => {
                 editTodo({
                   ...todo,
                   completed: e.target.checked,
                 });
               }}
               label={todo.text}
+              data-test-subj={`todoCheckbox-${todo.id}`}
             />
             <EuiButton
               style={{ marginLeft: '8px' }}
@@ -135,7 +139,7 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
         ))}
       </ul>
       <form
-        onSubmit={e => {
+        onSubmit={(e) => {
           const inputRef = (e.target as HTMLFormElement).elements.namedItem(
             'newTodo'
           ) as HTMLInputElement;
@@ -143,7 +147,7 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
           addTodo({
             text: inputRef.value,
             completed: false,
-            id: todos.map(todo => todo.id).reduce((a, b) => Math.max(a, b), 0) + 1,
+            id: todos.map((todo) => todo.id).reduce((a, b) => Math.max(a, b), 0) + 1,
           });
           inputRef.value = '';
           e.preventDefault();
@@ -153,7 +157,7 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
       </form>
       <div style={{ margin: '16px 0px' }}>
         <label htmlFor="globalInput">Global state piece: </label>
-        <input name="globalInput" value={text} onChange={e => setText(e.target.value)} />
+        <input name="globalInput" value={text} onChange={(e) => setText(e.target.value)} />
       </div>
     </>
   );
@@ -169,7 +173,7 @@ export const TodoAppPage: React.FC<{
   appTitle: string;
   appBasePath: string;
   isInitialRoute: () => boolean;
-}> = props => {
+}> = (props) => {
   const initialAppUrl = React.useRef(window.location.href);
   const [useHashedUrl, setUseHashedUrl] = React.useState(false);
 
@@ -177,7 +181,7 @@ export const TodoAppPage: React.FC<{
    * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
    * Persists the url in sessionStorage and tries to restore it on "componentDidMount"
    */
-  useUrlTracker(`lastUrlTracker:${props.appInstanceId}`, props.history, urlToRestore => {
+  useUrlTracker(`lastUrlTracker:${props.appInstanceId}`, props.history, (urlToRestore) => {
     // shouldRestoreUrl:
     // App decides if it should restore url or not
     // In this specific case, restore only if navigated to initial route

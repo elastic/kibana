@@ -21,9 +21,9 @@ import { get, isEmpty } from 'lodash';
 
 export function getAnnotationBuckets(resp, annotation) {
   return get(resp, `aggregations.${annotation.id}.buckets`, [])
-    .filter(bucket => !isEmpty(bucket.hits.hits.hits))
-    .map(bucket => ({
+    .filter((bucket) => !isEmpty(bucket.hits.hits.hits))
+    .map((bucket) => ({
       key: bucket.key,
-      docs: bucket.hits.hits.hits.map(doc => doc._source),
+      docs: bucket.hits.hits.hits.map((doc) => doc._source),
     }));
 }

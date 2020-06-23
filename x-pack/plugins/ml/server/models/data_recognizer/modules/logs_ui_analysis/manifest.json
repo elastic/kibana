@@ -1,7 +1,7 @@
 {
   "id": "logs_ui_analysis",
   "title": "Log Analysis",
-  "description": "Detect anomalies in log entries via the Logs UI",
+  "description": "Detect anomalies in log entries via the Logs UI.",
   "type": "Logs",
   "logoFile": "logo.json",
   "jobs": [

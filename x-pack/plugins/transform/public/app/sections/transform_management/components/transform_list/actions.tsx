@@ -11,9 +11,10 @@ import { TRANSFORM_STATE } from '../../../../../../common';
 import { TransformListRow } from '../../../../common';
 
 import { CloneAction } from './action_clone';
+import { DeleteAction } from './action_delete';
+import { EditAction } from './action_edit';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
-import { DeleteAction } from './action_delete';
 
 export const getActions = ({ forceDisable }: { forceDisable: boolean }) => {
   return [
@@ -24,6 +25,11 @@ export const getActions = ({ forceDisable }: { forceDisable: boolean }) => {
           return <StartAction items={[item]} forceDisable={forceDisable} />;
         }
         return <StopAction items={[item]} forceDisable={forceDisable} />;
+      },
+    },
+    {
+      render: (item: TransformListRow) => {
+        return <EditAction config={item.config} />;
       },
     },
     {

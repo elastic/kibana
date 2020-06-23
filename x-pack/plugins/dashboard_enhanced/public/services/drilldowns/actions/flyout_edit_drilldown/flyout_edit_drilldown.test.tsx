@@ -6,18 +6,34 @@
 
 import { FlyoutEditDrilldownAction, FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { drilldownsPluginMock } from '../../../../../../drilldowns/public/mocks';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-import { uiActionsPluginMock } from '../../../../../../../../src/plugins/ui_actions/public/mocks';
-import { MockEmbeddable } from '../test_helpers';
+import { uiActionsEnhancedPluginMock } from '../../../../../../ui_actions_enhanced/public/mocks';
+import { EnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
+import { MockEmbeddable, enhanceEmbeddable } from '../test_helpers';
 
 const overlays = coreMock.createStart().overlays;
-const drilldowns = drilldownsPluginMock.createStartContract();
-const uiActions = uiActionsPluginMock.createStartContract();
+const uiActionsPlugin = uiActionsEnhancedPluginMock.createPlugin();
+const uiActions = uiActionsPlugin.doStart();
+
+uiActionsPlugin.setup.registerDrilldown({
+  id: 'foo',
+  CollectConfig: {} as any,
+  createConfig: () => ({}),
+  isConfigValid: () => true,
+  execute: async () => {},
+  getDisplayName: () => 'test',
+});
 
 const actionParams: FlyoutEditDrilldownParams = {
-  drilldowns: () => Promise.resolve(drilldowns),
-  overlays: () => Promise.resolve(overlays),
+  start: () => ({
+    core: {
+      overlays,
+    } as any,
+    plugins: {
+      uiActionsEnhanced: uiActions,
+    },
+    self: {},
+  }),
 };
 
 test('should create', () => {
@@ -39,63 +55,91 @@ test('MenuItem exists', () => {
 });
 
 describe('isCompatible', () => {
-  const drilldownAction = new FlyoutEditDrilldownAction(actionParams);
+  function setupIsCompatible({
+    isEdit = true,
+    isEmbeddableEnhanced = true,
+  }: {
+    isEdit?: boolean;
+    isEmbeddableEnhanced?: boolean;
+  } = {}) {
+    const action = new FlyoutEditDrilldownAction(actionParams);
+    const input = {
+      id: '',
+      viewMode: isEdit ? ViewMode.EDIT : ViewMode.VIEW,
+    };
+    const embeddable = new MockEmbeddable(input, {});
+    const context = {
+      embeddable: (isEmbeddableEnhanced
+        ? enhanceEmbeddable(embeddable, uiActions)
+        : embeddable) as EnhancedEmbeddable<MockEmbeddable>,
+    };
 
-  function checkCompatibility(params: {
-    isEdit: boolean;
-    withUiActions: boolean;
-  }): Promise<boolean> {
-    return drilldownAction.isCompatible({
-      embeddable: new MockEmbeddable(
-        {
-          id: '',
-          viewMode: params.isEdit ? ViewMode.EDIT : ViewMode.VIEW,
-        },
-        {
-          uiActions: params.withUiActions ? uiActions : undefined, // dynamic actions support
-        }
-      ),
-    });
+    return {
+      action,
+      context,
+    };
   }
 
-  // TODO: need proper DynamicActionsMock and ActionFactory mock
-  test.todo('compatible if dynamicUiActions enabled, in edit view, and have at least 1 drilldown');
-
-  test('not compatible if dynamicUiActions disabled', async () => {
-    expect(
-      await checkCompatibility({
-        withUiActions: false,
-        isEdit: true,
-      })
-    ).toBe(false);
+  test('not compatible if no drilldowns', async () => {
+    const { action, context } = setupIsCompatible();
+    expect(await action.isCompatible(context)).toBe(false);
   });
 
-  test('not compatible if no drilldowns', async () => {
-    expect(
-      await checkCompatibility({
-        withUiActions: true,
-        isEdit: true,
-      })
-    ).toBe(false);
+  test('not compatible if embeddable is not enhanced', async () => {
+    const { action, context } = setupIsCompatible({ isEmbeddableEnhanced: false });
+    expect(await action.isCompatible(context)).toBe(false);
+  });
+
+  describe('when has at least one drilldown', () => {
+    test('is compatible in edit mode', async () => {
+      const { action, context } = setupIsCompatible();
+
+      await context.embeddable.enhancements.dynamicActions.createEvent(
+        {
+          config: {},
+          factoryId: 'foo',
+          name: '',
+        },
+        ['VALUE_CLICK_TRIGGER']
+      );
+
+      expect(await action.isCompatible(context)).toBe(true);
+    });
+
+    test('not compatible in view mode', async () => {
+      const { action, context } = setupIsCompatible({ isEdit: false });
+
+      await context.embeddable.enhancements.dynamicActions.createEvent(
+        {
+          config: {},
+          factoryId: 'foo',
+          name: '',
+        },
+        ['VALUE_CLICK_TRIGGER']
+      );
+
+      expect(await action.isCompatible(context)).toBe(false);
+    });
   });
 });
 
 describe('execute', () => {
   const drilldownAction = new FlyoutEditDrilldownAction(actionParams);
+
   test('throws error if no dynamicUiActions', async () => {
     await expect(
       drilldownAction.execute({
         embeddable: new MockEmbeddable({ id: '' }, {}),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Can't execute FlyoutEditDrilldownAction without dynamicActionsManager"`
+      `"Need embeddable to be EnhancedEmbeddable to execute FlyoutEditDrilldownAction."`
     );
   });
 
   test('should open flyout', async () => {
     const spy = jest.spyOn(overlays, 'openFlyout');
     await drilldownAction.execute({
-      embeddable: new MockEmbeddable({ id: '' }, { uiActions }),
+      embeddable: enhanceEmbeddable(new MockEmbeddable({ id: '' }, {})),
     });
     expect(spy).toBeCalled();
   });

@@ -39,7 +39,7 @@ export function ensureDeepObject(obj: any): any {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => ensureDeepObject(item));
+    return obj.map((item) => ensureDeepObject(item));
   }
 
   return Object.keys(obj).reduce((fullObject, propertyKey) => {

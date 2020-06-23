@@ -12,7 +12,8 @@ import { ValidationResult } from '../../../types';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
-import { AlertEdit } from './alert_edit';
+import AlertEdit from './alert_edit';
+import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
@@ -26,13 +27,26 @@ describe('alert_edit', () => {
   });
 
   async function setup() {
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mockedCoreSetup.getStartServices();
     deps = {
       toastNotifications: mockedCoreSetup.notifications.toasts,
       http: mockedCoreSetup.http,
       uiSettings: mockedCoreSetup.uiSettings,
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+      capabilities,
     };
+
+    mockedCoreSetup.http.get.mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+    });
+
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
@@ -41,6 +55,7 @@ describe('alert_edit', () => {
         return { errors: {} };
       },
       alertParamsExpression: () => <React.Fragment />,
+      requiresAppContext: false,
     };
 
     const actionTypeModel = {
@@ -69,7 +84,7 @@ describe('alert_edit', () => {
         window: '1s',
         comparator: 'between',
       },
-      consumer: 'alerting',
+      consumer: 'alerts',
       alertTypeId: 'my-alert-type',
       enabled: false,
       schedule: { interval: '1m' },
@@ -102,24 +117,24 @@ describe('alert_edit', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AlertsContextProvider
-        value={{
-          reloadAlerts: () => {
-            return new Promise<void>(() => {});
-          },
-          http: deps!.http,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          alertTypeRegistry: deps!.alertTypeRegistry,
-          toastNotifications: deps!.toastNotifications,
-          uiSettings: deps!.uiSettings,
-        }}
-      >
-        <AlertEdit
-          editFlyoutVisible={true}
-          setEditFlyoutVisibility={() => {}}
-          initialAlert={alert}
-        />
-      </AlertsContextProvider>
+      <AppContextProvider appDeps={deps}>
+        <AlertsContextProvider
+          value={{
+            reloadAlerts: () => {
+              return new Promise<void>(() => {});
+            },
+            http: deps!.http,
+            actionTypeRegistry: deps!.actionTypeRegistry,
+            alertTypeRegistry: deps!.alertTypeRegistry,
+            toastNotifications: deps!.toastNotifications,
+            uiSettings: deps!.uiSettings,
+            docLinks: deps.docLinks,
+            capabilities: deps!.capabilities,
+          }}
+        >
+          <AlertEdit onClose={() => {}} initialAlert={alert} />
+        </AlertsContextProvider>
+      </AppContextProvider>
     );
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -142,13 +157,8 @@ describe('alert_edit', () => {
     err.body.message = 'Fail message';
     mockedCoreSetup.http.put.mockRejectedValue(err);
     await act(async () => {
-      wrapper
-        .find('[data-test-subj="saveEditedAlertButton"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="saveEditedAlertButton"]').first().simulate('click');
     });
-    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Failed to save alert: Fail message'
-    );
+    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith('Fail message');
   });
 });

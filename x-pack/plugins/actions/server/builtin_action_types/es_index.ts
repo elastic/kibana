@@ -18,7 +18,7 @@ export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 const ConfigSchema = schema.object({
   index: schema.string(),
   refresh: schema.boolean({ defaultValue: false }),
-  executionTimeField: schema.maybe(schema.string()),
+  executionTimeField: schema.nullable(schema.string()),
 });
 
 // params definition
@@ -63,20 +63,20 @@ async function executor(
 
   const bulkBody = [];
   for (const document of params.documents) {
-    if (config.executionTimeField != null) {
-      document[config.executionTimeField] = new Date();
+    const timeField = config.executionTimeField == null ? '' : config.executionTimeField.trim();
+    if (timeField !== '') {
+      document[timeField] = new Date();
     }
 
     bulkBody.push({ index: {} });
     bulkBody.push(document);
   }
 
-  const bulkParams: any = {
+  const bulkParams = {
     index,
     body: bulkBody,
+    refresh: config.refresh,
   };
-
-  bulkParams.refresh = config.refresh;
 
   let result;
   try {

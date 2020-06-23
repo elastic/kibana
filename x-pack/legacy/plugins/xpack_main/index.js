@@ -13,7 +13,7 @@ import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 
-export const xpackMain = kibana => {
+export const xpackMain = (kibana) => {
   return new kibana.Plugin({
     id: 'xpack_main',
     configPrefix: 'xpack.xpack_main',
@@ -23,11 +23,6 @@ export const xpackMain = kibana => {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        telemetry: Joi.object({
-          config: Joi.string().default(),
-          enabled: Joi.boolean().default(),
-          url: Joi.string().default(),
-        }).default(), // deprecated
       }).default();
     },
 
@@ -69,10 +64,7 @@ export const xpackMain = kibana => {
 
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
-      featuresPlugin.registerLegacyAPI({
-        xpackInfo: setupXPackMain(server),
-        savedObjectTypes: server.savedObjects.types,
-      });
+      setupXPackMain(server);
 
       // register routes
       xpackInfoRoute(server);

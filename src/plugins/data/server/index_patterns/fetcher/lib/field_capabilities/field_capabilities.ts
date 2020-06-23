@@ -47,10 +47,10 @@ export async function getFieldCapabilities(
   const fieldsFromFieldCapsByName = indexBy(readFieldCapsResponse(esFieldCaps), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
-    .filter(name => !name.startsWith('_'))
+    .filter((name) => !name.startsWith('_'))
     .concat(metaFields)
     .reduce(concatIfUniq, [] as string[])
-    .map<FieldDescriptor>(name =>
+    .map<FieldDescriptor>((name) =>
       defaults({}, fieldsFromFieldCapsByName[name], {
         name,
         type: 'string',

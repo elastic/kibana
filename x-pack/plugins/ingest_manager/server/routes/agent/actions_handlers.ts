@@ -13,7 +13,7 @@ import { ActionsService } from '../../services/agents';
 import { NewAgentAction } from '../../../common/types/models';
 import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 
-export const postNewAgentActionHandlerBuilder = function(
+export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService
 ): RequestHandler<
   TypeOf<typeof PostNewAgentActionRequestSchema.params>,
@@ -28,11 +28,11 @@ export const postNewAgentActionHandlerBuilder = function(
 
       const newAgentAction = request.body.action as NewAgentAction;
 
-      const savedAgentAction = await actionsService.updateAgentActions(
-        soClient,
-        agent,
-        newAgentAction
-      );
+      const savedAgentAction = await actionsService.createAgentAction(soClient, {
+        created_at: new Date().toISOString(),
+        ...newAgentAction,
+        agent_id: agent.id,
+      });
 
       const body: PostNewAgentActionResponse = {
         success: true,

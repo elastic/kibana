@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'header']);
   const overview = getService('monitoringClusterOverview');
   const indicesList = getService('monitoringElasticsearchIndices');

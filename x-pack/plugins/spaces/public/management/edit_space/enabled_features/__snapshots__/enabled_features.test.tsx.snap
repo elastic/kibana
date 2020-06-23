@@ -67,15 +67,15 @@ exports[`EnabledFeatures renders as expected 1`] = `
             id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
             values={
               Object {
-                "rolesLink": <ForwardRef
-                  href="#/management/security/roles"
+                "rolesLink": <EuiLink
+                  href="management"
                 >
                   <FormattedMessage
                     defaultMessage="Roles"
                     id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           />
@@ -91,14 +91,14 @@ exports[`EnabledFeatures renders as expected 1`] = `
               "icon": "spacesApp",
               "id": "feature-1",
               "name": "Feature 1",
-              "privileges": Object {},
+              "privileges": null,
             },
             Object {
               "app": Array [],
               "icon": "spacesApp",
               "id": "feature-2",
               "name": "Feature 2",
-              "privileges": Object {},
+              "privileges": null,
             },
           ]
         }

@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const calendarSchema = {
+export const calendarSchema = schema.object({
   calendar_id: schema.maybe(schema.string()),
   calendarId: schema.string(),
   job_ids: schema.arrayOf(schema.maybe(schema.string())),
@@ -22,4 +22,11 @@ export const calendarSchema = {
       })
     )
   ),
-};
+});
+
+export const calendarIdSchema = schema.object({ calendarId: schema.string() });
+
+export const calendarIdsSchema = schema.object({
+  /** Comma-separated list of calendar IDs */
+  calendarIds: schema.string(),
+});

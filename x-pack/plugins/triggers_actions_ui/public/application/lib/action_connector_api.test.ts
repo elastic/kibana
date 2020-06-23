@@ -36,34 +36,21 @@ describe('loadActionTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/types",
+        "/api/actions/list_action_types",
       ]
     `);
   });
 });
 
 describe('loadAllActions', () => {
-  test('should call find actions API', async () => {
-    const resolvedValue = {
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    };
-    http.get.mockResolvedValueOnce(resolvedValue);
+  test('should call getAll actions API', async () => {
+    http.get.mockResolvedValueOnce([]);
 
     const result = await loadAllActions({ http });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual([]);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/_find",
-        Object {
-          "query": Object {
-            "per_page": 10000,
-            "sort_field": "name.keyword",
-            "sort_order": "asc",
-          },
-        },
+        "/api/actions",
       ]
     `);
   });
@@ -73,6 +60,7 @@ describe('createActionConnector', () => {
   test('should call create action API', async () => {
     const connector: ActionConnectorWithoutId = {
       actionTypeId: 'test',
+      isPreconfigured: false,
       name: 'My test',
       config: {},
       secrets: {},
@@ -84,9 +72,9 @@ describe('createActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action",
+        "/api/actions/action",
         Object {
-          "body": "{\\"actionTypeId\\":\\"test\\",\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
+          "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
       ]
     `);
@@ -98,6 +86,7 @@ describe('updateActionConnector', () => {
     const id = '123';
     const connector: ActionConnectorWithoutId = {
       actionTypeId: 'test',
+      isPreconfigured: false,
       name: 'My test',
       config: {},
       secrets: {},
@@ -109,7 +98,7 @@ describe('updateActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/123",
+        "/api/actions/action/123",
         Object {
           "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
@@ -127,13 +116,13 @@ describe('deleteActions', () => {
     expect(http.delete.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/action/1",
+          "/api/actions/action/1",
         ],
         Array [
-          "/api/action/2",
+          "/api/actions/action/2",
         ],
         Array [
-          "/api/action/3",
+          "/api/actions/action/3",
         ],
       ]
     `);

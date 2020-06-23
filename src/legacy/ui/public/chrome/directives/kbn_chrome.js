@@ -60,13 +60,13 @@ export function kbnChromeProvider(chrome, internals) {
 
         // Continue to support legacy nav controls not registered with the NP.
         const navControls = Private(chromeHeaderNavControlsRegistry);
-        (navControls.bySide[NavControlSide.Left] || []).forEach(navControl =>
+        (navControls.bySide[NavControlSide.Left] || []).forEach((navControl) =>
           npStart.core.chrome.navControls.registerLeft({
             order: navControl.order,
             mount: navControl.render,
           })
         );
-        (navControls.bySide[NavControlSide.Right] || []).forEach(navControl =>
+        (navControls.bySide[NavControlSide.Right] || []).forEach((navControl) =>
           npStart.core.chrome.navControls.registerRight({
             order: navControl.order,
             mount: navControl.render,

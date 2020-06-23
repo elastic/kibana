@@ -28,10 +28,20 @@ beforeEach(() => {
     ),
     actionsConfigUtils: mockedActionsConfig,
     licenseState: mockedLicenseState,
+    preconfiguredActions: [
+      {
+        actionTypeId: 'foo',
+        config: {},
+        id: 'my-slack1',
+        name: 'Slack #xyz',
+        secrets: {},
+        isPreconfigured: true,
+      },
+    ],
   };
 });
 
-const executor: ExecutorType = async options => {
+const executor: ExecutorType = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
@@ -59,6 +69,19 @@ describe('register()', () => {
         },
       ]
     `);
+  });
+
+  test('shallow clones the given action type', () => {
+    const myType: ActionType = {
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    };
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register(myType);
+    myType.name = 'Changed';
+    expect(actionTypeRegistry.get('my-action-type').name).toEqual('My action type');
   });
 
   test('throws error if action type already registered', () => {
@@ -192,6 +215,19 @@ describe('isActionTypeEnabled', () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
     actionTypeRegistry.isActionTypeEnabled('foo');
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
+  });
+
+  test('should call isActionExecutable of the actions config', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionTypeRegistry.isActionExecutable('my-slack1', 'foo');
+    expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
+  });
+
+  test('should return true when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has preconfigured connectors', async () => {
+    mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
   });
 
   test('should call isLicenseValidForActionType of the license state', async () => {

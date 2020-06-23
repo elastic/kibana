@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { UiComponent } from 'src/plugins/kibana_utils/public';
 
 /**
  * Represents something that can be displayed to user in UI.
@@ -51,9 +51,17 @@ export interface Presentable<Context extends object = object> {
   getDisplayName(context: Context): string;
 
   /**
-   * This method should return a link if this item can be clicked on.
+   * Returns tooltip text which should be displayed when user hovers this object.
+   * Should return empty string if tooltip should not be displayed.
    */
-  getHref?(context: Context): string | undefined;
+  getDisplayNameTooltip(context: Context): string;
+
+  /**
+   * This method should return a link if this item can be clicked on. The link
+   * is used to navigate user if user middle-clicks it or Ctrl + clicks or
+   * right-clicks and selects "Open in new tab".
+   */
+  getHref?(context: Context): Promise<string | undefined>;
 
   /**
    * Returns a promise that resolves to true if this item is compatible given
