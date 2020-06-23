@@ -9,13 +9,12 @@
 - [4. Design](#4-design)
   - [4.0 Assumptions and tradeoffs](#40-assumptions-and-tradeoffs)
   - [4.1 Discover and remedy potential failures before any downtime](#41-discover-and-remedy-potential-failures-before-any-downtime)
-  - [4.2 Tag objects as “invalid” if their transformation fails](#42-tag-objects-as-invalid-if-their-transformation-fails)
-  - [4.3 Automatically retry failed migrations until they succeed](#43-automatically-retry-failed-migrations-until-they-succeed)
-  - [4.3.1 Idempotent migrations performed without coordination](#431-idempotent-migrations-performed-without-coordination)
-    - [4.3.1.1 Restrictions](#4311-restrictions)
-    - [4.3.1.2 Migration algorithm: Cloned index per version](#4312-migration-algorithm-cloned-index-per-version)
-    - [4.3.1.3 Upgrade and rollback procedure](#4313-upgrade-and-rollback-procedure)
-    - [4.3.1.4 Handling documents that belong to a disabled plugin](#4314-handling-documents-that-belong-to-a-disabled-plugin)
+  - [4.2 Automatically retry failed migrations until they succeed](#42-automatically-retry-failed-migrations-until-they-succeed)
+  - [4.2.1 Idempotent migrations performed without coordination](#421-idempotent-migrations-performed-without-coordination)
+    - [4.2.1.1 Restrictions](#4211-restrictions)
+    - [4.2.1.2 Migration algorithm: Cloned index per version](#4212-migration-algorithm-cloned-index-per-version)
+    - [4.2.1.3 Upgrade and rollback procedure](#4213-upgrade-and-rollback-procedure)
+    - [4.2.1.4 Handling documents that belong to a disabled plugin](#4214-handling-documents-that-belong-to-a-disabled-plugin)
 - [5. Alternatives](#5-alternatives)
   - [5.1 Rolling upgrades](#51-rolling-upgrades)
   - [5.2 Single node migrations coordinated through a lease/lock](#52-single-node-migrations-coordinated-through-a-leaselock)
@@ -26,6 +25,7 @@
   - [5.4 In-place migrations that re-use the same index (8.0)](#54-in-place-migrations-that-re-use-the-same-index-80)
     - [5.4.1 Migration algorithm (8.0):](#541-migration-algorithm-80)
     - [5.4.2 Minimizing data loss with unsupported upgrade configurations (8.0)](#542-minimizing-data-loss-with-unsupported-upgrade-configurations-80)
+  - [5.5 Tag objects as “invalid” if their transformation fails](#55-tag-objects-as-invalid-if-their-transformation-fails)
 - [6. How we teach this](#6-how-we-teach-this)
 - [7. Unresolved questions](#7-unresolved-questions)
 
@@ -109,7 +109,7 @@ migrations.](https://github.com/elastic/kibana/blob/75444a9f1879c5702f9f2b8ad4a7
 **Assumptions and tradeoffs:**
 1. The simplicity of idempotent, coordination-free migrations outweighs the
    restrictions this will impose on the kinds of migrations we're able to
-   support in the future. See (4.3.1)
+   support in the future. See (4.2.1)
 2. Maintaining the upgrade behaviour and rollback procedures of previous
    Kibana 7.x releases is more important than introducing enhancements like:
    1. (2.6) _mixed Kibana versions shouldn't cause data loss_.
@@ -149,30 +149,7 @@ migrations.](https://github.com/elastic/kibana/blob/75444a9f1879c5702f9f2b8ad4a7
    documentation.
 5. (Optional) Add dry run migrations to the standard cloud upgrade procedure?
 
-## 4.2 Tag objects as “invalid” if their transformation fails
-
-> Achieves goals: (2.2)
-> Mitigates Errors (3.1), (3.2)
-
-1. Tag objects as “invalid” if they cause an exception when being transformed,
-   but don’t fail the entire migration. 
-2. Log an error message informing administrators that there are invalid
-   objects which require inspection. For each invalid object, provide an error
-   stack trace to aid in debugging. 
-3. Administrators should be able to generate a migration report (similar to
-   the one dry run migrations create) which is an NDJSON export of all objects
-   tagged as “invalid”.
-   1. Expose this as an HTTP API first
-   2. (later) Notify administrators and allow them to export invalid objects
-      from the Kibana UI.
-4. When an invalid object is read, the Saved Objects repository will throw an
-   invalid object exception which should include a link to the documentation
-   to help administrators resolve migration bugs.
-5. Educate Kibana developers to no longer simply write back an unmigrated
-   document if an exception occurred. A migration function should either
-   successfully transform the object or throw. 
-
-## 4.3 Automatically retry failed migrations until they succeed
+## 4.2 Automatically retry failed migrations until they succeed
 
 > Achieves goals: (2.2), (2.6)
 > Mitigates errors (3.3) and (3.4)
@@ -191,17 +168,17 @@ migrations are idempotent:
 Idempotent migrations don't require coordination making the algorithm
 significantly less complex and will never require manual intervention to
 retry. We, therefore, prefer this solution, even though it introduces
-restrictions on migrations (4.3.1.1). For other alternatives that were
+restrictions on migrations (4.2.1.1). For other alternatives that were
 considered see section [(5)](#5-alternatives).
 
-## 4.3.1 Idempotent migrations performed without coordination
+## 4.2.1 Idempotent migrations performed without coordination
 
 The migration system can be said to be idempotent if the same results are
 produced whether the migration was run once or multiple times. This property
 should hold even if new (up to date) writes occur in between migration runs
 which introduces the following restrictions:
 
-### 4.3.1.1 Restrictions
+### 4.2.1.1 Restrictions
 
 1. All document transforms need to be deterministic, that is a document
    transform will always return the same result for the same set of inputs. 
@@ -216,7 +193,7 @@ these migrations are idempotent, they will have to generate new saved object
 id's deterministically with e.g. UUIDv5.
 
 
-### 4.3.1.2 Migration algorithm: Cloned index per version
+### 4.2.1.2 Migration algorithm: Cloned index per version
 Note:
 - The description below assumes the migration algorithm is released in 7.10.0.
   So < 7.10.0 will use `.kibana` and >= 7.10.0 will use `.kibana_current`.
@@ -227,7 +204,7 @@ Note:
 1. Locate the source index by fetching aliases (including `.kibana` for versions prior to v7.10.0) `GET '/_alias/.kibana_current,.kibana_7.10.0,.kibana'`. The source index is the index the `.kibana_current` alias points to, or if it doesn’t exist, the index the `.kibana` alias points to.
 2. If `.kibana_current` and `.kibana_7.10.0` both exists and are pointing to the same index this version's migration has already been completed.
    1. Because the same version can have plugins enabled at any point in time, perform the mappings update in step (6).
-   2. If the target index contains any documents with an outdated migrationVersion number, log an error explaining that a re-migration is required and mark the saved object type these documents belong to as unavailable. See section (4.3.1.4).
+   2. If the target index contains any documents with an outdated migrationVersion number, log an error explaining that a re-migration is required and mark the saved object type these documents belong to as unavailable. See section (4.2.1.4).
    3. Skip to step (9) to start serving traffic.
 3. If `.kibana_current` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001` fail the migration.
 4. Mark the source index as read-only and wait for all in-flight operations to drain (requires new functionality in Elasticsearch). This prevents any further writes from outdated nodes. Assuming this API is similar to the existing `/<index>/_close` API, we expect to receive `"acknowledged" : true` and `"shards_acknowledged" : true`. If all shards don’t acknowledge within the timeout, retry the operation until it succeeds.
@@ -262,7 +239,7 @@ transforming documents in that version's target index, but because migrations ar
   Although the migration algorithm guarantees there's no data loss while providing read-only access to outdated nodes, this could cause plugins to behave in unexpected ways. If we wish to persue it in the future, enabling read-only functionality during the downtime window will be it's own project and must include an audit of all plugins' behaviours.
 <details>
 
-### 4.3.1.3 Upgrade and rollback procedure
+### 4.2.1.3 Upgrade and rollback procedure
 When a newer Kibana starts an upgrade, it blocks all writes to the outdated index to prevent data loss. Since Kibana is not designed to gracefully handle a read-only index this could have unintended consequences such as a task executing multiple times but never being able to write that the task was completed successfully. To prevent unintended consequences, the following procedure should be followed when upgrading Kibana:
 
 1. Gracefully shutdown outdated nodes by sending a `SIGTERM` signal
@@ -292,7 +269,7 @@ To rollback to a previous version of Kibana without a snapshot:
 5. Remove the write block from the rollback index.
 6. Start the rollback Kibana nodes. All running Kibana nodes should be on the same rollback version, have the same plugins enabled and use the same configuration.
 
-### 4.3.1.4 Handling documents that belong to a disabled plugin
+### 4.2.1.4 Handling documents that belong to a disabled plugin
 It is possible for a plugin to create documents in one version of Kibana, but then when upgrading Kibana to a newer version, that plugin is disabled. Because the plugin is disabled it cannot register it's Saved Objects type including the mappings or any migration transformation functions. These "orphan" documents could cause future problems:
  - A major version introduces breaking mapping changes that cannot be applied to the data in these documents.
  - Two majors later migrations will no longer be able to migrate this old schema and could fail unexpectadly when the plugin is suddenly enabled.
@@ -301,7 +278,7 @@ There are several approaches we could take to dealing with this orphan data
 
 1. Start up but refuse to query on types with outdated documents until a user manually triggers a re-migration
    
-   This is the approach implemented by the migration algorithm in (4.3.1.2)
+   This is the approach implemented by the migration algorithm in (4.2.1.2)
    
    Advantages:
     - The impact is limited to the single plugin which if it was disabled before can’t have a critical impact
@@ -309,14 +286,14 @@ There are several approaches we could take to dealing with this orphan data
     
    Disadvantages:
     - It might be less obvious that a plugin is in a degraded state unless you read the logs (not possible on Cloud) or view the `/status` endpoint.
-    - If a user doesn't care to that the plugin is degraded, orphan documents are carried forward indefinitely.
+    - If a user doesn't care that the plugin is degraded, orphan documents are carried forward indefinitely.
 
     To perform a re-migration:
       - Remove the `.kibana_7.10.0` alias
       - Take a snapshot OR set the configuration option `migrations.target_index_postfix: '002'` to create a new target index `.kibana_7.10.0_002` and keep the `.kibana_7.10.0_001` index to be able to perform a rollback.
       - Start up Kibana
   
-2. Refuse to start Kibana
+2. Refuse to start Kibana until the plugin is enabled or it's data deleted
 
     Advantages:
     - Admin’s are forced to deal with the problem as soon as they disable a plugin
@@ -324,10 +301,11 @@ There are several approaches we could take to dealing with this orphan data
     Disadvantages:
     - Cannot temporarily disable a plugin to aid in debugging or to reduce the load a Kibana plugin places on as ES cluster.
 
-3. Refuse to start a migration
+3. Refuse to start a migration until the plugin is enabled or it's data deleted
 
     Advantages:
-    - We force users to enable a plugin or delete the documents which prevents these documents from creating future problems like a mapping update not being compatible because there are fields which are assumed to have been migrated. - We keep the index “clean”.
+    - We force users to enable a plugin or delete the documents which prevents these documents from creating future problems like a mapping update not being compatible because there are fields which are assumed to have been migrated.
+    - We keep the index “clean”.
 
     Disadvantages:
     - Since users have to take down outdated nodes before they can start the upgrade, they have to enter the downtime window before they know about this problem. This prolongs the downtime window and in many cases might cause an operations team to have to reschedule their downtime window to give them time to investigate the documents that need to be deleted. Logging an error on every startup could warn users ahead of time to mitigate this.
@@ -349,7 +327,7 @@ https://github.com/elastic/kibana/issues/52202 for more information.
 ## 5.2 Single node migrations coordinated through a lease/lock
 This alternative is a proposed algorithm for coordinating migrations so that
 these only happen on a single node and therefore don't have the restrictions
-found in [(4.3.1.1)](#4311-restrictions). We decided against this algorithm
+found in [(4.2.1.1)](#4311-restrictions). We decided against this algorithm
 primarily because it is a lot more complex, but also because it could still
 require manual intervention to retry from certain unlikely edge cases.
 
@@ -385,7 +363,7 @@ unlikely.
 ### 5.2.1 Migration algorithm
 1. Obtain a document lock (see [5.2.2 Document lock
    algorithm](#522-document-lock-algorithm)). Convert the lock into a "weak
-   lease" by expiring locks for nodes which aren't active (see [4.3.2.4
+   lease" by expiring locks for nodes which aren't active (see [4.2.2.4
    Checking for lease expiry](#4324-checking-for-lease-expiry)). This "weak
    lease" doesn't require strict guarantees since it's only used to prevent
    multiple Kibana nodes from performing a migration in parallel to reduce the
@@ -577,7 +555,7 @@ Drawbacks:
   users to ensure that they don't rely on `.kibana_n` indices as backups.
   (Apart from the need to educate users, snapshot restores provide many
   benefits).
-- It narrows the second restriction under (4.3.1) even further: migrations
+- It narrows the second restriction under (4.2.1) even further: migrations
   cannot rely on any state that could change as part of a migration because we
   can no longer use the previous index as a snapshot of unmigrated state.
 - We can’t automatically perform a rollback from a half-way done migration.
@@ -671,6 +649,33 @@ to enumarate some scenarios and their worst case impact:
    which can cause future problems like write failures or inconsistent query
    results.
 
+## 5.5 Tag objects as “invalid” if their transformation fails
+> This alternative prevents a failed migration when there's a migration transform function bug or a document with invalid data. Although it seems preferable to not fail the entire migration because of a single saved object type's migration transform bug or a single invalid document this has several pitfalls:
+>  1. When an object fails to migrate the data for that saved object type becomes inconsistent. This could load to a critical feature being unavailable to a user leaving them with no choice but to downgrade.
+>  2. Because Kibana starts accepting traffic after encountering invalid objects a rollback will lead to data loss leaving users with no clean way to recover.
+> As a result we prefer to let an upgrade fail and making it easy for users to rollback until they can resolve the root cause.
+
+> Achieves goals: (2.2)
+> Mitigates Errors (3.1), (3.2)
+
+1. Tag objects as “invalid” if they cause an exception when being transformed,
+   but don’t fail the entire migration. 
+2. Log an error message informing administrators that there are invalid
+   objects which require inspection. For each invalid object, provide an error
+   stack trace to aid in debugging. 
+3. Administrators should be able to generate a migration report (similar to
+   the one dry run migrations create) which is an NDJSON export of all objects
+   tagged as “invalid”.
+   1. Expose this as an HTTP API first
+   2. (later) Notify administrators and allow them to export invalid objects
+      from the Kibana UI.
+4. When an invalid object is read, the Saved Objects repository will throw an
+   invalid object exception which should include a link to the documentation
+   to help administrators resolve migration bugs.
+5. Educate Kibana developers to no longer simply write back an unmigrated
+   document if an exception occurred. A migration function should either
+   successfully transform the object or throw. 
+
 # 6. How we teach this
 1. Update documentation and server logs to start educating users to depend on
    snapshots for Kibana rollbacks.
@@ -678,4 +683,4 @@ to enumarate some scenarios and their worst case impact:
    for writing migration functions. 
 
 # 7. Unresolved questions
-1. How do we want to deal with orphan data as described in (4.3.1.4) "Handling documents that belong to a disabled plugin"
+1. How do we want to deal with orphan data as described in (4.2.1.4) "Handling documents that belong to a disabled plugin"
