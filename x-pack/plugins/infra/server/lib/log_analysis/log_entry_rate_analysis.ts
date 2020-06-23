@@ -103,7 +103,8 @@ export class LogEntryRateAnalysis {
       const partition = {
         analysisBucketCount: timestampPartitionBucket.filter_model_plot.doc_count,
         anomalies: timestampPartitionBucket.filter_records.top_hits_record.hits.hits.map(
-          ({ _source: record }) => ({
+          ({ _id, _source: record }) => ({
+            id: _id,
             actualLogEntryRate: record.actual[0],
             anomalyScore: record.record_score,
             duration: record.bucket_span * 1000,

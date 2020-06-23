@@ -6,11 +6,11 @@
 
 import { useMemo, useState } from 'react';
 
-import uuid from 'uuid';
 import {
   GetLogEntryRateSuccessResponsePayload,
   LogEntryRateHistogramBucket,
   LogEntryRatePartition,
+  LogEntryRateAnomaly,
 } from '../../../../common/http_api/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryRateAPI } from './service_calls/get_log_entry_rate';
@@ -24,15 +24,9 @@ type PartitionRecord = Record<
   { buckets: PartitionBucket[]; topAnomalyScore: number; totalNumberOfLogEntries: number }
 >;
 
-interface AnomalyRecord {
+type AnomalyRecord = LogEntryRateAnomaly & {
   partitionId: string;
-  anomalyScore: number;
-  actualLogEntryRate: number;
-  typicalLogEntryRate: number;
-  startTime: number;
-  duration: number;
-  uuid: string;
-}
+};
 
 export interface LogEntryRateResults {
   bucketDuration: number;
@@ -139,7 +133,6 @@ const formatLogEntryRateResultsByAllAnomalies = (
       if (partition.anomalies.length > 0) {
         partition.anomalies.forEach((anomaly) => {
           _anomalies.push({
-            uuid: uuid.v4(),
             partitionId: partition.partitionId,
             ...anomaly,
           });

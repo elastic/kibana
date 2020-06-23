@@ -30,12 +30,15 @@ export type GetLogEntryRateRequestPayload = rt.TypeOf<typeof getLogEntryRateRequ
  */
 
 export const logEntryRateAnomalyRT = rt.type({
+  id: rt.string,
   actualLogEntryRate: rt.number,
   anomalyScore: rt.number,
   duration: rt.number,
   startTime: rt.number,
   typicalLogEntryRate: rt.number,
 });
+
+export type LogEntryRateAnomaly = rt.TypeOf<typeof logEntryRateAnomalyRT>;
 
 export const logEntryRatePartitionRT = rt.type({
   analysisBucketCount: rt.number,

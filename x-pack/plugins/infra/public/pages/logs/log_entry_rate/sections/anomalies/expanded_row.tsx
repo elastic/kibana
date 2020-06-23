@@ -17,6 +17,7 @@ import {
   getLogEntryRateSeriesForPartition,
   getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
+import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   id: string;
@@ -26,8 +27,12 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   jobId: string;
 }> = ({ id, results, timeRange, setTimeRange, jobId }) => {
   const anomaly = useMemo(() => {
-    return results.anomalies.find((_anomaly) => _anomaly.uuid === id);
+    return results.anomalies.find((_anomaly) => _anomaly.id === id);
   }, [results, id]);
+
+  const {
+    sourceConfiguration: { sourceId },
+  } = useLogEntryRateModuleContext();
 
   if (!anomaly) return null;
 

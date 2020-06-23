@@ -20,7 +20,7 @@ import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 
 interface TableItem {
-  uuid: string;
+  id: string;
   dataset: string;
   datasetName: string;
   anomalyScore: number;
@@ -90,7 +90,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   const tableItems: TableItem[] = useMemo(() => {
     return results.anomalies.map((anomaly) => {
       return {
-        uuid: anomaly.uuid,
+        id: anomaly.id,
         // The real ID
         dataset: anomaly.partitionId,
         // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
@@ -101,18 +101,16 @@ export const AnomaliesTable: React.FunctionComponent<{
     });
   }, [results]);
 
-  const [expandedUuids, { add: expandDataset, remove: collapseDataset }] = useSet<string>(
-    new Set()
-  );
+  const [expandedIds, { add: expandDataset, remove: collapseDataset }] = useSet<string>(new Set());
 
   const expandedDatasetRowContents = useMemo(
     () =>
-      [...expandedUuids].reduce<Record<string, React.ReactNode>>((aggregatedDatasetRows, uuid) => {
+      [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedDatasetRows, id) => {
         return {
           ...aggregatedDatasetRows,
-          [uuid]: (
+          [id]: (
             <AnomaliesTableExpandedRow
-              id={uuid}
+              id={id}
               results={results}
               setTimeRange={setTimeRange}
               timeRange={timeRange}
@@ -121,7 +119,7 @@ export const AnomaliesTable: React.FunctionComponent<{
           ),
         };
       }, {}),
-    [expandedUuids, results, setTimeRange, timeRange, jobId]
+    [expandedIds, results, setTimeRange, timeRange, jobId]
   );
 
   const [sorting, setSorting] = useState<SortingOptions>({
@@ -209,21 +207,21 @@ export const AnomaliesTable: React.FunctionComponent<{
         isExpander: true,
         render: (item: TableItem) => (
           <RowExpansionButton
-            isExpanded={expandedUuids.has(item.uuid)}
-            item={item.uuid}
+            isExpanded={expandedIds.has(item.id)}
+            item={item.id}
             onExpand={expandDataset}
             onCollapse={collapseDataset}
           />
         ),
       },
     ],
-    [collapseDataset, expandDataset, expandedUuids]
+    [collapseDataset, expandDataset, expandedIds]
   );
 
   return (
     <StyledEuiBasicTable
       items={pageOfItems}
-      itemId="uuid"
+      itemId="id"
       itemIdToExpandedRowMap={expandedDatasetRowContents}
       isExpandable={true}
       hasActions={true}
