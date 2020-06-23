@@ -34,6 +34,8 @@ import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './schema';
 import * as I18n from './translations';
+import { APP_ID } from '../../../../../common/constants';
+import { SecurityPageName } from '../../../../app/types';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -84,9 +86,16 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     schema,
   });
 
-  const kibanaAbsoluteUrl = useMemo(() => application.getUrlForApp('siem', { absolute: true }), [
-    application,
-  ]);
+  // TO DO need to make sure that logic is still valid
+  const kibanaAbsoluteUrl = useMemo(() => {
+    const url = application.getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+      absolute: true,
+    });
+    if (url != null && url.includes('app/security/alerts')) {
+      return url.replace('app/security/alerts', 'app/security');
+    }
+    return url;
+  }, [application]);
 
   const onSubmit = useCallback(
     async (enabled: boolean) => {

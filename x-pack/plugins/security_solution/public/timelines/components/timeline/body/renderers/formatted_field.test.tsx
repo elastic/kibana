@@ -16,6 +16,7 @@ import { FormattedFieldValue } from './formatted_field';
 import { HOST_NAME_FIELD_NAME } from './constants';
 
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/components/link_to');
 
 describe('Events', () => {
   const mount = useMountAppended();
