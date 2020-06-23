@@ -13,11 +13,13 @@ import {
   EuiLink,
   EuiHealth,
   EuiToolTip,
+  EuiSelectableProps,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
+import { useDispatch } from 'react-redux';
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useHostSelector } from './hooks';
@@ -43,6 +45,7 @@ import {
   getPolicyDetailPath,
 } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { HostAction } from '../store/action';
 
 const HostListNavLink = memo<{
   name: string;
@@ -79,8 +82,11 @@ export const HostList = () => {
     uiQueryParams: queryParams,
     hasSelectedHost,
     policyItems,
+    selectedPolicyId,
   } = useHostSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+
+  const dispatch = useDispatch<(a: HostAction) => void>();
 
   const paginationSetup = useMemo(() => {
     return {
@@ -128,8 +134,37 @@ export const HostList = () => {
   );
 
   const handleDeployEndpointsClick = useNavigateToAppEventHandler('ingestManager', {
-    path: `#/fleet`,
+    path: `#/configs/${selectedPolicyId}`,
   });
+
+  const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
+    return policyItems.map((item) => {
+      return {
+        key: item.config_id,
+        label: item.name,
+        checked: selectedPolicyId === item.id ? 'on' : undefined,
+      };
+    });
+  }, [policyItems, selectedPolicyId]);
+
+  const handleSelectableOnChange = useCallback<(o: EuiSelectableProps['options']) => void>(
+    (changedOptions) => {
+      return changedOptions.some((option) => {
+        if ('checked' in option && option.checked === 'on') {
+          dispatch({
+            type: 'userSelectedEndpointPolicy',
+            payload: {
+              selectedPolicyId: option.key as string,
+            },
+          });
+          return true;
+        } else {
+          return false;
+        }
+      });
+    },
+    [dispatch]
+  );
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpointList.lastActive', {
@@ -297,7 +332,9 @@ export const HostList = () => {
         <EndpointsEmptyState
           loading={loading}
           onActionClick={handleDeployEndpointsClick}
-          actionDisabled={isFetchingPackageInfo}
+          actionDisabled={isFetchingPackageInfo && selectedPolicyId === undefined}
+          handleSelectableOnChange={handleSelectableOnChange}
+          selectionOptions={selectionOptions}
         />
       );
     } else {
@@ -320,6 +357,9 @@ export const HostList = () => {
     handleCreatePolicyClick,
     isFetchingPackageInfo,
     handleDeployEndpointsClick,
+    handleSelectableOnChange,
+    selectedPolicyId,
+    selectionOptions,
   ]);
 
   return (

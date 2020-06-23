@@ -13,7 +13,10 @@ import {
   EuiButton,
   EuiSteps,
   EuiTitle,
+  EuiSelectable,
   EuiProgress,
+  EuiSelectableMessage,
+  EuiSelectableProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -104,50 +107,69 @@ const EndpointsEmptyState = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled: boolean;
-}>(({ loading, onActionClick, actionDisabled }) => {
+  handleSelectableOnChange: (o: EuiSelectableProps['options']) => void;
+  selectionOptions: EuiSelectableProps['options'];
+}>(({ loading, onActionClick, actionDisabled, handleSelectableOnChange, selectionOptions }) => {
   const policySteps = useMemo(
     () => [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepOneTitle', {
-          defaultMessage: 'Head over to Ingest Manager.',
+          defaultMessage: 'Select a policy you created from the list below.',
         }),
         children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.endpointList.stepOne"
-              defaultMessage="Here, you’ll add the Elastic Endpoint Security Integration to your Agent Configuration."
-            />
-          </EuiText>
+          <>
+            <EuiText color="subdued" size="xs">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.endpointList.stepOne"
+                defaultMessage="These are existing policies."
+              />
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiSelectable
+              options={selectionOptions}
+              singleSelection="always"
+              isLoading={loading}
+              height={100}
+              listProps={{ bordered: true, singleSelection: true }}
+              onChange={handleSelectableOnChange}
+            >
+              {(list) =>
+                loading ? (
+                  <EuiSelectableMessage>
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.endpointList.loadingPolicies"
+                      defaultMessage="Loading policy configs"
+                    />
+                  </EuiSelectableMessage>
+                ) : selectionOptions.length ? (
+                  list
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.endpointList.noPolicies"
+                    defaultMessage="There are no policies."
+                  />
+                )
+              }
+            </EuiSelectable>
+          </>
         ),
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepTwoTitle', {
-          defaultMessage: 'We’ll create a recommended security policy for you.',
+          defaultMessage:
+            'Head over to Ingest to deploy your Agent with Endpoint Security enabled.',
         }),
         children: (
           <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.securitySolution.endpoint.endpointList.stepTwo"
-              defaultMessage="You can edit this policy in the “Policies” tab after you’ve added the Elastic Endpoint integration."
-            />
-          </EuiText>
-        ),
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepThreeTitle', {
-          defaultMessage: 'Enroll your agents through Fleet.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.endpointList.stepThree"
-              defaultMessage="If you haven’t already, enroll your agents through Fleet using the same agent configuration."
+              defaultMessage="You'll be given a command in Ingest to get you started."
             />
           </EuiText>
         ),
       },
     ],
-    []
+    [selectionOptions, handleSelectableOnChange, loading]
   );
 
   return (

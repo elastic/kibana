@@ -54,6 +54,13 @@ interface ServerFailedToReturnEndpointPolicies {
   payload: ServerApiError;
 }
 
+interface UserSelectedEndpointPolicy {
+  type: 'userSelectedEndpointPolicy';
+  payload: {
+    selectedPolicyId: string;
+  };
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
@@ -62,4 +69,5 @@ export type HostAction =
   | ServerReturnedHostPolicyResponse
   | ServerFailedToReturnHostPolicyResponse
   | ServerReturnEndpointPolicies
-  | ServerFailedToReturnEndpointPolicies;
+  | ServerFailedToReturnEndpointPolicies
+  | UserSelectedEndpointPolicy;

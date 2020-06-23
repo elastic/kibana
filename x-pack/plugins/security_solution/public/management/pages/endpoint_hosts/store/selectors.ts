@@ -39,6 +39,8 @@ export const detailsError = (state: Immutable<HostState>) => state.detailsError;
 
 export const policyItems = (state: Immutable<HostState>) => state.policyItems;
 
+export const selectedPolicyId = (state: Immutable<HostState>) => state.selectedPolicyId;
+
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
  */

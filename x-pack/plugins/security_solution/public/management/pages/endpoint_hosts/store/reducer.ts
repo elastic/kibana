@@ -25,6 +25,7 @@ export const initialHostListState: Immutable<HostState> = {
   policyResponseError: undefined,
   location: undefined,
   policyItems: [],
+  selectedPolicyId: undefined,
 };
 
 export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
@@ -89,6 +90,12 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
     return {
       ...state,
       policyResponseError: action.payload,
+      policyResponseLoading: false,
+    };
+  } else if (action.type === 'userSelectedEndpointPolicy') {
+    return {
+      ...state,
+      selectedPolicyId: action.payload.selectedPolicyId,
       policyResponseLoading: false,
     };
   } else if (action.type === 'userChangedUrl') {
