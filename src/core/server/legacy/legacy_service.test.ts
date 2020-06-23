@@ -122,7 +122,6 @@ beforeEach(() => {
   startDeps = {
     core: {
       ...coreMock.createInternalStart(),
-      savedObjects: savedObjectsServiceMock.createInternalStartContract(),
       plugins: { contracts: new Map() },
     },
     plugins: {},
