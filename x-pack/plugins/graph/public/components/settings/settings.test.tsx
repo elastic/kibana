@@ -177,6 +177,28 @@ describe('settings', () => {
         )
       );
     });
+
+    it('should let the user edit and empty the field to input a new number', () => {
+      act(() => {
+        input('Sample size').prop('onChange')!({
+          target: { valueAsNumber: '' },
+        } as React.ChangeEvent<HTMLInputElement>);
+      });
+      // Central state should not be called
+      expect(dispatchSpy).not.toHaveBeenCalledWith(
+        updateSettings(
+          expect.objectContaining({
+            timeoutMillis: 10000,
+            sampleSize: '',
+          })
+        )
+      );
+
+      // Update the local state
+      instance.update();
+      // Now check that local state should reflect what the user sent
+      expect(input('Sample size').prop('value')).toEqual('');
+    });
   });
 
   describe('blacklist', () => {
