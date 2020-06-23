@@ -324,6 +324,23 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const nr = await el.getAttribute('data-fetch-counter');
       return Number(nr);
     }
+
+    /**
+     * Check if Discover app is currently rendered on the screen.
+     */
+    public async isDiscoverAppOnScreen(): Promise<boolean> {
+      const result = await find.allByCssSelector('discover-app');
+      return result.length === 1;
+    }
+
+    /**
+     * Wait until Discover app is rendered on the screen.
+     */
+    public async waitForDiscoverAppOnScreen() {
+      await retry.waitFor('Discover app on screen', async () => {
+        return await this.isDiscoverAppOnScreen();
+      });
+    }
   }
 
   return new DiscoverPage();

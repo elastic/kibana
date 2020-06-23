@@ -4372,7 +4372,7 @@ exports[`Header renders 2`] = `
                     <EuiPopover
                       anchorPosition="downRight"
                       button={
-                        <ForwardRef
+                        <EuiHeaderSectionItemButton
                           aria-expanded={false}
                           aria-haspopup="true"
                           aria-label="Help menu"
@@ -4382,7 +4382,7 @@ exports[`Header renders 2`] = `
                             size="m"
                             type="help"
                           />
-                        </ForwardRef>
+                        </EuiHeaderSectionItemButton>
                       }
                       closePopover={[Function]}
                       data-test-subj="helpMenuButton"
@@ -8583,7 +8583,7 @@ exports[`Header renders 3`] = `
                     <EuiPopover
                       anchorPosition="downRight"
                       button={
-                        <ForwardRef
+                        <EuiHeaderSectionItemButton
                           aria-expanded={false}
                           aria-haspopup="true"
                           aria-label="Help menu"
@@ -8593,7 +8593,7 @@ exports[`Header renders 3`] = `
                             size="m"
                             type="help"
                           />
-                        </ForwardRef>
+                        </EuiHeaderSectionItemButton>
                       }
                       closePopover={[Function]}
                       data-test-subj="helpMenuButton"
@@ -9081,6 +9081,7 @@ exports[`Header renders 3`] = `
                           >
                             <div
                               class="euiFlexItem euiFlexItem--flexGrowZero"
+                              style="flex-shrink: 0;"
                             >
                               <div
                                 class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
@@ -9351,6 +9352,7 @@ exports[`Header renders 3`] = `
                             >
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
+                                style="flex-shrink: 0;"
                               >
                                 <div
                                   class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
@@ -9843,7 +9845,7 @@ exports[`Header renders 3`] = `
                           arrowDisplay="right"
                           buttonClassName="euiCollapsibleNavGroup__heading"
                           buttonContent={
-                            <ForwardRef
+                            <EuiFlexGroup
                               alignItems="center"
                               gutterSize="m"
                               responsive={false}
@@ -9860,7 +9862,7 @@ exports[`Header renders 3`] = `
                                   </h3>
                                 </EuiTitle>
                               </EuiFlexItem>
-                            </ForwardRef>
+                            </EuiFlexGroup>
                           }
                           className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                           data-test-subj="collapsibleNavGroup-recentlyViewed"
@@ -14012,7 +14014,7 @@ exports[`Header renders 4`] = `
                     <EuiPopover
                       anchorPosition="downRight"
                       button={
-                        <ForwardRef
+                        <EuiHeaderSectionItemButton
                           aria-expanded={false}
                           aria-haspopup="true"
                           aria-label="Help menu"
@@ -14022,7 +14024,7 @@ exports[`Header renders 4`] = `
                             size="m"
                             type="help"
                           />
-                        </ForwardRef>
+                        </EuiHeaderSectionItemButton>
                       }
                       closePopover={[Function]}
                       data-test-subj="helpMenuButton"

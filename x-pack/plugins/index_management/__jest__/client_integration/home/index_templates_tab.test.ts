@@ -432,18 +432,18 @@ describe('Index Templates tab', () => {
           // Navigate and verify all tabs
           actions.selectDetailsTab('settings');
           expect(exists('summaryTab')).toBe(false);
-          expect(exists('settingsTab')).toBe(true);
+          expect(exists('settingsTabContent')).toBe(true);
 
           actions.selectDetailsTab('aliases');
           expect(exists('summaryTab')).toBe(false);
-          expect(exists('settingsTab')).toBe(false);
-          expect(exists('aliasesTab')).toBe(true);
+          expect(exists('settingsTabContent')).toBe(false);
+          expect(exists('aliasesTabContent')).toBe(true);
 
           actions.selectDetailsTab('mappings');
           expect(exists('summaryTab')).toBe(false);
-          expect(exists('settingsTab')).toBe(false);
-          expect(exists('aliasesTab')).toBe(false);
-          expect(exists('mappingsTab')).toBe(true);
+          expect(exists('settingsTabContent')).toBe(false);
+          expect(exists('aliasesTabContent')).toBe(false);
+          expect(exists('mappingsTabContent')).toBe(true);
         });
 
         test('should show an info callout if data is not present', async () => {

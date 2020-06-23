@@ -468,6 +468,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="flex-shrink: 0;"
                         >
                           <div
                             class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
@@ -1151,6 +1152,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
+                            style="flex-shrink: 0;"
                           >
                             <div
                               class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
@@ -2057,7 +2059,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       arrowDisplay="right"
                       buttonClassName="euiCollapsibleNavGroup__heading"
                       buttonContent={
-                        <ForwardRef
+                        <EuiFlexGroup
                           alignItems="center"
                           gutterSize="m"
                           responsive={false}
@@ -2074,7 +2076,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               </h3>
                             </EuiTitle>
                           </EuiFlexItem>
-                        </ForwardRef>
+                        </EuiFlexGroup>
                       }
                       className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                       data-test-subj="collapsibleNavGroup-recentlyViewed"
@@ -2300,7 +2302,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           arrowDisplay="right"
                           buttonClassName="euiCollapsibleNavGroup__heading"
                           buttonContent={
-                            <ForwardRef
+                            <EuiFlexGroup
                               alignItems="center"
                               gutterSize="m"
                               responsive={false}
@@ -2325,7 +2327,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   </h3>
                                 </EuiTitle>
                               </EuiFlexItem>
-                            </ForwardRef>
+                            </EuiFlexGroup>
                           }
                           className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                           data-test-subj="collapsibleNavGroup-kibana"
@@ -2587,7 +2589,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           arrowDisplay="right"
                           buttonClassName="euiCollapsibleNavGroup__heading"
                           buttonContent={
-                            <ForwardRef
+                            <EuiFlexGroup
                               alignItems="center"
                               gutterSize="m"
                               responsive={false}
@@ -2612,7 +2614,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   </h3>
                                 </EuiTitle>
                               </EuiFlexItem>
-                            </ForwardRef>
+                            </EuiFlexGroup>
                           }
                           className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                           data-test-subj="collapsibleNavGroup-observability"
@@ -2835,7 +2837,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           arrowDisplay="right"
                           buttonClassName="euiCollapsibleNavGroup__heading"
                           buttonContent={
-                            <ForwardRef
+                            <EuiFlexGroup
                               alignItems="center"
                               gutterSize="m"
                               responsive={false}
@@ -2860,7 +2862,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   </h3>
                                 </EuiTitle>
                               </EuiFlexItem>
-                            </ForwardRef>
+                            </EuiFlexGroup>
                           }
                           className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                           data-test-subj="collapsibleNavGroup-security"
@@ -3043,7 +3045,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           arrowDisplay="right"
                           buttonClassName="euiCollapsibleNavGroup__heading"
                           buttonContent={
-                            <ForwardRef
+                            <EuiFlexGroup
                               alignItems="center"
                               gutterSize="m"
                               responsive={false}
@@ -3060,7 +3062,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   </h3>
                                 </EuiTitle>
                               </EuiFlexItem>
-                            </ForwardRef>
+                            </EuiFlexGroup>
                           }
                           className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                           data-test-subj="collapsibleNavGroup-management"
@@ -4127,7 +4129,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                       arrowDisplay="right"
                       buttonClassName="euiCollapsibleNavGroup__heading"
                       buttonContent={
-                        <ForwardRef
+                        <EuiFlexGroup
                           alignItems="center"
                           gutterSize="m"
                           responsive={false}
@@ -4144,7 +4146,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                               </h3>
                             </EuiTitle>
                           </EuiFlexItem>
-                        </ForwardRef>
+                        </EuiFlexGroup>
                       }
                       className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                       data-test-subj="collapsibleNavGroup-recentlyViewed"
@@ -4770,6 +4772,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="flex-shrink: 0;"
                         >
                           <div
                             class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
@@ -4959,6 +4962,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
+                            style="flex-shrink: 0;"
                           >
                             <div
                               class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
@@ -5261,7 +5265,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       arrowDisplay="right"
                       buttonClassName="euiCollapsibleNavGroup__heading"
                       buttonContent={
-                        <ForwardRef
+                        <EuiFlexGroup
                           alignItems="center"
                           gutterSize="m"
                           responsive={false}
@@ -5278,7 +5282,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                               </h3>
                             </EuiTitle>
                           </EuiFlexItem>
-                        </ForwardRef>
+                        </EuiFlexGroup>
                       }
                       className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                       data-test-subj="collapsibleNavGroup-recentlyViewed"

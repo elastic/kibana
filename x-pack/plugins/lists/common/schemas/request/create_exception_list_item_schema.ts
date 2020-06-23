@@ -14,7 +14,6 @@ import {
   Tags,
   _Tags,
   _tags,
-  comment,
   description,
   exceptionListItemType,
   list_id,
@@ -24,7 +23,7 @@ import {
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
-import { DefaultEntryArray } from '../types';
+import { CommentsPartialArray, DefaultCommentsPartialArray, DefaultEntryArray } from '../types';
 import { EntriesArray } from '../types/entries';
 import { DefaultUuid } from '../../siem_common_deps';
 
@@ -40,7 +39,7 @@ export const createExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       _tags, // defaults to empty array if not set during decode
-      comment, // defaults to empty array if not set during decode
+      comments: DefaultCommentsPartialArray, // defaults to empty array if not set during decode
       entries: DefaultEntryArray, // defaults to empty array if not set during decode
       item_id: DefaultUuid, // defaults to GUID (uuid v4) if not set during decode
       meta, // defaults to undefined if not set during decode
@@ -61,9 +60,10 @@ export type CreateExceptionListItemSchema = RequiredKeepUndefined<
 export type CreateExceptionListItemSchemaDecoded = Identity<
   Omit<
     CreateExceptionListItemSchema,
-    '_tags' | 'tags' | 'item_id' | 'entries' | 'namespace_type'
+    '_tags' | 'tags' | 'item_id' | 'entries' | 'namespace_type' | 'comments'
   > & {
     _tags: _Tags;
+    comments: CommentsPartialArray;
     tags: Tags;
     item_id: ItemId;
     entries: EntriesArray;
