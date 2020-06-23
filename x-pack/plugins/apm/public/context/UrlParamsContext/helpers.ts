@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, pick } from 'lodash';
+import { compact, pickBy } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -62,7 +62,7 @@ export function getPathAsArray(pathname: string = '') {
 }
 
 export function removeUndefinedProps<T>(obj: T): Partial<T> {
-  return pick(obj, (value) => value !== undefined);
+  return pickBy(obj as any, (value) => value !== undefined) as any;
 }
 
 export function getPathParams(pathname: string = ''): PathParams {

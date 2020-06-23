@@ -39,7 +39,6 @@ module.exports = {
     'highlight.js',
     'html-entities',
     'jquery',
-    'lodash.clone',
     'lodash',
     'markdown-it',
     'mocha',

@@ -78,7 +78,7 @@ export async function loadInitialState({
   defaultIndexPatternId?: string;
 }): Promise<IndexPatternPrivateState> {
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
-  const requiredPatterns = _.unique(
+  const requiredPatterns = _.uniq(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)

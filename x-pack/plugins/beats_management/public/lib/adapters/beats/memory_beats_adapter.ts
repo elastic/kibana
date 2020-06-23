@@ -32,14 +32,14 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async getAll() {
-    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
+    return this.beatsDB.map((beat: any) => omit(beat, ['access_token'])) as CMBeat[];
   }
   public async getBeatsWithTag(tagId: string): Promise<CMBeat[]> {
-    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
+    return this.beatsDB.map((beat: any) => omit(beat, ['access_token'])) as CMBeat[];
   }
 
   public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
-    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']))[0];
+    return this.beatsDB.map((beat: any) => omit(beat, ['access_token']))[0] as CMBeat | null;
   }
   public async removeTagsFromBeats(
     removals: BeatsTagAssignment[]
@@ -66,11 +66,11 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
         return beat;
       });
 
-    return response.map<any>((item: CMBeat, resultIdx: number) => ({
+    return response.map((item: CMBeat, resultIdx: number) => ({
       idxInRequest: removals[resultIdx].idxInRequest,
       result: 'updated',
       status: 200,
-    }));
+    })) as any;
   }
 
   public async assignTagsToBeats(

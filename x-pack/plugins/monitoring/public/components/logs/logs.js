@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { PureComponent } from 'react';
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import { Legacy } from '../../legacy_shims';
 import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
 import { INFRA_SOURCE_ID } from '../../../common/constants';
@@ -59,7 +59,7 @@ const columns = [
     field: 'type',
     name: columnTypeTitle,
     width: '10%',
-    render: (type) => capitalize(type),
+    render: (type) => upperFirst(type),
   },
   {
     field: 'message',
@@ -89,7 +89,7 @@ const clusterColumns = [
     field: 'type',
     name: columnTypeTitle,
     width: '10%',
-    render: (type) => capitalize(type),
+    render: (type) => upperFirst(type),
   },
   {
     field: 'message',

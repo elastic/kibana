@@ -161,7 +161,7 @@ export function updateLayerIndexPattern(
   layer: IndexPatternLayer,
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
-  const keptColumns: IndexPatternLayer['columns'] = _.pick(layer.columns, (column) =>
+  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) =>
     isColumnTransferable(column, newIndexPattern)
   );
   const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, (column) => {

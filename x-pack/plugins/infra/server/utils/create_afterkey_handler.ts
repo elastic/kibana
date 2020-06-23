@@ -14,7 +14,7 @@ export const createAfterKeyHandler = (
   if (!response.aggregations) {
     return options;
   }
-  const newOptions = { ...options };
+  const newOptions = { ...options } as any;
   const afterKey = afterKeySelector(response);
   set(newOptions, optionsAfterKeyPath, afterKey);
   return newOptions;

@@ -26,7 +26,7 @@ import {
   ExecutorSubActionPushParams,
 } from './types';
 
-import { transformers, Transformer } from './transformers';
+import { transformers } from './transformers';
 
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
 
@@ -205,7 +205,7 @@ export const transformFields = ({
   currentIncident,
 }: TransformFieldsArgs): Record<string, string> => {
   return fields.reduce((prev, cur) => {
-    const transform = flow<Transformer>(...cur.pipes.map((p) => transformers[p]));
+    const transform = flow(...cur.pipes.map((p) => transformers[p]));
     return {
       ...prev,
       [cur.key]: transform({
@@ -228,7 +228,7 @@ export const transformFields = ({
 export const transformComments = (comments: Comment[], pipes: string[]): Comment[] => {
   return comments.map((c) => ({
     ...c,
-    comment: flow<Transformer>(...pipes.map((p) => transformers[p]))({
+    comment: flow(...pipes.map((p) => transformers[p]))({
       value: c.comment,
       date: c.updatedAt ?? c.createdAt,
       user:

@@ -43,7 +43,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       };
     }
     const response = await this.database.search(user, params);
-    const tags = get<any>(response, 'hits.hits', []);
+    const tags = get(response, 'hits.hits', []) as any;
 
     return tags.map((tag: any) => ({ hasConfigurationBlocksTypes: [], ...tag._source.tag }));
   }
@@ -63,7 +63,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
 
     const beatsResponse = await this.database.search(user, params);
 
-    const beats = get<BeatTag[]>(beatsResponse, 'hits.hits', []).map(
+    const beats = (get(beatsResponse, 'hits.hits', []) as BeatTag[]).map(
       (beat: any) => beat._source.beat
     );
 
@@ -142,7 +142,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     };
     const response = await this.database.index(user, params);
 
-    return get<string>(response, 'result');
+    return get(response, 'result') as string;
   }
 
   public async getWithoutConfigTypes(
@@ -172,7 +172,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       size: 10000,
     };
     const response = await this.database.search(user, params);
-    const tags = get<any>(response, 'hits.hits', []);
+    const tags = get(response, 'hits.hits', []) as any;
 
     return tags.map((tag: any) => ({ hasConfigurationBlocksTypes: [], ...tag._source.tag }));
   }

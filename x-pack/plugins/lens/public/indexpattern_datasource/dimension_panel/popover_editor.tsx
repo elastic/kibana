@@ -94,7 +94,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
       validOperationTypes.push(...operationByField[selectedColumn.sourceField]!);
     }
 
-    return _.uniq(
+    return _.uniqBy(
       [
         ...asOperationOptions(validOperationTypes, true),
         ...asOperationOptions(possibleOperationTypes, false),

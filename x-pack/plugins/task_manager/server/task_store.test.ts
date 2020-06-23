@@ -853,7 +853,7 @@ if (doc['task.runAt'].size()!=0) {
         type,
         attributes: {
           ..._.omit(task, 'id'),
-          ..._.mapValues(_.pick(task, 'params', 'state'), (value) => JSON.stringify(value)),
+          ..._.mapValues(_.pick(task, ['params', 'state']), (value) => JSON.stringify(value)),
         },
         references: [],
         version: '123',
@@ -904,7 +904,7 @@ if (doc['task.runAt'].size()!=0) {
             type,
             attributes: {
               ..._.omit(task, 'id'),
-              ..._.mapValues(_.pick(task, 'params', 'state'), (value) => JSON.stringify(value)),
+              ..._.mapValues(_.pick(task, ['params', 'state']), (value) => JSON.stringify(value)),
             },
             references: [],
             version: '123',

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import clone from 'lodash.clone';
+import { clone } from 'lodash';
 
 export class Registry {
   constructor(prop = 'name') {

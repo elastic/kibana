@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq, indexBy } from 'lodash';
+import { uniq, keyBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   // @ts-ignore
@@ -231,7 +231,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const allFields = currentIndexPattern.fields;
-  const fieldByName = indexBy(allFields, 'name');
+  const fieldByName = keyBy(allFields, 'name');
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
 
   const lazyScroll = () => {

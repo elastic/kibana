@@ -550,19 +550,11 @@
         ],
       },
       {
-        groupSlug: 'lodash.clonedeep',
-        groupName: 'lodash.clonedeep related packages',
+        groupSlug: 'lodash3',
+        groupName: 'lodash3 related packages',
         packageNames: [
-          'lodash.clonedeep',
-          '@types/lodash.clonedeep',
-        ],
-      },
-      {
-        groupSlug: 'lodash.clonedeepwith',
-        groupName: 'lodash.clonedeepwith related packages',
-        packageNames: [
-          'lodash.clonedeepwith',
-          '@types/lodash.clonedeepwith',
+          'lodash3',
+          '@types/lodash3',
         ],
       },
       {

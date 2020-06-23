@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { cloneDeep, sortByOrder } from 'lodash';
+import { cloneDeep, orderBy } from 'lodash';
 import { UIFilters } from '../../../../typings/ui_filters';
 import { Projection } from '../../../../common/projections/typings';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
@@ -48,7 +48,7 @@ export async function getLocalUIFilters({
 
       return {
         ...filter,
-        options: sortByOrder(
+        options: orderBy(
           buckets.map((bucket) => {
             return {
               name: bucket.key as string,

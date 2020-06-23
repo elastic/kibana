@@ -6,14 +6,14 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { get, contains } from 'lodash';
+import { get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from '../legacy_shims';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
 
 function isOnPage(hash: string) {
-  return contains(window.location.hash, hash);
+  return includes(window.location.hash, hash);
 }
 
 interface IAngularState {

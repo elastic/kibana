@@ -5,7 +5,6 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import _ from 'lodash';
 import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

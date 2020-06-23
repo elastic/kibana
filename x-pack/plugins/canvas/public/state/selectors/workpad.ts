@@ -50,7 +50,7 @@ export function getWorkpadPersisted(state: State) {
 }
 
 export function getWorkpadInfo(state: State): WorkpadInfo {
-  return omit(getWorkpad(state), ['pages']);
+  return omit(getWorkpad(state), ['pages']) as WorkpadInfo;
 }
 
 export function isWriteable(state: State): boolean {
@@ -308,7 +308,7 @@ export function getElements(
   }
 
   const page = getPageById(state, id);
-  const elements = get<typeof page, CanvasElement[] | undefined>(page, 'elements');
+  const elements = get(page, 'elements') as any;
 
   if (!elements) {
     return [];
@@ -318,10 +318,10 @@ export function getElements(
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
   if (!withAst) {
-    return elements.map((el) => omit(el, ['ast']));
+    return elements.map((el: any) => omit(el, ['ast'])) as CanvasElement[];
   }
 
-  return elements.map(appendAst);
+  return elements.map(appendAst) as CanvasElement[];
 }
 
 const augment = (type: string) => <T extends CanvasElement | CanvasGroup>(n: T): T => ({
@@ -331,8 +331,8 @@ const augment = (type: string) => <T extends CanvasElement | CanvasGroup>(n: T):
 });
 
 const getNodesOfPage = (page: CanvasPage): CanvasElement[] => {
-  const elements = get<CanvasPage, CanvasElement[]>(page, 'elements').map(augment('element'));
-  const groups = get<CanvasPage, CanvasGroup[]>(page, 'groups', []).map(augment('group'));
+  const elements = get(page, 'elements').map(augment('element')) as any;
+  const groups = (get(page, 'groups', []) as any).map(augment('group')) as any;
 
   return elements.concat(groups as CanvasElement[]);
 };
@@ -354,7 +354,7 @@ export function getNodesForPage(page: CanvasPage, withAst: boolean): CanvasEleme
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
   if (!withAst) {
-    return elements.map((el) => omit(el, ['ast']));
+    return elements.map((el) => omit(el, ['ast'])) as CanvasElement[];
   }
 
   return elements.map(appendAst);
@@ -407,7 +407,7 @@ export function getResolvedArgs(state: State, elementId: string, path: any): any
   if (!elementId) {
     return;
   }
-  const args = get<State, ResolvedArgType>(state, ['transient', 'resolvedArgs', elementId]);
+  const args = get(state, ['transient', 'resolvedArgs', elementId]) as any;
   if (path) {
     return get(args, path);
   }

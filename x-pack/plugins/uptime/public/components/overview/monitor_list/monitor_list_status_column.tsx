@@ -7,7 +7,7 @@
 import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import styled from 'styled-components';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { parseTimestamp } from './parse_timestamp';
@@ -83,9 +83,9 @@ export const getLocationStatus = (checks: Check[], status: string) => {
     const location = check?.observer?.geo?.name ?? UNNAMED_LOCATION;
 
     if (check.monitor.status === STATUS.UP) {
-      upChecks.add(capitalize(location));
+      upChecks.add(upperFirst(location));
     } else if (check.monitor.status === STATUS.DOWN) {
-      downChecks.add(capitalize(location));
+      downChecks.add(upperFirst(location));
     }
   });
 

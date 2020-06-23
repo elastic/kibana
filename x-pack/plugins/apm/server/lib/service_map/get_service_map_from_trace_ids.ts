@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { find, uniq } from 'lodash';
+import { find, uniqBy } from 'lodash';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -257,22 +257,21 @@ export async function getServiceMapFromTraceIds({
     });
   }
 
-  const connections = uniq(
-    paths.flatMap((path) => {
-      return path.reduce((conns, location, index) => {
-        const prev = path[index - 1];
-        if (prev) {
-          return conns.concat({
-            source: prev,
-            destination: location,
-          });
-        }
-        return conns;
-      }, [] as Connection[]);
-    }, [] as Connection[]),
-    (value, _index, array) => {
-      return find(array, value);
-    }
+  const connectionsArr = paths.flatMap((path) => {
+    return path.reduce((conns, location, index) => {
+      const prev = path[index - 1];
+      if (prev) {
+        return conns.concat({
+          source: prev,
+          destination: location,
+        });
+      }
+      return conns;
+    }, [] as Connection[]);
+  }, [] as Connection[]);
+
+  const connections = uniqBy(connectionsArr, (value) =>
+    find(connectionsArr, value)
   );
 
   return {

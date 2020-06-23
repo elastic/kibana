@@ -21,7 +21,7 @@ export const buildHref = (
   getHref: (value: string | string[] | undefined) => string | undefined
 ): string | undefined => {
   const queryValue = checks
-    .map((check) => get<string | undefined>(check, path, undefined))
+    .map((check) => get(check, path, undefined))
     .filter((value: string | undefined) => value !== undefined);
   if (queryValue.length === 0) {
     return getHref(undefined);

@@ -429,7 +429,7 @@ function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInst
     retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
     runAt: (doc.runAt || new Date()).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
-  };
+  } as SerializedConcreteTaskInstance;
 }
 
 export function savedObjectToConcreteTaskInstance(
