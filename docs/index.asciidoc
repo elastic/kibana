@@ -28,4 +28,6 @@ include::CHANGELOG.asciidoc[]
 
 include::developer/index.asciidoc[]
 
+include::glossary.asciidoc[]
+
 include::redirects.asciidoc[]

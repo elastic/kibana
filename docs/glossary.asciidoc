@@ -1,0 +1,207 @@
+[glossary]
+[[glossary]]
+= Glossary of terms
+
+<<a_glos>> | <<b_glos>> | <<c_glos>> | <<d_glos>> | <<e_glos>> | <<f_glos>> | <<g_glos>> | <<h_glos>> | <<i_glos>> | <<j_glos>> | <<k_glos>> | <<l_glos>> | <<m_glos>> | <<n_glos>> | <<o_glos>> | <<p_glos>> | <<q_glos>> | <<r_glos>> | <<s_glos>> | <<t_glos>> | <<u_glos>> | V | <<w_glos>> | X | Y | Z
+
+[float]
+[[a_glos]]
+== A
+
+[glossary]
+[[glossary-alerts-and-actions]] Alerts and Actions ::
++
+--
+// tag::alerts-and-actions-def[]
+A {kib} app that provides comprehensive views across alert types and tools. It
+allows you to manage all your alerts and connector configurations in one
+place and view the active alert instances. Alerts and Actions works along side <<glossary-watcher,Watcher>>.
+Refer to {kibana-ref}/alerting-getting-started.html[Alerts and Actions].
+// end::alerts-and-actions-def[]
+--
+
+[[glossary-action]] action ::
+// tag::action-def[]
+The alert-specific response that occurs when an alert fires. The response is
+customizable and can contain a number of alert context variables. An action
+can be channelled to external services through a connector. An alert can have multiple actions.
+Refer to
+{kibana-ref}/action-types.html[Action and connector types].
+// end::action-def[]
+
+[[glossary-action-type]] action type ::
+// tag::action-type-def[]
+A programatically defined integration with another service, with an expected
+set of configuration and parameters.
+// end::action-type-def[]
+
+[[glossary-advanced-settings]] Advanced Settings ::
+// tag::advanced-settings-def[]
+A UI for editing the settings that control the appearance and behavior
+(for example, date format, default index) of {kib}. The UI is part of Management.
+For more information, see {kibana-ref}/advanced-options.html[Advanced Settings].
+// end::advanced-settings-def[]
+
+[[glossary-auto-follow-pattern]] auto-follow pattern ::
++
+--
+include::{es-repo-dir}/glossary.asciidoc[tag=auto-follow-pattern-def]
+--
+
+[float]
+[[b_glos]]
+== B
+
+
+[float]
+[[c_glos]]
+== C
+
+[[glossary-cluster]] cluster ::
++
+--
+include::{es-repo-dir}/glossary.asciidoc[tag=cluster-def]
+--
+
+[[glossary-ccr]] {ccr} (CCR)::
++
+--
+include::{es-repo-dir}/glossary.asciidoc[tag=ccr-def]
+--
+
+[[glossary-ccs]] {ccs} (CCS)::
++
+--
+include::{es-repo-dir}/glossary.asciidoc[tag=ccs-def]
+--
+
+
+[float]
+[[d_glos]]
+== D
+
+[float]
+[[e_glos]]
+== E
+
+[float]
+[[f_glos]]
+== F
+
+[float]
+[[g_glos]]
+== G
+
+[float]
+[[h_glos]]
+== H
+
+[float]
+[[i_glos]]
+== I
+
+[float]
+[[j_glos]]
+== J
+
+[float]
+[[k_glos]]
+== K
+
+[float]
+[[l_glos]]
+== L
+
+[float]
+[[m_glos]]
+== M
+
+[float]
+[[n_glos]]
+== N
+
+[float]
+[[o_glos]]
+== O
+
+[float]
+[[p_glos]]
+== P
+
+[float]
+[[q_glos]]
+== Q
+
+[float]
+[[r_glos]]
+== R
+
+[[glossary-reindex]] reindex ::
++
+--
+include::{es-repo-dir}/glossary.asciidoc[tag=reindex-def]
+--
+
+[float]
+[[s_glos]]
+== S
+
+[[glossary-space]] space ::
+// tag::space-def[]
+A place for organizing dashboards, visualizations, and other saved objects by category.
+For example, you might create a space based on a team, use case, or individual.
+// end::space-def[]
+
+[[glossary-feature-space]] Space ::
+// tag::space-feature-def[]
+A feature in {kib} that allows you to organize your dashboards, visualizations, and
+other saved objects into meaningful categories. Refer to
+{kibana-ref}/xpack-spaces.html[Spaces].
+// end::space-feature-def[]
+
+[[glossary-stack-monitoring]] Stack Monitoring ::
+// tag::stack-monitoring-def[]
+Features that enable you to monitor the Elastic Stack, including health and
+performance data for {es}, Logstash, and Beats. You can also monitor {kib}
+and route that data to the monitoring cluster. Refer to
+{kibana-ref}/xpack-monitoring.html[Stack Monitoring].
+// end::stack-monitoring-def[]
+
+
+[float]
+[[t_glos]]
+== T
+
+[float]
+[[u_glos]]
+== U
+
+[[glossary-upgrade-assistant]] Upgrade Assistant ::
+// tag::upgrade-assistant-def[]
+A feature that helps prepare you for an upgrade to the next major version of
+{es}. The assistant identifies the deprecated settings in your cluster and
+indices and guides you through resolving issues, including reindexing. For more information, refer to
+{kibana-ref}/upgrade-assistant.html[Upgrade Assistant].
+// end::upgrade-assistant-def[]
+
+
+[float]
+[[v_glos]]
+== V
+
+[[glossary-visualzation]] visualization ::
+// tag::visualzation-def[]
+A graphical representation of query results (e.g., a histogram, line graph, pie chart, or heat map).
+// end::visualization-def[]
+
+
+[float]
+[[w_glos]]
+== W
+
+[[glossary-watcher]] Watcher ::
+// tag::watcher-def[]
+The original suite of alerting features.
+For more information, refer to
+{kibana-ref}/watcher.html[Watcher].
+// end::watcher-def[]
