@@ -309,6 +309,9 @@ export class LegacyService implements CoreService {
         csp: setupDeps.core.http.csp,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
+      logging: {
+        configure: (config$) => setupDeps.core.logging.configure([], config$),
+      },
       metrics: {
         getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
       },
