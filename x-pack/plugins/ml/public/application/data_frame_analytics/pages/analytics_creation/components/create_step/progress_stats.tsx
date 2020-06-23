@@ -39,8 +39,8 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
           const progressStats = getDataFrameAnalyticsProgressPhase(jobStats);
           setCurrentProgress(progressStats);
           if (
-            progressStats.currentPhase < progressStats.totalPhases &&
-            progressStats.progress <= 100
+            progressStats.currentPhase <= progressStats.totalPhases &&
+            progressStats.progress < 100
           ) {
             setTimeout(startProgressBar, PROGRESS_REFRESH_INTERVAL_MS);
           }
