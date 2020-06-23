@@ -167,7 +167,7 @@ export function AdvancedSettingsForm({
                 defaultMessage:
                   'Max number of documents in a sample that can contain the same value for the',
               })}{' '}
-              <em>{advancedSettings.sampleDiversityField.name}</em>{' '}
+              <em>{formState.sampleDiversityField!.name}</em>{' '}
               {i18n.translate(
                 'xpack.graph.settings.advancedSettings.maxValuesInputHelpText.fieldText',
                 {
