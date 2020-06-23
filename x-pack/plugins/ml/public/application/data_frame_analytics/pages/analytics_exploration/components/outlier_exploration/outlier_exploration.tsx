@@ -53,10 +53,10 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
-  const { columns, errorMessage, status, tableItems } = outlierData;
+  const { columnsWithCharts, errorMessage, status, tableItems } = outlierData;
 
   // if it's a searchBar syntax error leave the table visible so they can try again
-  if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
+  if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
     return (
       <EuiPanel grow={false}>
         <ExplorationTitle title={explorationTitle} />
@@ -98,35 +98,36 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
-      {(columns.length > 0 || searchQuery !== defaultSearchQuery) && indexPattern !== undefined && (
-        <>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="s" />
-              <ColorRangeLegend
-                colorRange={colorRange}
-                title={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
-                  {
-                    defaultMessage: 'Feature influence score',
-                  }
-                )}
+      {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
+        indexPattern !== undefined && (
+          <>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSpacer size="s" />
+                <ColorRangeLegend
+                  colorRange={colorRange}
+                  title={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
+                    {
+                      defaultMessage: 'Feature influence score',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            {columnsWithCharts.length > 0 && tableItems.length > 0 && (
+              <DataGrid
+                {...outlierData}
+                dataTestSubj="mlExplorationDataGrid"
+                toastNotifications={getToastNotifications()}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          {columns.length > 0 && tableItems.length > 0 && (
-            <DataGrid
-              {...outlierData}
-              dataTestSubj="mlExplorationDataGrid"
-              toastNotifications={getToastNotifications()}
-            />
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
     </EuiPanel>
   );
 });

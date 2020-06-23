@@ -14,6 +14,7 @@ export interface MlContextValue {
   currentSavedSearch: SavedSearchSavedObject | null;
   indexPatterns: IndexPatternsContract;
   kibanaConfig: any; // IUiSettingsClient;
+  kibanaVersion: string;
 }
 
 export type SavedSearchQuery = object;

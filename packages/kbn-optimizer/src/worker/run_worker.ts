@@ -17,7 +17,10 @@
  * under the License.
  */
 
+import { inspect } from 'util';
+
 import * as Rx from 'rxjs';
+import { take, mergeMap } from 'rxjs/operators';
 
 import {
   parseBundles,
@@ -80,15 +83,38 @@ setInterval(() => {
   }
 }, 1000).unref();
 
+function assertInitMsg(msg: unknown): asserts msg is { args: string[] } {
+  if (typeof msg !== 'object' || !msg) {
+    throw new Error(`expected init message to be an object: ${inspect(msg)}`);
+  }
+
+  const { args } = msg as Record<string, unknown>;
+  if (!args || !Array.isArray(args) || !args.every((a) => typeof a === 'string')) {
+    throw new Error(
+      `expected init message to have an 'args' property that's an array of strings: ${inspect(msg)}`
+    );
+  }
+}
+
 Rx.defer(() => {
-  const workerConfig = parseWorkerConfig(process.argv[2]);
-  const bundles = parseBundles(process.argv[3]);
-  const bundleRefs = BundleRefs.parseSpec(process.argv[4]);
+  process.send!('init');
 
-  // set BROWSERSLIST_ENV so that style/babel loaders see it before running compilers
-  process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;
+  return Rx.fromEvent<[unknown]>(process as any, 'message').pipe(
+    take(1),
+    mergeMap(([msg]) => {
+      assertInitMsg(msg);
+      process.send!('ready');
 
-  return runCompilers(workerConfig, bundles, bundleRefs);
+      const workerConfig = parseWorkerConfig(msg.args[0]);
+      const bundles = parseBundles(msg.args[1]);
+      const bundleRefs = BundleRefs.parseSpec(msg.args[2]);
+
+      // set BROWSERSLIST_ENV so that style/babel loaders see it before running compilers
+      process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;
+
+      return runCompilers(workerConfig, bundles, bundleRefs);
+    })
+  );
 }).subscribe(
   (msg) => {
     send(msg);

@@ -9,7 +9,7 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@elastic/charts": "19.2.0",
+    "@elastic/charts": "19.5.2",
     "@elastic/eui": "24.1.0",
     "@elastic/numeral": "^2.5.0",
     "@kbn/i18n": "1.0.0",
@@ -29,7 +29,7 @@
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
     "regenerator-runtime": "^0.13.3",
-    "rxjs": "^6.5.3",
+    "rxjs": "^6.5.5",
     "symbol-observable": "^1.2.0",
     "whatwg-fetch": "^3.0.0"
   },

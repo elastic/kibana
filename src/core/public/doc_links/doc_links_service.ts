@@ -37,6 +37,9 @@ export class DocLinksService {
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
+        dashboard: {
+          drilldowns: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html`,
+        },
         filebeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
           installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`,
@@ -144,6 +147,9 @@ export interface DocLinksSetup {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
+    readonly dashboard: {
+      readonly drilldowns: string;
+    };
     readonly filebeat: {
       readonly base: string;
       readonly installation: string;

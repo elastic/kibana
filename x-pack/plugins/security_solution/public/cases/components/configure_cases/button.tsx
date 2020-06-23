@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
-import { getConfigureCasesUrl } from '../../../common/components/link_to';
+import { EuiToolTip } from '@elastic/eui';
+import React, { memo, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
+
+import { getConfigureCasesUrl, useFormatUrl } from '../../../common/components/link_to';
+import { LinkButton } from '../../../common/components/links';
+import { SecurityPageName } from '../../../app/types';
 
 export interface ConfigureCaseButtonProps {
   label: string;
@@ -25,19 +29,29 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
   titleTooltip,
   urlSearch,
 }: ConfigureCaseButtonProps) => {
+  const history = useHistory();
+  const { formatUrl } = useFormatUrl(SecurityPageName.case);
+  const goToCaseConfigure = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      history.push(getConfigureCasesUrl(urlSearch));
+    },
+    [history, urlSearch]
+  );
   const configureCaseButton = useMemo(
     () => (
-      <EuiButton
-        href={getConfigureCasesUrl(urlSearch)}
+      <LinkButton
+        onClick={goToCaseConfigure}
+        href={formatUrl(getConfigureCasesUrl())}
         iconType="controlsHorizontal"
         isDisabled={isDisabled}
         aria-label={label}
         data-test-subj="configure-case-button"
       >
         {label}
-      </EuiButton>
+      </LinkButton>
     ),
-    [label, isDisabled, urlSearch]
+    [label, isDisabled, formatUrl, goToCaseConfigure]
   );
   return showToolTip ? (
     <EuiToolTip
