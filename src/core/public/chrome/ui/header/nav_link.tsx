@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiImage } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
@@ -26,10 +26,6 @@ import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
 function isModifiedEvent(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-}
-
-function LinkIcon({ url }: { url: string }) {
-  return <EuiImage size="s" alt="" aria-hidden={true} url={url} />;
 }
 
 interface Props {
@@ -85,7 +81,8 @@ export function createEuiListItem({
     'data-test-subj': dataTestSubj,
     ...(basePath && {
       iconType: euiIconType,
-      icon: !euiIconType && icon ? <LinkIcon url={basePath.prepend(`/${icon}`)} /> : undefined,
+      icon:
+        !euiIconType && icon ? <EuiIcon type={basePath.prepend(`/${icon}`)} size="m" /> : undefined,
     }),
   };
 }
