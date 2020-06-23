@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/63621
-  describe('Endpoint List', function () {
+  describe('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     before(async () => {
@@ -83,13 +83,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('when the hostname is clicked on,', () => {
-      it(' display the details flyout', async () => {
+      it('display the details flyout', async () => {
         await (await testSubjects.find('hostnameCellLink')).click();
         await testSubjects.existOrFail('hostDetailsUpperList');
         await testSubjects.existOrFail('hostDetailsLowerList');
       });
 
-      it(' updates the details flyout when a new hostname is selected from the list', async () => {
+      it('updates the details flyout when a new hostname is selected from the list', async () => {
         // display flyout for the first host in the list
         await (await testSubjects.findAll('hostnameCellLink'))[0].click();
         await testSubjects.existOrFail('hostDetailsFlyoutTitle');
@@ -104,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(hostDetailTitle1).to.not.eql(hostDetailTitle0);
       });
 
-      it(' has the same flyout info when the same hostname is selected', async () => {
+      it('has the same flyout info when the same hostname is selected', async () => {
         // display flyout for the first host in the list
         await (await testSubjects.findAll('hostnameCellLink'))[1].click();
         await testSubjects.existOrFail('hostDetailsFlyoutTitle');
@@ -116,7 +116,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(hostDetailTitleNew).to.equal(hostDetailTitleInitial);
       });
 
-      it(' navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
+      it('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
         await (await testSubjects.find('hostDetailsLinkToIngest')).click();
         await testSubjects.existOrFail('fleetAgentListTable');
       });
@@ -132,7 +132,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // reload the data so the other tests continue to pass
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
       });
-      it(' displays No items found when empty', async () => {
+      it('displays No items found when empty', async () => {
         // get the endpoint list table data and verify message
         const [, [noItemsFoundMessage]] = await pageObjects.endpointPageUtils.tableData(
           'hostListTable'

@@ -6,7 +6,7 @@
 
 import { services as xPackFunctionalServices } from '../../functional/services';
 import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
-import { IngestManagerProvider } from '../../api_integration/services/ingest_manager';
+import { IngestManagerProvider } from '../../common/services/ingest_manager';
 
 export const services = {
   ...xPackFunctionalServices,
