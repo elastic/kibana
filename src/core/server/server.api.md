@@ -409,6 +409,43 @@ export interface AssistantAPIClientParams extends GenericParams {
     path: '/_migration/assistance';
 }
 
+// @public
+export interface AuditableEvent {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    type: string;
+}
+
+// Warning: (ae-missing-release-tag) "Auditor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface Auditor {
+    // (undocumented)
+    add(event: AuditableEvent): void;
+}
+
+// Warning: (ae-missing-release-tag) "AuditorFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface AuditorFactory {
+    // (undocumented)
+    asScoped(request: KibanaRequest): Auditor;
+}
+
+// Warning: (ae-missing-release-tag) "AuditTrailSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface AuditTrailSetup {
+    // (undocumented)
+    register(auditor: AuditorFactory): void;
+}
+
+// Warning: (ae-missing-release-tag) "AuditTrailStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type AuditTrailStart = AuditorFactory;
+
 // @public (undocumented)
 export interface Authenticated extends AuthResultParams {
     // (undocumented)
@@ -627,6 +664,8 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
+    auditTrail: AuditTrailSetup;
+    // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
@@ -652,6 +691,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    auditTrail: AuditTrailStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
@@ -1590,6 +1631,7 @@ export interface RequestHandlerContext {
         uiSettings: {
             client: IUiSettingsClient;
         };
+        auditor: Auditor;
     };
 }
 
