@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsType, SavedObjectTypeRegistry } from 'src/core/server';
+import { SavedObjectsFindResult, SavedObjectsType, SavedObjectTypeRegistry } from 'src/core/server';
 import { mapToResult, mapToResults } from './map_object_to_result';
 
 const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
@@ -22,11 +22,15 @@ const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
   };
 };
 
-const createObject = <T>(props: Partial<SavedObject>, attributes: T): SavedObject<T> => {
+const createObject = <T>(
+  props: Partial<SavedObjectsFindResult>,
+  attributes: T
+): SavedObjectsFindResult<T> => {
   return {
     id: 'id',
     type: 'dashboard',
     references: [],
+    score: 100,
     ...props,
     attributes,
   };
@@ -46,6 +50,7 @@ describe('mapToResult', () => {
       {
         id: 'dash1',
         type: 'dashboard',
+        score: 42,
       },
       {
         title: 'My dashboard',
@@ -57,7 +62,7 @@ describe('mapToResult', () => {
       title: 'My dashboard',
       type: 'dashboard',
       url: '/dashboard/dash1',
-      score: 100,
+      score: 42,
     });
   });
 });
@@ -103,6 +108,7 @@ describe('mapToResults', () => {
         {
           id: 'resultA',
           type: 'typeA',
+          score: 100,
         },
         {
           title: 'titleA',
@@ -113,6 +119,7 @@ describe('mapToResults', () => {
         {
           id: 'resultC',
           type: 'typeC',
+          score: 42,
         },
         {
           excerpt: 'titleC',
@@ -123,6 +130,7 @@ describe('mapToResults', () => {
         {
           id: 'resultB',
           type: 'typeB',
+          score: 69,
         },
         {
           description: 'titleB',
@@ -144,14 +152,14 @@ describe('mapToResults', () => {
         title: 'titleC',
         type: 'typeC',
         url: '/type-c/resultC',
-        score: 100,
+        score: 42,
       },
       {
         id: 'resultB',
         title: 'titleB',
         type: 'typeB',
         url: '/type-b/resultB',
-        score: 100,
+        score: 69,
       },
     ]);
   });

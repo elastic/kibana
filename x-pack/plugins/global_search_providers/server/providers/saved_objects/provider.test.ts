@@ -8,7 +8,7 @@ import { EMPTY } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import {
   SavedObjectsFindResponse,
-  SavedObject,
+  SavedObjectsFindResult,
   SavedObjectsType,
   SavedObjectTypeRegistry,
 } from 'src/core/server';
@@ -24,7 +24,9 @@ const getTestScheduler = () =>
     expect(actual).toEqual(expected);
   });
 
-const createFindResponse = (results: SavedObject[]): SavedObjectsFindResponse<unknown> => ({
+const createFindResponse = (
+  results: SavedObjectsFindResult[]
+): SavedObjectsFindResponse<unknown> => ({
   saved_objects: results,
   page: 1,
   per_page: 20,
@@ -46,10 +48,14 @@ const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
   };
 };
 
-const createObject = <T>(props: Partial<SavedObject>, attributes: T): SavedObject<T> => {
+const createObject = <T>(
+  props: Partial<SavedObjectsFindResult>,
+  attributes: T
+): SavedObjectsFindResult<T> => {
   return {
     id: 'id',
     type: 'dashboard',
+    score: 100,
     references: [],
     ...props,
     attributes,
@@ -116,8 +122,8 @@ describe('savedObjectsResultProvider', () => {
   it('converts the saved objects to results', async () => {
     context.core.savedObjects.client.find.mockResolvedValue(
       createFindResponse([
-        createObject({ id: 'resultA', type: 'typeA' }, { title: 'titleA' }),
-        createObject({ id: 'resultB', type: 'typeB' }, { description: 'titleB' }),
+        createObject({ id: 'resultA', type: 'typeA', score: 50 }, { title: 'titleA' }),
+        createObject({ id: 'resultB', type: 'typeB', score: 78 }, { description: 'titleB' }),
       ])
     );
 
@@ -128,14 +134,14 @@ describe('savedObjectsResultProvider', () => {
         title: 'titleA',
         type: 'typeA',
         url: '/type-a/resultA',
-        score: 100,
+        score: 50,
       },
       {
         id: 'resultB',
         title: 'titleB',
         type: 'typeB',
         url: '/type-b/resultB',
-        score: 100,
+        score: 78,
       },
     ]);
   });
