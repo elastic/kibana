@@ -45,7 +45,7 @@ describe('LegacyInternals', () => {
     beforeEach(async () => {
       uiExports = findLegacyPluginSpecsMock().uiExports;
       config = configMock.create() as any;
-      server = httpServiceMock.createSetupContract().server;
+      server = httpServiceMock.createInternalSetupContract().server;
       legacyInternals = new LegacyInternals(uiExports, config, server);
     });
 
@@ -84,7 +84,7 @@ describe('LegacyInternals', () => {
         jest.fn().mockResolvedValue({ is: 'merged-core' }),
       ];
 
-      injectors.forEach(injector => legacyInternals.injectUiAppVars('core', injector));
+      injectors.forEach((injector) => legacyInternals.injectUiAppVars('core', injector));
 
       await expect(legacyInternals.getInjectedUiAppVars('core')).resolves.toMatchInlineSnapshot(`
         Object {
@@ -107,7 +107,7 @@ describe('LegacyInternals', () => {
     beforeEach(async () => {
       uiExports = findLegacyPluginSpecsMock().uiExports;
       config = configMock.create() as any;
-      server = httpServiceMock.createSetupContract().server;
+      server = httpServiceMock.createInternalSetupContract().server;
       legacyInternals = new LegacyInternals(uiExports, config, server);
     });
 
@@ -136,10 +136,10 @@ describe('LegacyInternals', () => {
 
     it('gets: no default injectors, with injected vars replacers, with ui app injectors, no inject arg', async () => {
       uiExports.injectedVarsReplacers = [
-        jest.fn(async vars => ({ ...vars, added: 'key' })),
-        jest.fn(vars => vars),
-        jest.fn(vars => ({ replaced: 'all' })),
-        jest.fn(async vars => ({ ...vars, added: 'last-key' })),
+        jest.fn(async (vars) => ({ ...vars, added: 'key' })),
+        jest.fn((vars) => vars),
+        jest.fn((vars) => ({ replaced: 'all' })),
+        jest.fn(async (vars) => ({ ...vars, added: 'last-key' })),
       ];
 
       const request = httpServerMock.createRawRequest();
@@ -186,7 +186,7 @@ describe('LegacyInternals', () => {
         varsProvider({ gamma: 'gamma' }),
         varsProvider({ alpha: 'beta' }),
       ];
-      uiExports.injectedVarsReplacers = [jest.fn(async vars => ({ ...vars, gamma: 'delta' }))];
+      uiExports.injectedVarsReplacers = [jest.fn(async (vars) => ({ ...vars, gamma: 'delta' }))];
 
       legacyInternals.injectUiAppVars('core', async () => ({ is: 'core' }));
       legacyInternals.injectUiAppVars('core', () => ({ sync: 'injector' }));

@@ -111,7 +111,7 @@ export class UrlFormat extends FieldFormat {
     // trim all the odd bits, the variable names
     const parts = template.split(templateMatchRE).map((part, i) => (i % 2 ? part.trim() : part));
 
-    return function(locals: Record<string, any>): string {
+    return function (locals: Record<string, any>): string {
       // replace all the odd bits with their local var
       let output = '';
       let i = -1;
@@ -139,7 +139,7 @@ export class UrlFormat extends FieldFormat {
     return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
   }
 
-  textConvert: TextContextTypeConvert = value => this.formatLabel(value);
+  textConvert: TextContextTypeConvert = (value) => this.formatLabel(value);
 
   htmlConvert: HtmlContextTypeConvert = (rawValue, options = {}) => {
     const { field, hit } = options;
@@ -161,7 +161,7 @@ export class UrlFormat extends FieldFormat {
 
         return this.generateImgHtml(url, imageLabel);
       default:
-        const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+        const inWhitelist = whitelistUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
         if (!inWhitelist && !parsedUrl) {
           return url;
         }

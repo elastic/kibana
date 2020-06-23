@@ -38,7 +38,7 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
     }
   ) {
     core.savedObjects.registerType(tsvbTelemetrySavedObjectType);
-    globalConfig$.subscribe(config => {
+    globalConfig$.subscribe((config) => {
       this.kibanaIndex = config.kibana.index;
     });
     if (usageCollection) {

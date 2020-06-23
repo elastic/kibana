@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('security app', function() {
+export default function ({ loadTestFile }) {
+  describe('security app', function () {
     this.tags('ciGroup4');
 
     loadTestFile(require.resolve('./security'));

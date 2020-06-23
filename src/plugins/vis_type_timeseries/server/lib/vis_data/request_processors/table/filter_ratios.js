@@ -17,17 +17,17 @@
  * under the License.
  */
 
-const filter = metric => metric.type === 'filter_ratio';
+const filter = (metric) => metric.type === 'filter_ratio';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 
 export function ratios(req, panel) {
-  return next => doc => {
-    panel.series.forEach(column => {
+  return (next) => (doc) => {
+    panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
       if (column.metrics.some(filter)) {
-        column.metrics.filter(filter).forEach(metric => {
+        column.metrics.filter(filter).forEach((metric) => {
           overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}-numerator.filter`, {
             query_string: { query: metric.numerator || '*', analyze_wildcard: true },
           });

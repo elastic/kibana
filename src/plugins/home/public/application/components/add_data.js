@@ -40,6 +40,7 @@ import {
 
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
   const basePath = getServices().getBasePath();
+
   const renderCards = () => {
     const apmData = {
       title: intl.formatMessage({
@@ -79,11 +80,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     };
     const siemData = {
       title: intl.formatMessage({
-        id: 'home.addData.siem.nameTitle',
-        defaultMessage: 'SIEM',
+        id: 'home.addData.securitySolution.nameTitle',
+        defaultMessage: 'Security',
       }),
       description: intl.formatMessage({
-        id: 'home.addData.siem.nameDescription',
+        id: 'home.addData.securitySolution.nameDescription',
         defaultMessage:
           'Centralize security events for interactive investigation in ready-to-go visualizations.',
       }),
@@ -101,7 +102,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           footer={
             <EuiButton
               className="homAddData__button"
-              href="#/home/tutorial/apm"
+              href="#/tutorial/apm"
               aria-describedby={apmData.ariaDescribedby}
             >
               <FormattedMessage id="home.addData.apm.addApmButtonLabel" defaultMessage="Add APM" />
@@ -159,7 +160,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                   <EuiButton
                     className="homAddData__button"
                     data-test-subj="logsData"
-                    href="#/home/tutorial_directory/logging"
+                    href="#/tutorial_directory/logging"
                     aria-describedby={loggingData.ariaDescribedby}
                   >
                     <FormattedMessage
@@ -183,7 +184,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                 footer={
                   <EuiButton
                     className="homAddData__button"
-                    href="#/home/tutorial_directory/metrics"
+                    href="#/tutorial_directory/metrics"
                     aria-describedby={metricsData.ariaDescribedby}
                   >
                     <FormattedMessage
@@ -220,11 +221,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             footer={
               <EuiButton
                 className="homAddData__button"
-                href="#/home/tutorial_directory/siem"
+                href="#/tutorial_directory/security"
                 aria-describedby={siemData.ariaDescribedby}
               >
                 <FormattedMessage
-                  id="home.addData.siem.addSiemEventsButtonLabel"
+                  id="home.addData.securitySolution.addSecurityEventsButtonLabel"
                   defaultMessage="Add events"
                 />
               </EuiButton>
@@ -256,7 +257,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             </strong>
             <EuiLink
               style={{ display: 'block', textAlign: 'center' }}
-              href="#/home/tutorial_directory/sampleData"
+              href="#/tutorial_directory/sampleData"
             >
               <FormattedMessage
                 id="home.addData.sampleDataLink"
@@ -296,7 +297,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             </strong>
             <EuiLink
               style={{ display: 'block', textAlign: 'center' }}
-              href="#/management/kibana/index_pattern"
+              href={`${basePath}/app/management/kibana/indexPatterns`}
             >
               <FormattedMessage
                 id="home.addData.yourDataLink"

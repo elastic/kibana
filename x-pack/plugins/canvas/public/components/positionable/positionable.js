@@ -12,7 +12,7 @@ export const Positionable = ({ children, transformMatrix, width, height }) => {
   // Throw if there is more than one child
   React.Children.only(children);
   // This could probably be made nicer by having just one child
-  const wrappedChildren = React.Children.map(children, child => {
+  const wrappedChildren = React.Children.map(children, (child) => {
     const newStyle = {
       width,
       height,

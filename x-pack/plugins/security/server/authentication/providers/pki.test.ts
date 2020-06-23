@@ -241,11 +241,11 @@ describe('PKIAuthenticationProvider', () => {
   }
 
   describe('`login` method', () => {
-    defineCommonLoginAndAuthenticateTests(request => provider.login(request));
+    defineCommonLoginAndAuthenticateTests((request) => provider.login(request));
   });
 
   describe('`authenticate` method', () => {
-    defineCommonLoginAndAuthenticateTests(request => provider.authenticate(request, null));
+    defineCommonLoginAndAuthenticateTests((request) => provider.authenticate(request, null));
 
     it('does not handle authentication via `authorization` header.', async () => {
       const request = httpServerMock.createKibanaRequest({

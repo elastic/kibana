@@ -40,9 +40,9 @@ export const esPersistMiddleware = ({ getState }) => {
     setRefreshInterval, // used to set refresh time interval which is a transient value
     ...Object.values(resolvedArgsActions), // no resolved args affect persisted values
     ...Object.values(transientActions), // no transient actions cause persisted state changes
-  ].map(a => a.toString());
+  ].map((a) => a.toString());
 
-  return next => action => {
+  return (next) => (action) => {
     // if the action is in the skipped list, do not persist
     if (skippedActions.indexOf(action.type) >= 0) {
       return next(action);
@@ -58,7 +58,7 @@ export const esPersistMiddleware = ({ getState }) => {
       return;
     }
 
-    const notifyError = err => {
+    const notifyError = (err) => {
       const statusCode = err.response && err.response.status;
       switch (statusCode) {
         case 400:

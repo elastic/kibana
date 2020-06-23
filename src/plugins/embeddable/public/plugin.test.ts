@@ -42,7 +42,7 @@ test('can set custom embeddable factory provider', async () => {
   const coreStart = coreMock.createStart();
   const { setup, doStart } = testPlugin(coreSetup, coreStart);
 
-  const customProvider: EmbeddableFactoryProvider = def => ({
+  const customProvider: EmbeddableFactoryProvider = (def) => ({
     ...defaultEmbeddableFactoryProvider(def),
     getDisplayName: () => 'Intercepted!',
   });
@@ -66,7 +66,7 @@ test('custom embeddable factory provider test for intercepting embeddable creati
   const { setup, doStart } = testPlugin(coreSetup, coreStart);
 
   let updateCount = 0;
-  const customProvider: EmbeddableFactoryProvider = def => {
+  const customProvider: EmbeddableFactoryProvider = (def) => {
     return {
       ...defaultEmbeddableFactoryProvider(def),
       create: async (input, parent) => {
@@ -105,6 +105,6 @@ test('custom embeddable factory provider test for intercepting embeddable creati
   expect(updateCount).toEqual(2);
 
   embeddable!.destroy();
-  await new Promise(resolve => process.nextTick(resolve));
+  await new Promise((resolve) => process.nextTick(resolve));
   expect(updateCount).toEqual(0);
 });

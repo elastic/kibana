@@ -54,7 +54,7 @@ export const getMovingAvgMetricAgg = ({
       dslName: 'moving_fn',
       title: movingAvgTitle,
       subtype: parentPipelineAggHelper.subtype,
-      makeLabel: agg => makeNestedLabel(agg, movingAvgLabel),
+      makeLabel: (agg) => makeNestedLabel(agg, movingAvgLabel),
       params: [
         ...parentPipelineAggHelper.params(),
         {

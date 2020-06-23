@@ -43,7 +43,7 @@ export const pie = () => ({
       };
       config.options.series.pie.label.formatter = labelFormatter;
 
-      const legendFormatter = label => {
+      const legendFormatter = (label) => {
         const labelSpan = document.createElement('span');
         Object.assign(labelSpan.style, config.font.spec);
         labelSpan.textContent = label;

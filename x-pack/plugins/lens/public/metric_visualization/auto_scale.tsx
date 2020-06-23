@@ -61,10 +61,10 @@ export class AutoScale extends React.Component<Props, State> {
 
     return (
       <EuiResizeObserver onResize={this.scale}>
-        {resizeRef => (
+        {(resizeRef) => (
           <div
             {...rest}
-            ref={el => {
+            ref={(el) => {
               this.setParent(el);
               resizeRef(el);
             }}

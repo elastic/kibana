@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { KueryBarComponent } from './kuery_bar';
-export { KueryBar } from './kuery_bar_container';
+export { KueryBar } from './kuery_bar';

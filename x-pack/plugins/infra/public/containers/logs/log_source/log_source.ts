@@ -78,6 +78,7 @@ export const useLogSource = ({
     [sourceId, fetch]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const logIndicesExist = useMemo(() => (sourceStatus?.logIndexNames?.length ?? 0) > 0, [
     sourceStatus,
   ]);
@@ -87,6 +88,7 @@ export const useLogSource = ({
       fields: sourceStatus?.logIndexFields ?? [],
       title: sourceConfiguration?.configuration.name ?? 'unknown',
     }),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [sourceConfiguration, sourceStatus]
   );
 

@@ -12,7 +12,7 @@ import { ValidationResult } from '../../../types';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
-import { AlertEdit } from './alert_edit';
+import AlertEdit from './alert_edit';
 import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -55,6 +55,7 @@ describe('alert_edit', () => {
         return { errors: {} };
       },
       alertParamsExpression: () => <React.Fragment />,
+      requiresAppContext: false,
     };
 
     const actionTypeModel = {
@@ -83,7 +84,7 @@ describe('alert_edit', () => {
         window: '1s',
         comparator: 'between',
       },
-      consumer: 'alerting',
+      consumer: 'alerts',
       alertTypeId: 'my-alert-type',
       enabled: false,
       schedule: { interval: '1m' },
@@ -131,11 +132,7 @@ describe('alert_edit', () => {
             capabilities: deps!.capabilities,
           }}
         >
-          <AlertEdit
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={() => {}}
-            initialAlert={alert}
-          />
+          <AlertEdit onClose={() => {}} initialAlert={alert} />
         </AlertsContextProvider>
       </AppContextProvider>
     );
@@ -160,10 +157,7 @@ describe('alert_edit', () => {
     err.body.message = 'Fail message';
     mockedCoreSetup.http.put.mockRejectedValue(err);
     await act(async () => {
-      wrapper
-        .find('[data-test-subj="saveEditedAlertButton"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="saveEditedAlertButton"]').first().simulate('click');
     });
     expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith('Fail message');
   });

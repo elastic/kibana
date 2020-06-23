@@ -10,7 +10,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'roleMappings']);
   const testSubjects = getService('testSubjects');
 
-  describe('Role Mappings', function() {
+  describe('Role Mappings', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('settings');
     });

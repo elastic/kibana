@@ -30,16 +30,17 @@ import _ from 'lodash';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import invoke from '../helpers/invoke_series_fn.js';
+import { UI_SETTINGS } from '../../../../data/server';
 
 function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {
     esDataClient: sinon.stub().returns({
-      callAsCurrentUser: function() {
+      callAsCurrentUser: function () {
         return Bluebird.resolve(response);
       },
     }),
     savedObjectsClient: {
-      find: function() {
+      find: function () {
         return Bluebird.resolve({
           saved_objects: indexPatternSavedObjects,
         });
@@ -58,14 +59,14 @@ describe('es', () => {
       });
       return invoke(es, [5], tlConfig)
         .then(expect.fail)
-        .catch(e => {
+        .catch((e) => {
           expect(e).to.be.an('error');
         });
     });
 
     it('returns a seriesList', () => {
       tlConfig = stubRequestAndServer(esResponse);
-      return invoke(es, [5], tlConfig).then(r => {
+      return invoke(es, [5], tlConfig).then((r) => {
         expect(r.output.type).to.eql('seriesList');
       });
     });
@@ -216,14 +217,14 @@ describe('es', () => {
 
       it('sets ignore_throttled=true on the request', () => {
         config.index = 'beer';
-        tlConfig.settings['search:includeFrozen'] = false;
+        tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
 
         expect(request.ignore_throttled).to.equal(true);
       });
 
       it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
-        tlConfig.settings['search:includeFrozen'] = true;
+        tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = true;
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields);
 
@@ -239,7 +240,7 @@ describe('es', () => {
             to: 5,
           },
           request: {
-            payload: {
+            body: {
               extended: {
                 es: {
                   filter: {
@@ -258,7 +259,7 @@ describe('es', () => {
         });
       });
 
-      it('adds the contents of payload.extended.es.filter to a filter clause of the bool', () => {
+      it('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
         const request = fn(config, tlConfig, emptyScriptedFields);
         const filter = request.body.query.bool.filter.bool;

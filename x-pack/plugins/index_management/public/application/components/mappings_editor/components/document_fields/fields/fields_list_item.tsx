@@ -171,7 +171,7 @@ function FieldListItemComponent(
 
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
-            {deleteField => (
+            {(deleteField) => (
               <EuiToolTip content={deleteButtonLabel}>
                 <EuiButtonIcon
                   iconType="trash"

@@ -25,8 +25,10 @@ import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
 import $ from 'jquery';
 import { pluginInstance } from './legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { setScopedHistory } from '../../../../../../plugins/discover/public/kibana_services';
+import { createBrowserHistory } from 'history';
 
-describe('Doc Table', function() {
+describe('Doc Table', function () {
   let $parentScope;
   let $scope;
 
@@ -37,9 +39,10 @@ describe('Doc Table', function() {
   let stubFieldFormatConverter;
   beforeEach(() => pluginInstance.initializeServices());
   beforeEach(() => pluginInstance.initializeInnerAngular());
+  before(() => setScopedHistory(createBrowserHistory()));
   beforeEach(ngMock.module('app/discover'));
   beforeEach(
-    ngMock.inject(function($rootScope, Private) {
+    ngMock.inject(function ($rootScope, Private) {
       $parentScope = $rootScope;
       $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       mapping = $parentScope.indexPattern.fields;
@@ -47,7 +50,7 @@ describe('Doc Table', function() {
       // Stub `getConverterFor` for a field in the indexPattern to return mock data.
       // Returns `val` if provided, otherwise generates fake data for the field.
       fakeRowVals = getFakeRowVals('formatted', 0, mapping);
-      stubFieldFormatConverter = function($root, field, val) {
+      stubFieldFormatConverter = function ($root, field, val) {
         const convertFn = (value, type, options) => {
           if (val) {
             return val;
@@ -64,8 +67,8 @@ describe('Doc Table', function() {
   );
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
-  const init = function($elem, props) {
-    ngMock.inject(function($compile) {
+  const init = function ($elem, props) {
+    ngMock.inject(function ($compile) {
       _.assign($parentScope, props);
       $compile($elem)($parentScope);
       $elem.scope().$digest();
@@ -73,19 +76,19 @@ describe('Doc Table', function() {
     });
   };
 
-  const destroy = function() {
+  const destroy = function () {
     $scope.$destroy();
     $parentScope.$destroy();
   };
 
   // For testing column removing/adding for the header and the rows
-  const columnTests = function(elemType, parentElem) {
-    it('should create a time column if the timefield is defined', function() {
+  const columnTests = function (elemType, parentElem) {
+    it('should create a time column if the timefield is defined', function () {
       const childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(1);
     });
 
-    it('should be able to add and remove columns', function() {
+    it('should be able to add and remove columns', function () {
       let childElems;
 
       stubFieldFormatConverter($parentScope, 'bytes');
@@ -111,7 +114,7 @@ describe('Doc Table', function() {
       expect($(childElems[1]).text()).to.contain('request_body');
     });
 
-    it('should create only the toggle column if there is no timeField', function() {
+    it('should create only the toggle column if there is no timeField', function () {
       delete parentElem.scope().indexPattern.timeFieldName;
       parentElem.scope().$digest();
 
@@ -120,7 +123,7 @@ describe('Doc Table', function() {
     });
   };
 
-  describe('kbnTableRow', function() {
+  describe('kbnTableRow', function () {
     const $elem = angular.element(
       '<tr kbn-table-row="row" ' +
         'columns="columns" ' +
@@ -131,7 +134,7 @@ describe('Doc Table', function() {
     );
     let row;
 
-    beforeEach(function() {
+    beforeEach(function () {
       row = getFakeRow(0, mapping);
 
       init($elem, {
@@ -142,41 +145,41 @@ describe('Doc Table', function() {
         maxLength: 50,
       });
     });
-    afterEach(function() {
+    afterEach(function () {
       destroy();
     });
 
-    describe('adding and removing columns', function() {
+    describe('adding and removing columns', function () {
       columnTests('[data-test-subj~="docTableField"]', $elem);
     });
 
-    describe('details row', function() {
-      it('should be an empty tr by default', function() {
+    describe('details row', function () {
+      it('should be an empty tr by default', function () {
         expect($elem.next().is('tr')).to.be(true);
         expect($elem.next().text()).to.be('');
       });
 
-      it('should expand the detail row when the toggle arrow is clicked', function() {
+      it('should expand the detail row when the toggle arrow is clicked', function () {
         $elem.children(':first-child').click();
         $scope.$digest();
         expect($elem.next().text()).to.not.be('');
       });
 
-      describe('expanded', function() {
+      describe('expanded', function () {
         let $details;
-        beforeEach(function() {
+        beforeEach(function () {
           // Open the row
           $scope.toggleRow();
           $scope.$digest();
           $details = $elem.next();
         });
-        afterEach(function() {
+        afterEach(function () {
           // Close the row
           $scope.toggleRow();
           $scope.$digest();
         });
 
-        it('should be a tr with something in it', function() {
+        it('should be a tr with something in it', function () {
           expect($details.is('tr')).to.be(true);
           expect($details.text()).to.not.be.empty();
         });
@@ -184,7 +187,7 @@ describe('Doc Table', function() {
     });
   });
 
-  describe('kbnTableRow meta', function() {
+  describe('kbnTableRow meta', function () {
     const $elem = angular.element(
       '<tr kbn-table-row="row" ' +
         'columns="columns" ' +
@@ -195,7 +198,7 @@ describe('Doc Table', function() {
     );
     let row;
 
-    beforeEach(function() {
+    beforeEach(function () {
       row = getFakeRow(0, mapping);
 
       init($elem, {
@@ -212,7 +215,7 @@ describe('Doc Table', function() {
       $elem.next();
     });
 
-    afterEach(function() {
+    afterEach(function () {
       destroy();
     });
 
@@ -225,14 +228,14 @@ describe('Doc Table', function() {
     }); */
   });
 
-  describe('row diffing', function() {
+  describe('row diffing', function () {
     let $row;
     let $scope;
     let $root;
     let $before;
 
     beforeEach(
-      ngMock.inject(function($rootScope, $compile, Private) {
+      ngMock.inject(function ($rootScope, $compile, Private) {
         $root = $rootScope;
         $root.row = getFakeRow(0, mapping);
         $root.columns = ['_source'];
@@ -243,7 +246,7 @@ describe('Doc Table', function() {
         $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
         // Stub field format converters for every field in the indexPattern
-        $root.indexPattern.fields.forEach(f => stubFieldFormatConverter($root, f.name));
+        $root.indexPattern.fields.forEach((f) => stubFieldFormatConverter($root, f.name));
 
         $row = $('<tr>').attr({
           'kbn-table-row': 'row',
@@ -259,26 +262,16 @@ describe('Doc Table', function() {
 
         $before = $row.find('td');
         expect($before).to.have.length(3);
-        expect(
-          $before
-            .eq(0)
-            .text()
-            .trim()
-        ).to.be('');
-        expect(
-          $before
-            .eq(1)
-            .text()
-            .trim()
-        ).to.match(/^time_formatted/);
+        expect($before.eq(0).text().trim()).to.be('');
+        expect($before.eq(1).text().trim()).to.match(/^time_formatted/);
       })
     );
 
-    afterEach(function() {
+    afterEach(function () {
       $row.remove();
     });
 
-    it('handles a new column', function() {
+    it('handles a new column', function () {
       $root.columns.push('bytes');
       $root.$apply();
 
@@ -287,15 +280,10 @@ describe('Doc Table', function() {
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
       expect($after[2]).to.be($before[2]);
-      expect(
-        $after
-          .eq(3)
-          .text()
-          .trim()
-      ).to.match(/^bytes_formatted/);
+      expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
     });
 
-    it('handles two new columns at once', function() {
+    it('handles two new columns at once', function () {
       $root.columns.push('bytes');
       $root.columns.push('request_body');
       $root.$apply();
@@ -305,21 +293,11 @@ describe('Doc Table', function() {
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
       expect($after[2]).to.be($before[2]);
-      expect(
-        $after
-          .eq(3)
-          .text()
-          .trim()
-      ).to.match(/^bytes_formatted/);
-      expect(
-        $after
-          .eq(4)
-          .text()
-          .trim()
-      ).to.match(/^request_body_formatted/);
+      expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
+      expect($after.eq(4).text().trim()).to.match(/^request_body_formatted/);
     });
 
-    it('handles three new columns in odd places', function() {
+    it('handles three new columns in odd places', function () {
       $root.columns = ['@timestamp', 'bytes', '_source', 'request_body'];
       $root.$apply();
 
@@ -327,28 +305,13 @@ describe('Doc Table', function() {
       expect($after).to.have.length(6);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
-      expect(
-        $after
-          .eq(2)
-          .text()
-          .trim()
-      ).to.match(/^@timestamp_formatted/);
-      expect(
-        $after
-          .eq(3)
-          .text()
-          .trim()
-      ).to.match(/^bytes_formatted/);
+      expect($after.eq(2).text().trim()).to.match(/^@timestamp_formatted/);
+      expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
       expect($after[4]).to.be($before[2]);
-      expect(
-        $after
-          .eq(5)
-          .text()
-          .trim()
-      ).to.match(/^request_body_formatted/);
+      expect($after.eq(5).text().trim()).to.match(/^request_body_formatted/);
     });
 
-    it('handles a removed column', function() {
+    it('handles a removed column', function () {
       _.pull($root.columns, '_source');
       $root.$apply();
 
@@ -358,7 +321,7 @@ describe('Doc Table', function() {
       expect($after[1]).to.be($before[1]);
     });
 
-    it('handles two removed columns', function() {
+    it('handles two removed columns', function () {
       // first add a column
       $root.columns.push('@timestamp');
       $root.$apply();
@@ -376,7 +339,7 @@ describe('Doc Table', function() {
       expect($after[1]).to.be($before[1]);
     });
 
-    it('handles three removed random columns', function() {
+    it('handles three removed random columns', function () {
       // first add two column
       $root.columns.push('@timestamp', 'bytes');
       $root.$apply();
@@ -393,15 +356,10 @@ describe('Doc Table', function() {
       expect($after).to.have.length(3);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
-      expect(
-        $after
-          .eq(2)
-          .text()
-          .trim()
-      ).to.match(/^@timestamp_formatted/);
+      expect($after.eq(2).text().trim()).to.match(/^@timestamp_formatted/);
     });
 
-    it('handles two columns with the same content', function() {
+    it('handles two columns with the same content', function () {
       stubFieldFormatConverter($root, 'request_body', fakeRowVals.bytes);
 
       $root.columns.length = 0;
@@ -411,21 +369,11 @@ describe('Doc Table', function() {
 
       const $after = $row.find('td');
       expect($after).to.have.length(4);
-      expect(
-        $after
-          .eq(2)
-          .text()
-          .trim()
-      ).to.match(/^bytes_formatted/);
-      expect(
-        $after
-          .eq(3)
-          .text()
-          .trim()
-      ).to.match(/^bytes_formatted/);
+      expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
+      expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
     });
 
-    it('handles two columns swapping position', function() {
+    it('handles two columns swapping position', function () {
       $root.columns.push('bytes');
       $root.$apply();
 
@@ -443,7 +391,7 @@ describe('Doc Table', function() {
       expect($after[3]).to.be($mid[2]);
     });
 
-    it('handles four columns all reversing position', function() {
+    it('handles four columns all reversing position', function () {
       $root.columns.push('bytes', 'response', '@timestamp');
       $root.$apply();
 
@@ -463,7 +411,7 @@ describe('Doc Table', function() {
       expect($after[5]).to.be($mid[2]);
     });
 
-    it('handles multiple columns with the same name', function() {
+    it('handles multiple columns with the same name', function () {
       $root.columns.push('bytes', 'bytes', 'bytes');
       $root.$apply();
 
@@ -472,24 +420,9 @@ describe('Doc Table', function() {
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
       expect($after[2]).to.be($before[2]);
-      expect(
-        $after
-          .eq(3)
-          .text()
-          .trim()
-      ).to.match(/^bytes_formatted/);
-      expect(
-        $after
-          .eq(4)
-          .text()
-          .trim()
-      ).to.match(/^bytes_formatted/);
-      expect(
-        $after
-          .eq(5)
-          .text()
-          .trim()
-      ).to.match(/^bytes_formatted/);
+      expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
+      expect($after.eq(4).text().trim()).to.match(/^bytes_formatted/);
+      expect($after.eq(5).text().trim()).to.match(/^bytes_formatted/);
     });
   });
 });

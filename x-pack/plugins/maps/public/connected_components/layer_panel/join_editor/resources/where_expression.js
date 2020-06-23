@@ -8,6 +8,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import { getUiSettings, getData } from '../../../../kibana_services';
 
 export class WhereExpression extends Component {
@@ -16,7 +17,7 @@ export class WhereExpression extends Component {
   };
 
   _togglePopover = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -79,7 +80,7 @@ export class WhereExpression extends Component {
             query={
               whereQuery
                 ? whereQuery
-                : { language: getUiSettings().get('search:queryLanguage'), query: '' }
+                : { language: getUiSettings().get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE), query: '' }
             }
             onQuerySubmit={this._onQueryChange}
             indexPatterns={[indexPattern]}

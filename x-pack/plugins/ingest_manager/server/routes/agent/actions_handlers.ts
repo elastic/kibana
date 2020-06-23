@@ -13,7 +13,7 @@ import { ActionsService } from '../../services/agents';
 import { NewAgentAction } from '../../../common/types/models';
 import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 
-export const postNewAgentActionHandlerBuilder = function(
+export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService
 ): RequestHandler<
   TypeOf<typeof PostNewAgentActionRequestSchema.params>,

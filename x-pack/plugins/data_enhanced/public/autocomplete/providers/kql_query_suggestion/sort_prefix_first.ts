@@ -12,7 +12,7 @@ export function sortPrefixFirst(array: any[], prefix?: string | number, property
   }
   const lowerCasePrefix = ('' + prefix).toLowerCase();
 
-  const partitions = partition(array, entry => {
+  const partitions = partition(array, (entry) => {
     const value = ('' + (property ? entry[property] : entry)).toLowerCase();
 
     return value.startsWith(lowerCasePrefix);

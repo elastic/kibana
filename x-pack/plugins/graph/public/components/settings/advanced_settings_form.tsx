@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SettingsProps } from './settings';
@@ -26,13 +26,30 @@ export function AdvancedSettingsForm({
   updateSettings,
   allFields,
 }: Pick<SettingsProps, 'advancedSettings' | 'updateSettings' | 'allFields'>) {
+  // keep a local state during changes
+  const [formState, updateFormState] = useState({ ...advancedSettings });
+  // useEffect update localState only based on the main store
+  useEffect(() => {
+    updateFormState(advancedSettings);
+  }, [updateFormState, advancedSettings]);
+
   function updateSetting<K extends keyof AdvancedSettings>(key: K, value: AdvancedSettings[K]) {
     updateSettings({ ...advancedSettings, [key]: value });
   }
 
   function getNumberUpdater<K extends NumberKeys<AdvancedSettings>>(key: K) {
-    return function({ target: { valueAsNumber } }: { target: { valueAsNumber: number } }) {
-      updateSetting(key, Number.isNaN(valueAsNumber) ? 1 : valueAsNumber);
+    return function ({
+      target: { valueAsNumber, value },
+    }: {
+      target: { valueAsNumber: number; value: string };
+    }) {
+      // if the value is valid, then update the central store, otherwise only the local store
+      if (Number.isNaN(valueAsNumber)) {
+        // localstate update
+        return updateFormState({ ...formState, [key]: value });
+      }
+      // do not worry about local store here, the useEffect will pick that up and sync it
+      updateSetting(key, valueAsNumber);
     };
   }
 
@@ -52,7 +69,7 @@ export function AdvancedSettingsForm({
           fullWidth
           min={1}
           step={1}
-          value={advancedSettings.sampleSize}
+          value={formState.sampleSize}
           onChange={getNumberUpdater('sampleSize')}
         />
       </EuiFormRow>
@@ -73,7 +90,7 @@ export function AdvancedSettingsForm({
             { defaultMessage: 'Significant links' }
           )}
           id="graphSignificance"
-          checked={advancedSettings.useSignificance}
+          checked={formState.useSignificance}
           onChange={({ target: { checked } }) => updateSetting('useSignificance', checked)}
         />
       </EuiFormRow>
@@ -91,7 +108,7 @@ export function AdvancedSettingsForm({
           fullWidth
           min={1}
           step={1}
-          value={advancedSettings.minDocCount}
+          value={formState.minDocCount}
           onChange={getNumberUpdater('minDocCount')}
         />
       </EuiFormRow>
@@ -125,18 +142,18 @@ export function AdvancedSettingsForm({
             { defaultMessage: 'No diversification' }
           )}
           singleSelection={{ asPlainText: true }}
-          options={allFields.map(field => ({ label: field.name, value: field }))}
+          options={allFields.map((field) => ({ label: field.name, value: field }))}
           selectedOptions={
-            advancedSettings.sampleDiversityField
+            formState.sampleDiversityField
               ? [
                   {
-                    label: advancedSettings.sampleDiversityField.name,
-                    value: advancedSettings.sampleDiversityField,
+                    label: formState.sampleDiversityField.name,
+                    value: formState.sampleDiversityField,
                   },
                 ]
               : []
           }
-          onChange={choices => {
+          onChange={(choices) => {
             updateSetting(
               'sampleDiversityField',
               choices.length === 1 ? choices[0].value : undefined
@@ -145,7 +162,7 @@ export function AdvancedSettingsForm({
         />
       </EuiFormRow>
 
-      {advancedSettings.sampleDiversityField && (
+      {formState.sampleDiversityField && (
         <EuiFormRow
           fullWidth
           helpText={
@@ -154,7 +171,7 @@ export function AdvancedSettingsForm({
                 defaultMessage:
                   'Max number of documents in a sample that can contain the same value for the',
               })}{' '}
-              <em>{advancedSettings.sampleDiversityField.name}</em>{' '}
+              <em>{formState.sampleDiversityField.name}</em>{' '}
               {i18n.translate(
                 'xpack.graph.settings.advancedSettings.maxValuesInputHelpText.fieldText',
                 {
@@ -171,7 +188,7 @@ export function AdvancedSettingsForm({
             fullWidth
             min={1}
             step={1}
-            value={advancedSettings.maxValuesPerDoc}
+            value={formState.maxValuesPerDoc}
             onChange={getNumberUpdater('maxValuesPerDoc')}
           />
         </EuiFormRow>
@@ -190,7 +207,7 @@ export function AdvancedSettingsForm({
           fullWidth
           min={1}
           step={1}
-          value={advancedSettings.timeoutMillis}
+          value={formState.timeoutMillis}
           onChange={getNumberUpdater('timeoutMillis')}
           append={
             <EuiText size="xs">

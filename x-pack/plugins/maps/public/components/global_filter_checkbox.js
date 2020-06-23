@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQuery }) {
-  const onApplyGlobalQueryChange = event => {
+  const onApplyGlobalQueryChange = (event) => {
     setApplyGlobalQuery(event.target.checked);
   };
 

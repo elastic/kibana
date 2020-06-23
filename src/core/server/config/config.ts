@@ -34,7 +34,7 @@ export function isConfigPath(value: unknown): value is ConfigPath {
     return true;
   }
 
-  return Array.isArray(value) && value.every(segment => typeof segment === 'string');
+  return Array.isArray(value) && value.every((segment) => typeof segment === 'string');
 }
 
 /**

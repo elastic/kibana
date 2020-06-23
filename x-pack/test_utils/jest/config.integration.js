@@ -15,7 +15,7 @@ export default {
     `!**/__jest__/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.{js,ts,tsx}`,
   ],
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
-    pattern => !pattern.includes(RESERVED_DIR_JEST_INTEGRATION_TESTS)
+    (pattern) => !pattern.includes(RESERVED_DIR_JEST_INTEGRATION_TESTS)
   ),
   reporters: [
     'default',

@@ -12,8 +12,8 @@ you’re likely moving your data to less performant hardware and reducing the
 number of shards and replicas.  It’s important to ensure that the index 
 continues to have enough replicas to prevent data loss in the event of failures.
 
-*Index Lifecycle Policies* is automatically enabled in {kib}. Go to 
-*Management > {es} > Index Lifecycle Policies*. 
+*Index Lifecycle Policies* is automatically enabled in {kib}. Open the menu, then go to 
+*Stack Management > {es} > Index Lifecycle Policies*. 
 
 NOTE: If you don’t want to use this feature, you can disable it by setting 
 `xpack.ilm.enabled` to false in your `kibana.yml` configuration file. If you 

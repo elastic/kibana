@@ -23,7 +23,7 @@ class GCPCloudService extends CloudService {
     const fields = ['id', 'machine-type', 'zone'];
 
     const create = this._createRequestForField;
-    const allRequests = fields.map(field => promisify(request)(create(field)));
+    const allRequests = fields.map((field) => promisify(request)(create(field)));
     return (
       Promise.all(allRequests)
         /*
@@ -31,8 +31,8 @@ class GCPCloudService extends CloudService {
       responses are arrays containing [fullResponse, body];
       because GCP returns plaintext, we have no way of validating without using the response code
      */
-        .then(responses => {
-          return responses.map(response => {
+        .then((responses) => {
+          return responses.map((response) => {
             return this._extractBody(response, response.body);
           });
         })

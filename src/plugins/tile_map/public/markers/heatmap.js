@@ -39,10 +39,10 @@ export class HeatmapMarkers extends EventEmitter {
     this._zoom = zoom;
     this._disableTooltips = false;
     this._getLatLng = _.memoize(
-      function(feature) {
+      function (feature) {
         return L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
       },
-      function(feature) {
+      function (feature) {
         // turn coords into a string for the memoize cache
         return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
       }
@@ -74,7 +74,7 @@ export class HeatmapMarkers extends EventEmitter {
   }
 
   _addTooltips() {
-    const mouseMoveLocation = e => {
+    const mouseMoveLocation = (e) => {
       if (!this._geojsonFeatureCollection.features.length || this._disableTooltips) {
         this.emit('hideTooltip');
         return;
@@ -118,7 +118,7 @@ export class HeatmapMarkers extends EventEmitter {
 
     _.reduce(
       this._geojsonFeatureCollection.features,
-      function(distance, feature) {
+      function (distance, feature) {
         const featureLatLng = self._getLatLng(feature);
         const dist = latLng.distanceTo(featureLatLng);
 
@@ -171,11 +171,7 @@ export class HeatmapMarkers extends EventEmitter {
       showTip = true;
     }
 
-    d3.scale
-      .pow()
-      .exponent(0.2)
-      .domain([1, 18])
-      .range([1500000, 50]);
+    d3.scale.pow().exponent(0.2).domain([1, 18]).range([1500000, 50]);
     return showTip;
   }
 }
@@ -188,7 +184,7 @@ export class HeatmapMarkers extends EventEmitter {
  * @return {Array}
  */
 function dataToHeatArray(featureCollection, max) {
-  return featureCollection.features.map(feature => {
+  return featureCollection.features.map((feature) => {
     const lat = feature.geometry.coordinates[1];
     const lng = feature.geometry.coordinates[0];
     // show bucket value normalized to max value

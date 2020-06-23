@@ -20,7 +20,7 @@ import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import {
   QuerySuggestion,
   esKuery,
-  IIndexPattern
+  IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
@@ -40,7 +40,7 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 export function KueryBar() {
   const [state, setState] = useState<State>({
     suggestions: [],
-    isLoadingSuggestions: false
+    isLoadingSuggestions: false,
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
@@ -55,7 +55,7 @@ export function KueryBar() {
     error: 'http.response.status_code >= 400',
     metric: 'process.pid = "1234"',
     defaults:
-      'transaction.duration.us > 300000 AND http.response.status_code >= 400'
+      'transaction.duration.us > 300000 AND http.response.status_code >= 400',
   };
 
   const example = examples[processorEvent || 'defaults'];
@@ -71,15 +71,15 @@ export function KueryBar() {
           } (E.g. {queryExample})`,
     values: {
       queryExample: example,
-      event: processorEvent
-    }
+      event: processorEvent,
+    },
   });
 
   // The bar should be disabled when viewing the service map
-  const disabled = /\/service-map$/.test(location.pathname);
+  const disabled = /\/(service-map|rum-overview)$/.test(location.pathname);
   const disabledPlaceholder = i18n.translate(
     'xpack.apm.kueryBar.disabledPlaceholder',
-    { defaultMessage: 'Search is not available for service map' }
+    { defaultMessage: 'Search is not available here' }
   );
 
   async function onChange(inputValue: string, selectionStart: number) {
@@ -100,10 +100,10 @@ export function KueryBar() {
           boolFilter: getBoolFilter(urlParams),
           query: inputValue,
           selectionStart,
-          selectionEnd: selectionStart
+          selectionEnd: selectionStart,
         })) || []
       )
-        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+        .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {
@@ -132,8 +132,8 @@ export function KueryBar() {
         ...location,
         search: fromQuery({
           ...toQuery(location.search),
-          kuery: encodeURIComponent(inputValue.trim())
-        })
+          kuery: encodeURIComponent(inputValue.trim()),
+        }),
       });
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console

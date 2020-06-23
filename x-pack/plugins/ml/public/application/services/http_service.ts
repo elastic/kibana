@@ -8,12 +8,11 @@ import { Observable } from 'rxjs';
 import { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from 'kibana/public';
 import { getHttp } from '../util/dependency_cache';
 
-function getResultHeaders(headers: HeadersInit): HeadersInit {
+function getResultHeaders(headers: HeadersInit) {
   return {
-    asSystemRequest: true,
     'Content-Type': 'application/json',
     ...headers,
-  } as HeadersInit;
+  };
 }
 
 function getFetchOptions(
@@ -25,6 +24,7 @@ function getFetchOptions(
   return {
     path: options.path,
     fetchOptions: {
+      asSystemRequest: true,
       credentials: 'same-origin',
       method: options.method || 'GET',
       ...(options.body ? { body: options.body } : {}),
@@ -37,6 +37,8 @@ function getFetchOptions(
 /**
  * Function for making HTTP requests to Kibana's backend.
  * Wrapper for Kibana's HttpHandler.
+ *
+ * @deprecated use {@link HttpService} instead
  */
 export async function http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
   const { path, fetchOptions } = getFetchOptions(options);
@@ -46,6 +48,8 @@ export async function http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
 /**
  * Function for making HTTP requests to Kibana's backend which returns an Observable
  * with request cancellation support.
+ *
+ * @deprecated use {@link HttpService} instead
  */
 export function http$<T>(options: HttpFetchOptionsWithPath): Observable<T> {
   const { path, fetchOptions } = getFetchOptions(options);
@@ -55,8 +59,8 @@ export function http$<T>(options: HttpFetchOptionsWithPath): Observable<T> {
 /**
  * Creates an Observable from Kibana's HttpHandler.
  */
-export function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
-  return new Observable<T>(subscriber => {
+function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
+  return new Observable<T>((subscriber) => {
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -82,12 +86,12 @@ export function fromHttpHandler<T>(input: string, init?: RequestInit): Observabl
 
     getHttp()
       .fetch<T>(input, perSubscriberInit)
-      .then(response => {
+      .then((response) => {
         abortable = false;
         subscriber.next(response);
         subscriber.complete();
       })
-      .catch(err => {
+      .catch((err) => {
         abortable = false;
         if (!unsubscribed) {
           subscriber.error(err);
@@ -111,7 +115,6 @@ export class HttpService {
 
   private getResultHeaders(headers: HeadersInit): HeadersInit {
     return {
-      asSystemRequest: true,
       'Content-Type': 'application/json',
       ...headers,
     } as HeadersInit;
@@ -126,6 +129,7 @@ export class HttpService {
     return {
       path: options.path,
       fetchOptions: {
+        asSystemRequest: true,
         credentials: 'same-origin',
         method: options.method || 'GET',
         ...(options.body ? { body: options.body } : {}),
@@ -139,7 +143,7 @@ export class HttpService {
    * Creates an Observable from Kibana's HttpHandler.
    */
   private fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
-    return new Observable<T>(subscriber => {
+    return new Observable<T>((subscriber) => {
       const controller = new AbortController();
       const signal = controller.signal;
 
@@ -165,12 +169,12 @@ export class HttpService {
 
       this.httpStart
         .fetch<T>(input, perSubscriberInit)
-        .then(response => {
+        .then((response) => {
           abortable = false;
           subscriber.next(response);
           subscriber.complete();
         })
-        .catch(err => {
+        .catch((err) => {
           abortable = false;
           if (!unsubscribed) {
             subscriber.error(err);

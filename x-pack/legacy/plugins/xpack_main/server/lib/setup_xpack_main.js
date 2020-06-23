@@ -22,8 +22,7 @@ export function setupXPackMain(server) {
 
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
-  const { registerFeature, getFeatures } = server.newPlatform.setup.plugins.features;
-  server.expose('registerFeature', registerFeature);
+  const { getFeatures } = server.newPlatform.setup.plugins.features;
   server.expose('getFeatures', getFeatures);
 
   const setPluginStatus = () => {

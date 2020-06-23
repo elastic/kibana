@@ -353,11 +353,11 @@ describe('kfetch', () => {
     beforeEach(async () => {
       fetchMock.get('*', { foo: 'bar' });
       addInterceptor({
-        request: config => ({
+        request: (config) => ({
           ...config,
           pathname: '/my/intercepted-route',
         }),
-        response: res => ({
+        response: (res) => ({
           ...res,
           addedByResponseInterceptor: true,
         }),
@@ -386,12 +386,12 @@ describe('kfetch', () => {
     beforeEach(async () => {
       fetchMock.get('*', { foo: 'bar' });
       addInterceptor({
-        request: config =>
+        request: (config) =>
           Promise.resolve({
             ...config,
             pathname: '/my/intercepted-route',
           }),
-        response: res =>
+        response: (res) =>
           Promise.resolve({
             ...res,
             addedByResponseInterceptor: true,
@@ -421,7 +421,7 @@ function mockInterceptorCalls(interceptors: Interceptor[]) {
   const interceptorCalls: string[] = [];
   interceptors.forEach((interceptor, i) => {
     addInterceptor({
-      request: config => {
+      request: (config) => {
         interceptorCalls.push(`Request #${i + 1}`);
 
         if (interceptor.request) {
@@ -430,7 +430,7 @@ function mockInterceptorCalls(interceptors: Interceptor[]) {
 
         return config;
       },
-      requestError: e => {
+      requestError: (e) => {
         interceptorCalls.push(`RequestError #${i + 1}`);
         if (interceptor.requestError) {
           return interceptor.requestError(e);
@@ -438,7 +438,7 @@ function mockInterceptorCalls(interceptors: Interceptor[]) {
 
         throw e;
       },
-      response: res => {
+      response: (res) => {
         interceptorCalls.push(`Response #${i + 1}`);
 
         if (interceptor.response) {
@@ -447,7 +447,7 @@ function mockInterceptorCalls(interceptors: Interceptor[]) {
 
         return res;
       },
-      responseError: e => {
+      responseError: (e) => {
         interceptorCalls.push(`ResponseError #${i + 1}`);
 
         if (interceptor.responseError) {

@@ -9,7 +9,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiToolTip,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -23,7 +23,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import {
   asDynamicBytes,
   asInteger,
-  asPercent
+  asPercent,
 } from '../../../utils/formatters';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { truncate, px, unit } from '../../../style/variables';
@@ -44,15 +44,15 @@ const ServiceNodeOverview = () => {
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {
-        serviceName
+        serviceName,
       },
-      projection: PROJECTION.SERVICE_NODES
+      projection: PROJECTION.SERVICE_NODES,
     }),
     [serviceName]
   );
 
   const { data: items = [] } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (!serviceName || !start || !end) {
         return undefined;
       }
@@ -60,14 +60,14 @@ const ServiceNodeOverview = () => {
         pathname: '/api/apm/services/{serviceName}/serviceNodes',
         params: {
           path: {
-            serviceName
+            serviceName,
           },
           query: {
             start,
             end,
-            uiFilters: JSON.stringify(uiFilters)
-          }
-        }
+            uiFilters: JSON.stringify(uiFilters),
+          },
+        },
       });
     },
     [serviceName, start, end, uiFilters]
@@ -82,12 +82,12 @@ const ServiceNodeOverview = () => {
       name: (
         <EuiToolTip
           content={i18n.translate('xpack.apm.jvmsTable.nameExplanation', {
-            defaultMessage: `By default, the JVM name is the container ID (where applicable) or the hostname, but it can be manually configured through the agent's 'service_node_name' configuration.`
+            defaultMessage: `By default, the JVM name is the container ID (where applicable) or the hostname, but it can be manually configured through the agent's 'service_node_name' configuration.`,
           })}
         >
           <>
             {i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
-              defaultMessage: 'Name'
+              defaultMessage: 'Name',
             })}
           </>
         </EuiToolTip>
@@ -103,9 +103,9 @@ const ServiceNodeOverview = () => {
                   'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
                   {
                     defaultMessage:
-                      'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.'
+                      'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
                   }
-                )
+                ),
               }
             : { displayedName: name, tooltip: name };
 
@@ -119,40 +119,40 @@ const ServiceNodeOverview = () => {
             </ServiceNodeMetricOverviewLink>
           </EuiToolTip>
         );
-      }
+      },
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.cpuColumnLabel', {
-        defaultMessage: 'CPU avg'
+        defaultMessage: 'CPU avg',
       }),
       field: 'cpu',
       sortable: true,
-      render: (value: number | null) => asPercent(value || 0, 1)
+      render: (value: number | null) => asPercent(value || 0, 1),
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {
-        defaultMessage: 'Heap memory avg'
+        defaultMessage: 'Heap memory avg',
       }),
       field: 'heapMemory',
       sortable: true,
-      render: asDynamicBytes
+      render: asDynamicBytes,
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.nonHeapMemoryColumnLabel', {
-        defaultMessage: 'Non-heap memory avg'
+        defaultMessage: 'Non-heap memory avg',
       }),
       field: 'nonHeapMemory',
       sortable: true,
-      render: asDynamicBytes
+      render: asDynamicBytes,
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.threadCountColumnLabel', {
-        defaultMessage: 'Thread count max'
+        defaultMessage: 'Thread count max',
       }),
       field: 'threadCount',
       sortable: true,
-      render: asInteger
-    }
+      render: asInteger,
+    },
   ];
 
   return (
@@ -168,7 +168,7 @@ const ServiceNodeOverview = () => {
               noItemsMessage={i18n.translate(
                 'xpack.apm.jvmsTable.noJvmsLabel',
                 {
-                  defaultMessage: 'No JVMs were found'
+                  defaultMessage: 'No JVMs were found',
                 }
               )}
               items={items}

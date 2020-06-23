@@ -13,7 +13,7 @@ import {
   UpdateEmbeddableExpressionPayload,
 } from '../actions/embeddable';
 
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { assignNodeProperties } from './elements';
 
 export const embeddableReducer = handleActions<
@@ -29,15 +29,15 @@ export const embeddableReducer = handleActions<
       const { elementId, embeddableExpression } = payload;
 
       // Find the element
-      const pageWithElement = workpadState.pages.find(page => {
-        return page.elements.find(element => element.id === elementId) !== undefined;
+      const pageWithElement = workpadState.pages.find((page) => {
+        return page.elements.find((element) => element.id === elementId) !== undefined;
       });
 
       if (!pageWithElement) {
         return workpadState;
       }
 
-      const element = pageWithElement.elements.find(elem => elem.id === elementId);
+      const element = pageWithElement.elements.find((elem) => elem.id === elementId);
 
       if (!element) {
         return workpadState;
@@ -48,7 +48,7 @@ export const embeddableReducer = handleActions<
       const searchForFunction = newAst.chain[0].function;
 
       // Find the first matching function in the existing ASt
-      const existingAstFunction = existingAst.chain.find(f => f.function === searchForFunction);
+      const existingAstFunction = existingAst.chain.find((f) => f.function === searchForFunction);
 
       if (!existingAstFunction) {
         return workpadState;

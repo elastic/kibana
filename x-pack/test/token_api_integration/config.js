@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default async function({ readConfigFile }) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+export default async function ({ readConfigFile }) {
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
     testFiles: [require.resolve('./auth')],

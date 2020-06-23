@@ -31,10 +31,10 @@ export default {
         max: 1415827160456,
       },
       yAxisLabel: 'Count of documents',
-      xAxisFormatter: function(thing) {
+      xAxisFormatter: function (thing) {
         return moment(thing);
       },
-      tooltipFormatter: function(d) {
+      tooltipFormatter: function (d) {
         return d;
       },
       series: [
@@ -850,10 +850,10 @@ export default {
         max: 1415827160457,
       },
       yAxisLabel: 'Count of documents',
-      xAxisFormatter: function(thing) {
+      xAxisFormatter: function (thing) {
         return moment(thing);
       },
-      tooltipFormatter: function(d) {
+      tooltipFormatter: function (d) {
         return d;
       },
       series: [

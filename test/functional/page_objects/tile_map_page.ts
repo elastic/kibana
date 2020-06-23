@@ -70,7 +70,7 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
     public async getMapZoomEnabled(zoomSelector: string): Promise<boolean> {
       const zooms = await this.getZoomSelectors(zoomSelector);
       const classAttributes = await Promise.all(
-        zooms.map(async zoom => await zoom.getAttribute('class'))
+        zooms.map(async (zoom) => await zoom.getAttribute('class'))
       );
       return !classAttributes.join('').includes('leaflet-disabled');
     }

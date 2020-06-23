@@ -12,23 +12,23 @@ export const apmIndices: SavedObjectsType = {
   mappings: {
     properties: {
       'apm_oss.sourcemapIndices': {
-        type: 'keyword'
+        type: 'keyword',
       },
       'apm_oss.errorIndices': {
-        type: 'keyword'
+        type: 'keyword',
       },
       'apm_oss.onboardingIndices': {
-        type: 'keyword'
+        type: 'keyword',
       },
       'apm_oss.spanIndices': {
-        type: 'keyword'
+        type: 'keyword',
       },
       'apm_oss.transactionIndices': {
-        type: 'keyword'
+        type: 'keyword',
       },
       'apm_oss.metricsIndices': {
-        type: 'keyword'
-      }
-    }
-  }
+        type: 'keyword',
+      },
+    },
+  },
 };

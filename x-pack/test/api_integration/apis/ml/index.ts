@@ -6,11 +6,11 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('Machine Learning', function() {
+  describe('Machine Learning', function () {
     this.tags(['mlqa']);
 
     before(async () => {
@@ -22,11 +22,30 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
 
-      await ml.testResources.deleteIndexPattern('kibana_sample_data_logs');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_apache');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_apm');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_logs');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_nginx');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_ecommerce');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_auditbeat');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_packetbeat');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_winlogbeat');
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
 
       await esArchiver.unload('ml/ecommerce');
       await esArchiver.unload('ml/categorization');
-      await esArchiver.unload('ml/sample_logs');
+      await esArchiver.unload('ml/module_apache');
+      await esArchiver.unload('ml/module_apm');
+      await esArchiver.unload('ml/module_logs');
+      await esArchiver.unload('ml/module_nginx');
+      await esArchiver.unload('ml/module_sample_ecommerce');
+      await esArchiver.unload('ml/module_sample_logs');
+      await esArchiver.unload('ml/module_siem_auditbeat');
+      await esArchiver.unload('ml/module_siem_packetbeat');
+      await esArchiver.unload('ml/module_siem_winlogbeat');
+      await esArchiver.unload('ml/farequote');
+      await esArchiver.unload('ml/bm_classification');
 
       await ml.testResources.resetKibanaTimeZone();
     });
@@ -37,5 +56,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./fields_service'));
     loadTestFile(require.resolve('./job_validation'));
     loadTestFile(require.resolve('./jobs'));
+    loadTestFile(require.resolve('./results'));
+    loadTestFile(require.resolve('./data_frame_analytics'));
   });
 }

@@ -32,7 +32,7 @@ function useEditorFormState() {
   const [formState, setFormState] = useState(initialFormState);
 
   const setValidity: SetValidity = useCallback((modelName, value) => {
-    setFormState(model => {
+    setFormState((model) => {
       const validity = {
         ...model.validity,
         [modelName]: value,
@@ -41,7 +41,7 @@ function useEditorFormState() {
       return {
         ...model,
         validity,
-        invalid: Object.values(validity).some(valid => !valid),
+        invalid: Object.values(validity).some((valid) => !valid),
       };
     });
   }, []);
@@ -51,7 +51,7 @@ function useEditorFormState() {
   }, []);
 
   const setTouched = useCallback((touched: boolean) => {
-    setFormState(model => ({
+    setFormState((model) => ({
       ...model,
       touched,
     }));

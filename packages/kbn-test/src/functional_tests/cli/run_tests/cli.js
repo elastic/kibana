@@ -30,7 +30,7 @@ import { processOptions, displayHelp } from './args';
  *                                      if no config option is passed
  */
 export async function runTestsCli(defaultConfigPaths) {
-  await runCli(displayHelp, async userOptions => {
+  await runCli(displayHelp, async (userOptions) => {
     const options = processOptions(userOptions, defaultConfigPaths);
     await runTests(options);
   });

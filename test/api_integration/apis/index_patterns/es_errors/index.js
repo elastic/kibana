@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function({ loadTestFile }) {
+export default function ({ loadTestFile }) {
   describe('index_patterns/service/lib', () => {
     loadTestFile(require.resolve('./errors'));
   });

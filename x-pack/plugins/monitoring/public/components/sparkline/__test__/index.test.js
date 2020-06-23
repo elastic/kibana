@@ -28,8 +28,8 @@ describe('Sparkline component', () => {
         ]}
         tooltip={{
           enabled: true,
-          xValueFormatter: x => x,
-          yValueFormatter: y => y,
+          xValueFormatter: (x) => x,
+          yValueFormatter: (y) => y,
         }}
         options={{
           xaxis: {

@@ -28,7 +28,7 @@ function createBufferedLog(): ToolingLog & { buffer: string } {
   const log: ToolingLog = new ToolingLog({
     level: 'debug',
     writeTo: {
-      write: chunk => ((log as any).buffer += chunk),
+      write: (chunk) => ((log as any).buffer += chunk),
     },
   });
   (log as any).buffer = '';
@@ -47,7 +47,7 @@ function assertDeepClones(a: any, b: any) {
       expect(one).to.eql(two);
       expect(one).to.not.be(two);
       const keys = uniq(Object.keys(one).concat(Object.keys(two)));
-      keys.forEach(k => {
+      keys.forEach((k) => {
         path.push(k);
         recurse(one[k], two[k]);
         path.pop();

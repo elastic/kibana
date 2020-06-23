@@ -7,8 +7,8 @@
 import {
   setBasePath,
   toggleIntegrationsPopover,
-  triggerAppRefresh,
   setAlertFlyoutVisible,
+  setSearchTextAction,
 } from '../../actions';
 import { uiReducer } from '../ui';
 import { Action } from 'redux-actions';
@@ -23,7 +23,7 @@ describe('ui reducer', () => {
           basePath: 'abc',
           esKuery: '',
           integrationsPopoverOpen: null,
-          lastRefresh: 125,
+          searchText: '',
         },
         action
       )
@@ -42,23 +42,7 @@ describe('ui reducer', () => {
           basePath: '',
           esKuery: '',
           integrationsPopoverOpen: null,
-          lastRefresh: 125,
-        },
-        action
-      )
-    ).toMatchSnapshot();
-  });
-
-  it('updates the refresh value', () => {
-    const action = triggerAppRefresh(125) as Action<never>;
-    expect(
-      uiReducer(
-        {
-          alertFlyoutVisible: false,
-          basePath: 'abc',
-          esKuery: '',
-          integrationsPopoverOpen: null,
-          lastRefresh: 125,
+          searchText: '',
         },
         action
       )
@@ -74,7 +58,7 @@ describe('ui reducer', () => {
           basePath: '',
           esKuery: '',
           integrationsPopoverOpen: null,
-          lastRefresh: 125,
+          searchText: '',
         },
         action
       )
@@ -84,7 +68,31 @@ describe('ui reducer', () => {
         "basePath": "",
         "esKuery": "",
         "integrationsPopoverOpen": null,
-        "lastRefresh": 125,
+        "searchText": "",
+      }
+    `);
+  });
+
+  it('sets the search text', () => {
+    const action = setSearchTextAction('lorem ipsum') as Action<never>;
+    expect(
+      uiReducer(
+        {
+          alertFlyoutVisible: false,
+          basePath: '',
+          esKuery: '',
+          integrationsPopoverOpen: null,
+          searchText: '',
+        },
+        action
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "alertFlyoutVisible": false,
+        "basePath": "",
+        "esKuery": "",
+        "integrationsPopoverOpen": null,
+        "searchText": "lorem ipsum",
       }
     `);
   });

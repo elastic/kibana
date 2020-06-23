@@ -11,7 +11,7 @@ import {
   getByText,
   getByDisplayValue,
   queryByDisplayValue,
-  fireEvent
+  fireEvent,
 } from '@testing-library/react';
 import { omit } from 'lodash';
 import { history } from '../../../../utils/history';
@@ -30,18 +30,18 @@ jest.spyOn(history, 'replace');
 jest.mock('ui/new_platform');
 function setup({
   urlParams,
-  serviceTransactionTypes
+  serviceTransactionTypes,
 }: {
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
 }) {
   const defaultLocation = {
     pathname: '/services/foo/transactions',
-    search: fromQuery(omit(urlParams, 'serviceName'))
+    search: fromQuery(omit(urlParams, 'serviceName')),
   } as any;
 
   history.replace({
-    ...defaultLocation
+    ...defaultLocation,
   });
 
   jest
@@ -71,12 +71,12 @@ describe('TransactionOverview', () => {
       setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
-          serviceName: 'MyServiceName'
-        }
+          serviceName: 'MyServiceName',
+        },
       });
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: 'transactionType=firstType'
+          search: 'transactionType=firstType',
         })
       );
     });
@@ -90,8 +90,8 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
           transactionType: 'secondType',
-          serviceName: 'MyServiceName'
-        }
+          serviceName: 'MyServiceName',
+        },
       });
 
       // secondType is selected in the dropdown
@@ -106,14 +106,14 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
           transactionType: 'secondType',
-          serviceName: 'MyServiceName'
-        }
+          serviceName: 'MyServiceName',
+        },
       });
 
       expect(queryByDisplayValue(container, 'firstType')).toBeNull();
 
       fireEvent.change(getByDisplayValue(container, 'secondType'), {
-        target: { value: 'firstType' }
+        target: { value: 'firstType' },
       });
 
       expect(history.push).toHaveBeenCalled();
@@ -130,8 +130,8 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType'],
         urlParams: {
           transactionType: 'firstType',
-          serviceName: 'MyServiceName'
-        }
+          serviceName: 'MyServiceName',
+        },
       });
 
       expect(queryByLabelText(container, FILTER_BY_TYPE_LABEL)).toBeNull();

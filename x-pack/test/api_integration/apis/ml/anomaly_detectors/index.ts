@@ -5,8 +5,9 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('anomaly detectors', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('anomaly detectors', function () {
     loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./get'));
   });
 }

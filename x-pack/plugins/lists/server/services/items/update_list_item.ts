@@ -48,7 +48,7 @@ export const updateListItem = async ({
       ...transformListItemToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
     };
 
-    const response: CreateDocumentResponse = await callCluster('update', {
+    const response = await callCluster<CreateDocumentResponse>('update', {
       body: {
         doc,
       },

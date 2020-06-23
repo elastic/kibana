@@ -185,7 +185,7 @@ import {
     // typings:expect-error
     plain = undefined; // it's undefined
     // typings:expect-error
-    plain = a => a; // it's a function
+    plain = (a) => a; // it's a function
     // typings:expect-error
     plain = [new Date()]; // it's a time
     // typings:expect-error

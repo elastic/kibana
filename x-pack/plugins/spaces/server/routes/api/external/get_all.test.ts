@@ -10,7 +10,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, kibanaResponseFactory, IRouter } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
 import {
   loggingServiceMock,
   httpServiceMock,
@@ -26,11 +26,11 @@ import { securityMock } from '../../../../../security/server/mocks';
 
 describe('GET /spaces/space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
     const coreStart = coreMock.createStart();
 
@@ -43,7 +43,7 @@ describe('GET /spaces/space', () => {
       http: (httpService as unknown) as CoreSetup['http'],
       getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 

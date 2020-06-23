@@ -8,7 +8,7 @@ import { getRollupSearchCapabilities } from './rollup_search_capabilities';
 class DefaultSearchCapabilities {
   constructor(request, fieldsCapabilities = {}) {
     this.fieldsCapabilities = fieldsCapabilities;
-    this.parseInterval = jest.fn(interval => interval);
+    this.parseInterval = jest.fn((interval) => interval);
   }
 }
 

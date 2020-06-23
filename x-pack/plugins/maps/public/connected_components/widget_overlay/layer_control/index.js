@@ -8,8 +8,7 @@ import { connect } from 'react-redux';
 import { LayerControl } from './view';
 
 import { FLYOUT_STATE } from '../../../reducers/ui';
-import { updateFlyout, setIsLayerTOCOpen } from '../../../actions/ui_actions';
-import { setSelectedLayer } from '../../../actions/map_actions';
+import { setSelectedLayer, updateFlyout, setIsLayerTOCOpen } from '../../../actions';
 import {
   getIsReadOnly,
   getIsLayerTOCOpen,

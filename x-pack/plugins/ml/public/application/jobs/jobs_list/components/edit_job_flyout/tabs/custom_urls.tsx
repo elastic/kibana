@@ -84,10 +84,10 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
   componentDidMount() {
     const { toasts } = this.props.kibana.services.notifications;
     loadSavedDashboards(MAX_NUMBER_DASHBOARDS)
-      .then(dashboards => {
+      .then((dashboards) => {
         this.setState({ dashboards });
       })
-      .catch(resp => {
+      .catch((resp) => {
         // eslint-disable-next-line no-console
         console.error('Error loading list of dashboards:', resp);
         toasts.addDanger(
@@ -101,10 +101,10 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       });
 
     loadIndexPatterns(MAX_NUMBER_INDEX_PATTERNS)
-      .then(indexPatterns => {
+      .then((indexPatterns) => {
         this.setState({ indexPatterns });
       })
-      .catch(resp => {
+      .catch((resp) => {
         // eslint-disable-next-line no-console
         console.error('Error loading list of dashboards:', resp);
         toasts.addDanger(
@@ -120,7 +120,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
 
   editNewCustomUrl = () => {
     // Opens the editor for configuring a new custom URL.
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const { dashboards, indexPatterns } = prevState;
 
       return {
@@ -138,7 +138,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
 
   addNewCustomUrl = () => {
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
-      .then(customUrl => {
+      .then((customUrl) => {
         const customUrls = [...this.state.customUrls, customUrl];
         this.props.setCustomUrls(customUrls);
         this.setState({ editorOpen: false });
@@ -163,12 +163,12 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     const { toasts } = this.props.kibana.services.notifications;
     const job = this.props.job;
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
-      .then(customUrl => {
+      .then((customUrl) => {
         getTestUrl(job, customUrl)
-          .then(testUrl => {
+          .then((testUrl) => {
             openCustomUrlWindow(testUrl, customUrl);
           })
-          .catch(resp => {
+          .catch((resp) => {
             // eslint-disable-next-line no-console
             console.error('Error obtaining URL for test:', resp);
             toasts.addWarning(
@@ -181,7 +181,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
             );
           });
       })
-      .catch(resp => {
+      .catch((resp) => {
         // eslint-disable-next-line no-console
         console.error('Error building custom URL from settings:', resp);
         toasts.addWarning(

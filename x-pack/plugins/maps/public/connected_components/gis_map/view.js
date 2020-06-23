@@ -11,10 +11,9 @@ import { MBMapContainer } from '../map/mb';
 import { WidgetOverlay } from '../widget_overlay';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { LayerPanel } from '../layer_panel';
-import { AddLayerPanel } from '../layer_addpanel';
+import { AddLayerPanel } from '../add_layer_panel';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
-
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
@@ -22,7 +21,8 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
-import { registerLayerWizards } from '../../layers/load_layer_wizards';
+import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -64,7 +64,7 @@ export class GisMap extends Component {
   // - If it's not, then reporting injects a listener into the browser for a custom "renderComplete" event.
   // - When that event is fired, we snapshot the viz and move on.
   // Failure to not have the dom attribute, or custom event, will timeout the job.
-  // See x-pack/legacy/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
+  // See x-pack/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
   _onInitialLoadRenderComplete = () => {
     const el = document.querySelector(`[data-dom-id="${this.state.domId}"]`);
 
@@ -73,7 +73,7 @@ export class GisMap extends Component {
     }
   };
 
-  _loadGeoFields = async nextIndexPatternIds => {
+  _loadGeoFields = async (nextIndexPatternIds) => {
     if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       // all ready loaded index pattern ids
       return;
@@ -84,8 +84,8 @@ export class GisMap extends Component {
     const geoFields = [];
     try {
       const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-      indexPatterns.forEach(indexPattern => {
-        indexPattern.fields.forEach(field => {
+      indexPatterns.forEach((indexPattern) => {
+        indexPattern.fields.forEach((field) => {
           if (
             !indexPatternsUtils.isNestedField(field) &&
             (field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||

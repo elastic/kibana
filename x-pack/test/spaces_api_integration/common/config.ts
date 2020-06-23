@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import path from 'path';
 import { TestInvoker } from './lib/types';
@@ -26,7 +25,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
       },
       xpack: {
-        api: await readConfigFile(require.resolve('../../api_integration/config.js')),
+        api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
       },
     };
 
@@ -67,8 +66,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           // disable anonymouse access so that we're testing both on and off in different suites
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'shared_type_plugin')}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

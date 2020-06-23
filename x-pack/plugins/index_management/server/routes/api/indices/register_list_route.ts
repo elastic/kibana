@@ -14,7 +14,7 @@ export function registerListRoute({ router, license, indexDataEnricher, lib }: R
     license.guardApiRoute(async (ctx, req, res) => {
       try {
         const indices = await fetchIndices(
-          ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+          ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
           indexDataEnricher
         );
         return res.ok({ body: indices });

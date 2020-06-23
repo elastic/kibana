@@ -35,7 +35,7 @@ export interface Props {
   };
 }
 
-export const ExtendedTemplate: FunctionComponent<Props> = props => {
+export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
   const { typeInstance, onValueChange, labels, argValue } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -47,7 +47,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
   }
 
   const fields = get<string[]>(typeInstance, 'options.include', []);
-  const hasPropFields = fields.some(field => ['lines', 'bars', 'points'].indexOf(field) !== -1);
+  const hasPropFields = fields.some((field) => ['lines', 'bars', 'points'].indexOf(field) !== -1);
 
   const handleChange: <T extends Argument>(key: T, val: ChangeEvent<HTMLSelectElement>) => void = (
     argName,
@@ -70,7 +70,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
   ];
 
   const labelOptions = [{ value: '', text: strings.getSelectSeriesOption() }];
-  labels.sort().forEach(val => labelOptions.push({ value: val, text: val }));
+  labels.sort().forEach((val) => labelOptions.push({ value: val, text: val }));
 
   return (
     <div>
@@ -81,7 +81,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
               compressed
               value={selectedSeries}
               options={labelOptions}
-              onChange={ev => handleChange('label', ev)}
+              onChange={(ev) => handleChange('label', ev)}
             />
           </EuiFormRow>
           <EuiSpacer size="s" />
@@ -98,7 +98,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
                     value={get(chainArgs, 'lines.0', 0)}
                     options={values}
                     compressed
-                    onChange={ev => handleChange('lines', ev)}
+                    onChange={(ev) => handleChange('lines', ev)}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -110,7 +110,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
                     value={get(chainArgs, 'bars.0', 0)}
                     options={values}
                     compressed
-                    onChange={ev => handleChange('bars', ev)}
+                    onChange={(ev) => handleChange('bars', ev)}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -122,7 +122,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
                     value={get(chainArgs, 'points.0', 0)}
                     options={values}
                     compressed
-                    onChange={ev => handleChange('points', ev)}
+                    onChange={(ev) => handleChange('points', ev)}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

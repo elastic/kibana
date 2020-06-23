@@ -18,7 +18,7 @@ describe('autocomplete', () => {
     it('should return function definition for plot', () => {
       const expression = 'plot ';
       const def = getFnArgDefAtPosition(functionSpecs, expression, expression.length);
-      const plotFn = functionSpecs.find(spec => spec.name === 'plot');
+      const plotFn = functionSpecs.find((spec) => spec.name === 'plot');
       expect(def.fnDef).toBe(plotFn);
     });
   });
@@ -34,7 +34,7 @@ describe('autocomplete', () => {
     it('should suggest arguments', () => {
       const expression = 'plot ';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-      const plotFn = functionSpecs.find(spec => spec.name === 'plot');
+      const plotFn = functionSpecs.find((spec) => spec.name === 'plot');
       expect(suggestions.length).toBe(Object.keys(plotFn!.args).length);
       expect(suggestions[0].start).toBe(expression.length);
       expect(suggestions[0].end).toBe(expression.length);
@@ -43,7 +43,7 @@ describe('autocomplete', () => {
     it('should suggest values', () => {
       const expression = 'shape shape=';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-      const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
+      const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
       expect(suggestions.length).toBe(shapeFn!.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length);
       expect(suggestions[0].end).toBe(expression.length);
@@ -85,14 +85,14 @@ describe('autocomplete', () => {
       expect(suggestions[0].fnDef.inputTypes).toEqual(['datatable']);
 
       const withReturnOnly = suggestions.findIndex(
-        suggestion =>
+        (suggestion) =>
           suggestion.fnDef.type === 'datatable' &&
           suggestion.fnDef.inputTypes &&
           !(suggestion.fnDef.inputTypes as string[]).includes('datatable')
       );
 
       const withNeither = suggestions.findIndex(
-        suggestion =>
+        (suggestion) =>
           suggestion.fnDef.type !== 'datatable' &&
           (!suggestion.fnDef.inputTypes ||
             !(suggestion.fnDef.inputTypes as string[]).includes('datatable'))
@@ -111,7 +111,7 @@ describe('autocomplete', () => {
         expression,
         expression.length - 1
       );
-      const ltFn = functionSpecs.find(spec => spec.name === 'lt');
+      const ltFn = functionSpecs.find((spec) => spec.name === 'lt');
       expect(suggestions.length).toBe(Object.keys(ltFn!.args).length);
       expect(suggestions[0].start).toBe(expression.length - 1);
       expect(suggestions[0].end).toBe(expression.length - 1);
@@ -124,7 +124,7 @@ describe('autocomplete', () => {
         expression,
         expression.length - 1
       );
-      const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
+      const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
       expect(suggestions.length).toBe(shapeFn!.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length - 1);
       expect(suggestions[0].end).toBe(expression.length - 1);
@@ -137,7 +137,7 @@ describe('autocomplete', () => {
         expression,
         expression.length - 1
       );
-      const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
+      const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
       expect(suggestions.length).toBe(shapeFn!.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length - '"ar"'.length);
       expect(suggestions[0].end).toBe(expression.length);
@@ -146,32 +146,32 @@ describe('autocomplete', () => {
     it('should prioritize functions that match the previous function type', () => {
       const expression = 'plot | ';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-      const renderIndex = suggestions.findIndex(suggestion => suggestion.text.includes('render'));
-      const anyIndex = suggestions.findIndex(suggestion => suggestion.text.includes('any'));
+      const renderIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('render'));
+      const anyIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('any'));
       expect(renderIndex).toBeLessThan(anyIndex);
     });
 
     it('should alphabetize functions', () => {
       const expression = '';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-      const metricIndex = suggestions.findIndex(suggestion => suggestion.text.includes('metric'));
-      const anyIndex = suggestions.findIndex(suggestion => suggestion.text.includes('any'));
+      const metricIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('metric'));
+      const anyIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('any'));
       expect(anyIndex).toBeLessThan(metricIndex);
     });
 
     it('should prioritize unnamed arguments', () => {
       const expression = 'case ';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-      const whenIndex = suggestions.findIndex(suggestion => suggestion.text.includes('when'));
-      const thenIndex = suggestions.findIndex(suggestion => suggestion.text.includes('then'));
+      const whenIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('when'));
+      const thenIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('then'));
       expect(whenIndex).toBeLessThan(thenIndex);
     });
 
     it('should alphabetize arguments', () => {
       const expression = 'plot ';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-      const yaxisIndex = suggestions.findIndex(suggestion => suggestion.text.includes('yaxis'));
-      const defaultStyleIndex = suggestions.findIndex(suggestion =>
+      const yaxisIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('yaxis'));
+      const defaultStyleIndex = suggestions.findIndex((suggestion) =>
         suggestion.text.includes('defaultStyle')
       );
       expect(defaultStyleIndex).toBeLessThan(yaxisIndex);

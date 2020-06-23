@@ -20,15 +20,12 @@
 import { PluginFunctionalProviderContext } from '../../services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: PluginFunctionalProviderContext) {
+export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 
   describe('server plugins', function describeIndexTests() {
     it('extend request handler context', async () => {
-      await supertest
-        .get('/core_plugin_b')
-        .expect(200)
-        .expect('Pong via plugin A: true');
+      await supertest.get('/core_plugin_b').expect(200).expect('Pong via plugin A: true');
     });
 
     it('extend request handler context with validation', async () => {

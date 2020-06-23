@@ -29,13 +29,13 @@ export const getIndexFields = (
     const types: FieldTypes = {};
     const allFields: string[] = [];
 
-    docFields.forEach(field => {
+    docFields.forEach((field) => {
       types[field.id] = field.type;
       allFields.push(field.id);
     });
 
     return {
-      defaultSelectedFields: defaultSelected.map(field => field.id),
+      defaultSelectedFields: defaultSelected.map((field) => field.id),
       fieldTypes: types,
       tableFields: allFields,
     };

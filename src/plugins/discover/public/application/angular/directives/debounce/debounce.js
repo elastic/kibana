@@ -22,7 +22,7 @@ import _ from 'lodash';
 // borrowed heavily from https://github.com/shahata/angular-debounce
 
 export function DebounceProviderTimeout($timeout) {
-  return function(func, wait, options) {
+  return function (func, wait, options) {
     let timeout;
     let args;
     let self;
@@ -37,7 +37,7 @@ export function DebounceProviderTimeout($timeout) {
       self = this;
       args = arguments;
 
-      const later = function() {
+      const later = function () {
         timeout = null;
         if (!options.leading || options.trailing) {
           result = func.apply(self, args);
@@ -58,7 +58,7 @@ export function DebounceProviderTimeout($timeout) {
       return result;
     }
 
-    debounce.cancel = function() {
+    debounce.cancel = function () {
       $timeout.cancel(timeout);
       timeout = null;
     };

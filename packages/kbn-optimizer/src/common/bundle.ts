@@ -29,8 +29,8 @@ export interface BundleSpec {
   readonly type: typeof VALID_BUNDLE_TYPES[0];
   /** Unique id for this bundle */
   readonly id: string;
-  /** Webpack entry request for this plugin, relative to the contextDir */
-  readonly entry: string;
+  /** directory names relative to the contextDir that can be imported from */
+  readonly publicDirNames: string[];
   /** Absolute path to the plugin source directory */
   readonly contextDir: string;
   /** Absolute path to the root of the repository */
@@ -44,8 +44,8 @@ export class Bundle {
   public readonly type: BundleSpec['type'];
   /** Unique identifier for this bundle */
   public readonly id: BundleSpec['id'];
-  /** Path, relative to `contextDir`, to the entry file for the Webpack bundle */
-  public readonly entry: BundleSpec['entry'];
+  /** directory names relative to the contextDir that can be imported from */
+  public readonly publicDirNames: BundleSpec['publicDirNames'];
   /**
    * Absolute path to the root of the bundle context (plugin directory)
    * where the entry is resolved relative to and the default output paths
@@ -62,7 +62,7 @@ export class Bundle {
   constructor(spec: BundleSpec) {
     this.type = spec.type;
     this.id = spec.id;
-    this.entry = spec.entry;
+    this.publicDirNames = spec.publicDirNames;
     this.contextDir = spec.contextDir;
     this.sourceRoot = spec.sourceRoot;
     this.outputDir = spec.outputDir;
@@ -73,14 +73,12 @@ export class Bundle {
   /**
    * Calculate the cache key for this bundle based from current
    * mtime values.
-   *
-   * @param mtimes pre-fetched mtimes (ms || undefined) for all referenced files
    */
   createCacheKey(files: string[], mtimes: Map<string, number | undefined>): unknown {
     return {
       spec: this.toSpec(),
       mtimes: entriesToObject(
-        files.map(p => [p, mtimes.get(p)] as const).sort(ascending(e => e[0]))
+        files.map((p) => [p, mtimes.get(p)] as const).sort(ascending((e) => e[0]))
       ),
     };
   }
@@ -94,7 +92,7 @@ export class Bundle {
     return {
       type: this.type,
       id: this.id,
-      entry: this.entry,
+      publicDirNames: this.publicDirNames,
       contextDir: this.contextDir,
       sourceRoot: this.sourceRoot,
       outputDir: this.outputDir,
@@ -134,9 +132,9 @@ export function parseBundles(json: string) {
           throw new Error('`bundles[]` must have a string `id` property');
         }
 
-        const { entry } = spec;
-        if (!(typeof entry === 'string')) {
-          throw new Error('`bundles[]` must have a string `entry` property');
+        const { publicDirNames } = spec;
+        if (!Array.isArray(publicDirNames) || !publicDirNames.every((d) => typeof d === 'string')) {
+          throw new Error('`bundles[]` must have an array of strings `publicDirNames` property');
         }
 
         const { contextDir } = spec;
@@ -157,7 +155,7 @@ export function parseBundles(json: string) {
         return new Bundle({
           type,
           id,
-          entry,
+          publicDirNames,
           contextDir,
           sourceRoot,
           outputDir,

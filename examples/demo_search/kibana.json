@@ -2,9 +2,9 @@
   "id": "demoSearch",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["demoSearch"],
   "server": true,
   "ui": true,
   "requiredPlugins": ["data"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "extraPublicDirs": ["common"]
 }

@@ -38,7 +38,7 @@ export function VegaChartPageProvider({
       const editor = await testSubjects.find('vega-editor');
       const lines = await editor.findAllByClassName('ace_line_group');
       const linesText = await Promise.all(
-        lines.map(async line => {
+        lines.map(async (line) => {
           return await line.getVisibleText();
         })
       );

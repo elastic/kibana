@@ -11,18 +11,22 @@ import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
 
 const { setup } = pageHelpers.pipelinesCreate;
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj']}
-      onChange={(syntheticEvent: any) => {
-        props.onChange(syntheticEvent.jsonString);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj']}
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.jsonString);
+        }}
+      />
+    ),
+  };
+});
 
 describe('<PipelinesCreate />', () => {
   let testBed: PipelinesCreateTestBed;
@@ -68,21 +72,6 @@ describe('<PipelinesCreate />', () => {
       expect(exists('versionField')).toBe(true);
     });
 
-    test('should toggle the on-failure processors editor', async () => {
-      const { actions, component, exists } = testBed;
-
-      // On-failure editor should be hidden by default
-      expect(exists('onFailureEditor')).toBe(false);
-
-      await act(async () => {
-        actions.toggleOnFailureSwitch();
-        await nextTick();
-        component.update();
-      });
-
-      expect(exists('onFailureEditor')).toBe(true);
-    });
-
     test('should show the request flyout', async () => {
       const { actions, component, find, exists } = testBed;
 
@@ -107,15 +96,11 @@ describe('<PipelinesCreate />', () => {
           component.update();
         });
 
-        expect(form.getErrorsMessages()).toEqual([
-          'Name is required.',
-          'A description is required.',
-        ]);
+        expect(form.getErrorsMessages()).toEqual(['Name is required.']);
         expect(find('submitButton').props().disabled).toEqual(true);
 
         // Add required fields and verify button is enabled again
         form.setInputValue('nameField.input', 'my_pipeline');
-        form.setInputValue('descriptionField.input', 'pipeline description');
 
         await act(async () => {
           await nextTick();

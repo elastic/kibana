@@ -19,3 +19,9 @@
 .devApp {
   height: 100%;
 }
+
+.devAppWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}

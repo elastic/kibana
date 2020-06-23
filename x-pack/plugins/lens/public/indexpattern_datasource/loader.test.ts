@@ -147,7 +147,7 @@ function indexPatternSavedObject({ id }: { id: keyof typeof sampleIndexPatterns 
     attributes: {
       title: pattern.title,
       timeFieldName: pattern.timeFieldName,
-      fields: JSON.stringify(pattern.fields.filter(f => f.type !== 'document')),
+      fields: JSON.stringify(pattern.fields.filter((f) => f.type !== 'document')),
     },
   };
 }
@@ -256,12 +256,14 @@ describe('loader', () => {
         } as unknown) as Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>,
       });
 
-      expect(cache.foo.fields.find(f => f.name === 'bytes')!.aggregationRestrictions).toEqual({
+      expect(cache.foo.fields.find((f) => f.name === 'bytes')!.aggregationRestrictions).toEqual({
         sum: { agg: 'sum' },
       });
-      expect(cache.foo.fields.find(f => f.name === 'timestamp')!.aggregationRestrictions).toEqual({
-        date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
-      });
+      expect(cache.foo.fields.find((f) => f.name === 'timestamp')!.aggregationRestrictions).toEqual(
+        {
+          date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
+        }
+      );
     });
   });
 
@@ -549,7 +551,7 @@ describe('loader', () => {
         return {
           indexPatternTitle,
           existingFieldNames: ['field_1', 'field_2'].map(
-            fieldName => `${indexPatternTitle}_${fieldName}`
+            (fieldName) => `${indexPatternTitle}_${fieldName}`
           ),
         };
       });

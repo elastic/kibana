@@ -9,20 +9,21 @@ export {
   XJsonMode,
   collapseLiteralStrings,
   expandLiteralStrings,
+  UseRequestConfig,
+  useRequest,
 } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
-  UseRequestConfig,
-  useRequest,
-} from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
-
-export {
+  fetchChartsData,
   getErrorMessage,
+  extractErrorMessage,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
+  ChartData,
   DataGrid,
   EsSorting,
   RenderCellValue,

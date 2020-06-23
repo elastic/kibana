@@ -20,7 +20,7 @@ export const RenderWithFn = compose(
     })
   ),
   withKibana,
-  withProps(props => ({
+  withProps((props) => ({
     onError: props.kibana.services.canvas.notify.error,
   }))
 )(Component);

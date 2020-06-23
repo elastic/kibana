@@ -23,6 +23,8 @@ export enum Aggregators {
   MAX = 'max',
   RATE = 'rate',
   CARDINALITY = 'cardinality',
+  P95 = 'p95',
+  P99 = 'p99',
 }
 
 export enum AlertStates {

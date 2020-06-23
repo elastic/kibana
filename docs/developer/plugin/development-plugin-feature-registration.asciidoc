@@ -22,7 +22,7 @@ init(server) {
 -----------
 
 ===== Feature details
-Registering a feature consists of the following fields. For more information, consult the {repo}blob/{branch}/x-pack/plugins/features/server/feature_registry.ts[feature registry interface].
+Registering a feature consists of the following fields. For more information, consult the {kib-repo}blob/{branch}/x-pack/plugins/features/server/feature_registry.ts[feature registry interface].
 
 
 [cols="1a, 1a, 1a, 1a"]
@@ -45,12 +45,12 @@ Registering a feature consists of the following fields. For more information, co
 |An array of applications this feature enables. Typically, all of your plugin's apps (from `uiExports`) will be included here.
 
 |`privileges` (required)
-|{repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
+|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
 |See <<example-1-canvas,Example 1>> and <<example-2-dev-tools,Example 2>>
 |The set of privileges this feature requires to function.
 
 |`subFeatures` (optional)
-|{repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
+|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
 |See <<example-3-discover,Example 3>>
 |The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.
 
@@ -68,7 +68,7 @@ Registering a feature consists of the following fields. For more information, co
 ===== Privilege definition
 The `privileges` section of feature registration allows plugins to implement read/write and read-only modes for their applications.
 
-For a full explanation of fields and options, consult the {repo}blob/{branch}/x-pack/plugins/features/server/feature_registry.ts[feature registry interface].
+For a full explanation of fields and options, consult the {kib-repo}blob/{branch}/x-pack/plugins/features/server/feature_registry.ts[feature registry interface].
 
 ==== Using UI Capabilities
 
@@ -153,7 +153,7 @@ init(server) {
       defaultMessage: 'Dev Tools',
     }),
     icon: 'devToolsApp',
-    navLinkId: 'kibana:dev_tools',
+    navLinkId: 'dev_tools',
     app: ['kibana'],
     catalogue: ['console', 'searchprofiler', 'grokdebugger'],
     privileges: {
@@ -216,7 +216,7 @@ init(server) {
       }),
       order: 100,
       icon: 'discoverApp',
-      navLinkId: 'kibana:discover',
+      navLinkId: 'discover',
       app: ['kibana'],
       catalogue: ['discover'],
       privileges: {

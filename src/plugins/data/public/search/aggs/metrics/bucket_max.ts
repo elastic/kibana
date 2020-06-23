@@ -49,7 +49,7 @@ export const getBucketMaxMetricAgg = ({
     {
       name: METRIC_TYPES.MAX_BUCKET,
       title: maxBucketTitle,
-      makeLabel: agg => makeNestedLabel(agg, overallMaxLabel),
+      makeLabel: (agg) => makeNestedLabel(agg, overallMaxLabel),
       subtype: siblingPipelineAggHelper.subtype,
       params: [...siblingPipelineAggHelper.params()],
       getFormat: siblingPipelineAggHelper.getFormat,

@@ -25,7 +25,7 @@ export const isType = (...types: string[]) => {
   return (agg: IAggConfig): boolean => {
     const field = agg.params.field;
 
-    return types.some(type => field && field.type === type);
+    return types.some((type) => field && field.type === type);
   };
 };
 

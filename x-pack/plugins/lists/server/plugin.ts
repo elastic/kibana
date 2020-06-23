@@ -13,7 +13,7 @@ import { SpacesServiceSetup } from '../../spaces/server';
 
 import { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
-import { ListClient } from './services/lists/client';
+import { ListClient } from './services/lists/list_client';
 import {
   ContextProvider,
   ContextProviderReturn,
@@ -24,6 +24,8 @@ import {
 import { createConfig$ } from './create_config';
 import { getSpaceId } from './get_space_id';
 import { getUser } from './get_user';
+import { initSavedObjects } from './saved_objects';
+import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 
 export class ListPlugin
   implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, PluginsSetup> {
@@ -37,9 +39,7 @@ export class ListPlugin
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<ListPluginSetup> {
-    const config = await createConfig$(this.initializerContext)
-      .pipe(first())
-      .toPromise();
+    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
 
     this.logger.error(
       'You have activated the lists values feature flag which is NOT currently supported for Elastic Security! You should turn this feature flag off immediately by un-setting "xpack.lists.enabled: true" in kibana.yml and restarting Kibana'
@@ -48,14 +48,22 @@ export class ListPlugin
     this.config = config;
     this.security = plugins.security;
 
+    initSavedObjects(core.savedObjects);
+
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
     const router = core.http.createRouter();
     initRoutes(router);
 
     return {
-      getListClient: (apiCaller, spaceId, user): ListClient => {
+      getExceptionListClient: (savedObjectsClient, user): ExceptionListClient => {
+        return new ExceptionListClient({
+          savedObjectsClient,
+          user,
+        });
+      },
+      getListClient: (callCluster, spaceId, user): ListClient => {
         return new ListClient({
-          callCluster: apiCaller,
+          callCluster,
           config,
           spaceId,
           user,
@@ -77,8 +85,11 @@ export class ListPlugin
       const { spaces, config, security } = this;
       const {
         core: {
+          savedObjects: { client: savedObjectsClient },
           elasticsearch: {
-            dataClient: { callAsCurrentUser },
+            legacy: {
+              client: { callAsCurrentUser: callCluster },
+            },
           },
         },
       } = context;
@@ -88,9 +99,14 @@ export class ListPlugin
         const spaceId = getSpaceId({ request, spaces });
         const user = getUser({ request, security });
         return {
+          getExceptionListClient: (): ExceptionListClient =>
+            new ExceptionListClient({
+              savedObjectsClient,
+              user,
+            }),
           getListClient: (): ListClient =>
             new ListClient({
-              callCluster: callAsCurrentUser,
+              callCluster,
               config,
               spaceId,
               user,

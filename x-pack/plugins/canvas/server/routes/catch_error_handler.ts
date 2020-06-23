@@ -8,7 +8,7 @@ import { RequestHandler } from 'src/core/server';
 
 export const catchErrorHandler: <P, Q, B>(
   fn: RequestHandler<P, Q, B>
-) => RequestHandler<P, Q, B> = fn => {
+) => RequestHandler<P, Q, B> = (fn) => {
   return async (context, request, response) => {
     try {
       return await fn(context, request, response);

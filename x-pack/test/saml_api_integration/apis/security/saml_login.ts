@@ -13,7 +13,7 @@ import { JSDOM } from 'jsdom';
 import { getLogoutRequest, getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
@@ -64,10 +64,7 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('SAML authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest
-        .get('/internal/security/me')
-        .set('kbn-xsrf', 'xxx')
-        .expect(401);
+      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
     });
 
     it('does not prevent basic login', async () => {
@@ -127,7 +124,7 @@ export default function({ getService }: FtrProviderContext) {
             // JSDOM doesn't support changing of `window.location` and throws an exception if script
             // tries to do that and we have to workaround this behaviour. We also need to wait until our
             // script is loaded and executed, __isScriptExecuted__ is used exactly for that.
-            (window as Record<string, any>).__isScriptExecuted__ = new Promise(resolve => {
+            (window as Record<string, any>).__isScriptExecuted__ = new Promise((resolve) => {
               Object.defineProperty(window, 'location', {
                 value: {
                   hash: '#/workpad',
@@ -515,7 +512,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('API access with expired access token.', () => {
       let sessionCookie: Cookie;
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         this.timeout(40000);
 
         const captureURLResponse = await supertest
@@ -651,9 +648,7 @@ export default function({ getService }: FtrProviderContext) {
           q: 'doc_type:token',
           refresh: true,
         });
-        expect(esResponse)
-          .to.have.property('deleted')
-          .greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
       });
 
       it('should properly set cookie and start new SAML handshake', async () => {
@@ -710,9 +705,7 @@ export default function({ getService }: FtrProviderContext) {
               q: 'doc_type:token',
               refresh: true,
             });
-            expect(esResponse)
-              .to.have.property('deleted')
-              .greaterThan(0);
+            expect(esResponse).to.have.property('deleted').greaterThan(0);
           },
         ],
       ];

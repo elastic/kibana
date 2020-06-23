@@ -30,9 +30,9 @@ export async function mountManagementSection(
   services: InternalServices,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs } = params;
+  const { element, setBreadcrumbs, history } = params;
   const [core] = await coreSetup.getStartServices();
-  const { docLinks, fatalErrors } = core;
+  const { docLinks, fatalErrors, application } = core;
 
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
@@ -40,11 +40,13 @@ export async function mountManagementSection(
   const appDependencies: AppDependencies = {
     core: {
       fatalErrors,
+      getUrlForApp: application.getUrlForApp,
     },
     plugins: {
       usageCollection,
     },
     services,
+    history,
   };
 
   return renderApp(element, { core, dependencies: appDependencies });

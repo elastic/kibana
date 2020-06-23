@@ -42,8 +42,8 @@ export class ChartTarget extends React.Component {
 
   filterByShow(seriesToShow) {
     if (seriesToShow) {
-      return metric => {
-        return seriesToShow.some(id => id.toLowerCase() === metric.id.toLowerCase());
+      return (metric) => {
+        return seriesToShow.some((id) => id.toLowerCase() === metric.id.toLowerCase());
       };
     }
     return () => true;
@@ -73,9 +73,7 @@ export class ChartTarget extends React.Component {
   }
 
   filterData(data, seriesToShow) {
-    return _(data)
-      .filter(this.filterByShow(seriesToShow))
-      .value();
+    return _(data).filter(this.filterByShow(seriesToShow)).value();
   }
 
   async getOptions() {

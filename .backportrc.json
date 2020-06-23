@@ -25,7 +25,7 @@
   ],
   "targetPRLabels": ["backport"],
   "branchLabelMapping": {
-    "^v7.8.0$": "7.x",
+    "^v7.9.0$": "7.x",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   }
 }

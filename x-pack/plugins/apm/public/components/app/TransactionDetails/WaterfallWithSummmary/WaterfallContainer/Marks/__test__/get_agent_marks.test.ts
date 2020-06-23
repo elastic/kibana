@@ -15,43 +15,43 @@ describe('getAgentMarks', () => {
           agent: {
             domInteractive: 117,
             timeToFirstByte: 10,
-            domComplete: 118
-          }
-        }
-      }
+            domComplete: 118,
+          },
+        },
+      },
     } as any;
     expect(getAgentMarks(transaction)).toEqual([
       {
         id: 'timeToFirstByte',
         offset: 10000,
         type: 'agentMark',
-        verticalLine: true
+        verticalLine: true,
       },
       {
         id: 'domInteractive',
         offset: 117000,
         type: 'agentMark',
-        verticalLine: true
+        verticalLine: true,
       },
       {
         id: 'domComplete',
         offset: 118000,
         type: 'agentMark',
-        verticalLine: true
-      }
+        verticalLine: true,
+      },
     ]);
   });
 
   it('should return empty array if marks are missing', () => {
     const transaction: Transaction = {
-      transaction: {}
+      transaction: {},
     } as any;
     expect(getAgentMarks(transaction)).toEqual([]);
   });
 
   it('should return empty array if agent marks are missing', () => {
     const transaction: Transaction = {
-      transaction: { marks: {} }
+      transaction: { marks: {} },
     } as any;
     expect(getAgentMarks(transaction)).toEqual([]);
   });

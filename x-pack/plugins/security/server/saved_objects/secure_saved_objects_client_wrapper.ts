@@ -207,14 +207,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actionsToTypesMap = new Map(
-      types.map(type => [this.actions.savedObject.get(type, action), type])
+      types.map((type) => [this.actions.savedObject.get(type, action), type])
     );
     const actions = Array.from(actionsToTypesMap.keys());
     const result = await this.checkPrivileges(actions, namespaceOrNamespaces);
 
     const { hasAllRequested, username, privileges } = result;
     const spaceIds = uniq(
-      privileges.map(({ resource }) => resource).filter(x => x !== undefined)
+      privileges.map(({ resource }) => resource).filter((x) => x !== undefined)
     ).sort() as string[];
 
     const isAuthorized =
@@ -253,7 +253,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private getUniqueObjectTypes(objects: Array<{ type: string }>) {
-    return uniq(objects.map(o => o.type));
+    return uniq(objects.map((o) => o.type));
   }
 
   private async getNamespacesPrivilegeMap(namespaces: string[]) {
@@ -287,7 +287,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       }
       return 0;
     };
-    return spaceIds.map(spaceId => (privilegeMap[spaceId] ? spaceId : '?')).sort(comparator);
+    return spaceIds.map((spaceId) => (privilegeMap[spaceId] ? spaceId : '?')).sort(comparator);
   }
 
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
@@ -312,7 +312,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return response;
     }
     const { saved_objects: savedObjects } = response;
-    const namespaces = uniq(savedObjects.flatMap(savedObject => savedObject.namespaces || []));
+    const namespaces = uniq(savedObjects.flatMap((savedObject) => savedObject.namespaces || []));
     if (namespaces.length === 0) {
       return response;
     }
@@ -321,7 +321,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     return {
       ...response,
-      saved_objects: savedObjects.map(savedObject => ({
+      saved_objects: savedObjects.map((savedObject) => ({
         ...savedObject,
         namespaces:
           savedObject.namespaces &&

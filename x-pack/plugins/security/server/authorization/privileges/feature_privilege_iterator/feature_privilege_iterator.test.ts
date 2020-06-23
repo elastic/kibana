@@ -140,7 +140,7 @@ describe('featurePrivilegeIterator', () => {
     const actualPrivileges = Array.from(
       featurePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
-        predicate: privilegeId => privilegeId === 'all',
+        predicate: (privilegeId) => privilegeId === 'all',
       })
     );
 

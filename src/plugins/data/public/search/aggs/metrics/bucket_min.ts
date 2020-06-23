@@ -49,7 +49,7 @@ export const getBucketMinMetricAgg = ({
     {
       name: METRIC_TYPES.MIN_BUCKET,
       title: minBucketTitle,
-      makeLabel: agg => makeNestedLabel(agg, overallMinLabel),
+      makeLabel: (agg) => makeNestedLabel(agg, overallMinLabel),
       subtype: siblingPipelineAggHelper.subtype,
       params: [...siblingPipelineAggHelper.params()],
       getFormat: siblingPipelineAggHelper.getFormat,

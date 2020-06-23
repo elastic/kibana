@@ -14,16 +14,16 @@ import { getNodeTypeClassLabel } from './get_node_type_class_label';
 import { i18n } from '@kbn/i18n';
 
 export function handleResponse(clusterState, shardStats, nodeUuid) {
-  return response => {
+  return (response) => {
     let nodeSummary = {};
     const nodeStatsHits = get(response, 'hits.hits', []);
-    const nodes = nodeStatsHits.map(hit => hit._source.source_node); // using [0] value because query results are sorted desc per timestamp
+    const nodes = nodeStatsHits.map((hit) => hit._source.source_node); // using [0] value because query results are sorted desc per timestamp
     const node = nodes[0] || getDefaultNodeFromId(nodeUuid);
     const sourceStats = get(response, 'hits.hits[0]._source.node_stats');
     const clusterNode = get(clusterState, ['nodes', nodeUuid]);
     const stats = {
       resolver: nodeUuid,
-      node_ids: nodes.map(node => node.uuid),
+      node_ids: nodes.map((node) => node.uuid),
       attributes: node.attributes,
       transport_address: node.transport_address,
       name: node.name,

@@ -41,7 +41,7 @@ class ColorRulesUI extends Component {
   }
 
   handleChange(item, name, cast = String) {
-    return e => {
+    return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = cast(_.get(e, '[0].value', _.get(e, 'target.value')));
@@ -54,7 +54,7 @@ class ColorRulesUI extends Component {
   renderRow(row, i, items) {
     const defaults = { value: 0 };
     const model = { ...defaults, ...row };
-    const handleAdd = collectionActions.handleAdd.bind(null, this.props);
+    const handleAdd = () => collectionActions.handleAdd(this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     const { intl } = this.props;
     const operatorOptions = [
@@ -87,12 +87,12 @@ class ColorRulesUI extends Component {
         value: 'lte',
       },
     ];
-    const handleColorChange = part => {
+    const handleColorChange = (part) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       handleChange(_.assign({}, model, part));
     };
     const htmlId = htmlIdGenerator(model.id);
-    const selectedOperatorOption = operatorOptions.find(option => {
+    const selectedOperatorOption = operatorOptions.find((option) => {
       return model.operator === option.value;
     });
 

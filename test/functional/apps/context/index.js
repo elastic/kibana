@@ -17,16 +17,16 @@
  * under the License.
  */
 
-export default function({ getService, getPageObjects, loadTestFile }) {
+export default function ({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common']);
   const kibanaServer = getService('kibanaServer');
 
-  describe('context app', function() {
+  describe('context app', function () {
     this.tags('ciGroup1');
 
-    before(async function() {
+    before(async function () {
       await browser.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');

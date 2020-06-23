@@ -23,7 +23,7 @@ import { last } from 'lodash';
 import { EuiFlexGroup } from '@elastic/eui';
 import { MultiValueRow } from './multi_value_row';
 
-export const PercentileRankValues = props => {
+export const PercentileRankValues = (props) => {
   const model = props.model || [];
   const { onChange, disableAdd, disableDelete, showOnlyLastRow } = props;
 

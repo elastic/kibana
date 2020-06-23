@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Paginate } from '../paginate';
 
-const getIcon = type => {
+const getIcon = (type) => {
   if (type === null) {
     return;
   }
@@ -36,9 +36,9 @@ const getIcon = type => {
   return <EuiIcon type={icon} color="subdued" />;
 };
 
-const getColumnName = col => (typeof col === 'string' ? col : col.name);
+const getColumnName = (col) => (typeof col === 'string' ? col : col.name);
 
-const getColumnType = col => col.type || null;
+const getColumnType = (col) => col.type || null;
 
 const getFormattedValue = (val, type) => {
   if (type === 'date') {
@@ -56,7 +56,7 @@ export const Datatable = ({ datatable, perPage, paginate, showHeader }) => (
             {!showHeader ? null : (
               <thead className="canvasDataTable__thead">
                 <tr className="canvasDataTable__tr">
-                  {datatable.columns.map(col => (
+                  {datatable.columns.map((col) => (
                     <th key={`header-${getColumnName(col)}`} className="canvasDataTable__th">
                       {getColumnName(col)}
                       &nbsp;
@@ -69,7 +69,7 @@ export const Datatable = ({ datatable, perPage, paginate, showHeader }) => (
             <tbody className="canvasDataTable__tbody">
               {rows.map((row, i) => (
                 <tr key={i} className="canvasDataTable__tr">
-                  {datatable.columns.map(col => (
+                  {datatable.columns.map((col) => (
                     <td key={`row-${i}-${getColumnName(col)}`} className="canvasDataTable__td">
                       {getFormattedValue(row[getColumnName(col)], getColumnType(col))}
                     </td>

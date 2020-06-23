@@ -23,7 +23,7 @@ import { useLinkProps } from '../../../hooks/use_link_props';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
 `;
 
 interface Props {
@@ -65,7 +65,7 @@ export const MetricDetail = withMetricPageProviders(
 
     const addNavItem = React.useCallback(
       (item: NavItem) => {
-        if (!sideNav.some(n => n.id === item.id)) {
+        if (!sideNav.some((n) => n.id === item.id)) {
           setSideNav([item, ...sideNav]);
         }
       },

@@ -14,17 +14,17 @@ const initialState = {
   selectedEditId: null,
 };
 
-const success = action => `${action}_SUCCESS`;
+const success = (action) => `${action}_SUCCESS`;
 
 const setActiveForIds = (ids, byId, active) => {
   const shallowCopyByIds = { ...byId };
-  ids.forEach(id => {
+  ids.forEach((id) => {
     shallowCopyByIds[id].active = active;
   });
   return shallowCopyByIds;
 };
 
-const parseAutoFollowPattern = autoFollowPattern => {
+const parseAutoFollowPattern = (autoFollowPattern) => {
   // Extract prefix and suffix from follow index pattern
   const { followIndexPatternPrefix, followIndexPatternSuffix } = getPrefixSuffixFromFollowPattern(
     autoFollowPattern.followIndexPattern
@@ -56,7 +56,7 @@ export const reducer = (state = initialState, action) => {
     case success(t.AUTO_FOLLOW_PATTERN_DELETE): {
       const byId = { ...state.byId };
       const { itemsDeleted } = action.payload;
-      itemsDeleted.forEach(id => delete byId[id]);
+      itemsDeleted.forEach((id) => delete byId[id]);
       return { ...state, byId };
     }
     case success(t.AUTO_FOLLOW_PATTERN_PAUSE): {

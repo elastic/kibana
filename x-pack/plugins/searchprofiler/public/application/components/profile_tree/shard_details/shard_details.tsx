@@ -34,7 +34,7 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
   const { relative, time } = shard;
 
   const [shardVisibility, setShardVisibility] = useState<boolean>(() =>
-    hasVisibleOperation(operations.map(op => op.treeRoot ?? op))
+    hasVisibleOperation(operations.map((op) => op.treeRoot ?? op))
   );
 
   return (

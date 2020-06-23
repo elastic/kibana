@@ -5,8 +5,8 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('fields service', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('fields service', function () {
     loadTestFile(require.resolve('./field_cardinality'));
     loadTestFile(require.resolve('./time_field_range'));
   });

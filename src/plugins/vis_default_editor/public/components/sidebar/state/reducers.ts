@@ -43,7 +43,7 @@ const createEditorStateReducer = ({
     case EditorStateActionTypes.ADD_NEW_AGG: {
       const { schema } = action.payload;
       const defaultConfig =
-        !state.data.aggs!.aggs.find(agg => agg.schema === schema.name) && schema.defaults
+        !state.data.aggs!.aggs.find((agg) => agg.schema === schema.name) && schema.defaults
           ? (schema as any).defaults.slice(0, schema.max)
           : { schema: schema.name };
       const aggConfig = state.data.aggs!.createAggConfig(defaultConfig, {
@@ -68,7 +68,7 @@ const createEditorStateReducer = ({
     case EditorStateActionTypes.CHANGE_AGG_TYPE: {
       const { aggId, value } = action.payload;
 
-      const newAggs = state.data.aggs!.aggs.map(agg => {
+      const newAggs = state.data.aggs!.aggs.map((agg) => {
         if (agg.id === aggId) {
           agg.type = value;
 
@@ -90,7 +90,7 @@ const createEditorStateReducer = ({
     case EditorStateActionTypes.SET_AGG_PARAM_VALUE: {
       const { aggId, paramName, value } = action.payload;
 
-      const newAggs = state.data.aggs!.aggs.map(agg => {
+      const newAggs = state.data.aggs!.aggs.map((agg) => {
         if (agg.id === aggId) {
           const parsedAgg = agg.toJSON();
 
@@ -131,7 +131,7 @@ const createEditorStateReducer = ({
       let isMetric = false;
       const newAggs = state.data.aggs!.aggs.filter(({ id, schema }) => {
         if (id === action.payload.aggId) {
-          const schemaDef = action.payload.schemas.find(s => s.name === schema);
+          const schemaDef = action.payload.schemas.find((s) => s.name === schema);
           if (schemaDef && schemaDef.group === AggGroupNames.Metrics) {
             isMetric = true;
           }
@@ -143,7 +143,7 @@ const createEditorStateReducer = ({
       });
 
       if (isMetric && getEnabledMetricAggsCount(newAggs) === 0) {
-        const aggToEnable = newAggs.find(agg => agg.schema === 'metric');
+        const aggToEnable = newAggs.find((agg) => agg.schema === 'metric');
 
         if (aggToEnable) {
           aggToEnable.enabled = true;
@@ -181,7 +181,7 @@ const createEditorStateReducer = ({
     case EditorStateActionTypes.TOGGLE_ENABLED_AGG: {
       const { aggId, enabled } = action.payload;
 
-      const newAggs = state.data.aggs!.aggs.map(agg => {
+      const newAggs = state.data.aggs!.aggs.map((agg) => {
         if (agg.id === aggId) {
           const parsedAgg = agg.toJSON();
 

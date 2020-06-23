@@ -31,15 +31,10 @@ import { PLUGIN } from '../../constants/plugin';
 
 interface AlertEditProps {
   initialAlert: Alert;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose(): void;
 }
 
-export const AlertEdit = ({
-  initialAlert,
-  editFlyoutVisible,
-  setEditFlyoutVisibility,
-}: AlertEditProps) => {
+export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
@@ -57,14 +52,10 @@ export const AlertEdit = ({
   } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
-    setEditFlyoutVisibility(false);
+    onClose();
     setAlert('alert', initialAlert);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setEditFlyoutVisibility]);
-
-  if (!editFlyoutVisible) {
-    return null;
-  }
+  }, [onClose]);
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
 
@@ -72,7 +63,7 @@ export const AlertEdit = ({
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const actionsErrors: Array<{
     errors: IErrorObject;
@@ -84,7 +75,7 @@ export const AlertEdit = ({
     actionsErrors.find(
       (errorObj: { errors: IErrorObject }) =>
         errorObj &&
-        !!Object.keys(errorObj.errors).find(errorKey => errorObj.errors[errorKey].length >= 1)
+        !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
     ) !== undefined;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
@@ -210,3 +201,6 @@ export const AlertEdit = ({
     </EuiPortal>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertEdit as default };

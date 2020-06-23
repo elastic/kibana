@@ -8,7 +8,7 @@ import { timeseriesResponse } from './mock_responses/timeseries_response';
 import {
   ApmTimeSeriesResponse,
   getTpmBuckets,
-  timeseriesTransformer
+  timeseriesTransformer,
 } from './transform';
 
 describe('timeseriesTransformer', () => {
@@ -16,17 +16,18 @@ describe('timeseriesTransformer', () => {
   beforeEach(async () => {
     res = await timeseriesTransformer({
       timeseriesResponse,
-      bucketSize: 12
+      bucketSize: 120,
+      durationAsMinutes: 10,
     });
   });
 
   it('should have correct order', () => {
-    expect(res.tpmBuckets.map(bucket => bucket.key)).toEqual([
+    expect(res.tpmBuckets.map((bucket) => bucket.key)).toEqual([
       'HTTP 2xx',
       'HTTP 3xx',
       'HTTP 4xx',
       'HTTP 5xx',
-      'A Custom Bucket (that should be last)'
+      'A Custom Bucket (that should be last)',
     ]);
   });
 
@@ -46,25 +47,25 @@ describe('getTpmBuckets', () => {
             {
               key_as_string: '',
               key: 0,
-              doc_count: 0
+              doc_count: 0,
             },
             {
               key_as_string: '',
               key: 1,
-              doc_count: 200
+              doc_count: 200,
             },
             {
               key_as_string: '',
               key: 2,
-              doc_count: 300
+              doc_count: 300,
             },
             {
               key_as_string: '',
               key: 3,
-              doc_count: 400
-            }
-          ]
-        }
+              doc_count: 400,
+            },
+          ],
+        },
       },
       {
         key: 'HTTP 5xx',
@@ -74,47 +75,55 @@ describe('getTpmBuckets', () => {
             {
               key_as_string: '',
               key: 0,
-              doc_count: 0
+              doc_count: 0,
             },
             {
               key_as_string: '',
               key: 1,
-              doc_count: 500
+              doc_count: 100,
             },
             {
               key_as_string: '',
               key: 2,
-              doc_count: 100
+              doc_count: 100,
             },
             {
               key_as_string: '',
               key: 3,
-              doc_count: 300
-            }
-          ]
-        }
-      }
+              doc_count: 300,
+            },
+          ],
+        },
+      },
     ];
-    const bucketSize = 10;
-    expect(getTpmBuckets(buckets as any, bucketSize)).toEqual([
+
+    expect(
+      getTpmBuckets({
+        transactionResultBuckets: buckets,
+        bucketSize: 120,
+        durationAsMinutes: 10,
+      })
+    ).toEqual([
       {
+        avg: 90,
         dataPoints: [
           { x: 0, y: 0 },
-          { x: 1, y: 1200 },
-          { x: 2, y: 1800 },
-          { x: 3, y: 2400 }
+          { x: 1, y: 100 },
+          { x: 2, y: 150 },
+          { x: 3, y: 200 },
         ],
-        key: 'HTTP 4xx'
+        key: 'HTTP 4xx',
       },
       {
+        avg: 50,
         dataPoints: [
           { x: 0, y: 0 },
-          { x: 1, y: 3000 },
-          { x: 2, y: 600 },
-          { x: 3, y: 1800 }
+          { x: 1, y: 50 },
+          { x: 2, y: 50 },
+          { x: 3, y: 150 },
         ],
-        key: 'HTTP 5xx'
-      }
+        key: 'HTTP 5xx',
+      },
     ]);
   });
 });

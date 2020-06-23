@@ -100,7 +100,7 @@ test('forwards http requests to https', async () => {
   await supertest(getServerListener(server))
     .get('/')
     .expect(302)
-    .then(res => {
+    .then((res) => {
       expect(res.header.location).toEqual(`https://${config.host}:${config.port}/`);
     });
 });

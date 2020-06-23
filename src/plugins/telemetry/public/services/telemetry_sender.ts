@@ -73,7 +73,7 @@ export class TelemetrySender {
       const clusters: string[] = [].concat(telemetryData);
       await Promise.all(
         clusters.map(
-          async cluster =>
+          async (cluster) =>
             await fetch(telemetryUrl, {
               method: 'POST',
               headers: {

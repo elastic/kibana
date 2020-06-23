@@ -24,11 +24,13 @@ import { UrlGeneratorInternal } from './url_generator_internal';
 import { UrlGeneratorContract } from './url_generator_contract';
 
 export interface UrlGeneratorsStart {
-  getUrlGenerator: (urlGeneratorId: UrlGeneratorId) => UrlGeneratorContract<UrlGeneratorId>;
+  getUrlGenerator: <T extends UrlGeneratorId>(urlGeneratorId: T) => UrlGeneratorContract<T>;
 }
 
 export interface UrlGeneratorsSetup {
-  registerUrlGenerator: <Id extends UrlGeneratorId>(generator: UrlGeneratorsDefinition<Id>) => void;
+  registerUrlGenerator: <Id extends UrlGeneratorId>(
+    generator: UrlGeneratorsDefinition<Id>
+  ) => UrlGeneratorContract<Id>;
 }
 
 export class UrlGeneratorsService implements Plugin<UrlGeneratorsSetup, UrlGeneratorsStart> {
@@ -43,10 +45,9 @@ export class UrlGeneratorsService implements Plugin<UrlGeneratorsSetup, UrlGener
       registerUrlGenerator: <Id extends UrlGeneratorId>(
         generatorOptions: UrlGeneratorsDefinition<Id>
       ) => {
-        this.urlGenerators.set(
-          generatorOptions.id,
-          new UrlGeneratorInternal<Id>(generatorOptions, this.getUrlGenerator)
-        );
+        const generator = new UrlGeneratorInternal<Id>(generatorOptions, this.getUrlGenerator);
+        this.urlGenerators.set(generatorOptions.id, generator);
+        return generator.getPublicContract();
       },
     };
     return setup;

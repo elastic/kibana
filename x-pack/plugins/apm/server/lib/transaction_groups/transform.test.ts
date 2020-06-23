@@ -14,7 +14,7 @@ describe('transactionGroupsTransformer', () => {
       transactionGroupsTransformer({
         response: transactionGroupsResponse,
         start: 100,
-        end: 2000
+        end: 2000,
       })
     ).toMatchSnapshot();
   });
@@ -29,17 +29,17 @@ describe('transactionGroupsTransformer', () => {
       sample: {
         hits: {
           total: 180,
-          hits: [{ _source: 'sample source' }]
-        }
-      }
+          hits: [{ _source: 'sample source' }],
+        },
+      },
     };
 
     const response = ({
       aggregations: {
         transaction_groups: {
-          buckets: [bucket]
-        }
-      }
+          buckets: [bucket],
+        },
+      },
     } as unknown) as ESResponse;
 
     expect(
@@ -51,8 +51,8 @@ describe('transactionGroupsTransformer', () => {
         name: 'POST /api/orders',
         p95: 320238.5,
         sample: 'sample source',
-        transactionsPerMinute: 542.713567839196
-      }
+        transactionsPerMinute: 542.713567839196,
+      },
     ]);
   });
 
@@ -63,20 +63,20 @@ describe('transactionGroupsTransformer', () => {
       avg: { value: 300000 },
       p95: { values: { '95.0': 320000 } },
       sum: { value: sum },
-      sample: { hits: { total: 180, hits: [{ _source: 'sample source' }] } }
+      sample: { hits: { total: 180, hits: [{ _source: 'sample source' }] } },
     });
 
     const response = ({
       aggregations: {
         transaction_groups: {
-          buckets: [getBucket(10), getBucket(20), getBucket(50)]
-        }
-      }
+          buckets: [getBucket(10), getBucket(20), getBucket(50)],
+        },
+      },
     } as unknown) as ESResponse;
 
     expect(
       transactionGroupsTransformer({ response, start: 100, end: 20000 }).map(
-        bucket => bucket.impact
+        (bucket) => bucket.impact
       )
     ).toEqual([100, 25, 0]);
   });

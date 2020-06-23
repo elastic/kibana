@@ -78,7 +78,7 @@ describe('#checkSavedObjectsPrivileges', () => {
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledTimes(1);
-      const spaceIds = mockSpacesService!.namespaceToSpaceId.mock.results.map(x => x.value);
+      const spaceIds = mockSpacesService!.namespaceToSpaceId.mock.results.map((x) => x.value);
       expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledWith(spaceIds, actions);
     });
   });

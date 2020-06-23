@@ -240,7 +240,7 @@ export class TelemetryCollectionManagerPlugin
       collection.licenseGetter(clustersDetails, statsCollectionConfig, context),
     ]);
 
-    return stats.map(stat => {
+    return stats.map((stat) => {
       const license = licenses[stat.cluster_uuid];
       return {
         ...(license ? { license } : {}),

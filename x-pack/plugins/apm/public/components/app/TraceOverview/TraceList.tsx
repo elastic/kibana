@@ -11,7 +11,7 @@ import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ITransactionGroup } from '../../../../server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
-import { convertTo } from '../../../utils/formatters';
+import { asMillisecondDuration } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
@@ -32,7 +32,7 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
   {
     field: 'name',
     name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
-      defaultMessage: 'Name'
+      defaultMessage: 'Name',
     }),
     width: '40%',
     sortable: true,
@@ -48,35 +48,31 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
           {name}
         </StyledTransactionLink>
       </EuiToolTip>
-    )
+    ),
   },
   {
     field: 'sample.service.name',
     name: i18n.translate(
       'xpack.apm.tracesTable.originatingServiceColumnLabel',
       {
-        defaultMessage: 'Originating service'
+        defaultMessage: 'Originating service',
       }
     ),
-    sortable: true
+    sortable: true,
   },
   {
     field: 'averageResponseTime',
     name: i18n.translate('xpack.apm.tracesTable.avgResponseTimeColumnLabel', {
-      defaultMessage: 'Avg. response time'
+      defaultMessage: 'Avg. response time',
     }),
     sortable: true,
     dataType: 'number',
-    render: (time: number) =>
-      convertTo({
-        unit: 'milliseconds',
-        microseconds: time
-      }).formatted
+    render: (time: number) => asMillisecondDuration(time),
   },
   {
     field: 'transactionsPerMinute',
     name: i18n.translate('xpack.apm.tracesTable.tracesPerMinuteColumnLabel', {
-      defaultMessage: 'Traces per minute'
+      defaultMessage: 'Traces per minute',
     }),
     sortable: true,
     dataType: 'number',
@@ -84,9 +80,9 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
       `${value.toLocaleString()} ${i18n.translate(
         'xpack.apm.tracesTable.tracesPerMinuteUnitLabel',
         {
-          defaultMessage: 'tpm'
+          defaultMessage: 'tpm',
         }
-      )}`
+      )}`,
   },
   {
     field: 'impact',
@@ -96,13 +92,13 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
           'xpack.apm.tracesTable.impactColumnDescription',
           {
             defaultMessage:
-              "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
+              "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute.",
           }
         )}
       >
         <>
           {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
-            defaultMessage: 'Impact'
+            defaultMessage: 'Impact',
           })}{' '}
           <EuiIcon
             size="s"
@@ -116,14 +112,14 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
     width: '20%',
     align: 'left',
     sortable: true,
-    render: (value: number) => <ImpactBar value={value} />
-  }
+    render: (value: number) => <ImpactBar value={value} />,
+  },
 ];
 
 const noItemsMessage = (
   <EmptyMessage
     heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
-      defaultMessage: 'No traces found for this query'
+      defaultMessage: 'No traces found for this query',
     })}
   />
 );

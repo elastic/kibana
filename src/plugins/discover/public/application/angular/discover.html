@@ -59,18 +59,7 @@
             fetch-error="fetchError"
           ></discover-fetch-error>
 
-          <div ng-hide="fetchError" class="dscOverlay">
-            <h2
-              i18n-id="discover.searchingTitle"
-              i18n-default-message="Searching"
-              class="euiTitle euiTitle--small"
-            ></h2>
-            <div class="euiSpacer euiSpacer--m"></div>
-            <div
-              class="euiLoadingSpinner euiLoadingSpinner--large"
-              data-test-subj="loadingSpinner"
-            ></div>
-          </div>
+          <loading-spinner ng-hide="fetchError" class="dscOverlay"></loading-spinner>
         </div>
 
         <div class="dscWrapper__content" ng-show="resultState === 'ready'">
@@ -101,45 +90,17 @@
               class="dscTimechart"
               ng-if="opts.timefield"
             >
-              <header class="dscTimechart__header">
-                <div class="small">
-                  <label
-                    for="dscResultsIntervalSelector"
-                    tooltip="{{::'discover.howToChangeTheTimeTooltip' | i18n: {defaultMessage: 'To change the time, click the calendar icon in the navigation bar'} }}"
-                  >
-                    {{toMoment(timeRange.from)}} - {{toMoment(timeRange.to)}}
-                  </label>
-
-                  &mdash;
-
-                  <span class="form-inline">
-                    <select
-                      id="dscResultsIntervalSelector"
-                      class="dscResults__interval form-control"
-                      ng-model="state.interval"
-                      ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
-                      ng-blur="toggleInterval()"
-                      data-test-subj="discoverIntervalSelect"
-                    >
-                    </select>
-                    <span ng-if="bucketInterval.scaled">
-                      <icon-tip
-                        content="getBucketIntervalToolTipText()"
-                        position="'top'"
-                      ></icon-tip>
-                      <span
-                        data-test-subj="discoverIntervalSelectScaledToDesc"
-                        i18n-id="discover.scaledToDescription"
-                        i18n-default-message="Scaled to {bucketIntervalDescription}"
-                        i18n-values="{
-                          bucketIntervalDescription: bucketInterval.description
-                        }"
-                      ></span>
-                    </span>
-                  </span>
-                </div>
-
-              </header>
+              <timechart-header 
+                from="toMoment(timeRange.from)"
+                to="toMoment(timeRange.to)" 
+                options="intervalOptions" 
+                on-change-interval="changeInterval" 
+                state-interval="state.interval"
+                show-scaled-info="bucketInterval.scaled"
+                bucket-interval-description="bucketInterval.description"
+                bucket-interval-scale="bucketInterval.scale"
+              >
+              </timechart-header>
 
               <discover-histogram
                 class="dscHistogram"

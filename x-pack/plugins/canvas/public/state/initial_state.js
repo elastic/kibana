@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import { platformService } from '../services';
 import { getDefaultWorkpad } from './defaults';
 
-export const getInitialState = path => {
+export const getInitialState = (path) => {
   const state = {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here

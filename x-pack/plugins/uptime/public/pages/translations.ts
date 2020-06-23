@@ -35,4 +35,11 @@ export const settings = {
   returnToOverviewLinkLabel: i18n.translate('xpack.uptime.settings.returnToOverviewLinkLabel', {
     defaultMessage: 'Return to overview',
   }),
+  mustBeNumber: i18n.translate('xpack.uptime.settings.blankNumberField.error', {
+    defaultMessage: 'Must be a number.',
+  }),
 };
+
+export const BLANK_STR = i18n.translate('xpack.uptime.settings.blank.error', {
+  defaultMessage: 'May not be blank.',
+});

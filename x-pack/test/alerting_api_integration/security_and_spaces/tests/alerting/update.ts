@@ -39,11 +39,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle update alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const updatedData = {
             name: 'bcd',
@@ -56,7 +56,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
           };
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(updatedData);
@@ -110,14 +110,16 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         it('should still be able to update when AAD is broken', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
+            .put(
+              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+            )
             .set('kbn-xsrf', 'foo')
             .send({
               attributes: {
@@ -137,7 +139,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
           };
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(updatedData);
@@ -191,14 +193,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't update alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix('other')}/api/alert/${createdAlert.id}`)
+            .put(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -238,14 +240,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         it('should handle update alert request appropriately when attempting to change alert type', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -287,7 +289,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         it('should handle update alert request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alert/1`)
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({});
@@ -319,7 +321,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         it(`should handle update alert request appropriately when alertTypeConfig isn't valid`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
@@ -330,10 +332,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -373,7 +375,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         it('should handle update alert request appropriately when interval schedule is wrong syntax', async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alert/1`)
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
@@ -411,7 +413,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         it('should handle updates to an alert schedule by rescheduling the underlying task', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
@@ -419,7 +421,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await retry.try(async () => {
             const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];
@@ -439,7 +441,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
           };
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(updatedData);

@@ -66,7 +66,7 @@ export class AnnotationsEditor extends Component {
   }
 
   handleChange(item, name) {
-    return e => {
+    return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
@@ -88,7 +88,7 @@ export class AnnotationsEditor extends Component {
       query_string: { query: '', language: getDefaultQueryLanguage() },
     };
     const model = { ...defaults, ...row };
-    const handleChange = part => {
+    const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
@@ -174,7 +174,7 @@ export class AnnotationsEditor extends Component {
                       language: model.query_string.language || getDefaultQueryLanguage(),
                       query: model.query_string.query || '',
                     }}
-                    onChange={query => this.handleQueryChange(model, query)}
+                    onChange={(query) => this.handleQueryChange(model, query)}
                     indexPatterns={[model.index_pattern]}
                   />
                 </EuiFormRow>

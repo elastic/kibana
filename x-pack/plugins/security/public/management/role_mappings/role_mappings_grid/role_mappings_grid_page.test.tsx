@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { CoreStart, ScopedHistory } from 'kibana/public';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { RoleMappingsGridPage } from '.';
 import { SectionLoading, PermissionDenied, NoCompatibleRealms } from '../components';
@@ -14,11 +15,19 @@ import { EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import { DocumentationLinksService } from '../documentation_links';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 
 describe('RoleMappingsGridPage', () => {
+  let history: ScopedHistory;
+  let coreStart: CoreStart;
+
+  beforeEach(() => {
+    history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+    coreStart = coreMock.createStart();
+  });
+
   it('renders an empty prompt when no role mappings exist', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([]);
@@ -34,6 +43,8 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -61,6 +72,8 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -96,6 +109,8 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -130,6 +145,8 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     await nextTick();
@@ -137,9 +154,7 @@ describe('RoleMappingsGridPage', () => {
 
     const links = findTestSubject(wrapper, 'roleMappingRoles').find(EuiLink);
     expect(links).toHaveLength(1);
-    expect(links.at(0).props()).toMatchObject({
-      href: '#/management/security/roles/edit/superuser',
-    });
+    expect(links.at(0).props().onClick).toBeDefined();
   });
 
   it('describes the number of mapped role templates', async () => {
@@ -164,6 +179,8 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     await nextTick();
@@ -202,6 +219,8 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     await nextTick();
@@ -263,6 +282,8 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     await nextTick();

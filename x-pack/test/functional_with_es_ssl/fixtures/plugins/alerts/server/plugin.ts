@@ -8,35 +8,36 @@ import { Plugin, CoreSetup } from 'kibana/server';
 import {
   PluginSetupContract as AlertingSetup,
   AlertType,
-} from '../../../../../../plugins/alerting/server';
+} from '../../../../../../plugins/alerts/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
 }
 
 export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerting }: AlertingExampleDeps) {
-    createNoopAlertType(alerting);
-    createAlwaysFiringAlertType(alerting);
+  public setup(core: CoreSetup, { alerts }: AlertingExampleDeps) {
+    createNoopAlertType(alerts);
+    createAlwaysFiringAlertType(alerts);
   }
 
   public start() {}
   public stop() {}
 }
 
-function createNoopAlertType(alerting: AlertingSetup) {
+function createNoopAlertType(alerts: AlertingSetup) {
   const noopAlertType: AlertType = {
     id: 'test.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
     async executor() {},
+    producer: 'alerting',
   };
-  alerting.registerType(noopAlertType);
+  alerts.registerType(noopAlertType);
 }
 
-function createAlwaysFiringAlertType(alerting: AlertingSetup) {
+function createAlwaysFiringAlertType(alerts: AlertingSetup) {
   // Alert types
   const alwaysFiringAlertType: any = {
     id: 'test.always-firing',
@@ -45,6 +46,7 @@ function createAlwaysFiringAlertType(alerting: AlertingSetup) {
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
+    producer: 'alerting',
     async executor(alertExecutorOptions: any) {
       const { services, state, params } = alertExecutorOptions;
 
@@ -61,5 +63,5 @@ function createAlwaysFiringAlertType(alerting: AlertingSetup) {
       };
     },
   };
-  alerting.registerType(alwaysFiringAlertType);
+  alerts.registerType(alwaysFiringAlertType);
 }

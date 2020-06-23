@@ -115,7 +115,7 @@ const handleCourierRequest = async ({
     },
   });
 
-  requestSearchSource.setField('aggs', function() {
+  requestSearchSource.setField('aggs', function () {
     return aggs.toDsl(metricsAtAllLevels);
   });
 
@@ -134,7 +134,7 @@ const handleCourierRequest = async ({
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
       return allTimeFields
-        .map(fieldName => getTime(indexPattern, timeRange, { fieldName }))
+        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName }))
         .filter(isRangeFilter);
     });
   }
@@ -282,7 +282,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
-    const searchSource = searchService.searchSource.create();
+    const searchSource = await searchService.searchSource.create();
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);

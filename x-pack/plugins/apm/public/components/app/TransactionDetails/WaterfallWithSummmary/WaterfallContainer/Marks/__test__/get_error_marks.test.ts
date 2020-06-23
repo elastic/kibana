@@ -20,14 +20,14 @@ describe('getErrorMarks', () => {
         docType: 'error',
         offset: 10,
         skew: 5,
-        doc: { error: { id: 1 }, service: { name: 'opbeans-java' } }
+        doc: { error: { id: 1 }, service: { name: 'opbeans-java' } },
       } as unknown,
       {
         docType: 'error',
         offset: 50,
         skew: 0,
-        doc: { error: { id: 2 }, service: { name: 'opbeans-node' } }
-      } as unknown
+        doc: { error: { id: 2 }, service: { name: 'opbeans-node' } },
+      } as unknown,
     ] as IWaterfallError[];
     expect(
       getErrorMarks(items, { 'opbeans-java': 'red', 'opbeans-node': 'blue' })
@@ -38,7 +38,7 @@ describe('getErrorMarks', () => {
         verticalLine: false,
         id: 1,
         error: { error: { id: 1 }, service: { name: 'opbeans-java' } },
-        serviceColor: 'red'
+        serviceColor: 'red',
       },
       {
         type: 'errorMark',
@@ -46,8 +46,8 @@ describe('getErrorMarks', () => {
         verticalLine: false,
         id: 2,
         error: { error: { id: 2 }, service: { name: 'opbeans-node' } },
-        serviceColor: 'blue'
-      }
+        serviceColor: 'blue',
+      },
     ]);
   });
 
@@ -57,14 +57,14 @@ describe('getErrorMarks', () => {
         docType: 'error',
         offset: 10,
         skew: 5,
-        doc: { error: { id: 1 }, service: { name: 'opbeans-java' } }
+        doc: { error: { id: 1 }, service: { name: 'opbeans-java' } },
       } as unknown,
       {
         docType: 'error',
         offset: 50,
         skew: 0,
-        doc: { error: { id: 2 }, service: { name: 'opbeans-node' } }
-      } as unknown
+        doc: { error: { id: 2 }, service: { name: 'opbeans-node' } },
+      } as unknown,
     ] as IWaterfallError[];
     expect(getErrorMarks(items, {})).toEqual([
       {
@@ -73,7 +73,7 @@ describe('getErrorMarks', () => {
         verticalLine: false,
         id: 1,
         error: { error: { id: 1 }, service: { name: 'opbeans-java' } },
-        serviceColor: undefined
+        serviceColor: undefined,
       },
       {
         type: 'errorMark',
@@ -81,8 +81,8 @@ describe('getErrorMarks', () => {
         verticalLine: false,
         id: 2,
         error: { error: { id: 2 }, service: { name: 'opbeans-node' } },
-        serviceColor: undefined
-      }
+        serviceColor: undefined,
+      },
     ]);
   });
 });

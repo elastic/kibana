@@ -35,7 +35,7 @@ describe('annotation_service', () => {
   });
 
   describe('deleteAnnotation()', () => {
-    it('should delete annotation', async done => {
+    it('should delete annotation', async (done) => {
       const { deleteAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -56,7 +56,7 @@ describe('annotation_service', () => {
   });
 
   describe('getAnnotation()', () => {
-    it('should get annotations for specific job', async done => {
+    it('should get annotations for specific job', async (done) => {
       const { getAnnotations } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -104,7 +104,7 @@ describe('annotation_service', () => {
   });
 
   describe('indexAnnotation()', () => {
-    it('should index annotation', async done => {
+    it('should index annotation', async (done) => {
       const { indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -132,7 +132,7 @@ describe('annotation_service', () => {
       done();
     });
 
-    it('should remove ._id and .key before updating annotation', async done => {
+    it('should remove ._id and .key before updating annotation', async (done) => {
       const { indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -164,7 +164,7 @@ describe('annotation_service', () => {
       done();
     });
 
-    it('should update annotation text and the username for modified_username', async done => {
+    it('should update annotation text and the username for modified_username', async (done) => {
       const { getAnnotations, indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 

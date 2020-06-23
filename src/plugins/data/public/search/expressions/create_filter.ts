@@ -27,16 +27,16 @@ const getOtherBucketFilterTerms = (table: TabbedTable, columnIndex: number, rowI
   }
 
   // get only rows where cell value matches current row for all the fields before columnIndex
-  const rows = table.rows.filter(row => {
+  const rows = table.rows.filter((row) => {
     return table.columns.every((column, i) => {
       return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
     });
   });
-  const terms = rows.map(row => row[table.columns[columnIndex].id]);
+  const terms = rows.map((row) => row[table.columns[columnIndex].id]);
 
   return [
     ...new Set(
-      terms.filter(term => {
+      terms.filter((term) => {
         const notOther = term !== '__other__';
         const notMissing = term !== '__missing__';
         return notOther && notMissing;

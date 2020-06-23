@@ -126,41 +126,6 @@ export function registerMyPluginUsageCollector(
 }
 ```
 
-### Migrating to NP from Legacy Plugins
-
-Pass `usageCollection` to the setup NP plugin setup function under plugins. Inside the `setup` function call the `registerCollector` like what you'd do in the NP example above.
-
-```js
-// index.js
-export const myPlugin = (kibana: any) => {
-  return new kibana.Plugin({
-    init: async function (server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      const plugins = {
-        usageCollection,
-      };
-      plugin(initializerContext).setup(core, plugins);
-    }
-  });
-}
-```
-
-### Legacy Plugins
-
-Typically, a plugin will create the collector object and register it with the Telemetry service from the `init` method of the plugin definition, or a helper module called from `init`.
-
-```js
-// index.js
-export const myPlugin = (kibana: any) => {
-  return new kibana.Plugin({
-    init: async function (server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      registerMyPluginUsageCollector(usageCollection);
-    }
-  });
-}
-```
-
 ## Update the telemetry payload and telemetry cluster field mappings
 
 There is a module in the telemetry service that creates the payload of data that gets sent up to the telemetry cluster.
@@ -238,15 +203,6 @@ To track a user interaction, use the `reportUiStats` method exposed by the plugi
       }
     }
     ```
-
-Alternatively, in the Legacy world you can still import the `createUiStatsReporter` helper function from UI Metric app:
-
-```js
-import { createUiStatsReporter, METRIC_TYPE } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
-const trackMetric = createUiStatsReporter(`<AppName>`);
-trackMetric(METRIC_TYPE.CLICK, `<EventName>`);
-trackMetric('click', `<EventName>`);
-```
 
 Metric Types:
 

@@ -51,7 +51,7 @@ export function createTagCloudVisualization({ colors }) {
       this._vis = vis;
       this._truncated = false;
       this._tagCloud = new TagCloud(cloudContainer, colorScale);
-      this._tagCloud.on('select', event => {
+      this._tagCloud.on('select', (event) => {
         if (!this._visParams.bucket) {
           return;
         }

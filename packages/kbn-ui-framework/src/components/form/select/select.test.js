@@ -77,7 +77,7 @@ describe('KuiSelect', () => {
     });
 
     describe('size', () => {
-      SELECT_SIZE.forEach(size => {
+      SELECT_SIZE.forEach((size) => {
         test(`renders ${size}`, () => {
           const component = <KuiSelect size={size} onChange={() => {}} />;
 

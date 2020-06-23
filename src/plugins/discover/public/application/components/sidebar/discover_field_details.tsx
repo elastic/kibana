@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
 import { Bucket, FieldDetails } from './types';
+import { getServices } from '../../../kibana_services';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 
 interface DiscoverFieldDetailsProps {
@@ -79,7 +80,11 @@ export function DiscoverFieldDetails({
         <>
           <EuiSpacer size={'s'} />
           <EuiLink
-            href={details.visualizeUrl}
+            onClick={() => {
+              getServices().core.application.navigateToApp(details.visualizeUrl.app, {
+                path: details.visualizeUrl.path,
+              });
+            }}
             className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
             data-test-subj={`fieldVisualize-${field.name}`}
           >

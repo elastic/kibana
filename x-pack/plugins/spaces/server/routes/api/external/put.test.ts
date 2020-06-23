@@ -11,7 +11,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
   loggingServiceMock,
   httpServiceMock,
@@ -31,7 +31,7 @@ describe('PUT /api/spaces/space', () => {
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
     const coreStart = coreMock.createStart();
 
@@ -44,7 +44,7 @@ describe('PUT /api/spaces/space', () => {
       http: (httpService as unknown) as CoreSetup['http'],
       getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 

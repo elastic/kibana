@@ -19,7 +19,7 @@ import { createCallApmApi } from '../../../../../services/rest/createCallApmApi'
 import { AgentConfigurationCreateEdit } from './index';
 import {
   ApmPluginContext,
-  ApmPluginContextValue
+  ApmPluginContextValue,
 } from '../../../../../context/ApmPluginContext';
 
 storiesOf(
@@ -35,8 +35,10 @@ storiesOf(
 
     const contextMock = {
       core: {
-        notifications: { toasts: { addWarning: () => {}, addDanger: () => {} } }
-      }
+        notifications: {
+          toasts: { addWarning: () => {}, addDanger: () => {} },
+        },
+      },
     };
     return (
       <ApmPluginContext.Provider
@@ -48,8 +50,8 @@ storiesOf(
             status: FETCH_STATUS.SUCCESS,
             data: {
               service: { name: 'opbeans-node', environment: 'production' },
-              settings: {}
-            } as AgentConfiguration
+              settings: {},
+            } as AgentConfiguration,
           }}
         />
       </ApmPluginContext.Provider>
@@ -57,7 +59,7 @@ storiesOf(
   },
   {
     info: {
-      source: false
-    }
+      source: false,
+    },
   }
 );

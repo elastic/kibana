@@ -21,6 +21,9 @@ import {
 import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
+import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -48,6 +51,11 @@ function getDefaultProps() {
     query: { query: '', language: 'lucene' },
     filters: [],
     core: coreMock.createSetup(),
+    plugins: {
+      uiActions: uiActionsPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
+    },
   };
 }
 
@@ -332,7 +340,7 @@ describe('editor_frame', () => {
               testDatasource: {
                 ...mockDatasource,
                 initialize: () =>
-                  new Promise(resolve => {
+                  new Promise((resolve) => {
                     databaseInitialized = resolve;
                   }),
               },
@@ -466,9 +474,11 @@ describe('editor_frame', () => {
     it('should render individual expression for each given layer', async () => {
       mockDatasource.toExpression.mockReturnValue('datasource');
       mockDatasource2.toExpression.mockImplementation((_state, layerId) => `datasource_${layerId}`);
-      mockDatasource.initialize.mockImplementation(initialState => Promise.resolve(initialState));
+      mockDatasource.initialize.mockImplementation((initialState) => Promise.resolve(initialState));
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mockDatasource2.initialize.mockImplementation(initialState => Promise.resolve(initialState));
+      mockDatasource2.initialize.mockImplementation((initialState) =>
+        Promise.resolve(initialState)
+      );
       mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
 
       await act(async () => {
@@ -764,9 +774,11 @@ describe('editor_frame', () => {
     });
 
     it('should create a separate datasource public api for each layer', async () => {
-      mockDatasource.initialize.mockImplementation(initialState => Promise.resolve(initialState));
+      mockDatasource.initialize.mockImplementation((initialState) => Promise.resolve(initialState));
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mockDatasource2.initialize.mockImplementation(initialState => Promise.resolve(initialState));
+      mockDatasource2.initialize.mockImplementation((initialState) =>
+        Promise.resolve(initialState)
+      );
       mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
 
       const datasource1State = { datasource1: '' };
@@ -864,10 +876,7 @@ describe('editor_frame', () => {
 
     function switchTo(subType: string) {
       act(() => {
-        instance
-          .find('[data-test-subj="lnsChartSwitchPopover"]')
-          .last()
-          .simulate('click');
+        instance.find('[data-test-subj="lnsChartSwitchPopover"]').last().simulate('click');
       });
 
       instance.update();
@@ -1141,7 +1150,7 @@ describe('editor_frame', () => {
         instance
           .find('[data-test-subj="lnsSuggestion"]')
           .find(EuiPanel)
-          .map(el => el.parents(EuiToolTip).prop('content'))
+          .map((el) => el.parents(EuiToolTip).prop('content'))
       ).toEqual([
         'Current',
         'Suggestion1',
@@ -1192,10 +1201,7 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance
-          .find('[data-test-subj="lnsSuggestion"]')
-          .at(2)
-          .simulate('click');
+        instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
       expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
@@ -1258,10 +1264,7 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance
-          .find('[data-test-subj="lnsWorkspace"]')
-          .last()
-          .simulate('drop');
+        instance.find('[data-test-subj="lnsWorkspace"]').last().simulate('drop');
       });
 
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
@@ -1332,10 +1335,7 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance
-          .find(DragDrop)
-          .filter('[data-test-subj="mockVisA"]')
-          .prop('onDrop')!({
+        instance.find(DragDrop).filter('[data-test-subj="mockVisA"]').prop('onDrop')!({
           indexPatternId: '1',
           field: {},
         });
@@ -1431,10 +1431,7 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance
-          .find(DragDrop)
-          .filter('[data-test-subj="lnsWorkspace"]')
-          .prop('onDrop')!({
+        instance.find(DragDrop).filter('[data-test-subj="lnsWorkspace"]').prop('onDrop')!({
           indexPatternId: '1',
           field: {},
         });
@@ -1456,7 +1453,7 @@ describe('editor_frame', () => {
       const onChange = jest.fn();
 
       mockDatasource.initialize.mockReturnValue(
-        new Promise(resolve => {
+        new Promise((resolve) => {
           resolver = resolve;
         })
       );

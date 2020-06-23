@@ -59,7 +59,7 @@ export class GuideSection extends React.Component<Props, State> {
     }
 
     if (props.codeSections) {
-      props.codeSections.forEach(section => {
+      props.codeSections.forEach((section) => {
         this.tabs.push({
           name: section.title,
           displayName: section.title,
@@ -79,7 +79,7 @@ export class GuideSection extends React.Component<Props, State> {
   };
 
   renderTabs() {
-    return this.tabs.map(tab => (
+    return this.tabs.map((tab) => (
       <EuiTab
         onClick={() => this.onSelectedTabChanged(tab.name)}
         isSelected={tab.name === this.state.selectedTab}
@@ -98,7 +98,7 @@ export class GuideSection extends React.Component<Props, State> {
     if (!this.props.codeSections) {
       return undefined;
     }
-    const section = this.props.codeSections.find(s => s.title === this.state.selectedTab);
+    const section = this.props.codeSections.find((s) => s.title === this.state.selectedTab);
 
     if (!section) {
       throw new Error('No section named ' + this.state.selectedTab);

@@ -51,7 +51,7 @@ export function getUiMetricsForPhases(phases: any): any {
         };
 
         // We only care about whether the user has interacted with the priority of *any* phase at all.
-        return [PHASE_HOT, PHASE_WARM, PHASE_COLD].some(phase => {
+        return [PHASE_HOT, PHASE_WARM, PHASE_COLD].some((phase) => {
           // If the priority is different than the default, we'll consider it a user interaction,
           // even if the user has set it to undefined.
           return (

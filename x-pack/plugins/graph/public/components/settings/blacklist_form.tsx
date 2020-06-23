@@ -48,7 +48,7 @@ export function BlacklistForm({
       {blacklistedNodes && unblacklistNode && blacklistedNodes.length > 0 && (
         <>
           <EuiListGroup bordered maxWidth={false}>
-            {blacklistedNodes.map(node => (
+            {blacklistedNodes.map((node) => (
               <EuiListGroupItem
                 icon={<LegacyIcon icon={node.icon} asListIcon />}
                 key={getListKey(node)}
@@ -77,7 +77,7 @@ export function BlacklistForm({
             size="s"
             fill
             onClick={() => {
-              blacklistedNodes.forEach(node => {
+              blacklistedNodes.forEach((node) => {
                 unblacklistNode(node);
               });
             }}

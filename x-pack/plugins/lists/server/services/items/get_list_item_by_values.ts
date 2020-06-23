@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { APICaller } from 'kibana/server';
 
 import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
@@ -25,7 +24,7 @@ export const getListItemByValues = async ({
   type,
   value,
 }: GetListItemByValuesOptions): Promise<ListItemArraySchema> => {
-  const response: SearchResponse<SearchEsListItemSchema> = await callCluster('search', {
+  const response = await callCluster<SearchEsListItemSchema>('search', {
     body: {
       query: {
         bool: {

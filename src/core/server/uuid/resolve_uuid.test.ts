@@ -68,7 +68,7 @@ const mockWriteFile = (error?: object) => {
 
 const getConfigService = (serverUuid: string | undefined) => {
   const configService = configServiceMock.create();
-  configService.atPath.mockImplementation(path => {
+  configService.atPath.mockImplementation((path) => {
     if (path === 'path') {
       return new BehaviorSubject({
         data: 'data-folder',

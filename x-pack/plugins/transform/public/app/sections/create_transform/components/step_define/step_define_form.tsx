@@ -36,7 +36,7 @@ import {
   PivotGroupByDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
-  PIVOT_SUPPORTED_AGGS,
+  PivotAggsConfig,
 } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
@@ -53,6 +53,7 @@ import { SourceSearchBar } from '../source_search_bar';
 
 import { StepDefineExposedState } from './common';
 import { useStepDefineForm } from './hooks/use_step_define_form';
+import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
@@ -60,7 +61,7 @@ export interface StepDefineFormProps {
   searchItems: SearchItems;
 }
 
-export const StepDefineForm: FC<StepDefineFormProps> = React.memo(props => {
+export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
   const { indexPattern } = searchItems;
 
@@ -133,7 +134,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo(props => {
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivot !== undefined && pivot.group_by !== undefined) {
-      Object.entries(pivot.group_by).forEach(d => {
+      Object.entries(pivot.group_by).forEach((d) => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotGroupByDict;
         const aggConfigKeys = Object.keys(aggConfig);
@@ -150,17 +151,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo(props => {
 
     const newAggList: PivotAggsConfigDict = {};
     if (pivot !== undefined && pivot.aggregations !== undefined) {
-      Object.entries(pivot.aggregations).forEach(d => {
+      Object.entries(pivot.aggregations).forEach((d) => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotAggDict;
-        const aggConfigKeys = Object.keys(aggConfig);
-        const agg = aggConfigKeys[0] as PIVOT_SUPPORTED_AGGS;
-        newAggList[aggName] = {
-          ...aggConfig[agg],
-          agg,
-          aggName,
-          dropDownName: '',
-        };
+
+        newAggList[aggName] = getAggConfigFromEsAgg(aggConfig, aggName) as PivotAggsConfig;
       });
     }
     stepDefineForm.pivotConfig.actions.setAggList(newAggList);

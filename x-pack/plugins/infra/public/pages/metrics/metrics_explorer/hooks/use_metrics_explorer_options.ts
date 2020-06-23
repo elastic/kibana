@@ -37,10 +37,11 @@ export interface MetricsExplorerChartOptions {
 export interface MetricsExplorerOptions {
   metrics: MetricsExplorerOptionsMetric[];
   limit?: number;
-  groupBy?: string;
+  groupBy?: string | string[];
   filterQuery?: string;
   aggregation: MetricsExplorerAggregation;
   forceInterval?: boolean;
+  dropLastBucket?: boolean;
 }
 
 export interface MetricsExplorerTimeOptions {

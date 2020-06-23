@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import { ActionType, ExecutorType } from '../types';
 
-const executor: ExecutorType = async options => {
+const executor: ExecutorType = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 

@@ -67,9 +67,7 @@ describe('get_logstash_info', () => {
           {
             _source: {
               logstash_stats: {
-                timestamp: moment()
-                  .subtract(11, 'minutes')
-                  .format(),
+                timestamp: moment().subtract(11, 'minutes').format(),
                 logstash: {
                   host: 'myhost',
                 },
@@ -115,9 +113,7 @@ describe('get_logstash_info', () => {
           {
             _source: {
               logstash_stats: {
-                timestamp: moment()
-                  .subtract(11, 'minutes')
-                  .format(),
+                timestamp: moment().subtract(11, 'minutes').format(),
                 logstash: {
                   host: 'myhost',
                 },

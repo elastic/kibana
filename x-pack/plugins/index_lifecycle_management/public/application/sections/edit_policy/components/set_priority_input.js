@@ -11,7 +11,7 @@ import { PHASE_INDEX_PRIORITY } from '../../../constants';
 import { LearnMoreLink, OptionalLabel } from '../../components';
 import { ErrableFormRow } from '../form_errors';
 
-export const SetPriorityInput = props => {
+export const SetPriorityInput = (props) => {
   const { errors, phaseData, phase, setPhaseData, isShowingErrors } = props;
 
   return (
@@ -55,7 +55,7 @@ export const SetPriorityInput = props => {
         <EuiFieldNumber
           id={`${phase}-${PHASE_INDEX_PRIORITY}`}
           value={phaseData[PHASE_INDEX_PRIORITY]}
-          onChange={e => {
+          onChange={(e) => {
             setPhaseData(PHASE_INDEX_PRIORITY, e.target.value);
           }}
           min={0}

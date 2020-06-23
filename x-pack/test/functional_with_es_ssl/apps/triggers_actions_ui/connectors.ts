@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
 
-  describe('Connectors', function() {
+  describe('Connectors', function () {
     before(async () => {
       await alerting.actions.createAction({
         name: `slack-${Date.now()}`,
@@ -189,6 +189,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       expect(await testSubjects.exists('deleteConnector')).to.be(false);
       expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
+
+      const checkboxSelectRow = await testSubjects.find('checkboxSelectRow-my-server-log');
+      expect(await checkboxSelectRow.getAttribute('disabled')).to.be('true');
     });
 
     it('should not be able to edit a preconfigured connector', async () => {

@@ -46,8 +46,8 @@ VisPickerItem.propTypes = {
   selected: PropTypes.bool,
 };
 
-export const VisPicker = injectI18n(function(props) {
-  const handleChange = type => {
+export const VisPicker = injectI18n(function (props) {
+  const handleChange = (type) => {
     props.onChange({ type });
   };
 
@@ -89,7 +89,7 @@ export const VisPicker = injectI18n(function(props) {
         defaultMessage: 'Table',
       }),
     },
-  ].map(item => {
+  ].map((item) => {
     return (
       <VisPickerItem
         key={item.type}

@@ -9,18 +9,18 @@ import { createStream } from './agent';
 describe('createStream', () => {
   it('should work', () => {
     const streamTemplate = `
-    input: log
-    paths:
-    {{#each paths}}
-      - {{this}}
-    {{/each}}
-    exclude_files: [".gz$"]
-    processors:
-      - add_locale: ~
-    password: {{password}}
-    {{#if password}}
-    hidden_password: {{password}}
-    {{/if}}
+input: log
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+exclude_files: [".gz$"]
+processors:
+  - add_locale: ~
+password: {{password}}
+{{#if password}}
+hidden_password: {{password}}
+{{/if}}
       `;
     const vars = {
       paths: { value: ['/usr/local/var/log/nginx/access.log'] },
@@ -39,13 +39,16 @@ describe('createStream', () => {
 
   it('should support yaml values', () => {
     const streamTemplate = `
-    input: redis/metrics
-    metricsets: ["key"]
-    test: null
-    password: {{password}}
-    {{#if key.patterns}}
-    key.patterns: {{key.patterns}}
-    {{/if}}
+input: redis/metrics
+metricsets: ["key"]
+test: null
+password: {{password}}
+{{custom}}
+custom: {{ custom }}
+{{#if key.patterns}}
+key.patterns: {{key.patterns}}
+{{/if}}
+{{ testEmpty }}
       `;
     const vars = {
       'key.patterns': {
@@ -53,6 +56,12 @@ describe('createStream', () => {
         value: `
         - limit: 20
           pattern: '*'
+        `,
+      },
+      custom: {
+        type: 'yaml',
+        value: `
+foo: bar
         `,
       },
       password: { type: 'password', value: '' },
@@ -70,6 +79,26 @@ describe('createStream', () => {
         },
       ],
       password: '',
+      foo: 'bar',
+      custom: { foo: 'bar' },
+    });
+  });
+
+  it('should support optional yaml values at root level', () => {
+    const streamTemplate = `
+input: logs
+{{custom}}
+    `;
+    const vars = {
+      custom: {
+        type: 'yaml',
+        value: null,
+      },
+    };
+
+    const output = createStream(vars, streamTemplate);
+    expect(output).toEqual({
+      input: 'logs',
     });
   });
 });

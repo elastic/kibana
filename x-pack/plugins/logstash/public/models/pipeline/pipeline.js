@@ -89,7 +89,7 @@ export class Pipeline {
     });
   }
 
-  isEqualTo = otherPipeline => {
+  isEqualTo = (otherPipeline) => {
     // We need to create a POJO copies because isEqual would return false
     // because of property getters
     const cleanPipeline = {

@@ -20,9 +20,9 @@
 }
 
 .spcSpaceSelector__logo {
-  margin-bottom: $euiSizeXL;
   @include kibanaCircleLogo;
   @include euiBottomShadowMedium;
+  margin-bottom: $euiSizeXL;
 }
 
 .spcSpaceSelector__searchHolder {

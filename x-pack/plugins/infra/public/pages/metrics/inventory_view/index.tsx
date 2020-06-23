@@ -36,8 +36,8 @@ export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
   const tutorialLinkProps = useLinkProps({
-    app: 'kibana',
-    hash: '/home/tutorial_directory/metrics',
+    app: 'home',
+    hash: '/tutorial_directory/metrics',
   });
 
   return (

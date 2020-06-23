@@ -1,5 +1,5 @@
 [[settings]]
-== Configuring {kib}
+== Configure {kib}
 
 The {kib} server reads properties from the `kibana.yml` file on startup. The
 location of this file differs depending on how you installed {kib}. For example,
@@ -216,7 +216,9 @@ on the {kib} index at startup. {kib} users still need to authenticate with
   | Enables use of interpreter in Visualize. *Default: `true`*
 
 | `kibana.defaultAppId:`
- | The default application to load. *Default: `"home"`*
+ | *deprecated* This setting is deprecated and will get removed in Kibana 8.0.
+Please use the `defaultRoute` advanced setting instead.
+The default application to load. *Default: `"home"`*
 
 | `kibana.index:`
  | {kib} uses an index in {es} to store saved searches, visualizations, and
@@ -225,11 +227,11 @@ If you configure a custom index, the name must be lowercase, and conform to the
 {es} {ref}/indices-create-index.html[index name limitations].
 *Default: `".kibana"`*
 
-| `kibana.autocompleteTimeout:`
+| `kibana.autocompleteTimeout:` {ess-icon}
  | Time in milliseconds to wait for autocomplete suggestions from {es}.
 This value must be a whole number greater than zero. *Default: `"1000"`*
 
-| `kibana.autocompleteTerminateAfter:`
+| `kibana.autocompleteTerminateAfter:` {ess-icon}
  | Maximum number of documents loaded by each shard to generate autocomplete
 suggestions. This value must be a whole number greater than zero.
 *Default: `"100000"`*
@@ -300,11 +302,11 @@ suppress all logging output. *Default: `false`*
 (for example, `America/Los_Angeles`) to log events using that timezone. For a
 list of timezones, refer to https://en.wikipedia.org/wiki/List_of_tz_database_time_zones. *Default: `UTC`*
 
-| [[logging-verbose]] `logging.verbose:`
+| [[logging-verbose]] `logging.verbose:` {ece-icon}
  | Set to `true` to log all events, including system usage information and all
-requests. Supported on {ece}. *Default: `false`*
+requests. *Default: `false`*
 
-| `map.includeElasticMapsService:`
+| `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
 When `includeElasticMapsService` is turned off, only the vector layers configured by `map.regionmap`
 and the tile layer configured by `map.tilemap.url` are available in <<maps, Maps>>. *Default: `true`*
@@ -313,9 +315,9 @@ and the tile layer configured by `map.tilemap.url` are available in <<maps, Maps
  | Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
 requests through the {kib} server. *Default: `false`*
 
-| [[regionmap-settings]] `map.regionmap:`
+| [[regionmap-settings]] `map.regionmap:` {ess-icon} {ece-icon}
  | Specifies additional vector layers for
-use in <<maps, Maps>> visualizations. Supported on {ece}. Each layer
+use in <<maps, Maps>> visualizations. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
 https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system (ESPG:4326)]
@@ -343,20 +345,19 @@ map.regionmap:
 [cols="2*<"]
 |===
 
-| [[regionmap-ES-map]] `map.includeElasticMapsService:`
+| [[regionmap-ES-map]] `map.includeElasticMapsService:` {ece-icon}
  | Turns on or off whether layers from the Elastic Maps Service should be included in the vector
-layer option list. Supported on {ece}. By turning this off,
+layer option list. By turning this off,
 only the layers that are configured here will be included. The default is `true`.
 This also affects whether tile-service from the Elastic Maps Service will be available.
 
-| [[regionmap-attribution]] `map.regionmap.layers[].attribution:`
+| [[regionmap-attribution]] `map.regionmap.layers[].attribution:` {ess-icon} {ece-icon}
  | Optional. References the originating source of the geojson file.
-Supported on {ece}.
 
-| [[regionmap-fields]] `map.regionmap.layers[].fields[]:`
+| [[regionmap-fields]] `map.regionmap.layers[].fields[]:` {ess-icon} {ece-icon}
  | Mandatory. Each layer
 can contain multiple fields to indicate what properties from the geojson
-features you wish to expose. Supported on {ece}. The following shows how to define multiple
+features you wish to expose. The following shows how to define multiple
 properties:
 
 |===
@@ -379,44 +380,44 @@ map.regionmap:
 [cols="2*<"]
 |===
 
-| [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:`
+| [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:` {ess-icon} {ece-icon}
  | Mandatory. The human readable text that is shown under the Options tab when
-building the Region Map visualization. Supported on {ece}.
+building the Region Map visualization.
 
-| [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:`
+| [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:` {ess-icon} {ece-icon}
  | Mandatory.
 This value is used to do an inner-join between the document stored in
 {es} and the geojson file. For example, if the field in the geojson is
 called `Location` and has city names, there must be a field in {es}
 that holds the same values that {kib} can then use to lookup for the geoshape
-data. Supported on {ece}.
+data.
 
-| [[regionmap-name]] `map.regionmap.layers[].name:`
+| [[regionmap-name]] `map.regionmap.layers[].name:` {ess-icon} {ece-icon}
  | Mandatory. A description of
-the map being provided. Supported on {ece}.
+the map being provided.
 
-| [[regionmap-url]] `map.regionmap.layers[].url:`
+| [[regionmap-url]] `map.regionmap.layers[].url:` {ess-icon} {ece-icon}
  | Mandatory. The location of the
-geojson file as provided by a webserver. Supported on {ece}.
+geojson file as provided by a webserver.
 
-| [[tilemap-settings]] `map.tilemap.options.attribution:`
- | The map attribution string. Supported on {ece}.
+| [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon} {ece-icon}
+ | The map attribution string.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*
 
-| [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:`
- | The maximum zoom level. Supported on {ece}. *Default: `10`*
+| [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon} {ece-icon}
+ | The maximum zoom level. *Default: `10`*
 
-| [[tilemap-min-zoom]] `map.tilemap.options.minZoom:`
- | The minimum zoom level. Supported on {ece}. *Default: `1`*
+| [[tilemap-min-zoom]] `map.tilemap.options.minZoom:` {ess-icon} {ece-icon}
+ | The minimum zoom level. *Default: `1`*
 
-| [[tilemap-subdomains]] `map.tilemap.options.subdomains:`
+| [[tilemap-subdomains]] `map.tilemap.options.subdomains:` {ess-icon} {ece-icon}
  | An array of subdomains
 used by the tile service. Specify the position of the subdomain the URL with
-the token `{s}`. Supported on {ece}.
+the token `{s}`.
 
-| [[tilemap-url]] `map.tilemap.url:`
+| [[tilemap-url]] `map.tilemap.url:` {ess-icon} {ece-icon}
  | The URL to the tileservice that {kib} uses
-to display map tiles in tilemap visualizations. Supported on {ece}. By default,
+to display map tiles in tilemap visualizations. By default,
 {kib} reads this URL from an external metadata service, but users can
 override this parameter to use their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
@@ -451,7 +452,7 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header.
 This setting may not be used when `server.compression.enabled` is set to `false`. *Default: `none`*
 
-| `server.customResponseHeaders:`
+| `server.customResponseHeaders:` {ess-icon}
  | Header names and values to
 send on all responses to the client from the {kib} server. *Default: `{}`*
 
@@ -610,7 +611,7 @@ us improve your user experience. Your data is never shared with anyone. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through *Advanced Settings*. *Default: `true`*
 
-| `vis_type_vega.enableExternalUrls:`
+| `vis_type_vega.enableExternalUrls:` {ess-icon}
  | Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
@@ -622,23 +623,24 @@ disable the License Management UI. *Default: `true`*
  | Set this value to false to disable the
 Rollup UI. *Default: true*
 
-| `i18n.locale`
+| `i18n.locale` {ess-icon}
  | Set this value to change the {kib} interface language.
 Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 
 |===
 
-include::{docdir}/settings/alert-action-settings.asciidoc[]
-include::{docdir}/settings/apm-settings.asciidoc[]
-include::{docdir}/settings/dev-settings.asciidoc[]
-include::{docdir}/settings/graph-settings.asciidoc[]
-include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]
-include::{docdir}/settings/i18n-settings.asciidoc[]
-include::{docdir}/settings/logs-ui-settings.asciidoc[]
-include::{docdir}/settings/ml-settings.asciidoc[]
-include::{docdir}/settings/monitoring-settings.asciidoc[]
-include::{docdir}/settings/reporting-settings.asciidoc[]
+include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
+include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
+include::{kib-repo-dir}/settings/dev-settings.asciidoc[]
+include::{kib-repo-dir}/settings/graph-settings.asciidoc[]
+include::{kib-repo-dir}/settings/ingest-manager-settings.asciidoc[]
+include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
+include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/ml-settings.asciidoc[]
+include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
+include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]
 include::secure-settings.asciidoc[]
-include::{docdir}/settings/security-settings.asciidoc[]
-include::{docdir}/settings/spaces-settings.asciidoc[]
-include::{docdir}/settings/telemetry-settings.asciidoc[]
+include::{kib-repo-dir}/settings/security-settings.asciidoc[]
+include::{kib-repo-dir}/settings/spaces-settings.asciidoc[]
+include::{kib-repo-dir}/settings/telemetry-settings.asciidoc[]

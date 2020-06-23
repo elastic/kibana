@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
@@ -27,8 +27,8 @@ export default function({ getService, getPageObjects }) {
   const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
   const toTime = 'Sep 23, 2019 @ 03:31:44.000';
 
-  describe('date_nanos', function() {
-    before(async function() {
+  describe('date_nanos', function () {
+    before(async function () {
       await esArchiver.loadIfNeeded('date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
@@ -41,7 +41,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.unload('date_nanos');
     });
 
-    it('should show a timestamp with nanoseconds in the first result row', async function() {
+    it('should show a timestamp with nanoseconds in the first result row', async function () {
       const time = await PageObjects.timePicker.getTimeConfig();
       expect(time.start).to.be(fromTime);
       expect(time.end).to.be(toTime);

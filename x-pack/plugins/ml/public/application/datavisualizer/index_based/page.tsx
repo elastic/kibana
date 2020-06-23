@@ -27,6 +27,7 @@ import {
   Query,
   esQuery,
   esKuery,
+  UI_SETTINGS,
 } from '../../../../../../../src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
@@ -131,7 +132,7 @@ export const Page: FC = () => {
   // Obtain the list of non metric field types which appear in the index pattern.
   let indexedFieldTypes: ML_JOB_FIELD_TYPES[] = [];
   const indexPatternFields: IFieldType[] = currentIndexPattern.fields;
-  indexPatternFields.forEach(field => {
+  indexPatternFields.forEach((field) => {
     if (field.scripted !== true) {
       const dataVisualizerType: ML_JOB_FIELD_TYPES | undefined = kbnTypeToMLJobType(field);
       if (
@@ -254,7 +255,7 @@ export const Page: FC = () => {
       qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
     } else {
       qry = esQuery.luceneStringToDsl(qryString);
-      esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+      esQuery.decorateQuery(qry, kibanaConfig.get(UI_SETTINGS.QUERY_STRING_OPTIONS));
     }
 
     return {
@@ -300,7 +301,7 @@ export const Page: FC = () => {
     }
 
     const configsToLoad = metricConfigs.filter(
-      config => config.existsInDocs === true && config.loading === true
+      (config) => config.existsInDocs === true && config.loading === true
     );
     if (configsToLoad.length === 0) {
       return;
@@ -308,7 +309,7 @@ export const Page: FC = () => {
 
     // Pass the field name, type and cardinality in the request.
     // Top values will be obtained on a sample if cardinality > 100000.
-    const existMetricFields: FieldRequestConfig[] = configsToLoad.map(config => {
+    const existMetricFields: FieldRequestConfig[] = configsToLoad.map((config) => {
       const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
       if (config.stats !== undefined && config.stats.cardinality !== undefined) {
         props.cardinality = config.stats.cardinality;
@@ -347,7 +348,7 @@ export const Page: FC = () => {
 
       // Add the metric stats to the existing stats in the corresponding config.
       const configs: FieldVisConfig[] = [];
-      metricConfigs.forEach(config => {
+      metricConfigs.forEach((config) => {
         const configWithStats = { ...config };
         if (config.fieldName !== undefined) {
           configWithStats.stats = {
@@ -383,7 +384,7 @@ export const Page: FC = () => {
     }
 
     const configsToLoad = nonMetricConfigs.filter(
-      config => config.existsInDocs === true && config.loading === true
+      (config) => config.existsInDocs === true && config.loading === true
     );
     if (configsToLoad.length === 0) {
       return;
@@ -391,7 +392,7 @@ export const Page: FC = () => {
 
     // Pass the field name, type and cardinality in the request.
     // Top values will be obtained on a sample if cardinality > 100000.
-    const existNonMetricFields: FieldRequestConfig[] = configsToLoad.map(config => {
+    const existNonMetricFields: FieldRequestConfig[] = configsToLoad.map((config) => {
       const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
       if (config.stats !== undefined && config.stats.cardinality !== undefined) {
         props.cardinality = config.stats.cardinality;
@@ -418,7 +419,7 @@ export const Page: FC = () => {
 
       // Add the field stats to the existing stats in the corresponding config.
       const configs: FieldVisConfig[] = [];
-      nonMetricConfigs.forEach(config => {
+      nonMetricConfigs.forEach((config) => {
         const configWithStats = { ...config };
         if (config.fieldName !== undefined) {
           configWithStats.stats = {
@@ -442,7 +443,7 @@ export const Page: FC = () => {
     const configs: FieldVisConfig[] = [];
     const aggregatableExistsFields: any[] = overallStats.aggregatableExistsFields || [];
 
-    let allMetricFields = indexPatternFields.filter(f => {
+    let allMetricFields = indexPatternFields.filter((f) => {
       return (
         f.type === KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
@@ -451,14 +452,14 @@ export const Page: FC = () => {
     });
     if (metricFieldQuery !== undefined) {
       const metricFieldRegexp = new RegExp(`(${metricFieldQuery})`, 'gi');
-      allMetricFields = allMetricFields.filter(f => {
+      allMetricFields = allMetricFields.filter((f) => {
         const addField = f.displayName !== undefined && !!f.displayName.match(metricFieldRegexp);
         return addField;
       });
     }
 
-    const metricExistsFields = allMetricFields.filter(f => {
-      return aggregatableExistsFields.find(existsF => {
+    const metricExistsFields = allMetricFields.filter((f) => {
+      return aggregatableExistsFields.find((existsF) => {
         return existsF.fieldName === f.displayName;
       });
     });
@@ -493,8 +494,8 @@ export const Page: FC = () => {
 
     const metricFieldsToShow = showAllMetrics === true ? allMetricFields : metricExistsFields;
 
-    metricFieldsToShow.forEach(field => {
-      const fieldData = aggregatableFields.find(f => {
+    metricFieldsToShow.forEach((field) => {
+      const fieldData = aggregatableFields.find((f) => {
         return f.fieldName === field.displayName;
       });
 
@@ -517,7 +518,7 @@ export const Page: FC = () => {
   function createNonMetricCards() {
     let allNonMetricFields = [];
     if (nonMetricShowFieldType === '*') {
-      allNonMetricFields = indexPatternFields.filter(f => {
+      allNonMetricFields = indexPatternFields.filter((f) => {
         return (
           f.type !== KBN_FIELD_TYPES.NUMBER &&
           f.displayName !== undefined &&
@@ -531,7 +532,7 @@ export const Page: FC = () => {
       ) {
         const aggregatableCheck =
           nonMetricShowFieldType === ML_JOB_FIELD_TYPES.KEYWORD ? true : false;
-        allNonMetricFields = indexPatternFields.filter(f => {
+        allNonMetricFields = indexPatternFields.filter((f) => {
           return (
             f.displayName !== undefined &&
             dataLoader.isDisplayField(f.displayName) === true &&
@@ -540,7 +541,7 @@ export const Page: FC = () => {
           );
         });
       } else {
-        allNonMetricFields = indexPatternFields.filter(f => {
+        allNonMetricFields = indexPatternFields.filter((f) => {
           return (
             f.type === nonMetricShowFieldType &&
             f.displayName !== undefined &&
@@ -554,7 +555,7 @@ export const Page: FC = () => {
     if (nonMetricFieldQuery !== undefined) {
       const nonMetricFieldRegexp = new RegExp(`(${nonMetricFieldQuery})`, 'gi');
       allNonMetricFields = allNonMetricFields.filter(
-        f => f.displayName !== undefined && f.displayName.match(nonMetricFieldRegexp)
+        (f) => f.displayName !== undefined && f.displayName.match(nonMetricFieldRegexp)
       );
     }
 
@@ -565,9 +566,9 @@ export const Page: FC = () => {
     const aggregatableExistsFields: any[] = overallStats.aggregatableExistsFields || [];
     const nonAggregatableExistsFields: any[] = overallStats.nonAggregatableExistsFields || [];
 
-    allNonMetricFields.forEach(f => {
+    allNonMetricFields.forEach((f) => {
       const checkAggregatableField = aggregatableExistsFields.find(
-        existsField => existsField.fieldName === f.displayName
+        (existsField) => existsField.fieldName === f.displayName
       );
 
       if (checkAggregatableField !== undefined) {
@@ -575,7 +576,7 @@ export const Page: FC = () => {
         nonMetricFieldData.push(checkAggregatableField);
       } else {
         const checkNonAggregatableField = nonAggregatableExistsFields.find(
-          existsField => existsField.fieldName === f.displayName
+          (existsField) => existsField.fieldName === f.displayName
         );
 
         if (checkNonAggregatableField !== undefined) {
@@ -606,8 +607,8 @@ export const Page: FC = () => {
 
     const configs: FieldVisConfig[] = [];
 
-    nonMetricFieldsToShow.forEach(field => {
-      const fieldData = nonMetricFieldData.find(f => f.fieldName === field.displayName);
+    nonMetricFieldsToShow.forEach((field) => {
+      const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.displayName);
 
       const nonMetricConfig = {
         ...fieldData,

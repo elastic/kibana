@@ -45,7 +45,7 @@ const textViewButton = i18n.translate(
 // from charts metadata for React's key attribute
 function getChartId(series) {
   const { jobId, detectorLabel, entityFields } = series;
-  const entities = entityFields.map(ef => `${ef.fieldName}/${ef.fieldValue}`).join(',');
+  const entities = entityFields.map((ef) => `${ef.fieldName}/${ef.fieldValue}`).join(',');
   const id = `${jobId}_${detectorLabel}_${entities}`;
   return id;
 }
@@ -58,7 +58,7 @@ function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel })
   let DetectorLabel = <React.Fragment>{detectorLabel}</React.Fragment>;
 
   if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
-    const byField = series.entityFields.find(d => d.fieldType === 'by');
+    const byField = series.entityFields.find((d) => d.fieldType === 'by');
     if (typeof byField !== 'undefined') {
       DetectorLabel = (
         <React.Fragment>
@@ -121,7 +121,7 @@ function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel })
         ) {
           return (
             <MlTooltipComponent>
-              {tooltipService => (
+              {(tooltipService) => (
                 <ExplorerChartDistribution
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
@@ -134,7 +134,7 @@ function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel })
         }
         return (
           <MlTooltipComponent>
-            {tooltipService => (
+            {(tooltipService) => (
               <ExplorerChartSingleMetric
                 tooManyBuckets={tooManyBuckets}
                 seriesConfig={series}
@@ -161,12 +161,12 @@ export const ExplorerChartsContainer = ({
   const chartsWidth = chartsPerRow === 1 ? 'calc(100% - 20px)' : 'auto';
   const chartsColumns = chartsPerRow === 1 ? 0 : chartsPerRow;
 
-  const wrapLabel = seriesToPlot.some(series => isLabelLengthAboveThreshold(series));
+  const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
 
   return (
     <EuiFlexGrid columns={chartsColumns}>
       {seriesToPlot.length > 0 &&
-        seriesToPlot.map(series => (
+        seriesToPlot.map((series) => (
           <EuiFlexItem
             key={getChartId(series)}
             className="ml-explorer-chart-container"

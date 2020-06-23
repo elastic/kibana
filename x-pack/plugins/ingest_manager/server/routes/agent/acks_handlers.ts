@@ -14,7 +14,7 @@ import { AcksService } from '../../services/agents';
 import { AgentEvent } from '../../../common/types/models';
 import { PostAgentAcksResponse } from '../../../common/types/rest_spec';
 
-export const postAgentAcksHandlerBuilder = function(
+export const postAgentAcksHandlerBuilder = function (
   ackService: AcksService
 ): RequestHandler<
   TypeOf<typeof PostAgentAcksRequestSchema.params>,
@@ -30,7 +30,7 @@ export const postAgentAcksHandlerBuilder = function(
 
       // validate that all events are for the authorized agent obtained from the api key
       const notAuthorizedAgentEvent = agentEvents.filter(
-        agentEvent => agentEvent.agent_id !== agent.id
+        (agentEvent) => agentEvent.agent_id !== agent.id
       );
 
       if (notAuthorizedAgentEvent && notAuthorizedAgentEvent.length > 0) {

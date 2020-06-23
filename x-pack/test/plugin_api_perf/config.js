@@ -8,12 +8,12 @@ import path from 'path';
 import fs from 'fs';
 import { services } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file =>
+  const plugins = allFiles.filter((file) =>
     fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
   );
 
@@ -42,7 +42,7 @@ export default async function({ readConfigFile }) {
           'sample_task_plugin'
         )}`,
         ...plugins.map(
-          pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
       ],
     },

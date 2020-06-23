@@ -17,17 +17,16 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
-import { ManagementSetup } from 'src/plugins/management/public';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { JobId, JobStatusBuckets } from '../';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+import { ManagementSectionId, ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { ConfigType } from '../common/types';
+import { ReportingConfigType, JobId, JobStatusBuckets } from '../common/types';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
 import { getGeneralErrorToast } from './components';
 import { ReportListing } from './components/report_listing';
@@ -38,7 +37,7 @@ import { csvReportingProvider } from './share_context_menu/register_csv_reportin
 import { reportingPDFPNGProvider } from './share_context_menu/register_pdf_png_reporting';
 
 export interface ClientConfigType {
-  poll: ConfigType['poll'];
+  poll: ReportingConfigType['poll'];
 }
 
 function getStored(): JobId[] {
@@ -112,16 +111,16 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
         defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
       }),
       icon: 'reportingApp',
-      path: '/app/kibana#/management/kibana/reporting',
+      path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    management.sections.getSection('kibana')!.registerApp({
+    management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
       id: 'reporting',
       title: this.title,
-      order: 15,
-      mount: async params => {
+      order: 1,
+      mount: async (params) => {
         const [start] = await getStartServices();
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         ReactDOM.render(
@@ -156,8 +155,6 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
     );
   }
 
-  // FIXME: only perform these actions for authenticated routes
-  // Depends on https://github.com/elastic/kibana/pull/39477
   public start(core: CoreStart) {
     const { http, notifications } = core;
     const apiClient = new ReportingAPIClient(http);
@@ -168,10 +165,10 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       .pipe(
         takeUntil(this.stop$), // stop the interval when stop method is called
         map(() => getStored()), // read all pending job IDs from session storage
-        filter(storedJobs => storedJobs.length > 0), // stop the pipeline here if there are none pending
-        mergeMap(storedJobs => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
+        filter((storedJobs) => storedJobs.length > 0), // stop the pipeline here if there are none pending
+        mergeMap((storedJobs) => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
         mergeMap(({ completed, failed }) => streamHandler.showNotifications({ completed, failed })),
-        catchError(err => handleError(notifications, err))
+        catchError((err) => handleError(notifications, err))
       )
       .subscribe();
   }

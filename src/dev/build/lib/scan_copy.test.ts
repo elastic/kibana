@@ -31,10 +31,7 @@ const FIXTURES = resolve(__dirname, '__tests__/fixtures');
 const WORLD_EXECUTABLE = resolve(FIXTURES, 'bin/world_executable');
 const TMP = resolve(__dirname, '__tests__/__tmp__');
 
-const getCommonMode = (path: string) =>
-  statSync(path)
-    .mode.toString(8)
-    .slice(-3);
+const getCommonMode = (path: string) => statSync(path).mode.toString(8).slice(-3);
 
 // ensure WORLD_EXECUTABLE is actually executable by all
 beforeAll(async () => {
@@ -104,7 +101,7 @@ it('applies filter function specified', async () => {
   await scanCopy({
     source: FIXTURES,
     destination,
-    filter: record => !record.name.includes('bar'),
+    filter: (record) => !record.name.includes('bar'),
   });
 
   expect((await getChildPaths(resolve(destination, 'foo_dir'))).sort()).toEqual([

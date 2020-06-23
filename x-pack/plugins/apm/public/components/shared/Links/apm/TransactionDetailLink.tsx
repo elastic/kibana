@@ -41,7 +41,7 @@ export const TransactionDetailLink = ({
         transactionId,
         transactionName,
         transactionType,
-        ...persistedFilters
+        ...persistedFilters,
       }}
       {...rest}
     />

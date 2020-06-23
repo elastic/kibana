@@ -15,7 +15,9 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
   describe('list_alert_types', () => {
     it('should return 200 with list of alert types', async () => {
-      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+      );
       expect(response.status).to.eql(200);
       const fixtureAlertType = response.body.find((alertType: any) => alertType.id === 'test.noop');
       expect(fixtureAlertType).to.eql({
@@ -27,11 +29,14 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           state: [],
           context: [],
         },
+        producer: 'alerting',
       });
     });
 
     it('should return actionVariables with both context and state', async () => {
-      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+      );
       expect(response.status).to.eql(200);
 
       const fixtureAlertType = response.body.find(
@@ -45,7 +50,9 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
     });
 
     it('should return actionVariables with just context', async () => {
-      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+      );
       expect(response.status).to.eql(200);
 
       const fixtureAlertType = response.body.find(
@@ -59,7 +66,9 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
     });
 
     it('should return actionVariables with just state', async () => {
-      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+      );
       expect(response.status).to.eql(200);
 
       const fixtureAlertType = response.body.find(

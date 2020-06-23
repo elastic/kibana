@@ -27,7 +27,7 @@ type PingListPayload = PingsResponse & Error;
 
 export const pingListReducer = handleActions<PingListState, PingListPayload>(
   {
-    [String(getPings)]: state => ({
+    [String(getPings)]: (state) => ({
       ...state,
       loading: true,
     }),

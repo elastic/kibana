@@ -93,15 +93,15 @@ export const UseArray = ({
     );
 
   const addItem = () => {
-    setItems(previousItems => {
+    setItems((previousItems) => {
       const itemIndex = previousItems.length;
       return [...previousItems, getNewItemAtIndex(itemIndex)];
     });
   };
 
   const removeItem = (id: number) => {
-    setItems(previousItems => {
-      const updatedItems = previousItems.filter(item => item.id !== id);
+    setItems((previousItems) => {
+      const updatedItems = previousItems.filter((item) => item.id !== id);
       return updatePaths(updatedItems);
     });
   };

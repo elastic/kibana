@@ -5,7 +5,7 @@
  */
 import boom from 'boom';
 
-export const formatResponse = esErrors => resp => {
+export const formatResponse = (esErrors) => (resp) => {
   if (resp.isBoom) {
     return resp;
   } // can't wrap it if it's already a boom error

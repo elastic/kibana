@@ -57,23 +57,23 @@ export function valueClickAction(
       });
     },
     isCompatible,
-    execute: async (context: ValueClickActionContext) => {
-      if (!(await isCompatible(context))) {
+    execute: async ({ data }: ValueClickActionContext) => {
+      if (!(await isCompatible({ data }))) {
         throw new IncompatibleActionError();
       }
 
-      const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
+      const filters: Filter[] = await createFiltersFromValueClickAction(data);
 
       let selectedFilters = filters;
 
       if (filters.length > 1) {
         const indexPatterns = await Promise.all(
-          filters.map(filter => {
+          filters.map((filter) => {
             return getIndexPatterns().get(filter.meta.index!);
           })
         );
 
-        const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
+        const filterSelectionPromise: Promise<Filter[]> = new Promise((resolve) => {
           const overlay = getOverlays().openModal(
             toMountPoint(
               applyFiltersPopover(
@@ -98,9 +98,9 @@ export function valueClickAction(
         selectedFilters = await filterSelectionPromise;
       }
 
-      if (context.timeFieldName) {
+      if (data.timeFieldName) {
         const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-          context.timeFieldName,
+          data.timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);

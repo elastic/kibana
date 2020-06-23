@@ -6,7 +6,7 @@
 
 import {
   CustomLink,
-  CustomLinkES
+  CustomLinkES,
 } from '../../../../common/custom_link/custom_link_types';
 import { APMIndexDocumentParams } from '../../helpers/es_client';
 import { Setup } from '../../helpers/setup_request';
@@ -15,7 +15,7 @@ import { toESFormat } from './helper';
 export async function createOrUpdateCustomLink({
   customLinkId,
   customLink,
-  setup
+  setup,
 }: {
   customLinkId?: string;
   customLink: Omit<CustomLink, '@timestamp'>;
@@ -28,8 +28,8 @@ export async function createOrUpdateCustomLink({
     index: indices.apmCustomLinkIndex,
     body: {
       '@timestamp': Date.now(),
-      ...toESFormat(customLink)
-    }
+      ...toESFormat(customLink),
+    },
   };
 
   // by specifying an id elasticsearch will delete the previous doc and insert the updated doc

@@ -4,15 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ValidationIndicesError } from '../../../../../common/http_api';
+import * as rt from 'io-ts';
+import { ValidationIndicesError, validationIndicesErrorRT } from '../../../../../common/http_api';
 import { DatasetFilter } from '../../../../../common/log_analysis';
 
-export { ValidationIndicesError };
+export { ValidationIndicesError, validationIndicesErrorRT };
 
-export type ValidationIndicesUIError =
+export const timeRangeValidationErrorRT = rt.strict({
+  error: rt.literal('INVALID_TIME_RANGE'),
+});
+
+export type TimeRangeValidationError = rt.TypeOf<typeof timeRangeValidationErrorRT>;
+
+export type ValidationUIError =
   | ValidationIndicesError
   | { error: 'NETWORK_ERROR' }
-  | { error: 'TOO_FEW_SELECTED_INDICES' };
+  | { error: 'TOO_FEW_SELECTED_INDICES' }
+  | TimeRangeValidationError;
 
 interface ValidAvailableIndex {
   validity: 'valid';

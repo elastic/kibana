@@ -31,11 +31,11 @@ const TestHook = ({ callback }) => {
 
 let element;
 
-const testHook = callback => {
+const testHook = (callback) => {
   element = mount(<TestHook callback={callback} />);
 };
 
-const wait = async wait => new Promise(resolve => setTimeout(resolve, wait || 1));
+const wait = async (wait) => new Promise((resolve) => setTimeout(resolve, wait || 1));
 
 // FLAKY:
 // - https://github.com/elastic/kibana/issues/42561

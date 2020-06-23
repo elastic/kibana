@@ -55,9 +55,9 @@ class VisEditorVisualizationUI extends Component {
     this.setState({ dragging: false });
   };
 
-  handleMouseMove = event => {
+  handleMouseMove = (event) => {
     if (this.state.dragging) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         height: Math.max(MIN_CHART_HEIGHT, prevState.height + event.movementY),
       }));
     }
@@ -74,7 +74,7 @@ class VisEditorVisualizationUI extends Component {
     this._handler = embeddableHandler;
     await this._handler.render(this._visEl.current);
 
-    this._subscription = this._handler.handler.data$.subscribe(data => {
+    this._subscription = this._handler.handler.data$.subscribe((data) => {
       this.setPanelInterval(data.value.visData);
       onDataChange(data.value);
     });
@@ -94,11 +94,11 @@ class VisEditorVisualizationUI extends Component {
    * We use 15px steps to do the scaling and make sure the chart has at least its
    * defined minimum width (MIN_CHART_HEIGHT).
    */
-  onSizeHandleKeyDown = ev => {
+  onSizeHandleKeyDown = (ev) => {
     const { keyCode } = ev;
     if (keyCode === keyCodes.UP || keyCode === keyCodes.DOWN) {
       ev.preventDefault();
-      this.setState(prevState => {
+      this.setState((prevState) => {
         const newHeight = prevState.height + (keyCode === keyCodes.UP ? -15 : 15);
         return {
           height: Math.max(MIN_CHART_HEIGHT, newHeight),

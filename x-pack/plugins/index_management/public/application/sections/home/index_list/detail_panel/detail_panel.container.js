@@ -23,7 +23,7 @@ import {
   refreshIndices,
 } from '../../../../store/actions';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const indexName = getDetailPanelIndexName(state);
   return {
     panelType: getDetailPanelType(state),
@@ -32,27 +32,27 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    clearCacheIndex: indexName => {
+    clearCacheIndex: (indexName) => {
       dispatch(clearCacheIndices({ indexNames: [indexName] }));
     },
-    closeIndex: indexName => {
+    closeIndex: (indexName) => {
       dispatch(closeIndices({ indexNames: [indexName] }));
     },
-    flushIndex: indexName => {
+    flushIndex: (indexName) => {
       dispatch(flushIndices({ indexNames: [indexName] }));
     },
-    openIndex: indexName => {
+    openIndex: (indexName) => {
       dispatch(openIndices({ indexNames: [indexName] }));
     },
-    refreshIndex: indexName => {
+    refreshIndex: (indexName) => {
       dispatch(refreshIndices({ indexNames: [indexName] }));
     },
-    forcemergeIndex: indexName => {
+    forcemergeIndex: (indexName) => {
       dispatch(forcemergeIndices({ indexNames: [indexName] }));
     },
-    deleteIndex: indexName => {
+    deleteIndex: (indexName) => {
       dispatch(deleteIndices({ indexNames: [indexName] }));
     },
     closeDetailPanel: () => dispatch(closeDetailPanel()),

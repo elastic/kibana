@@ -16,7 +16,7 @@ import { SECTIONS } from '../../../../../constants';
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   autoFollowPatternId: getSelectedAutoFollowPatternId('detail')(state),
   autoFollowPattern: getSelectedAutoFollowPattern('detail')(state),
   apiStatus: getApiStatus(scope)(state),

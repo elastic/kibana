@@ -76,7 +76,7 @@ export interface ChromeRecentlyAccessed {
    *
    * @param link a relative URL to the resource (not including the {@link HttpStart.basePath | `http.basePath`})
    * @param label the label to display in the UI
-   * @param id a unique string used to de-duplicate the recently accessed llist.
+   * @param id a unique string used to de-duplicate the recently accessed list.
    */
   add(link: string, label: string, id: string): void;
 

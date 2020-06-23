@@ -20,10 +20,10 @@ export function getUserHasLeftApp() {
   return _userHasLeftApp;
 }
 
-const isModifiedEvent = event =>
+const isModifiedEvent = (event) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
-const isLeftClickEvent = event => event.button === 0;
+const isLeftClickEvent = (event) => event.button === 0;
 
 let router;
 export function registerRouter(reactRouter) {
@@ -44,7 +44,7 @@ export function getRouterLinkProps(to) {
 
   const href = router.history.createHref(location);
 
-  const onClick = event => {
+  const onClick = (event) => {
     if (event.defaultPrevented) {
       return;
     }

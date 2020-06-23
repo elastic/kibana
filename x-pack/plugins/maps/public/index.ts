@@ -5,10 +5,15 @@
  */
 
 import { PluginInitializer } from 'kibana/public';
+import { PluginInitializerContext } from 'kibana/public';
 import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
+import { MapsXPackConfig } from '../config';
 
-export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = () => {
-  return new MapsPlugin();
+export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
+  initContext: PluginInitializerContext<MapsXPackConfig>
+) => {
+  // @ts-ignore
+  return new MapsPlugin(initContext);
 };
 
 export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';

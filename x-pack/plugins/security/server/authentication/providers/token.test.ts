@@ -211,7 +211,7 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
@@ -386,7 +386,7 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       const authenticationError = new errors.AuthenticationException('Some error');
-      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(

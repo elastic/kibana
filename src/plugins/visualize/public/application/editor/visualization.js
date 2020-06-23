@@ -18,7 +18,7 @@
  */
 
 export function initVisualizationDirective(app) {
-  app.directive('visualizationEmbedded', function($timeout) {
+  app.directive('visualizationEmbedded', function ($timeout) {
     return {
       restrict: 'E',
       scope: {
@@ -29,7 +29,7 @@ export function initVisualizationDirective(app) {
         query: '=',
         appState: '=',
       },
-      link: function($scope, element) {
+      link: function ($scope, element) {
         $scope.renderFunction = async () => {
           if (!$scope.rendered) {
             $scope.embeddableHandler.render(element[0]);
@@ -43,7 +43,7 @@ export function initVisualizationDirective(app) {
           });
         };
 
-        $scope.$on('render', event => {
+        $scope.$on('render', (event) => {
           event.preventDefault();
           $timeout(() => {
             $scope.renderFunction();

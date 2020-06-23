@@ -25,7 +25,7 @@ export const registerServices = async (
   registry: ISavedObjectsManagementServiceRegistry,
   getStartServices: StartServicesAccessor<StartDependencies, SavedObjectsManagementPluginStart>
 ) => {
-  const [coreStart, { dashboard, data, visualizations, discover }] = await getStartServices();
+  const [, { dashboard, visualizations, discover }] = await getStartServices();
 
   if (dashboard) {
     registry.register({
@@ -47,13 +47,7 @@ export const registerServices = async (
     registry.register({
       id: 'savedSearches',
       title: 'searches',
-      service: discover.savedSearches.createLoader({
-        savedObjectsClient: coreStart.savedObjects.client,
-        indexPatterns: data.indexPatterns,
-        search: data.search,
-        chrome: coreStart.chrome,
-        overlays: coreStart.overlays,
-      }),
+      service: discover.savedSearchLoader,
     });
   }
 };

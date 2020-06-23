@@ -29,7 +29,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     async expectHomePage(spaceId: string) {
-      return await this.expectRoute(spaceId, `/app/kibana#/home`);
+      return await this.expectRoute(spaceId, `/app/home#/`);
     }
 
     async expectRoute(spaceId: string, route: string) {

@@ -27,7 +27,7 @@ import { createRenderer, createAppMounter, createLegacyAppMounter, getUnmounter 
 import { AppStatus } from '../types';
 import { ScopedHistory } from '../scoped_history';
 
-describe('AppContainer', () => {
+describe('AppRouter', () => {
   let mounters: MockedMounterMap<EitherApp>;
   let globalHistory: History;
   let appStatuses$: BehaviorSubject<Map<string, AppStatus>>;
@@ -45,7 +45,7 @@ describe('AppContainer', () => {
   const mountersToAppStatus$ = () => {
     return new BehaviorSubject(
       new Map(
-        [...mounters.keys()].map(id => [
+        [...mounters.keys()].map((id) => [
           id,
           id.startsWith('disabled') ? AppStatus.inaccessible : AppStatus.accessible,
         ])
@@ -77,6 +77,16 @@ describe('AppContainer', () => {
           scopedAppHistory = history;
           history.push('/subpath');
         },
+      }),
+      createAppMounter({
+        appId: 'app5',
+        html: '<div>App 5</div>',
+        appRoute: '/app/my-app/app5',
+      }),
+      createAppMounter({
+        appId: 'app6',
+        html: '<div>App 6</div>',
+        appRoute: '/app/my-app/app6',
       }),
     ] as Array<MockedMounterTuple<EitherApp>>);
     globalHistory = createMemoryHistory();
@@ -280,6 +290,16 @@ describe('AppContainer', () => {
     await update();
     expect(mounter.mount).toHaveBeenCalledTimes(1);
     expect(unmount).not.toHaveBeenCalled();
+  });
+
+  it('allows multiple apps with the same `/app/appXXX` appRoute prefix', async () => {
+    await navigate('/app/my-app/app5/path');
+    expect(mounters.get('app5')!.mounter.mount).toHaveBeenCalledTimes(1);
+    expect(mounters.get('app6')!.mounter.mount).toHaveBeenCalledTimes(0);
+
+    await navigate('/app/my-app/app6/another-path');
+    expect(mounters.get('app5')!.mounter.mount).toHaveBeenCalledTimes(1);
+    expect(mounters.get('app6')!.mounter.mount).toHaveBeenCalledTimes(1);
   });
 
   it('should not remount when when changing pages within app using hash history', async () => {

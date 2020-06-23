@@ -36,7 +36,7 @@ describe('configuration deprecations', () => {
     await root.setup();
 
     const logs = loggingServiceMock.collect(mockLoggingService);
-    const warnings = logs.warn.flatMap(i => i);
+    const warnings = logs.warn.flatMap((i) => i);
     expect(warnings).not.toContain(
       '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'
     );
@@ -56,7 +56,7 @@ describe('configuration deprecations', () => {
     await root.setup();
 
     const logs = loggingServiceMock.collect(mockLoggingService);
-    const warnings = logs.warn.flatMap(i => i);
+    const warnings = logs.warn.flatMap((i) => i);
     expect(warnings).toContain(
       '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'
     );

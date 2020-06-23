@@ -45,6 +45,8 @@ export * from './term_vector_parameter';
 
 export * from './type_parameter';
 
+export * from './subtype_parameter';
+
 export * from './ignore_z_value_parameter';
 
 export * from './orientation_parameter';

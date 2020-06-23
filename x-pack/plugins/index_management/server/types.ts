@@ -5,16 +5,21 @@
  */
 import { ScopedClusterClient, IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { License, IndexDataEnricher } from './services';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 
 export interface Dependencies {
+  security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
 }
 
 export interface RouteDependencies {
   router: IRouter;
   license: License;
+  config: {
+    isSecurityEnabled: () => boolean;
+  };
   indexDataEnricher: IndexDataEnricher;
   lib: {
     isEsError: typeof isEsError;
@@ -32,6 +37,7 @@ export interface Index {
   size: any;
   isFrozen: boolean;
   aliases: string | string[];
+  data_stream?: string;
   [key: string]: any;
 }
 

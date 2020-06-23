@@ -75,7 +75,7 @@ describe('migrationsRetryCallCluster', () => {
     loggingServiceMock.clear(mockLogger);
   });
 
-  errors.forEach(errorName => {
+  errors.forEach((errorName) => {
     it('retries ES API calls that rejects with ' + errorName, () => {
       expect.assertions(1);
       const callEsApi = jest.fn();

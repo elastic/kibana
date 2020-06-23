@@ -54,7 +54,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
           options={levelOptions}
           value={level}
           defaultValue={'info'}
-          onChange={e => {
+          onChange={(e) => {
             editAction('level', e.target.value, index);
           }}
         />
@@ -86,7 +86,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
           value={message || ''}
           name="message"
           data-test-subj="loggingMessageInput"
-          onChange={e => {
+          onChange={(e) => {
             editAction('message', e.target.value, index);
           }}
           onBlur={() => {

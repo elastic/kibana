@@ -79,7 +79,7 @@ export async function parseEntries(cwd, entries, strategy, results, wasParsed = 
   const sanitizedCwd = cwd || process.cwd();
 
   // Test each entry against canRequire function
-  const entriesQueue = entries.map(entry => canRequire(entry));
+  const entriesQueue = entries.map((entry) => canRequire(entry));
 
   while (entriesQueue.length) {
     // Get the first element in the queue as

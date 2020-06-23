@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
 import {
   RangeSelectTriggerContext,
   ValueClickTriggerContext,
@@ -63,7 +63,7 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
           name="url"
           placeholder="Enter URL"
           value={config.url}
-          onChange={event => onConfig({ ...config, url: event.target.value })}
+          onChange={(event) => onConfig({ ...config, url: event.target.value })}
           onBlur={() => {
             if (!config.url) return;
             if (/https?:\/\//.test(config.url)) return;

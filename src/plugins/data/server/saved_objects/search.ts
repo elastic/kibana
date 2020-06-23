@@ -36,7 +36,7 @@ export const searchSavedObjectType: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
+        path: `/app/discover#/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'discover.show',
       };
     },

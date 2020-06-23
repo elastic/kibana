@@ -5,7 +5,7 @@
  */
 
 function removeEmptyValues(object) {
-  Object.keys(object).forEach(key => {
+  Object.keys(object).forEach((key) => {
     if (object[key] == null || object[key].trim() === '') {
       delete object[key];
     }
@@ -142,11 +142,11 @@ export function deserializeJob(job) {
   }
 
   if (terms) {
-    deserializedJob.terms = terms.fields.map(name => ({ name }));
+    deserializedJob.terms = terms.fields.map((name) => ({ name }));
   }
 
   if (histogram) {
-    deserializedJob.histogram = histogram.fields.map(name => ({ name }));
+    deserializedJob.histogram = histogram.fields.map((name) => ({ name }));
     deserializedJob.histogramInterval = histogram.interval;
   }
 

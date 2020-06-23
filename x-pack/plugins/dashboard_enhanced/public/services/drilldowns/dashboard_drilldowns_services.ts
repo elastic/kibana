@@ -41,9 +41,15 @@ export class DashboardDrilldownsService {
 
   setupDrilldowns(
     core: CoreSetup<StartDependencies>,
-    { advancedUiActions: uiActions }: SetupDependencies
+    { uiActionsEnhanced: uiActions }: SetupDependencies
   ) {
     const start = createStartServicesGetter(core.getStartServices);
+    const getDashboardUrlGenerator = () => {
+      const urlGenerator = start().plugins.dashboard.dashboardUrlGenerator;
+      if (!urlGenerator)
+        throw new Error('dashboardUrlGenerator is required for dashboard to dashboard drilldown');
+      return urlGenerator;
+    };
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ start });
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
@@ -51,7 +57,10 @@ export class DashboardDrilldownsService {
     const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ start });
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
 
-    const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({ start });
+    const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({
+      start,
+      getDashboardUrlGenerator,
+    });
     uiActions.registerDrilldown(dashboardToDashboardDrilldown);
   }
 }

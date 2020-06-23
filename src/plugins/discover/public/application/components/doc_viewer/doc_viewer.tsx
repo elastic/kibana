@@ -35,7 +35,7 @@ export function DocViewer(renderProps: DocViewRenderProps) {
     .getDocViewsSorted(renderProps.hit)
     .map(({ title, render, component }: DocView, idx: number) => {
       return {
-        id: title,
+        id: `kbn_doc_viewer_tab_${idx}`,
         name: title,
         content: (
           <DocViewerTab

@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 export default function repositionArguments(functionDef, unorderedArgs) {
   const args = [];
 
-  _.each(unorderedArgs, function(unorderedArg, i) {
+  _.each(unorderedArgs, function (unorderedArg, i) {
     let argDef;
     let targetIndex;
     let value;
@@ -45,7 +45,7 @@ export default function repositionArguments(functionDef, unorderedArgs) {
           storeAsArray = true;
         }
       } else {
-        targetIndex = _.findIndex(functionDef.args, function(orderedArg) {
+        targetIndex = _.findIndex(functionDef.args, function (orderedArg) {
           return unorderedArg.name === orderedArg.name;
         });
         storeAsArray = argDef.multi;

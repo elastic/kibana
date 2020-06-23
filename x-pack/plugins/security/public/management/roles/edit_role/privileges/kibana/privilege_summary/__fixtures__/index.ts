@@ -32,7 +32,7 @@ export function getDisplayedFeaturePrivileges(
   role: Role
 ): DisplayedFeaturePrivileges {
   const allExpanderButtons = findTestSubject(wrapper, 'expandPrivilegeSummaryRow');
-  allExpanderButtons.forEach(button => button.simulate('click'));
+  allExpanderButtons.forEach((button) => button.simulate('click'));
 
   // each expanded row renders its own `EuiTableRow`, so there are 2 rows
   // for each feature: one for the primary feature privilege, and one for the sub privilege form
@@ -81,7 +81,7 @@ function getDisplayedSubFeaturePrivileges(
 
   displayedFeatures[feature.id] = displayedFeatures[feature.id] ?? {};
 
-  subFeatureEntries.forEach(subFeatureEntry => {
+  subFeatureEntries.forEach((subFeatureEntry) => {
     const subFeatureName = findTestSubject(subFeatureEntry, 'subFeatureName').text();
 
     const entryElements = findTestSubject(subFeatureEntry as ReactWrapper<any>, 'entry', '|=');

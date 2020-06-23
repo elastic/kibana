@@ -55,7 +55,7 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
         label: i18n.translate('home.tutorials.elasticsearchMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

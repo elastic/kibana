@@ -61,10 +61,10 @@ export class DoSearch extends React.Component<Props, State> {
     this.abortController = new AbortController();
 
     this.props.search(this.abortController.signal).subscribe(
-      response => {
+      (response) => {
         this.setState({ response, error: undefined });
       },
-      error => {
+      (error) => {
         this.setState({ error, searching: false, response: undefined });
       },
       () => {

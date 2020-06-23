@@ -90,7 +90,7 @@ export const getCloudMetadata = async (
 
   const accounts: InventoryCloudAccount[] = [];
   if (response.aggregations && response.aggregations.accounts) {
-    response.aggregations.accounts.buckets.forEach(b => {
+    response.aggregations.accounts.buckets.forEach((b) => {
       if (b.accountNames.buckets.length) {
         accounts.push({
           value: b.key,
@@ -102,7 +102,7 @@ export const getCloudMetadata = async (
   }
   return {
     accounts,
-    projects: projectBuckets.map(b => b.key),
-    regions: regionBuckets.map(b => b.key),
+    projects: projectBuckets.map((b) => b.key),
+    regions: regionBuckets.map((b) => b.key),
   };
 };

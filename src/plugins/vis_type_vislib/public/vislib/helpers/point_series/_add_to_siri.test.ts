@@ -21,8 +21,8 @@ import { addToSiri, Serie } from './_add_to_siri';
 import { Point } from './_get_point';
 import { Dimension } from './point_series';
 
-describe('addToSiri', function() {
-  it('creates a new series the first time it sees an id', function() {
+describe('addToSiri', function () {
+  it('creates a new series the first time it sees an id', function () {
     const series = new Map<string, Serie>();
     const point = {} as Point;
     const id = 'id';
@@ -36,7 +36,7 @@ describe('addToSiri', function() {
     expect(expectedSerie.values[0]).toBe(point);
   });
 
-  it('adds points to existing series if id has been seen', function() {
+  it('adds points to existing series if id has been seen', function () {
     const series = new Map();
     const id = 'id';
 
@@ -54,7 +54,7 @@ describe('addToSiri', function() {
     expect(series.get(id).values[1]).toBe(point2);
   });
 
-  it('allows overriding the series label', function() {
+  it('allows overriding the series label', function () {
     const series = new Map();
     const id = 'id';
     const label = 'label';
@@ -68,7 +68,7 @@ describe('addToSiri', function() {
     expect(series.get(id).values[0]).toBe(point);
   });
 
-  it('correctly sets id and rawId', function() {
+  it('correctly sets id and rawId', function () {
     const series = new Map();
     const id = 'id-id2';
 

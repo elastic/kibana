@@ -51,6 +51,21 @@ export function validateMetricThreshold({
       );
     }
 
+    // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
+    // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
+    if (c.threshold && c.threshold.length && ![...c.threshold].every(isNumber)) {
+      [...c.threshold].forEach((v, i) => {
+        if (!isNumber(v)) {
+          const key = i === 0 ? 'threshold0' : 'threshold1';
+          errors[id][key].push(
+            i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdTypeRequired', {
+              defaultMessage: 'Thresholds must contain a valid number.',
+            })
+          );
+        }
+      });
+    }
+
     if (c.comparator === 'between' && (!c.threshold || c.threshold.length < 2)) {
       errors[id].threshold1.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
@@ -78,3 +93,5 @@ export function validateMetricThreshold({
 
   return validationResult;
 }
+
+const isNumber = (value: unknown): value is number => typeof value === 'number';

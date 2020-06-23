@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }: { loadTestFile: (file: string) => void }) {
+export default function ({ loadTestFile }: { loadTestFile: (file: string) => void }) {
   /*
    * This test provides a test framework for spawning multiple concurrent tasks in
    * Task Manager and measuring how well Task Manager performs in claiming, processing

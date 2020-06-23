@@ -167,13 +167,13 @@ export class LoggingConfig {
     ];
 
     const loggerConfigByContext = new Map(
-      loggers.map(loggerConfig => toTuple(loggerConfig.context, loggerConfig))
+      loggers.map((loggerConfig) => toTuple(loggerConfig.context, loggerConfig))
     );
 
     for (const [loggerContext, loggerConfig] of loggerConfigByContext) {
       // Ensure logger config only contains valid appenders.
       const unsupportedAppenderKey = loggerConfig.appenders.find(
-        appenderKey => !this.appenders.has(appenderKey)
+        (appenderKey) => !this.appenders.has(appenderKey)
       );
 
       if (unsupportedAppenderKey) {

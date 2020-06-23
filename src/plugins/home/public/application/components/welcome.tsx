@@ -38,7 +38,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices } from '../kibana_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
-import { PRIVACY_STATEMENT_URL } from '../../../../telemetry/common/constants';
 
 import { SampleDataCard } from './sample_data';
 interface Props {
@@ -60,7 +59,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   private redirecToSampleData() {
-    const path = this.services.addBasePath('#/home/tutorial_directory/sampleData');
+    const path = this.services.addBasePath('#/tutorial_directory/sampleData');
     window.location.href = path;
   }
 
@@ -101,7 +100,7 @@ export class Welcome extends React.Component<Props> {
             id="home.dataManagementDisableCollection"
             defaultMessage=" To stop collection, "
           />
-          <EuiLink href="#/management/kibana/settings">
+          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
             <FormattedMessage
               id="home.dataManagementDisableCollectionLink"
               defaultMessage="disable usage data here."
@@ -116,7 +115,7 @@ export class Welcome extends React.Component<Props> {
             id="home.dataManagementEnableCollection"
             defaultMessage=" To start collection, "
           />
-          <EuiLink href="#/management/kibana/settings">
+          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
             <FormattedMessage
               id="home.dataManagementEnableCollectionLink"
               defaultMessage="enable usage data here."
@@ -162,7 +161,11 @@ export class Welcome extends React.Component<Props> {
                         id="home.dataManagementDisclaimerPrivacy"
                         defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
                       />
-                      <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" rel="noopener">
+                      <EuiLink
+                        href={telemetry.telemetryConstants.getPrivacyStatementUrl()}
+                        target="_blank"
+                        rel="noopener"
+                      >
                         <FormattedMessage
                           id="home.dataManagementDisclaimerPrivacyLink"
                           defaultMessage="Privacy Statement."

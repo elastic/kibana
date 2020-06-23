@@ -37,7 +37,7 @@ const mockMBMap = {
   on: (eventName, callback) => {
     mockMbMapHandlers[eventName] = callback;
   },
-  off: eventName => {
+  off: (eventName) => {
     delete mockMbMapHandlers[eventName];
   },
   getLayer: () => {},

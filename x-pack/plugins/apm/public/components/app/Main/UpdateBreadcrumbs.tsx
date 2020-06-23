@@ -11,7 +11,7 @@ import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import {
   Breadcrumb,
   ProvideBreadcrumbs,
-  BreadcrumbRoute
+  BreadcrumbRoute,
 } from './ProvideBreadcrumbs';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
@@ -38,7 +38,7 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
           text: value,
           href: isLastBreadcrumbItem
             ? undefined // makes the breadcrumb item not clickable
-            : getAPMHref(match.url, this.props.location.search)
+            : getAPMHref(match.url, this.props.location.search),
         };
       }
     );

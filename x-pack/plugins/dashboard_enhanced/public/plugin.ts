@@ -9,22 +9,21 @@ import { SharePluginStart, SharePluginSetup } from '../../../../src/plugins/shar
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardDrilldownsService } from './services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
-import { DrilldownsSetup, DrilldownsStart } from '../../drilldowns/public';
+import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../ui_actions_enhanced/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupDependencies {
-  advancedUiActions: AdvancedUiActionsSetup;
-  drilldowns: DrilldownsSetup;
+  uiActionsEnhanced: AdvancedUiActionsSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
 }
 
 export interface StartDependencies {
-  advancedUiActions: AdvancedUiActionsStart;
+  uiActionsEnhanced: AdvancedUiActionsStart;
   data: DataPublicPluginStart;
-  drilldowns: DrilldownsStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  dashboard: DashboardStart;
 }
 
 // eslint-disable-next-line

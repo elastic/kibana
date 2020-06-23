@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
 
   const browser = getService('browser');
@@ -135,7 +135,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(wrapperHeight).to.be.below(windowHeight);
     });
 
-    it('can navigate from NP apps to legacy apps', async () => {
+    // Not sure if we need this test or not. If yes, we need to find another legacy app
+    it.skip('can navigate from NP apps to legacy apps', async () => {
       await appsMenu.clickLink('Stack Management');
       await testSubjects.existOrFail('managementNav');
     });

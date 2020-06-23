@@ -19,10 +19,10 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
   const typeBuckets = get(response, 'aggregations.types.buckets', []);
   if (typeBuckets.length) {
     result.enabled = true;
-    result.types = typeBuckets.map(typeBucket => {
+    result.types = typeBuckets.map((typeBucket) => {
       return {
         type: typeBucket.key.split('.')[1],
-        levels: typeBucket.levels.buckets.map(levelBucket => {
+        levels: typeBucket.levels.buckets.map((levelBucket) => {
           return {
             level: levelBucket.key.toLowerCase(),
             count: levelBucket.doc_count,

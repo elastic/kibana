@@ -12,7 +12,7 @@ import { notificationService } from '../../services/notification';
 
 export const flushIndicesStart = createAction('INDEX_MANAGEMENT_FLUSH_INDICES_START');
 
-export const flushIndices = ({ indexNames }) => async dispatch => {
+export const flushIndices = ({ indexNames }) => async (dispatch) => {
   dispatch(flushIndicesStart({ indexNames }));
   try {
     await request(indexNames);

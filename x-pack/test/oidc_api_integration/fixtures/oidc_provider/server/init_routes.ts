@@ -13,7 +13,7 @@ export function initRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/oidc_provider/setup',
-      validate: { body: value => ({ value }) },
+      validate: { body: (value) => ({ value }) },
       options: { authRequired: false },
     },
     (context, request, response) => {
@@ -25,7 +25,7 @@ export function initRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/oidc_provider/token_endpoint',
-      validate: { body: value => ({ value }) },
+      validate: { body: (value) => ({ value }) },
       // Token endpoint needs authentication (with the client credentials) but we don't attempt to
       // validate this OIDC behavior here
       options: { authRequired: false, xsrfRequired: false },

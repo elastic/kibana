@@ -37,13 +37,13 @@ export function uiSettingsMixin(kbnServer, server) {
     return acc;
   }, {});
 
-  kbnServer.newPlatform.__internals.uiSettings.register(mergedUiSettingDefaults);
+  server.newPlatform.setup.core.uiSettings.register(mergedUiSettingDefaults);
 
   server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
     return uiSettingsServiceFactory(server, options);
   });
 
-  server.addMemoizedFactoryToRequest('getUiSettingsService', request => {
+  server.addMemoizedFactoryToRequest('getUiSettingsService', (request) => {
     return getUiSettingsServiceForRequest(server, request);
   });
 

@@ -23,14 +23,14 @@ import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { calculateLabel } from '../../../../../common/calculate_label';
 
 export function seriesAgg(resp, panel, series) {
-  return next => results => {
-    if (series.metrics.some(m => m.type === 'series_agg')) {
+  return (next) => (results) => {
+    if (series.metrics.some((m) => m.type === 'series_agg')) {
       const decoration = getDefaultDecoration(series);
 
       const targetSeries = [];
       // Filter out the seires with the matching metric and store them
       // in targetSeries
-      results = results.filter(s => {
+      results = results.filter((s) => {
         if (s.id.split(/:/)[0] === series.id) {
           targetSeries.push(s.data);
           return false;
@@ -38,7 +38,7 @@ export function seriesAgg(resp, panel, series) {
         return true;
       });
       const data = series.metrics
-        .filter(m => m.type === 'series_agg')
+        .filter((m) => m.type === 'series_agg')
         .reduce((acc, m) => {
           const fn = SeriesAgg[m.function];
           return (fn && fn(acc)) || acc;

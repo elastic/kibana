@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { checkNodesSettings } from '../';
 
 describe('Elasticsearch Nodes Settings', () => {
-  const getReq = response => {
+  const getReq = (response) => {
     return {
       server: {
         plugins: {

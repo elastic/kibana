@@ -46,7 +46,7 @@ import {
   ElasticsearchServiceStart,
 } from './elasticsearch';
 
-import { HttpServiceSetup } from './http';
+import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -121,6 +121,7 @@ export {
   CustomHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,
+  HttpAuth,
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerInfo,
@@ -217,6 +218,7 @@ export {
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportError,
@@ -338,10 +340,8 @@ export {
  *      which uses the credentials of the incoming request
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
  *      all the registered types.
- *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
+ *    - {@link ScopedClusterClient | elasticsearch.legacy.client} - Elasticsearch
  *      data client which uses the credentials of the incoming request
- *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
- *      admin client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
  *
@@ -354,8 +354,9 @@ export interface RequestHandlerContext {
       typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
-      dataClient: IScopedClusterClient;
-      adminClient: IScopedClusterClient;
+      legacy: {
+        client: IScopedClusterClient;
+      };
     };
     uiSettings: {
       client: IUiSettingsClient;
@@ -421,6 +422,8 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
+  /** {@link HttpServiceStart} */
+  http: HttpServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */

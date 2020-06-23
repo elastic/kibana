@@ -32,7 +32,7 @@ class VisualizationStub {
   }
 
   render() {
-    renderPromise = new Promise(resolve => {
+    renderPromise = new Promise((resolve) => {
       this.el.textContent = this.vis.params.markdown;
       resolve();
     });

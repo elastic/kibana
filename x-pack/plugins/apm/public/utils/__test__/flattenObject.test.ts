@@ -11,14 +11,14 @@ describe('FlattenObject', () => {
     const data = {
       foo: {
         item1: 'value 1',
-        item2: { itemA: 'value 2' }
+        item2: { itemA: 'value 2' },
       },
       bar: {
         item3: { itemA: { itemAB: 'value AB' } },
         item4: 'value 4',
         item5: [1],
-        item6: [1, 2, 3]
-      }
+        item6: [1, 2, 3],
+      },
     };
 
     const flatten = flattenObject(data);
@@ -30,7 +30,7 @@ describe('FlattenObject', () => {
       { key: 'bar.item6.1', value: 2 },
       { key: 'bar.item6.2', value: 3 },
       { key: 'foo.item1', value: 'value 1' },
-      { key: 'foo.item2.itemA', value: 'value 2' }
+      { key: 'foo.item2.itemA', value: 'value 2' },
     ]);
   });
   it('returns an empty array if no valid object is provided', () => {

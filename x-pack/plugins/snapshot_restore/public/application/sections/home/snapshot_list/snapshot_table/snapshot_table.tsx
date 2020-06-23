@@ -24,6 +24,8 @@ import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/na
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+
 interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
@@ -58,7 +60,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   repositoryFilter,
   policyFilter,
 }) => {
-  const { i18n, uiMetricService } = useServices();
+  const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 
   const lastSuccessfulManagedSnapshot = getLastSuccessfulManagedSnapshot(snapshots);
@@ -74,8 +76,11 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
-          onClick={() => uiMetricService.trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
-          href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
+          {...reactRouterNavigate(
+            history,
+            openSnapshotDetailsUrl(snapshot.repository, snapshotId),
+            () => uiMetricService.trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)
+          )}
           data-test-subj="snapshotLink"
         >
           {snapshotId}
@@ -90,7 +95,10 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (repositoryName: string) => (
-        <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
+        <EuiLink
+          {...reactRouterNavigate(history, linkToRepository(repositoryName))}
+          data-test-subj="repositoryLink"
+        >
           {repositoryName}
         </EuiLink>
       ),
@@ -199,7 +207,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                   iconType="importAction"
                   color="primary"
                   data-test-subj="srsnapshotListRestoreActionButton"
-                  href={linkToRestoreSnapshot(repository, snapshot)}
+                  {...reactRouterNavigate(history, linkToRestoreSnapshot(repository, snapshot))}
                   isDisabled={!canRestore}
                 />
               </EuiToolTip>
@@ -210,7 +218,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           render: ({ snapshot, repository }: SnapshotDetails) => {
             return (
               <SnapshotDeleteProvider>
-                {deleteSnapshotPrompt => {
+                {(deleteSnapshotPrompt) => {
                   const isDeleteDisabled = Boolean(lastSuccessfulManagedSnapshot)
                     ? snapshot === lastSuccessfulManagedSnapshot!.snapshot
                     : false;
@@ -330,9 +338,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           );
         }}
       </SnapshotDeleteProvider>
-    ) : (
-      undefined
-    ),
+    ) : undefined,
     toolsRight: (
       <EuiButton
         color="secondary"
@@ -358,7 +364,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           defaultMessage: 'Repository',
         }),
         multiSelect: false,
-        options: repositories.map(repository => ({
+        options: repositories.map((repository) => ({
           value: repository,
           view: repository,
         })),

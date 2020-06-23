@@ -8,7 +8,7 @@ import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus, getChecksDateRange } from './helper/make_checks';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('snapshot count', () => {

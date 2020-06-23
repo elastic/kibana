@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDisplayName }) {
   const renderJoins = () => {
     return joins.map((joinDescriptor, index) => {
-      const handleOnChange = updatedDescriptor => {
+      const handleOnChange = (updatedDescriptor) => {
         onChange(layer, [...joins.slice(0, index), updatedDescriptor, ...joins.slice(index + 1)]);
       };
 

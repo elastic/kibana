@@ -14,7 +14,7 @@ describe('Model Updater for Angular Controller with React Components', () => {
 
   beforeEach(() => {
     $scope = {};
-    $scope.$evalAsync = cb => cb();
+    $scope.$evalAsync = (cb) => cb();
 
     model = {};
 

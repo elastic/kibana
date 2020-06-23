@@ -13,9 +13,9 @@ const initialState = {
   selectedEditId: null,
 };
 
-const success = action => `${action}_SUCCESS`;
+const success = (action) => `${action}_SUCCESS`;
 
-const parseFollowerIndex = followerIndex => {
+const parseFollowerIndex = (followerIndex) => {
   // Extract status into boolean
   return { ...followerIndex, isPaused: followerIndex.status === 'paused' };
 };
@@ -42,7 +42,7 @@ export const reducer = (state = initialState, action) => {
     case success(t.FOLLOWER_INDEX_UNFOLLOW): {
       const byId = { ...state.byId };
       const { itemsUnfollowed } = action.payload;
-      itemsUnfollowed.forEach(id => delete byId[id]);
+      itemsUnfollowed.forEach((id) => delete byId[id]);
       return { ...state, byId };
     }
     default:

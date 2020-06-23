@@ -24,12 +24,12 @@ export function ServiceAlertTrigger(props: Props) {
     setAlertParams,
     setAlertProperty,
     alertTypeName,
-    defaults
+    defaults,
   } = props;
 
   const params: Record<string, any> = {
     ...defaults,
-    serviceName: urlParams.serviceName!
+    serviceName: urlParams.serviceName!,
   };
 
   useEffect(() => {
@@ -37,9 +37,9 @@ export function ServiceAlertTrigger(props: Props) {
     setAlertProperty('name', `${alertTypeName} | ${params.serviceName}`);
     setAlertProperty('tags', [
       'apm',
-      `service.name:${params.serviceName}`.toLowerCase()
+      `service.name:${params.serviceName}`.toLowerCase(),
     ]);
-    Object.keys(params).forEach(key => {
+    Object.keys(params).forEach((key) => {
       setAlertParams(key, params[key]);
     });
 

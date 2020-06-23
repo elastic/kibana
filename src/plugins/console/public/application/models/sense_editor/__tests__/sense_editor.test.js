@@ -28,7 +28,7 @@ import editorInput1 from './editor_input1.txt';
 describe('Editor', () => {
   let input;
 
-  beforeEach(function() {
+  beforeEach(function () {
     // Set up our document body
     document.body.innerHTML = `<div>
         <div id="ConAppEditor" />
@@ -40,14 +40,14 @@ describe('Editor', () => {
     $(input.getCoreEditor().getContainer()).show();
     input.autocomplete._test.removeChangeListener();
   });
-  afterEach(function() {
+  afterEach(function () {
     $(input.getCoreEditor().getContainer()).hide();
     input.autocomplete._test.addChangeListener();
   });
 
   let testCount = 0;
 
-  const callWithEditorMethod = (editorMethod, fn) => async done => {
+  const callWithEditorMethod = (editorMethod, fn) => async (done) => {
     const results = await input[editorMethod]();
     fn(results, done);
   };
@@ -69,7 +69,7 @@ describe('Editor', () => {
       data = prefix;
     }
 
-    test('Utils test ' + id + ' : ' + name, async function(done) {
+    test('Utils test ' + id + ' : ' + name, async function (done) {
       await input.update(data, true);
       testToRun(done);
     });
@@ -81,7 +81,7 @@ describe('Editor', () => {
       expected = [expected];
     }
 
-    _.each(requests, function(r) {
+    _.each(requests, function (r) {
       delete r.range;
     });
     expect(requests).toEqual(expected);
@@ -340,10 +340,10 @@ describe('Editor', () => {
   );
 
   function multiReqTest(name, editorInput, range, expected) {
-    utilsTest('multi request select - ' + name, editorInput, async function(done) {
+    utilsTest('multi request select - ' + name, editorInput, async function (done) {
       const requests = await input.getRequestsInRange(range, false);
       // convert to format returned by request.
-      _.each(expected, function(req) {
+      _.each(expected, function (req) {
         req.data = req.data == null ? [] : [JSON.stringify(req.data, null, 2)];
       });
 
@@ -451,7 +451,7 @@ describe('Editor', () => {
   );
 
   function multiReqCopyAsCurlTest(name, editorInput, range, expected) {
-    utilsTest('multi request copy as curl - ' + name, editorInput, async function(done) {
+    utilsTest('multi request copy as curl - ' + name, editorInput, async function (done) {
       const curl = await input.getRequestsAsCURL('http://localhost:9200', range);
       expect(curl).toEqual(expected);
       done();

@@ -32,7 +32,7 @@ export const SplitFieldSelect: FC<Props> = ({
   placeholder,
 }) => {
   const options: EuiComboBoxOptionOption[] = fields.map(
-    f =>
+    (f) =>
       ({
         label: f.name,
         field: f,

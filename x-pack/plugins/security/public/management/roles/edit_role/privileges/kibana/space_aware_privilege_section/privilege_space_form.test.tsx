@@ -218,10 +218,7 @@ describe('PrivilegeSpaceForm', () => {
       />
     );
 
-    wrapper
-      .find(SpaceSelector)
-      .props()
-      .onChange(['*']);
+    wrapper.find(SpaceSelector).props().onChange(['*']);
 
     wrapper.update();
 

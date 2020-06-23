@@ -21,9 +21,9 @@ import expect from '@kbn/expect';
 import { rename } from '../rename';
 import sinon from 'sinon';
 
-describe('deprecation/deprecations', function() {
-  describe('rename', function() {
-    it('should rename simple property', function() {
+describe('deprecation/deprecations', function () {
+  describe('rename', function () {
+    it('should rename simple property', function () {
       const value = 'value';
       const settings = {
         before: value,
@@ -34,7 +34,7 @@ describe('deprecation/deprecations', function() {
       expect(settings.after).to.be(value);
     });
 
-    it('should rename nested property', function() {
+    it('should rename nested property', function () {
       const value = 'value';
       const settings = {
         someObject: {
@@ -47,7 +47,7 @@ describe('deprecation/deprecations', function() {
       expect(settings.someObject.after).to.be(value);
     });
 
-    it('should rename property, even when the value is null', function() {
+    it('should rename property, even when the value is null', function () {
       const value = null;
       const settings = {
         before: value,
@@ -58,7 +58,7 @@ describe('deprecation/deprecations', function() {
       expect(settings.after).to.be(null);
     });
 
-    it(`shouldn't log when a rename doesn't occur`, function() {
+    it(`shouldn't log when a rename doesn't occur`, function () {
       const settings = {
         exists: true,
       };
@@ -68,7 +68,7 @@ describe('deprecation/deprecations', function() {
       expect(log.called).to.be(false);
     });
 
-    it('should log when a rename does occur', function() {
+    it('should log when a rename does occur', function () {
       const settings = {
         exists: true,
       };

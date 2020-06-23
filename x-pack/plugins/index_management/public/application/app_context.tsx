@@ -5,6 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { ScopedHistory } from 'kibana/public';
 import { CoreStart } from '../../../../../src/core/public';
 
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
@@ -17,6 +18,7 @@ const AppContext = createContext<AppDependencies | undefined>(undefined);
 export interface AppDependencies {
   core: {
     fatalErrors: CoreStart['fatalErrors'];
+    getUrlForApp: CoreStart['application']['getUrlForApp'];
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
@@ -27,6 +29,7 @@ export interface AppDependencies {
     httpService: HttpService;
     notificationService: NotificationService;
   };
+  history: ScopedHistory;
 }
 
 export const AppContextProvider = ({

@@ -16,12 +16,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Delete reports', function() {
+  describe('Delete reports', function () {
     before(async () => {
-      await security.testUser.setRoles(['global_discover_read', 'reporting_user']);
+      await security.testUser.setRoles(['kibana_admin', 'reporting_user']);
       await esArchiver.load('empty_kibana');
       await esArchiver.load('reporting/archived_reports');
-      await pageObjects.common.navigateToActualUrl('kibana', '/management/kibana/reporting');
+      await pageObjects.common.navigateToApp('reporting');
       await testSubjects.existOrFail('reportJobListing', { timeout: 200000 });
     });
 

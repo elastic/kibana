@@ -58,7 +58,7 @@ export class IndexSettings extends Component {
     }
   }
 
-  _setIndexName = async name => {
+  _setIndexName = async (name) => {
     const errorMessage = await this._isIndexNameAndPatternValid(name);
     return this.setState({
       indexName: name,
@@ -72,7 +72,7 @@ export class IndexSettings extends Component {
     this.props.setIndexName(name);
   };
 
-  _isIndexNameAndPatternValid = async name => {
+  _isIndexNameAndPatternValid = async (name) => {
     const { indexNameList, indexPatternList } = this.state;
     const nameAlreadyInUse = [...indexNameList, ...indexPatternList].includes(name);
     if (nameAlreadyInUse) {
@@ -113,7 +113,7 @@ export class IndexSettings extends Component {
           <EuiSelect
             data-test-subj="fileImportIndexSelect"
             disabled={indexDisabled}
-            options={indexTypes.map(indexType => ({
+            options={indexTypes.map((indexType) => ({
               text: indexType,
               value: indexType,
             }))}

@@ -212,7 +212,7 @@ const validateFetchArguments = (
     );
   }
 
-  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter(headerName =>
+  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter((headerName) =>
     headerName.startsWith('kbn-')
   );
   if (invalidHeaders.length) {

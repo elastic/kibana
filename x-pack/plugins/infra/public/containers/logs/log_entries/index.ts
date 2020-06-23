@@ -98,8 +98,8 @@ export const logEntriesInitialState: LogEntriesStateParams = {
 };
 
 const cleanDuplicateItems = (entriesA: LogEntry[], entriesB: LogEntry[]) => {
-  const ids = new Set(entriesB.map(item => item.id));
-  return entriesA.filter(item => !ids.has(item.id));
+  const ids = new Set(entriesB.map((item) => item.id));
+  return entriesA.filter((item) => !ids.has(item.id));
 };
 
 const shouldFetchNewEntries = ({
@@ -194,7 +194,10 @@ const useFetchEntriesEffect = (
     }
   };
 
-  const runFetchMoreEntriesRequest = async (direction: ShouldFetchMoreEntries) => {
+  const runFetchMoreEntriesRequest = async (
+    direction: ShouldFetchMoreEntries,
+    overrides: Partial<LogEntriesProps> = {}
+  ) => {
     if (!props.startTimestamp || !props.endTimestamp) {
       return;
     }
@@ -209,10 +212,10 @@ const useFetchEntriesEffect = (
 
     try {
       const commonFetchArgs: LogEntriesBaseRequest = {
-        sourceId: props.sourceId,
-        startTimestamp: props.startTimestamp,
-        endTimestamp: props.endTimestamp,
-        query: props.filterQuery,
+        sourceId: overrides.sourceId || props.sourceId,
+        startTimestamp: overrides.startTimestamp || props.startTimestamp,
+        endTimestamp: overrides.endTimestamp || props.endTimestamp,
+        query: overrides.filterQuery || props.filterQuery,
       };
 
       const fetchArgs: LogEntriesRequest = getEntriesBefore
@@ -266,6 +269,7 @@ const useFetchEntriesEffect = (
     }
   };
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const fetchNewerEntries = useCallback(
     throttle(() => runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After), 500),
     [props, state.bottomCursor]
@@ -279,10 +283,10 @@ const useFetchEntriesEffect = (
   const streamEntriesEffect = () => {
     (async () => {
       if (props.isStreaming && !state.isLoadingMore && !state.isReloading) {
+        const endTimestamp = Date.now();
         if (startedStreaming) {
-          await new Promise(res => setTimeout(res, LIVE_STREAM_INTERVAL));
+          await new Promise((res) => setTimeout(res, LIVE_STREAM_INTERVAL));
         } else {
-          const endTimestamp = Date.now();
           props.jumpToTargetPosition({ tiebreaker: 0, time: endTimestamp });
           setStartedStreaming(true);
           if (state.hasMoreAfterEnd) {
@@ -290,7 +294,9 @@ const useFetchEntriesEffect = (
             return;
           }
         }
-        const newEntriesEnd = await runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After);
+        const newEntriesEnd = await runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After, {
+          endTimestamp,
+        });
         if (newEntriesEnd) {
           props.jumpToTargetPosition(newEntriesEnd);
         }
@@ -325,17 +331,19 @@ const useFetchEntriesEffect = (
     props.timestampsLastUpdate,
   ];
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
   useEffect(streamEntriesEffect, streamEntriesEffectDependencies);
   useEffect(expandRangeEffect, expandRangeEffectDependencies);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return { fetchNewerEntries, checkForNewEntries: runFetchNewEntriesRequest };
 };
 
 export const useLogEntriesState: (
   props: LogEntriesProps
-) => [LogEntriesStateParams, LogEntriesCallbacks] = props => {
+) => [LogEntriesStateParams, LogEntriesCallbacks] = (props) => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
   const { fetchNewerEntries, checkForNewEntries } = useFetchEntriesEffect(state, dispatch, props);

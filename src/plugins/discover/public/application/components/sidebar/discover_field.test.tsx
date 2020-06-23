@@ -92,18 +92,18 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
   return { comp, props };
 }
 
-describe('discover sidebar field', function() {
-  it('should allow selecting fields', function() {
+describe('discover sidebar field', function () {
+  it('should allow selecting fields', function () {
     const { comp, props } = getComponent();
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
-  it('should allow deselecting fields', function() {
+  it('should allow deselecting fields', function () {
     const { comp, props } = getComponent(true);
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
   });
-  it('should trigger onShowDetails', function() {
+  it('should trigger onShowDetails', function () {
     const { comp, props } = getComponent();
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
     expect(props.onShowDetails).toHaveBeenCalledWith(true, props.field);

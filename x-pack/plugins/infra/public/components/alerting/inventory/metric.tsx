@@ -24,7 +24,7 @@ interface Props {
   metric?: { value: SnapshotMetricType; text: string };
   metrics: Array<{ value: string; text: string }>;
   errors: IErrorObject;
-  onChange: (metric: SnapshotMetricType) => void;
+  onChange: (metric?: SnapshotMetricType) => void;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -49,7 +49,7 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
     value: '',
   };
 
-  const availablefieldsOptions = metrics.map(m => {
+  const availablefieldsOptions = metrics.map((m) => {
     return { label: m.text, value: m.value };
   }, []);
 
@@ -65,11 +65,11 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
             }
           )}
           value={metric?.text || firstFieldOption.text}
-          isActive={aggFieldPopoverOpen || !metric}
+          isActive={Boolean(aggFieldPopoverOpen || (errors.metric && errors.metric.length > 0))}
           onClick={() => {
             setAggFieldPopoverOpen(true);
           }}
-          color={metric ? 'secondary' : 'danger'}
+          color={errors.metric?.length ? 'danger' : 'secondary'}
         />
       }
       isOpen={aggFieldPopoverOpen}
@@ -89,27 +89,25 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
         </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
-            <EuiFormRow
-              fullWidth
-              isInvalid={errors.metric.length > 0 && metric !== undefined}
-              error={errors.metric}
-            >
+            <EuiFormRow fullWidth isInvalid={errors.metric.length > 0} error={errors.metric}>
               <EuiComboBox
                 fullWidth
                 singleSelection={{ asPlainText: true }}
                 data-test-subj="availablefieldsOptionsComboBox"
-                isInvalid={errors.metric.length > 0 && metric !== undefined}
+                isInvalid={errors.metric.length > 0}
                 placeholder={firstFieldOption.text}
                 options={availablefieldsOptions}
                 noSuggestions={!availablefieldsOptions.length}
                 selectedOptions={
-                  metric ? availablefieldsOptions.filter(a => a.value === metric.value) : []
+                  metric ? availablefieldsOptions.filter((a) => a.value === metric.value) : []
                 }
                 renderOption={(o: any) => o.label}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   if (selectedOptions.length > 0) {
                     onChange(selectedOptions[0].value as SnapshotMetricType);
                     setAggFieldPopoverOpen(false);
+                  } else {
+                    onChange();
                   }
                 }}
               />

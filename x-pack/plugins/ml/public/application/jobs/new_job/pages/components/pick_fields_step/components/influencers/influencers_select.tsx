@@ -27,10 +27,10 @@ export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedIn
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
   ];
 
-  const selection: EuiComboBoxOptionOption[] = selectedInfluencers.map(i => ({ label: i }));
+  const selection: EuiComboBoxOptionOption[] = selectedInfluencers.map((i) => ({ label: i }));
 
   function onChange(selectedOptions: EuiComboBoxOptionOption[]) {
-    changeHandler(selectedOptions.map(o => o.label));
+    changeHandler(selectedOptions.map((o) => o.label));
   }
 
   return (

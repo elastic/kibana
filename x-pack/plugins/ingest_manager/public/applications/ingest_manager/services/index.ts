@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getFlattenedObject } from '../../../../../../../src/core/utils';
+export { getFlattenedObject } from '../../../../../../../src/core/public';
 
 export {
   agentConfigRouteService,
@@ -19,6 +19,7 @@ export {
   settingsRoutesService,
   appRoutesService,
   packageToConfigDatasourceInputs,
-  storedDatasourceToAgentDatasource,
+  storedDatasourcesToAgentInputs,
+  configToYaml,
   AgentStatusKueryHelper,
 } from '../../../../common';

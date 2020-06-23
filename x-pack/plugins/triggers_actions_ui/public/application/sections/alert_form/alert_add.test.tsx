@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { AlertAdd } from './alert_add';
+import AlertAdd from './alert_add';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { AlertsContextProvider, useAlertsContext } from '../../context/alerts_context';
@@ -71,6 +71,7 @@ describe('alert_add', () => {
         return { errors: {} };
       },
       alertParamsExpression: TestExpression,
+      requiresAppContext: false,
     };
 
     const actionTypeModel = {
@@ -119,11 +120,7 @@ describe('alert_add', () => {
             },
           }}
         >
-          <AlertAdd
-            consumer={'alerting'}
-            addFlyoutVisible={true}
-            setAddFlyoutVisibility={() => {}}
-          />
+          <AlertAdd consumer={'alerts'} addFlyoutVisible={true} setAddFlyoutVisibility={() => {}} />
         </AlertsContextProvider>
       </AppContextProvider>
     );
@@ -141,10 +138,7 @@ describe('alert_add', () => {
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
 
-    wrapper
-      .find('[data-test-subj="my-alert-type-SelectOption"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
 
     expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
   });

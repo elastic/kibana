@@ -19,12 +19,12 @@ describe('mergeProjection', () => {
           bool: {
             must: [
               {
-                term: 'b'
-              }
-            ]
-          }
-        }
-      }
+                term: 'b',
+              },
+            ],
+          },
+        },
+      },
     });
   });
 
@@ -36,9 +36,9 @@ describe('mergeProjection', () => {
         {
           body: {
             aggs: {
-              foo: { ...termsAgg, aggs: { bar: { terms: { field: 'baz' } } } }
-            }
-          }
+              foo: { ...termsAgg, aggs: { bar: { terms: { field: 'baz' } } } },
+            },
+          },
         }
       )
     ).toEqual({
@@ -47,18 +47,18 @@ describe('mergeProjection', () => {
         aggs: {
           foo: {
             terms: {
-              field: 'bar'
+              field: 'bar',
             },
             aggs: {
               bar: {
                 terms: {
-                  field: 'baz'
-                }
-              }
-            }
-          }
-        }
-      }
+                  field: 'baz',
+                },
+              },
+            },
+          },
+        },
+      },
     });
   });
 });

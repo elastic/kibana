@@ -6,7 +6,7 @@
 
 import { ES_INDEX_NAME } from './constants';
 
-export default function({ getService, loadTestFile }) {
+export default function ({ getService, loadTestFile }) {
   const es = getService('legacyEs');
 
   describe('beats', () => {

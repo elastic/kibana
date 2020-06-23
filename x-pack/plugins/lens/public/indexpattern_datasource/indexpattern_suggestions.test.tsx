@@ -1308,7 +1308,7 @@ describe('IndexPattern Data Source suggestions', () => {
         ...state,
         indexPatterns: { 1: { ...state.indexPatterns['1'], timeFieldName: undefined } },
       });
-      suggestions.forEach(suggestion => expect(suggestion.table.columns.length).toBe(1));
+      suggestions.forEach((suggestion) => expect(suggestion.table.columns.length).toBe(1));
     });
 
     it('returns simplified versions of table with more than 2 columns', () => {
@@ -1616,9 +1616,9 @@ function isTableWithBucketColumns(
   columnIds: string[],
   numBuckets: number
 ) {
-  expect(suggestion.table.columns.map(column => column.columnId)).toEqual(columnIds);
+  expect(suggestion.table.columns.map((column) => column.columnId)).toEqual(columnIds);
   expect(
-    suggestion.table.columns.slice(0, numBuckets).every(column => column.operation.isBucketed)
+    suggestion.table.columns.slice(0, numBuckets).every((column) => column.operation.isBucketed)
   ).toBeTruthy();
 }
 
@@ -1627,6 +1627,6 @@ function isTableWithMetricColumns(
   columnIds: string[]
 ) {
   expect(suggestion.table.isMultiRow).toEqual(false);
-  expect(suggestion.table.columns.map(column => column.columnId)).toEqual(columnIds);
-  expect(suggestion.table.columns.every(column => !column.operation.isBucketed)).toBeTruthy();
+  expect(suggestion.table.columns.map((column) => column.columnId)).toEqual(columnIds);
+  expect(suggestion.table.columns.every((column) => !column.operation.isBucketed)).toBeTruthy();
 }

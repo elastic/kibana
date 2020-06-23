@@ -19,23 +19,23 @@
 
 import { fromUser } from '../';
 
-describe('user input helpers', function() {
-  describe('user input parser', function() {
-    it('should return the input if passed an object', function() {
+describe('user input helpers', function () {
+  describe('user input parser', function () {
+    it('should return the input if passed an object', function () {
       expect(fromUser({ foo: 'bar' })).toEqual({ foo: 'bar' });
     });
 
-    it('unless the object is empty, then convert it to an empty string', function() {
+    it('unless the object is empty, then convert it to an empty string', function () {
       expect(fromUser({})).toEqual('');
     });
 
-    it('should pass through input strings that not start with {', function() {
+    it('should pass through input strings that not start with {', function () {
       expect(fromUser('foo')).toEqual('foo');
       expect(fromUser('400')).toEqual('400');
       expect(fromUser('true')).toEqual('true');
     });
 
-    it('should parse valid JSON and return the object instead of a string', function() {
+    it('should parse valid JSON and return the object instead of a string', function () {
       expect(fromUser('{}')).toEqual({});
 
       // invalid json remains a string

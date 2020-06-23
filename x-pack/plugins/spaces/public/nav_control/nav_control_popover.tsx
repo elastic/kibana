@@ -51,7 +51,7 @@ export class NavControlPopover extends Component<Props, State> {
 
   public componentDidMount() {
     this.activeSpace$ = this.props.spacesManager.onActiveSpaceChange$.subscribe({
-      next: activeSpace => {
+      next: (activeSpace) => {
         this.setState({
           activeSpace,
         });

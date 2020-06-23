@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs/operators';
  * Convert a Readable stream to an observable of lines
  */
 export const getLine$ = (stream: Readable) => {
-  return new Rx.Observable<string>(subscriber => {
+  return new Rx.Observable<string>((subscriber) => {
     let buffer = '';
     return Rx.fromEvent(stream, 'data')
       .pipe(takeUntil(Rx.fromEvent(stream, 'close')))

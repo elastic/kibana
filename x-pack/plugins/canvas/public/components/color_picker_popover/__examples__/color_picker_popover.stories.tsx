@@ -27,7 +27,7 @@ class Interactive extends React.Component<
       <div>
         <ColorPickerPopover
           colors={this.state.colors}
-          onChange={value => this.setState({ value })}
+          onChange={(value) => this.setState({ value })}
           onAddColor={action('onAddColor')}
           onRemoveColor={action('onRemoveColor')}
           value={this.state.value}

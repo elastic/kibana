@@ -22,6 +22,7 @@ jest.mock('history');
 import { setRootControllerMock, historyMock } from './new_platform.test.mocks';
 import { legacyAppRegister, __reset__, __setup__, __start__ } from './new_platform';
 import { coreMock } from '../../../../core/public/mocks';
+import { AppMount } from '../../../../core/public';
 
 describe('ui/new_platform', () => {
   describe('legacyAppRegister', () => {
@@ -33,7 +34,7 @@ describe('ui/new_platform', () => {
 
     const registerApp = () => {
       const unmountMock = jest.fn();
-      const mountMock = jest.fn(() => unmountMock);
+      const mountMock = jest.fn<ReturnType<AppMount>, Parameters<AppMount>>(() => unmountMock);
       legacyAppRegister({
         id: 'test',
         title: 'Test',
@@ -62,11 +63,23 @@ describe('ui/new_platform', () => {
 
       controller(scopeMock, elementMock);
       expect(mountMock).toHaveBeenCalledWith({
-        element: elementMock[0],
+        element: expect.any(HTMLElement),
         appBasePath: '/test/base/path/app/test',
         onAppLeave: expect.any(Function),
         history: historyMock,
       });
+    });
+
+    test('app is mounted in new div inside containing element', () => {
+      const { mountMock } = registerApp();
+      const controller = setRootControllerMock.mock.calls[0][1];
+      const scopeMock = { $on: jest.fn() };
+      const elementMock = [document.createElement('div')];
+
+      controller(scopeMock, elementMock);
+
+      const { element } = mountMock.mock.calls[0][0];
+      expect(element.parentElement).toEqual(elementMock[0]);
     });
 
     test('controller calls deprecated context app.mount when invoked', () => {
@@ -84,7 +97,7 @@ describe('ui/new_platform', () => {
 
       controller(scopeMock, elementMock);
       expect(mountMock).toHaveBeenCalledWith(expect.any(Object), {
-        element: elementMock[0],
+        element: expect.any(HTMLElement),
         appBasePath: '/test/base/path/app/test',
         onAppLeave: expect.any(Function),
         history: historyMock,
@@ -100,7 +113,7 @@ describe('ui/new_platform', () => {
       controller(scopeMock, elementMock);
       // Flush promise queue. Must be done this way because the controller cannot return a Promise without breaking
       // angular.
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise((resolve) => setTimeout(resolve, 1));
 
       const [event, eventHandler] = scopeMock.$on.mock.calls[0];
       expect(event).toEqual('$destroy');

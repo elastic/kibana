@@ -14,7 +14,7 @@ import {
   AuthorizationContext,
 } from '../../../../lib/authorization';
 
-import { CLIENT_BASE_PATH, SECTION_SLUG } from '../../../../constants';
+import { SECTION_SLUG } from '../../../../constants';
 
 interface CloneActionProps {
   itemId: string;
@@ -30,7 +30,7 @@ export const CloneAction: FC<CloneActionProps> = ({ itemId }) => {
   });
 
   function clickHandler() {
-    history.push(`${CLIENT_BASE_PATH}${SECTION_SLUG.CLONE_TRANSFORM}/${itemId}`);
+    history.push(`/${SECTION_SLUG.CLONE_TRANSFORM}/${itemId}`);
   }
 
   const cloneButton = (

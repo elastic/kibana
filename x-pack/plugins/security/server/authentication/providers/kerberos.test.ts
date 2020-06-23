@@ -280,11 +280,11 @@ describe('KerberosAuthenticationProvider', () => {
   }
 
   describe('`login` method', () => {
-    defineCommonLoginAndAuthenticateTests(request => provider.login(request));
+    defineCommonLoginAndAuthenticateTests((request) => provider.login(request));
   });
 
   describe('`authenticate` method', () => {
-    defineCommonLoginAndAuthenticateTests(request => provider.authenticate(request, null));
+    defineCommonLoginAndAuthenticateTests((request) => provider.authenticate(request, null));
 
     it('does not handle authentication via `authorization` header with non-negotiate scheme.', async () => {
       const request = httpServerMock.createKibanaRequest({
@@ -376,7 +376,7 @@ describe('KerberosAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(

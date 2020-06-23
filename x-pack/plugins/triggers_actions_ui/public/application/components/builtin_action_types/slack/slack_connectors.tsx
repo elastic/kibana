@@ -47,7 +47,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
           placeholder="Example: https://hooks.slack.com/services"
           value={webhookUrl || ''}
           data-test-subj="slackWebhookUrlInput"
-          onChange={e => {
+          onChange={(e) => {
             editActionSecrets('webhookUrl', e.target.value);
           }}
           onBlur={() => {

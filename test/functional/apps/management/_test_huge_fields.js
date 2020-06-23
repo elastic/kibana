@@ -19,22 +19,22 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
-  describe('test large number of fields', function() {
+  describe('test large number of fields', function () {
     this.tags(['skipCloud']);
 
     const EXPECTED_FIELD_COUNT = '10006';
-    before(async function() {
+    before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader']);
       await esArchiver.loadIfNeeded('large_fields');
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 
-    it('test_huge data should have expected number of fields', async function() {
+    it('test_huge data should have expected number of fields', async function () {
       const tabCount = await PageObjects.settings.getFieldsTabCount();
       expect(tabCount).to.be(EXPECTED_FIELD_COUNT);
     });

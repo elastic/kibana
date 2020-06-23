@@ -228,5 +228,21 @@ describe('filter manager utilities', () => {
 
       expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeFalsy();
     });
+
+    test('should compare index with index true', () => {
+      const f1 = {
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+      };
+      const f2 = {
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+      };
+
+      f2.meta.index = 'wassup';
+      f2.meta.index = 'dog';
+
+      expect(compareFilters([f1], [f2], { index: true })).toBeFalsy();
+    });
   });
 });

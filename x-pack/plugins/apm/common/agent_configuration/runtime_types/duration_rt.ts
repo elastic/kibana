@@ -32,18 +32,23 @@ export function getDurationRt({ min, max }: { min?: string; max?: string }) {
     'durationRt',
     t.string.is,
     (input, context) => {
-      return either.chain(t.string.validate(input, context), inputAsString => {
-        const inputAsMilliseconds = amountAndUnitToMilliseconds(inputAsString);
+      return either.chain(
+        t.string.validate(input, context),
+        (inputAsString) => {
+          const inputAsMilliseconds = amountAndUnitToMilliseconds(
+            inputAsString
+          );
 
-        const isValidAmount =
-          inputAsMilliseconds !== undefined &&
-          inputAsMilliseconds >= minAsMilliseconds &&
-          inputAsMilliseconds <= maxAsMilliseconds;
+          const isValidAmount =
+            inputAsMilliseconds !== undefined &&
+            inputAsMilliseconds >= minAsMilliseconds &&
+            inputAsMilliseconds <= maxAsMilliseconds;
 
-        return isValidAmount
-          ? t.success(inputAsString)
-          : t.failure(input, context, message);
-      });
+          return isValidAmount
+            ? t.success(inputAsString)
+            : t.failure(input, context, message);
+        }
+      );
     },
     t.identity
   );

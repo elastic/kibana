@@ -26,7 +26,7 @@ export function registerFreezeRoute({ router, license, lib }: RouteDependencies)
       };
 
       try {
-        await await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+        await await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
           'transport.request',
           params
         );
