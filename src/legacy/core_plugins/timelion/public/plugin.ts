@@ -16,7 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, Plugin, PluginInitializerContext, IUiSettingsClient } from 'kibana/public';
+import {
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  IUiSettingsClient,
+  CoreStart,
+} from 'kibana/public';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
