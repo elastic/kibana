@@ -161,7 +161,7 @@ export class Field implements IFieldType {
         aggregatable: this.aggregatable,
         readFromDocValues: this.readFromDocValues,
         subType: this.subType,
-        format: this.indexPattern?.fieldFormatMap[this.name]?.toJSON() || {},
+        format: this.indexPattern?.fieldFormatMap[this.name]?.toJSON() || undefined,
       };
     };
     return newObj;
