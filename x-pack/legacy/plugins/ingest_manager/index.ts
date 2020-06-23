@@ -8,6 +8,7 @@ import { resolve } from 'path';
 export function ingestManager(kibana: any) {
   return new kibana.Plugin({
     id: 'ingestManager',
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     publicDir: resolve(__dirname, '../../../plugins/ingest_manager/public'),
   });
 }

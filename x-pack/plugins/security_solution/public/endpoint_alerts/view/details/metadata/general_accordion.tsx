@@ -56,7 +56,7 @@ export const GeneralAccordion = memo(({ alertData }: { alertData: Immutable<Aler
             defaultMessage: 'MalwareScore',
           }
         ),
-        description: alertData.file.malware_classification.score,
+        description: alertData.file.Ext.malware_classification.score,
       },
       {
         title: i18n.translate(

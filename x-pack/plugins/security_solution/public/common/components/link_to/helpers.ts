@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const appendSearch = (search?: string) => (search != null ? `${search}` : '');
+import { isEmpty } from 'lodash/fp';
+
+export const appendSearch = (search?: string) =>
+  isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;

@@ -70,22 +70,22 @@ export const HostsTabs = memo<HostsTabsProps>(
 
     return (
       <Switch>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}>
+        <Route path={`/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}>
+        <Route path={`/:tabName(${HostsTableType.authentications})`}>
           <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
+        <Route path={`/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}>
+        <Route path={`/:tabName(${HostsTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}>
+        <Route path={`/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}>
+        <Route path={`/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} />
         </Route>
       </Switch>
