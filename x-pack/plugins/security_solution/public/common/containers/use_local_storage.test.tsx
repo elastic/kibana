@@ -5,90 +5,53 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useSecurityLocalStorage, UseSecurityLocalStorage } from './use_local_storage';
+import { useKibana } from '../lib/kibana';
+import { createUseKibanaMock } from '../mock/kibana_react';
+import { useMessagesStorage, UseMessagesStorage } from './use_local_storage';
 
-const localStorageMock = () => {
-  let store: Record<string, unknown> = {};
-
-  return {
-    getItem: (key: string) => {
-      return store[key] || null;
-    },
-    setItem: (key: string, value: unknown) => {
-      store[key] = value;
-    },
-    clear() {
-      store = {};
-    },
-  };
-};
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock(),
-});
+jest.mock('../lib/kibana');
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('useLocalStorage', () => {
   beforeEach(() => {
-    localStorage.clear();
+    const services = { ...createUseKibanaMock()().services };
+    useKibanaMock.mockImplementation(() => ({ services }));
+    services.storage.store.clear();
   });
 
-  it('should return an empty array when there is no plugin settings', async () => {
+  it('should return an empty array when there is no messages', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseSecurityLocalStorage>(() =>
-        useSecurityLocalStorage()
+      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
+        useMessagesStorage()
       );
       await waitForNextUpdate();
-      const { getCallouts } = result.current;
-      expect(getCallouts('case')).toEqual([]);
+      const { getMessages } = result.current;
+      expect(getMessages('case')).toEqual([]);
     });
   });
 
-  it('should return an empty array when there is no callouts', async () => {
-    localStorage.setItem('case', JSON.stringify({ foo: 'bar' }));
+  it('should add a message', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseSecurityLocalStorage>(() =>
-        useSecurityLocalStorage()
+      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
+        useMessagesStorage()
       );
       await waitForNextUpdate();
-      const { getCallouts } = result.current;
-      expect(getCallouts('case')).toEqual([]);
+      const { getMessages, addMessage } = result.current;
+      addMessage('case', 'id-1');
+      expect(getMessages('case')).toEqual(['id-1']);
     });
   });
 
-  it('should return the callouts', async () => {
-    localStorage.setItem('case', JSON.stringify({ callouts: ['id-1'] }));
+  it('should add multiple messages', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseSecurityLocalStorage>(() =>
-        useSecurityLocalStorage()
+      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
+        useMessagesStorage()
       );
       await waitForNextUpdate();
-      const { getCallouts } = result.current;
-      expect(getCallouts('case')).toEqual(['id-1']);
-    });
-  });
-
-  it('persist a callout', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseSecurityLocalStorage>(() =>
-        useSecurityLocalStorage()
-      );
-      await waitForNextUpdate();
-      const { getCallouts, persistDismissCallout } = result.current;
-      persistDismissCallout('case', 'id-1');
-      expect(getCallouts('case')).toEqual(['id-1']);
-    });
-  });
-
-  it('updates the callouts correctly', async () => {
-    localStorage.setItem('case', JSON.stringify({ callouts: ['id-1'] }));
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseSecurityLocalStorage>(() =>
-        useSecurityLocalStorage()
-      );
-      await waitForNextUpdate();
-      const { getCallouts, persistDismissCallout } = result.current;
-      persistDismissCallout('case', 'id-2');
-      expect(getCallouts('case')).toEqual(['id-1', 'id-2']);
+      const { getMessages, addMessage } = result.current;
+      addMessage('case', 'id-1');
+      addMessage('case', 'id-2');
+      expect(getMessages('case')).toEqual(['id-1', 'id-2']);
     });
   });
 });

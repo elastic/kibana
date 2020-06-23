@@ -7,17 +7,17 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { useSecurityLocalStorage } from '../../../common/containers/use_local_storage';
+import { useMessagesStorage } from '../../../common/containers/use_local_storage';
 import { TestProviders } from '../../../common/mock';
 import { createCalloutId } from './helpers';
 import { CaseCallOut } from '.';
 
 jest.mock('../../../common/containers/use_local_storage');
 
-const useSecurityLocalStorageMock = useSecurityLocalStorage as jest.Mock;
+const useSecurityLocalStorageMock = useMessagesStorage as jest.Mock;
 const securityLocalStorageMock = {
-  getCallouts: jest.fn(() => []),
-  persistDismissCallout: jest.fn(),
+  getMessages: jest.fn(() => []),
+  addMessage: jest.fn(),
 };
 
 const defaultProps = {
@@ -127,9 +127,9 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['generic-message-error']);
-    expect(securityLocalStorageMock.getCallouts).toHaveBeenCalledWith('case');
+    expect(securityLocalStorageMock.getMessages).toHaveBeenCalledWith('case');
     wrapper.find(`[data-test-subj="callout-dismiss-${id}"]`).last().simulate('click');
-    expect(securityLocalStorageMock.persistDismissCallout).toHaveBeenCalledWith('case', id);
+    expect(securityLocalStorageMock.addMessage).toHaveBeenCalledWith('case', id);
   });
 
   it('do not show the callout if is in the localStorage', () => {
@@ -142,7 +142,7 @@ describe('CaseCallOut ', () => {
 
     useSecurityLocalStorageMock.mockImplementation(() => ({
       ...securityLocalStorageMock,
-      getCallouts: jest.fn(() => [id]),
+      getMessages: jest.fn(() => [id]),
     }));
 
     const wrapper = mount(
@@ -173,6 +173,6 @@ describe('CaseCallOut ', () => {
       </TestProviders>
     );
 
-    expect(securityLocalStorageMock.persistDismissCallout).not.toHaveBeenCalled();
+    expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
   });
 });

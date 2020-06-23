@@ -7,7 +7,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
 
-import { useSecurityLocalStorage } from '../../../common/containers/use_local_storage';
+import { useMessagesStorage } from '../../../common/containers/use_local_storage';
 import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';
@@ -32,8 +32,8 @@ interface CalloutVisibility {
 }
 
 const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) => {
-  const { getCallouts, persistDismissCallout } = useSecurityLocalStorage();
-  const dismissedCallouts = getCallouts('case').reduce<CalloutVisibility>(
+  const { getMessages, addMessage } = useMessagesStorage();
+  const dismissedCallouts = getMessages('case').reduce<CalloutVisibility>(
     (acc, id) => ({
       ...acc,
       [id]: false,
@@ -46,10 +46,10 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
     (id, type) => {
       setCalloutVisibility((prevState) => ({ ...prevState, [id]: false }));
       if (type !== 'danger') {
-        persistDismissCallout('case', id);
+        addMessage('case', id);
       }
     },
-    [setCalloutVisibility, persistDismissCallout]
+    [setCalloutVisibility, addMessage]
   );
 
   let callOutMessages = messages ?? [];

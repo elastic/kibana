@@ -5,33 +5,33 @@
  */
 
 import { useCallback } from 'react';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { useKibana } from '../lib/kibana';
 
-export interface UseSecurityLocalStorage {
-  getCallouts: (plugin: string) => string[];
-  persistDismissCallout: (plugin: string, id: string) => void;
+export interface UseMessagesStorage {
+  getMessages: (plugin: string) => string[];
+  addMessage: (plugin: string, id: string) => void;
 }
 
-export const useSecurityLocalStorage = (): UseSecurityLocalStorage => {
-  const storage = new Storage(localStorage);
+export const useMessagesStorage = (): UseMessagesStorage => {
+  const { storage } = useKibana().services;
 
-  const getCallouts = useCallback(
+  const getMessages = useCallback(
     (plugin: string): string[] => {
-      return storage.get(plugin)?.callouts ?? [];
+      return storage.get(`${plugin}-messages`) ?? [];
     },
     [storage]
   );
 
-  const persistDismissCallout = useCallback(
+  const addMessage = useCallback(
     (plugin: string, id: string) => {
-      const pluginStorage = storage.get(plugin) ?? { callouts: [] };
-      storage.set(plugin, { ...pluginStorage, callouts: [...pluginStorage.callouts, id] });
+      const pluginStorage = storage.get(`${plugin}-messages`) ?? [];
+      storage.set(`${plugin}-messages`, [...pluginStorage, id]);
     },
     [storage]
   );
 
   return {
-    persistDismissCallout,
-    getCallouts,
+    getMessages,
+    addMessage,
   };
 };
