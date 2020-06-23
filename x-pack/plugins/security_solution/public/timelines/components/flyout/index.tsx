@@ -44,7 +44,7 @@ interface OwnProps {
 type Props = OwnProps & ProsFromRedux;
 
 export const FlyoutComponent = React.memo<Props>(
-  ({ dataProviders, flyoutHeight, show, showTimeline, timelineId, usersViewing, width }) => {
+  ({ dataProviders, flyoutHeight, show = true, showTimeline, timelineId, usersViewing, width }) => {
     const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
       showTimeline,
       timelineId,
