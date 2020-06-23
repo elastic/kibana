@@ -69,7 +69,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
         title={
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.errorMessage"
-            defaultMessage="Unable to load the ML swimlane data"
+            defaultMessage="Unable to load the ML swim lane data"
           />
         }
         color="danger"
