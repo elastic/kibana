@@ -8,7 +8,7 @@ import { ElasticsearchServiceSetup } from 'src/core/server';
 import { LevelLogger } from '../';
 import { ReportingCore } from '../../';
 import { Report } from './report';
-import { schema } from './schema';
+import { mapping } from './mapping';
 import { indexTimestamp } from './index_timestamp';
 import { LayoutInstance } from '../../export_types/common/layouts';
 
@@ -60,25 +60,25 @@ export class ReportingStore {
   }
 
   private async createIndex(indexName: string) {
-    const indexSettings = {
-      number_of_shards: 1,
-      auto_expand_replicas: '0-1',
-    };
-    const body = {
-      settings: indexSettings,
-      mappings: {
-        properties: schema,
-      },
-    };
-
     return this.client
       .callAsInternalUser('indices.exists', {
         index: indexName,
       })
       .then((exists) => {
-        if (!exists) {
+        if (exists) {
           return exists;
         }
+
+        const indexSettings = {
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+        };
+        const body = {
+          settings: indexSettings,
+          mappings: {
+            properties: mapping,
+          },
+        };
 
         return this.client
           .callAsInternalUser('indices.create', {

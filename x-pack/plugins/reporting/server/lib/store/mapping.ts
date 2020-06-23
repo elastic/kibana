@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const schema = {
+export const mapping = {
   meta: {
     // We are indexing these properties with both text and keyword fields because that's what will be auto generated
     // when an index already exists. This schema is only used when a reporting index doesn't exist.  This way existing
