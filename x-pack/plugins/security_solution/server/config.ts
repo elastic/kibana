@@ -29,6 +29,8 @@ export const configSchema = schema.object({
     from: schema.string({ defaultValue: 'now-15m' }),
     to: schema.string({ defaultValue: 'now' }),
   }),
+  // TODO: why can't we remove this? :)
+  packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 });
 
 export const createConfig$ = (context: PluginInitializerContext) =>
