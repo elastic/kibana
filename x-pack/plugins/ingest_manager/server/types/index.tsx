@@ -20,7 +20,7 @@ export {
   Datasource,
   NewDatasource,
   DatasourceSOAttributes,
-  FullAgentConfigDatasource,
+  FullAgentConfigInput,
   FullAgentConfig,
   AgentConfig,
   AgentConfigSOAttributes,

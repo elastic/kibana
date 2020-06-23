@@ -138,11 +138,11 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         if (curCheck.tls == null) {
                           curCheck.tls = new HashMap();
                         }
-                        if (!doc["tls.server.x509.not_after"].isEmpty()) {
-                          curCheck.tls.not_after = doc["tls.server.x509.not_after"][0];
+                         if (!doc["tls.certificate_not_valid_after"].isEmpty()) {
+                          curCheck.tls.not_after = doc["tls.certificate_not_valid_after"][0];
                         }
-                        if (!doc["tls.server.x509.not_before"].isEmpty()) {
-                          curCheck.tls.not_before = doc["tls.server.x509.not_before"][0];
+                         if (!doc["tls.certificate_not_valid_before"].isEmpty()) {
+                          curCheck.tls.not_before = doc["tls.certificate_not_valid_before"][0];
                         }
 
                         state.checksByAgentIdIP[agentIdIP] = curCheck;

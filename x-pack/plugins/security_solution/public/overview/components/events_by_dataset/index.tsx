@@ -5,12 +5,11 @@
  */
 
 import { Position } from '@elastic/charts';
-import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import uuid from 'uuid';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
@@ -18,8 +17,6 @@ import {
   MatrixHisrogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
 import { eventsStackByOptions } from '../../../hosts/pages/navigation';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
@@ -35,6 +32,9 @@ import { HostsTableType, HostsType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
 import * as i18n from '../../pages/translations';
+import { SecurityPageName } from '../../../app/types';
+import { useFormatUrl } from '../../../common/components/link_to';
+import { LinkButton } from '../../../common/components/links';
 
 const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
@@ -95,16 +95,30 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   }, [deleteQuery, uniqueQueryId]);
 
   const kibana = useKibana();
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.hosts);
+  const { navigateToApp } = kibana.services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const urlSearch = useGetUrlSearch(navTabs.hosts);
+
+  const goToHostEvents = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        path: getTabsOnHostsUrl(HostsTableType.events, urlSearch),
+      });
+    },
+    [navigateToApp, urlSearch]
+  );
 
   const eventsCountViewEventsButton = useMemo(
     () => (
-      <EuiButton href={getTabsOnHostsUrl(HostsTableType.events, urlSearch)}>
+      <LinkButton
+        onClick={goToHostEvents}
+        href={formatUrl(getTabsOnHostsUrl(HostsTableType.events))}
+      >
         {i18n.VIEW_EVENTS}
-      </EuiButton>
+      </LinkButton>
     ),
-    [urlSearch]
+    [goToHostEvents, formatUrl]
   );
 
   const filterQuery = useMemo(

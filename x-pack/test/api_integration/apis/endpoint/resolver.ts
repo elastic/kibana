@@ -15,6 +15,7 @@ import {
   ResolverTree,
   LegacyEndpointEvent,
   ResolverNodeStats,
+  ResolverRelatedAlerts,
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import { parentEntityId } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -41,25 +42,6 @@ const expectLifecycleNodeInMap = (node: LifecycleNode, nodeMap: Map<string, Tree
 };
 
 /**
- * Verify that all the ancestor nodes including the origin are valid.
- *
- * @param origin the origin node for the tree
- * @param ancestors an array of ancestors
- * @param tree the generated resolver tree as the source of truth
- * @param verifyLastParent a boolean indicating whether to check the last ancestor. If the ancestors array intentionally
- *  does not contain all the ancestors, the last one will not have the parent
- */
-const verifyAncestryFromOrigin = (
-  origin: LifecycleNode,
-  ancestors: LifecycleNode[],
-  tree: Tree,
-  verifyLastParent: boolean
-) => {
-  compareArrays(tree.origin.lifecycle, origin.lifecycle, true);
-  verifyAncestry(ancestors, tree, verifyLastParent);
-};
-
-/**
  * Verify that all the ancestor nodes are valid and optionally have parents.
  *
  * @param ancestors an array of ancestors
@@ -78,14 +60,59 @@ const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent
   expect(Object.keys(groupedAncestors).length).to.eql(ancestors.length);
   // make sure there aren't any nodes with the same parent entity_id
   expect(Object.keys(groupedAncestorsParent).length).to.eql(ancestors.length);
-  ancestors.forEach((node) => {
-    const parentID = parentEntityId(node.lifecycle[0]);
-    // the last node generated will have `undefined` as the parent entity_id
-    if (parentID !== undefined && verifyLastParent) {
-      expect(groupedAncestors[parentID]).to.be.ok();
-    }
+
+  // make sure each of the ancestors' lifecycle events are in the generated tree
+  for (const node of ancestors) {
     expectLifecycleNodeInMap(node, tree.ancestry);
-  });
+  }
+
+  // start at the origin which is always the first element of the array and make sure we have a connection
+  // using parent id between each of the nodes
+  let foundParents = 0;
+  let node = ancestors[0];
+  for (let i = 0; i < ancestors.length; i++) {
+    const parentID = parentEntityId(node.lifecycle[0]);
+    if (parentID !== undefined) {
+      const nextNode = groupedAncestors[parentID];
+      if (!nextNode) {
+        break;
+      }
+      // the grouped nodes should only have a single entry since each entity is unique
+      node = nextNode[0];
+    }
+    foundParents++;
+  }
+
+  if (verifyLastParent) {
+    expect(foundParents).to.eql(ancestors.length);
+  } else {
+    // if we only retrieved a portion of all the ancestors then the most distant grandparent's parent will not necessarily
+    // be in the results
+    expect(foundParents).to.eql(ancestors.length - 1);
+  }
+};
+
+/**
+ * Retrieves the most distant ancestor in the given array.
+ *
+ * @param ancestors an array of ancestor nodes
+ */
+const retrieveDistantAncestor = (ancestors: LifecycleNode[]) => {
+  // group the ancestors by their entity_id mapped to a lifecycle node
+  const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
+  let node = ancestors[0];
+  for (let i = 0; i < ancestors.length; i++) {
+    const parentID = parentEntityId(node.lifecycle[0]);
+    if (parentID !== undefined) {
+      const nextNode = groupedAncestors[parentID];
+      if (nextNode) {
+        node = nextNode[0];
+      } else {
+        return node;
+      }
+    }
+  }
+  return node;
 };
 
 /**
@@ -151,7 +178,11 @@ const compareArrays = (
  * @param relatedEvents the related events received for a particular node
  * @param categories the related event info used when generating the resolver tree
  */
-const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEventInfo[]) => {
+const verifyStats = (
+  stats: ResolverNodeStats | undefined,
+  categories: RelatedEventInfo[],
+  relatedAlerts: number
+) => {
   expect(stats).to.not.be(undefined);
   let totalExpEvents = 0;
   for (const cat of categories) {
@@ -169,6 +200,7 @@ const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEv
     totalExpEvents += cat.count;
   }
   expect(stats?.events.total).to.be(totalExpEvents);
+  expect(stats?.totalAlerts);
 };
 
 /**
@@ -177,9 +209,13 @@ const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEv
  * @param nodes an array of lifecycle nodes that should have a stats field defined
  * @param categories the related event info used when generating the resolver tree
  */
-const verifyLifecycleStats = (nodes: LifecycleNode[], categories: RelatedEventInfo[]) => {
+const verifyLifecycleStats = (
+  nodes: LifecycleNode[],
+  categories: RelatedEventInfo[],
+  relatedAlerts: number
+) => {
   for (const node of nodes) {
-    verifyStats(node.stats, categories);
+    verifyStats(node.stats, categories, relatedAlerts);
   }
 };
 
@@ -193,12 +229,13 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     { category: RelatedEventCategory.File, count: 1 },
     { category: RelatedEventCategory.Registry, count: 1 },
   ];
-
+  const relatedAlerts = 4;
   let resolverTrees: GeneratedTrees;
   let tree: Tree;
   const treeOptions: Options = {
     ancestors: 5,
     relatedEvents: relatedEventsToGen,
+    relatedAlerts,
     children: 3,
     generations: 2,
     percentTerminated: 100,
@@ -218,6 +255,62 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       await resolver.deleteTrees(resolverTrees);
       // this unload is for an endgame-* index so it does not use data streams
       await esArchiver.unload('endpoint/resolver/api_feature');
+    });
+
+    describe('related alerts route', () => {
+      describe('endpoint events', () => {
+        it('should not find any alerts', async () => {
+          const { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/5555/alerts`)
+            .expect(200);
+          expect(body.nextAlert).to.eql(null);
+          expect(body.alerts).to.be.empty();
+        });
+
+        it('should return details for the root node', async () => {
+          const { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
+            .expect(200);
+          expect(body.alerts.length).to.eql(4);
+          compareArrays(tree.origin.relatedAlerts, body.alerts, true);
+          expect(body.nextAlert).to.eql(null);
+        });
+
+        it('should return paginated results for the root node', async () => {
+          let { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2`)
+            .expect(200);
+          expect(body.alerts.length).to.eql(2);
+          compareArrays(tree.origin.relatedAlerts, body.alerts);
+          expect(body.nextAlert).not.to.eql(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2&afterAlert=${body.nextAlert}`
+            )
+            .expect(200));
+          expect(body.alerts.length).to.eql(2);
+          compareArrays(tree.origin.relatedAlerts, body.alerts);
+          expect(body.nextAlert).to.not.eql(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2&afterAlert=${body.nextAlert}`
+            )
+            .expect(200));
+          expect(body.alerts).to.be.empty();
+          expect(body.nextAlert).to.eql(null);
+        });
+
+        it('should return the first page of information when the cursor is invalid', async () => {
+          const { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/alerts?afterAlert=blah`)
+            .expect(200);
+          expect(body.alerts.length).to.eql(4);
+          compareArrays(tree.origin.relatedAlerts, body.alerts, true);
+          expect(body.nextAlert).to.eql(null);
+        });
+      });
     });
 
     describe('related events route', () => {
@@ -340,6 +433,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             )
             .expect(200);
           expect(body.ancestors[0].lifecycle.length).to.eql(2);
+          expect(body.ancestors.length).to.eql(2);
           expect(body.nextAncestor).to.eql(null);
         });
 
@@ -367,9 +461,12 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       });
 
       describe('endpoint events', () => {
-        const getRootAndAncestry = (ancestry: ResolverAncestry) => {
-          return { root: ancestry.ancestors[0], ancestry: ancestry.ancestors.slice(1) };
-        };
+        it('should return the origin node at the front of the array', async () => {
+          const { body }: { body: ResolverAncestry } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=9`)
+            .expect(200);
+          expect(body.ancestors[0].entityID).to.eql(tree.origin.id);
+        });
 
         it('should return details for the root node', async () => {
           const { body }: { body: ResolverAncestry } = await supertest
@@ -377,8 +474,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .expect(200);
           // the tree we generated had 5 ancestors + 1 origin node
           expect(body.ancestors.length).to.eql(6);
-          const ancestryInfo = getRootAndAncestry(body);
-          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree, true);
+          expect(body.ancestors[0].entityID).to.eql(tree.origin.id);
+          verifyAncestry(body.ancestors, tree, true);
           expect(body.nextAncestor).to.eql(null);
         });
 
@@ -396,12 +493,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .expect(200);
           // it should have 2 ancestors + 1 origin
           expect(body.ancestors.length).to.eql(3);
-          const ancestryInfo = getRootAndAncestry(body);
-          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree, false);
-          expect(body.nextAncestor).to.eql(
-            // it should be the parent entity id on the last element of the ancestry array
-            parentEntityId(ancestryInfo.ancestry[ancestryInfo.ancestry.length - 1].lifecycle[0])
-          );
+          verifyAncestry(body.ancestors, tree, false);
+          const distantGrandparent = retrieveDistantAncestor(body.ancestors);
+          expect(body.nextAncestor).to.eql(parentEntityId(distantGrandparent.lifecycle[0]));
         });
 
         it('should handle multiple ancestor requests', async () => {
@@ -605,24 +699,27 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         it('returns a tree', async () => {
           const { body }: { body: ResolverTree } = await supertest
             .get(
-              `/api/endpoint/resolver/${tree.origin.id}?children=100&generations=3&ancestors=5&events=4`
+              `/api/endpoint/resolver/${tree.origin.id}?children=100&generations=3&ancestors=5&events=4&alerts=4`
             )
             .expect(200);
 
           expect(body.children.nextChild).to.equal(null);
           expect(body.children.childNodes.length).to.equal(12);
           verifyChildren(body.children.childNodes, tree, 4, 3);
-          verifyLifecycleStats(body.children.childNodes, relatedEventsToGen);
+          verifyLifecycleStats(body.children.childNodes, relatedEventsToGen, relatedAlerts);
 
           expect(body.ancestry.nextAncestor).to.equal(null);
           verifyAncestry(body.ancestry.ancestors, tree, true);
-          verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen);
+          verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen, relatedAlerts);
 
           expect(body.relatedEvents.nextEvent).to.equal(null);
           compareArrays(tree.origin.relatedEvents, body.relatedEvents.events, true);
 
+          expect(body.relatedAlerts.nextAlert).to.equal(null);
+          compareArrays(tree.origin.relatedAlerts, body.relatedAlerts.alerts, true);
+
           compareArrays(tree.origin.lifecycle, body.lifecycle, true);
-          verifyStats(body.stats, relatedEventsToGen);
+          verifyStats(body.stats, relatedEventsToGen, relatedAlerts);
         });
       });
     });
