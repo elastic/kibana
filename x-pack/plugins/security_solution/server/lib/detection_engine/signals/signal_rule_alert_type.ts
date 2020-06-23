@@ -22,13 +22,7 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import {
-  getGapBetweenRuns,
-  parseScheduleDates,
-  getListsClient,
-  getExceptions,
-  sortExceptionItems,
-} from './utils';
+import { getGapBetweenRuns, parseScheduleDates, getListsClient, getExceptions } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
@@ -153,9 +147,6 @@ export const signalRulesAlertType = ({
           client: exceptionsClient,
           lists: exceptionsList,
         });
-        const { exceptionsWithValueLists, exceptionsWithoutValueLists } = sortExceptionItems(
-          exceptionItems ?? []
-        );
 
         if (isMlRule(type)) {
           if (ml == null) {
@@ -240,12 +231,12 @@ export const signalRulesAlertType = ({
             savedId,
             services,
             index: inputIndex,
-            lists: exceptionsWithoutValueLists,
+            lists: exceptionItems ?? [],
           });
 
           result = await searchAfterAndBulkCreate({
             listClient,
-            exceptionsList: exceptionsWithValueLists,
+            exceptionsList: exceptionItems ?? [],
             ruleParams: params,
             services,
             logger,

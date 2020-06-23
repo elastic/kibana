@@ -79,7 +79,7 @@ export const getExceptions = async ({
     if (lists != null) {
       try {
         // Gather all exception items of all exception lists linked to rule
-        const exceptions: ExceptionListItemSchema[] = await Promise.all(
+        const exceptions = await Promise.all(
           lists
             .map(async (list) => {
               const { id, namespace_type: namespaceType } = list;

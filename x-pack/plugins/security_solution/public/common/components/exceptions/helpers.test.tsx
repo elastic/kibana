@@ -215,7 +215,7 @@ describe('Exception helpers', () => {
           fieldName: 'host.name',
           isNested: false,
           operator: 'is in list',
-          value: ['some host name'],
+          value: 'some-list-id',
         },
         {
           fieldName: 'host.name',

@@ -12,12 +12,13 @@ import {
   EntryMatchAny,
   EntryNested,
   EntryExists,
+  EntriesArray,
   Operator,
   entriesMatchAny,
   entriesExists,
   entriesMatch,
   entriesNested,
-  EntriesArray,
+  entriesList,
 } from '../../../../../lists/common/schemas';
 
 type Operators = 'and' | 'or' | 'not';
@@ -182,10 +183,12 @@ export const buildExceptionItemEntries = ({
   language: Language;
 }): string => {
   const and = getLanguageBooleanOperator({ language, value: 'and' });
-  const exceptionItem = lists.reduce<string[]>((accum, listItem) => {
-    const exceptionSegment = evaluateValues({ item: listItem, language });
-    return [...accum, exceptionSegment];
-  }, []);
+  const exceptionItem = lists
+    .filter((t) => !entriesList.is(t))
+    .reduce<string[]>((accum, listItem) => {
+      const exceptionSegment = evaluateValues({ item: listItem, language });
+      return [...accum, exceptionSegment];
+    }, []);
 
   return exceptionItem.join(` ${and} `);
 };

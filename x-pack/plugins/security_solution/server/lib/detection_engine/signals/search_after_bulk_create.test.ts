@@ -256,7 +256,7 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       listClient,
-      exceptionsList: undefined,
+      exceptionsList: [],
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
