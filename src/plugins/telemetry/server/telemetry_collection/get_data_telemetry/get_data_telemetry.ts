@@ -65,18 +65,20 @@ function findMatchingDescriptors({
   shipper,
   datasetName,
   datasetType,
-}: DataTelemetryIndex): DataDescriptor | undefined {
+}: DataTelemetryIndex): DataDescriptor[] {
   // If we already have the data from the indices' mappings...
   if ([shipper, datasetName, datasetType].some(Boolean)) {
-    return {
-      ...(shipper && { shipper }),
-      ...(datasetName && { datasetName }),
-      ...(datasetType && { datasetType }),
-    } as AtLeastOne<{ datasetName: string; datasetType: string; shipper: string }>; // Using casting here because TS doesn't infer at least one exists from the if clause
+    return [
+      {
+        ...(shipper && { shipper }),
+        ...(datasetName && { datasetName }),
+        ...(datasetType && { datasetType }),
+      } as AtLeastOne<{ datasetName: string; datasetType: string; shipper: string }>, // Using casting here because TS doesn't infer at least one exists from the if clause
+    ];
   }
 
   // Otherwise, try with the list of known index patterns
-  return DATA_DATASETS_INDEX_PATTERNS.find(({ pattern }) => {
+  return DATA_DATASETS_INDEX_PATTERNS.filter(({ pattern }) => {
     if (!pattern.startsWith('.') && name.startsWith('.')) {
       // avoid system indices caught by very fuzzy index patterns (i.e.: *log* would catch `.kibana-log-...`)
       return false;
@@ -124,8 +126,7 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
 
   for (const indexCandidate of indexCandidates) {
     const matchingDescriptors = findMatchingDescriptors(indexCandidate);
-    if (matchingDescriptors) {
-      const { datasetName, datasetType, shipper, patternName } = matchingDescriptors;
+    for (const { datasetName, datasetType, shipper, patternName } of matchingDescriptors) {
       const key = `${datasetName}-${datasetType}-${shipper}-${patternName}`;
       acc.set(key, {
         ...((datasetName || datasetType) && { dataset: { name: datasetName, type: datasetType } }),
