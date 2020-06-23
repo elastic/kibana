@@ -152,6 +152,7 @@ describe('test alerts route', () => {
     });
 
     mockSavedObjectClient.get.mockImplementationOnce(() =>
+      // eslint-disable-next-line prefer-promise-reject-errors
       Promise.reject({ output: { statusCode: 404 } })
     );
 
