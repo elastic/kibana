@@ -5,14 +5,17 @@
  */
 
 interface Percentage {
+  label: string;
   pct: number;
   color?: string;
 }
 interface Bytes {
+  label: string;
   bytes: number;
   color?: string;
 }
 interface Numeral {
+  label: string;
   value: number;
   color?: string;
 }
