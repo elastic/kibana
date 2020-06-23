@@ -1277,10 +1277,10 @@ export interface Logger {
     warn(errorOrMessage: string | Error, meta?: LogMeta): void;
 }
 
-// Warning: (ae-forgotten-export) The symbol "createLoggerSchema" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "loggerSchema" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type LoggerConfigType = TypeOf<typeof createLoggerSchema>;
+export type LoggerConfigType = TypeOf<typeof loggerSchema>;
 
 // @public (undocumented)
 export interface LoggerContextConfigInput {

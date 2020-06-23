@@ -24,7 +24,7 @@ configure(config$: Observable<LoggerContextConfigInput>): void;
 
 ## Remarks
 
-Assumes that that the `context` property of the individual `logger` items emitted by `config$` are relative to the `baseContextParts`<!-- -->.
+Assumes that that the `context` property of the individual `logger` items emitted by `config$` are relative to the plugin's logging context (defaults to `plugins.<plugin_id>`<!-- -->).
 
 ## Example
 

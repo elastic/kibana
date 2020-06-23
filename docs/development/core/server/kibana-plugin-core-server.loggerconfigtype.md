@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type LoggerConfigType = TypeOf<typeof createLoggerSchema>;
+export declare type LoggerConfigType = TypeOf<typeof loggerSchema>;
 ```
