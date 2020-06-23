@@ -8,17 +8,26 @@ import { isEmpty } from 'lodash/fp';
 
 import { ChromeBreadcrumb } from 'src/core/public';
 
-import { getCaseDetailsUrl, getCaseUrl, getCreateCaseUrl } from '../../common/components/link_to';
+import { getCaseDetailsUrl, getCreateCaseUrl } from '../../common/components/link_to';
 import { RouteSpyState } from '../../common/utils/route/types';
 import * as i18n from './translations';
+import { GetUrlForApp } from '../../common/components/navigation/types';
+import { APP_ID } from '../../../common/constants';
+import { SecurityPageName } from '../../app/types';
 
-export const getBreadcrumbs = (params: RouteSpyState, search: string[]): ChromeBreadcrumb[] => {
-  const queryParameters = !isEmpty(search[0]) ? search[0] : null;
+export const getBreadcrumbs = (
+  params: RouteSpyState,
+  search: string[],
+  getUrlForApp: GetUrlForApp
+): ChromeBreadcrumb[] => {
+  const queryParameters = !isEmpty(search[0]) ? search[0] : '';
 
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getCaseUrl(queryParameters),
+      href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: queryParameters,
+      }),
     },
   ];
   if (params.detailName === 'create') {
@@ -26,7 +35,9 @@ export const getBreadcrumbs = (params: RouteSpyState, search: string[]): ChromeB
       ...breadcrumb,
       {
         text: i18n.CREATE_BC_TITLE,
-        href: getCreateCaseUrl(queryParameters),
+        href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+          path: getCreateCaseUrl(queryParameters),
+        }),
       },
     ];
   } else if (params.detailName != null) {
@@ -34,7 +45,9 @@ export const getBreadcrumbs = (params: RouteSpyState, search: string[]): ChromeB
       ...breadcrumb,
       {
         text: params.state?.caseTitle ?? '',
-        href: getCaseDetailsUrl({ id: params.detailName, search: queryParameters }),
+        href: getUrlForApp(`${APP_ID}:${SecurityPageName.case}`, {
+          path: getCaseDetailsUrl({ id: params.detailName, search: queryParameters }),
+        }),
       },
     ];
   }

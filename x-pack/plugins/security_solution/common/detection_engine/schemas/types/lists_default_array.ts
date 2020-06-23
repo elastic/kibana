@@ -24,8 +24,8 @@ export type ListOperator = t.TypeOf<typeof listOperator>;
 export const ListsDefaultArray = new t.Type<List[], List[], unknown>(
   'listsWithDefaultArray',
   t.array(listAnd).is,
-  (input): Either<t.Errors, List[]> =>
-    input == null ? t.success([]) : t.array(listAnd).decode(input),
+  (input, context): Either<t.Errors, List[]> =>
+    input == null ? t.success([]) : t.array(listAnd).validate(input, context),
   t.identity
 );
 
