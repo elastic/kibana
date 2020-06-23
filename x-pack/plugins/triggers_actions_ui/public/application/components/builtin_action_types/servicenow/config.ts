@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorConfiguration } from './types';
 import * as i18n from './translations';
 import logo from './logo.svg';
 
-export const connector: ConnectorConfiguration = {
+export const connectorConfiguration = {
   id: '.servicenow',
   name: i18n.SERVICENOW_TITLE,
   logo,

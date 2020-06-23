@@ -25,6 +25,7 @@ export interface AlertReducerAction {
     key: string;
     value: {};
     index?: number;
+    subKey?: string;
   };
 }
 

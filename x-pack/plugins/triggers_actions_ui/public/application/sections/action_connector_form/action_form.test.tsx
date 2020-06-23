@@ -149,6 +149,15 @@ describe('action_form', () => {
           config: {},
           isPreconfigured: false,
         },
+        {
+          secrets: {},
+          id: 'test5',
+          actionTypeId: actionType.id,
+          name: 'Non consumer connector',
+          config: {},
+          isPreconfigured: false,
+          consumer: 'case',
+        },
       ]);
       const mocks = coreMock.createSetup();
       const [
@@ -272,6 +281,7 @@ describe('action_form', () => {
           toastNotifications={deps!.toastNotifications}
           docLinks={deps.docLinks}
           capabilities={deps.capabilities}
+          consumer={'alerts'}
         />
       );
 

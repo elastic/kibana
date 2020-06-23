@@ -42,6 +42,7 @@ interface ActionUpdate extends SavedObjectAttributes {
 
 interface Action extends ActionUpdate {
   actionTypeId: string;
+  consumer?: string;
 }
 
 interface CreateOptions {
@@ -98,7 +99,7 @@ export class ActionsClient {
    * Create an action
    */
   public async create({ action }: CreateOptions): Promise<ActionResult> {
-    const { actionTypeId, name, config, secrets } = action;
+    const { actionTypeId, name, config, secrets, consumer } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
@@ -110,6 +111,7 @@ export class ActionsClient {
       name,
       config: validatedActionTypeConfig as SavedObjectAttributes,
       secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+      consumer,
     });
 
     return {
@@ -118,6 +120,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      consumer: result.attributes.consumer,
     };
   }
 
@@ -148,7 +151,7 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.savedObjectsClient.update('action', id, {
+    const result = await this.savedObjectsClient.update<RawAction>('action', id, {
       actionTypeId,
       name,
       config: validatedActionTypeConfig as SavedObjectAttributes,
@@ -161,6 +164,7 @@ export class ActionsClient {
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
+      consumer: existingObject.attributes.consumer,
     };
   }
 
@@ -177,6 +181,7 @@ export class ActionsClient {
         actionTypeId: preconfiguredActionsList.actionTypeId,
         name: preconfiguredActionsList.name,
         isPreconfigured: true,
+        consumer: preconfiguredActionsList.consumer,
       };
     }
     const result = await this.savedObjectsClient.get<RawAction>('action', id);
@@ -187,6 +192,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      consumer: result.attributes.consumer,
     };
   }
 
@@ -208,6 +214,7 @@ export class ActionsClient {
         actionTypeId: preconfiguredAction.actionTypeId,
         name: preconfiguredAction.name,
         isPreconfigured: true,
+        consumer: preconfiguredAction.consumer,
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
     return await injectExtraFindData(

@@ -118,7 +118,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     setIsLoadingActions(true);
     try {
       const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse);
+      setActions(
+        actionsResponse.filter((action) => !action.consumer || action.consumer === 'alerts')
+      );
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(

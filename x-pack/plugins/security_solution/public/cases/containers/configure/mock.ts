@@ -40,6 +40,7 @@ export const connectorsMock: Connector[] = [
       },
     },
     isPreconfigured: false,
+    consumer: 'case',
   },
   {
     id: 'servicenow-2',
@@ -68,6 +69,7 @@ export const connectorsMock: Connector[] = [
       },
     },
     isPreconfigured: false,
+    consumer: 'case',
   },
   {
     id: 'jira-1',
@@ -96,6 +98,7 @@ export const connectorsMock: Connector[] = [
       },
     },
     isPreconfigured: false,
+    consumer: 'case',
   },
 ];
 

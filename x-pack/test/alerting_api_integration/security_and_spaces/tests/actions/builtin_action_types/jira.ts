@@ -50,7 +50,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
     params: {
       subAction: 'pushToService',
       subActionParams: {
-        caseId: '123',
+        savedObjectId: '123',
         title: 'a title',
         description: 'a description',
         createdAt: '2020-03-13T08:34:53.450Z',
@@ -361,12 +361,12 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
               });
             });
         });
 
-        it('should handle failing with a simulated success without caseId', async () => {
+        it('should handle failing with a simulated success without savedObjectId', async () => {
           await supertest
             .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
@@ -379,7 +379,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -392,7 +392,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockJira.params,
                 subActionParams: {
-                  caseId: 'success',
+                  savedObjectId: 'success',
                 },
               },
             })
@@ -415,7 +415,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockJira.params,
                 subActionParams: {
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                 },
               },
@@ -440,7 +440,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 ...mockJira.params,
                 subActionParams: {
                   ...mockJira.params.subActionParams,
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },
@@ -468,7 +468,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 ...mockJira.params,
                 subActionParams: {
                   ...mockJira.params.subActionParams,
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },
@@ -496,7 +496,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 ...mockJira.params,
                 subActionParams: {
                   ...mockJira.params.subActionParams,
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },

@@ -144,7 +144,7 @@ export interface PipedField {
 }
 
 export interface PrepareFieldsForTransformArgs {
-  params: PushToServiceApiParams;
+  externalCase: Record<string, any>;
   mapping: Map<string, MapRecord>;
   defaultPipes?: string[];
 }

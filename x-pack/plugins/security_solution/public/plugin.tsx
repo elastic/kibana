@@ -21,7 +21,7 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
+import { jiraActionType } from './common/lib/connectors';
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
 import {
   APP_ID,
@@ -67,7 +67,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: FeatureCatalogueCategory.DATA,
     });
 
-    plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
     plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
     const mountSecurityFactory = async () => {

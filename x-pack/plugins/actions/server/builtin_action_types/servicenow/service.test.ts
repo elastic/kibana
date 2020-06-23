@@ -7,12 +7,12 @@
 import axios from 'axios';
 
 import { createExternalService } from './service';
-import * as utils from '../case/utils';
-import { ExternalService } from '../case/types';
+import * as utils from '../lib/axios_utils';
+import { ExternalService } from './types';
 
 jest.mock('axios');
-jest.mock('../case/utils', () => {
-  const originalUtils = jest.requireActual('../case/utils');
+jest.mock('../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),
@@ -198,58 +198,22 @@ describe('ServiceNow service', () => {
         '[Action][ServiceNow]: Unable to update incident with id 1. Error: An error has occurred'
       );
     });
-  });
-
-  describe('createComment', () => {
     test('it creates the comment correctly', async () => {
       patchMock.mockImplementation(() => ({
-        data: { result: { sys_id: '1', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' } },
+        data: { result: { sys_id: '11', number: 'INC011', sys_updated_on: '2020-03-10 12:24:20' } },
       }));
 
-      const res = await service.createComment({
+      const res = await service.updateIncident({
         incidentId: '1',
-        comment: { comment: 'comment', commentId: 'comment-1' },
-        field: 'comments',
+        comment: 'comment-1',
       });
 
       expect(res).toEqual({
-        commentId: 'comment-1',
+        title: 'INC011',
+        id: '11',
         pushedDate: '2020-03-10T12:24:20.000Z',
+        url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=11',
       });
-    });
-
-    test('it should call request with correct arguments', async () => {
-      patchMock.mockImplementation(() => ({
-        data: { result: { sys_id: '1', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' } },
-      }));
-
-      await service.createComment({
-        incidentId: '1',
-        comment: { comment: 'comment', commentId: 'comment-1' },
-        field: 'my_field',
-      });
-
-      expect(patchMock).toHaveBeenCalledWith({
-        axios,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
-        data: { my_field: 'comment' },
-      });
-    });
-
-    test('it should throw an error', async () => {
-      patchMock.mockImplementation(() => {
-        throw new Error('An error has occurred');
-      });
-
-      expect(
-        service.createComment({
-          incidentId: '1',
-          comment: { comment: 'comment', commentId: 'comment-1' },
-          field: 'comments',
-        })
-      ).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to create comment at incident with id 1. Error: An error has occurred'
-      );
     });
   });
 });

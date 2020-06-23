@@ -6,7 +6,6 @@
 
 import { curry, flow, get } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { AxiosInstance, Method, AxiosResponse } from 'axios';
 
 import { ActionTypeExecutorOptions, ActionTypeExecutorResult, ActionType } from '../../types';
 
@@ -134,65 +133,18 @@ export const createConnector = ({
   });
 };
 
-export const throwIfNotAlive = (
-  status: number,
-  contentType: string,
-  validStatusCodes: number[] = [200, 201, 204]
-) => {
-  if (!validStatusCodes.includes(status) || !contentType.includes('application/json')) {
-    throw new Error('Instance is not alive.');
-  }
-};
-
-export const request = async <T = unknown>({
-  axios,
-  url,
-  method = 'get',
-  data,
-}: {
-  axios: AxiosInstance;
-  url: string;
-  method?: Method;
-  data?: T;
-}): Promise<AxiosResponse> => {
-  const res = await axios(url, { method, data: data ?? {} });
-  throwIfNotAlive(res.status, res.headers['content-type']);
-  return res;
-};
-
-export const patch = async <T = unknown>({
-  axios,
-  url,
-  data,
-}: {
-  axios: AxiosInstance;
-  url: string;
-  data: T;
-}): Promise<AxiosResponse> => {
-  return request({
-    axios,
-    url,
-    method: 'patch',
-    data,
-  });
-};
-
-export const addTimeZoneToDate = (date: string, timezone = 'GMT'): string => {
-  return `${date} ${timezone}`;
-};
-
 export const prepareFieldsForTransformation = ({
-  params,
+  externalCase,
   mapping,
   defaultPipes = ['informationCreated'],
 }: PrepareFieldsForTransformArgs): PipedField[] => {
-  return Object.keys(params.externalCase)
+  return Object.keys(externalCase)
     .filter((p) => mapping.get(p)?.actionType != null && mapping.get(p)?.actionType !== 'nothing')
     .map((p) => {
       const actionType = mapping.get(p)?.actionType ?? 'nothing';
       return {
         key: p,
-        value: params.externalCase[p],
+        value: externalCase[p],
         actionType,
         pipes: actionType === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
       };

@@ -106,6 +106,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
+          "consumer": undefined,
           "name": "my name",
           "secrets": Object {},
         },
@@ -210,6 +211,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
+          "consumer": undefined,
           "name": "my name",
           "secrets": Object {},
         },

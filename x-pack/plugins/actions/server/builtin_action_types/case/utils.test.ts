@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import axios from 'axios';
-
 import {
   normalizeMapping,
   buildMap,
@@ -13,18 +11,10 @@ import {
   prepareFieldsForTransformation,
   transformFields,
   transformComments,
-  addTimeZoneToDate,
-  throwIfNotAlive,
-  request,
-  patch,
-  getErrorMessage,
 } from './utils';
 
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
 import { Comment, MapRecord, PushToServiceApiParams } from './types';
-
-jest.mock('axios');
-const axiosMock = (axios as unknown) as jest.Mock;
 
 const mapping: MapRecord[] = [
   { source: 'title', target: 'short_description', actionType: 'overwrite' },
@@ -63,7 +53,7 @@ const maliciousMapping: MapRecord[] = [
 ];
 
 const fullParams: PushToServiceApiParams = {
-  caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
+  savedObjectId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   title: 'a title',
   description: 'a description',
   createdAt: '2020-03-13T08:34:53.450Z',
@@ -132,7 +122,7 @@ describe('buildMap', () => {
 describe('mapParams', () => {
   test('maps params correctly', () => {
     const params = {
-      caseId: '123',
+      savedObjectId: '123',
       incidentId: '456',
       title: 'Incident title',
       description: 'Incident description',
@@ -148,7 +138,7 @@ describe('mapParams', () => {
 
   test('do not add fields not in mapping', () => {
     const params = {
-      caseId: '123',
+      savedObjectId: '123',
       incidentId: '456',
       title: 'Incident title',
       description: 'Incident description',
@@ -164,7 +154,7 @@ describe('mapParams', () => {
 describe('prepareFieldsForTransformation', () => {
   test('prepare fields with defaults', () => {
     const res = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
     });
     expect(res).toEqual([
@@ -185,7 +175,7 @@ describe('prepareFieldsForTransformation', () => {
 
   test('prepare fields with default pipes', () => {
     const res = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
       defaultPipes: ['myTestPipe'],
     });
@@ -209,7 +199,7 @@ describe('prepareFieldsForTransformation', () => {
 describe('transformFields', () => {
   test('transform fields for creation correctly', () => {
     const fields = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
     });
 
@@ -226,14 +216,7 @@ describe('transformFields', () => {
 
   test('transform fields for update correctly', () => {
     const fields = prepareFieldsForTransformation({
-      params: {
-        ...fullParams,
-        updatedAt: '2020-03-15T08:34:53.450Z',
-        updatedBy: {
-          username: 'anotherUser',
-          fullName: 'Another User',
-        },
-      },
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
     });
@@ -262,7 +245,7 @@ describe('transformFields', () => {
 
   test('add newline character to descripton', () => {
     const fields = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
     });
@@ -280,7 +263,7 @@ describe('transformFields', () => {
 
   test('append username if fullname is undefined when create', () => {
     const fields = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
     });
 
@@ -300,14 +283,7 @@ describe('transformFields', () => {
 
   test('append username if fullname is undefined when update', () => {
     const fields = prepareFieldsForTransformation({
-      params: {
-        ...fullParams,
-        updatedAt: '2020-03-15T08:34:53.450Z',
-        updatedBy: {
-          username: 'anotherUser',
-          fullName: 'Another User',
-        },
-      },
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
     });
@@ -477,100 +453,5 @@ describe('transformComments', () => {
         updatedBy: { fullName: '', username: 'elastic2' },
       },
     ]);
-  });
-});
-
-describe('addTimeZoneToDate', () => {
-  test('adds timezone with default', () => {
-    const date = addTimeZoneToDate('2020-04-14T15:01:55.456Z');
-    expect(date).toBe('2020-04-14T15:01:55.456Z GMT');
-  });
-
-  test('adds timezone correctly', () => {
-    const date = addTimeZoneToDate('2020-04-14T15:01:55.456Z', 'PST');
-    expect(date).toBe('2020-04-14T15:01:55.456Z PST');
-  });
-});
-
-describe('throwIfNotAlive ', () => {
-  test('throws correctly when status is invalid', async () => {
-    expect(() => {
-      throwIfNotAlive(404, 'application/json');
-    }).toThrow('Instance is not alive.');
-  });
-
-  test('throws correctly when content is invalid', () => {
-    expect(() => {
-      throwIfNotAlive(200, 'application/html');
-    }).toThrow('Instance is not alive.');
-  });
-
-  test('do NOT throws with custom validStatusCodes', async () => {
-    expect(() => {
-      throwIfNotAlive(404, 'application/json', [404]);
-    }).not.toThrow('Instance is not alive.');
-  });
-});
-
-describe('request', () => {
-  beforeEach(() => {
-    axiosMock.mockImplementation(() => ({
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-      data: { incidentId: '123' },
-    }));
-  });
-
-  test('it fetch correctly with defaults', async () => {
-    const res = await request({ axios, url: '/test' });
-
-    expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'get', data: {} });
-    expect(res).toEqual({
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-      data: { incidentId: '123' },
-    });
-  });
-
-  test('it fetch correctly', async () => {
-    const res = await request({ axios, url: '/test', method: 'post', data: { id: '123' } });
-
-    expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'post', data: { id: '123' } });
-    expect(res).toEqual({
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-      data: { incidentId: '123' },
-    });
-  });
-
-  test('it throws correctly', async () => {
-    axiosMock.mockImplementation(() => ({
-      status: 404,
-      headers: { 'content-type': 'application/json' },
-      data: { incidentId: '123' },
-    }));
-
-    await expect(request({ axios, url: '/test' })).rejects.toThrow();
-  });
-});
-
-describe('patch', () => {
-  beforeEach(() => {
-    axiosMock.mockImplementation(() => ({
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    }));
-  });
-
-  test('it fetch correctly', async () => {
-    await patch({ axios, url: '/test', data: { id: '123' } });
-    expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'patch', data: { id: '123' } });
-  });
-});
-
-describe('getErrorMessage', () => {
-  test('it returns the correct error message', () => {
-    const msg = getErrorMessage('My connector name', 'An error has occurred');
-    expect(msg).toBe('[Action][My connector name]: An error has occurred');
   });
 });
