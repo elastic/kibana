@@ -1,13 +1,3 @@
 .actAlertVisualization__chart {
   height: $euiSize * 14;
 }
-
-.actAddAlertSteps {
-  .euiStep__titleWrapper {
-    align-items: center;
-  }
-
-  .euiStep__title {
-    @include euiTitle('xs');
-  }
-}

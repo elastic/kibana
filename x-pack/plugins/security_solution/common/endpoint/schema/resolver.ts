@@ -16,7 +16,9 @@ export const validateTree = {
     generations: schema.number({ defaultValue: 3, min: 0, max: 3 }),
     ancestors: schema.number({ defaultValue: 3, min: 0, max: 5 }),
     events: schema.number({ defaultValue: 100, min: 0, max: 1000 }),
+    alerts: schema.number({ defaultValue: 100, min: 0, max: 1000 }),
     afterEvent: schema.maybe(schema.string()),
+    afterAlert: schema.maybe(schema.string()),
     afterChild: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
   }),
@@ -30,6 +32,18 @@ export const validateEvents = {
   query: schema.object({
     events: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
     afterEvent: schema.maybe(schema.string()),
+    legacyEndpointID: schema.maybe(schema.string()),
+  }),
+};
+
+/**
+ * Used to validate GET requests for alerts for a specific process.
+ */
+export const validateAlerts = {
+  params: schema.object({ id: schema.string() }),
+  query: schema.object({
+    alerts: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+    afterAlert: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
   }),
 };

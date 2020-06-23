@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('detail page', async () => {
       await uptimeService.navigation.goToMonitor(A11Y_TEST_MONITOR_ID);
-      await uptimeService.monitor.locationMapIsRendered();
+      await uptimeService.monitor.displayOverallAvailability('0.00 %');
       await a11y.testAppSnapshot();
     });
 

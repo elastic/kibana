@@ -29,14 +29,14 @@ such as cost, revenue, and price.
 
 To use the sample data sets:
 
-. Go to the {kib} home page.
+. Go to the home page.
 
 . Click *Load a data set and a {kib} dashboard*.
 
 . Click *View data* and view the prepackaged dashboards, maps, and more.
 
 [role="screenshot"]
-image::images/add-sample-data.png[]
+image::getting-started/images/add-sample-data.png[]
 
 NOTE: The timestamps in the sample data sets are relative to when they are installed.
 If you uninstall and reinstall a data set, the timestamps change to reflect the most recent installation.
