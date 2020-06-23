@@ -20,7 +20,7 @@ import {
   AgentConfigStatus,
   ListWithKuery,
 } from '../types';
-import { DeleteAgentConfigResponse, storedDatasourceToAgentDatasource } from '../../common';
+import { DeleteAgentConfigResponse, storedDatasourcesToAgentInputs } from '../../common';
 import { listAgents } from './agents';
 import { datasourceService } from './datasource';
 import { outputService } from './output';
@@ -65,15 +65,14 @@ class AgentConfigService {
       updated_by: user ? user.username : 'system',
     });
 
-    await this.triggerAgentConfigUpdatedEvent(soClient, 'updated', id);
-
     return (await this.get(soClient, id)) as AgentConfig;
   }
 
   public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
     const configs = await soClient.find<AgentConfigSOAttributes>({
       type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
-      filter: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
+      searchFields: ['is_default'],
+      search: 'true',
     });
 
     if (configs.total === 0) {
@@ -374,9 +373,7 @@ class AgentConfigService {
           {} as FullAgentConfig['outputs']
         ),
       },
-      datasources: (config.datasources as Datasource[])
-        .filter((datasource) => datasource.enabled)
-        .map((ds) => storedDatasourceToAgentDatasource(ds)),
+      inputs: storedDatasourcesToAgentInputs(config.datasources as Datasource[]),
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {
