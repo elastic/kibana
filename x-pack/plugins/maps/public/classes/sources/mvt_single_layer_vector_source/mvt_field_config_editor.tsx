@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiSuperSelect,
   EuiFieldText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MVTFieldDescriptor, MVTFieldType } from '../../../../common/descriptor_types';
@@ -77,7 +78,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
       <EuiSuperSelect
         options={FIELD_TYPE_OPTIONS}
         valueOfSelected={mvtFieldConfig.type}
-        onChange={value => onChange(value)}
+        onChange={(value) => onChange(value)}
       />
     );
   }
@@ -97,7 +98,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   _renderFieldConfig() {
     return this.props.fields.map((mvtFieldConfig: MVTFieldDescriptor, index: number) => {
       return (
-        <EuiFlexGroup key={index}>
+        <EuiFlexGroup key={index} gutterSize="xs">
           <EuiFlexItem>{this._renderFieldNameInput(mvtFieldConfig, index)}</EuiFlexItem>
           <EuiFlexItem>{this._renderFieldTypeDropDown(mvtFieldConfig, index)}</EuiFlexItem>
           <EuiFlexItem>
@@ -124,6 +125,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
     return (
       <Fragment>
         {this._renderFieldConfig()}
+        <EuiSpacer size={'xs'} />
         <EuiButton fill isDisabled={false} onClick={this._addField} size="s">
           {'Add field'}
         </EuiButton>

@@ -92,6 +92,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
             fields={fields}
             minSourceZoom={this.props.source.getMinZoom()}
             maxSourceZoom={this.props.source.getMaxZoom()}
+            includeFields={true}
           />
         </EuiPanel>
 
