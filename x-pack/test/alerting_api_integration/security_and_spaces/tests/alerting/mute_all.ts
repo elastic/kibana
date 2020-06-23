@@ -210,7 +210,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
               getTestAlertData({
                 enabled: false,
                 alertTypeId: 'test.restricted-noop',
-                consumer: 'alerting',
+                consumer: 'alerts',
               })
             )
             .expect(200);

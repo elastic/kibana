@@ -205,7 +205,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.noop',
-                consumer: 'alerting',
+                consumer: 'alerts',
               })
             )
             .expect(200);

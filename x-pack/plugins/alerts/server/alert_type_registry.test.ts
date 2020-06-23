@@ -36,7 +36,7 @@ describe('has()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     });
     expect(registry.has('foo')).toEqual(true);
   });
@@ -55,7 +55,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
@@ -87,7 +87,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
@@ -109,7 +109,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
@@ -140,7 +140,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     };
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register(alertType);
@@ -161,7 +161,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     });
     expect(() =>
       registry.register({
@@ -175,7 +175,7 @@ describe('register()', () => {
         ],
         defaultActionGroupId: 'default',
         executor: jest.fn(),
-        producer: 'alerting',
+        producer: 'alerts',
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
   });
@@ -195,7 +195,7 @@ describe('get()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
@@ -214,7 +214,7 @@ describe('get()', () => {
         "executor": [MockFunction],
         "id": "test",
         "name": "Test",
-        "producer": "alerting",
+        "producer": "alerts",
       }
     `);
   });
@@ -247,7 +247,7 @@ describe('list()', () => {
       ],
       defaultActionGroupId: 'testActionGroup',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
@@ -266,7 +266,7 @@ describe('list()', () => {
           "defaultActionGroupId": "testActionGroup",
           "id": "test",
           "name": "Test",
-          "producer": "alerting",
+          "producer": "alerts",
         },
       }
     `);
@@ -314,7 +314,7 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     actionGroups: [],
     defaultActionGroupId: id,
     async executor() {},
-    producer: 'alerting',
+    producer: 'alerts',
   };
 
   if (!context && !state) {

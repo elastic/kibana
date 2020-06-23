@@ -25,7 +25,7 @@ const alertType = {
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   executor: jest.fn(),
-  producer: 'alerting',
+  producer: 'alerts',
 };
 let fakeTimer: sinon.SinonFakeTimers;
 

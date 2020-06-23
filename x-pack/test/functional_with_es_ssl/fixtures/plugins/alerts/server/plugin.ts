@@ -61,7 +61,7 @@ function createNoopAlertType(alerts: AlertingSetup) {
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
     async executor() {},
-    producer: 'alerting',
+    producer: 'alerts',
   };
   alerts.registerType(noopAlertType);
 }
@@ -75,7 +75,7 @@ function createAlwaysFiringAlertType(alerts: AlertingSetup) {
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
-    producer: 'alerting',
+    producer: 'alerts',
     async executor(alertExecutorOptions: any) {
       const { services, state, params } = alertExecutorOptions;
 

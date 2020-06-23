@@ -112,7 +112,7 @@ describe('listAlertTypesRoute', () => {
           context: [],
           state: [],
         },
-        producer: 'alerting',
+        producer: 'alerts',
       },
     ];
 
@@ -161,7 +161,7 @@ describe('listAlertTypesRoute', () => {
           context: [],
           state: [],
         },
-        producer: 'alerting',
+        producer: 'alerts',
       },
     ];
 

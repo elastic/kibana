@@ -20,7 +20,7 @@ test('should return passed in params when validation not defined', () => {
       ],
       defaultActionGroupId: 'default',
       async executor() {},
-      producer: 'alerting',
+      producer: 'alerts',
     },
     {
       foo: true,
@@ -48,7 +48,7 @@ test('should validate and apply defaults when params is valid', () => {
         }),
       },
       async executor() {},
-      producer: 'alerting',
+      producer: 'alerts',
     },
     { param1: 'value' }
   );
@@ -77,7 +77,7 @@ test('should validate and throw error when params is invalid', () => {
           }),
         },
         async executor() {},
-        producer: 'alerting',
+        producer: 'alerts',
       },
       {}
     )

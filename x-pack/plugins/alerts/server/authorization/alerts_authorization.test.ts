@@ -59,9 +59,9 @@ function mockFeature(appName: string, typeName: string, requiredApps: string[] =
     },
   });
 }
-const alertsFeature = mockFeature('alerting', 'myBuiltInType');
-const myAppFeature = mockFeature('myApp', 'myType', ['alerting']);
-const myOtherAppFeature = mockFeature('myOtherApp', 'myType', ['alerting']);
+const alertsFeature = mockFeature('alerts', 'myBuiltInType');
+const myAppFeature = mockFeature('myApp', 'myType', ['alerts']);
+const myOtherAppFeature = mockFeature('myOtherApp', 'myType', ['alerts']);
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -161,7 +161,7 @@ describe('ensureAuthorized', () => {
       privileges: [],
     });
 
-    await alertAuthorization.ensureAuthorized('myType', 'alerting', 'create');
+    await alertAuthorization.ensureAuthorized('myType', 'alerts', 'create');
 
     expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
 
@@ -177,7 +177,7 @@ describe('ensureAuthorized', () => {
         "some-user",
         "myType",
         0,
-        "alerting",
+        "alerts",
         "create",
       ]
     `);
@@ -383,7 +383,7 @@ describe('getFindAuthorizationFilter', () => {
     defaultActionGroupId: 'default',
     id: 'alertingAlertType',
     name: 'alertingAlertType',
-    producer: 'alerting',
+    producer: 'alerts',
   };
   const myAppAlertType = {
     actionGroups: [],
@@ -451,7 +451,7 @@ describe('getFindAuthorizationFilter', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchInlineSnapshot(
-      `"((alert.attributes.alertTypeId:myAppAlertType and (alert.attributes.consumer:alerting or alert.attributes.consumer:myApp or alert.attributes.consumer:myOtherApp)) or (alert.attributes.alertTypeId:alertingAlertType and (alert.attributes.consumer:alerting or alert.attributes.consumer:myApp or alert.attributes.consumer:myOtherApp)))"`
+      `"((alert.attributes.alertTypeId:myAppAlertType and (alert.attributes.consumer:alerts or alert.attributes.consumer:myApp or alert.attributes.consumer:myOtherApp)) or (alert.attributes.alertTypeId:alertingAlertType and (alert.attributes.consumer:alerts or alert.attributes.consumer:myApp or alert.attributes.consumer:myOtherApp)))"`
     );
 
     expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -468,7 +468,7 @@ describe('getFindAuthorizationFilter', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'alerting', 'find'),
+          privilege: mockAuthorizationAction('alertingAlertType', 'alerts', 'find'),
           authorized: true,
         },
         {
@@ -480,7 +480,7 @@ describe('getFindAuthorizationFilter', () => {
           authorized: false,
         },
         {
-          privilege: mockAuthorizationAction('myAppAlertType', 'alerting', 'find'),
+          privilege: mockAuthorizationAction('myAppAlertType', 'alerts', 'find'),
           authorized: true,
         },
         {
@@ -534,7 +534,7 @@ describe('getFindAuthorizationFilter', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'alerting', 'find'),
+          privilege: mockAuthorizationAction('alertingAlertType', 'alerts', 'find'),
           authorized: true,
         },
         {
@@ -546,7 +546,7 @@ describe('getFindAuthorizationFilter', () => {
           authorized: false,
         },
         {
-          privilege: mockAuthorizationAction('myAppAlertType', 'alerting', 'find'),
+          privilege: mockAuthorizationAction('myAppAlertType', 'alerts', 'find'),
           authorized: true,
         },
         {
@@ -595,7 +595,7 @@ describe('filterByAlertTypeAuthorization', () => {
     defaultActionGroupId: 'default',
     id: 'alertingAlertType',
     name: 'alertingAlertType',
-    producer: 'alerting',
+    producer: 'alerts',
   };
   const myAppAlertType = {
     actionGroups: [],
@@ -627,7 +627,7 @@ describe('filterByAlertTypeAuthorization', () => {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
                 "authorizedConsumers": Array [
-                  "alerting",
+                  "alerts",
                   "myApp",
                   "myOtherApp",
                 ],
@@ -640,14 +640,14 @@ describe('filterByAlertTypeAuthorization', () => {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
                 "authorizedConsumers": Array [
-                  "alerting",
+                  "alerts",
                   "myApp",
                   "myOtherApp",
                 ],
                 "defaultActionGroupId": "default",
                 "id": "alertingAlertType",
                 "name": "alertingAlertType",
-                "producer": "alerting",
+                "producer": "alerts",
               },
             }
           `);
@@ -664,7 +664,7 @@ describe('filterByAlertTypeAuthorization', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'alerting', 'create'),
+          privilege: mockAuthorizationAction('alertingAlertType', 'alerts', 'create'),
           authorized: true,
         },
         {
@@ -676,7 +676,7 @@ describe('filterByAlertTypeAuthorization', () => {
           authorized: false,
         },
         {
-          privilege: mockAuthorizationAction('myAppAlertType', 'alerting', 'create'),
+          privilege: mockAuthorizationAction('myAppAlertType', 'alerts', 'create'),
           authorized: true,
         },
         {
@@ -710,19 +710,19 @@ describe('filterByAlertTypeAuthorization', () => {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
                 "authorizedConsumers": Array [
-                  "alerting",
+                  "alerts",
                   "myApp",
                 ],
                 "defaultActionGroupId": "default",
                 "id": "alertingAlertType",
                 "name": "alertingAlertType",
-                "producer": "alerting",
+                "producer": "alerts",
               },
               Object {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
                 "authorizedConsumers": Array [
-                  "alerting",
+                  "alerts",
                   "myApp",
                   "myOtherApp",
                 ],
@@ -746,7 +746,7 @@ describe('filterByAlertTypeAuthorization', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'alerting', 'create'),
+          privilege: mockAuthorizationAction('alertingAlertType', 'alerts', 'create'),
           authorized: true,
         },
         {
@@ -758,7 +758,7 @@ describe('filterByAlertTypeAuthorization', () => {
           authorized: true,
         },
         {
-          privilege: mockAuthorizationAction('myAppAlertType', 'alerting', 'create'),
+          privilege: mockAuthorizationAction('myAppAlertType', 'alerts', 'create'),
           authorized: false,
         },
         {
@@ -792,14 +792,14 @@ describe('filterByAlertTypeAuthorization', () => {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
                 "authorizedConsumers": Array [
-                  "alerting",
+                  "alerts",
                   "myApp",
                   "myOtherApp",
                 ],
                 "defaultActionGroupId": "default",
                 "id": "alertingAlertType",
                 "name": "alertingAlertType",
-                "producer": "alerting",
+                "producer": "alerts",
               },
             }
           `);
