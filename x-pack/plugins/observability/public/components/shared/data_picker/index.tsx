@@ -5,7 +5,6 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { stringify } from 'query-string';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';

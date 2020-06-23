@@ -21,7 +21,7 @@ import React, { useEffect, useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { appsSection } from './section';
-import { WithHeaderLayout } from '../../components/layout/with_header';
+import { WithHeaderLayout } from '../../components/app/layout/with_header';
 
 const EuiCardWithoutPadding = styled(EuiCard)`
   padding: 0;

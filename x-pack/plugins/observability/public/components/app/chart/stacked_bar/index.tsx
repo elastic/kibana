@@ -18,7 +18,7 @@ import {
 import { ThemeContext } from 'styled-components';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { FetchDataResponse } from '../../../typings/fetch_data_response';
+import { FetchDataResponse } from '../../../../typings/fetch_data_response';
 import { ChartContainer } from '../container';
 import { Stats } from '../../stats';
 

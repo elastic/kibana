@@ -7,12 +7,12 @@ import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui'
 import { isEmpty } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { APMChart } from '../../components/chart/apm';
-import { ChartContainer } from '../../components/chart/container';
-import { MetricsChart } from '../../components/chart/metrics';
-import { StackedBarChart } from '../../components/chart/stacked_bar';
-import { EmptySection } from '../../components/empty_section';
-import { WithHeaderLayout } from '../../components/layout/with_header';
+import { APMChart } from '../../components/app/chart/apm';
+import { ChartContainer } from '../../components/app/chart/container';
+import { MetricsChart } from '../../components/app/chart/metrics';
+import { StackedBarChart } from '../../components/app/chart/stacked_bar';
+import { EmptySection } from '../../components/app/empty_section';
+import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { getDataHandler } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
