@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
           1,
           'metrics-endpoint.metadata-default',
           'metrics-endpoint.policy-default',
-          'logs-endpoint.events.fake-default',
+          'logs-endpoint.events.process-default',
           'logs-endpoint.alerts-default',
           numberOfAlertsPerHost
         );

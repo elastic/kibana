@@ -95,7 +95,7 @@ async function main() {
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
-      default: 'logs-endpoint.events.fake-default',
+      default: 'logs-endpoint.events.process-default',
       type: 'string',
     },
     alertIndex: {

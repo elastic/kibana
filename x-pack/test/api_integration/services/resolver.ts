@@ -35,7 +35,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
   return {
     async createTrees(
       options: Options,
-      eventsIndex: string = 'logs-endpoint.events.fake-default',
+      eventsIndex: string = 'logs-endpoint.events.process-default',
       alertsIndex: string = 'logs-endpoint.alerts-default'
     ): Promise<GeneratedTrees> {
       const allTrees: Tree[] = [];
