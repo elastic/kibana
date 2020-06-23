@@ -7,7 +7,7 @@ import { asPercent } from '../formatters';
 
 describe('formatters', () => {
   describe('asPercent', () => {
-    it('should divide and format item as percent', () => {
+    it('should format as integer when number is above 10', () => {
       expect(asPercent(3725, 10000, 'n/a')).toEqual('37%');
     });
 
