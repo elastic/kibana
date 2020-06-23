@@ -91,7 +91,6 @@ export interface RegistryInput {
 
 export interface RegistryStream {
   input: string;
-  dataset: string;
   title: string;
   description?: string;
   enabled?: boolean;
