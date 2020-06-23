@@ -39,7 +39,7 @@ export class AuditTrailPlugin implements Plugin {
     };
 
     const event$ = new Subject<AuditEvent>();
-    event$.subscribe((e) => this.logger.debug('', e));
+    event$.subscribe(({ message, ...other }) => this.logger.debug(message, other));
 
     core.auditTrail.register({
       asScoped(request: KibanaRequest) {
