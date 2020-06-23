@@ -10,7 +10,7 @@ import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
-import { getGapBetweenRuns } from './utils';
+import { getGapBetweenRuns, getListsClient, getExceptions, sortExceptionItems } from './utils';
 import { RuleExecutorOptions } from './types';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
@@ -18,6 +18,9 @@ import { RuleAlertType } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { listMock } from '../../../../../lists/server/mocks';
+import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
+import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -84,6 +87,15 @@ describe('rules_notification_alert_type', () => {
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(0));
+    (getListsClient as jest.Mock).mockReturnValue({
+      listClient: getListClientMock(),
+      exceptionsClient: getExceptionListClientMock(),
+    });
+    (getExceptions as jest.Mock).mockReturnValue([getExceptionListItemSchemaMock()]);
+    (sortExceptionItems as jest.Mock).mockReturnValue({
+      exceptionsWithoutValueLists: [getExceptionListItemSchemaMock()],
+      exceptionsWithValueLists: [],
+    });
     (searchAfterAndBulkCreate as jest.Mock).mockClear();
     (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
       success: true,
