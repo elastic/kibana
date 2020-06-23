@@ -32,8 +32,14 @@ import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { ManagementPageView } from '../../../components/management_page_view';
-import { getManagementUrl } from '../../..';
 import { FormattedDate } from '../../../../common/components/formatted_date';
+import { SecurityPageName } from '../../../../app/types';
+import {
+  getEndpointListPath,
+  getEndpointDetailsPath,
+  getPolicyDetailPath,
+} from '../../../common/routing';
+import { useFormatUrl } from '../../../../common/components/link_to';
 
 const HostListNavLink = memo<{
   name: string;
@@ -70,6 +76,7 @@ export const HostList = () => {
     uiQueryParams: queryParams,
     hasSelectedHost,
   } = useHostSelector(selector);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -86,9 +93,8 @@ export const HostList = () => {
       const { index, size } = page;
       // FIXME: PT: if host details is open, table is not displaying correct number of rows
       history.push(
-        getManagementUrl({
+        getEndpointListPath({
           name: 'endpointList',
-          excludePrefix: true,
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
@@ -110,17 +116,15 @@ export const HostList = () => {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
-          const toRoutePath = getManagementUrl({
-            ...queryParams,
-            name: 'endpointDetails',
-            selected_host: id,
-            excludePrefix: true,
-          });
-          const toRouteUrl = getManagementUrl({
-            ...queryParams,
-            name: 'endpointDetails',
-            selected_host: id,
-          });
+          const toRoutePath = getEndpointDetailsPath(
+            {
+              ...queryParams,
+              name: 'endpointDetails',
+              selected_host: id,
+            },
+            search
+          );
+          const toRouteUrl = formatUrl(toRoutePath);
           return (
             <HostListNavLink
               name={hostname}
@@ -161,15 +165,8 @@ export const HostList = () => {
         truncateText: true,
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
-          const toRoutePath = getManagementUrl({
-            name: 'policyDetails',
-            policyId: policy.id,
-            excludePrefix: true,
-          });
-          const toRouteUrl = getManagementUrl({
-            name: 'policyDetails',
-            policyId: policy.id,
-          });
+          const toRoutePath = getPolicyDetailPath(policy.id);
+          const toRouteUrl = formatUrl(toRoutePath);
           return (
             <HostListNavLink
               name={policy.name}
@@ -187,15 +184,11 @@ export const HostList = () => {
         }),
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
-          const toRoutePath = getManagementUrl({
-            name: 'endpointPolicyResponse',
-            selected_host: item.metadata.host.id,
-            excludePrefix: true,
-          });
-          const toRouteUrl = getManagementUrl({
+          const toRoutePath = getEndpointDetailsPath({
             name: 'endpointPolicyResponse',
             selected_host: item.metadata.host.id,
           });
+          const toRouteUrl = formatUrl(toRoutePath);
           return (
             <EuiHealth
               color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
@@ -257,7 +250,7 @@ export const HostList = () => {
         },
       },
     ];
-  }, [queryParams]);
+  }, [formatUrl, queryParams, search]);
 
   return (
     <ManagementPageView
@@ -285,7 +278,7 @@ export const HostList = () => {
         pagination={paginationSetup}
         onChange={onTableChange}
       />
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.management} />
     </ManagementPageView>
   );
 };
