@@ -33,12 +33,12 @@ interface FetchDataResponse {
   appLink: string;
 }
 
-interface LogsFetchDataResponse extends FetchDataResponse {
+export interface LogsFetchDataResponse extends FetchDataResponse {
   stats: Record<string, Numeral>;
   series: Record<string, Series>;
 }
 
-interface MetricsFetchDataResponse extends FetchDataResponse {
+export interface MetricsFetchDataResponse extends FetchDataResponse {
   stats: {
     hosts: Numeral;
     cpu: Percentage;
@@ -53,7 +53,7 @@ interface MetricsFetchDataResponse extends FetchDataResponse {
   };
 }
 
-interface UptimeFetchDataResponse extends FetchDataResponse {
+export interface UptimeFetchDataResponse extends FetchDataResponse {
   stats: {
     monitors: Numeral;
     up: Numeral;
@@ -65,7 +65,7 @@ interface UptimeFetchDataResponse extends FetchDataResponse {
   };
 }
 
-interface ApmFetchDataResponse extends FetchDataResponse {
+export interface ApmFetchDataResponse extends FetchDataResponse {
   stats: {
     services: Numeral;
     transactions: Numeral;
