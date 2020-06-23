@@ -17,7 +17,6 @@ export const mapSavedObjects: SavedObjectsType = {
       description: { type: 'text' },
       title: { type: 'text' },
       version: { type: 'integer' },
-      bounds: { type: 'geo_shape' },
       mapStateJSON: { type: 'text' },
       layerListJSON: { type: 'text' },
       uiStateJSON: { type: 'text' },

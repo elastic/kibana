@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializer } from '../../../../src/core/server';
 import { beatsManagementConfigSchema } from '../common';
+import { BeatsManagementPlugin } from './plugin';
 
 export const config = {
   schema: beatsManagementConfigSchema,
@@ -16,8 +18,4 @@ export const config = {
   },
 };
 
-export const plugin = () => ({
-  setup() {},
-  start() {},
-  stop() {},
-});
+export const plugin: PluginInitializer<{}, {}> = (context) => new BeatsManagementPlugin(context);

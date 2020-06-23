@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import jest from 'jest';
+import { run } from 'jest';
 
-jest.run(process.argv.slice(2));
+run(process.argv.slice(2));

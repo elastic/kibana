@@ -11,12 +11,20 @@ export {
   usePersistExceptionList,
   ExceptionIdentifiers,
   ExceptionList,
-  mockNewExceptionItem,
-  mockNewExceptionList,
+  Pagination,
+  UseExceptionListSuccess,
 } from '../../lists/public';
 export {
   ExceptionListSchema,
   ExceptionListItemSchema,
-  Entries,
+  Entry,
+  EntryExists,
+  EntryNested,
+  EntriesArray,
   NamespaceType,
+  Operator,
+  OperatorType,
+  OperatorTypeEnum,
+  entriesNested,
+  entriesExists,
 } from '../../lists/common/schemas';
