@@ -28,7 +28,12 @@ import {
   FieldFormat,
   shortenDottedString,
 } from '../../../common';
-import { OnNotification, FieldSpec } from '../types';
+import {
+  OnNotification,
+  FieldSpec,
+  FieldSpecConflictDescriptions,
+  FieldSpecExportFmt,
+} from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 
 interface FieldDependencies {
@@ -57,7 +62,7 @@ export class Field implements IFieldType {
   readFromDocValues?: boolean;
   format: any;
   $$spec: FieldSpec;
-  conflictDescriptions?: Record<string, string[]>;
+  conflictDescriptions?: FieldSpecConflictDescriptions;
 
   constructor(
     indexPattern: IIndexPattern,
@@ -167,5 +172,5 @@ export class Field implements IFieldType {
     return newObj;
   }
   // only providing type info as constructor returns new object instead of `this`
-  toSpec = () => ({});
+  toSpec = () => (({} as unknown) as FieldSpecExportFmt);
 }

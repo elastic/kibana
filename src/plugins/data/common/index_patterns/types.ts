@@ -20,6 +20,7 @@
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 import { IFieldType } from './fields';
 import { IFieldFormatMetaParams } from '../field_formats/types';
+import { KBN_FIELD_TYPES } from '..';
 
 export interface IIndexPattern {
   [key: string]: any;
@@ -70,9 +71,34 @@ export type AggregationRestrictions = Record<
   }
 >;
 
+export interface IFieldSubType {
+  multi?: { parent: string };
+  nested?: { path: string };
+}
+
 export interface TypeMeta {
   aggs?: Record<string, AggregationRestrictions>;
   [key: string]: any;
+}
+
+export type FieldSpecConflictDescriptions = Record<string, string[]>;
+
+// This should become FieldSpec once types are cleaned up
+export interface FieldSpecExportFmt {
+  count?: number;
+  script?: string;
+  lang?: string;
+  conflictDescriptions?: FieldSpecConflictDescriptions;
+  name: string;
+  type: KBN_FIELD_TYPES;
+  esTypes?: string[];
+  scripted: boolean;
+  searchable: boolean;
+  aggregatable: boolean;
+  readFromDocValues?: boolean;
+  subType?: IFieldSubType;
+  format?: FieldFormatSpec;
+  indexed?: boolean;
 }
 
 export interface FieldSpec {
