@@ -107,7 +107,11 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 });
 -----------
 
+<<<<<<< HEAD
 Full details are {repo}tree/6.7/packages/kbn-i18n#vanilla-js[here].
+=======
+Full details are {kib-repo}tree/master/packages/kbn-i18n#vanilla-js[here].
+>>>>>>> d26cbef389... [DOCS] Adds kibana-pull attribute for release docs (#69554)
 
 [float]
 ===== i18n for React 
@@ -131,7 +135,11 @@ export const Component = () => {
 };
 -----------
 
+<<<<<<< HEAD
 Full details are {repo}tree/6.7/packages/kbn-i18n#react[here].
+=======
+Full details are {kib-repo}tree/master/packages/kbn-i18n#react[here].
+>>>>>>> d26cbef389... [DOCS] Adds kibana-pull attribute for release docs (#69554)
 
 
 
@@ -152,7 +160,11 @@ The translation directive has the following syntax:
 ></ANY>
 -----------
 
+<<<<<<< HEAD
 Full details are {repo}tree/6.7/packages/kbn-i18n#angularjs[here].
+=======
+Full details are {kib-repo}tree/master/packages/kbn-i18n#angularjs[here].
+>>>>>>> d26cbef389... [DOCS] Adds kibana-pull attribute for release docs (#69554)
 
 
 [float]
