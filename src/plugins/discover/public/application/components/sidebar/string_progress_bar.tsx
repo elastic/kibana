@@ -17,24 +17,12 @@
  * under the License.
  */
 import React from 'react';
-import { EuiProgress, EuiToolTip } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 
 interface Props {
   percent: number;
-  count: number;
-  value: string;
 }
 
-export function StringFieldProgressBar({ value, percent, count }: Props) {
-  const tooltipContent = `${value} ${count}`;
-  return (
-    <EuiToolTip
-      anchorClassName="dscProgressBarTooltip__anchor"
-      content={tooltipContent}
-      delay="regular"
-      position="right"
-    >
-      <EuiProgress value={percent} max={100} color="secondary" aria-hidden={true} size="s" />
-    </EuiToolTip>
-  );
+export function StringFieldProgressBar({ percent }: Props) {
+  return <EuiProgress value={percent} max={100} color="secondary" aria-hidden={true} size="s" />;
 }
