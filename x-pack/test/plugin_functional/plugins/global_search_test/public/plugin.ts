@@ -17,7 +17,8 @@ import { createResult } from '../common/utils';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchTestPluginSetup {}
 export interface GlobalSearchTestPluginStart {
-  findAll: (term: string) => Promise<GlobalSearchResult[]>;
+  findTest: (term: string) => Promise<GlobalSearchResult[]>;
+  findReal: (term: string) => Promise<GlobalSearchResult[]>;
 }
 
 export interface GlobalSearchTestPluginSetupDeps {
