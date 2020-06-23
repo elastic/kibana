@@ -99,7 +99,11 @@ async function init() {
     .split('\n')
     .filter((item) => item)
     .map((item) => JSON.parse(item))
-    .filter((item) => item.url === '/intake/v2/events');
+    .filter((item) => {
+      return (
+        item.url === '/intake/v2/events' || item.url === '/intake/v2/rum/events'
+      );
+    });
 
   spinner.start();
   requestProgress.total = items.length;

@@ -15,7 +15,7 @@
           "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
           "applied": {
             "name": "Default",
@@ -44,7 +44,9 @@
           "full": "Windows 10",
           "name": "windows 10.0",
           "version": "10.0",
-          "variant" : "Windows Pro"
+          "Ext": {
+            "variant" : "Windows Pro"
+          }
         }
       }
     }
@@ -68,7 +70,7 @@
           "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
           "applied": {
             "name": "Default",
@@ -96,7 +98,9 @@
           "full": "Windows Server 2016",
           "name": "windows 10.0",
           "version": "10.0",
-          "variant" : "Windows Server"
+          "Ext": {
+            "variant" : "Windows Server"
+          }
         }
       }
     }
@@ -120,7 +124,7 @@
           "id": "023fa40c-411d-4188-a941-4147bfadd095"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
           "applied": {
             "name": "Default",
@@ -146,7 +150,9 @@
           "full": "Windows 10",
           "name": "windows 10.0",
           "version": "10.0",
-          "variant" : "Windows Pro"
+          "Ext": {
+            "variant" : "Windows Pro"
+          }
         }
       }
     }
@@ -170,7 +176,7 @@
           "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
           "applied": {
             "name": "Default",
@@ -199,7 +205,9 @@
           "full": "Windows Server 2016",
           "name": "windows 10.0",
           "version": "10.0",
-          "variant" : "Windows Server 2016"
+          "Ext": {
+            "variant" : "Windows Server 2016"
+          }
         }
       }
     }
@@ -223,7 +231,7 @@
           "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
           "applied": {
             "name": "Default",
@@ -250,7 +258,9 @@
           "full": "Windows Server 2012",
           "name": "windows 6.2",
           "version": "6.2",
-          "variant" : "Windows Server 2012"
+          "Ext": {
+            "variant" : "Windows Server 2012"
+          }
         }
       }
     }
@@ -274,7 +284,7 @@
           "id": "023fa40c-411d-4188-a941-4147bfadd095"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
           "applied": {
             "name": "With Eventing",
@@ -301,7 +311,9 @@
           "full": "Windows Server 2012",
           "name": "windows 6.2",
           "version": "6.2",
-          "variant" : "Windows Server 2012"
+          "Ext": {
+            "variant" : "Windows Server 2012"
+          }
         }
       }
     }
@@ -325,7 +337,7 @@
           "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
           "applied": {
             "name": "With Eventing",
@@ -353,7 +365,9 @@
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
           "version": "6.3",
-          "variant" : "Windows Server 2012 R2"
+          "Ext": {
+            "variant" : "Windows Server 2012 R2"
+          }
         }
       }
     }
@@ -377,7 +391,7 @@
           "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
           "applied": {
             "name": "Default",
@@ -404,7 +418,9 @@
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
           "version": "6.3",
-          "variant" : "Windows Server 2012 R2"
+          "Ext": {
+            "variant" : "Windows Server 2012 R2"
+          }
         }
       }
     }
@@ -428,7 +444,7 @@
           "id": "023fa40c-411d-4188-a941-4147bfadd095"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
           "applied": {
             "name": "With Eventing",
@@ -455,7 +471,9 @@
           "full": "Windows Server 2012",
           "name": "windows 6.2",
           "version": "6.2",
-          "variant" : "Windows Server 2012"
+          "Ext": {
+            "variant" : "Windows Server 2012"
+          }
         }
       }
     }

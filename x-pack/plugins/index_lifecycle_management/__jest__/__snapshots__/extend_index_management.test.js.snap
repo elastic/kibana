@@ -495,7 +495,7 @@ exports[`extend index management ilm summary extension should return extension w
                   <EuiPopover
                     anchorPosition="downCenter"
                     button={
-                      <ForwardRef
+                      <EuiLink
                         onClick={[Function]}
                       >
                         <FormattedMessage
@@ -503,7 +503,7 @@ exports[`extend index management ilm summary extension should return extension w
                           id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                           values={Object {}}
                         />
-                      </ForwardRef>
+                      </EuiLink>
                     }
                     closePopover={[Function]}
                     display="inlineBlock"
