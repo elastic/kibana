@@ -6,7 +6,7 @@
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
@@ -26,7 +26,6 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -41,7 +40,7 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
-  dashboard: DashboardStart;
+  embeddable: EmbeddableStart;
 }
 
 export class LensPlugin {
