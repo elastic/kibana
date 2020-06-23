@@ -32,7 +32,7 @@ export const EditFieldContainer = React.memo(({ field, allFields }: Props) => {
     });
 
     return subscription.unsubscribe;
-  }, [form, dispatch]);
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const exitEdit = useCallback(() => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });

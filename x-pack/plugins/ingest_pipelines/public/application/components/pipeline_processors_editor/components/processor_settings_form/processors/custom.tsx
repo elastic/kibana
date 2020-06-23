@@ -76,6 +76,7 @@ export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
       defaultValue={defaultOptions}
       componentProps={{
         euiCodeEditorProps: {
+          'data-test-subj': 'processorOptionsEditor',
           height: '300px',
           'aria-label': i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldAriaLabel',

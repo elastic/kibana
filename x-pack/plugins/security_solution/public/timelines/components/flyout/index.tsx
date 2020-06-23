@@ -48,7 +48,7 @@ export const FlyoutComponent = React.memo<Props>(
   ({
     dataProviders,
     flyoutHeight,
-    show,
+    show = true,
     showTimeline,
     timelineId,
     timelineType,

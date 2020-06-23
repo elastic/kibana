@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EntriesArray } from './schemas/types';
+
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
 export const USER = 'some user';
 export const LIST_INDEX = '.lists';
@@ -32,9 +34,25 @@ export const NAMESPACE_TYPE = 'single';
 
 // Exception List specific
 export const ID = 'uuid_here';
+export const ITEM_ID = 'some-list-item-id';
 export const ENDPOINT_TYPE = 'endpoint';
-export const ENTRIES = [
-  { field: 'some.field', match: 'some value', match_any: undefined, operator: 'included' },
+export const FIELD = 'host.name';
+export const OPERATOR = 'included';
+export const ENTRY_VALUE = 'some host name';
+export const MATCH = 'match';
+export const MATCH_ANY = 'match_any';
+export const LIST = 'list';
+export const EXISTS = 'exists';
+export const NESTED = 'nested';
+export const ENTRIES: EntriesArray = [
+  {
+    entries: [
+      { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
+    ],
+    field: 'some.field',
+    type: 'nested',
+  },
+  { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
 ];
 export const ITEM_TYPE = 'simple';
 export const _TAGS = [];

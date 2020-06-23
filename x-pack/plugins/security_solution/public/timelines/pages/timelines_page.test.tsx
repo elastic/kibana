@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ApolloClient from 'apollo-client';
 import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 
@@ -20,7 +19,6 @@ jest.mock('../../common/lib/kibana', () => {
 });
 
 describe('TimelinesPageComponent', () => {
-  const mockAppollloClient = {} as ApolloClient<object>;
   let wrapper: ShallowWrapper;
 
   describe('If the user is authorized', () => {
@@ -36,7 +34,7 @@ describe('TimelinesPageComponent', () => {
           },
         },
       });
-      wrapper = shallow(<TimelinesPageComponent apolloClient={mockAppollloClient} />);
+      wrapper = shallow(<TimelinesPageComponent />);
     });
 
     afterAll(() => {
@@ -78,7 +76,7 @@ describe('TimelinesPageComponent', () => {
           },
         },
       });
-      wrapper = shallow(<TimelinesPageComponent apolloClient={mockAppollloClient} />);
+      wrapper = shallow(<TimelinesPageComponent />);
     });
 
     afterAll(() => {

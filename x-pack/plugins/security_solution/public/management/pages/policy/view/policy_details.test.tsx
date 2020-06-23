@@ -10,18 +10,13 @@ import { mount } from 'enzyme';
 import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getManagementUrl } from '../../../common/routing';
+import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
-  const policyDetailsPathUrl = getManagementUrl({
-    name: 'policyDetails',
-    policyId: '1',
-    excludePrefix: true,
-  });
-  const policyListPathUrl = getManagementUrl({ name: 'policyList', excludePrefix: true });
-  const policyListPathUrlWithPrefix = getManagementUrl({ name: 'policyList' });
+  const policyDetailsPathUrl = getPolicyDetailPath('1');
+  const policyListPathUrl = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
   const { history, AppWrapper, coreStart } = createAppRootMockRenderer();
@@ -97,7 +92,7 @@ describe('Policy Details', () => {
 
       const backToListButton = pageHeaderLeft.find('EuiButtonEmpty');
       expect(backToListButton.prop('iconType')).toBe('arrowLeft');
-      expect(backToListButton.prop('href')).toBe(policyListPathUrlWithPrefix);
+      expect(backToListButton.prop('href')).toBe(policyListPathUrl);
       expect(backToListButton.text()).toBe('Back to policy list');
 
       const pageTitle = pageHeaderLeft.find('[data-test-subj="pageViewHeaderLeftTitle"]');

@@ -7,6 +7,7 @@
 import { extname } from 'path';
 import { chunk, omit } from 'lodash/fp';
 
+import { validate } from '../../../../common/validate';
 import { importRulesSchema } from '../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { createPromiseFromStreams } from '../../../../../../../src/legacy/utils';
 import { IRouter } from '../../../../../../../src/core/server';
@@ -17,7 +18,6 @@ import { SetupPlugins } from '../../../plugin';
 import { ConfigType } from '../../../config';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 
-import { validate } from '../../detection_engine/routes/rules/validate';
 import {
   buildSiemResponse,
   createBulkErrorObject,

@@ -120,7 +120,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
       Array [
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -142,7 +142,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -421,7 +421,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
       Array [
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -443,7 +443,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -627,7 +627,7 @@ exports[`renders 1`] = `
     Array [
       Object {
         "children": <React.Fragment>
-          <ForwardRef
+          <EuiFlexGroup
             alignItems="center"
             justifyContent="spaceBetween"
           >
@@ -649,7 +649,7 @@ exports[`renders 1`] = `
                 Load Kibana objects
               </EuiButton>
             </EuiFlexItem>
-          </ForwardRef>
+          </EuiFlexGroup>
           <EuiSpacer
             size="s"
           />

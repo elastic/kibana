@@ -8,8 +8,9 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-
 import { useParams } from 'react-router-dom';
+
+import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
@@ -158,7 +159,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
           }}
         </WithSource>
 
-        <SpyRoute />
+        <SpyRoute pageName={SecurityPageName.hosts} />
       </>
     );
   }
