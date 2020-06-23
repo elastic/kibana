@@ -40,7 +40,16 @@ const baseAlertRequestParamsRT = rt.intersection([
     sourceId: rt.string,
   }),
   rt.type({
-    lookback: rt.union([rt.literal('h'), rt.literal('d'), rt.literal('w'), rt.literal('M')]),
+    lookback: rt.union([
+      rt.literal('ms'),
+      rt.literal('s'),
+      rt.literal('m'),
+      rt.literal('h'),
+      rt.literal('d'),
+      rt.literal('w'),
+      rt.literal('M'),
+      rt.literal('y'),
+    ]),
     criteria: rt.array(rt.any),
     alertInterval: rt.string,
   }),
