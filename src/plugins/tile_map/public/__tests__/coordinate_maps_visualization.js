@@ -52,8 +52,9 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceSettings } from '../../../maps_legacy/public/map/service_settings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../maps_legacy/public/kibana_services';
-import { getBaseMapsVis } from '../../../maps_legacy/public';
+import { KibanaMap } from '../../../maps_legacy/public/map/kibana_map';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseMapsVisualizationProvider } from '../../../maps_legacy/public/map/base_maps_visualization';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -105,26 +106,12 @@ describe('CoordinateMapsVisualizationTest', function () {
           },
         },
       };
-      setInjectedVarFunc((injectedVar) => {
-        switch (injectedVar) {
-          case 'version':
-            return '123';
-          default:
-            return 'not found';
-        }
-      });
 
-      const coreSetupMock = {
-        notifications: {
-          toasts: {},
-        },
-        uiSettings: {},
-        injectedMetadata: {
-          getInjectedVar: () => {},
-        },
-      };
       const serviceSettings = new ServiceSettings(mapConfig, tilemapsConfig);
-      const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
+      const BaseMapsVisualization = new BaseMapsVisualizationProvider(
+        (...args) => new KibanaMap(...args),
+        serviceSettings
+      );
       const uiSettings = $injector.get('config');
 
       dependencies = {
