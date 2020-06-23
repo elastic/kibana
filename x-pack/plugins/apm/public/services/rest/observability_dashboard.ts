@@ -6,10 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { sum } from 'lodash';
-import {
-  ApmFetchDataResponse,
-  FetchData,
-} from '../../../../observability/public/typings/data_handler';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FetchData } from '../../../../observability/public/data_handler';
+import { ApmFetchDataResponse } from '../../../../observability/public/typings/fetch_data_response';
 import { callApmApi } from './createCallApmApi';
 
 export const fetchData: FetchData<ApmFetchDataResponse> = async ({
