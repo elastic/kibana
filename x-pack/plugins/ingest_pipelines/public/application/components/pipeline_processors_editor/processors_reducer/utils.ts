@@ -9,6 +9,17 @@ import { ProcessorInternal, ProcessorSelector } from '../types';
 import { DropSpecialLocations } from '../constants';
 import { checkIfSamePath, getValue } from '../utils';
 
+import { ON_FAILURE_STATE_SCOPE } from './constants';
+
+/**
+ * We know that it must be an on-failure handler if the selector length is greater than 2
+ * because the first element will always be either processors or the global on-failure
+ * array and the second element will be a number indicating the processor position in the
+ * array. Anything more than that we know we are add an on failure handler.
+ */
+export const isOnFailureSelector = (selector: ProcessorSelector) =>
+  selector[0] === ON_FAILURE_STATE_SCOPE || selector.length > 2;
+
 export const PARENT_CHILD_NEST_ERROR = 'PARENT_CHILD_NEST_ERROR';
 
 export const duplicateProcessor = (sourceProcessor: ProcessorInternal): ProcessorInternal => {

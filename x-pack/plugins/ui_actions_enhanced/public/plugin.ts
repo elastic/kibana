@@ -24,7 +24,6 @@ import {
   CUSTOM_TIME_RANGE,
   TimeRangeActionContext,
 } from './custom_time_range_action';
-
 import {
   CustomTimeRangeBadge,
   CUSTOM_TIME_RANGE_BADGE,
@@ -32,6 +31,8 @@ import {
 } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
+import { createFlyoutManageDrilldowns } from './drilldowns';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -49,7 +50,9 @@ export interface SetupContract
 
 export interface StartContract
   extends UiActionsStart,
-    Pick<UiActionsServiceEnhancements, 'getActionFactory' | 'getActionFactories'> {}
+    Pick<UiActionsServiceEnhancements, 'getActionFactory' | 'getActionFactories'> {
+  FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
+}
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -94,6 +97,12 @@ export class AdvancedUiActionsPublicPlugin
     return {
       ...uiActions,
       ...this.enhancements,
+      FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
+        actionFactories: this.enhancements.getActionFactories(),
+        storage: new Storage(window?.localStorage),
+        toastService: core.notifications.toasts,
+        docsLink: core.docLinks.links.dashboard.drilldowns,
+      }),
     };
   }
 

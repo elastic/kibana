@@ -36,7 +36,12 @@ describe('Security Plugin', () => {
     );
 
     mockCoreSetup = coreMock.createSetup();
-    mockCoreSetup.http.isTlsEnabled = true;
+    mockCoreSetup.http.getServerInfo.mockReturnValue({
+      host: 'localhost',
+      name: 'kibana',
+      port: 80,
+      protocol: 'https',
+    });
 
     mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
     mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
