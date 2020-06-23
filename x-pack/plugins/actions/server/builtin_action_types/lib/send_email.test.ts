@@ -10,14 +10,14 @@ jest.mock('nodemailer', () => ({
 
 import { Logger } from '../../../../../../src/core/server';
 import { sendEmail } from './send_email';
-import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import nodemailer from 'nodemailer';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
 
-const mockLogger = loggingServiceMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('send_email module', () => {
   beforeEach(() => {
