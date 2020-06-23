@@ -7,7 +7,16 @@
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiPanel, EuiRadioGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FileLayer } from '@elastic/ems-client';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFormRow,
+  EuiPanel,
+  EuiRadioGroup,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { EMSFileSelect } from '../../../components/ems_file_select';
@@ -15,6 +24,7 @@ import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_sel
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternSelectComponent } from '../../../kibana_services';
 import { getGeoFields, getSourceFields } from '../../../index_pattern_util';
+import { getEmsFileLayers } from '../../../meta';
 
 export enum BOUNDARIES_SOURCE {
   ELASTICSEARCH = 'ELASTICSEARCH',
@@ -41,6 +51,7 @@ const IndexPatternSelect = getIndexPatternSelectComponent();
 interface State {
   leftSource: BOUNDARIES_SOURCE;
   leftEmsFileId: string | null;
+  leftEmsFields: Array<EuiComboBoxOptionOption<string>>;
   leftIndexPattern: IndexPattern | null;
   leftGeoFields: IFieldType[];
   leftJoinFields: IFieldType[];
@@ -51,9 +62,12 @@ interface State {
 }
 
 export class LayerTemplate extends Component<RenderWizardArguments, State> {
+  private _isMounted: boolean = false;
+
   state = {
     leftSource: BOUNDARIES_SOURCE.ELASTICSEARCH,
     leftEmsFileId: null,
+    leftEmsFields: [],
     leftIndexPattern: null,
     leftGeoFields: [],
     leftJoinFields: [],
@@ -63,8 +77,41 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     rightJoinField: null,
   };
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  _loadEmsFileFields = async () => {
+    const emsFileLayers = await getEmsFileLayers();
+    const emsFileLayer = emsFileLayers.find((fileLayer: FileLayer) => {
+      return fileLayer.getId() === this.state.leftEmsFileId;
+    });
+
+    if (!this._isMounted || !emsFileLayer) {
+      return;
+    }
+
+    const fields = emsFileLayer.getFieldsInLanguage();
+    this.setState({
+      leftEmsFields: fields
+        .filter((field) => {
+          return field.type === 'id';
+        })
+        .map((field) => {
+          return {
+            value: field.name,
+            label: field.description,
+          };
+        }),
+    });
+  };
+
   _onLeftSourceChange = (optionId: string) => {
-    this.setState({ leftSource: optionId }, this._previewLayer);
+    this.setState({ leftSource: optionId, leftJoinField: null });
   };
 
   _onLeftIndexPatternChange = (indexPattern: IndexPattern) => {
@@ -93,8 +140,16 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     this.setState({ leftJoinField: joinField }, this._previewLayer);
   };
 
-  _onEmsFileChange = (emFileId: string) => {
-    this.setState({ leftEmsFileId: emFileId }, this._previewLayer);
+  _onLeftEmsFileChange = (emFileId: string) => {
+    this.setState({ leftEmsFileId: emFileId, leftJoinField: null }, this._loadEmsFileFields);
+  };
+
+  _onLeftEmsFieldChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    if (selectedOptions.length === 0) {
+      return;
+    }
+
+    this.setState({ leftJoinField: selectedOptions[0].value }, this._previewLayer);
   };
 
   _isLeftConfigComplete() {
@@ -151,7 +206,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
         joinFieldSelect = (
           <EuiFormRow
             label={i18n.translate('xpack.maps.choropleth.joinFieldLabel', {
-              defaultMessage: 'Boundaries join field',
+              defaultMessage: 'Join field',
             })}
           >
             <SingleFieldSelect
@@ -177,7 +232,38 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
         </>
       );
     } else {
-      return <EMSFileSelect value={this.state.leftEmsFileId} onChange={this._onEmsFileChange} />;
+      let emsFieldSelect;
+      if (this.state.leftEmsFields.length) {
+        let selectedOption;
+        if (this.state.leftJoinField) {
+          selectedOption = this.state.leftEmsFields.find(
+            (option: EuiComboBoxOptionOption<string>) => {
+              return this.state.leftJoinField === option.value;
+            }
+          );
+        }
+        emsFieldSelect = (
+          <EuiFormRow
+            label={i18n.translate('xpack.maps.choropleth.joinFieldLabel', {
+              defaultMessage: 'Join field',
+            })}
+          >
+            <EuiComboBox
+              singleSelection={true}
+              isClearable={false}
+              options={this.state.leftEmsFields}
+              selectedOptions={selectedOption ? [selectedOption] : []}
+              onChange={this._onLeftEmsFieldChange}
+            />
+          </EuiFormRow>
+        );
+      }
+      return (
+        <>
+          <EMSFileSelect value={this.state.leftEmsFileId} onChange={this._onLeftEmsFileChange} />
+          {emsFieldSelect}
+        </>
+      );
     }
   }
 
