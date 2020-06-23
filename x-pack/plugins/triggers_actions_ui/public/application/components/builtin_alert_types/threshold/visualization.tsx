@@ -179,6 +179,8 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   if (!charts || !uiSettings || !dataFieldsFormats) {
     return null;
   }
+  const chartsTheme = charts.theme.useChartsTheme();
+  const chartsBaseTheme = charts.theme.useChartsBaseTheme();
 
   const domain = getDomain(alertInterval, startVisualizationAt);
   const visualizeOptions = {
@@ -258,8 +260,8 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         {alertVisualizationDataKeys.length ? (
           <Chart size={['100%', 200]} renderer="canvas">
             <Settings
-              theme={[customTheme(), charts.theme.useChartsTheme()]}
-              baseTheme={charts.theme.useChartsBaseTheme()}
+              theme={[customTheme(), chartsTheme]}
+              baseTheme={chartsBaseTheme}
               xDomain={domain}
               showLegend={!!termField}
               showLegendExtra
