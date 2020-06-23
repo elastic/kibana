@@ -77,8 +77,9 @@ import {
   rumPageLoadDistributionRoute,
 } from './rum_client';
 import {
-  fetchObservabilityDashboardDataRoute,
-  hasApmDataRoute,
+  observabilityDashboardHasDataRoute,
+  observabilityDashboardServiceCountRoute,
+  observabilityDashboardTransactionsRoute,
 } from './observability_dashboard';
 
 const createApmApi = () => {
@@ -167,8 +168,9 @@ const createApmApi = () => {
     .add(rumClientMetricsRoute)
 
     // Observability dashboard
-    .add(fetchObservabilityDashboardDataRoute)
-    .add(hasApmDataRoute);
+    .add(observabilityDashboardHasDataRoute)
+    .add(observabilityDashboardServiceCountRoute)
+    .add(observabilityDashboardTransactionsRoute);
 
   return api;
 };

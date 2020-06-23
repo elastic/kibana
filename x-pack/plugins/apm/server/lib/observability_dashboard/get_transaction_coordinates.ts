@@ -8,13 +8,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { Coordinates } from '../../../../observability/public/typings/data_handler';
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { rangeFilter } from '../helpers/range_filter';
 import { ProcessorEvent } from '../../../common/processor_event';
 
-export async function getTransactionDistribution({
+export async function getTransactionCoordinates({
   setup,
   bucketSize,
 }: {

@@ -13,10 +13,20 @@ export const fetchData: FetchData = async ({
   endTime,
   bucketSize,
 }) => {
-  const { serviceCount, transactionCoordinates } = await callApmApi({
-    pathname: '/api/apm/observability-dashboard',
+  const serviceCountPromise = callApmApi({
+    pathname: '/api/apm/observability-dashboard/service-count',
     params: { query: { start: startTime, end: endTime, bucketSize } },
   });
+
+  const transactionCoordinatesPromise = callApmApi({
+    pathname: '/api/apm/observability-dashboard/transactions',
+    params: { query: { start: startTime, end: endTime, bucketSize } },
+  });
+
+  const [serviceCount, transactionCoordinates] = await Promise.all([
+    serviceCountPromise,
+    transactionCoordinatesPromise,
+  ]);
 
   return {
     title: i18n.translate('xpack.apm.observabilityDashboard.title', {
