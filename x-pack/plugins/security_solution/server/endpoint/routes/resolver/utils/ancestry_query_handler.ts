@@ -99,11 +99,7 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     return this.levels > 0 && this.ancestorsToFind.length > 0;
   }
 
-  buildQuery(): QueryInfo | undefined {
-    if (!this.hasMore()) {
-      return;
-    }
-
+  buildQuery(): QueryInfo {
     return {
       query: this.query,
       ids: this.ancestorsToFind,

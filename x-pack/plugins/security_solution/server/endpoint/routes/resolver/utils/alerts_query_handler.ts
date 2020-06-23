@@ -6,16 +6,16 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { ResolverRelatedEvents, ResolverEvent } from '../../../../../common/endpoint/types';
-import { createRelatedEvents } from './node';
-import { EventsQuery } from '../queries/events';
+import { ResolverRelatedAlerts, ResolverEvent } from '../../../../../common/endpoint/types';
+import { createRelatedAlerts } from './node';
+import { AlertsQuery } from '../queries/alerts';
 import { PaginationBuilder } from './pagination';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
 
-export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRelatedEvents> {
-  private relatedEvents: ResolverRelatedEvents | undefined;
-  private readonly query: EventsQuery;
+export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRelatedAlerts> {
+  private relatedEvents: ResolverRelatedAlerts | undefined;
+  private readonly query: AlertsQuery;
   constructor(
     private readonly limit: number,
     private readonly entityID: string,
@@ -23,7 +23,7 @@ export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRel
     indexPattern: string,
     legacyEndpointID: string | undefined
   ) {
-    this.query = new EventsQuery(
+    this.query = new AlertsQuery(
       PaginationBuilder.createBuilder(limit, after),
       indexPattern,
       legacyEndpointID
@@ -32,7 +32,7 @@ export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRel
 
   handleResponse = (response: SearchResponse<ResolverEvent>) => {
     const results = this.query.formatResponse(response);
-    this.relatedEvents = createRelatedEvents(
+    this.relatedEvents = createRelatedAlerts(
       this.entityID,
       results,
       PaginationBuilder.buildCursorRequestLimit(this.limit, results)
@@ -53,6 +53,6 @@ export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRel
 
   async search(client: IScopedClusterClient) {
     this.handleResponse(await this.query.search(client, this.entityID));
-    return this.getResults() || createRelatedEvents(this.entityID);
+    return this.getResults() || createRelatedAlerts(this.entityID);
   }
 }

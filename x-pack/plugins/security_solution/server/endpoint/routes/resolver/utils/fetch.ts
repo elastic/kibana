@@ -5,33 +5,25 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 import {
   ResolverChildren,
   ResolverRelatedEvents,
   ResolverAncestry,
   ResolverRelatedAlerts,
   LifecycleNode,
-  ResolverEvent,
 } from '../../../../../common/endpoint/types';
-import {
-  entityId,
-  ancestryArray,
-  parentEntityId,
-} from '../../../../../common/endpoint/models/event';
-import { PaginationBuilder } from './pagination';
+import { entityId, ancestryArray } from '../../../../../common/endpoint/models/event';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
-import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
-import { createRelatedEvents, createLifecycle, createRelatedAlerts } from './node';
-import { AlertsQuery } from '../queries/alerts';
+import { createLifecycle } from './node';
 import { ChildrenNodesHelper } from './children_helper';
 import { TotalsPaginationBuilder } from './totals_pagination';
 import { MultiSearcher, QueryInfo } from '../queries/multi_searcher';
 import { AncestryQueryHandler } from './ancestry_query_handler';
 import { RelatedEventsQueryHandler } from './events_query_handler';
+import { RelatedAlertsQueryHandler } from './alerts_query_handler';
 
 export interface TreeOptions {
   children: number;
@@ -51,13 +43,14 @@ export interface TreeOptions {
 //  buildQueery: QueryInfo
 //  hasMore()
 //  search()
-export interface QueryHandler<T> {
-  hasMore(): boolean;
-  buildQuery(): QueryInfo | undefined;
-  // todo remove this
-  handleResponse(searchResponse: SearchResponse<ResolverEvent>): void;
+export interface SingleQueryHandler<T> {
+  buildQuery(): QueryInfo;
   getResults(): T | undefined;
   search(client: IScopedClusterClient): Promise<T>;
+}
+
+export interface QueryHandler<T> extends SingleQueryHandler<T> {
+  hasMore(): boolean;
 }
 
 /**
@@ -128,6 +121,14 @@ export class Fetcher {
       this.indexPattern,
       this.endpointID
     );
+
+    const alertsHandler = new RelatedAlertsQueryHandler(
+      options.events,
+      this.id,
+      options.afterEvent,
+      this.indexPattern,
+      this.endpointID
+    );
     // if ancestryQuery -> queries.push()
     // if eventsQuery -> queries.push()
     // if alertsQuery -> queries.push()
@@ -140,30 +141,27 @@ export class Fetcher {
     // then
     // stats
     const msearch = new MultiSearcher(this.client);
+    let queries: QueryInfo[] = [eventsHandler.buildQuery(), alertsHandler.buildQuery()];
+    if (ancestryHandler.hasMore()) {
+      queries.push(ancestryHandler.buildQuery());
+    }
+    await msearch.search(queries);
 
-    while (ancestryHandler.hasMore() || eventsHandler.hasMore()) {
-      const queries: QueryInfo[] = [];
+    while (ancestryHandler.hasMore()) {
+      queries = [];
       const ancestryQuery = ancestryHandler.buildQuery();
-      if (ancestryQuery) {
-        queries.push(ancestryQuery);
-      }
-
-      const eventsQuery = eventsHandler.buildQuery();
-      if (eventsQuery) {
-        queries.push(eventsQuery);
-      }
-
-      if (queries.length === 0) {
-        break;
-      }
+      queries.push(ancestryQuery);
 
       await msearch.search(queries);
     }
 
-    return new Tree(this.id, {
+    const tree = new Tree(this.id, {
       ancestry: ancestryHandler.getResults(),
       relatedEvents: eventsHandler.getResults(),
+      relatedAlerts: alertsHandler.getResults(),
     });
+
+    return this.stats(tree);
   }
 
   /**
@@ -221,23 +219,15 @@ export class Fetcher {
    * @param after a cursor to use as the starting point for retrieving alerts
    */
   public async alerts(limit: number, after?: string): Promise<ResolverRelatedAlerts> {
-    const query = new AlertsQuery(
-      PaginationBuilder.createBuilder(limit, after),
+    const alertsHandler = new RelatedAlertsQueryHandler(
+      limit,
+      this.id,
+      after,
       this.indexPattern,
       this.endpointID
     );
 
-    const results = await query.search(this.client, this.id);
-    if (results.length === 0) {
-      // return an empty set of results
-      return createRelatedAlerts(this.id);
-    }
-
-    return createRelatedAlerts(
-      this.id,
-      results,
-      PaginationBuilder.buildCursorRequestLimit(limit, results)
-    );
+    return alertsHandler.search(this.client);
   }
 
   /**
