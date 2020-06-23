@@ -82,15 +82,13 @@ export const TreeNode: FunctionComponent<Props> = ({
   };
 
   return (
-    <>
-      <PipelineProcessorsEditorItem
-        movingProcessor={movingProcessor}
-        selector={processorInfo.selector}
-        processor={processor}
-        handlers={handlers}
-        description={processor.options.description}
-      />
-      {renderOnFailureHandlersTree()}
-    </>
+    <PipelineProcessorsEditorItem
+      movingProcessor={movingProcessor}
+      selector={processorInfo.selector}
+      processor={processor}
+      handlers={handlers}
+      description={processor.options.description}
+      renderOnFailureHandlers={renderOnFailureHandlersTree}
+    />
   );
 };

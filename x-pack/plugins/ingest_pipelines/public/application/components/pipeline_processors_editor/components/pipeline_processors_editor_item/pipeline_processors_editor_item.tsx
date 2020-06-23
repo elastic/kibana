@@ -38,10 +38,18 @@ export interface Props {
   selector: ProcessorSelector;
   description?: string;
   movingProcessor?: ProcessorInfo;
+  renderOnFailureHandlers?: () => React.ReactNode;
 }
 
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
-  ({ processor, description, handlers: { onCancelMove, onMove }, selector, movingProcessor }) => {
+  ({
+    processor,
+    description,
+    handlers: { onCancelMove, onMove },
+    selector,
+    movingProcessor,
+    renderOnFailureHandlers,
+  }) => {
     const {
       state: { editor, processorsDispatch },
     } = usePipelineProcessorsContext();
@@ -165,6 +173,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {renderOnFailureHandlers && renderOnFailureHandlers()}
       </EuiPanel>
     );
   }
