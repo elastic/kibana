@@ -109,5 +109,5 @@ describe('Mappings editor: edit field', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  });
+  }, 50000);
 });

@@ -18,7 +18,6 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';
 import { FilterBadgeList } from './FilterBadgeList';
 import { unit, px } from '../../../../style/variables';
@@ -39,9 +38,9 @@ const SelectContainer = styled.div`
 `;
 
 const Counter = styled.div`
-  border-radius: ${theme.euiBorderRadius};
-  background: ${theme.euiColorLightShade};
-  padding: 0 ${theme.paddingSizes.xs};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+  background: ${({ theme }) => theme.eui.euiColorLightShade};
+  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
 `;
 
 const ApplyButton = styled(EuiButton)`
