@@ -7,7 +7,7 @@
 // Tests for scripted field in default distribution where async search is used
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   // const log = getService('log');
   const retry = getService('retry');
@@ -18,7 +18,7 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'settings', 'discover', 'timePicker']);
   const queryBar = getService('queryBar');
 
-  describe('async search with scripted fields', function() {
+  describe('async search with scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function() {
@@ -38,7 +38,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.load('empty_kibana');
     });
 
-    it('query should show failed shards pop up', async function() {
+    it('query should show failed shards pop up', async function () {
       /* If you had to modify the scripted fields, you could un-comment all this, run it, use es_archiver to update 'kibana_scripted_fields_on_logstash'
        */
 
@@ -61,7 +61,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('logsta*');
 
-      await retry.tryForTime(20000, async function() {
+      await retry.tryForTime(20000, async function () {
         // wait for shards failed message
         const shardMessage = await testSubjects.getVisibleText('euiToastHeader');
         log.debug(shardMessage);
@@ -69,7 +69,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    it('query return results with valid scripted field', async function() {
+    it('query return results with valid scripted field', async function () {
       // the commented-out steps below were used to create the scripted fields in the logstash-* index pattern
       // which are now saved in the esArchive.
 
