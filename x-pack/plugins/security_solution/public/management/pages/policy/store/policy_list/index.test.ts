@@ -26,10 +26,10 @@ import {
   createSpyMiddleware,
   MiddlewareActionSpyHelper,
 } from '../../../../../common/store/test_utils';
-import { getManagementUrl } from '../../../../common/routing';
+import { getPoliciesPath } from '../../../../common/routing';
 
 describe('policy list store concerns', () => {
-  const policyListPathUrl = getManagementUrl({ name: 'policyList', excludePrefix: true });
+  const policyListPathUrl = getPoliciesPath();
   let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let store: Store;

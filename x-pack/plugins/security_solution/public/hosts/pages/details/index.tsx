@@ -9,6 +9,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
+import { SecurityPageName } from '../../../app/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -209,7 +210,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
           }}
         </WithSource>
 
-        <SpyRoute />
+        <SpyRoute pageName={SecurityPageName.hosts} />
       </>
     );
   }
