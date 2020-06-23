@@ -58,12 +58,8 @@ import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
-import {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
+import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
-import { registerFeature } from './feature';
 
 const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -90,7 +86,6 @@ export interface AlertingPluginsSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
-  features: FeaturesPluginSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -143,7 +138,6 @@ export class AlertingPlugin {
       );
     }
 
-    registerFeature(plugins.features);
     setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
