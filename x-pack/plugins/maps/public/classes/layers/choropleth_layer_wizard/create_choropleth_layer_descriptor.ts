@@ -9,6 +9,7 @@ import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
+  SCALING_TYPES,
   SOURCE_TYPES,
   STYLE_TYPE,
   VECTOR_STYLES,
@@ -23,6 +24,7 @@ import {
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../vector_layer/vector_layer';
 import { EMSFileSource } from '../../sources/ems_file_source';
+import { ESSearchSource } from '../../sources/es_search_source';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
@@ -86,24 +88,53 @@ function createChoroplethLayerDescriptor({
 }
 
 export function createEmsChoroplethLayerDescriptor({
-  emsFileId,
-  emsField,
+  leftEmsFileId,
+  leftEmsField,
   rightIndexPatternId,
   rightIndexPatternTitle,
   rightTermField,
 }: {
-  emsFileId: string;
-  emsField: string;
+  leftEmsFileId: string;
+  leftEmsField: string;
   rightIndexPatternId: string;
   rightIndexPatternTitle: string;
   rightTermField: string;
 }) {
   return createChoroplethLayerDescriptor({
     sourceDescriptor: EMSFileSource.createDescriptor({
-      id: emsFileId,
-      tooltipProperties: [emsField],
+      id: leftEmsFileId,
+      tooltipProperties: [leftEmsField],
     }),
-    leftField: emsField,
+    leftField: leftEmsField,
+    rightIndexPatternId,
+    rightIndexPatternTitle,
+    rightTermField,
+  });
+}
+
+export function createEsChoroplethLayerDescriptor({
+  leftIndexPatternId,
+  leftGeoField,
+  leftJoinField,
+  rightIndexPatternId,
+  rightIndexPatternTitle,
+  rightTermField,
+}: {
+  leftIndexPatternId: string;
+  leftGeoField: string;
+  leftJoinField: string;
+  rightIndexPatternId: string;
+  rightIndexPatternTitle: string;
+  rightTermField: string;
+}) {
+  return createChoroplethLayerDescriptor({
+    sourceDescriptor: ESSearchSource.createDescriptor({
+      indexPatternId: leftIndexPatternId,
+      geoField: leftGeoField,
+      scalingType: SCALING_TYPES.LIMIT,
+      tooltipProperties: [leftJoinField],
+    }),
+    leftField: leftJoinField,
     rightIndexPatternId,
     rightIndexPatternTitle,
     rightTermField,
