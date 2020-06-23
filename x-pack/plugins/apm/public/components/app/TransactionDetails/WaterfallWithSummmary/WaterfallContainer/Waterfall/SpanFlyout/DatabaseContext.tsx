@@ -5,7 +5,6 @@
  */
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { tint } from 'polished';
 import React, { Fragment } from 'react';
@@ -33,9 +32,9 @@ registerLanguage('sql', sql);
 
 const DatabaseStatement = styled.div`
   padding: ${px(units.half)} ${px(unit)};
-  background: ${tint(0.1, theme.euiColorWarning)};
+  background: ${({ theme }) => tint(0.1, theme.eui.euiColorWarning)};
   border-radius: ${borderRadius};
-  border: 1px solid ${theme.euiColorLightShade};
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
 `;

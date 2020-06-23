@@ -48,6 +48,7 @@ import {
 } from './generic_row_renderer';
 import * as i18n from './translations';
 
+jest.mock('../../../../../../common/components/link_to');
 jest.mock('../../../../../../overview/components/events_by_dataset');
 
 describe('GenericRowRenderer', () => {

@@ -118,7 +118,7 @@ describe('pollEsNodesVersion', () => {
     });
 
   beforeEach(() => {
-    callWithInternalUser.mockClear();
+    callWithInternalUser.mockReset();
   });
 
   it('returns iscCompatible=false and keeps polling when a poll request throws', (done) => {
