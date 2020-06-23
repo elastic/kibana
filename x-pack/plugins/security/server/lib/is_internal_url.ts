@@ -6,16 +6,9 @@
 
 import { parse } from 'url';
 
-export function parseNext(href, basePath = '') {
-  const { query, hash } = parse(href, true);
-  if (!query.next) {
-    return `${basePath}/`;
-  }
-
-  // validate that `next` is not attempting a redirect to somewhere
-  // outside of this Kibana install
+export function isInternalURL(url: string, basePath = '') {
   const { protocol, hostname, port, pathname } = parse(
-    query.next,
+    url,
     false /* parseQueryString */,
     true /* slashesDenoteHost */
   );
@@ -26,12 +19,21 @@ export function parseNext(href, basePath = '') {
   // hostname is `abc.com`, but for Node hostname is an empty string i.e. everything between schema (`//`)
   // and the first slash that belongs to path.
   if (protocol !== null || hostname !== null || port !== null) {
-    return `${basePath}/`;
+    return false;
   }
 
-  if (!String(pathname).startsWith(basePath)) {
-    return `${basePath}/`;
+  if (basePath) {
+    // Now we need to normalize URL to make sure any relative path segments (`..`) cannot escape expected
+    // base path. We can rely on `URL` with a localhost to automatically "normalize" the URL.
+    const normalizedPathname = new URL(String(pathname), 'https://localhost').pathname;
+    return (
+      // Normalized pathname can add a leading slash, but we should also make sure it's included in
+      // the original URL too
+      pathname &&
+      pathname.startsWith('/') &&
+      (normalizedPathname === basePath || normalizedPathname.startsWith(`${basePath}/`))
+    );
   }
 
-  return query.next + (hash || '');
+  return true;
 }
