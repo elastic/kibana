@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
                       type: 'index-pattern',
                     },
                   ],
+                  score: 0,
                   updated_at: '2017-09-21T18:51:23.794Z',
                   meta: {
                     editUrl:

@@ -5,7 +5,8 @@
  */
 
 import React, { memo } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { useHistory, Route, Switch } from 'react-router-dom';
+
 import { PolicyContainer } from './policy';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
@@ -14,9 +15,10 @@ import {
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
-import { getManagementUrl } from '..';
+import { getEndpointListPath } from '../common/routing';
 
 export const ManagementContainer = memo(() => {
+  const history = useHistory();
   return (
     <Switch>
       <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
@@ -24,9 +26,10 @@ export const ManagementContainer = memo(() => {
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact
-        render={() => (
-          <Redirect to={getManagementUrl({ name: 'endpointList', excludePrefix: true })} />
-        )}
+        render={() => {
+          history.replace(getEndpointListPath({ name: 'endpointList' }));
+          return null;
+        }}
       />
       <Route path="*" component={NotFoundPage} />
     </Switch>
