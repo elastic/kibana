@@ -34,7 +34,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sortBy, isEqual } from 'lodash';
+import { sortBy, isEqual } from 'lodash3';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryAttributes } from '../../query';
 

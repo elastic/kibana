@@ -17,7 +17,7 @@
  * under the License.
  */
 import { schema } from '@kbn/config-schema';
-import _ from 'lodash';
+import _ from 'lodash4';
 import { IRouter } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';

@@ -20,7 +20,7 @@
 import fn from './carry';
 import moment from 'moment';
 const expect = require('chai').expect;
-import _ from 'lodash';
+import _ from 'lodash4';
 
 describe('carry.js', function () {
   it('fills holes in the data', function () {

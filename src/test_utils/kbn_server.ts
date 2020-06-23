@@ -28,7 +28,7 @@ import {
   setupUsers,
   // @ts-ignore: implicit any for JS file
 } from '@kbn/test';
-import { defaultsDeep, get } from 'lodash';
+import { defaultsDeep, get } from 'lodash4';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
@@ -217,7 +217,7 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = get<'oss' | 'basic' | 'gold' | 'trial'>(settings, 'es.license', 'oss');
+  const license = get(settings, 'es.license', 'oss');
   const usersToBeAdded = get(settings, 'users', []);
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {

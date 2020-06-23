@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { capitalize } from 'lodash';
+import { capitalize } from 'lodash3';
 
 import { BasicVislibParams, ValueAxis, SeriesParam } from '../../../types';
 import { ChartModes, ChartTypes, InterpolationModes, Positions } from '../../../utils/collections';

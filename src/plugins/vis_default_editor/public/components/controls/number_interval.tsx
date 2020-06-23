@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash4';
 import React, { useEffect, useCallback } from 'react';
 
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
@@ -56,7 +56,7 @@ function NumberIntervalParamEditor({
   setValidity,
   setValue,
 }: AggParamEditorProps<number | undefined>) {
-  const base: number = get(editorConfig, 'interval.base');
+  const base: number = get(editorConfig, 'interval.base') as number;
   const min = base || 0;
   const isValid = value !== undefined && value >= min;
 

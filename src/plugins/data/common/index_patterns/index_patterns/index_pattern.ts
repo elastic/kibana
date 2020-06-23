@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { each, reject } from 'lodash';
+import _, { each, reject } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';

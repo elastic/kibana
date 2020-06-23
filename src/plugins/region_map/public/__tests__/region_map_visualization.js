@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
+import _ from 'lodash4';
 
 import ChoroplethLayer from '../choropleth_layer';
 import { ImageComparator } from 'test_utils/image_comparator';

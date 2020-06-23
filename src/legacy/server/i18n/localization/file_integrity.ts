@@ -19,7 +19,7 @@
 
 import { createHash } from 'crypto';
 import * as fs from 'fs';
-import { zipObject } from 'lodash';
+import { zipObject } from 'lodash4';
 import * as stream from 'stream';
 import * as util from 'util';
 
@@ -33,7 +33,7 @@ export interface Integrities {
 
 export async function getIntegrityHashes(filepaths: string[]): Promise<Integrities> {
   const hashes = await Promise.all(filepaths.map(getIntegrityHash));
-  return zipObject(filepaths, hashes);
+  return zipObject(filepaths, hashes) as Integrities;
 }
 
 export async function getIntegrityHash(filepath: string): Promise<Hash | null> {

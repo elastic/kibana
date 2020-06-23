@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash4';
 import { npSetup } from 'ui/new_platform';
 
 const newPlatformInjectedVars = npSetup.core.injectedMetadata;

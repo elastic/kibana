@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import React, { Component } from 'react';
 
 import { Required } from '@kbn/utility-types';

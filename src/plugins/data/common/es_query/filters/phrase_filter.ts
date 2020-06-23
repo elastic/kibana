@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, isPlainObject } from 'lodash';
+import { get, isPlainObject } from 'lodash3';
 import { Filter, FilterMeta } from './meta_filter';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
 

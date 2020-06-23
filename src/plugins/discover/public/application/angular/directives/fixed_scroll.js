@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash4';
 import { DebounceProvider } from './debounce';
 
 const SCROLLER_HEIGHT = 20;

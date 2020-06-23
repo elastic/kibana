@@ -18,7 +18,7 @@
  */
 import './search_embeddable.scss';
 import angular from 'angular';
-import _ from 'lodash';
+import _ from 'lodash4';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';

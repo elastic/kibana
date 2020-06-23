@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { difference, get, set } from 'lodash';
+import { difference, get, set } from 'lodash4';
 // @ts-ignore
 import { getTransform } from '../../../../legacy/deprecation/index';
 import { unset } from '../../../../legacy/utils';

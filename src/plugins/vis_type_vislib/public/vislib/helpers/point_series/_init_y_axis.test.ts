@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { initYAxis } from './_init_y_axis';
 import { Chart } from './point_series';
 

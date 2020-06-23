@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 /*
  * Accepts an array of zero-filled y value objects (arr1)

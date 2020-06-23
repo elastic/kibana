@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, pick, throttle } from 'lodash';
+import { cloneDeep, pick, throttle } from 'lodash4';
 import { resolve as resolveUrl } from 'url';
 
 import {
@@ -162,7 +162,9 @@ export class SavedObjectsClient {
             });
 
             if (!foundObject) {
-              return queueItem.resolve(this.createSavedObject(pick(queueItem, ['id', 'type'])));
+              return queueItem.resolve(
+                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+              );
             }
 
             queueItem.resolve(foundObject);

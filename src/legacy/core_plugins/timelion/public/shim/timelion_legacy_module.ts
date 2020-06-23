@@ -22,7 +22,7 @@ import 'brace/mode/hjson';
 import 'brace/ext/searchbox';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 
-import { once } from 'lodash';
+import { once } from 'lodash4';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { Panel } from '../panels/panel';

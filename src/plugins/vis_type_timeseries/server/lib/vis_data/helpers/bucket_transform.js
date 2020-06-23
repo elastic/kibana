@@ -19,7 +19,7 @@
 
 import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
-import { set, isEmpty } from 'lodash';
+import { set, isEmpty } from 'lodash4';
 import { i18n } from '@kbn/i18n';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';
 

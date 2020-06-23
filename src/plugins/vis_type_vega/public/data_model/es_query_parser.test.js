@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash4';
 import moment from 'moment';
 import { EsQueryParser } from './es_query_parser';
 

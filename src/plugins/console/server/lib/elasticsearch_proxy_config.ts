@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import http from 'http';
 import https from 'https';
 import url from 'url';
@@ -25,7 +25,7 @@ import url from 'url';
 import { ESConfigForProxy } from '../types';
 
 const createAgent = (legacyConfig: ESConfigForProxy) => {
-  const target = url.parse(_.head(legacyConfig.hosts));
+  const target = url.parse(_.head(legacyConfig.hosts) as any);
   if (!/^https/.test(target.protocol || '')) return new http.Agent();
 
   const agentOptions: https.AgentOptions = {};

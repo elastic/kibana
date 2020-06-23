@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { intersection, isObject } from 'lodash';
+import { intersection, isObject } from 'lodash4';
 import { Headers } from '../http/router';
 import { APICaller, CallAPIOptions } from './api_types';
 

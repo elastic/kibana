@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import * as ast from '../ast';
 import { nodeTypes } from '../node_types';
 import { NamedArgTypeBuildNode } from './types';

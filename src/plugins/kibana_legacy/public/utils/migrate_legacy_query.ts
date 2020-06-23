@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { has } from 'lodash';
+import { has } from 'lodash4';
 import { Query } from 'src/plugins/data/public';
 
 /**

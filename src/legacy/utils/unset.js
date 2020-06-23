@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import toPath from 'lodash/internal/toPath';
+import _ from 'lodash4';
 
 export function unset(object, rawPath) {
   if (!object) return;
-  const path = toPath(rawPath);
+  const path = _.toPath(rawPath);
 
   switch (path.length) {
     case 0:

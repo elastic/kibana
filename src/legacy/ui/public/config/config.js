@@ -20,7 +20,7 @@
 import angular from 'angular';
 import { fatalError } from 'ui/notify/fatal_error';
 import chrome from '../chrome';
-import { isPlainObject } from 'lodash';
+import { isPlainObject } from 'lodash4';
 import { uiModules } from '../modules';
 import { subscribeWithScope } from '../../../../plugins/kibana_legacy/public';
 

@@ -25,7 +25,7 @@ import sinon from 'sinon';
 import './legacy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npStart } from 'ui/new_platform';
-import { round } from 'lodash';
+import { round } from 'lodash4';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInnerAngular } from '../../../../../../plugins/vis_type_table/public/get_inner_angular';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map, pick, zipObject } from 'lodash';
+import { map, pick, zipObject } from 'lodash4';
 
 import { ExpressionTypeDefinition } from '../types';
 import { PointSeries } from './pointseries';
@@ -109,7 +109,7 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
     pointseries: (value: PointSeries) => ({
       type: name,
       rows: value.rows,
-      columns: map(value.columns, (val, colName) => {
+      columns: map(value.columns, (val: any, colName) => {
         return { name: colName!, type: val.type };
       }),
     }),

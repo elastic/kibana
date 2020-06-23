@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import _ from 'lodash4';
 import { createHashHistory } from 'history';
 import { ScopedHistory } from 'kibana/public';
 import { DiscoverServices } from './build_services';

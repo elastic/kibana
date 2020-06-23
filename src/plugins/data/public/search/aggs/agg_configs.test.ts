@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { indexBy } from 'lodash';
+import { indexBy } from 'lodash3';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';

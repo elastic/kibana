@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { last } from 'lodash';
+import { last } from 'lodash4';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SeriesDragHandler } from '../series_drag_handler';

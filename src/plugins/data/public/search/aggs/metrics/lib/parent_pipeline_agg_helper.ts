@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { noop, identity } from 'lodash';
+import { noop, identity } from 'lodash3';
 
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';

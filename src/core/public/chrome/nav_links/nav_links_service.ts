@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { sortBy } from 'lodash';
+import { sortBy } from 'lodash4';
 import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 

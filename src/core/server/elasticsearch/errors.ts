@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { get } from 'lodash';
+import { get } from 'lodash4';
 
 const code = Symbol('ElasticsearchError');
 
@@ -81,7 +81,7 @@ export class ElasticsearchErrorHelpers {
 
   public static decorateNotAuthorizedError(error: Error, reason?: string) {
     const decoratedError = decorate(error, ErrorCode.NOT_AUTHORIZED, 401, reason);
-    const wwwAuthHeader = get<string>(error, 'body.error.header[WWW-Authenticate]');
+    const wwwAuthHeader = get<string>(error as any, 'body.error.header[WWW-Authenticate]' as any);
 
     decoratedError.output.headers['WWW-Authenticate'] =
       wwwAuthHeader || 'Basic realm="Authorization Required"';

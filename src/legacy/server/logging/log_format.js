@@ -19,7 +19,7 @@
 
 import Stream from 'stream';
 import moment from 'moment-timezone';
-import { get, _ } from 'lodash';
+import { get, _ } from 'lodash4';
 import queryString from 'query-string';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
@@ -144,7 +144,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.message = message || 'Unknown error (no message)';
     } else if (event.error instanceof Error) {
       data.type = 'error';
-      data.level = _.contains(event.tags, 'fatal') ? 'fatal' : 'error';
+      data.level = _.includes(event.tags, 'fatal') ? 'fatal' : 'error';
       data.error = serializeError(event.error);
       const message = get(event, 'error.message');
       data.message = message || 'Unknown error object (no message)';

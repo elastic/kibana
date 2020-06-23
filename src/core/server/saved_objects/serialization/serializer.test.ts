@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { SavedObjectsSerializer } from './serializer';
 import { SavedObjectsRawDoc } from './types';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';

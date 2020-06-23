@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { memoize, noop } from 'lodash';
+import { memoize, noop } from 'lodash3';
 import moment from 'moment';
 import {
   FieldFormat,

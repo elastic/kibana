@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 // Upsampling and downsampling of non-cumulative sets
 // Good: average, min, max

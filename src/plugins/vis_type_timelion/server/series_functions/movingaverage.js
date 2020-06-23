@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
-import _ from 'lodash';
+import _ from 'lodash4';
 import Chainable from '../lib/classes/chainable';
 import { toMS } from '../../common/lib/to_milliseconds';
 
@@ -81,7 +81,7 @@ export default new Chainable('movingaverage', {
       }
 
       _position = _position || defaultPosition;
-      if (!_.contains(validPositions, _position)) {
+      if (!_.includes(validPositions, _position)) {
         throw new Error(
           i18n.translate(
             'timelion.serverSideErrors.movingaverageFunction.notValidPositionErrorMessage',

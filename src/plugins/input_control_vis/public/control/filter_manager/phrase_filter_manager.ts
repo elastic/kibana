@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 import { FilterManager } from './filter_manager';
 import {
@@ -86,11 +86,11 @@ export class PhraseFilterManager extends FilterManager {
   private getValueFromFilter(kbnFilter: PhraseFilter): any {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
-      return _.get<PhraseFilter[]>(kbnFilter, 'query.bool.should')
-        .map((kbnQueryFilter) => {
+      return _.get(kbnFilter, 'query.bool.should')
+        .map((kbnQueryFilter: any) => {
           return this.getValueFromFilter(kbnQueryFilter);
         })
-        .filter((value) => {
+        .filter((value: any) => {
           if (value) {
             return true;
           }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isArray } from 'lodash';
+import { isArray } from 'lodash4';
 import { uiModules } from '../modules';
 import { npStart } from '../new_platform';
 

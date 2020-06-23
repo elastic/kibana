@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import rison from 'rison-node';
 import { uiModules } from 'ui/modules';
 import 'ui/directives/input_focus';
@@ -165,7 +165,7 @@ module
         };
 
         self.getLabel = function () {
-          return _.words(self.properties.nouns).map(_.capitalize).join(' ');
+          return _.words(self.properties.nouns).map(_.upperFirst).join(' ');
         };
 
         //key handler for the filter text box

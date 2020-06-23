@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import _ from 'lodash4';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { NotificationsStart, Toast } from 'src/core/public';
 import { DashboardPanelState } from '../embeddable';

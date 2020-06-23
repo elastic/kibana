@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import { get, pull, restParam, size, reduce } from 'lodash';
+import { get, pull, restParam, size, reduce } from 'lodash3';
 import $ from 'jquery';
 import { DIMMING_OPACITY_SETTING } from '../../../common';
 

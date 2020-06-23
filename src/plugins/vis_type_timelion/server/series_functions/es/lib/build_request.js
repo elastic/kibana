@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import moment from 'moment';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
@@ -50,7 +50,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
           .map(function (q) {
             return [q, { query_string: { query: q } }];
           })
-          .zipObject()
+          .fromPairs()
           .value(),
       },
       aggs: {},

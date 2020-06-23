@@ -18,7 +18,7 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import { intersection, union, get } from 'lodash';
+import { intersection, union, get } from 'lodash4';
 
 import {
   EuiBasicTable,

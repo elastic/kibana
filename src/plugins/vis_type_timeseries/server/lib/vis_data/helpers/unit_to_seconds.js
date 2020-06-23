@@ -17,7 +17,7 @@
  * under the License.
  */
 import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
-import { sortBy, isNumber } from 'lodash';
+import { sortBy, isNumber } from 'lodash4';
 
 export const ASCENDING_UNIT_ORDER = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
 

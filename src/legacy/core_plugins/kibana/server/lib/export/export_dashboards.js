@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { collectReferencesDeep } from './collect_references_deep';
 
 export async function exportDashboards(req) {

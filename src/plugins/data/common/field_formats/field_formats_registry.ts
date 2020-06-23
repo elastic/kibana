@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { forOwn, isFunction, memoize, identity } from 'lodash';
+import { forOwn, isFunction, memoize, identity } from 'lodash3';
 
 import {
   FieldFormatsGetConfigFn,

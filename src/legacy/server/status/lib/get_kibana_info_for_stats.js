@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash4';
 
 const snapshotRegex = /-snapshot/i;
 

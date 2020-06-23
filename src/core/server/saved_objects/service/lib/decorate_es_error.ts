@@ -18,7 +18,7 @@
  */
 
 import * as legacyElasticsearch from 'elasticsearch';
-import { get } from 'lodash';
+import { get } from 'lodash4';
 
 const {
   ConnectionFault,

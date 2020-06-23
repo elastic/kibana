@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash4';
 import { applyDiff } from './diff_object';
 
 describe('diff_object', () => {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 export const getSiblingAggValue = (row, metric) => {
   let key = metric.type.replace(/_bucket$/, '');

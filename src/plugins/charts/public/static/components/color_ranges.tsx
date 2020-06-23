@@ -18,7 +18,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { last } from 'lodash';
+import { last } from 'lodash4';
 
 import { i18n } from '@kbn/i18n';
 

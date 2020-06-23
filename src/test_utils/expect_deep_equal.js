@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash4';
 import expect from '@kbn/expect';
 
 // expect.js's `eql` method provides nice error messages but sometimes misses things

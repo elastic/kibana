@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from 'lodash4';
 import { Duration, Moment } from 'moment';
 import { Unit } from '@elastic/datemath';
 

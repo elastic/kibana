@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { groupBy } from 'lodash';
+import { groupBy } from 'lodash4';
 import { organizeBy } from './organize_by';
 
 describe('organizeBy', () => {

@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import _ from 'lodash';
+import _ from 'lodash4';
 import { createDefer } from 'ui/promises';
 import { WorkQueue } from './work_queue';
 

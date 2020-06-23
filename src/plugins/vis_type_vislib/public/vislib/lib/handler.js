@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from 'lodash3';
 import MarkdownIt from 'markdown-it';
 
 import { NoResults } from '../errors';

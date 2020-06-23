@@ -69,7 +69,7 @@
  *    `appSearchSource`.
  */
 
-import { uniqueId, uniq, extend, pick, difference, omit, set, keys, isFunction } from 'lodash';
+import { uniqueId, uniq, extend, pick, difference, omit, set, keys, isFunction } from 'lodash3';
 import { map } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';

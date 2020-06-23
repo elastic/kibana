@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { last } from 'lodash';
+import { last } from 'lodash4';
 
 /**
  * @param {Array} seriesGroup

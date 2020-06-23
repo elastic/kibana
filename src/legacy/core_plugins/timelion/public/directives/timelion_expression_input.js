@@ -40,7 +40,7 @@
  *     that has more than a single consecutive newline.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import $ from 'jquery';
 import PEG from 'pegjs';
 import grammar from 'raw-loader!../../../../../plugins/vis_type_timelion/common/chain.peg';
@@ -78,7 +78,7 @@ export function TimelionExpInput($http, $timeout) {
       function init() {
         $http.get('../api/timelion/functions').then(function (resp) {
           Object.assign(functionReference, {
-            byName: _.indexBy(resp.data, 'name'),
+            byName: _.keyBy(resp.data, 'name'),
             list: resp.data,
           });
         });

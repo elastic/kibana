@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { constant, trimRight, trimLeft, get } from 'lodash';
+import { constant, trimRight, trimLeft, get } from 'lodash3';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
 

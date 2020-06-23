@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { contains } from 'lodash';
+import { contains } from 'lodash3';
 import { CoreStart } from 'kibana/public';
 import { IndexPatternsContract } from './index_patterns';
 

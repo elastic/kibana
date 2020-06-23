@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, has, set } from 'lodash';
+import { get, has, set } from 'lodash4';
 import { SavedObject as SavedObjectType } from '../../server';
 import { SavedObjectsClientContract } from './saved_objects_client';
 
@@ -60,7 +60,7 @@ export class SimpleSavedObject<T = unknown> {
   }
 
   public set(key: string, value: any): T {
-    return set(this.attributes, key, value);
+    return set(this.attributes as any, key, value) as any;
   }
 
   public has(key: string): boolean {

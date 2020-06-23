@@ -19,7 +19,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
+import { memoize } from 'lodash4';
 import moment from 'moment';
 import {
   keyCodes,

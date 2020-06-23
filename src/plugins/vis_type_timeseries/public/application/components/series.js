@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { assign, get } from 'lodash';
+import { assign, get } from 'lodash4';
 
 import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
 import { MetricSeries as metric } from './vis_types/metric/series';

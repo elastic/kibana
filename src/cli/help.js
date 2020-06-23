@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 export default function help(command, spaces) {
   if (!_.size(command.commands)) {
@@ -72,7 +72,7 @@ function commandsSummary(program) {
   }, 0);
 
   return cmds.reduce(function (help, cmd) {
-    return `${help || ''}${_.padRight(cmd[0], cmdLColWidth)} ${cmd[1] || ''}\n`;
+    return `${help || ''}${_.padEnd(cmd[0], cmdLColWidth)} ${cmd[1] || ''}\n`;
   }, '');
 }
 

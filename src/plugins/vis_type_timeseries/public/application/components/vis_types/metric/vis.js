@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import _, { get, isUndefined, assign, includes, pick } from 'lodash';
+import _, { get, isUndefined, assign, includes, pick } from 'lodash4';
 import { Metric } from '../../../visualizations/views/metric';
 import { getLastValue } from '../../../../../../../plugins/vis_type_timeseries/common/get_last_value';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';

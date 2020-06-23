@@ -18,7 +18,7 @@
  */
 import '../sense_editor.test.mocks';
 import { create } from '../create';
-import _ from 'lodash';
+import _ from 'lodash4';
 import $ from 'jquery';
 
 import * as kb from '../../../../lib/kb/kb';
@@ -117,7 +117,7 @@ describe('Integration', () => {
             return t;
           });
           if (terms.length !== expectedTerms.length) {
-            expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
+            expect(_.map(terms, 'name')).toEqual(_.map(expectedTerms, 'name'));
           } else {
             const filteredActualTerms = _.map(terms, function (actualTerm, i) {
               const expectedTerm = expectedTerms[i];

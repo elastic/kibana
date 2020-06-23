@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import * as _ from 'lodash';
+import * as _ from 'lodash4';
 
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 import { setServices } from '../../../../kibana_services';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import toPath from 'lodash/internal/toPath';
+import { toPath } from 'lodash4';
 import { SavedObjectsCoreFieldMapping, SavedObjectsFieldMapping, IndexMapping } from '../types';
 
 function getPropertyMappingFromObjectMapping(

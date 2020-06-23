@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { newMetricAggFn } from './new_metric_agg_fn';
 import { isBasicAgg } from '../../../../../../plugins/vis_type_timeseries/common/agg_lookup';
 import { handleAdd, handleChange } from './collection_actions';
@@ -31,7 +31,7 @@ export const seriesChangeHandler = (props, items) => (doc) => {
       const metric = newMetricAggFn();
       metric.type = doc.type;
       const incompatPipelines = ['calculation', 'series_agg'];
-      if (!_.contains(incompatPipelines, doc.type)) metric.field = doc.id;
+      if (!_.includes(incompatPipelines, doc.type)) metric.field = doc.id;
       return metric;
     });
   } else {

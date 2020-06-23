@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { getLoggerStream } from './log_reporter';
 
 export default function loggingConfiguration(config) {

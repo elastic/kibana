@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { includes, startsWith } from 'lodash';
+import { includes, startsWith } from 'lodash4';
 import { lookup } from './agg_lookup';
 import { i18n } from '@kbn/i18n';
 

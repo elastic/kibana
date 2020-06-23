@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import _ from 'lodash4';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';

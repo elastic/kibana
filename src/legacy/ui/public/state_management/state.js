@@ -25,7 +25,7 @@
  * @description Persists generic "state" to and reads it from the URL.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import rison from 'rison-node';
@@ -341,7 +341,7 @@ export function StateProvider(
    * @return {object}
    */
   State.prototype.toObject = function () {
-    return _.omit(this, (value, key) => {
+    return _.omitBy(this, (value, key) => {
       return key.charAt(0) === '$' || key.charAt(0) === '_' || _.isFunction(value);
     });
   };

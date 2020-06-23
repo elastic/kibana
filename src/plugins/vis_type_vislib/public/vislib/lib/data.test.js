@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { Data } from './data';
 import { getMockUiState } from '../../fixtures/mocks';

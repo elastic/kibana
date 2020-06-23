@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, isEqual, omit, map } from 'lodash';
+import { defaults, isEqual, omit, map } from 'lodash3';
 import { FilterMeta, Filter } from '../../es_query';
 
 export interface FilterCompareOptions {

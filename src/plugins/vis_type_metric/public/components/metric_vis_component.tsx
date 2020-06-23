@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { last, findIndex, isNaN } from 'lodash';
+import { last, findIndex, isNaN } from 'lodash4';
 import React, { Component } from 'react';
 import { isColorDark } from '@elastic/eui';
 import { MetricVisValue } from './metric_vis_value';
@@ -41,7 +41,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
-    const max = last(colorsRange).to;
+    const max = (last(colorsRange) as any).to;
     const labels: string[] = [];
 
     colorsRange.forEach((range: any) => {
@@ -111,7 +111,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     const dimensions = this.props.visParams.dimensions;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
-    const max = last(config.colorsRange).to;
+    const max = (last(config.colorsRange) as any).to;
     const colors = this.getColors();
     const labels = this.getLabels();
     const metrics: MetricVisMetric[] = [];

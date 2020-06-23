@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getServices } from '../../../../kibana_services';
@@ -70,7 +70,7 @@ export function QueryActionsProvider(Promise) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() =>
-      fetchAnchor(indexPatternId, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
+      fetchAnchor(indexPatternId, anchorId, [_.fromPairs([sort]), { [tieBreakerField]: sort[1] }])
     ).then(
       (anchorDocument) => {
         setLoadedStatus(state)('anchor');

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import _ from 'lodash3';
 import numeral from '@elastic/numeral';
 import { renderToStaticMarkup } from 'react-dom/server';
 

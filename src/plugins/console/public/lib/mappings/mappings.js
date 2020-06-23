@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash4';
 import * as es from '../es/es';
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
@@ -98,7 +98,7 @@ export function getFields(indices, types) {
     ret = [].concat.apply([], ret);
   }
 
-  return _.uniq(ret, function (f) {
+  return _.uniqBy(ret, function (f) {
     return f.name + ':' + f.type;
   });
 }
@@ -191,7 +191,7 @@ function getFieldNamesFromProperties(properties = {}) {
   });
 
   // deduping
-  return _.uniq(fieldList, function (f) {
+  return _.uniqBy(fieldList, function (f) {
     return f.name + ':' + f.type;
   });
 }

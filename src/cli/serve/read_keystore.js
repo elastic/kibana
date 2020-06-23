@@ -18,7 +18,7 @@
  */
 
 import path from 'path';
-import { set } from 'lodash';
+import { set } from 'lodash4';
 
 import { Keystore } from '../../legacy/server/keystore';
 import { getDataPath } from '../../core/server/path';

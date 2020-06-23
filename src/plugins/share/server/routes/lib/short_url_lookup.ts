@@ -18,7 +18,7 @@
  */
 
 import crypto from 'crypto';
-import { get } from 'lodash';
+import { get } from 'lodash4';
 
 import { Logger, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 

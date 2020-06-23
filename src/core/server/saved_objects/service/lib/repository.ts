@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit } from 'lodash4';
 import uuid from 'uuid';
 import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
 import { APICaller } from '../../../elasticsearch/';
@@ -1342,7 +1342,7 @@ export class SavedObjectsRepository {
   // method transparently to the specified namespace.
   private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
-    return omit(savedObject, 'namespace');
+    return omit(savedObject, 'namespace') as SavedObject<any>;
   }
 
   /**

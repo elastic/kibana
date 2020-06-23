@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import d3 from 'd3';
 import { isColorDark } from '@elastic/eui/lib/services';
 import { PointSeries } from './_point_series';

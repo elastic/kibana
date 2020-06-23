@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import { uniq, map, size, flow } from 'lodash';
+import { uniq, map, size, flow } from 'lodash4';
 
 export const areFieldsDifferent = (name) => (series) => flow(uniq, size)(map(series, name)) > 1;

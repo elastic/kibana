@@ -25,7 +25,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { createTickFormatter } from './lib/tick_formatter';
 import { convertSeriesToVars } from './lib/convert_series_to_vars';
-import _ from 'lodash';
+import _ from 'lodash4';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
 

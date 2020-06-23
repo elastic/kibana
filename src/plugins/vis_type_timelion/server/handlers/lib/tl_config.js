@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import buildTarget from '../../lib/build_target.js';
 
 export default function tlConfigFn(setup) {

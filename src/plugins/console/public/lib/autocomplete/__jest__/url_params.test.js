@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+import _ from 'lodash4';
 import { UrlParams } from '../../autocomplete/url_params';
 import { populateContext } from '../../autocomplete/engine';
 

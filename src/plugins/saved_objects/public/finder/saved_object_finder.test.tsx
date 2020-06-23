@@ -17,7 +17,7 @@
  * under the License.
  */
 
-jest.mock('lodash', () => ({
+jest.mock('lodash4', () => ({
   debounce: (fn: any) => fn,
 }));
 

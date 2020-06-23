@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find } from 'lodash';
+import { find } from 'lodash3';
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 
 /**

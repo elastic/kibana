@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from 'lodash4';
 import expect from '@kbn/expect';
 
 import { ChartTitle } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/chart_title';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import React from 'react';
 import { Subscription, Subject, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';

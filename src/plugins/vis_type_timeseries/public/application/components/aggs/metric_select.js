@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { includes } from 'lodash';
+import { includes } from 'lodash4';
 import { injectI18n } from '@kbn/i18n/react';
 import { EuiComboBox } from '@elastic/eui';
 import { calculateSiblings } from '../lib/calculate_siblings';

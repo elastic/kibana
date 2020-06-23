@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniq } from 'lodash';
+import { uniqBy } from 'lodash4';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../../expression_functions';
 import { KibanaContext } from '../../expression_types';
@@ -40,9 +40,9 @@ const getParsedValue = (data: any, defaultValue: any) =>
   typeof data === 'string' && data.length ? JSON.parse(data) || defaultValue : defaultValue;
 
 const mergeQueries = (first: Query | Query[] = [], second: Query | Query[]) =>
-  uniq<Query>(
+  uniqBy<Query>(
     [...(Array.isArray(first) ? first : [first]), ...(Array.isArray(second) ? second : [second])],
-    (n: any) => JSON.stringify(n.query)
+    (n: any) => JSON.stringify(n.query) as any
   );
 
 export const kibanaContextFunction: ExpressionFunctionKibanaContext = {

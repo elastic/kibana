@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 export function timeBucketsToPairs(buckets) {
-  const timestamps = _.pluck(buckets, 'key');
+  const timestamps = _.map(buckets, 'key');
   const series = {};
   _.each(buckets, function (bucket) {
     _.forOwn(bucket, function (val, key) {

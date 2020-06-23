@@ -26,7 +26,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep, set } from 'lodash4';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SimpleSavedObject, SavedObjectsClientContract } from '../../../../../../core/public';

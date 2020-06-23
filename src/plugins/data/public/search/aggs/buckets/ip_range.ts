@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { noop, map, omit, isNull } from 'lodash';
+import { noop, map, omit, isNull } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';

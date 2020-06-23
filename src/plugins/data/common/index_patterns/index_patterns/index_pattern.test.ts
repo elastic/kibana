@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, pluck, last, get } from 'lodash';
+import { defaults, pluck, last, get } from 'lodash3';
 
 import { IndexPattern } from './index_pattern';
 

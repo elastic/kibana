@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { chain } from 'lodash';
+import { chain } from 'lodash3';
 import moment from 'moment';
 
 import { APICaller } from 'kibana/server';

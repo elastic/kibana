@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { createDefer } from 'ui/promises';
 
 // Throw this inside of an Angular route resolver after calling `kbnUrl.change`

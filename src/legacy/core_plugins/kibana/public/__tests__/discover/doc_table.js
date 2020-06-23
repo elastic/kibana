@@ -18,7 +18,7 @@
  */
 import angular from 'angular';
 import expect from '@kbn/expect';
-import _ from 'lodash';
+import _ from 'lodash4';
 import ngMock from 'ng_mock';
 import 'ui/private';
 import { pluginInstance } from './legacy';

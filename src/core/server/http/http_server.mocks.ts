@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Request } from 'hapi';
-import { merge } from 'lodash';
+import { merge } from 'lodash4';
 import { Socket } from 'net';
 import { stringify } from 'query-string';
 

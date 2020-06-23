@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { identity } from 'lodash';
+import { identity } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';

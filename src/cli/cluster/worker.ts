@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import cluster from 'cluster';
 import { EventEmitter } from 'events';
 
@@ -177,7 +177,7 @@ export class Worker extends EventEmitter {
   }
 
   flushChangeBuffer() {
-    const files = _.unique(this.changes.splice(0));
+    const files = _.uniq(this.changes.splice(0));
     const prefix = files.length > 1 ? '\n - ' : '';
     return files.reduce(function (list, file) {
       return `${list || ''}${prefix}"${file}"`;

@@ -21,7 +21,7 @@
  * Smokescreen tests for core migration logic
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { assert } from 'chai';
 import {
   DocumentMigrator,
@@ -293,7 +293,7 @@ export default ({ getService }) => {
 
       // It only created the original and the dest
       assert.deepEqual(
-        _.pluck(
+        _.map(
           await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }),
           'index'
         ).sort(),

@@ -19,8 +19,8 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
+jest.mock('lodash4', () => ({
+  ...jest.requireActual('lodash4'),
   debounce: (fn: any) => fn,
 }));
 

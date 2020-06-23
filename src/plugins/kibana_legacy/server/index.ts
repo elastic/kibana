@@ -23,7 +23,7 @@ import {
   CoreStart,
   PluginConfigDescriptor,
 } from 'kibana/server';
-import { get } from 'lodash';
+import { get } from 'lodash4';
 
 import { configSchema, ConfigSchema } from '../config';
 

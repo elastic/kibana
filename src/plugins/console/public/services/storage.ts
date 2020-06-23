@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { transform, keys, startsWith } from 'lodash';
+import { transform, keys, startsWith } from 'lodash4';
 
 type IStorageEngine = typeof window.localStorage;
 

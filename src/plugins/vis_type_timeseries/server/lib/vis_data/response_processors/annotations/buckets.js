@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash4';
 
 export function getAnnotationBuckets(resp, annotation) {
   return get(resp, `aggregations.${annotation.id}.buckets`, [])

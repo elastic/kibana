@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { highlightTags } from './highlight_tags';
 import { htmlTags } from './html_tags';
 

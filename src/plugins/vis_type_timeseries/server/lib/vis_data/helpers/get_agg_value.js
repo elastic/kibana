@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, includes, max, min, sum, noop } from 'lodash';
+import { get, includes, max, min, sum, noop } from 'lodash4';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
 import { EXTENDED_STATS_TYPES, METRIC_TYPES } from '../../../../common/metric_types';
 

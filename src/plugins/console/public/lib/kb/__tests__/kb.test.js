@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { populateContext } from '../../autocomplete/engine';
 
 import '../../../application/models/sense_editor/sense_editor.test.mocks';

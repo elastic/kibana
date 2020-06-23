@@ -18,7 +18,7 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash4';
 
 export interface IndexStats {
   skipped: boolean;

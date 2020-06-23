@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, set } from 'lodash';
+import { get, set } from 'lodash4';
 import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
 import { unset } from '../../../utils';
 

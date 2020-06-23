@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { pick } from 'lodash';
+import { pick } from 'lodash4';
 
 import { PluginsSetup, PluginsStart } from './new_platform';
 import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';

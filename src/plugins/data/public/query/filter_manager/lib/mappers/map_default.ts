@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find, keys, get } from 'lodash';
+import { find, keys, get } from 'lodash3';
 import { Filter, FILTERS } from '../../../../../common';
 
 export const mapDefault = (filter: Filter) => {

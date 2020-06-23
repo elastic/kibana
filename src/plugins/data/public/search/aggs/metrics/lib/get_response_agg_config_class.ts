@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { assign } from 'lodash';
+import { assign } from 'lodash3';
 import { IMetricAggConfig } from '../metric_agg_type';
 
 /**

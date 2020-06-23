@@ -18,7 +18,7 @@
  */
 
 import { FakeRequest, RequestHandlerContext } from 'kibana/server';
-import _ from 'lodash';
+import _ from 'lodash4';
 import { first, map } from 'rxjs/operators';
 import { getPanelData } from './vis_data/get_panel_data';
 import { Framework } from '../index';

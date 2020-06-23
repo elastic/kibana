@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isEqual, clone } from 'lodash';
+import { isEqual, clone } from 'lodash3';
 import { migrateFilter, DeprecatedMatchPhraseFilter } from './migrate_filter';
 import { PhraseFilter, MatchAllFilter } from '../filters';
 

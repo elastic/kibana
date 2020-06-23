@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { snakeCase } from 'lodash';
+import { snakeCase } from 'lodash4';
 import { Logger, APICaller } from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';

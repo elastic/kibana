@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import RowParser from '../../../lib/row_parser';
 import { collapseLiteralStrings } from '../../../../../es_ui_shared/public';
 import * as utils from '../../../lib/utils';

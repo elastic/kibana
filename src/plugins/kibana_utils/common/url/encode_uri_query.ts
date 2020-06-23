@@ -18,7 +18,7 @@
  */
 
 import { ParsedQuery } from 'query-string';
-import { transform } from 'lodash';
+import { transform } from 'lodash4';
 
 /**
  * This method is intended for encoding *key* or *value* parts of query component. We need a custom
@@ -45,7 +45,7 @@ export const encodeQuery = (
   query: ParsedQuery,
   encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery
 ) =>
-  transform(query, (result, value, key) => {
+  transform(query, (result: any, value, key) => {
     if (key) {
       const singleValue = Array.isArray(value) ? value.join(',') : value;
 

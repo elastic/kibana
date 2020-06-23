@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, indexBy, sortBy } from 'lodash';
+import { defaults, indexBy, sortBy } from 'lodash3';
 
 import { APICaller } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';

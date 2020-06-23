@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import _ from 'lodash4';
 import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
 import { History } from 'history';

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { cloneDeep, isEqual, isPlainObject, set } from 'lodash';
+import { cloneDeep, isEqual, isPlainObject, set } from 'lodash4';
 import { State } from './state';
 
 export const stateMonitorFactory = {

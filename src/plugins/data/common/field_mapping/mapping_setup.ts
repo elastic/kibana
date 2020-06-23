@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mapValues, isString } from 'lodash';
+import { mapValues, isString } from 'lodash3';
 import { FieldMappingSpec, MappingObject } from './types';
 
 // import from ./common/types to prevent circular dependency of kibana_utils <-> data plugin

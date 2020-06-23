@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { WalkingState, walkTokenPath, wrapComponentWithDefaults } from './engine';
 import {
   ConstantComponent,
@@ -51,7 +51,7 @@ function resolvePathToComponents(tokenPath, context, editor, components) {
     context,
     editor
   );
-  const result = [].concat.apply([], _.pluck(walkStates, 'components'));
+  const result = [].concat.apply([], _.map(walkStates, 'components'));
   return result;
 }
 

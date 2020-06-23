@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 /**
  * Adds alerts that float in front of a visualization

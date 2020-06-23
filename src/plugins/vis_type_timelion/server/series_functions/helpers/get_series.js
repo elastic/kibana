@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 export default function getSeries(name, buckets, points) {
   const fill = _.partial(

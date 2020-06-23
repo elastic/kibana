@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { last } from 'lodash';
+import { last } from 'lodash4';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 
@@ -105,7 +105,7 @@ function validateValueUnique(
 }
 
 function getNextModel(list: NumberRowModel[], range: NumberListRange): NumberRowModel {
-  const lastValue = last(list).value;
+  const lastValue = (last(list) as any).value;
   let next = Number(lastValue) ? Number(lastValue) + 1 : 1;
 
   if (next >= range.max) {

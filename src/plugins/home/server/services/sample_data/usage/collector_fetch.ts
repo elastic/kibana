@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash4';
 import moment from 'moment';
 
 interface SearchHit {

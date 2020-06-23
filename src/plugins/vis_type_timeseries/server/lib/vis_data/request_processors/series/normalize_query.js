@@ -17,7 +17,7 @@
  * under the License.
  */
 import { overwrite } from '../../helpers';
-import _ from 'lodash';
+import _ from 'lodash4';
 
 const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && _.isEmpty(filter.match_all);
 const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 1;

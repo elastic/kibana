@@ -35,7 +35,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash4';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { DocLinksStart, ToastsStart } from '../../../../../../core/public';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { identity } from 'lodash';
+import { identity } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { convertDateRangeToString, DateRangeKey } from '../../search/aggs/buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../../search/aggs/buckets/lib/ip_range';

@@ -18,7 +18,7 @@
  */
 import { buildRequestBody } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
-import { get } from 'lodash';
+import { get } from 'lodash4';
 import { processBucket } from './table/process_bucket';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';

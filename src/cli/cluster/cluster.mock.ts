@@ -20,7 +20,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import EventEmitter from 'events';
-import { assign, random } from 'lodash';
+import { assign, random } from 'lodash4';
 import { delay } from 'bluebird';
 
 class MockClusterFork extends EventEmitter {

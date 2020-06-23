@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { functions } from '../functions';
 import { IIndexPattern, KueryNode } from '../../..';

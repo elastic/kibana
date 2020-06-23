@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import schemaParser from 'vega-schema-url-parser';

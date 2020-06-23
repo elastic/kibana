@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { expandLiteralStrings, collapseLiteralStrings } from '../../../../es_ui_shared/public';
 
 export function textFromRequest(request: any) {

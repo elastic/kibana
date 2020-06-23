@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';

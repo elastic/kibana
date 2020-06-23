@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { flow, omit } from 'lodash';
+import { flow, omit } from 'lodash3';
 import { SavedObjectMigrationFn } from 'kibana/server';
 
 const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any> = (doc) => ({

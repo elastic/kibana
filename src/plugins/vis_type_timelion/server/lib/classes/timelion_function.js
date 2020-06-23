@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import loadFunctions from '../load_functions.js';
 const fitFunctions = loadFunctions('fit_functions');
 
@@ -25,7 +25,7 @@ export default class TimelionFunction {
   constructor(name, config) {
     this.name = name;
     this.args = config.args || [];
-    this.argsByName = _.indexBy(this.args, 'name');
+    this.argsByName = _.keyBy(this.args, 'name');
     this.help = config.help || '';
     this.aliases = config.aliases || [];
     this.extended = config.extended || false;

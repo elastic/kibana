@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { join } from 'path';
 
 import { pkg } from '../core/server/utils';

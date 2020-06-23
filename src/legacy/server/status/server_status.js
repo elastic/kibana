@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 import * as states from './states';
 import Status from './status';
@@ -81,7 +81,7 @@ export default class ServerStatus {
       // reduce to the state with the highest severity, defaulting to green
       .reduce((a, b) => (a.severity > b.severity ? a : b), states.get('green'));
 
-    const statuses = _.where(this._created, { state: state.id });
+    const statuses = _.filter(this._created, { state: state.id });
     const since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
 
     return {

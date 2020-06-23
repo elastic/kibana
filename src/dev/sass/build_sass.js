@@ -27,7 +27,7 @@ import { findPluginSpecs } from '../../legacy/plugin_discovery';
 import { collectUiExports } from '../../legacy/ui';
 import { buildAll } from '../../legacy/server/sass/build_all';
 import chokidar from 'chokidar';
-import debounce from 'lodash/function/debounce';
+import debounce from 'lodash4/debounce';
 
 // TODO: clintandrewhall - Extract and use FSWatcher from legacy/server/sass
 const build = async ({ log, kibanaDir, styleSheetPaths, watch }) => {

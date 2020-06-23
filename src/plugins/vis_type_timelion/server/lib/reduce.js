@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 function allSeriesContainKey(seriesList, key) {
   const containsKeyInitialValue = true;
@@ -42,7 +42,7 @@ async function pairwiseReduce(left, right, fn) {
   if (allSeriesContainKey(left, 'split') && allSeriesContainKey(right, 'split')) {
     pairwiseField = 'split';
   }
-  const indexedList = _.indexBy(right.list, pairwiseField);
+  const indexedList = _.keyBy(right.list, pairwiseField);
 
   // ensure seriesLists contain same pairwise labels
   left.list.forEach((leftSeries) => {

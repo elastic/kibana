@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, sortBy } from 'lodash';
+import { get, sortBy } from 'lodash4';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
 import { DataPublicPluginStart } from '../../../../../data/public';
 import { MatchedIndex } from '../types';

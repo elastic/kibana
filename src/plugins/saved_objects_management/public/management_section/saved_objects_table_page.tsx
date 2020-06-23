@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { get } from 'lodash';
+import { get } from 'lodash4';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
@@ -78,7 +78,7 @@ const SavedObjectsTablePage = ({
       }}
       canGoInApp={(savedObject) => {
         const { inAppUrl } = savedObject.meta;
-        return inAppUrl ? get(capabilities, inAppUrl.uiCapabilitiesPath) : false;
+        return inAppUrl ? (get(capabilities, inAppUrl.uiCapabilitiesPath) as any) : false;
       }}
     />
   );

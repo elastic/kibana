@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { defaults } from 'lodash';
+import _, { defaults } from 'lodash4';
 
 import { Optional } from '@kbn/utility-types';
 
@@ -58,6 +58,7 @@ export class Schemas implements ISchemas {
     >
   ) {
     _(schemas || [])
+      .chain()
       .map((schema) => {
         if (!schema.name) throw new Error('all schema must have a unique name');
 

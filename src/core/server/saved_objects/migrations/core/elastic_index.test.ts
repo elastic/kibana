@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {

@@ -19,7 +19,6 @@
 
 import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
 import { Test } from 'mocha';
-import _ from 'lodash';
 
 import testSubjSelector from '@kbn/test-subj-selector';
 

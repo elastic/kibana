@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find } from 'lodash';
+import { find } from 'lodash3';
 import moment, { unitOfTime } from 'moment';
 import dateMath from '@elastic/datemath';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, has } from 'lodash';
+import { get, has } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import {
   KibanaContext,

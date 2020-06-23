@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from 'lodash4';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import { ToolingLog } from '@kbn/dev-utils';

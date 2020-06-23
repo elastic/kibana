@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import _ from 'lodash4';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { collectionActions } from '../lib/collection_actions';
 import { MetricSelect } from './metric_select';

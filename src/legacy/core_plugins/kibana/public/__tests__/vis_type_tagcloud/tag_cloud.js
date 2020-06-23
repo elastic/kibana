@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import _ from 'lodash';
+import _ from 'lodash4';
 import d3 from 'd3';
 
 import { fromNode, delay } from 'bluebird';

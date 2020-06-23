@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { isArray, last, get } from 'lodash';
+import _, { isArray, last, get } from 'lodash4';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createTickFormatter } from '../../lib/tick_formatter';

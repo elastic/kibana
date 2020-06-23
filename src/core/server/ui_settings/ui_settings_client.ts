@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { defaultsDeep, omit } from 'lodash';
+import { defaultsDeep, omit } from 'lodash4';
 
 import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';

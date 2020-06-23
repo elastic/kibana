@@ -18,7 +18,7 @@
  */
 
 import { deepCloneWithBuffers as clone } from '../utils';
-import { forEach, noop } from 'lodash';
+import { forEach, noop } from 'lodash4';
 
 export function createTransform(deprecations) {
   return (settings, log = noop) => {

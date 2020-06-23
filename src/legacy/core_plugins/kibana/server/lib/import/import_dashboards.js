@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { flatten } from 'lodash';
+import { flatten } from 'lodash4';
 
 export async function importDashboards(req) {
   const { payload } = req;

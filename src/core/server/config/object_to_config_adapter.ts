@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, get, has, set } from 'lodash';
+import { cloneDeep, get, has, set } from 'lodash4';
 
 import { getFlattenedObject } from '../../utils';
 import { Config, ConfigPath } from './';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash4';
 import { documentationLinks } from './documentation_links';
 
 export const getDocLink = (id: string): string | undefined => get(documentationLinks, id);

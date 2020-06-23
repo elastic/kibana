@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { dataArray as createArr } from './data_array';
 import { uniqLabels as getArrOfUniqLabels } from './uniq_labels';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit, get } from 'lodash';
+import { omit, get } from 'lodash3';
 import { Filter } from './meta_filter';
 
 export * from './build_filters';

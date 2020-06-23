@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { groupBy } from 'lodash';
+import { groupBy } from 'lodash3';
 import { IAggConfig } from '../aggs';
 import { TabbedAggColumn } from './types';
 

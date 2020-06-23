@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 export default function unzipPairs(timeValObject) {
   const paired = _.chain(timeValObject)
-    .pairs()
+    .toPairs()
     .map(function (point) {
       return [parseInt(point[0], 10), point[1]];
     })

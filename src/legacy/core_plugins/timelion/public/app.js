@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 // required for `ngSanitize` angular module
 import 'angular-sanitize';
 
@@ -427,7 +427,7 @@ app.controller('timelion', function (
     const httpResult = $http
       .post('../api/timelion/run', {
         sheet: $scope.state.sheet,
-        time: _.extend(
+        time: _.assignIn(
           {
             from: timeRangeBounds.min,
             to: timeRangeBounds.max,

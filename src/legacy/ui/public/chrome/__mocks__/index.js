@@ -42,7 +42,7 @@ const chrome = {
 export default chrome;
 
 // Copied from `src/legacy/ui/public/chrome/chrome.js`
-import _ from 'lodash';
+import _ from 'lodash4';
 import angular from 'angular';
 import { metadata } from '../../metadata';
 

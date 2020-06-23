@@ -19,7 +19,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
-import { chain } from 'lodash';
+import { chain } from 'lodash4';
 import { resolve } from 'path';
 import { fromNode } from 'bluebird';
 import glob from 'glob-all';

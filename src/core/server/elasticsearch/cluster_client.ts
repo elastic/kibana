@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Client } from 'elasticsearch';
-import { get } from 'lodash';
+import { get } from 'lodash4';
 
 import { ElasticsearchErrorHelpers } from './errors';
 import { GetAuthHeaders, isRealRequest, LegacyRequest } from '../http';

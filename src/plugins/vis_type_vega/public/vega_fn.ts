@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash4';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, KibanaContext, Render } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
@@ -58,9 +58,9 @@ export const createVegaFn = (
     const vegaRequestHandler = createVegaRequestHandler(dependencies, context.abortSignal);
 
     const response = await vegaRequestHandler({
-      timeRange: get(input, 'timeRange'),
-      query: get(input, 'query'),
-      filters: get(input, 'filters'),
+      timeRange: get(input, 'timeRange') as any,
+      query: get(input, 'query') as any,
+      filters: get(input, 'filters') as any,
       visParams: { spec: args.spec },
     });
 

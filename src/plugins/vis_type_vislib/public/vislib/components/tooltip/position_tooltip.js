@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import $ from 'jquery';
 
 const OFFSET = 10;

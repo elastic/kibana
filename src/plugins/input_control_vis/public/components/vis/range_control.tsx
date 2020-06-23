@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import React, { PureComponent } from 'react';
 import { ValidatedDualRange } from '../../../../kibana_react/public';
 import { FormRow } from './form_row';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';

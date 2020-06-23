@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { ScaledCirclesMarkers } from './scaled_circles';
 import { L } from '../../../maps_legacy/public';
 

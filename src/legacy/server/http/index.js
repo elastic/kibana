@@ -18,7 +18,7 @@
  */
 
 import { format } from 'url';
-import _ from 'lodash';
+import _ from 'lodash4';
 import Boom from 'boom';
 
 import { registerHapiPlugins } from './register_hapi_plugins';

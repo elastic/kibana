@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { merge } from 'lodash';
+import _, { merge } from 'lodash4';
 import glob from 'glob';
 import { basename, join, resolve } from 'path';
 import { readFileSync } from 'fs';
@@ -55,11 +55,14 @@ export class SpecDefinitionsService {
     });
 
     if (urlParamsDef) {
-      description.url_params = _.extend(description.url_params || {}, copiedDescription.url_params);
+      description.url_params = _.assignIn(
+        description.url_params || {},
+        copiedDescription.url_params
+      );
       _.defaults(description.url_params, urlParamsDef);
     }
 
-    _.extend(copiedDescription, description);
+    _.assignIn(copiedDescription, description);
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],

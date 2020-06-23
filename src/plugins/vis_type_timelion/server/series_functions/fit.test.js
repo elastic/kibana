@@ -22,7 +22,7 @@ import moment from 'moment';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 import getSeriesList from './helpers/get_single_series_list';
-import _ from 'lodash';
+import _ from 'lodash4';
 
 describe('fit.js', function () {
   describe('should not filter out zeros', function () {

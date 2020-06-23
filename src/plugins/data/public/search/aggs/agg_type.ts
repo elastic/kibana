@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { constant, noop, identity } from 'lodash';
+import { constant, noop, identity } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { initParams } from './agg_params';
 

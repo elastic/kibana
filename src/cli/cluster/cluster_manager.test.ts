@@ -50,7 +50,7 @@ const mockConfig: any = {
   },
 };
 
-import { sample } from 'lodash';
+import { sample } from 'lodash4';
 
 import { ClusterManager } from './cluster_manager';
 import { Worker } from './worker';
@@ -93,7 +93,7 @@ describe('CLI cluster manager', () => {
     }
 
     const football = {};
-    const messenger = sample(manager.workers);
+    const messenger = sample(manager.workers) as any;
 
     messenger.emit('broadcast', football);
     for (const worker of manager.workers) {

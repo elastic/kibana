@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash4';
 import PropTypes from 'prop-types';
 import React, { useContext } from 'react';
 import {

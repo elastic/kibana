@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { merge } from 'lodash';
+import { merge } from 'lodash4';
 // @ts-ignore not really worth typing
 import { KFetchError } from './kfetch_error';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 export default function GeoHashGridAggResponseFixture() {
   // for vis:
   //
@@ -44,7 +44,7 @@ export default function GeoHashGridAggResponseFixture() {
     // random number of tags
     let docCount = 0;
     const buckets = _.times(_.random(40, 200), function () {
-      return _.sample(geoHashCharts, 3).join('');
+      return _.sampleSize(geoHashCharts, 3).join('');
     })
       .sort()
       .map(function (geoHash) {

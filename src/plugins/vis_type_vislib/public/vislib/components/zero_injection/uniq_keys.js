@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isObject, isNumber } from 'lodash';
+import { isObject, isNumber } from 'lodash3';
 import { flattenData } from './flatten_data';
 
 /*

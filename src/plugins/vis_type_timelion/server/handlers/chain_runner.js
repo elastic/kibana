@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import Bluebird from 'bluebird';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -132,7 +132,7 @@ export default function chainRunner(tlConfig) {
       });
     });
     return Bluebird.all(seriesList).then(function (args) {
-      const list = _.chain(args).pluck('list').flatten().value();
+      const list = _.chain(args).map('list').flatten().value();
       const seriesList = _.merge.apply(this, _.flatten([{}, args]));
       seriesList.list = list;
       return seriesList;

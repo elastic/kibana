@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { IRouter } from 'kibana/server';
 import { LoadFunctions } from '../lib/load_functions';
 

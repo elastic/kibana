@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import moment from 'moment';
 
 export function timeShift(resp, panel, series) {

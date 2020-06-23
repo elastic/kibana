@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { UrlPatternMatcher } from '../autocomplete/components';
 import { UrlParams } from '../autocomplete/url_params';
 import {
@@ -60,19 +60,15 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
 
   cls.addEndpointDescription = function (endpoint, description) {
     const copiedDescription = {};
-    _.extend(copiedDescription, description || {});
+    _.assignIn(copiedDescription, description || {});
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],
       methods: ['GET'],
     });
-    _.each(
-      copiedDescription.patterns,
-      function (p) {
-        this.urlPatternMatcher.addEndpoint(p, copiedDescription);
-      },
-      this
-    );
+    _.each(copiedDescription.patterns, (p) => {
+      this.urlPatternMatcher.addEndpoint(p, copiedDescription);
+    });
 
     copiedDescription.paramsAutocomplete = new UrlParams(copiedDescription.url_params);
     copiedDescription.bodyAutocompleteRootComponents = compileBodyDescription(

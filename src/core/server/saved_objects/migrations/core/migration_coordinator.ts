@@ -34,7 +34,7 @@
  * Kibana.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import { SavedObjectsMigrationLogger } from './migration_logger';
 
 const DEFAULT_POLL_INTERVAL = 15000;

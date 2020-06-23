@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 
 /**
  * move an obj either up or down in the collection by
@@ -50,7 +50,7 @@ export function move(
   }
 
   below = !!below;
-  qualifier = qualifier && _.callback(qualifier);
+  qualifier = qualifier && _.iteratee(qualifier);
 
   const above = !below;
   const finder = below ? _.findIndex : _.findLastIndex;

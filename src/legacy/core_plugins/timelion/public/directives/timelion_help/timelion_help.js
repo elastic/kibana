@@ -20,7 +20,7 @@
 import template from './timelion_help.html';
 import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
-import _ from 'lodash';
+import _ from 'lodash4';
 import moment from 'moment';
 import '../../components/timelionhelp_tabs_directive';
 

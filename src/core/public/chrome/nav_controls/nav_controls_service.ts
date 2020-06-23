@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { sortBy } from 'lodash';
+import { sortBy } from 'lodash4';
 import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { MountPoint } from '../../types';

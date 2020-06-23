@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import glob from 'glob';
 import path from 'path';
 import processFunctionDefinition from './process_function_definition';
@@ -47,7 +47,7 @@ export default function (directory) {
     })
     .value();
 
-  const functions = _.zipObject(files.concat(directories));
+  const functions = _.fromPairs(files.concat(directories));
 
   _.each(functions, function (func) {
     _.assign(functions, processFunctionDefinition(func));

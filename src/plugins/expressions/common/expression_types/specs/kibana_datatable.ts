@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map } from 'lodash';
+import { map } from 'lodash4';
 import { SerializedFieldFormat } from '../../types/common';
 import { Datatable, PointSeries } from '.';
 
@@ -62,7 +62,7 @@ export const kibanaDatatable = {
       };
     },
     pointseries: (context: PointSeries) => {
-      const columns = map(context.columns, (column, n) => {
+      const columns = map(context.columns, (column: any, n) => {
         return { id: n, name: n, ...column };
       });
       return {

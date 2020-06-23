@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
-import _ from 'lodash';
+import _ from 'lodash4';
 import Chainable from '../lib/classes/chainable';
 
 const validSymbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
@@ -105,7 +105,7 @@ export default new Chainable('points', {
       }
 
       symbol = symbol || defaultSymbol;
-      if (!_.contains(validSymbols, symbol)) {
+      if (!_.includes(validSymbols, symbol)) {
         throw new Error(
           i18n.translate('timelion.serverSideErrors.pointsFunction.notValidSymbolErrorMessage', {
             defaultMessage: 'Valid symbols are: {validSymbols}',

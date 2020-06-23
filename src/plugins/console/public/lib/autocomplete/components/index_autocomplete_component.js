@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+import _ from 'lodash4';
 import { getIndices } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
 function nonValidIndexType(token) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import url from 'url';
 
 /**
@@ -44,7 +44,7 @@ export default function getUrl(config, app) {
 }
 
 getUrl.noAuth = function getUrlNoAuth(config, app) {
-  config = _.pick(config, function (val, param) {
+  config = _.pickBy(config, function (val, param) {
     return param !== 'auth';
   });
   return getUrl(config, app);

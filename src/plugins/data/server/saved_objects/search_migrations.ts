@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { flow, get } from 'lodash';
+import { flow, get } from 'lodash3';
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { DEFAULT_QUERY_LANGUAGE } from '../../common';
 

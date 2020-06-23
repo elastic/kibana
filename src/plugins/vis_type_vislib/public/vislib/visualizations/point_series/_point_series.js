@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 
 const thresholdLineDefaults = {

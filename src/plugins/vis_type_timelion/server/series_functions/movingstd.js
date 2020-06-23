@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
-import _ from 'lodash';
+import _ from 'lodash4';
 import Chainable from '../lib/classes/chainable';
 
 const positions = ['left', 'right', 'center'];
@@ -61,7 +61,7 @@ export default new Chainable('movingstd', {
     return alter(args, function (eachSeries, _window, _position) {
       _position = _position || defaultPosition;
 
-      if (!_.contains(positions, _position)) {
+      if (!_.includes(positions, _position)) {
         throw new Error(
           i18n.translate(
             'timelion.serverSideErrors.movingstdFunction.notValidPositionErrorMessage',

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash4';
 import ace from 'brace';
 // @ts-ignore
 import * as OutputMode from './mode/output';
