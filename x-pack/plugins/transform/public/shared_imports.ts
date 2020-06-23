@@ -16,6 +16,7 @@ export {
 export {
   getErrorMessage,
   extractErrorMessage,
+  formatHumanReadableDateTimeSeconds,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,

@@ -54,7 +54,9 @@ export const useApi = () => {
         });
       },
       getTransformsPreview(obj: PreviewRequestBody): Promise<GetTransformsResponse> {
-        return http.post(`${API_BASE_PATH}transforms/_preview`, { body: JSON.stringify(obj) });
+        return http.post(`${API_BASE_PATH}transforms/_preview`, {
+          body: JSON.stringify(obj),
+        });
       },
       startTransforms(
         transformsInfo: TransformEndpointRequest[]
