@@ -64,6 +64,7 @@ const {
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
+import { validateTimeRange } from '../helpers/validate_time_range';
 import {
   esFilters,
   fieldFormats,
@@ -782,7 +783,7 @@ function discoverController(
     if (!init.complete) return;
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
-    if (!validateTimeRange()) {
+    if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
       $scope.resultState = 'none';
       return;
     }
@@ -915,26 +916,6 @@ function discoverController(
     $scope.searchSource.getSearchRequestBody().then((body) => {
       inspectorRequest.json(body);
     });
-  }
-
-  function validateTimeRange() {
-    const { from, to } = timefilter.getTime();
-    if (!from || !to || !dateMath.parse(from) || !dateMath.parse(to)) {
-      toastNotifications.addDanger({
-        title: i18n.translate('discover.notifications.invalidTimeRangeTitle', {
-          defaultMessage: `Invalid time range`,
-        }),
-        text: i18n.translate('discover.notifications.invalidTimeRangeText', {
-          defaultMessage: `The provided time range is invalid. (from: '{from}', to: '{to}')`,
-          values: {
-            from,
-            to,
-          },
-        }),
-      });
-      return false;
-    }
-    return true;
   }
 
   $scope.updateTime = function () {
