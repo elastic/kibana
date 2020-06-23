@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import { useState } from 'react';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 
@@ -14,18 +15,20 @@ interface MetricThresholdPrefillOptions {
 }
 
 export const useMetricThresholdAlertPrefill = () => {
-  const [{ groupBy, filterQuery, metrics }, setPrefillOptions] = useState<
-    MetricThresholdPrefillOptions
-  >({
+  const [prefillOptionsState, setPrefillOptionsState] = useState<MetricThresholdPrefillOptions>({
     groupBy: undefined,
     filterQuery: undefined,
     metrics: [],
   });
 
+  const { groupBy, filterQuery, metrics } = prefillOptionsState;
+
   return {
     groupBy,
     filterQuery,
     metrics,
-    setPrefillOptions,
+    setPrefillOptions(newState: MetricThresholdPrefillOptions) {
+      if (!isEqual(newState, prefillOptionsState)) setPrefillOptionsState(newState);
+    },
   };
 };

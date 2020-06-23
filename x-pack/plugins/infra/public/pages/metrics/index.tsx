@@ -11,6 +11,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { DocumentTitle } from '../../components/document_title';
+import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
 import { Header } from '../../components/header';
@@ -51,6 +52,13 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                 <ColumnarPage>
                   <DocumentTitle
                     title={i18n.translate('xpack.infra.homePage.documentTitle', {
+                      defaultMessage: 'Metrics',
+                    })}
+                  />
+
+                  <HelpCenterContent
+                    feedbackLink="https://discuss.elastic.co/c/metrics"
+                    appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
                       defaultMessage: 'Metrics',
                     })}
                   />
@@ -116,59 +124,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         >
                           {ADD_DATA_LABEL}
                         </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </AppNavigation>
-
-                  <Header
-                    breadcrumbs={[
-                      {
-                        text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-                          defaultMessage: 'Metrics',
-                        }),
-                      },
-                    ]}
-                    readOnlyBadge={!uiCapabilities?.infrastructure?.save}
-                  />
-                  <AppNavigation
-                    aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
-                      defaultMessage: 'Metrics',
-                    })}
-                  >
-                    <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
-                      <EuiFlexItem>
-                        <RoutedTabs
-                          tabs={[
-                            {
-                              app: 'metrics',
-                              title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-                                defaultMessage: 'Inventory',
-                              }),
-                              pathname: '/inventory',
-                            },
-                            {
-                              app: 'metrics',
-                              title: i18n.translate(
-                                'xpack.infra.homePage.metricsExplorerTabTitle',
-                                {
-                                  defaultMessage: 'Metrics Explorer',
-                                }
-                              ),
-                              pathname: '/explorer',
-                            },
-                            {
-                              app: 'metrics',
-                              title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-                                defaultMessage: 'Settings',
-                              }),
-                              pathname: '/settings',
-                            },
-                          ]}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <Route path={'/explorer'} component={MetricsAlertDropdown} />
-                        <Route path={'/inventory'} component={InventoryAlertDropdown} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </AppNavigation>
