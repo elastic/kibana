@@ -58,7 +58,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     });
   }
 
-  public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
+  public getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
     const adapters = searchEmbeddable.getInspectorAdapters();
     if (!adapters) {
       return {};

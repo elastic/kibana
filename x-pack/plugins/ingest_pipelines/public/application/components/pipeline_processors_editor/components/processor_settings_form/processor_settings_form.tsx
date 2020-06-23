@@ -64,7 +64,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
     );
 
     return (
-      <Form form={form}>
+      <Form data-test-subj="processorSettingsForm" form={form}>
         <EuiFlyout onClose={onClose}>
           <EuiFlyoutHeader>
             <EuiFlexGroup gutterSize="xs">
@@ -122,7 +122,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
                   return (
                     <>
                       {formContent}
-                      <EuiButton onClick={form.submit}>
+                      <EuiButton data-test-subj="submitButton" onClick={form.submit}>
                         {i18n.translate(
                           'xpack.ingestPipelines.pipelineEditor.settingsForm.submitButtonLabel',
                           { defaultMessage: 'Submit' }

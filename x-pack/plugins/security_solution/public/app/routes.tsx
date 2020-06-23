@@ -14,17 +14,17 @@ import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
 
 interface RouterProps {
+  children: React.ReactNode;
   history: History;
-  subPluginRoutes: JSX.Element[];
 }
 
-const PageRouterComponent: FC<RouterProps> = ({ history, subPluginRoutes }) => (
+const PageRouterComponent: FC<RouterProps> = ({ history, children }) => (
   <ManageRoutesSpy>
     <Router history={history}>
       <RouteCapture>
         <Switch>
           <Route path="/">
-            <HomePage subPlugins={subPluginRoutes} />
+            <HomePage>{children}</HomePage>
           </Route>
           <Route>
             <NotFoundPage />

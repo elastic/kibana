@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import moment from 'moment';
 import React from 'react';
-import { toJson } from '../../../../../utils/testHelpers';
+import { toJson, mountWithTheme } from '../../../../../utils/testHelpers';
 import { InnerCustomPlot } from '../index';
 import responseWithData from './responseWithData.json';
 import VoronoiPlot from '../VoronoiPlot';
@@ -30,7 +29,7 @@ describe('when response has data', () => {
     onHover = jest.fn();
     onMouseLeave = jest.fn();
     onSelectionEnd = jest.fn();
-    wrapper = mount(
+    wrapper = mountWithTheme(
       <InnerCustomPlot
         series={series}
         onHover={onHover}
@@ -274,7 +273,7 @@ describe('when response has no data', () => {
   beforeEach(() => {
     const series = getEmptySeries(1451606400000, 1451610000000);
 
-    wrapper = mount(
+    wrapper = mountWithTheme(
       <InnerCustomPlot
         annotations={annotations}
         series={series}

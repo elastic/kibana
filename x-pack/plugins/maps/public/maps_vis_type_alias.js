@@ -28,7 +28,7 @@ The Maps app offers more functionality and is easier to use.`,
 
   return {
     aliasApp: APP_ID,
-    aliasPath: `#/${MAP_SAVED_OBJECT_TYPE}`,
+    aliasPath: `/${MAP_SAVED_OBJECT_TYPE}`,
     name: APP_ID,
     title: i18n.translate('xpack.maps.visTypeAlias.title', {
       defaultMessage: 'Maps',
