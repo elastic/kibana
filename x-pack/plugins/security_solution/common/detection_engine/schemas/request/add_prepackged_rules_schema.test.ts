@@ -625,7 +625,7 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "references"']);
     expect(message.schema).toEqual({});
   });
 
@@ -776,7 +776,9 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "max_signals"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -789,7 +791,7 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to "max_signals"']);
     expect(message.schema).toEqual({});
   });
 
@@ -837,9 +839,9 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to ""',
-      'Invalid value "1" supplied to ""',
-      'Invalid value "2" supplied to ""',
+      'Invalid value "0" supplied to "tags"',
+      'Invalid value "1" supplied to "tags"',
+      'Invalid value "2" supplied to "tags"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -871,7 +873,7 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "framework"',
+      'Invalid value "undefined" supplied to "threat,framework"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -899,7 +901,7 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "tactic"',
+      'Invalid value "undefined" supplied to "threat,tactic"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -925,7 +927,7 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "technique"',
+      'Invalid value "undefined" supplied to "threat,technique"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -959,8 +961,8 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to ""',
-      'Invalid value "4" supplied to ""',
+      'Invalid value "5" supplied to "false_positives"',
+      'Invalid value "4" supplied to "false_positives"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1184,7 +1186,7 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "group"',
+      'Invalid value "undefined" supplied to "actions,group"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1198,7 +1200,9 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to "id"']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,id"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -1212,7 +1216,7 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "action_type_id"',
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1227,7 +1231,7 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "params"',
+      'Invalid value "undefined" supplied to "actions,params"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1249,7 +1253,7 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "action_type_id"',
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1323,8 +1327,7 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
-        // TODO: Fix/Change the formatErrors to be better able to handle objects
-        'Invalid value "[object Object]" supplied to "note"',
+        'Invalid value "{"somethingHere":"something else"}" supplied to "note"',
       ]);
       expect(message.schema).toEqual({});
     });

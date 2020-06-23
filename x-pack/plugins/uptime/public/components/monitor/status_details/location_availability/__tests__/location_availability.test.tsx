@@ -23,8 +23,9 @@ describe('LocationAvailability component', () => {
       setItem: jest.fn(),
     };
 
-    // @ts-ignore replacing a call to localStorage we use for monitor list size
-    global.localStorage = localStorageMock;
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+    });
 
     monitorLocations = {
       monitorId: 'wapo',

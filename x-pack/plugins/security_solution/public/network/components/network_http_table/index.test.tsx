@@ -24,6 +24,8 @@ import { networkModel } from '../../store';
 import { NetworkHttpTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('../../../common/components/link_to');
+
 describe('NetworkHttp Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;

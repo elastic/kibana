@@ -1065,9 +1065,8 @@ describe('patch_rules_schema', () => {
       const decoded = patchRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      // TODO: Change the formatter to output something more readable than [object Object]
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "[object Object]" supplied to "note"',
+        'Invalid value "{"someProperty":"something else here"}" supplied to "note"',
       ]);
       expect(message.schema).toEqual({});
     });
