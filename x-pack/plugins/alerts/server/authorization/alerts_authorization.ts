@@ -190,7 +190,10 @@ export class AlertsAuthorization {
     if (!this.authorization) {
       return {
         hasAllRequested: true,
-        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(alertTypes, featuresIds),
+        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(alertTypes, [
+          ALERTS_FEATURE_ID,
+          ...featuresIds,
+        ]),
       };
     } else {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
@@ -223,7 +226,7 @@ export class AlertsAuthorization {
         hasAllRequested,
         authorizedAlertTypes: hasAllRequested
           ? // has access to all features
-            this.augmentWithAuthorizedConsumers(alertTypes, featuresIds)
+            this.augmentWithAuthorizedConsumers(alertTypes, [ALERTS_FEATURE_ID, ...featuresIds])
           : // only has some of the required privileges
             privileges.reduce((authorizedAlertTypes, { authorized, privilege }) => {
               if (authorized && privilegeToAlertType.has(privilege)) {
@@ -244,7 +247,7 @@ export class AlertsAuthorization {
     return new Set(
       Array.from(alertTypes).map((alertType) => ({
         ...alertType,
-        authorizedConsumers: authorizedConsumers ?? [],
+        authorizedConsumers: authorizedConsumers ?? [ALERTS_FEATURE_ID],
       }))
     );
   }

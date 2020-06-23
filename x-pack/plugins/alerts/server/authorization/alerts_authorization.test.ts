@@ -59,9 +59,9 @@ function mockFeature(appName: string, typeName: string, requiredApps: string[] =
     },
   });
 }
-const alertsFeature = mockFeature('alerts', 'myBuiltInType');
-const myAppFeature = mockFeature('myApp', 'myType', ['alerts']);
-const myOtherAppFeature = mockFeature('myOtherApp', 'myType', ['alerts']);
+
+const myAppFeature = mockFeature('myApp', 'myType', []);
+const myOtherAppFeature = mockFeature('myOtherApp', 'myType', []);
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -82,7 +82,7 @@ beforeEach(() => {
     async executor() {},
     producer: 'myApp',
   }));
-  features.getFeatures.mockReturnValue([alertsFeature, myAppFeature, myOtherAppFeature]);
+  features.getFeatures.mockReturnValue([myAppFeature, myOtherAppFeature]);
 });
 
 describe('ensureAuthorized', () => {
