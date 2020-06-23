@@ -40,9 +40,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
     });
-    after(async () => {
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-    });
 
     it('should go back after loading', async function () {
       await retry.waitFor('user navigating to context and returning to discover', async () => {
