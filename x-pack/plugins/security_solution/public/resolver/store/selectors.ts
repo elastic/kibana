@@ -69,6 +69,22 @@ export const relatedEventsStats = composeSelectors(
 );
 
 /**
+ * Map of related events... by entity id
+ */
+export const relatedEventsByEntityId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsByEntityId
+);
+
+/**
+ * Entity ids to booleans for waiting status
+ */
+export const relatedEventsReady = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsReady
+);
+
+/**
  * Returns the id of the "current" tree node (fake-focused)
  */
 export const uiActiveDescendantId = composeSelectors(
@@ -83,6 +99,19 @@ export const uiSelectedDescendantId = composeSelectors(
   uiStateSelector,
   uiSelectors.selectedDescendantId
 );
+
+/**
+ * Returns the entity_id of the "selected" tree node's process
+ */
+export const uiSelectedDescendantProcessId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.selectedDescendantProcessId
+);
+
+/**
+ * The current panel to display
+ */
+export const currentPanelView = composeSelectors(uiStateSelector, uiSelectors.currentPanelView);
 
 /**
  * Returns the camera state from within ResolverState
@@ -114,6 +143,14 @@ export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoa
  * Whether or not the resolver encountered an error while fetching data
  */
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
+
+/**
+ * An array containing all the processes currently in the Resolver than can be graphed
+ */
+export const graphableProcesses = composeSelectors(
+  dataStateSelector,
+  dataSelectors.graphableProcesses
+);
 
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a

@@ -8,7 +8,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceTransactionTypes(
