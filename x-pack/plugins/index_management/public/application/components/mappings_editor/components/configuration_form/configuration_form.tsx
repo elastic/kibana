@@ -113,7 +113,7 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
     });
 
     return subscription.unsubscribe;
-  }, [form, dispatch]);
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (isMounted.current === undefined) {

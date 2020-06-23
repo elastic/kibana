@@ -435,6 +435,21 @@ export function relatedEventsStats(data: DataState) {
   return data.relatedEventsStats;
 }
 
+/**
+ * returns {Map<string, ResolverRelatedEvents>} a map of entity_ids to related event data.
+ */
+export function relatedEventsByEntityId(data: DataState) {
+  return data.relatedEvents;
+}
+
+/**
+ * returns {Map<string, boolean>} a map of entity_ids to booleans indicating if it is waiting on related event
+ * A value of `undefined` can be interpreted as `not yet requested`
+ */
+export function relatedEventsReady(data: DataState) {
+  return data.relatedEventsReady;
+}
+
 export const processAdjacencies = createSelector(
   indexedProcessTree,
   graphableProcesses,
