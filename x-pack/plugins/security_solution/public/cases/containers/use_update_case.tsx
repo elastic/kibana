@@ -118,6 +118,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
         abortCtrl.abort();
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

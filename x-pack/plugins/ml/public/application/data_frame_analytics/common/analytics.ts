@@ -228,6 +228,16 @@ export const getPredictionFieldName = (
   return predictionFieldName;
 };
 
+export const getNumTopClasses = (
+  analysis: AnalysisConfig
+): ClassificationAnalysis['classification']['num_top_classes'] => {
+  let numTopClasses;
+  if (isClassificationAnalysis(analysis) && analysis.classification.num_top_classes !== undefined) {
+    numTopClasses = analysis.classification.num_top_classes;
+  }
+  return numTopClasses;
+};
+
 export const getNumTopFeatureImportanceValues = (
   analysis: AnalysisConfig
 ):

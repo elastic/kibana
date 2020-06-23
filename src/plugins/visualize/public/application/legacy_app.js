@@ -63,6 +63,17 @@ const getResolvedResults = (deps) => {
       })
       .then((embeddableHandler) => {
         results.embeddableHandler = embeddableHandler;
+
+        embeddableHandler.getOutput$().subscribe((output) => {
+          if (output.error) {
+            core.notifications.toasts.addError(output.error, {
+              title: i18n.translate('visualize.error.title', {
+                defaultMessage: 'Visualization error',
+              }),
+            });
+          }
+        });
+
         if (results.vis.data.savedSearchId) {
           return createSavedSearchesLoader({
             savedObjectsClient: core.savedObjects.client,

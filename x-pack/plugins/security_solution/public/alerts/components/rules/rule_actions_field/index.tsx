@@ -56,6 +56,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       updatedActions[index] = deepMerge(updatedActions[index], { id });
       field.setValue(updatedActions);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [field.setValue, actions]
   );
 
@@ -71,6 +72,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       updatedActions[index].params[key] = value;
       field.setValue(updatedActions);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [field.setValue, actions]
   );
 
@@ -82,6 +84,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       );
       setSupportedActionTypes(supportedTypes);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

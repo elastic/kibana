@@ -20,7 +20,9 @@ To create a workpad, choose one of the following options:
 
 To use the background colors, images, and data of your choice, start with a blank workpad.
 
-. On the *Canvas workpads* page, click *Create workpad*.
+. Open the menu, then go to *Canvas*.
+
+. On the *Canvas workpads* view, click *Create workpad*.
 
 . Add a *Name* to your workpad.
 
@@ -41,7 +43,9 @@ image::images/canvas-background-color-picker.png[Canvas color picker]
 
 If you're unsure about where to start, you can use one of the preconfigured templates that come with Canvas.
 
-. On the *Canvas workpads* page, select *Templates*.
+. Open the menu, then go to *Canvas*.
+
+. On the *Canvas workpads* view, select *Templates*.
 
 . Click the preconfigured template that you want to use.
 
@@ -53,7 +57,9 @@ If you're unsure about where to start, you can use one of the preconfigured temp
 
 When you want to use a workpad that someone else has already started, import the JSON file into Canvas.
 
-To import a workpad, go to the *Canvas workpads* page, then click and drag the file to the *Import workpad JSON file* field.
+. Open the menu, then go to *Canvas*.
+
+. On the *Canvas workpads* view, click and drag the file to the *Import workpad JSON file* field.
 
 [float]
 [[sample-data-workpad]]

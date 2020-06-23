@@ -73,6 +73,7 @@ export const LinuxEvents = React.memo(() => {
             <EventsCheckbox
               name={item.name}
               key={index}
+              data-test-subj={`policyLinuxEvent_${item.protectionField}`}
               setter={(config, checked) =>
                 setIn(config)(item.os)('events')(item.protectionField)(checked)
               }

@@ -16,7 +16,8 @@ import { CreateDatasourceFrom } from './types';
 export const StepConfigureDatasource: React.FunctionComponent<{
   from?: CreateDatasourceFrom;
   packageInfo: PackageInfo;
-  datasource: NewDatasource | (NewDatasource & { id: string });
+  datasource: NewDatasource;
+  datasourceId?: string;
   updateDatasource: (fields: Partial<NewDatasource>) => void;
   validationResults: DatasourceValidationResults;
   submitAttempted: boolean;
@@ -24,6 +25,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   from = 'config',
   packageInfo,
   datasource,
+  datasourceId,
   updateDatasource,
   validationResults,
   submitAttempted,
@@ -70,9 +72,10 @@ export const StepConfigureDatasource: React.FunctionComponent<{
     ) : (
       <EuiPanel>
         <CustomConfigureDatasource
+          from={from}
           packageName={packageInfo.name}
           datasource={datasource}
-          from={from}
+          datasourceId={datasourceId}
         />
       </EuiPanel>
     );

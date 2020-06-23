@@ -27,14 +27,13 @@ import {
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
 } from '../../../core/server/saved_objects';
-import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
 
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
   const typeRegistry = kbnServer.newPlatform.start.core.savedObjects.getTypeRegistry();
   const mappings = migrator.getActiveMappings();
-  const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+  const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
   const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
   const visibleTypes = allTypes.filter((type) => !schema.isHiddenType(type));
 

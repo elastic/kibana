@@ -9,6 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
+import { createDataStreamPayload } from './data_streams_tab.helpers';
 
 /**
  * The below import is required to avoid a console error warn from the "brace" package
@@ -49,6 +50,49 @@ describe('<IndexManagementHome />', () => {
       // Note: this test modifies the shared location.hash state, we put it back the way it was
       actions.clickIncludeHiddenIndicesToggle();
       expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(true);
+    });
+  });
+
+  describe('data stream column', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          health: '',
+          status: '',
+          primary: '',
+          replica: '',
+          documents: '',
+          documents_deleted: '',
+          size: '',
+          primary_size: '',
+          name: 'data-stream-index',
+          data_stream: 'dataStream1',
+        },
+      ]);
+
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([
+        createDataStreamPayload('dataStream1'),
+        createDataStreamPayload('dataStream2'),
+      ]);
+
+      testBed = await setup();
+
+      await act(async () => {
+        const { component } = testBed;
+
+        await nextTick();
+        component.update();
+      });
+    });
+
+    test('navigates to the data stream in the Data Streams tab', async () => {
+      const { table, actions } = testBed;
+
+      await actions.clickDataStreamAt(0);
+
+      expect(table.getMetaData('dataStreamTable').tableCellsValues).toEqual([
+        ['dataStream1', '1', '@timestamp', '1'],
+      ]);
     });
   });
 

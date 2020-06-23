@@ -7,7 +7,7 @@
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerts/server';
 import { readRules } from './read_rules';
-import { UpdateRuleParams } from './types';
+import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion } from './utils';
 import { hasListsFeature } from '../feature_flags';
@@ -43,11 +43,11 @@ export const updateRules = async ({
   references,
   version,
   note,
-  exceptions_list,
+  exceptionsList,
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: UpdateRuleParams): Promise<PartialAlert | null> => {
+}: UpdateRulesOptions): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
     return null;
@@ -80,10 +80,11 @@ export const updateRules = async ({
     note,
     anomalyThreshold,
     machineLearningJobId,
+    exceptionsList,
   });
 
   // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptions_list } : {};
+  const exceptionsListParam = hasListsFeature() ? { exceptionsList } : {};
 
   const update = await alertsClient.update({
     id: rule.id,

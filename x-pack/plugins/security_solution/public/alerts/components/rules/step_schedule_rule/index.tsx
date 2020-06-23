@@ -62,6 +62,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
         setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   useEffect(() => {
@@ -74,12 +75,14 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
       setMyStepData(myDefaultValues);
       setFieldValue(form, schema, myDefaultValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.scheduleRule, form);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   return isReadOnlyView && myStepData != null ? (

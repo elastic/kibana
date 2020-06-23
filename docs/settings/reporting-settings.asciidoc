@@ -1,6 +1,6 @@
 [role="xpack"]
 [[reporting-settings-kb]]
-=== Reporting settings in Kibana
+=== Reporting settings in {kib}
 ++++
 <titleabbrev>Reporting settings</titleabbrev>
 ++++

@@ -8,6 +8,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { WithSource } from '../../../common/containers/source';
 import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
@@ -30,7 +31,7 @@ export interface OwnProps {
   usersViewing: string[];
 }
 
-type Props = OwnProps & PropsFromRedux;
+export type Props = OwnProps & PropsFromRedux;
 
 const StatefulTimelineComponent = React.memo<Props>(
   ({
@@ -42,6 +43,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     filters,
     id,
     isLive,
+    isTimelineExists,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
@@ -67,16 +69,17 @@ const StatefulTimelineComponent = React.memo<Props>(
         eventType &&
         signalIndexExists &&
         signalIndexName != null &&
-        ['signal', 'all'].includes(eventType)
+        ['signal', 'alert', 'all'].includes(eventType)
       ) {
         return [signalIndexName];
       }
-      return [];
+      return [NO_ALERT_INDEX]; // Following index does not exist so we won't show any events;
     }, [eventType, signalIndexExists, signalIndexName]);
 
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
       (providerId: string, andProviderId?: string) =>
         removeProvider!({ id, providerId, andProviderId }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -88,6 +91,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -99,6 +103,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -113,11 +118,13 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           value,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -140,13 +147,15 @@ const StatefulTimelineComponent = React.memo<Props>(
           });
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [columns, id]
     );
 
     useEffect(() => {
-      if (createTimeline != null) {
+      if (createTimeline != null && !isTimelineExists) {
         createTimeline({ id, columns: defaultHeaders, show: false });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -240,6 +249,7 @@ const makeMapStateToProps = () => {
       filters: timelineFilter,
       id,
       isLive: input.policy.kind === 'interval',
+      isTimelineExists: getTimeline(state, id) != null,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,

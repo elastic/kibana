@@ -174,6 +174,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     return () => {
       _isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Number of current columns plus one for actions.

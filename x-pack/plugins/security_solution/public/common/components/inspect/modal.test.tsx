@@ -9,7 +9,8 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { ModalInspectQuery } from './modal';
+import { NO_ALERT_INDEX } from '../../../../common/constants';
+import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
 
 const request =
   '{"index": ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"],"allowNoIndices": true, "ignoreUnavailable": true, "body": { "aggregations": {"hosts": {"cardinality": {"field": "host.name" } }, "hosts_histogram": {"auto_date_histogram": {"field": "@timestamp","buckets": "6"},"aggs": { "count": {"cardinality": {"field": "host.name" }}}}}, "query": {"bool": {"filter": [{"range": { "@timestamp": {"gte": 1562290224506,"lte": 1562376624506 }}}]}}, "size": 0, "track_total_hits": false}}';
@@ -242,6 +243,33 @@ describe('Modal Inspect', () => {
       wrapper.find('button[data-test-subj="modal-inspect-close"]').simulate('click');
       wrapper.update();
       expect(closeModal).toHaveBeenCalled();
+    });
+  });
+
+  describe('formatIndexPatternRequested', () => {
+    test('Return specific messages to NO_ALERT_INDEX if we only have one index and we match the index name `NO_ALERT_INDEX`', () => {
+      const expected = formatIndexPatternRequested([NO_ALERT_INDEX]);
+      expect(expected).toEqual(<i>{'No alert index found'}</i>);
+    });
+
+    test('Ignore NO_ALERT_INDEX if you have more than one indices', () => {
+      const expected = formatIndexPatternRequested([NO_ALERT_INDEX, 'indice-1']);
+      expect(expected).toEqual('indice-1');
+    });
+
+    test('Happy path', () => {
+      const expected = formatIndexPatternRequested(['indice-1, indice-2']);
+      expect(expected).toEqual('indice-1, indice-2');
+    });
+
+    test('Empty array with no indices', () => {
+      const expected = formatIndexPatternRequested([]);
+      expect(expected).toEqual('Sorry about that, something went wrong.');
+    });
+
+    test('Undefined indices', () => {
+      const expected = formatIndexPatternRequested(undefined);
+      expect(expected).toEqual('Sorry about that, something went wrong.');
     });
   });
 });

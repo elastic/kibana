@@ -17,6 +17,14 @@ jest.mock('react-redux', () => {
   return {
     ...reactRedux,
     useDispatch: () => mockDispatch,
+    useSelector: jest
+      .fn()
+      .mockReturnValueOnce({
+        timelineId: 'timeline-id',
+        timelineSavedObjectId: '34578-3497-5893-47589-34759',
+        timelineTitle: 'Timeline title',
+      })
+      .mockReturnValue(null),
   };
 });
 const mockLocation = {
@@ -25,17 +33,6 @@ const mockLocation = {
   search: '',
   state: '',
 };
-const mockLocationWithState = {
-  ...mockLocation,
-  state: {
-    insertTimeline: {
-      timelineId: 'timeline-id',
-      timelineSavedObjectId: '34578-3497-5893-47589-34759',
-      timelineTitle: 'Timeline title',
-    },
-  },
-};
-
 const onTimelineChange = jest.fn();
 const defaultProps = {
   isDisabled: false,
@@ -43,18 +40,21 @@ const defaultProps = {
 };
 
 describe('Insert timeline popover ', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should insert a timeline when passed in the router state', () => {
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocationWithState);
     mount(<InsertTimelinePopoverComponent {...defaultProps} />);
-    expect(mockDispatch).toBeCalledWith({
+    expect(mockDispatch.mock.calls[0][0]).toEqual({
       payload: { id: 'timeline-id', show: false },
       type: 'x-pack/security_solution/local/timeline/SHOW_TIMELINE',
     });
     expect(onTimelineChange).toBeCalledWith('Timeline title', '34578-3497-5893-47589-34759');
+    expect(mockDispatch.mock.calls[1][0]).toEqual({
+      payload: null,
+      type: 'x-pack/security_solution/local/timeline/SET_INSERT_TIMELINE',
+    });
   });
   it('should do nothing when router state', () => {
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);

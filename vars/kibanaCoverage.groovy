@@ -98,7 +98,7 @@ def collectVcsInfo(title) {
 
 def generateReports(title) {
   kibanaPipeline.bash("""
-    source src/dev/ci_setup/setup_env.sh
+    source src/dev/ci_setup/setup_env.sh true
     # bootstrap from x-pack folder
     cd x-pack
     yarn kbn bootstrap --prefer-offline

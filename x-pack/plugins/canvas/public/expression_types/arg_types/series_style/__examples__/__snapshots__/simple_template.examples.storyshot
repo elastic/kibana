@@ -169,6 +169,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
     >
       <span
         className="euiToolTipAnchor"
+        onKeyUp={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >

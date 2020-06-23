@@ -61,6 +61,7 @@ export const readRawTags = async ({
     page: 1,
     sortField: 'createdAt',
     sortOrder: 'desc',
+    filter: undefined,
   });
   // Get all the rules to aggregate over all the tags of the rules
   const rules = await findRules({
@@ -70,6 +71,7 @@ export const readRawTags = async ({
     sortField: 'createdAt',
     sortOrder: 'desc',
     page: 1,
+    filter: undefined,
   });
   const tagSet = convertTagsToSet(rules.data);
   return Array.from(tagSet);

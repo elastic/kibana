@@ -101,6 +101,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
         setMyStepData({ ...data, isNew: false } as AboutStepRule);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   useEffect(() => {
@@ -113,12 +114,14 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       setMyStepData(myDefaultValues);
       setFieldValue(form, schema, myDefaultValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.aboutRule, form);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   return isReadOnlyView && myStepData.name != null ? (

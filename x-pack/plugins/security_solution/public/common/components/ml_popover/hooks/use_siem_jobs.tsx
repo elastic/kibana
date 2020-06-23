@@ -74,6 +74,7 @@ export const useSiemJobs = (refetchData: boolean): Return => {
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refetchData, userPermissions]);
 
   return [loading, siemJobs];

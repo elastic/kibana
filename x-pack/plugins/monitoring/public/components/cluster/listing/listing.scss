@@ -1,0 +1,41 @@
+/*
+ * A table that stretches the full window width and columns size appropriately to content.
+ * The .monitoringTable class is on the KuiControlledTable instance.
+ * The table within it requires the shrinkToContent flag as well as width set to 100%
+ */
+
+.monTableCell__clusterCellExpired,
+.monTableCell__offline {
+  color: $euiTextColor;
+}
+
+.monTableCell__clusterCellLicense {
+  font-size: $euiFontSize;
+}
+
+.monTableCell__clusterCellExpiration {
+  color: $euiColorDarkShade;
+}
+
+.monTableCell__name,
+.monTableCell__status {
+  @include euiFontSizeM;
+}
+
+.monTableCell__status {
+  overflow-x: hidden;
+  white-space: nowrap;
+}
+
+.monTableCell__transportAddress {
+  @include euiFontSizeS;
+  color: $euiColorDarkShade;
+}
+
+.monTableCell__number {
+  @include euiFontSizeL;
+}
+
+.monTableCell__splitNumber {
+  @include euiFontSizeM;
+}

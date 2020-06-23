@@ -388,6 +388,7 @@ describe('editor_frame state management', () => {
               filters: [],
             },
             title: 'heyo!',
+            description: 'My lens',
             type: 'lens',
             visualizationType: 'line',
           },
@@ -406,6 +407,7 @@ describe('editor_frame state management', () => {
         },
         persistedId: 'b',
         title: 'heyo!',
+        description: 'My lens',
         visualization: {
           activeId: 'line',
           state: {

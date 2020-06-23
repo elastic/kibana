@@ -9,7 +9,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { alertTypeInitializers } from '../../alert_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 import {
@@ -33,18 +32,6 @@ export const getKibanaFrameworkAdapter = (
     http: { basePath },
     i18n,
   } = core;
-
-  const {
-    data: { autocomplete },
-    triggers_actions_ui,
-  } = plugins;
-
-  alertTypeInitializers.forEach((init) => {
-    const alertInitializer = init({ autocomplete });
-    if (!triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)) {
-      triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }));
-    }
-  });
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,

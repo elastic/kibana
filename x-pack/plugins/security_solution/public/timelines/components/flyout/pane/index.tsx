@@ -50,7 +50,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   const dispatch = useDispatch();
 
   const onResizeStop: ResizeCallback = useCallback(
-    (e, direction, ref, delta) => {
+    (_e, _direction, _ref, delta) => {
       const bodyClientWidthPixels = document.body.clientWidth;
 
       if (delta.width) {
@@ -65,6 +65,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         );
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dispatch]
   );
   const resizableDefaultSize = useMemo(
@@ -72,6 +73,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
       width,
       height: '100%',
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const resizableHandleComponent = useMemo(

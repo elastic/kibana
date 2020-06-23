@@ -87,6 +87,7 @@ export const schema: FormSchema = {
   },
   riskScore: {
     type: FIELD_TYPES.RANGE,
+    serializer: (input: string) => Number(input),
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRiskScoreLabel',
       {

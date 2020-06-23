@@ -12,8 +12,8 @@
     "kbn:watch": "node scripts/build --watch --source-maps"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.9.0",
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.2",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@types/intl-relativeformat": "^2.1.0",
@@ -21,7 +21,7 @@
     "del": "^5.1.0",
     "getopts": "^2.2.4",
     "supports-color": "^7.0.0",
-    "typescript": "3.7.2"
+    "typescript": "3.9.5"
   },
   "dependencies": {
     "intl-format-cache": "^2.1.0",

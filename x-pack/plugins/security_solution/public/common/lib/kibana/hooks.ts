@@ -89,10 +89,12 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     return () => {
       didCancel = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [security]);
 
   useEffect(() => {
     fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return user;
 };
@@ -111,13 +113,9 @@ export const useGetUserSavedObjectPermissions = () => {
 
   useEffect(() => {
     const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities.securitySolution.crud === 'boolean'
-        ? uiCapabilities.securitySolution.crud
-        : false;
+      typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
     const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities.securitySolution.show === 'boolean'
-        ? uiCapabilities.securitySolution.show
-        : false;
+      typeof uiCapabilities.siem.show === 'boolean' ? uiCapabilities.siem.show : false;
     setSavedObjectsPermissions({
       crud: capabilitiesCanUserCRUD,
       read: capabilitiesCanUserRead,

@@ -13,6 +13,8 @@ import { StepAboutRule } from '.';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
+import { wait } from '@testing-library/react';
+import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
@@ -57,31 +59,31 @@ describe('StepAboutRuleComponent', () => {
       </ThemeProvider>
     );
 
-    const nameInput = wrapper
-      .find('input[aria-describedby="detectionEngineStepAboutRuleName"]')
-      .at(0);
-    nameInput.simulate('change', { target: { value: 'Test name text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
 
     const descriptionInput = wrapper
-      .find('textarea[aria-describedby="detectionEngineStepAboutRuleDescription"]')
-      .at(0);
-    const nextButton = wrapper.find('button[data-test-subj="about-continue"]').at(0);
-    nextButton.simulate('click');
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first();
+    wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click');
 
     expect(
-      wrapper.find('input[aria-describedby="detectionEngineStepAboutRuleName"]').at(0).props().value
+      wrapper.find('[data-test-subj="detectionEngineStepAboutRuleName"] input').first().props()
+        .value
     ).toEqual('Test name text');
     expect(descriptionInput.props().value).toEqual('');
     expect(
       wrapper
-        .find('EuiFormRow[data-test-subj="detectionEngineStepAboutRuleDescription"] label')
-        .at(0)
+        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] label')
+        .first()
         .hasClass('euiFormLabel-isInvalid')
     ).toBeTruthy();
     expect(
       wrapper
-        .find('EuiFormRow[data-test-subj="detectionEngineStepAboutRuleDescription"] EuiTextArea')
-        .at(0)
+        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] EuiTextArea')
+        .first()
         .prop('isInvalid')
     ).toBeTruthy();
   });
@@ -101,39 +103,40 @@ describe('StepAboutRuleComponent', () => {
       </ThemeProvider>
     );
 
-    const descriptionInput = wrapper
-      .find('textarea[aria-describedby="detectionEngineStepAboutRuleDescription"]')
-      .at(0);
-    descriptionInput.simulate('change', { target: { value: 'Test description text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
 
     const nameInput = wrapper
-      .find('input[aria-describedby="detectionEngineStepAboutRuleName"]')
-      .at(0);
-    const nextButton = wrapper.find('button[data-test-subj="about-continue"]').at(0);
-    nextButton.simulate('click');
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first();
+
+    wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click');
 
     expect(
       wrapper
-        .find('textarea[aria-describedby="detectionEngineStepAboutRuleDescription"]')
-        .at(0)
+        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+        .first()
         .props().value
     ).toEqual('Test description text');
     expect(nameInput.props().value).toEqual('');
     expect(
       wrapper
-        .find('EuiFormRow[data-test-subj="detectionEngineStepAboutRuleName"] label')
-        .at(0)
+        .find('[data-test-subj="detectionEngineStepAboutRuleName"] label')
+        .first()
         .hasClass('euiFormLabel-isInvalid')
     ).toBeTruthy();
     expect(
       wrapper
-        .find('EuiFormRow[data-test-subj="detectionEngineStepAboutRuleName"] EuiFieldText')
-        .at(0)
+        .find('[data-test-subj="detectionEngineStepAboutRuleName"] EuiFieldText')
+        .first()
         .prop('isInvalid')
     ).toBeTruthy();
   });
 
-  test('it allows user to click continue if "name" and "description" are defined', () => {
+  test('it allows user to click continue if "name" and "description" are defined', async () => {
+    const stepDataMock = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <StepAboutRule
@@ -143,22 +146,93 @@ describe('StepAboutRuleComponent', () => {
           isReadOnlyView={false}
           isLoading={false}
           setForm={jest.fn()}
-          setStepData={jest.fn()}
+          setStepData={stepDataMock}
         />
       </ThemeProvider>
     );
 
-    const descriptionInput = wrapper
-      .find('textarea[aria-describedby="detectionEngineStepAboutRuleDescription"]')
-      .at(0);
-    descriptionInput.simulate('change', { target: { value: 'Test description text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
 
-    const nameInput = wrapper
-      .find('input[aria-describedby="detectionEngineStepAboutRuleName"]')
-      .at(0);
-    nameInput.simulate('change', { target: { value: 'Test name text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
 
-    const nextButton = wrapper.find('button[data-test-subj="about-continue"]').at(0);
-    nextButton.simulate('click');
+    wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click').update();
+    await wait();
+    const expected: Omit<AboutStepRule, 'isNew'> = {
+      description: 'Test description text',
+      falsePositives: [''],
+      name: 'Test name text',
+      note: '',
+      references: [''],
+      riskScore: 50,
+      severity: 'low',
+      tags: [],
+      threat: [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
+      ],
+    };
+    expect(stepDataMock.mock.calls[1][1]).toEqual(expected);
+  });
+
+  test('it allows user to set the risk score as a number (and not a string)', async () => {
+    const stepDataMock = jest.fn();
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <StepAboutRule
+          addPadding={true}
+          defaultValues={stepAboutDefaultValue}
+          descriptionColumns="multi"
+          isReadOnlyView={false}
+          isLoading={false}
+          setForm={jest.fn()}
+          setStepData={stepDataMock}
+        />
+      </ThemeProvider>
+    );
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore"] input')
+      .first()
+      .simulate('change', { target: { value: '80' } });
+
+    wrapper.find('[data-test-subj="about-continue"]').first().simulate('click').update();
+    await wait();
+    const expected: Omit<AboutStepRule, 'isNew'> = {
+      description: 'Test description text',
+      falsePositives: [''],
+      name: 'Test name text',
+      note: '',
+      references: [''],
+      riskScore: 80,
+      severity: 'low',
+      tags: [],
+      threat: [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
+      ],
+    };
+    expect(stepDataMock.mock.calls[1][1]).toEqual(expected);
   });
 });

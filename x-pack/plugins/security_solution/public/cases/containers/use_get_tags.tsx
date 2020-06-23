@@ -89,6 +89,7 @@ export const useGetTags = (): UseGetTags => {
   };
   useEffect(() => {
     callFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return { ...state, fetchTags: callFetch };
 };

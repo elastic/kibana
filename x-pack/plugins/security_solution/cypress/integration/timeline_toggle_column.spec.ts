@@ -12,7 +12,7 @@ import {
 } from '../screens/timeline';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/siem_main';
+import { openTimeline } from '../tasks/security_main';
 import {
   checkIdToggleField,
   createNewTimeline,

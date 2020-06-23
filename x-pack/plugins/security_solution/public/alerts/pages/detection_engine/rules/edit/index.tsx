@@ -17,11 +17,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Redirect, useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 
 import { useRule, usePersistRule } from '../../../../../alerts/containers/detection_engine/rules';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../../common/components/link_to/redirect_to_detection_engine';
+import {
+  getRuleDetailsUrl,
+  getDetectionEngineUrl,
+} from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserInfo } from '../../../../components/user_info';
@@ -48,6 +51,7 @@ import {
   ActionsStepRule,
 } from '../types';
 import * as i18n from './translations';
+import { SecurityPageName } from '../../../../../app/types';
 
 interface StepRuleForm {
   isValid: boolean;
@@ -67,6 +71,7 @@ interface ActionsStepRuleForm extends StepRuleForm {
 }
 
 const EditRulePageComponent: FC = () => {
+  const history = useHistory();
   const [, dispatchToaster] = useStateToaster();
   const {
     loading: initLoading,
@@ -104,6 +109,7 @@ const EditRulePageComponent: FC = () => {
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule]);
   const setStepsForm = useCallback(
     (step: RuleStep, form: FormHook<FormData>) => {
@@ -113,6 +119,7 @@ const EditRulePageComponent: FC = () => {
         form.submit();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [initForm, selectedTab]
   );
   const tabs = useMemo(
@@ -206,6 +213,7 @@ const EditRulePageComponent: FC = () => {
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       rule,
       loading,
@@ -265,6 +273,7 @@ const EditRulePageComponent: FC = () => {
     } else {
       setTabHasError(invalidForms);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     stepsForm,
     myAboutRuleForm,
@@ -320,7 +329,16 @@ const EditRulePageComponent: FC = () => {
       setInitForm(true);
       setSelectedTab(tab);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedTab, stepsForm.current]
+  );
+
+  const goToDetailsRule = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      history.replace(getRuleDetailsUrl(ruleId ?? ''));
+    },
+    [history, ruleId]
   );
 
   useEffect(() => {
@@ -338,17 +356,21 @@ const EditRulePageComponent: FC = () => {
   useEffect(() => {
     const tabIndex = rule?.immutable ? 3 : 0;
     setSelectedTab(tabs[tabIndex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rule]);
 
   if (isSaved) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
+    history.replace(getRuleDetailsUrl(ruleId ?? ''));
+    return null;
   }
 
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    history.replace(getDetectionEngineUrl());
+    return null;
   } else if (userHasNoPermissions(canUserCRUD)) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
+    history.replace(getRuleDetailsUrl(ruleId ?? ''));
+    return null;
   }
 
   return (
@@ -356,8 +378,9 @@ const EditRulePageComponent: FC = () => {
       <WrapperPage restrictWidth>
         <DetectionEngineHeaderPage
           backOptions={{
-            href: `#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`,
+            href: getRuleDetailsUrl(ruleId ?? ''),
             text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
+            pageId: SecurityPageName.alerts,
           }}
           isLoading={isLoading}
           title={i18n.PAGE_TITLE}
@@ -404,7 +427,7 @@ const EditRulePageComponent: FC = () => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="cross" href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`}>
+            <EuiButton iconType="cross" onClick={goToDetailsRule}>
               {i18n.CANCEL}
             </EuiButton>
           </EuiFlexItem>
@@ -423,7 +446,7 @@ const EditRulePageComponent: FC = () => {
         </EuiFlexGroup>
       </WrapperPage>
 
-      <SpyRoute state={{ ruleName: rule?.name }} />
+      <SpyRoute pageName={SecurityPageName.alerts} state={{ ruleName: rule?.name }} />
     </>
   );
 };

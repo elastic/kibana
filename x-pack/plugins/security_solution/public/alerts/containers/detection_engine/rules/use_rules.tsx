@@ -46,7 +46,7 @@ export const useRules = ({
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function fetchData(forceReload: boolean = false) {
+    async function fetchData() {
       try {
         setLoading(true);
         const fetchRulesResult = await fetchRules({
@@ -80,7 +80,7 @@ export const useRules = ({
 
     fetchData();
     reFetchRules.current = (refreshPrePackagedRule: boolean = false) => {
-      fetchData(true);
+      fetchData();
       if (refreshPrePackagedRule && refetchPrePackagedRulesStatus != null) {
         refetchPrePackagedRulesStatus();
       }
@@ -89,12 +89,14 @@ export const useRules = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     pagination.page,
     pagination.perPage,
     filterOptions.filter,
     filterOptions.sortField,
     filterOptions.sortOrder,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     filterOptions.tags?.sort().join(),
     filterOptions.showCustomRules,
     filterOptions.showElasticRules,

@@ -4,48 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import {
+  updateRulesSchema,
+  UpdateRulesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/update_rules_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
-import { UpdateRuleAlertParamsRest } from '../../rules/types';
-import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { PartialFilter } from '../../types';
 
 export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation<UpdateRuleAlertParamsRest>(updateRulesSchema),
+        body: buildRouteValidation<typeof updateRulesSchema, UpdateRulesSchemaDecoded>(
+          updateRulesSchema
+        ),
       },
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+      const validationErrors = updateRuleValidateTypeDependents(request.body);
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
+
       const {
-        actions,
+        actions: actionsRest,
         anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
         from,
-        query,
-        language,
+        query: queryOrUndefined,
+        language: languageOrUndefined,
         machine_learning_job_id: machineLearningJobId,
         output_index: outputIndex,
         saved_id: savedId,
         timeline_id: timelineId,
         timeline_title: timelineTitle,
         meta,
-        filters,
+        filters: filtersRest,
         rule_id: ruleId,
         id,
         index,
@@ -62,11 +76,21 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
         references,
         note,
         version,
-        exceptions_list,
+        exceptions_list: exceptionsList,
       } = request.body;
-      const siemResponse = buildSiemResponse(response);
-
       try {
+        const query =
+          type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+
+        const language =
+          type !== 'machine_learning' && languageOrUndefined == null
+            ? 'kuery'
+            : languageOrUndefined;
+
+        // TODO: Fix these either with an is conversion or by better typing them within io-ts
+        const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
+        const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
+
         const alertsClient = context.alerting?.getAlertsClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
@@ -112,7 +136,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           references,
           note,
           version,
-          exceptions_list,
+          exceptionsList,
           actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it
         });
 

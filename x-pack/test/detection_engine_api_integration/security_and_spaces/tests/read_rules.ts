@@ -92,14 +92,14 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return 404 if given a fake id', async () => {
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?id=fake_id`)
+          .get(`${DETECTION_ENGINE_RULES_URL}?id=c1e1b359-7ac1-4e96-bc81-c683c092436f`)
           .set('kbn-xsrf', 'true')
           .send(getSimpleRule())
           .expect(404);
 
         expect(body).to.eql({
           status_code: 404,
-          message: 'id: "fake_id" not found',
+          message: 'id: "c1e1b359-7ac1-4e96-bc81-c683c092436f" not found',
         });
       });
 

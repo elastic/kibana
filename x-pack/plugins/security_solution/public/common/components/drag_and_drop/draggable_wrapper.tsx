@@ -126,6 +126,7 @@ export const DraggableWrapper = React.memo<Props>(
       () => () => {
         unRegisterProvider();
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
 

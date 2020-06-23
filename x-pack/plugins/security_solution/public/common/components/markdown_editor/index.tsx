@@ -135,6 +135,7 @@ export const MarkdownEditor = React.memo<{
           ),
         },
       ],
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [content, isDisabled, placeholder]
     );
     return (

@@ -114,17 +114,17 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the id does not exist when trying to delete an id', async () => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
-          .send([{ id: 'fake_id' }])
+          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
           .expect(200);
 
         expect(body).to.eql([
           {
             error: {
-              message: 'id: "fake_id" not found',
+              message: 'id: "c4e80a0d-e20f-4efc-84c1-08112da5a612" not found',
               status_code: 404,
             },
-            id: 'fake_id',
+            id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
           },
         ]);
       });
@@ -139,14 +139,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
-          .send([{ id: bodyWithCreatedRule.id }, { id: 'fake_id' }])
+          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
           getSimpleRuleOutputWithoutRuleId(),
-          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          {
+            id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
+            error: {
+              status_code: 404,
+              message: 'id: "c4e80a0d-e20f-4efc-84c1-08112da5a612" not found',
+            },
+          },
         ]);
       });
     });
@@ -241,17 +247,17 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the id does not exist when trying to delete an id', async () => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
-          .send([{ id: 'fake_id' }])
+          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
           .expect(200);
 
         expect(body).to.eql([
           {
             error: {
-              message: 'id: "fake_id" not found',
+              message: 'id: "c4e80a0d-e20f-4efc-84c1-08112da5a612" not found',
               status_code: 404,
             },
-            id: 'fake_id',
+            id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
           },
         ]);
       });
@@ -266,14 +272,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
-          .send([{ id: bodyWithCreatedRule.id }, { id: 'fake_id' }])
+          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
           getSimpleRuleOutputWithoutRuleId(),
-          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          {
+            id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
+            error: {
+              status_code: 404,
+              message: 'id: "c4e80a0d-e20f-4efc-84c1-08112da5a612" not found',
+            },
+          },
         ]);
       });
     });

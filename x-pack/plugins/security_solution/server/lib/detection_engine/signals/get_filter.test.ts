@@ -449,8 +449,8 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work when lists has value null', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], null);
+    test('it should work when lists has value undefined', () => {
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], undefined);
       expect(esQuery).toEqual({
         bool: {
           filter: [
@@ -463,16 +463,57 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work when lists has value undefined', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], undefined);
+    test('it should work with a nested object queries', () => {
+      const esQuery = getQueryFilter(
+        'category:{ name:Frank and trusted:true }',
+        'kuery',
+        [],
+        ['auditbeat-*'],
+        []
+      );
       expect(esQuery).toEqual({
         bool: {
-          filter: [
-            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
-          ],
           must: [],
-          must_not: [],
+          filter: [
+            {
+              nested: {
+                path: 'category',
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                'category.name': 'Frank',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                'category.trusted': true,
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+                score_mode: 'none',
+              },
+            },
+          ],
           should: [],
+          must_not: [],
         },
       });
     });

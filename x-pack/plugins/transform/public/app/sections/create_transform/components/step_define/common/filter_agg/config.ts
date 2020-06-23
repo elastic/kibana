@@ -30,6 +30,7 @@ export function getFilterAggConfig(
 ): PivotAggsConfigFilter {
   return {
     ...commonConfig,
+    isSubAggsSupported: true,
     field: isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : '',
     AggFormComponent: FilterAggForm,
     aggConfig: {},

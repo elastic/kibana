@@ -56,7 +56,7 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
           <p>
             <FormattedMessage
               id="xpack.ingestManager.integrations.settings.confirmUninstallModal.uninstallCallout.description"
-              defaultMessage="Kibana and Elasticsearch assets that were created by this Integration will be removed. Agents configurations and any data sent by your agents will not be effected."
+              defaultMessage="Kibana and Elasticsearch assets that were created by this integration will be removed. Agents configurations and any data sent by your agents will not be effected."
             />
           </p>
         </EuiCallOut>

@@ -22,9 +22,9 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypesStart, VisType } from '../vis_types';
 import { NewVisModal } from './new_vis_modal';
 import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
+import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 
 describe('NewVisModal', () => {
-  const { location } = window;
   const defaultVisTypeParams = {
     hidden: false,
     visualization: class Controller {
@@ -65,12 +65,16 @@ describe('NewVisModal', () => {
   const settingsGet = jest.fn();
   const uiSettings: any = { get: settingsGet };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        assign: jest.fn(),
+      },
+    });
   });
 
-  afterAll(() => {
-    window.location = location;
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should render as expected', () => {
@@ -105,7 +109,6 @@ describe('NewVisModal', () => {
 
   describe('open editor', () => {
     it('should open the editor for visualizations without search', () => {
-      window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -123,7 +126,6 @@ describe('NewVisModal', () => {
     });
 
     it('passes through editor params to the editor URL', () => {
-      window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -143,30 +145,34 @@ describe('NewVisModal', () => {
       );
     });
 
-    it('closes and redirects properly if visualization with aliasPath and addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasPath and originatingApp in props', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
+      const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
           onClose={onClose}
           visTypesRegistry={visTypes}
-          editorParams={['foo=true', 'bar=42', 'embeddableOriginatingApp=notAnApp']}
+          editorParams={['foo=true', 'bar=42']}
+          originatingApp={'coolJestTestApp'}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={({ navigateToApp } as unknown) as ApplicationStart}
+          stateTransfer={stateTransfer}
           savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(navigateToApp).toBeCalledWith('otherApp', {
-        path: '#/aliasUrl?embeddableOriginatingApp=notAnApp',
+      expect(stateTransfer.navigateToWithOriginatingApp).toBeCalledWith('otherApp', {
+        path: '#/aliasUrl',
+        state: { originatingApp: 'coolJestTestApp' },
       });
       expect(onClose).toHaveBeenCalled();
     });
 
-    it('closes and redirects properly if visualization with aliasApp and without addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasApp and without originatingApp in props', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
       const wrapper = mountWithIntl(

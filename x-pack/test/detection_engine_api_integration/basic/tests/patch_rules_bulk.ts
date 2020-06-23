@@ -261,11 +261,17 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
           .set('kbn-xsrf', 'true')
-          .send([{ id: 'fake_id', name: 'some other name' }])
+          .send([{ id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' }])
           .expect(200);
 
         expect(body).to.eql([
-          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          {
+            id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d',
+            error: {
+              status_code: 404,
+              message: 'id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" not found',
+            },
+          },
         ]);
       });
 
@@ -333,7 +339,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'true')
           .send([
             { id: createdBody.id, name: 'some other name' },
-            { id: 'fake_id', name: 'some other name' },
+            { id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' },
           ])
           .expect(200);
 
@@ -346,10 +352,10 @@ export default ({ getService }: FtrProviderContext) => {
           outputRule,
           {
             error: {
-              message: 'id: "fake_id" not found',
+              message: 'id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" not found',
               status_code: 404,
             },
-            id: 'fake_id',
+            id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d',
           },
         ]);
       });

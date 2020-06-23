@@ -128,9 +128,12 @@ describe('query for signal', () => {
         path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         body: {},
       });
-      const result = server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalledWith('"value" must have at least 1 children');
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: '"value" must have at least 1 children',
+        status_code: 400,
+      });
     });
   });
 });
