@@ -65,7 +65,7 @@ export class ThemeService {
   /** A React hook for consuming the charts theme */
   public useChartsBaseTheme = (): Theme => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [value, update] = useState(LIGHT_THEME);
+    const [value, update] = useState(this.chartsDefaultBaseTheme);
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
