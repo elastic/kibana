@@ -65,8 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.getActions().move({ x: 5, y: 5, origin: el._webElement }).click().perform();
   }
 
-  // eslint-disable-next-line ban/ban
-  describe.only('lens smokescreen tests', () => {
+  describe('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
