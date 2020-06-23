@@ -136,6 +136,7 @@ describe('getSortedObjectsForExport()', () => {
           type: 'search',
           attributes: {},
           namespaces: ['foo', 'bar'],
+          score: 0,
           references: [
             {
               name: 'name',
@@ -149,6 +150,7 @@ describe('getSortedObjectsForExport()', () => {
           type: 'index-pattern',
           attributes: {},
           namespaces: ['foo', 'bar'],
+          score: 0,
           references: [],
         },
       ],
