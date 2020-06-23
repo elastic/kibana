@@ -10,9 +10,9 @@ import {
   AgentService,
   IngestManagerStartContract,
   ExternalCallback,
-  DatasourceServiceInterface,
 } from '../../../ingest_manager/server';
 import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
+import { createDatasourceServiceMock } from '../../../ingest_manager/server/mocks';
 
 /**
  * Crates a mocked input contract for the `EndpointAppContextService#start()` method
@@ -38,20 +38,6 @@ export const createMockAgentService = (): jest.Mocked<AgentService> => {
   };
 };
 
-const createMockDatasourceService = (): jest.Mocked<DatasourceServiceInterface> => {
-  return {
-    assignPackageStream: jest.fn(),
-    buildDatasourceFromPackage: jest.fn(),
-    bulkCreate: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    get: jest.fn(),
-    getByIDs: jest.fn(),
-    list: jest.fn(),
-    update: jest.fn(),
-  };
-};
-
 /**
  * Creates a mock IndexPatternService for use in tests that need to interact with the Ingest Manager's
  * ESIndexPatternService.
@@ -68,7 +54,7 @@ export const createMockIngestManagerStartContract = (
     },
     agentService: createMockAgentService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
-    datasourceService: createMockDatasourceService(),
+    datasourceService: createDatasourceServiceMock(),
   };
 };
 

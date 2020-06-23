@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import {
+  loggingServiceMock,
+  savedObjectsServiceMock,
+  savedObjectsClientMock,
+} from 'src/core/server/mocks';
+import { IngestManagerAppContext } from './plugin';
+import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
+import { securityMock } from '../../security/server/mocks';
+import { DatasourceServiceInterface } from './services/datasource';
+
+export const createAppContextStartContractMock = (): IngestManagerAppContext => {
+  return {
+    encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
+    savedObjects: savedObjectsServiceMock.createStartContract(),
+    security: securityMock.createSetup(),
+    logger: loggingServiceMock.create(),
+  };
+};
+
+export const createDatasourceServiceMock = (): jest.Mocked<DatasourceServiceInterface> => {
+  return {
+    assignPackageStream: jest.fn(),
+    buildDatasourceFromPackage: jest.fn(),
+    bulkCreate: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    get: jest.fn(),
+    getByIDs: jest.fn(),
+    list: jest.fn(),
+    update: jest.fn(),
+  };
+};
