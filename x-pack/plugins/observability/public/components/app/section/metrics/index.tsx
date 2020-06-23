@@ -8,14 +8,14 @@ import { AreaSeries, Chart, DARK_THEME, LIGHT_THEME, ScaleType, Settings } from 
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiProgress } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { ChartContainer } from '../container';
-import { FetchDataResponse } from '../../../../typings/fetch_data_response';
+import { SectionContainer } from '../';
+import { MetricsFetchDataResponse } from '../../../../typings/fetch_data_response';
 
 interface Props {
-  data?: FetchDataResponse;
+  data?: MetricsFetchDataResponse;
 }
 
-export const MetricsChart = ({ data }: Props) => {
+export const MetricsSection = ({ data }: Props) => {
   const theme = useContext(ThemeContext);
 
   if (!data) {
@@ -23,9 +23,9 @@ export const MetricsChart = ({ data }: Props) => {
   }
 
   return (
-    <ChartContainer title={data.title} appLink={data.appLink}>
+    <SectionContainer title={data.title} appLink={data.appLink}>
       <EuiFlexGroup>
-        {data.stats.map((stat) => {
+        {/* {data.stats.map((stat) => {
           return (
             <EuiFlexItem key={stat.label}>
               <EuiStat description={stat.label} title={stat.value}>
@@ -33,8 +33,9 @@ export const MetricsChart = ({ data }: Props) => {
               </EuiStat>
             </EuiFlexItem>
           );
-        })}
-        {data.series.map((serie) => {
+        })} */}
+        {Object.keys(data.series).map((key) => {
+          const serie = data.series[key as keyof MetricsFetchDataResponse['series']];
           return (
             <EuiFlexItem key={serie.label}>
               <EuiStat description={serie.label} title={1}>
@@ -58,6 +59,6 @@ export const MetricsChart = ({ data }: Props) => {
           );
         })}
       </EuiFlexGroup>
-    </ChartContainer>
+    </SectionContainer>
   );
 };

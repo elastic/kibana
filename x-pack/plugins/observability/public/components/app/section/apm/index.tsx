@@ -19,22 +19,21 @@ import { EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { ChartContainer } from '../container';
-import { FetchDataResponse } from '../../../../typings/fetch_data_response';
+import { SectionContainer } from '../';
+import { ApmFetchDataResponse } from '../../../../typings/fetch_data_response';
 
 interface Props {
-  data?: FetchDataResponse;
+  data?: ApmFetchDataResponse;
 }
 
-export const APMChart = ({ data }: Props) => {
+export const APMSection = ({ data }: Props) => {
   const theme = useContext(ThemeContext);
 
   if (!data) {
     return null;
   }
 
-  const transactionSeries = data.series.find((d) => d.key === 'transactions');
-  const errorSeries = data.series.find((d) => d.key === 'errors');
+  const transactionSeries = data.series.transactions;
 
   const startAPM = transactionSeries?.coordinates[0].x || 0;
   const endAPM = transactionSeries?.coordinates[transactionSeries?.coordinates.length - 1].x || 0;
@@ -47,10 +46,10 @@ export const APMChart = ({ data }: Props) => {
   };
 
   return (
-    <ChartContainer title={data.title} appLink={data.appLink}>
-      {data.stats.map((stat) => (
+    <SectionContainer title={data.title} appLink={data.appLink}>
+      {/* {data.stats.map((stat) => (
         <EuiStat key={stat.label} title={stat.value} description={stat.label} />
-      ))}
+      ))} */}
       <Chart size={{ height: 220 }}>
         <Settings
           onBrushEnd={({ x }) => {
@@ -81,28 +80,8 @@ export const APMChart = ({ data }: Props) => {
             />
           </>
         )}
-        {errorSeries?.coordinates && (
-          <>
-            <LineSeries
-              id="errors"
-              name="Errors"
-              data={errorSeries.coordinates}
-              xScaleType="time"
-              xAccessor={'x'}
-              yAccessors={['y']}
-              color={getSerieColor(errorSeries.color)}
-              groupId="errors"
-            />
-            <Axis
-              id="right"
-              position={Position.Right}
-              tickFormat={(d) => `${Number(d).toFixed(0)} %`}
-              groupId="errors"
-            />
-          </>
-        )}
         <Axis id="bottom-axis" position="bottom" tickFormat={formatterAPM} showGridLines />
       </Chart>
-    </ChartContainer>
+    </SectionContainer>
   );
 };

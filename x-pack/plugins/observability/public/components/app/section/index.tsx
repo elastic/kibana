@@ -13,7 +13,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const ChartContainer = ({ title, appLink, children }: Props) => {
+export const SectionContainer = ({ title, appLink, children }: Props) => {
   return (
     <EuiAccordion
       initialIsOpen

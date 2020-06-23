@@ -11,7 +11,7 @@ export const fetchUptimeData: FetchData<UptimeFetchDataResponse> = () => {
 };
 
 const response: UptimeFetchDataResponse = {
-  title: 'Uptiome',
+  title: 'Uptime',
   appLink: '/app/uptime',
   stats: {
     monitors: { label: 'Monitors', value: 5 },

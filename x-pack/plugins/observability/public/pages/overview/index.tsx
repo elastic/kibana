@@ -7,12 +7,12 @@ import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui'
 import { isEmpty } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { APMChart } from '../../components/app/chart/apm';
-import { ChartContainer } from '../../components/app/chart/container';
-import { MetricsChart } from '../../components/app/chart/metrics';
-import { StackedBarChart } from '../../components/app/chart/stacked_bar';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
+import { APMSection } from '../../components/app/section/apm';
+import { LogsSection } from '../../components/app/section/logs';
+import { MetricsSection } from '../../components/app/section/metrics';
+import { UptimeSection } from '../../components/app/section/uptime';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { getDataHandler } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
@@ -36,12 +36,12 @@ export const Overview = ({ routeParams }: Props) => {
     const endTime = getParsedDate(rangeTo);
     if (startTime && endTime) {
       const params = { startTime, endTime, bucketSize: '3' };
-      const apmHandler = getDataHandler('apm')?.fetchData(params);
-      const logsHandler = getDataHandler('infra_logs')?.fetchData(params);
-      const metricsHandler = getDataHandler('infra_metrics')?.fetchData(params);
-      const uptimeHandler = getDataHandler('uptime')?.fetchData(params);
+      const apmDataPromise = getDataHandler('apm')?.fetchData(params);
+      const logsDataPromise = getDataHandler('infra_logs')?.fetchData(params);
+      const metricsDataPromise = getDataHandler('infra_metrics')?.fetchData(params);
+      const uptimeDataPromise = getDataHandler('uptime')?.fetchData(params);
 
-      return Promise.all([apmHandler, logsHandler, metricsHandler, uptimeHandler]);
+      return Promise.all([apmDataPromise, logsDataPromise, metricsDataPromise, uptimeDataPromise]);
     }
   }, [rangeFrom, rangeTo]);
 
@@ -76,24 +76,21 @@ export const Overview = ({ routeParams }: Props) => {
         <EuiFlexItem grow={6}>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
-              <StackedBarChart data={logsData} />
+              <LogsSection data={logsData} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <MetricsChart data={metricsData} />
+              <MetricsSection data={metricsData} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <APMChart data={apmData} />
+              <APMSection data={apmData} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <StackedBarChart data={uptimeData} />
+              <UptimeSection data={uptimeData} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={4}>
-          <ChartContainer title="alert">chart goes here</ChartContainer>
-        </EuiFlexItem>
+        <EuiFlexItem grow={4}>Alert chart goes here</EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer />
 
       <EuiFlexItem>
