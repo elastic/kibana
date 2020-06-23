@@ -17,22 +17,5 @@
  * under the License.
  */
 
-import { SavedObjectAttributes } from 'kibana/public';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-  EmbeddableFactoryDefinition,
-} from './lib/embeddables';
-
-export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
-
-export type EmbeddableFactoryProvider = <
-  I extends EmbeddableInput = EmbeddableInput,
-  O extends EmbeddableOutput = EmbeddableOutput,
-  E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends SavedObjectAttributes = SavedObjectAttributes
->(
-  def: EmbeddableFactoryDefinition<I, O, E, T>
-) => EmbeddableFactory<I, O, E, T>;
+export { EmbeddableStateTransfer } from './embeddable_state_transfer';
+export { EmbeddableOriginatingAppState, EmbeddablePackageState } from './types';
