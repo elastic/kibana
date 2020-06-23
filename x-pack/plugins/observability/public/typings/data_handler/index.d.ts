@@ -26,27 +26,30 @@ interface Series {
   label: string;
   coordinates: Coordinates[];
   color?: string;
-  key?: string;
 }
 
 interface FetchDataResponse {
   title: string;
   appLink: string;
-  series: Series[];
 }
 
 interface LogsFetchDataResponse extends FetchDataResponse {
   stats: Record<string, Numeral>;
+  series: Record<string, Series>;
 }
 
 interface MetricsFetchDataResponse extends FetchDataResponse {
   stats: {
-    hots: Numeral;
+    hosts: Numeral;
     cpu: Percentage;
     memory: Percentage;
     disk: Percentage;
     inboundTraffic: Bytes;
     outboundTraffic: Bytes;
+  };
+  series: {
+    inboundTraffic: Series;
+    outboundTraffic: Series;
   };
 }
 
@@ -56,13 +59,19 @@ interface UptimeFetchDataResponse extends FetchDataResponse {
     up: Numeral;
     down: Numeral;
   };
+  series: {
+    up: Series;
+    down: Series;
+  };
 }
 
 interface ApmFetchDataResponse extends FetchDataResponse {
   stats: {
     services: Numeral;
     transactions: Numeral;
-    errorRate?: Percentage;
+  };
+  series: {
+    transactions: Series;
   };
 }
 
