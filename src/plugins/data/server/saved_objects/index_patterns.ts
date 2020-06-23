@@ -32,11 +32,11 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
+      return `/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
+        path: `/app/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'management.kibana.index_patterns',
       };
     },

@@ -6,14 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import { ILicense } from '../../licensing/public';
+import { ILicense } from '../../licensing/common/types';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
-  SPAN_TYPE
+  SPAN_TYPE,
 } from './elasticsearch_fieldnames';
 
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
@@ -34,6 +34,16 @@ export interface Connection {
   destination: ConnectionNode;
 }
 
+export interface ServiceAnomaly {
+  anomaly_score: number;
+  anomaly_severity: string;
+  actual_value: number;
+  typical_value: number;
+  ml_job_id: string;
+}
+
+export type ServiceNode = ConnectionNode & Partial<ServiceAnomaly>;
+
 export interface ServiceNodeMetrics {
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
@@ -50,6 +60,6 @@ export const invalidLicenseMessage = i18n.translate(
   'xpack.apm.serviceMap.invalidLicenseMessage',
   {
     defaultMessage:
-      "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."
+      "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data.",
   }
 );

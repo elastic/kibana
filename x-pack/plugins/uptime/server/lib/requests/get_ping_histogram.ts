@@ -73,7 +73,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   const result = await callES('search', params);
   const interval = result.aggregations?.timeseries?.interval;
   const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
-  const histogram = buckets.map(bucket => {
+  const histogram = buckets.map((bucket) => {
     const x: number = bucket.key;
     const downCount: number = bucket.down.doc_count;
     const upCount: number = bucket.up.doc_count;

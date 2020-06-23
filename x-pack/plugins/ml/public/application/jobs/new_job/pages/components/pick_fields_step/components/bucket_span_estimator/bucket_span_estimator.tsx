@@ -35,7 +35,7 @@ export const BucketSpanEstimator: FC<Props> = ({ setEstimating }) => {
   function checkIsUsingMlCategory() {
     return (
       isAdvancedJobCreator(jobCreator) &&
-      jobCreator.detectors.some(d => {
+      jobCreator.detectors.some((d) => {
         if (
           d.partition_field_name === MLCATEGORY ||
           d.over_field_name === MLCATEGORY ||

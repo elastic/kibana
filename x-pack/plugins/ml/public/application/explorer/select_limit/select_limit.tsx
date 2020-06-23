@@ -15,7 +15,7 @@ import { EuiSelect } from '@elastic/eui';
 
 const limitOptions = [5, 10, 25, 50];
 
-const euiOptions = limitOptions.map(limit => ({
+const euiOptions = limitOptions.map((limit) => ({
   value: limit,
   text: `${limit}`,
 }));
@@ -36,5 +36,5 @@ export const SelectLimit = () => {
     setLimit(parseInt(e.target.value, 10));
   }
 
-  return <EuiSelect options={euiOptions} onChange={onChange} value={limit} />;
+  return <EuiSelect compressed options={euiOptions} onChange={onChange} value={limit} />;
 };

@@ -20,7 +20,7 @@ interface ButtonsProps {
 
 export function Buttons({
   onFocusClick = () => {},
-  selectedNodeServiceName
+  selectedNodeServiceName,
 }: ButtonsProps) {
   const urlParams = useUrlParams().urlParams as APMQueryParams;
   const detailsUrl = getAPMHref(
@@ -39,14 +39,14 @@ export function Buttons({
       <EuiFlexItem>
         <EuiButton href={detailsUrl} fill={true}>
           {i18n.translate('xpack.apm.serviceMap.serviceDetailsButtonText', {
-            defaultMessage: 'Service Details'
+            defaultMessage: 'Service Details',
           })}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButton color="secondary" href={focusUrl} onClick={onFocusClick}>
           {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
-            defaultMessage: 'Focus map'
+            defaultMessage: 'Focus map',
           })}
         </EuiButton>
       </EuiFlexItem>

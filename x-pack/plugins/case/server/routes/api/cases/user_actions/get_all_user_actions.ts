@@ -31,11 +31,12 @@ export function initGetAllUserActionsApi({ userActionService, router }: RouteDep
         });
         return response.ok({
           body: CaseUserActionsResponseRt.encode(
-            userActions.saved_objects.map(ua => ({
+            userActions.saved_objects.map((ua) => ({
               ...ua.attributes,
               action_id: ua.id,
-              case_id: ua.references.find(r => r.type === CASE_SAVED_OBJECT)?.id ?? '',
-              comment_id: ua.references.find(r => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
+              case_id: ua.references.find((r) => r.type === CASE_SAVED_OBJECT)?.id ?? '',
+              comment_id:
+                ua.references.find((r) => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
             }))
           ),
         });

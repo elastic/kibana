@@ -144,7 +144,7 @@ describe('CollectorSet', () => {
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
-          formatForBulkUpload: result => ({
+          formatForBulkUpload: (result) => ({
             type: 'MY_TEST_COLLECTOR',
             payload: { test: result.test * 2 },
           }),

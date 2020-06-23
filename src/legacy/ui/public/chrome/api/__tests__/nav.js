@@ -29,7 +29,7 @@ const basePath = '/someBasePath';
 
 function init(customInternals = { basePath }) {
   const chrome = {
-    addBasePath: path => path,
+    addBasePath: (path) => path,
     getBasePath: () => customInternals.basePath || '',
   };
   const internals = {
@@ -40,11 +40,11 @@ function init(customInternals = { basePath }) {
   return { chrome, internals };
 }
 
-describe('chrome nav apis', function() {
+describe('chrome nav apis', function () {
   let coreNavLinks;
   let fakedLinks = [];
 
-  const baseUrl = (function() {
+  const baseUrl = (function () {
     const a = document.createElement('a');
     a.setAttribute('href', '/');
     return a.href.slice(0, a.href.length - 1);
@@ -60,7 +60,9 @@ describe('chrome nav apis', function() {
       return link;
     });
     sinon.stub(coreNavLinks, 'getAll').callsFake(() => fakedLinks);
-    sinon.stub(coreNavLinks, 'get').callsFake(linkId => fakedLinks.find(({ id }) => id === linkId));
+    sinon
+      .stub(coreNavLinks, 'get')
+      .callsFake((linkId) => fakedLinks.find(({ id }) => id === linkId));
   });
 
   afterEach(() => {
@@ -69,12 +71,12 @@ describe('chrome nav apis', function() {
     coreNavLinks.get.restore();
   });
 
-  describe('#untrackNavLinksForDeletedSavedObjects', function() {
+  describe('#untrackNavLinksForDeletedSavedObjects', function () {
     const appId = 'appId';
     const appUrl = `${baseUrl}/app/kibana#test`;
     const deletedId = 'IAMDELETED';
 
-    it('should clear last url when last url contains link to deleted saved object', function() {
+    it('should clear last url when last url contains link to deleted saved object', function () {
       const appUrlStore = new StubBrowserStorage();
       fakedLinks = [
         {
@@ -92,7 +94,7 @@ describe('chrome nav apis', function() {
       expect(coreNavLinks.update.calledWith(appId, { url: appUrl })).to.be(true);
     });
 
-    it('should not clear last url when last url does not contains link to deleted saved object', function() {
+    it('should not clear last url when last url does not contains link to deleted saved object', function () {
       const lastUrl = `${appUrl}?id=anotherSavedObjectId`;
       const appUrlStore = new StubBrowserStorage();
       fakedLinks = [
@@ -112,8 +114,8 @@ describe('chrome nav apis', function() {
     });
   });
 
-  describe('chrome.trackSubUrlForApp()', function() {
-    it('injects a manual app url', function() {
+  describe('chrome.trackSubUrlForApp()', function () {
+    it('injects a manual app url', function () {
       const appUrlStore = new StubBrowserStorage();
       fakedLinks = [
         {

@@ -10,7 +10,7 @@ import {
 } from '../../../../../../src/plugins/dashboard/public/dashboard_constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
@@ -84,7 +84,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['Dashboard', 'Stack Management']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dashboard', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -271,7 +271,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Dashboard', 'Stack Management']);
       });
 
@@ -390,7 +390,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Dashboard', 'Stack Management']);
       });
 

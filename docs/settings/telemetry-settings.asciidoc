@@ -1,5 +1,5 @@
 [[telemetry-settings-kbn]]
-=== Telemetry settings in Kibana
+=== Telemetry settings in {kib}
 ++++
 <titleabbrev>Telemetry settings</titleabbrev>
 ++++
@@ -29,7 +29,7 @@ See our https://www.elastic.co/legal/privacy-statement[Privacy Statement] to lea
   | Set to `'server'` to report the cluster statistics from the {kib} server.
   If the server fails to connect to our endpoint at https://telemetry.elastic.co/, it assumes
   it is behind a firewall and falls back to `'browser'` to send it from users' browsers
-  when they are navigating through {kib}. Defaults to 'browser'.
+  when they are navigating through {kib}. Defaults to `'server'`.
 
 | `telemetry.optIn`
   | Set to `true` to automatically opt into reporting cluster statistics. You can also opt out through

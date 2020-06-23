@@ -18,7 +18,7 @@ export async function getStoredAnnotations({
   serviceName,
   environment,
   apiCaller,
-  annotationsClient
+  annotationsClient,
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
@@ -42,27 +42,27 @@ export async function getStoredAnnotations({
                   range: {
                     '@timestamp': {
                       gte: setup.start,
-                      lt: setup.end
-                    }
-                  }
+                      lt: setup.end,
+                    },
+                  },
                 },
                 { term: { 'annotation.type': 'deployment' } },
                 { term: { tags: 'apm' } },
                 { term: { [SERVICE_NAME]: serviceName } },
-                ...(environmentFilter ? [environmentFilter] : [])
-              ]
-            }
-          }
-        }
+                ...(environmentFilter ? [environmentFilter] : []),
+              ],
+            },
+          },
+        },
       }
     )) as any;
 
-    return response.hits.hits.map(hit => {
+    return response.hits.hits.map((hit) => {
       return {
         type: AnnotationType.VERSION,
         id: hit._id,
         '@timestamp': new Date(hit._source['@timestamp']).getTime(),
-        text: hit._source.message
+        text: hit._source.message,
       };
     });
   } catch (error) {

@@ -14,8 +14,8 @@ and then put the API credentials into a cron job.
 Or, you might create API keys to automate ingestion of new data from
 remote sources, without a live user interaction.
 
-You can create API keys from the {kib} Console. To view and invalidate
-API keys, use *Management > Security > API Keys*.
+You can create API keys from the {kib} Console. To view and invalidate 
+API keys, open the menu, then go to *Stack Management > Security > API Keys*.
 
 [role="screenshot"]
 image:user/security/api-keys/images/api-keys.png["API Keys UI"]
@@ -38,9 +38,9 @@ or contact your system administrator.
 [[api-keys-security-privileges]]
 === Security privileges
 
-You must have the `manage_security`, `manage_api_key`, or the `manage_own_api_key`
-cluster privileges to use API keys in {kib}. You can manage roles in
-*Management > Security > Roles*, or use the <<role-management-api, {kib} Role Management API>>.
+You must have the `manage_security`, `manage_api_key`, or the `manage_own_api_key` 
+cluster privileges to use API keys in {kib}. To manage roles, open the menu, then go to 
+*Stack Management > Security > Roles*, or use the <<role-management-api, {kib} Role Management API>>. 
 
 
 [float]

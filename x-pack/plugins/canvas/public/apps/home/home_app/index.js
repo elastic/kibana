@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { resetWorkpad } from '../../../state/actions/workpad';
 import { HomeApp as Component } from './home_app';
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   onLoad() {
     dispatch(resetWorkpad());
   },

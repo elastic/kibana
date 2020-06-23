@@ -21,7 +21,7 @@
  * Returns true if the given array contains at least 1 object
  */
 export function arrayContainsObjects(value: unknown[]): boolean {
-  return Array.isArray(value) && value.some(v => typeof v === 'object' && v !== null);
+  return Array.isArray(value) && value.some((v) => typeof v === 'object' && v !== null);
 }
 
 /**

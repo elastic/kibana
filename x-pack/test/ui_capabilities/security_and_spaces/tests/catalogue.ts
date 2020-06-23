@@ -14,7 +14,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('catalogue', () => {
-    UserAtSpaceScenarios.forEach(scenario => {
+    UserAtSpaceScenarios.forEach((scenario) => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 

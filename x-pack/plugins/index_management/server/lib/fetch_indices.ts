@@ -23,6 +23,7 @@ interface Hit {
 interface IndexInfo {
   aliases: { [aliasName: string]: unknown };
   mappings: unknown;
+  data_stream?: string;
   settings: {
     index: {
       hidden: 'true' | 'false';
@@ -71,7 +72,7 @@ async function fetchIndicesCall(
   });
 
   // The two responses should be equal in the number of indices returned
-  return catHits.map(hit => {
+  return catHits.map((hit) => {
     const index = indices[hit.index];
     const aliases = Object.keys(index.aliases);
 
@@ -87,6 +88,7 @@ async function fetchIndicesCall(
       isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
       aliases: aliases.length ? aliases : 'none',
       hidden: index.settings.index.hidden === 'true',
+      data_stream: index.data_stream,
     };
   });
 }

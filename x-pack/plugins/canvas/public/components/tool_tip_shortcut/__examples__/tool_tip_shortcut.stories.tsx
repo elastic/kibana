@@ -8,7 +8,7 @@ import React from 'react';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 
 storiesOf('components/ToolTipShortcut', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '100px', backgroundColor: '#343741', padding: '5px' }}>{story()}</div>
   ))
   .add('with shortcut', () => <ToolTipShortcut shortcut="G" />)

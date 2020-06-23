@@ -13,8 +13,10 @@ import { EMSFileSource, sourceTitle } from './ems_file_source';
 // @ts-ignore
 import { getIsEmsEnabled } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: () => {
     return getIsEmsEnabled();
   },
@@ -22,11 +24,11 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Administrative boundaries from Elastic Maps Service',
   }),
   icon: 'emsApp',
-  renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
       const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
     return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },

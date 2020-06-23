@@ -45,7 +45,7 @@ describe('AppRouter', () => {
   const mountersToAppStatus$ = () => {
     return new BehaviorSubject(
       new Map(
-        [...mounters.keys()].map(id => [
+        [...mounters.keys()].map((id) => [
           id,
           id.startsWith('disabled') ? AppStatus.inaccessible : AppStatus.accessible,
         ])

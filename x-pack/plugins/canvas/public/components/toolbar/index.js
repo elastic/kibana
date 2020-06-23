@@ -19,7 +19,7 @@ import {
 
 import { Toolbar as Component } from './toolbar';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   workpadName: getWorkpadName(state),
   workpadId: getWorkpad(state).id,
   totalPages: getWorkpad(state).pages.length,
@@ -35,15 +35,15 @@ export const Toolbar = compose(
     router: PropTypes.object,
   }),
   withHandlers({
-    nextPage: props => () => {
+    nextPage: (props) => () => {
       const pageNumber = Math.min(props.selectedPageNumber + 1, props.totalPages);
       props.router.navigateTo('loadWorkpad', { id: props.workpadId, page: pageNumber });
     },
-    previousPage: props => () => {
+    previousPage: (props) => () => {
       const pageNumber = Math.max(1, props.selectedPageNumber - 1);
       props.router.navigateTo('loadWorkpad', { id: props.workpadId, page: pageNumber });
     },
   }),
-  withState('tray', 'setTray', props => props.tray),
+  withState('tray', 'setTray', (props) => props.tray),
   withState('showWorkpadManager', 'setShowWorkpadManager', false)
 )(Component);

@@ -169,7 +169,7 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
 
 export function License(props) {
   const { status, type, isExpired, expiryDate } = props;
-  const licenseManagement = `${Legacy.shims.getBasePath()}/app/kibana#/management/elasticsearch/license_management`;
+  const licenseManagement = `${Legacy.shims.getBasePath()}/app/management/stack/license_management`;
   return (
     <EuiPage>
       <EuiScreenReaderOnly>

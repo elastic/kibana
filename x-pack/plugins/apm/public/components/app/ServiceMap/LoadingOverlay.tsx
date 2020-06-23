@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { EuiProgress, EuiText, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
@@ -22,7 +21,7 @@ const Overlay = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding: ${theme.gutterTypes.gutterMedium};
+  padding: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
 `;
 
 const ProgressBarContainer = styled.div`
@@ -51,7 +50,7 @@ export const LoadingOverlay = ({ isLoading, percentageLoaded }: Props) => (
         <EuiText size="s" textAlign="center">
           {i18n.translate('xpack.apm.loadingServiceMap', {
             defaultMessage:
-              'Loading service map... This might take a short while.'
+              'Loading service map... This might take a short while.',
           })}
         </EuiText>
       </Overlay>

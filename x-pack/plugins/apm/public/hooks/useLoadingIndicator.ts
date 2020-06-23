@@ -22,7 +22,7 @@ export function useLoadingIndicator() {
     return {
       setIsLoading: (loading: boolean) => {
         dispatchStatus({ id, isLoading: loading });
-      }
+      },
     };
   }, [dispatchStatus, id]);
 }

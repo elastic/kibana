@@ -32,10 +32,10 @@ export const LogEntryColumn = euiStyled.div.attrs(() => ({
 }))<LogEntryColumnProps>`
   align-items: stretch;
   display: flex;
-  flex-basis: ${props => props.baseWidth || '0%'};
+  flex-basis: ${(props) => props.baseWidth || '0%'};
   flex-direction: row;
-  flex-grow: ${props => props.growWeight || 0};
-  flex-shrink: ${props => props.shrinkWeight || 0};
+  flex-grow: ${(props) => props.growWeight || 0};
+  flex-shrink: ${(props) => props.shrinkWeight || 0};
   overflow: hidden;
 `;
 
@@ -69,10 +69,10 @@ export const getColumnWidths = (
           [column.timestampColumn.id]: {
             growWeight: 0,
             shrinkWeight: 0,
-            baseWidth: `${Math.ceil(
-              characterWidth * formattedDateWidth * DATE_COLUMN_SLACK_FACTOR
-            ) +
-              2 * COLUMN_PADDING}px`,
+            baseWidth: `${
+              Math.ceil(characterWidth * formattedDateWidth * DATE_COLUMN_SLACK_FACTOR) +
+              2 * COLUMN_PADDING
+            }px`,
           },
         };
       } else if (isMessageLogColumnConfiguration(column)) {
@@ -90,8 +90,9 @@ export const getColumnWidths = (
           [column.fieldColumn.id]: {
             growWeight: 1,
             shrinkWeight: 0,
-            baseWidth: `${Math.ceil(characterWidth * FIELD_COLUMN_MIN_WIDTH_CHARACTERS) +
-              2 * COLUMN_PADDING}px`,
+            baseWidth: `${
+              Math.ceil(characterWidth * FIELD_COLUMN_MIN_WIDTH_CHARACTERS) + 2 * COLUMN_PADDING
+            }px`,
           },
         };
       }

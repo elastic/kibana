@@ -47,7 +47,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
   } = repository;
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
-  const locationModeOptions = ['primary_only', 'secondary_only'].map(option => ({
+  const locationModeOptions = ['primary_only', 'secondary_only'].map((option) => ({
     value: option,
     text: option,
   }));
@@ -88,7 +88,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={client || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 client: e.target.value,
               });
@@ -132,7 +132,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={container || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 container: e.target.value,
               });
@@ -176,7 +176,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={basePath || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 basePath: e.target.value,
               });
@@ -220,7 +220,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!(compress === false)}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 compress: e.target.checked,
               });
@@ -265,7 +265,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={chunkSize || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 chunkSize: e.target.value,
               });
@@ -310,7 +310,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={maxSnapshotBytesPerSec || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 maxSnapshotBytesPerSec: e.target.value,
               });
@@ -355,7 +355,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={maxRestoreBytesPerSec || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 maxRestoreBytesPerSec: e.target.value,
               });
@@ -399,7 +399,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <EuiSelect
             options={locationModeOptions}
             value={locationMode || locationModeOptions[0].value}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 locationMode: e.target.value,
                 readonly: e.target.value === locationModeOptions[1].value ? true : readonly,
@@ -446,7 +446,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!!readonly}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 readonly: locationMode === locationModeOptions[1].value ? true : e.target.checked,
               });

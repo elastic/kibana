@@ -74,9 +74,9 @@ describe('Relationships', () => {
         meta: {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
-          editUrl: '#/management/kibana/index_patterns/1',
+          editUrl: '#/management/kibana/indexPatterns/patterns/1',
           inAppUrl: {
-            path: '/management/kibana/index_patterns/1',
+            path: '/management/kibana/indexPatterns/patterns/1',
             uiCapabilitiesPath: 'management.kibana.index_patterns',
           },
         },
@@ -90,7 +90,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -109,10 +109,10 @@ describe('Relationships', () => {
           id: '1',
           relationship: 'child',
           meta: {
-            editUrl: '/management/kibana/index_patterns/1',
+            editUrl: '/management/kibana/indexPatterns/patterns/1',
             icon: 'indexPatternApp',
             inAppUrl: {
-              path: '/app/kibana#/management/kibana/index_patterns/1',
+              path: '/app/management/kibana/indexPatterns/patterns/1',
               uiCapabilitiesPath: 'management.kibana.index_patterns',
             },
             title: 'My Index Pattern',
@@ -141,7 +141,7 @@ describe('Relationships', () => {
         meta: {
           title: 'MySearch',
           icon: 'search',
-          editUrl: '#/management/kibana/objects/savedSearches/1',
+          editUrl: '/management/kibana/objects/savedSearches/1',
           inAppUrl: {
             path: '/discover/1',
             uiCapabilitiesPath: 'discover.show',
@@ -157,7 +157,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -208,7 +208,7 @@ describe('Relationships', () => {
         meta: {
           title: 'MyViz',
           icon: 'visualizeApp',
-          editUrl: '#/management/kibana/objects/savedVisualizations/1',
+          editUrl: '/management/kibana/objects/savedVisualizations/1',
           inAppUrl: {
             path: '/edit/1',
             uiCapabilitiesPath: 'visualize.show',
@@ -224,7 +224,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -275,7 +275,7 @@ describe('Relationships', () => {
         meta: {
           title: 'MyDashboard',
           icon: 'dashboardApp',
-          editUrl: '#/management/kibana/objects/savedDashboards/1',
+          editUrl: '/management/kibana/objects/savedDashboards/1',
           inAppUrl: {
             path: '/dashboard/1',
             uiCapabilitiesPath: 'dashboard.show',
@@ -291,7 +291,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -315,7 +315,7 @@ describe('Relationships', () => {
         meta: {
           title: 'MyDashboard',
           icon: 'dashboardApp',
-          editUrl: '#/management/kibana/objects/savedDashboards/1',
+          editUrl: '/management/kibana/objects/savedDashboards/1',
           inAppUrl: {
             path: '/dashboard/1',
             uiCapabilitiesPath: 'dashboard.show',
@@ -328,7 +328,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 

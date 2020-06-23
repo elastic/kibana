@@ -68,12 +68,12 @@ export function valueClickAction(
 
       if (filters.length > 1) {
         const indexPatterns = await Promise.all(
-          filters.map(filter => {
+          filters.map((filter) => {
             return getIndexPatterns().get(filter.meta.index!);
           })
         );
 
-        const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
+        const filterSelectionPromise: Promise<Filter[]> = new Promise((resolve) => {
           const overlay = getOverlays().openModal(
             toMountPoint(
               applyFiltersPopover(

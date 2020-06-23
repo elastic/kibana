@@ -25,8 +25,8 @@ Examples:
   - Run the jest test case whose description matches 'filtering should skip values of null':
     `cd x-pack && yarn test:jest -t 'filtering should skip values of null' plugins/ml/public/application/explorer/explorer_charts/explorer_charts_container_service.test.js`
   - Run the x-pack api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config x-pack/test/api_integration/config.js`
-    `node scripts/functional_test_runner --config x-pack/test/api_integration/config.js --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
+    `node scripts/functional_tests_server --config x-pack/test/api_integration/config.ts`
+    `node scripts/functional_test_runner --config x-pack/test/api_integration/config.ts --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
 
 In addition to to providing a regular expression argument, specific tests can also be run by appeding `.only` to an `it` or `describe` function block. E.g. `describe(` to `describe.only(`.
 
@@ -63,7 +63,7 @@ yarn test:mocha
 
 For more info, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
 
-The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.js)), and *SAML API integration tests* ([specified by this config](test/saml_api_integration/config.js)).
+The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.ts)), and *SAML API integration tests* ([specified by this config](test/saml_api_integration/config.ts)).
 
 The script runs all sets of tests sequentially like so:
 * builds Elasticsearch and X-Pack

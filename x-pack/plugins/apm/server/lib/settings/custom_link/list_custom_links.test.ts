@@ -7,21 +7,21 @@
 import { listCustomLinks } from './list_custom_links';
 import {
   inspectSearchParams,
-  SearchParamsMock
+  SearchParamsMock,
 } from '../../../../public/utils/testHelpers';
 import { Setup } from '../../helpers/setup_request';
 import {
   SERVICE_NAME,
-  TRANSACTION_NAME
+  TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 
 describe('List Custom Links', () => {
   let mock: SearchParamsMock;
 
   it('fetches all custom links', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       listCustomLinks({
-        setup: (setup as unknown) as Setup
+        setup: (setup as unknown) as Setup,
       })
     );
 
@@ -31,12 +31,12 @@ describe('List Custom Links', () => {
   it('filters custom links', async () => {
     const filters = {
       [SERVICE_NAME]: 'foo',
-      [TRANSACTION_NAME]: 'bar'
+      [TRANSACTION_NAME]: 'bar',
     };
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       listCustomLinks({
         filters,
-        setup: (setup as unknown) as Setup
+        setup: (setup as unknown) as Setup,
       })
     );
 

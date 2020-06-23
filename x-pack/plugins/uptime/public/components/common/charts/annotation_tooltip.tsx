@@ -15,7 +15,7 @@ const Header = styled.div`
 
 const RecordSeverity = styled.div`
   font-weight: bold;
-  border-left: 4px solid ${props => props.color};
+  border-left: 4px solid ${(props) => props.color};
   padding-left: 2px;
 `;
 

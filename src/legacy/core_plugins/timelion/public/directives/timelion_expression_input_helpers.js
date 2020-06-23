@@ -101,10 +101,10 @@ function getArgumentsHelp(functionHelp, functionArgs = []) {
   const argsHelp = functionHelp.chainable ? functionHelp.args.slice(1) : functionHelp.args.slice(0);
 
   // ignore arguments that are already provided in function declaration
-  const functionArgNames = functionArgs.map(arg => {
+  const functionArgNames = functionArgs.map((arg) => {
     return arg.name;
   });
-  return argsHelp.filter(arg => {
+  return argsHelp.filter((arg) => {
     return !functionArgNames.includes(arg.name);
   });
 }
@@ -115,7 +115,7 @@ async function extractSuggestionsFromParsedResult(
   functionList,
   argValueSuggestions
 ) {
-  const activeFunc = result.functions.find(func => {
+  const activeFunc = result.functions.find((func) => {
     return cursorPosition >= func.location.min && cursorPosition < func.location.max;
   });
 
@@ -123,7 +123,7 @@ async function extractSuggestionsFromParsedResult(
     return;
   }
 
-  const functionHelp = functionList.find(func => {
+  const functionHelp = functionList.find((func) => {
     return func.name === activeFunc.function;
   });
 
@@ -135,7 +135,7 @@ async function extractSuggestionsFromParsedResult(
   }
 
   // return argument value suggestions when cursor is inside argument value
-  const activeArg = activeFunc.arguments.find(argument => {
+  const activeArg = activeFunc.arguments.find((argument) => {
     return inLocation(cursorPosition, argument.location);
   });
   if (
@@ -159,7 +159,7 @@ async function extractSuggestionsFromParsedResult(
         partialInput
       );
     } else {
-      const { suggestions: staticSuggestions } = functionHelp.args.find(arg => {
+      const { suggestions: staticSuggestions } = functionHelp.args.find((arg) => {
         return arg.name === activeArg.name;
       });
       valueSuggestions = argValueSuggestions.getStaticSuggestionsForInput(
@@ -176,7 +176,7 @@ async function extractSuggestionsFromParsedResult(
 
   // return argument suggestions
   const argsHelp = getArgumentsHelp(functionHelp, activeFunc.arguments);
-  const argumentSuggestions = argsHelp.filter(arg => {
+  const argumentSuggestions = argsHelp.filter((arg) => {
     if (_.get(activeArg, 'type') === 'namedArg') {
       return _.startsWith(arg.name, activeArg.name);
     } else if (activeArg) {
@@ -222,7 +222,7 @@ export async function suggest(
         if (message.function) {
           // The user has start typing a function name, so we'll filter the list down to only
           // possible matches.
-          list = functionList.filter(func => _.startsWith(func.name, message.function));
+          list = functionList.filter((func) => _.startsWith(func.name, message.function));
         } else {
           // The user hasn't typed anything yet, so we'll just return the entire list.
           list = functionList;
@@ -231,7 +231,7 @@ export async function suggest(
       }
       case 'incompleteArgument': {
         const { currentFunction: functionName, currentArgs: functionArgs } = message;
-        const functionHelp = functionList.find(func => func.name === functionName);
+        const functionHelp = functionList.find((func) => func.name === functionName);
         return {
           list: getArgumentsHelp(functionHelp, functionArgs),
           location: message.location,
@@ -248,9 +248,9 @@ export async function suggest(
             functionArgs
           );
         } else {
-          const functionHelp = functionList.find(func => func.name === functionName);
+          const functionHelp = functionList.find((func) => func.name === functionName);
           if (functionHelp) {
-            const argHelp = functionHelp.args.find(arg => arg.name === argName);
+            const argHelp = functionHelp.args.find((arg) => arg.name === argName);
             if (argHelp && argHelp.suggestions) {
               valueSuggestions = argHelp.suggestions;
             }

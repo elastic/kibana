@@ -32,7 +32,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const SplitUnsupported = props => {
+export const SplitUnsupported = (props) => {
   const { onChange, model, uiRestrictions } = props;
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);

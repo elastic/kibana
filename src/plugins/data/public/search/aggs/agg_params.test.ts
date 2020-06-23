@@ -68,7 +68,7 @@ describe('AggParams class', () => {
       expect(aggParams[0] instanceof OptionedParamType).toBeTruthy();
     });
 
-    it('Always converts the params to a BaseParamType', function() {
+    it('Always converts the params to a BaseParamType', function () {
       const params = [
         {
           name: 'height',
@@ -88,7 +88,7 @@ describe('AggParams class', () => {
 
       expect(aggParams).toHaveLength(params.length);
 
-      aggParams.forEach(aggParam => expect(aggParam instanceof BaseParamType).toBeTruthy());
+      aggParams.forEach((aggParam) => expect(aggParam instanceof BaseParamType).toBeTruthy());
     });
   });
 });

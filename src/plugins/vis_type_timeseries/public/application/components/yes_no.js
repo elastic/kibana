@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export function YesNo(props) {
   const { name, value, disabled, 'data-test-subj': dataTestSubj } = props;
-  const handleChange = value => {
+  const handleChange = (value) => {
     const { name } = props;
     return () => {
       const parts = { [name]: value };

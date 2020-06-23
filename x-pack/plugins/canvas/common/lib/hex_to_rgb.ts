@@ -10,12 +10,12 @@ export const hexToRgb = (hex: string) => {
 
   const shorthandMatches = shorthandHexColor.exec(hex);
   if (shorthandMatches) {
-    return shorthandMatches.slice(1, 4).map(mappedHex => parseInt(mappedHex + mappedHex, 16));
+    return shorthandMatches.slice(1, 4).map((mappedHex) => parseInt(mappedHex + mappedHex, 16));
   }
 
   const hexMatches = hexColor.exec(hex);
   if (hexMatches) {
-    return hexMatches.slice(1, 4).map(slicedHex => parseInt(slicedHex, 16));
+    return hexMatches.slice(1, 4).map((slicedHex) => parseInt(slicedHex, 16));
   }
 
   return null;

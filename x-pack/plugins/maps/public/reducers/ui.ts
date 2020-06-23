@@ -16,7 +16,7 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   UPDATE_INDEXING_STAGE,
-} from '../actions/ui_actions';
+} from '../actions';
 
 export enum FLYOUT_STATE {
   NONE = 'NONE',
@@ -81,7 +81,7 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
     case HIDE_TOC_DETAILS:
       return {
         ...state,
-        openTOCDetails: state.openTOCDetails.filter(layerId => {
+        openTOCDetails: state.openTOCDetails.filter((layerId) => {
           return layerId !== action.layerId;
         }),
       };

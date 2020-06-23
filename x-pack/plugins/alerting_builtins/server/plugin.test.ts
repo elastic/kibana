@@ -6,7 +6,7 @@
 
 import { AlertingBuiltinsPlugin } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
-import { alertsMock } from '../../../plugins/alerting/server/mocks';
+import { alertsMock } from '../../alerts/server/mocks';
 
 describe('AlertingBuiltins Plugin', () => {
   describe('setup()', () => {
@@ -22,7 +22,7 @@ describe('AlertingBuiltins Plugin', () => {
 
     it('should register built-in alert types', async () => {
       const alertingSetup = alertsMock.createSetup();
-      await plugin.setup(coreSetup, { alerting: alertingSetup });
+      await plugin.setup(coreSetup, { alerts: alertingSetup });
 
       expect(alertingSetup.registerType).toHaveBeenCalledTimes(1);
 
@@ -44,7 +44,7 @@ describe('AlertingBuiltins Plugin', () => {
 
     it('should return a service in the expected shape', async () => {
       const alertingSetup = alertsMock.createSetup();
-      const service = await plugin.setup(coreSetup, { alerting: alertingSetup });
+      const service = await plugin.setup(coreSetup, { alerts: alertingSetup });
 
       expect(typeof service.indexThreshold.timeSeriesQuery).toBe('function');
     });

@@ -52,35 +52,26 @@ export const registerHelpers = ({ supertest, es }) => {
     },
   });
 
-  const createJob = payload => {
+  const createJob = (payload) => {
     jobsCreated.push(payload.job.id);
 
-    return supertest
-      .put(`${API_BASE_PATH}/create`)
-      .set('kbn-xsrf', 'xxx')
-      .send(payload);
+    return supertest.put(`${API_BASE_PATH}/create`).set('kbn-xsrf', 'xxx').send(payload);
   };
 
-  const deleteJob = id => {
+  const deleteJob = (id) => {
     const jobIds = Array.isArray(id) ? id : [id];
 
-    return supertest
-      .post(`${API_BASE_PATH}/delete`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ jobIds });
+    return supertest.post(`${API_BASE_PATH}/delete`).set('kbn-xsrf', 'xxx').send({ jobIds });
   };
 
-  const startJob = ids => {
+  const startJob = (ids) => {
     const jobIds = Array.isArray(ids) ? ids : [ids];
     jobsStarted.concat(jobIds);
 
-    return supertest
-      .post(`${API_BASE_PATH}/start`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ jobIds });
+    return supertest.post(`${API_BASE_PATH}/start`).set('kbn-xsrf', 'xxx').send({ jobIds });
   };
 
-  const stopJob = ids => {
+  const stopJob = (ids) => {
     const jobIds = Array.isArray(ids) ? ids : [ids];
 
     return supertest
@@ -93,7 +84,7 @@ export const registerHelpers = ({ supertest, es }) => {
 
   const stopAllJobs = () =>
     loadJobs().then(async ({ body: { jobs } }) => {
-      const jobIds = jobs.map(job => job.config.id);
+      const jobIds = jobs.map((job) => job.config.id);
 
       await stopJob(jobIds);
 
@@ -119,7 +110,7 @@ export const registerHelpers = ({ supertest, es }) => {
     Promise.all([
       stopAllJobs().then(deleteJob),
       deleteIndicesGeneratedByJobs().then(deleteAllIndicesCreated),
-    ]).catch(err => {
+    ]).catch((err) => {
       console.log('ERROR cleaning up!');
       throw err;
     });

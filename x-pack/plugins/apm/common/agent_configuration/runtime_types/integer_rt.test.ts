@@ -12,12 +12,12 @@ describe('getIntegerRt', () => {
   describe('with range', () => {
     const integerRt = getIntegerRt({
       min: 0,
-      max: 32000
+      max: 32000,
     });
 
     describe('it should not accept', () => {
       [NaN, undefined, null, '', 'foo', 0, 55, '-1', '-55', '33000'].map(
-        input => {
+        (input) => {
           it(`${JSON.stringify(input)}`, () => {
             expect(isRight(integerRt.decode(input))).toBe(false);
           });
@@ -26,7 +26,7 @@ describe('getIntegerRt', () => {
     });
 
     describe('it should return correct error message', () => {
-      ['-1', '-55', '33000'].map(input => {
+      ['-1', '-55', '33000'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           const result = integerRt.decode(input);
           const message = PathReporter.report(result)[0];
@@ -37,7 +37,7 @@ describe('getIntegerRt', () => {
     });
 
     describe('it should accept number between 0 and 32000', () => {
-      ['0', '1000', '32000'].map(input => {
+      ['0', '1000', '32000'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(integerRt.decode(input))).toBe(true);
         });
@@ -49,7 +49,7 @@ describe('getIntegerRt', () => {
     const integerRt = getIntegerRt();
 
     describe('it should not accept', () => {
-      [NaN, undefined, null, '', 'foo', 0, 55].map(input => {
+      [NaN, undefined, null, '', 'foo', 0, 55].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(integerRt.decode(input))).toBe(false);
         });
@@ -57,7 +57,7 @@ describe('getIntegerRt', () => {
     });
 
     describe('it should accept any number', () => {
-      ['-100', '-1', '0', '1000', '32000', '100000'].map(input => {
+      ['-100', '-1', '0', '1000', '32000', '100000'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(integerRt.decode(input))).toBe(true);
         });

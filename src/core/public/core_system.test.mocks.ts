@@ -32,6 +32,7 @@ import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
+import { coreAppMock } from './core_app/core_app.mock';
 
 export const MockLegacyPlatformService = legacyPlatformServiceMock.create();
 export const LegacyPlatformServiceConstructor = jest
@@ -135,4 +136,10 @@ export const IntegrationsServiceConstructor = jest
   .mockImplementation(() => MockIntegrationsService);
 jest.doMock('./integrations', () => ({
   IntegrationsService: IntegrationsServiceConstructor,
+}));
+
+export const MockCoreApp = coreAppMock.create();
+export const CoreAppConstructor = jest.fn().mockImplementation(() => MockCoreApp);
+jest.doMock('./core_app', () => ({
+  CoreApp: CoreAppConstructor,
 }));

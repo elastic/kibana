@@ -61,7 +61,7 @@ describe('sibling pipeline aggs', () => {
     },
   ];
 
-  metrics.forEach(metric => {
+  metrics.forEach((metric) => {
     describe(`${metric.title} metric`, () => {
       let aggDsl: Record<string, any>;
       let metricAgg: MetricAggType;
@@ -127,7 +127,7 @@ describe('sibling pipeline aggs', () => {
         expect(metricAgg.makeLabel(aggConfig)).toEqual(`${metric.title} of Count`);
       });
 
-      it('should set parent aggs', function() {
+      it('should set parent aggs', function () {
         init();
 
         expect(aggDsl[metric.name].buckets_path).toBe('2-bucket>_count');
@@ -186,7 +186,7 @@ describe('sibling pipeline aggs', () => {
         customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
         customBucket.type.params[0].modifyAggConfigOnSearchRequestStart = customBucketSpy;
 
-        aggConfig.type.params.forEach(param => {
+        aggConfig.type.params.forEach((param) => {
           param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
         });
 

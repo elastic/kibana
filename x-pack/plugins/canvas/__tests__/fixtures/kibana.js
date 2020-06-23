@@ -24,10 +24,10 @@ export class Plugin {
         elasticsearch: mockElasticsearch,
       },
       config: () => ({
-        get: key => get(config, key),
-        has: key => has(config, key),
+        get: (key) => get(config, key),
+        has: (key) => has(config, key),
       }),
-      route: def => this.routes.push(def),
+      route: (def) => this.routes.push(def),
     };
 
     const { init } = this.props;

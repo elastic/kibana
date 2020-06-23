@@ -26,7 +26,7 @@ describe('getClustersSummary', () => {
   });
 
   it('should log and throw an exception if a cluster does not have a license', () => {
-    const fakeClusters = clusters.map(cluster => ({
+    const fakeClusters = clusters.map((cluster) => ({
       ...cluster,
       license: undefined,
     }));

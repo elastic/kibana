@@ -12,7 +12,7 @@ import { SectionsWithRows } from '../helper';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = {
-  wrapper: MockApmPluginContextWrapper
+  wrapper: MockApmPluginContextWrapper,
 };
 
 describe('MetadataTable', () => {
@@ -26,9 +26,9 @@ describe('MetadataTable', () => {
         properties: ['props.A', 'props.B'],
         rows: [
           { key: 'props.A', value: 'A' },
-          { key: 'props.B', value: 'B' }
-        ]
-      }
+          { key: 'props.B', value: 'B' },
+        ],
+      },
     ] as unknown) as SectionsWithRows;
     const output = render(
       <MetadataTable sections={sectionsWithRows} />,
@@ -41,7 +41,7 @@ describe('MetadataTable', () => {
       'props.A',
       'A',
       'props.B',
-      'B'
+      'B',
     ]);
   });
   describe('required sections', () => {
@@ -50,8 +50,8 @@ describe('MetadataTable', () => {
         {
           key: 'foo',
           label: 'Foo',
-          required: true
-        }
+          required: true,
+        },
       ] as unknown) as SectionsWithRows;
       const output = render(
         <MetadataTable sections={sectionsWithRows} />,

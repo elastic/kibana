@@ -50,7 +50,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       createTest(`user with no access from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.noAccess,

@@ -28,6 +28,7 @@ import {
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
+import { ViewMode } from '../../embeddable/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -73,6 +74,11 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * true is default
    */
   preserveSavedFilters?: boolean;
+
+  /**
+   * View mode of the dashboard.
+   */
+  viewMode?: ViewMode;
 }>;
 
 export const createDashboardUrlGenerator = (
@@ -83,7 +89,7 @@ export const createDashboardUrlGenerator = (
   }>
 ): UrlGeneratorsDefinition<typeof DASHBOARD_APP_URL_GENERATOR> => ({
   id: DASHBOARD_APP_URL_GENERATOR,
-  createUrl: async state => {
+  createUrl: async (state) => {
     const startServices = await getStartServices();
     const useHash = state.useHash ?? startServices.useHashedUrl;
     const appBasePath = startServices.appBasePath;
@@ -103,7 +109,7 @@ export const createDashboardUrlGenerator = (
     };
 
     const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
-      Object.keys(stateObj).forEach(key => {
+      Object.keys(stateObj).forEach((key) => {
         if (stateObj[key] === undefined) {
           delete stateObj[key];
         }
@@ -122,7 +128,8 @@ export const createDashboardUrlGenerator = (
       STATE_STORAGE_KEY,
       cleanEmptyKeys({
         query: state.query,
-        filters: filters?.filter(f => !esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
+        viewMode: state.viewMode,
       }),
       { useHash },
       `${appBasePath}#/${hash}`
@@ -132,7 +139,7 @@ export const createDashboardUrlGenerator = (
       GLOBAL_STATE_STORAGE_KEY,
       cleanEmptyKeys({
         time: state.timeRange,
-        filters: filters?.filter(f => esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => esFilters.isFilterPinned(f)),
         refreshInterval: state.refreshInterval,
       }),
       { useHash },

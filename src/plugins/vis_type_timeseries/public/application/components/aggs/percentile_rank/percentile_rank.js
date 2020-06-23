@@ -40,7 +40,7 @@ import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 
-export const PercentileRankAgg = props => {
+export const PercentileRankAgg = (props) => {
   const { series, panel, fields } = props;
   const defaults = { values: [''] };
   const model = { ...defaults, ...props.model };
@@ -52,7 +52,7 @@ export const PercentileRankAgg = props => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
 
-  const handlePercentileRankValuesChange = values => {
+  const handlePercentileRankValuesChange = (values) => {
     handleChange(
       assign({}, model, {
         values,

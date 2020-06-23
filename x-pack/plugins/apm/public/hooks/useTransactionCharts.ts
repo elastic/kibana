@@ -12,11 +12,11 @@ import { useUrlParams } from './useUrlParams';
 export function useTransactionCharts() {
   const {
     urlParams: { serviceName, transactionType, start, end, transactionName },
-    uiFilters
+    uiFilters,
   } = useUrlParams();
 
   const { data, error, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/transaction_groups/charts',
@@ -27,9 +27,9 @@ export function useTransactionCharts() {
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -44,6 +44,6 @@ export function useTransactionCharts() {
   return {
     data: memoizedData,
     status,
-    error
+    error,
   };
 }

@@ -9,22 +9,7 @@ Helper to setup syncing of global data with the URL
 <b>Signature:</b>
 
 ```typescript
-syncQueryStateWithUrl: (query: Pick<{
-    filterManager: import("..").FilterManager;
-    timefilter: import("..").TimefilterSetup;
-    state$: import("rxjs").Observable<{
-        changes: import("./types").QueryStateChange;
-        state: QueryState;
-    }>;
-    savedQueries: import("..").SavedQueryService;
-} | {
-    filterManager: import("..").FilterManager;
-    timefilter: import("..").TimefilterSetup;
-    state$: import("rxjs").Observable<{
-        changes: import("./types").QueryStateChange;
-        state: QueryState;
-    }>;
-}, "state$" | "timefilter" | "filterManager">, kbnUrlStateStorage: IKbnUrlStateStorage) => {
+syncQueryStateWithUrl: (query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'state$'>, kbnUrlStateStorage: IKbnUrlStateStorage) => {
     stop: () => void;
     hasInheritedQueryFromUrl: boolean;
 }

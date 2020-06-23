@@ -13,8 +13,8 @@ import { MAX_FILE_SIZE } from '../../common/constants/file_import';
 import _ from 'lodash';
 
 const ACCEPTABLE_FILETYPES = ['json', 'geojson'];
-const acceptedFileTypeString = ACCEPTABLE_FILETYPES.map(type => `.${type}`).join(',');
-const acceptedFileTypeStringMessage = ACCEPTABLE_FILETYPES.map(type => `.${type}`).join(', ');
+const acceptedFileTypeString = ACCEPTABLE_FILETYPES.map((type) => `.${type}`).join(',');
+const acceptedFileTypeStringMessage = ACCEPTABLE_FILETYPES.map((type) => `.${type}`).join(', ');
 
 export class JsonIndexFilePicker extends Component {
   state = {
@@ -35,7 +35,7 @@ export class JsonIndexFilePicker extends Component {
 
   getFileParseActive = () => this._isMounted && this.state.fileParseActive;
 
-  _fileHandler = fileList => {
+  _fileHandler = (fileList) => {
     const fileArr = Array.from(fileList);
     this.props.resetFileAndIndexSettings();
     this.setState({
@@ -168,7 +168,7 @@ export class JsonIndexFilePicker extends Component {
       onFileUpload,
       setFileProgress: this.setFileProgress,
       getFileParseActive: this.getFileParseActive,
-    }).catch(err => {
+    }).catch((err) => {
       if (this._isMounted) {
         this.setState({
           fileParseActive: false,

@@ -46,7 +46,7 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         description: 'This is the second test space',
         disabledFeatures: [],
       },
-    ].filter(entry => spaceIds.includes(entry.id));
+    ].filter((entry) => spaceIds.includes(entry.id));
     expect(resp.body).to.eql(expectedBody);
   };
 

@@ -7,7 +7,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../state/defaults';
 
 import { Arguments, ArgumentTypes, BorderStyle, ExtendedTemplate } from '../extended_template';
@@ -27,7 +27,7 @@ const defaultValues: Arguments = {
 class Interactive extends React.Component<{}, Arguments> {
   public state = defaultValues;
 
-  _getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = arg => {
+  _getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = (arg) => {
     return this.state[arg];
   };
 
@@ -50,18 +50,18 @@ class Interactive extends React.Component<{}, Arguments> {
   }
 }
 
-const getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = arg => {
+const getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = (arg) => {
   return defaultValues[arg];
 };
 
 storiesOf('arguments/ContainerStyle', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('extended', () => <Interactive />);
 
 storiesOf('arguments/ContainerStyle/components', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('appearance form', () => (

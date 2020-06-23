@@ -20,15 +20,15 @@ const mockRequest = httpServerMock.createKibanaRequest();
 
 const createMockAuthz = (options: MockAuthzOptions) => {
   const mock = authorizationMock.create({ version: '1.0.0-zeta1' });
-  mock.checkPrivilegesDynamicallyWithRequest.mockImplementation(request => {
+  mock.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
     expect(request).toBe(mockRequest);
 
-    return jest.fn().mockImplementation(checkActions => {
+    return jest.fn().mockImplementation((checkActions) => {
       if ('rejectCheckPrivileges' in options) {
         throw options.rejectCheckPrivileges;
       }
 
-      const expected = options.resolveCheckPrivileges.privileges.map(x => x.privilege);
+      const expected = options.resolveCheckPrivileges.privileges.map((x) => x.privilege);
       expect(checkActions).toEqual(expected);
       return options.resolveCheckPrivileges;
     });

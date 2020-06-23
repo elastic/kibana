@@ -15,7 +15,7 @@ test('InfraLink produces the correct URL', async () => {
       <InfraLink app="metrics" path="/some/path" query={{ time: 1554687198 }} />
     ),
     {
-      search: '?rangeFrom=now-5h&rangeTo=now-2h'
+      search: '?rangeFrom=now-5h&rangeTo=now-2h',
     } as Location
   );
 

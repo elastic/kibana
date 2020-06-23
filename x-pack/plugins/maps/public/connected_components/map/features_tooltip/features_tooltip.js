@@ -32,7 +32,7 @@ export class FeaturesTooltip extends React.Component {
     return null;
   }
 
-  _setCurrentFeature = feature => {
+  _setCurrentFeature = (feature) => {
     this.setState({ currentFeature: feature });
   };
 

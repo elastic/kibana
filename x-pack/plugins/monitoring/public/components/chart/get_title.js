@@ -12,7 +12,7 @@ import { chain } from 'lodash';
  */
 export function getTitle(series = []) {
   return chain(
-    series.map(s => {
+    series.map((s) => {
       return s.metric.title || s.metric.label;
     })
   )

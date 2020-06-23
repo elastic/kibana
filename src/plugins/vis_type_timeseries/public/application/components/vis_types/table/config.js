@@ -126,7 +126,7 @@ class TableSeriesConfigUI extends Component {
         value: 'cumulative_sum',
       },
     ];
-    const selectedAggFuncOption = functionOptions.find(option => {
+    const selectedAggFuncOption = functionOptions.find((option) => {
       return model.aggregate_function === option.value;
     });
 
@@ -187,7 +187,7 @@ class TableSeriesConfigUI extends Component {
                       : getDefaultQueryLanguage(),
                   query: model.filter && model.filter.query ? model.filter.query : '',
                 }}
-                onChange={filter => this.props.onChange({ filter })}
+                onChange={(filter) => this.props.onChange({ filter })}
                 indexPatterns={[this.props.indexPatternForQuery]}
               />
             </EuiFormRow>

@@ -10,7 +10,7 @@ import { EuiCard, EuiIcon } from '@elastic/eui';
 
 export const DatasourceSelector = ({ onSelect, datasources, current }) => (
   <div className="canvasDataSource__list">
-    {datasources.map(d => (
+    {datasources.map((d) => (
       <EuiCard
         key={d.name}
         title={d.displayName}

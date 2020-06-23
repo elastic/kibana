@@ -99,10 +99,10 @@ export const seriesMonthlyInterval = {
     1477980000000,
     1480575600000,
   ],
-  xAxisFormatter: function(thing) {
+  xAxisFormatter: function (thing) {
     return moment(thing);
   },
-  tooltipFormatter: function(d) {
+  tooltipFormatter: function (d) {
     return d;
   },
 };

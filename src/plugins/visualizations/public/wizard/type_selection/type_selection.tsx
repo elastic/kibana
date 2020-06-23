@@ -124,7 +124,9 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                             one {type}
                             other {types}
                           } found"
-                          values={{ resultCount: visTypes.filter(type => type.highlighted).length }}
+                          values={{
+                            resultCount: visTypes.filter((type) => type.highlighted).length,
+                          }}
                         />
                       )}
                     </span>
@@ -153,7 +155,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                   </EuiTitle>
                   <EuiSpacer size="m" />
                   <NewVisHelp
-                    promotedTypes={(visTypes as VisTypeAliasListEntry[]).filter(t => t.promotion)}
+                    promotedTypes={(visTypes as VisTypeAliasListEntry[]).filter((t) => t.promotion)}
                     onPromotionClicked={this.props.onVisTypeSelected}
                   />
                 </React.Fragment>
@@ -169,7 +171,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     visTypes: TypesStart,
     query: string
   ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
-    const types = visTypes.all().filter(type => {
+    const types = visTypes.all().filter((type) => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;
@@ -187,10 +189,10 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
     let entries: Array<VisTypeListEntry | VisTypeAliasListEntry>;
     if (!query) {
-      entries = allTypes.map(type => ({ ...type, highlighted: false }));
+      entries = allTypes.map((type) => ({ ...type, highlighted: false }));
     } else {
       const q = query.toLowerCase();
-      entries = allTypes.map(type => {
+      entries = allTypes.map((type) => {
         const matchesQuery =
           type.name.toLowerCase().includes(q) ||
           type.title.toLowerCase().includes(q) ||

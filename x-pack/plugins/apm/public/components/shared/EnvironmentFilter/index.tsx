@@ -13,7 +13,7 @@ import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import {
   ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED
+  ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
 import { useEnvironments, ALL_OPTION } from '../../../hooks/useEnvironments';
 
@@ -27,16 +27,16 @@ function updateEnvironmentUrl(
     ...location,
     search: fromQuery({
       ...toQuery(location.search),
-      environment: nextEnvironmentQueryParam
-    })
+      environment: nextEnvironmentQueryParam,
+    }),
   });
 }
 
 const NOT_DEFINED_OPTION = {
   value: ENVIRONMENT_NOT_DEFINED,
   text: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-    defaultMessage: 'Not defined'
-  })
+    defaultMessage: 'Not defined',
+  }),
 };
 
 const SEPARATOR_OPTION = {
@@ -44,15 +44,15 @@ const SEPARATOR_OPTION = {
     'xpack.apm.filter.environment.selectEnvironmentLabel',
     { defaultMessage: 'Select environment' }
   )} -`,
-  disabled: true
+  disabled: true,
 };
 
 function getOptions(environments: string[]) {
   const environmentOptions = environments
-    .filter(env => env !== ENVIRONMENT_NOT_DEFINED)
-    .map(environment => ({
+    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED)
+    .map((environment) => ({
       value: environment,
-      text: environment
+      text: environment,
     }));
 
   return [
@@ -61,7 +61,7 @@ function getOptions(environments: string[]) {
       ? [NOT_DEFINED_OPTION]
       : []),
     ...(environmentOptions.length > 0 ? [SEPARATOR_OPTION] : []),
-    ...environmentOptions
+    ...environmentOptions,
   ];
 }
 
@@ -74,17 +74,17 @@ export const EnvironmentFilter: React.FC = () => {
   const { environments, status = 'loading' } = useEnvironments({
     serviceName,
     start,
-    end
+    end,
   });
 
   return (
     <EuiSelect
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
-        defaultMessage: 'environment'
+        defaultMessage: 'environment',
       })}
       options={getOptions(environments)}
       value={environment || ENVIRONMENT_ALL}
-      onChange={event => {
+      onChange={(event) => {
         updateEnvironmentUrl(location, event.target.value);
       }}
       isLoading={status === 'loading'}

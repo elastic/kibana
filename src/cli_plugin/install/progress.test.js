@@ -21,26 +21,26 @@ import sinon from 'sinon';
 import Progress from './progress';
 import Logger from '../lib/logger';
 
-describe('kibana cli', function() {
-  describe('plugin installer', function() {
-    describe('progressReporter', function() {
+describe('kibana cli', function () {
+  describe('plugin installer', function () {
+    describe('progressReporter', function () {
       let logger;
       let progress;
 
-      beforeEach(function() {
+      beforeEach(function () {
         logger = new Logger({ silent: false, quiet: false });
         sinon.stub(logger, 'log');
         sinon.stub(logger, 'error');
         progress = new Progress(logger);
       });
 
-      afterEach(function() {
+      afterEach(function () {
         logger.log.restore();
         logger.error.restore();
       });
 
-      describe('handleData', function() {
-        it('should show a max of 20 dots for full progress', function() {
+      describe('handleData', function () {
+        it('should show a max of 20 dots for full progress', function () {
           progress.init(1000);
           progress.progress(1000);
           progress.complete();
@@ -70,7 +70,7 @@ describe('kibana cli', function() {
           expect(logger.log.getCall(21).args[0]).toMatch(/complete/i);
         });
 
-        it('should show dot for each 5% of completion', function() {
+        it('should show dot for each 5% of completion', function () {
           progress.init(1000);
           expect(logger.log.callCount).toBe(1);
 

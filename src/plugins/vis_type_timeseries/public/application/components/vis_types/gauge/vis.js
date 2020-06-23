@@ -27,11 +27,11 @@ import { getLastValue } from '../../../../../../../plugins/vis_type_timeseries/c
 
 function getColors(props) {
   const { model, visData } = props;
-  const series = get(visData, `${model.id}.series`, []).filter(s => !isUndefined(s));
+  const series = get(visData, `${model.id}.series`, []).filter((s) => !isUndefined(s));
   let text;
   let gauge;
   if (model.gauge_color_rules) {
-    model.gauge_color_rules.forEach(rule => {
+    model.gauge_color_rules.forEach((rule) => {
       if (rule.operator && rule.value != null) {
         const value = (series[0] && getLastValue(series[0].data)) || 0;
         if (_[rule.operator](value, rule.value)) {
@@ -49,9 +49,9 @@ function GaugeVisualization(props) {
   const colors = getColors(props);
 
   const series = get(visData, `${model.id}.series`, [])
-    .filter(row => row)
+    .filter((row) => row)
     .map((row, i) => {
-      const seriesDef = model.series.find(s => includes(row.id, s.id));
+      const seriesDef = model.series.find((s) => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
         newProps.formatter = createTickFormatter(

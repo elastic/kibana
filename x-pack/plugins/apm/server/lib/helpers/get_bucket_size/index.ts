@@ -22,7 +22,7 @@ export function getBucketSize(start: number, end: number, interval: string) {
   if (bucketSize < minBucketSize) {
     return {
       bucketSize: minBucketSize,
-      intervalString: interval
+      intervalString: interval,
     };
   }
 

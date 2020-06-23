@@ -47,7 +47,7 @@ export class Config {
     }
 
     if (!key) {
-      return _.each(extension._inner.children, child => {
+      return _.each(extension._inner.children, (child) => {
         this.extendSchema(child.schema, _.get(settings, child.key), child.key);
       });
     }
@@ -193,9 +193,7 @@ export class Config {
   getSchema() {
     if (!this[schema]) {
       this[schema] = (function convertToSchema(children) {
-        let schema = Joi.object()
-          .keys({})
-          .default();
+        let schema = Joi.object().keys({}).default();
 
         for (const key of Object.keys(children)) {
           const child = children[key];

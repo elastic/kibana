@@ -78,7 +78,7 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
 
     const sortedStats = Object.keys(stats)
       .sort()
-      .map(id => ({ id, ...stats[id] } as RequestDetailsStatRow));
+      .map((id) => ({ id, ...stats[id] } as RequestDetailsStatRow));
 
     return (
       <EuiTable responsive={false}>

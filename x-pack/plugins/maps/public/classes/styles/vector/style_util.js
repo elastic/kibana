@@ -34,6 +34,21 @@ export function isOnlySingleFeatureType(featureType, supportedFeatures, hasFeatu
   }, true);
 }
 
+export function dynamicRound(value) {
+  if (typeof value !== 'number') {
+    return value;
+  }
+
+  let precision = 0;
+  let threshold = 10;
+  while (value < threshold && precision < 8) {
+    precision++;
+    threshold = threshold / 10;
+  }
+
+  return precision === 0 ? Math.round(value) : parseFloat(value.toFixed(precision + 1));
+}
+
 export function assignCategoriesToPalette({ categories, paletteValues }) {
   const stops = [];
   let fallback = null;

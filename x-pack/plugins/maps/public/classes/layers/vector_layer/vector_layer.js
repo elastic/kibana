@@ -9,9 +9,10 @@ import { AbstractLayer } from '../layer';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import {
   FEATURE_ID_PROPERTY_NAME,
-  SOURCE_DATA_ID_ORIGIN,
-  SOURCE_META_ID_ORIGIN,
-  SOURCE_FORMATTERS_ID_ORIGIN,
+  SOURCE_DATA_REQUEST_ID,
+  SOURCE_META_DATA_REQUEST_ID,
+  SOURCE_FORMATTERS_DATA_REQUEST_ID,
+  SOURCE_BOUNDS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
   LAYER_TYPE,
@@ -69,7 +70,7 @@ export class VectorLayer extends AbstractLayer {
     if (this.getSource()) {
       this.getSource().destroy();
     }
-    this.getJoins().forEach(joinSource => {
+    this.getJoins().forEach((joinSource) => {
       joinSource.destroy();
     });
   }
@@ -79,7 +80,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getValidJoins() {
-    return this.getJoins().filter(join => {
+    return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
     });
   }
@@ -120,7 +121,9 @@ export class VectorLayer extends AbstractLayer {
 
     if (
       this.getJoins().length &&
-      !featureCollection.features.some(feature => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME])
+      !featureCollection.features.some(
+        (feature) => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]
+      )
     ) {
       return {
         icon: noResultsIcon,
@@ -153,18 +156,41 @@ export class VectorLayer extends AbstractLayer {
     return this.getCurrentStyle().renderLegendDetails();
   }
 
-  async getBounds(dataFilters) {
+  async getBounds({ startLoading, stopLoading, registerCancelCallback, dataFilters }) {
     const isStaticLayer = !this.getSource().isBoundsAware();
     if (isStaticLayer) {
       return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this._hasJoins());
     }
 
+    const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
     const searchFilters = this._getSearchFilters(
       dataFilters,
       this.getSource(),
       this.getCurrentStyle()
     );
-    return await this.getSource().getBoundsForFilters(searchFilters);
+    // Do not pass all searchFilters to source.getBoundsForFilters().
+    // For example, do not want to filter bounds request by extent and buffer.
+    const boundsFilters = {
+      sourceQuery: searchFilters.sourceQuery,
+      query: searchFilters.query,
+      timeFilters: searchFilters.timeFilters,
+      filters: searchFilters.filters,
+      applyGlobalQuery: searchFilters.applyGlobalQuery,
+    };
+
+    let bounds = null;
+    try {
+      startLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, boundsFilters);
+      bounds = await this.getSource().getBoundsForFilters(
+        boundsFilters,
+        registerCancelCallback.bind(null, requestToken)
+      );
+    } finally {
+      // Use stopLoading callback instead of onLoadError callback.
+      // Function is loading bounds and not feature data.
+      stopLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, bounds, boundsFilters);
+    }
+    return bounds;
   }
 
   async getLeftJoinFields() {
@@ -173,7 +199,7 @@ export class VectorLayer extends AbstractLayer {
 
   _getJoinFields() {
     const joinFields = [];
-    this.getValidJoins().forEach(join => {
+    this.getValidJoins().forEach((join) => {
       const fields = join.getJoinFields();
       joinFields.push(...fields);
     });
@@ -192,7 +218,7 @@ export class VectorLayer extends AbstractLayer {
 
   getIndexPatternIds() {
     const indexPatternIds = this.getSource().getIndexPatternIds();
-    this.getValidJoins().forEach(join => {
+    this.getValidJoins().forEach((join) => {
       indexPatternIds.push(...join.getIndexPatternIds());
     });
     return indexPatternIds;
@@ -200,7 +226,7 @@ export class VectorLayer extends AbstractLayer {
 
   getQueryableIndexPatternIds() {
     const indexPatternIds = this.getSource().getQueryableIndexPatternIds();
-    this.getValidJoins().forEach(join => {
+    this.getValidJoins().forEach((join) => {
       indexPatternIds.push(...join.getQueryableIndexPatternIds());
     });
     return indexPatternIds;
@@ -266,7 +292,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncJoins(syncContext, style) {
-    const joinSyncs = this.getValidJoins().map(async join => {
+    const joinSyncs = this.getValidJoins().map(async (join) => {
       await this._syncJoinStyleMeta(syncContext, join, style);
       await this._syncJoinFormatters(syncContext, join, style);
       return this._syncJoin({ join, ...syncContext });
@@ -279,7 +305,7 @@ export class VectorLayer extends AbstractLayer {
     const fieldNames = [
       ...source.getFieldNames(),
       ...style.getSourceFieldNames(),
-      ...this.getValidJoins().map(join => join.getLeftField().getName()),
+      ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 
     return {
@@ -299,7 +325,7 @@ export class VectorLayer extends AbstractLayer {
     //-- visibility of any of the features has changed
 
     let shouldUpdateStore =
-      sourceResult.refreshed || joinStates.some(joinState => joinState.dataHasChanged);
+      sourceResult.refreshed || joinStates.some((joinState) => joinState.dataHasChanged);
 
     if (!shouldUpdateStore) {
       return;
@@ -340,7 +366,7 @@ export class VectorLayer extends AbstractLayer {
       dataFilters,
       isRequestStillActive,
     } = syncContext;
-    const dataRequestId = SOURCE_DATA_ID_ORIGIN;
+    const dataRequestId = SOURCE_DATA_REQUEST_ID;
     const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
     const searchFilters = this._getSearchFilters(dataFilters, source, style);
     const prevDataRequest = this.getSourceDataRequest();
@@ -392,8 +418,8 @@ export class VectorLayer extends AbstractLayer {
       source,
       style,
       sourceQuery: this.getQuery(),
-      dataRequestId: SOURCE_META_ID_ORIGIN,
-      dynamicStyleProps: style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+      dataRequestId: SOURCE_META_DATA_REQUEST_ID,
+      dynamicStyleProps: style.getDynamicPropertiesArray().filter((dynamicStyleProp) => {
         return (
           dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE &&
           dynamicStyleProp.isFieldMetaEnabled()
@@ -412,7 +438,7 @@ export class VectorLayer extends AbstractLayer {
       dataRequestId: join.getSourceMetaDataRequestId(),
       dynamicStyleProps: this.getCurrentStyle()
         .getDynamicPropertiesArray()
-        .filter(dynamicStyleProp => {
+        .filter((dynamicStyleProp) => {
           const matchingField = joinSource.getMetricFieldForName(
             dynamicStyleProp.getField().getName()
           );
@@ -442,7 +468,7 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    const dynamicStyleFields = dynamicStyleProps.map(dynamicStyleProp => {
+    const dynamicStyleFields = dynamicStyleProps.map((dynamicStyleProp) => {
       return `${dynamicStyleProp.getField().getName()}${dynamicStyleProp.getNumberOfCategories()}`;
     });
 
@@ -468,7 +494,7 @@ export class VectorLayer extends AbstractLayer {
         layerName,
         style,
         dynamicStyleProps,
-        registerCancelCallback,
+        registerCancelCallback.bind(null, requestToken),
         nextMeta
       );
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
@@ -486,13 +512,13 @@ export class VectorLayer extends AbstractLayer {
 
     return this._syncFormatters({
       source,
-      dataRequestId: SOURCE_FORMATTERS_ID_ORIGIN,
+      dataRequestId: SOURCE_FORMATTERS_DATA_REQUEST_ID,
       fields: style
         .getDynamicPropertiesArray()
-        .filter(dynamicStyleProp => {
+        .filter((dynamicStyleProp) => {
           return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE;
         })
-        .map(dynamicStyleProp => {
+        .map((dynamicStyleProp) => {
           return dynamicStyleProp.getField();
         }),
       ...syncContext,
@@ -506,13 +532,13 @@ export class VectorLayer extends AbstractLayer {
       dataRequestId: join.getSourceFormattersDataRequestId(),
       fields: style
         .getDynamicPropertiesArray()
-        .filter(dynamicStyleProp => {
+        .filter((dynamicStyleProp) => {
           const matchingField = joinSource.getMetricFieldForName(
             dynamicStyleProp.getField().getName()
           );
           return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN && !!matchingField;
         })
-        .map(dynamicStyleProp => {
+        .map((dynamicStyleProp) => {
           return dynamicStyleProp.getField();
         }),
       ...syncContext,
@@ -524,7 +550,7 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    const fieldNames = fields.map(field => {
+    const fieldNames = fields.map((field) => {
       return field.getName();
     });
     const nextMeta = {
@@ -542,10 +568,10 @@ export class VectorLayer extends AbstractLayer {
 
       const formatters = {};
       const promises = fields
-        .filter(field => {
+        .filter((field) => {
           return field.canValueBeFormatted();
         })
-        .map(async field => {
+        .map(async (field) => {
           formatters[field.getName()] = await source.createFieldFormatter(field);
         });
       await Promise.all(promises);
@@ -571,10 +597,6 @@ export class VectorLayer extends AbstractLayer {
   // Given 2 above, which source/style to use can not be pulled from data request state.
   // Therefore, source and style are provided as arugments and must be used instead of calling getSource or getCurrentStyle.
   async _syncData(syncContext, source, style) {
-    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
-      return;
-    }
-
     await this._syncSourceStyleMeta(syncContext, source, style);
     await this._syncSourceFormatters(syncContext, source, style);
     const sourceResult = await this._syncSource(syncContext, source, style);
@@ -858,11 +880,7 @@ export class VectorLayer extends AbstractLayer {
       const tooltipProperty = tooltipsFromSource[i];
       const matchingJoins = [];
       for (let j = 0; j < this.getJoins().length; j++) {
-        if (
-          this.getJoins()
-            [j].getLeftField()
-            .getName() === tooltipProperty.getPropertyKey()
-        ) {
+        if (this.getJoins()[j].getLeftField().getName() === tooltipProperty.getPropertyKey()) {
           matchingJoins.push(this.getJoins()[j]);
         }
       }
@@ -897,7 +915,7 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    return featureCollection.features.find(feature => {
+    return featureCollection.features.find((feature) => {
       return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
   }

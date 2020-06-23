@@ -33,7 +33,7 @@ export const navigateToLegacyKibanaUrl = (
 
   // try to find an existing redirect for the target path if possible
   // this avoids having to load the legacy app just to get redirected to a core application again afterwards
-  const relevantForward = forwards.find(forward => path.startsWith(`/${forward.legacyAppId}`));
+  const relevantForward = forwards.find((forward) => path.startsWith(`/${forward.legacyAppId}`));
   if (relevantForward) {
     targetAppPath = relevantForward.rewritePath(path);
     targetAppId = relevantForward.newAppId;

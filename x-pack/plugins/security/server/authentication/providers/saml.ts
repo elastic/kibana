@@ -177,8 +177,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Login has been successfully performed.');
     } else {
       this.logger.debug(
-        `Failed to perform a login: ${authenticationResult.error &&
-          authenticationResult.error.message}`
+        `Failed to perform a login: ${
+          authenticationResult.error && authenticationResult.error.message
+        }`
       );
     }
 

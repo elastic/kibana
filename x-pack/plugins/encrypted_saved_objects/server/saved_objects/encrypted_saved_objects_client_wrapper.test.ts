@@ -450,7 +450,7 @@ describe('#bulkUpdate', () => {
     ];
 
     const mockedResponse = {
-      saved_objects: docs.map(doc => ({
+      saved_objects: docs.map((doc) => ({
         ...doc,
         attributes: {
           ...doc.attributes,
@@ -465,7 +465,7 @@ describe('#bulkUpdate', () => {
 
     await expect(
       wrapper.bulkUpdate(
-        docs.map(doc => ({ ...doc })),
+        docs.map((doc) => ({ ...doc })),
         {}
       )
     ).resolves.toEqual({
@@ -558,7 +558,7 @@ describe('#bulkUpdate', () => {
       const options = { namespace };
 
       mockBaseClient.bulkUpdate.mockResolvedValue({
-        saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
+        saved_objects: docs.map((doc) => ({ ...doc, references: undefined })),
       });
 
       await expect(wrapper.bulkUpdate(docs, options)).resolves.toEqual({
@@ -676,12 +676,14 @@ describe('#find', () => {
           id: 'some-id',
           type: 'unknown-type',
           attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          score: 1,
           references: [],
         },
         {
           id: 'some-id-2',
           type: 'unknown-type',
           attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          score: 1,
           references: [],
         },
       ],
@@ -722,6 +724,7 @@ describe('#find', () => {
             attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
+          score: 1,
           references: [],
         },
         {
@@ -733,6 +736,7 @@ describe('#find', () => {
             attrNotSoSecret: '*not-so-secret*',
             attrThree: 'three',
           },
+          score: 1,
           references: [],
         },
       ],
@@ -793,6 +797,7 @@ describe('#find', () => {
             attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
+          score: 1,
           references: [],
         },
         {
@@ -804,6 +809,7 @@ describe('#find', () => {
             attrNotSoSecret: '*not-so-secret*',
             attrThree: 'three',
           },
+          score: 1,
           references: [],
         },
       ],

@@ -63,7 +63,7 @@ function getSortScoreByPriority(a: GenericOperationDefinition, b: GenericOperati
 export function getOperationTypesForField(field: IndexPatternField): OperationType[] {
   return operationDefinitions
     .filter(
-      operationDefinition =>
+      (operationDefinition) =>
         'getPossibleOperationForField' in operationDefinition &&
         operationDefinition.getPossibleOperationForField(field)
     )
@@ -133,8 +133,8 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
     }
   };
 
-  operationDefinitions.sort(getSortScoreByPriority).forEach(operationDefinition => {
-    indexPattern.fields.forEach(field => {
+  operationDefinitions.sort(getSortScoreByPriority).forEach((operationDefinition) => {
+    indexPattern.fields.forEach((field) => {
       addToMap(
         {
           type: 'field',

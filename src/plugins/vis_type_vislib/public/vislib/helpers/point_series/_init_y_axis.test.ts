@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { initYAxis } from './_init_y_axis';
 import { Chart } from './point_series';
 
-describe('initYAxis', function() {
+describe('initYAxis', function () {
   const baseChart = {
     aspects: {
       y: [
@@ -36,25 +36,25 @@ describe('initYAxis', function() {
     },
   } as Chart;
 
-  describe('with a single y aspect', function() {
+  describe('with a single y aspect', function () {
     const singleYBaseChart = _.cloneDeep(baseChart);
     singleYBaseChart.aspects.y = [singleYBaseChart.aspects.y[0]];
 
-    it('sets the yAxisFormatter the the field formats convert fn', function() {
+    it('sets the yAxisFormatter the the field formats convert fn', function () {
       const chart = _.cloneDeep(singleYBaseChart);
       initYAxis(chart);
       expect(chart).toHaveProperty('yAxisFormat');
     });
 
-    it('sets the yAxisLabel', function() {
+    it('sets the yAxisLabel', function () {
       const chart = _.cloneDeep(singleYBaseChart);
       initYAxis(chart);
       expect(chart).toHaveProperty('yAxisLabel', 'y1');
     });
   });
 
-  describe('with multiple y aspects', function() {
-    it('sets the yAxisFormatter the the field formats convert fn for the first y aspect', function() {
+  describe('with multiple y aspects', function () {
+    it('sets the yAxisFormatter the the field formats convert fn for the first y aspect', function () {
       const chart = _.cloneDeep(baseChart);
       initYAxis(chart);
 
@@ -63,7 +63,7 @@ describe('initYAxis', function() {
       expect(chart.yAxisFormat).not.toBe(chart.aspects.y[1].format);
     });
 
-    it('does not set the yAxisLabel, it does not make sense to put multiple labels on the same axis', function() {
+    it('does not set the yAxisLabel, it does not make sense to put multiple labels on the same axis', function () {
       const chart = _.cloneDeep(baseChart);
       initYAxis(chart);
       expect(chart).toHaveProperty('yAxisLabel', '');

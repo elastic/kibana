@@ -5,7 +5,7 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('delete', () => {

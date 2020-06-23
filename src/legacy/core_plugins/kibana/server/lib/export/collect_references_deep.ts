@@ -40,7 +40,7 @@ export async function collectReferencesDeep(
       for (const reference of references) {
         const isDuplicate = queue
           .concat(result)
-          .some(obj => obj.type === reference.type && obj.id === reference.id);
+          .some((obj) => obj.type === reference.type && obj.id === reference.id);
         if (isDuplicate) {
           continue;
         }

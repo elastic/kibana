@@ -25,7 +25,7 @@ export class ModelUpdater {
     const { $scope, model } = this;
     const keys = Object.keys(properties);
     $scope.$evalAsync(() => {
-      keys.forEach(key => {
+      keys.forEach((key) => {
         if (Array.isArray(model[key])) {
           model[key].push(properties[key]);
         } else {

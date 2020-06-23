@@ -75,7 +75,7 @@ export class Form extends Component<FormProps, FormState> {
     const isValid = this.isFormValid();
     return (
       <EuiForm data-test-subj="savedObjectEditForm" role="form">
-        {fields.map(field => (
+        {fields.map((field) => (
           <Field
             key={`${field.type}-${field.name}`}
             type={field.type}
@@ -141,7 +141,7 @@ export class Form extends Component<FormProps, FormState> {
 
   isFormValid() {
     const { fieldStates } = this.state;
-    return !Object.values(fieldStates).some(state => state.invalid === true);
+    return !Object.values(fieldStates).some((state) => state.invalid === true);
   }
 
   onCancel = () => {
@@ -161,7 +161,7 @@ export class Form extends Component<FormProps, FormState> {
     });
 
     const source = cloneDeep(object.attributes as any);
-    fields.forEach(field => {
+    fields.forEach((field) => {
       let value = fieldStates[field.name]?.value ?? field.value;
 
       if (field.type === 'array' && typeof value === 'string') {
@@ -171,6 +171,7 @@ export class Form extends Component<FormProps, FormState> {
       set(source, field.name, value);
     });
 
+    // we extract the `references` field that does not belong to attributes
     const { references, ...attributes } = source;
 
     await onSave({ attributes, references });

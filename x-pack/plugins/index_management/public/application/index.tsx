@@ -10,9 +10,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { CoreStart } from '../../../../../src/core/public';
 
+import { API_BASE_PATH } from '../../common';
+
 import { AppContextProvider, AppDependencies } from './app_context';
 import { App } from './app';
 import { indexManagementStore } from './store';
+import { ComponentTemplatesProvider } from './components';
 
 export const renderApp = (
   elem: HTMLElement | null,
@@ -22,15 +25,25 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n } = core;
+  const { i18n, docLinks, notifications } = core;
   const { Context: I18nContext } = i18n;
-  const { services } = dependencies;
+  const { services, history } = dependencies;
+
+  const componentTemplateProviderValues = {
+    httpClient: services.httpService.httpClient,
+    apiBasePath: API_BASE_PATH,
+    trackMetric: services.uiMetricService.trackMetric.bind(services.uiMetricService),
+    docLinks,
+    toasts: notifications.toasts,
+  };
 
   render(
     <I18nContext>
       <Provider store={indexManagementStore(services)}>
         <AppContextProvider value={dependencies}>
-          <App />
+          <ComponentTemplatesProvider value={componentTemplateProviderValues}>
+            <App history={history} />
+          </ComponentTemplatesProvider>
         </AppContextProvider>
       </Provider>
     </I18nContext>,

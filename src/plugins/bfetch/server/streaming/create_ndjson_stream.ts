@@ -39,7 +39,7 @@ export const createNDJSONStream = <Response>(
         logger.error(error);
       }
     },
-    error: error => {
+    error: (error) => {
       stream.end();
       logger.error(error);
     },

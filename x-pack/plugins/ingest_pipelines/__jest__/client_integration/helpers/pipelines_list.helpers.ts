@@ -67,10 +67,7 @@ const createActions = (testBed: TestBed) => {
 
     clickActionMenu(pipelineName);
 
-    component
-      .find('.euiContextMenuItem')
-      .at(actions.indexOf(action))
-      .simulate('click');
+    component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
   };
 
   return {

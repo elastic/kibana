@@ -15,7 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const aceEditor = getService('aceEditor');
 
-  describe('Role Mappings', function() {
+  describe('Role Mappings', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('roleMappings');
     });
@@ -83,17 +83,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays an error and returns to the listing page when navigating to a role mapping which does not exist', async () => {
-      await pageObjects.common.navigateToActualUrl(
-        'kibana',
-        '#/management/security/role_mappings/edit/i-do-not-exist',
-        { ensureCurrentUrl: false }
+      await pageObjects.common.navigateToUrl(
+        'management',
+        'security/role_mappings/edit/i-do-not-exist',
+        { ensureCurrentUrl: false, shouldUseHashForSubUrl: false }
       );
 
       await testSubjects.existOrFail('errorLoadingRoleMappingEditorToast');
 
       const url = parse(await browser.getCurrentUrl());
 
-      expect(url.hash).to.eql('#/management/security/role_mappings');
+      expect(url.pathname).to.eql('/app/management/security/role_mappings/');
     });
 
     describe('with role mappings', () => {
@@ -124,7 +124,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       before(async () => {
         await Promise.all(
-          mappings.map(mapping => {
+          mappings.map((mapping) => {
             const { name, ...payload } = mapping;
             return security.roleMappings.create(name, payload);
           })
@@ -134,7 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await Promise.all(mappings.map(mapping => security.roleMappings.delete(mapping.name)));
+        await Promise.all(mappings.map((mapping) => security.roleMappings.delete(mapping.name)));
       });
 
       it('displays a table of all role mappings', async () => {

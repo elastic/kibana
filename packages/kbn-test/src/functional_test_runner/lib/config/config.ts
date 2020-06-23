@@ -114,7 +114,7 @@ export class Config {
       throw new Error(`Unknown config key "${key}"`);
     }
 
-    return cloneDeep(get(this[$values], key, defaultValue), v => {
+    return cloneDeep(get(this[$values], key, defaultValue), (v) => {
       if (typeof v === 'function') {
         return v;
       }
@@ -122,7 +122,7 @@ export class Config {
   }
 
   public getAll() {
-    return cloneDeep(this[$values], v => {
+    return cloneDeep(this[$values], (v) => {
       if (typeof v === 'function') {
         return v;
       }

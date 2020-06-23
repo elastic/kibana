@@ -26,13 +26,13 @@ describe('timeseriesFetcher', () => {
         config: new Proxy(
           {},
           {
-            get: () => 'myIndex'
+            get: () => 'myIndex',
           }
         ) as APMConfig,
         uiFiltersES: [
           {
-            term: { 'service.environment': 'test' }
-          }
+            term: { 'service.environment': 'test' },
+          },
         ],
         indices: {
           'apm_oss.sourcemapIndices': 'myIndex',
@@ -42,10 +42,10 @@ describe('timeseriesFetcher', () => {
           'apm_oss.transactionIndices': 'myIndex',
           'apm_oss.metricsIndices': 'myIndex',
           apmAgentConfigurationIndex: 'myIndex',
-          apmCustomLinkIndex: 'myIndex'
+          apmCustomLinkIndex: 'myIndex',
         },
-        dynamicIndexPattern: null as any
-      }
+        dynamicIndexPattern: null as any,
+      },
     });
   });
 
@@ -59,9 +59,9 @@ describe('timeseriesFetcher', () => {
       expect.arrayContaining([
         {
           term: {
-            [PROCESSOR_EVENT]: 'transaction'
-          }
-        } as any
+            [PROCESSOR_EVENT]: 'transaction',
+          },
+        } as any,
       ])
     );
   });

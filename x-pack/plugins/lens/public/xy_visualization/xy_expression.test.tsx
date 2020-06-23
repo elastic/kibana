@@ -281,7 +281,7 @@ describe('xy_expression', () => {
     let convertSpy: jest.Mock;
 
     beforeEach(() => {
-      convertSpy = jest.fn(x => x);
+      convertSpy = jest.fn((x) => x);
       getFormatSpy = jest.fn();
       getFormatSpy.mockReturnValue({ convert: convertSpy });
     });
@@ -618,10 +618,7 @@ describe('xy_expression', () => {
         />
       );
 
-      wrapper
-        .find(Settings)
-        .first()
-        .prop('onBrushEnd')!({ x: [1585757732783, 1585758880838] });
+      wrapper.find(Settings).first().prop('onBrushEnd')!({ x: [1585757732783, 1585758880838] });
 
       expect(onSelectRange).toHaveBeenCalledWith({
         column: 0,
@@ -671,10 +668,9 @@ describe('xy_expression', () => {
         />
       );
 
-      wrapper
-        .find(Settings)
-        .first()
-        .prop('onElementClick')!([[geometry, series as XYChartSeriesIdentifier]]);
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
 
       expect(onClickValue).toHaveBeenCalledWith({
         data: [
@@ -1188,10 +1184,7 @@ describe('xy_expression', () => {
         />
       );
 
-      const tickFormatter = instance
-        .find(Axis)
-        .first()
-        .prop('tickFormat');
+      const tickFormatter = instance.find(Axis).first().prop('tickFormat');
 
       if (!tickFormatter) {
         throw new Error('tickFormatter prop not found');
@@ -1281,6 +1274,65 @@ describe('xy_expression', () => {
       // Only one series should be rendered, even though 2 are configured
       // This one series should only have one row, even though 2 are sent
       expect(series.prop('data')).toEqual([{ a: 1, b: 5, c: 'J', d: 'Row 2' }]);
+    });
+
+    test('it should not remove rows with falsy but non-undefined values', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'kibana_datatable',
+            columns: [
+              { id: 'a', name: 'a' },
+              { id: 'b', name: 'b' },
+              { id: 'c', name: 'c' },
+            ],
+            rows: [
+              { a: 0, b: 2, c: 5 },
+              { a: 1, b: 0, c: 7 },
+            ],
+          },
+        },
+      };
+
+      const args: XYArgs = {
+        xTitle: '',
+        yTitle: '',
+        legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'line',
+            xAccessor: 'a',
+            accessors: ['c'],
+            splitAccessor: 'b',
+            columnToLabel: '',
+            xScaleType: 'ordinal',
+            yScaleType: 'linear',
+            isHistogram: false,
+          },
+        ],
+      };
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const series = component.find(LineSeries);
+
+      expect(series.prop('data')).toEqual([
+        { a: 0, b: 2, c: 5 },
+        { a: 1, b: 0, c: 7 },
+      ]);
     });
 
     test('it should show legend for split series, even with one row', () => {

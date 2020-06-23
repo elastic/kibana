@@ -130,7 +130,7 @@ export const checks: DisallowedSyntaxCheck[] = [
   {
     name: '[es2018] object spread properties',
     nodeType: 'ObjectExpression',
-    test: (n: estree.ObjectExpression) => n.properties.some(p => p.type === 'SpreadElement'),
+    test: (n: estree.ObjectExpression) => n.properties.some((p) => p.type === 'SpreadElement'),
   },
   // https://github.com/estree/estree/blob/master/es2018.md#template-literals
   {
@@ -142,7 +142,7 @@ export const checks: DisallowedSyntaxCheck[] = [
   {
     name: '[es2018] rest properties',
     nodeType: 'ObjectPattern',
-    test: (n: estree.ObjectPattern) => n.properties.some(p => p.type === 'RestElement'),
+    test: (n: estree.ObjectPattern) => n.properties.some((p) => p.type === 'RestElement'),
   },
 
   /**

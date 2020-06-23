@@ -19,7 +19,7 @@
 
 import { apmImport, apmInit } from '../apm';
 
-export const appEntryTemplate = bundle => `
+export const appEntryTemplate = (bundle) => `
 /**
  * Kibana entry file
  *

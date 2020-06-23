@@ -35,7 +35,7 @@ export enum AGGREGATION_TYPES {
 
 export interface MetricThresholdAlertParams {
   criteria?: MetricExpression[];
-  groupBy?: string;
+  groupBy?: string | string[];
   filterQuery?: string;
   sourceId?: string;
 }

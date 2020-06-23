@@ -34,7 +34,7 @@ export function getWarnings(field: IndexPatternField) {
   }
 
   if (warnings.length > 1) {
-    warnings = warnings.map(function(warning, i) {
+    warnings = warnings.map(function (warning, i) {
       return (i > 0 ? '\n' : '') + (i + 1) + ' - ' + warning;
     });
   }

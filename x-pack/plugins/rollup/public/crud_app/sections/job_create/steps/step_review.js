@@ -43,7 +43,7 @@ export class StepReview extends Component {
     };
   }
 
-  selectTab = tab => {
+  selectTab = (tab) => {
     this.setState({
       selectedTab: tab,
     });

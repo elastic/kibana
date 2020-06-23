@@ -5,6 +5,7 @@
  */
 
 import { ReactElement } from 'react';
+import { AppUnmount } from 'kibana/public';
 import { UMBadge } from '../badge';
 import { UptimeAppProps } from '../uptime_app';
 
@@ -17,5 +18,5 @@ export type UMUpdateBadge = (badge: UMBadge) => void;
 export type BootstrapUptimeApp = (props: UptimeAppProps) => ReactElement<any>;
 
 export interface UMFrameworkAdapter {
-  render(element: any): void;
+  render(element: any): Promise<AppUnmount>;
 }

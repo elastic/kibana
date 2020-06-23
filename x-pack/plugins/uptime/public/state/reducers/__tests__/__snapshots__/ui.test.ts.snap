@@ -9,7 +9,7 @@ Object {
     "id": "popover-2",
     "open": true,
   },
-  "lastRefresh": 125,
+  "searchText": "",
 }
 `;
 
@@ -19,16 +19,6 @@ Object {
   "basePath": "yyz",
   "esKuery": "",
   "integrationsPopoverOpen": null,
-  "lastRefresh": 125,
-}
-`;
-
-exports[`ui reducer updates the refresh value 1`] = `
-Object {
-  "alertFlyoutVisible": false,
-  "basePath": "abc",
-  "esKuery": "",
-  "integrationsPopoverOpen": null,
-  "lastRefresh": 125,
+  "searchText": "",
 }
 `;

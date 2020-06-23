@@ -59,14 +59,14 @@ export const ElementWrapper = compose(
   connectAdvanced(selectorFactory),
   withPropsOnChange(
     (props, nextProps) => !isEqual(props.element, nextProps.element),
-    props => {
+    (props) => {
       const { element, createHandlers } = props;
       const handlers = createHandlers(element);
       // this removes element and createHandlers from passed props
       return { handlers };
     }
   ),
-  mapProps(props => {
+  mapProps((props) => {
     // remove element and createHandlers from props passed to component
     // eslint-disable-next-line no-unused-vars
     const { element, createHandlers, selectedPage, ...restProps } = props;

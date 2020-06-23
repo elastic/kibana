@@ -66,7 +66,7 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
   const { callCluster, usageCollection } = config;
 
   return await Promise.all(
-    clustersDetails.map(async clustersDetail => {
+    clustersDetails.map(async (clustersDetail) => {
       const [clusterInfo, clusterStats, kibana] = await Promise.all([
         getClusterInfo(callCluster), // cluster info
         getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)

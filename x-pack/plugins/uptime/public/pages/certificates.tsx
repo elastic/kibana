@@ -13,6 +13,8 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiHideFor,
+  EuiShowFor,
 } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -73,7 +75,7 @@ export const CertificatesPage: React.FC = () => {
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem grow={false} style={{ marginRight: 'auto', alignSelf: 'center' }}>
           <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
             <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
@@ -87,21 +89,32 @@ export const CertificatesPage: React.FC = () => {
         <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
           <Link to={SETTINGS_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
             <EuiButtonEmpty size="s" color="primary" iconType="gear">
-              {labels.SETTINGS_ON_CERT}
+              <EuiHideFor sizes={['xs']}> {labels.SETTINGS_ON_CERT}</EuiHideFor>
             </EuiButtonEmpty>
           </Link>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="refresh"
-            onClick={() => {
-              refreshApp();
-            }}
-            data-test-subj="superDatePickerApplyTimeButton"
-          >
-            {labels.REFRESH_CERT}
-          </EuiButton>
+          <EuiHideFor sizes={['xs']}>
+            <EuiButton
+              fill
+              iconType="refresh"
+              onClick={() => {
+                refreshApp();
+              }}
+              data-test-subj="superDatePickerApplyTimeButton"
+            >
+              {labels.REFRESH_CERT}
+            </EuiButton>
+          </EuiHideFor>
+          <EuiShowFor sizes={['xs']}>
+            <EuiButtonEmpty
+              iconType="refresh"
+              onClick={() => {
+                refreshApp();
+              }}
+              data-test-subj="superDatePickerApplyTimeButton"
+            />
+          </EuiShowFor>
         </EuiFlexItem>
       </EuiFlexGroup>
 

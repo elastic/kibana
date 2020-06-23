@@ -40,17 +40,16 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { DefaultEditorController } from '../../vis_default_editor/public';
-import { DashboardStart } from '../../dashboard/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
+import { EmbeddableStart } from '../../embeddable/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
   navigation: NavigationStart;
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
-  dashboard: DashboardStart;
+  embeddable: EmbeddableStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
 }
@@ -103,7 +102,7 @@ export class VisualizePlugin
     core.application.register({
       id: 'visualize',
       title: 'Visualize',
-      order: -1002,
+      order: 8000,
       euiIconType: 'visualizeApp',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -130,12 +129,11 @@ export class VisualizePlugin
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
+          embeddable: pluginsStart.embeddable,
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
-          DefaultVisualizationEditor: DefaultEditorController,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
-          dashboard: pluginsStart.dashboard,
           scopedHistory: () => this.currentHistory!,
           savedObjects: pluginsStart.savedObjects,
         };

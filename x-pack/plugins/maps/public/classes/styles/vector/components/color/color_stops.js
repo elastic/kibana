@@ -22,7 +22,7 @@ export const ColorStops = ({
   swatches,
 }) => {
   function getStopInput(stop, index) {
-    const onStopChange = newStopValue => {
+    const onStopChange = (newStopValue) => {
       const newColorStops = _.cloneDeep(colorStops);
       newColorStops[index].stop = newStopValue;
       onChange({
@@ -38,7 +38,7 @@ export const ColorStops = ({
   }
 
   const rows = colorStops.map((colorStop, index) => {
-    const onColorChange = color => {
+    const onColorChange = (color) => {
       const newColorStops = _.cloneDeep(colorStops);
       newColorStops[index].color = color;
       onChange({

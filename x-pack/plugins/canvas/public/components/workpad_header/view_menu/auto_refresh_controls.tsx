@@ -151,7 +151,7 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <CustomInterval onSubmit={value => setRefresh(value)} />
+        <CustomInterval onSubmit={(value) => setRefresh(value)} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

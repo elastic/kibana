@@ -11,8 +11,11 @@ kibanaPipeline(timeoutMinutes: 240) {
       'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
-        kibanaCoverage.runTests()
-        handleIngestion(TIME_STAMP)
+        catchError {
+          kibanaCoverage.runTests()
+          handleIngestion(TIME_STAMP)
+        }
+        handleFail()
       }
     }
     kibanaPipeline.sendMail()
@@ -23,8 +26,19 @@ def handleIngestion(timestamp) {
   kibanaPipeline.downloadCoverageArtifacts()
   kibanaCoverage.prokLinks("### Process HTML Links")
   kibanaCoverage.collectVcsInfo("### Collect VCS Info")
+  kibanaCoverage.generateReports("### Merge coverage reports")
+  kibanaCoverage.uploadCombinedReports()
   kibanaCoverage.ingest(timestamp, '### Injest && Upload')
   kibanaCoverage.uploadCoverageStaticSite(timestamp)
 }
 
+def handleFail() {
+  def buildStatus = buildUtils.getBuildStatus()
+  if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
+    slackNotifications.sendFailedBuild(
+      channel: '#kibana-qa',
+      username: 'Kibana QA'
+    )
+  }
+}
 

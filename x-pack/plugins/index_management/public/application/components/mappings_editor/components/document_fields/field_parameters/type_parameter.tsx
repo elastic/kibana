@@ -26,7 +26,7 @@ interface Props {
 
 export const TypeParameter = ({ isMultiField, isRootLevelField, showDocLink = false }: Props) => (
   <UseField<ComboBoxOption[]> path="type" config={getFieldConfig<ComboBoxOption[]>('type')}>
-    {typeField => {
+    {(typeField) => {
       const error = typeField.getErrorsMessages();
       const isInvalid = error ? Boolean(error.length) : false;
 

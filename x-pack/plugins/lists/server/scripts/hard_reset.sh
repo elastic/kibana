@@ -12,3 +12,6 @@ set -e
 # re-create the list and list item indexes
 ./delete_list_index.sh
 ./post_list_index.sh
+
+# re-create the exception list and exception list items
+./delete_all_exception_lists.sh

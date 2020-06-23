@@ -149,27 +149,27 @@ async function combineFieldsAndAggs(
   const isRollup = Object.keys(rollupFields).length > 0;
   const mix = mixFactory(isRollup, rollupFields);
 
-  aggs.forEach(a => {
+  aggs.forEach((a) => {
     if (a.type === METRIC_AGG_TYPE && a.fields !== undefined) {
       switch (a.id) {
         case ML_JOB_AGGREGATION.LAT_LONG:
-          geoFields.forEach(f => mix(f, a));
+          geoFields.forEach((f) => mix(f, a));
           break;
         case ML_JOB_AGGREGATION.INFO_CONTENT:
         case ML_JOB_AGGREGATION.HIGH_INFO_CONTENT:
         case ML_JOB_AGGREGATION.LOW_INFO_CONTENT:
-          textFields.forEach(f => mix(f, a));
+          textFields.forEach((f) => mix(f, a));
         case ML_JOB_AGGREGATION.DISTINCT_COUNT:
         case ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT:
         case ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT:
           // distinct count (i.e. cardinality) takes keywords, ips
           // as well as numerical fields
-          keywordFields.forEach(f => mix(f, a));
-          ipFields.forEach(f => mix(f, a));
+          keywordFields.forEach((f) => mix(f, a));
+          ipFields.forEach((f) => mix(f, a));
         // note, no break to fall through to add numerical fields.
         default:
           // all other aggs take numerical fields
-          numericalFields.forEach(f => {
+          numericalFields.forEach((f) => {
             mix(f, a);
           });
           break;
@@ -186,7 +186,7 @@ async function combineFieldsAndAggs(
 // remove fields that have no aggs associated to them, unless they are date fields
 function filterFields(fields: Field[]): Field[] {
   return fields.filter(
-    f => f.aggs && (f.aggs.length > 0 || (f.aggs.length === 0 && f.type === ES_FIELD_TYPES.DATE))
+    (f) => f.aggs && (f.aggs.length > 0 || (f.aggs.length === 0 && f.type === ES_FIELD_TYPES.DATE))
   );
 }
 
@@ -196,7 +196,7 @@ function mixFactory(isRollup: boolean, rollupFields: RollupFields) {
   return function mix(field: Field, agg: Aggregation): void {
     if (
       isRollup === false ||
-      (rollupFields[field.id] && rollupFields[field.id].find(f => f.agg === agg.dslName))
+      (rollupFields[field.id] && rollupFields[field.id].find((f) => f.agg === agg.dslName))
     ) {
       if (field.aggs !== undefined) {
         field.aggs.push(agg);
@@ -210,14 +210,14 @@ function mixFactory(isRollup: boolean, rollupFields: RollupFields) {
 
 function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
   const rollupFields: RollupFields = {};
-  rollupConfigs.forEach(conf => {
-    Object.keys(conf.fields).forEach(fieldName => {
+  rollupConfigs.forEach((conf) => {
+    Object.keys(conf.fields).forEach((fieldName) => {
       if (rollupFields[fieldName] === undefined) {
         rollupFields[fieldName] = conf.fields[fieldName];
       } else {
         const aggs = conf.fields[fieldName];
-        aggs.forEach(agg => {
-          if (rollupFields[fieldName].find(f => f.agg === agg.agg) === null) {
+        aggs.forEach((agg) => {
+          if (rollupFields[fieldName].find((f) => f.agg === agg.agg) === null) {
             rollupFields[fieldName].push(agg);
           }
         });
@@ -228,20 +228,20 @@ function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
 }
 
 function getKeywordFields(fields: Field[]): Field[] {
-  return fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD);
+  return fields.filter((f) => f.type === ES_FIELD_TYPES.KEYWORD);
 }
 
 function getTextFields(fields: Field[]): Field[] {
-  return fields.filter(f => f.type === ES_FIELD_TYPES.TEXT);
+  return fields.filter((f) => f.type === ES_FIELD_TYPES.TEXT);
 }
 
 function getIpFields(fields: Field[]): Field[] {
-  return fields.filter(f => f.type === ES_FIELD_TYPES.IP);
+  return fields.filter((f) => f.type === ES_FIELD_TYPES.IP);
 }
 
 function getNumericalFields(fields: Field[]): Field[] {
   return fields.filter(
-    f =>
+    (f) =>
       f.type === ES_FIELD_TYPES.LONG ||
       f.type === ES_FIELD_TYPES.INTEGER ||
       f.type === ES_FIELD_TYPES.SHORT ||
@@ -255,6 +255,6 @@ function getNumericalFields(fields: Field[]): Field[] {
 
 function getGeoFields(fields: Field[]): Field[] {
   return fields.filter(
-    f => f.type === ES_FIELD_TYPES.GEO_POINT || f.type === ES_FIELD_TYPES.GEO_SHAPE
+    (f) => f.type === ES_FIELD_TYPES.GEO_POINT || f.type === ES_FIELD_TYPES.GEO_SHAPE
   );
 }

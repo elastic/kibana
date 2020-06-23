@@ -27,7 +27,7 @@ describe('createStartServicesGetter', () => {
     const accessor: StartServicesAccessor = async () => await future.promise;
     const start = createStartServicesGetter(accessor);
 
-    await new Promise(r => setTimeout(r, 1));
+    await new Promise((r) => setTimeout(r, 1));
 
     expect(() => start()).toThrowErrorMatchingInlineSnapshot(
       `"Trying to access start services before start."`
@@ -42,11 +42,11 @@ describe('createStartServicesGetter', () => {
     const accessor: StartServicesAccessor = async () => await future.promise;
     const start = createStartServicesGetter(accessor);
 
-    await new Promise(r => setTimeout(r, 1));
+    await new Promise((r) => setTimeout(r, 1));
 
     expect(() => start()).toThrow();
 
-    await new Promise(r => setTimeout(r, 1));
+    await new Promise((r) => setTimeout(r, 1));
     future.resolve([core, plugins, self]);
     await future.promise;
 
@@ -65,7 +65,7 @@ describe('createStartServicesGetter', () => {
     const accessor: StartServicesAccessor = async () => await future.promise;
     const start = createStartServicesGetter(accessor);
 
-    await new Promise(r => setTimeout(r, 1));
+    await new Promise((r) => setTimeout(r, 1));
     future.resolve([core, plugins, self]);
     await future.promise;
 

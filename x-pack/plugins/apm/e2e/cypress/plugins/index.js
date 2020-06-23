@@ -21,9 +21,9 @@
 const wp = require('@cypress/webpack-preprocessor');
 const fs = require('fs');
 
-module.exports = on => {
+module.exports = (on) => {
   const options = {
-    webpackOptions: require('../webpack.config.js')
+    webpackOptions: require('../webpack.config.js'),
   };
   on('file:preprocessor', wp(options));
 
@@ -35,6 +35,6 @@ module.exports = on => {
       }
 
       return null;
-    }
+    },
   });
 };

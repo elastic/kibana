@@ -46,8 +46,8 @@ export async function buildProductionProjects({
   const projectGraph = buildProjectGraph(projects);
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
-  const projectNames = [...projects.values()].map(project => project.name);
-  log.write(`Preparing production build for [${projectNames.join(', ')}]`);
+  const projectNames = [...projects.values()].map((project) => project.name);
+  log.info(`Preparing production build for [${projectNames.join(', ')}]`);
 
   for (const batch of batchedProjects) {
     for (const project of batch) {
@@ -82,7 +82,7 @@ async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
   productionProjects.delete('kibana');
 
   if (onlyOSS) {
-    productionProjects.forEach(project => {
+    productionProjects.forEach((project) => {
       if (project.getBuildConfig().oss === false) {
         productionProjects.delete(project.json.name);
       }

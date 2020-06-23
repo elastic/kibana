@@ -15,31 +15,34 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '../../../../../plugins/encrypted_saved_objects/server';
 import { SpacesPluginSetup } from '../../../../../plugins/spaces/server';
+import { registerHiddenSORoutes } from './hidden_saved_object_routes';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
+const HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE = 'hidden-saved-object-with-secret';
 const SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE =
   'saved-object-with-secret-and-multiple-spaces';
 const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
 
-interface PluginsSetup {
+export interface PluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   spaces: SpacesPluginSetup;
 }
 
-interface PluginsStart {
+export interface PluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   spaces: never;
 }
 
 export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> = () => ({
   setup(core: CoreSetup<PluginsStart>, deps) {
-    for (const [name, namespaceType] of [
-      [SAVED_OBJECT_WITH_SECRET_TYPE, 'single'],
-      [SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE, 'multiple'],
-    ] as Array<[string, SavedObjectsNamespaceType]>) {
+    for (const [name, namespaceType, hidden] of [
+      [SAVED_OBJECT_WITH_SECRET_TYPE, 'single', false],
+      [HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE, 'single', true],
+      [SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE, 'multiple', false],
+    ] as Array<[string, SavedObjectsNamespaceType, boolean]>) {
       core.savedObjects.registerType({
         name,
-        hidden: false,
+        hidden,
         namespaceType,
         mappings: deepFreeze({
           properties: {
@@ -68,10 +71,11 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
       mappings: deepFreeze({ properties: { publicProperty: { type: 'keyword' } } }),
     });
 
-    core.http.createRouter().get(
+    const router = core.http.createRouter();
+    router.get(
       {
         path: '/api/saved_objects/get-decrypted-as-internal-user/{type}/{id}',
-        validate: { params: value => ({ value }) },
+        validate: { params: (value) => ({ value }) },
       },
       async (context, request, response) => {
         const [, { encryptedSavedObjects }] = await core.getStartServices();
@@ -80,11 +84,9 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
 
         try {
           return response.ok({
-            body: await encryptedSavedObjects.getDecryptedAsInternalUser(
-              request.params.type,
-              request.params.id,
-              { namespace }
-            ),
+            body: await encryptedSavedObjects
+              .getClient()
+              .getDecryptedAsInternalUser(request.params.type, request.params.id, { namespace }),
           });
         } catch (err) {
           if (encryptedSavedObjects.isEncryptionError(err)) {
@@ -95,6 +97,8 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
         }
       }
     );
+
+    registerHiddenSORoutes(router, core, deps, [HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE]);
   },
   start() {},
   stop() {},

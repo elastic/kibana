@@ -29,7 +29,7 @@ const mockLogger = mockLoggerFactory.get('mock logger');
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
       namespaceType: 'single',
@@ -73,7 +73,7 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: {
-          bar: doc => doc,
+          bar: (doc) => doc,
         },
       }),
       validateDoc: _.noop,
@@ -131,7 +131,7 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'user',
         migrations: {
-          '1.2.3': doc => {
+          '1.2.3': (doc) => {
             _.set(doc, 'attributes.name', 'Mike');
             return doc;
           },
@@ -639,10 +639,10 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'aaa',
         migrations: {
-          '2.3.4': d => _.set(d, 'attributes.counter', 42),
+          '2.3.4': (d) => _.set(d, 'attributes.counter', 42),
         },
       }),
-      validateDoc: d => {
+      validateDoc: (d) => {
         if ((d.attributes as any).counter === 42) {
           throw new Error('Meaningful!');
         }

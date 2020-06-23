@@ -25,7 +25,7 @@
  * @param {Array<[alias,path]>} aliasEntries
  * @return {string|undefined}
  */
-exports.resolveWebpackAlias = function(source, aliasEntries) {
+exports.resolveWebpackAlias = function (source, aliasEntries) {
   for (const [alias, path] of aliasEntries) {
     if (source === alias) {
       return path;

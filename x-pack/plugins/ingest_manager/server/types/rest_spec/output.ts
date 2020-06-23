@@ -18,7 +18,7 @@ export const PutOutputRequestSchema = {
     outputId: schema.string(),
   }),
   body: schema.object({
-    hosts: schema.maybe(schema.arrayOf(schema.string())),
+    hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
     ca_sha256: schema.maybe(schema.string()),
   }),
 };

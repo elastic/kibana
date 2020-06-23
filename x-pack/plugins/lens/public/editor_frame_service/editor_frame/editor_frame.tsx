@@ -73,7 +73,7 @@ export function EditorFrame(props: EditorFrameProps) {
         ) {
           datasource
             .initialize(state.datasourceStates[datasourceId].state || undefined)
-            .then(datasourceState => {
+            .then((datasourceState) => {
               if (!isUnmounted) {
                 dispatch({
                   type: 'UPDATE_DATASOURCE_STATE',
@@ -93,13 +93,13 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
   Object.keys(props.datasourceMap)
-    .filter(id => state.datasourceStates[id] && !state.datasourceStates[id].isLoading)
-    .forEach(id => {
+    .filter((id) => state.datasourceStates[id] && !state.datasourceStates[id].isLoading)
+    .forEach((id) => {
       const datasourceState = state.datasourceStates[id].state;
       const datasource = props.datasourceMap[id];
 
       const layers = datasource.getLayers(datasourceState);
-      layers.forEach(layer => {
+      layers.forEach((layer) => {
         datasourceLayers[layer] = props.datasourceMap[id].getPublicAPI({
           state: datasourceState,
           layerId: layer,
@@ -140,7 +140,7 @@ export function EditorFrame(props: EditorFrameProps) {
         });
       }
 
-      layerIds.forEach(layerId => {
+      layerIds.forEach((layerId) => {
         const layerDatasourceId = Object.entries(props.datasourceMap).find(
           ([datasourceId, datasource]) =>
             state.datasourceStates[datasourceId] &&
@@ -305,6 +305,7 @@ export function EditorFrame(props: EditorFrameProps) {
               dispatch={dispatch}
               ExpressionRenderer={props.ExpressionRenderer}
               stagedPreview={state.stagedPreview}
+              plugins={props.plugins}
             />
           )
         }

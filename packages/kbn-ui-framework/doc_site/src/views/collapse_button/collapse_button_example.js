@@ -32,7 +32,7 @@ import CollapseButtonAria from './collapse_button_aria';
 import collapseButtonAriaSource from '!!raw-loader!./collapse_button_aria';
 const collapseButtonAriaHtml = renderToHtml(CollapseButtonAria);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="CollapseButton"

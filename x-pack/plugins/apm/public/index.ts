@@ -6,7 +6,7 @@
 
 import {
   PluginInitializer,
-  PluginInitializerContext
+  PluginInitializerContext,
 } from '../../../../src/core/public';
 import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
 

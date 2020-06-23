@@ -61,7 +61,7 @@ export function combineErrors(errors: Array<Error | FailError>) {
     .filter(isFailError)
     .reduce((acc, error) => Math.max(acc, error.exitCode), 1);
 
-  const showHelp = errors.some(error => isFailError(error) && error.showHelp);
+  const showHelp = errors.some((error) => isFailError(error) && error.showHelp);
 
   const message = errors.reduce((acc, error) => {
     if (isFailError(error)) {

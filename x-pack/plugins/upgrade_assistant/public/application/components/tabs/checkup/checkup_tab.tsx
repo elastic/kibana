@@ -218,7 +218,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
       return [];
     }
 
-    return Object.keys(GroupByOption).filter(opt => find(deprecations, opt)) as GroupByOption[];
+    return Object.keys(GroupByOption).filter((opt) => find(deprecations, opt)) as GroupByOption[];
   }
 
   private renderCheckupData() {

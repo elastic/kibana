@@ -85,7 +85,7 @@ export function runMochaCli() {
           ],
         }
       )
-      .forEach(file => {
+      .forEach((file) => {
         process.argv.push(file);
       });
   }

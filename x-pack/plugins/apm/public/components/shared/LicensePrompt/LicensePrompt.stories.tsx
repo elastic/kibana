@@ -8,7 +8,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
   ApmPluginContext,
-  ApmPluginContextValue
+  ApmPluginContextValue,
 } from '../../../context/ApmPluginContext';
 import { LicensePrompt } from '.';
 
@@ -16,7 +16,7 @@ storiesOf('app/LicensePrompt', module).add(
   'example',
   () => {
     const contextMock = ({
-      core: { http: { basePath: { prepend: () => {} } } }
+      core: { http: { basePath: { prepend: () => {} } } },
     } as unknown) as ApmPluginContextValue;
 
     return (
@@ -27,7 +27,7 @@ storiesOf('app/LicensePrompt', module).add(
   },
   {
     info: {
-      source: false
-    }
+      source: false,
+    },
   }
 );

@@ -28,7 +28,7 @@ jest.doMock('fs', () => ({
     const streamData = filepath.split('');
     let cursor = 0;
 
-    readableStream._read = function(size) {
+    readableStream._read = function (size) {
       const current = streamData[cursor++];
       if (typeof current === 'undefined') {
         return this.push(null);

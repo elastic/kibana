@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects }) {
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'header']);
 
   describe('layer errors', () => {

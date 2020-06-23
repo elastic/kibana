@@ -60,7 +60,7 @@ export function deserializeSnapshotDetails(
   }, {});
 
   // Sort all failures by their shard.
-  Object.keys(indexToFailuresMap).forEach(index => {
+  Object.keys(indexToFailuresMap).forEach((index) => {
     indexToFailuresMap[index].failures = sortBy(
       indexToFailuresMap[index].failures,
       ({ shard }) => shard

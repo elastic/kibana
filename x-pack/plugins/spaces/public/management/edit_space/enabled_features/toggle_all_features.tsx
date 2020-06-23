@@ -54,7 +54,7 @@ export class ToggleAllFeatures extends Component<Props, State> {
       </EuiLink>
     );
 
-    const items = options.map(item => {
+    const items = options.map((item) => {
       return (
         <EuiContextMenuItem
           data-test-subj={`spc-toggle-all-features-${item.id}`}

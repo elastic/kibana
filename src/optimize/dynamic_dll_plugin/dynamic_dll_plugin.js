@@ -72,7 +72,7 @@ export class DynamicDllPlugin {
     const dllContext = rawDllConfig.context;
     const dllManifestPaths = this.dllCompiler.getManifestPaths();
 
-    dllManifestPaths.forEach(dllChunkManifestPath => {
+    dllManifestPaths.forEach((dllChunkManifestPath) => {
       new webpack.DllReferencePlugin({
         context: dllContext,
         manifest: dllChunkManifestPath,
@@ -109,10 +109,10 @@ export class DynamicDllPlugin {
 
   registerBeforeCompileHook(compiler) {
     compiler.hooks.beforeCompile.tapPromise('DynamicDllPlugin', async ({ normalModuleFactory }) => {
-      normalModuleFactory.hooks.factory.tap('DynamicDllPlugin', actualFactory => (params, cb) => {
+      normalModuleFactory.hooks.factory.tap('DynamicDllPlugin', (actualFactory) => (params, cb) => {
         // This is used in order to avoid the cache for DLL modules
         // resolved from other dependencies
-        normalModuleFactory.cachePredicate = module =>
+        normalModuleFactory.cachePredicate = (module) =>
           !(module.stubType === DLL_ENTRY_STUB_MODULE_TYPE);
 
         // Overrides the normalModuleFactory module creation behaviour
@@ -123,7 +123,7 @@ export class DynamicDllPlugin {
           } else {
             this.mapNormalModule(module).then(
               (m = module) => cb(undefined, m),
-              error => cb(error)
+              (error) => cb(error)
             );
           }
         });
@@ -132,7 +132,7 @@ export class DynamicDllPlugin {
   }
 
   registerCompilationHook(compiler) {
-    compiler.hooks.compilation.tap('DynamicDllPlugin', compilation => {
+    compiler.hooks.compilation.tap('DynamicDllPlugin', (compilation) => {
       compilation.hooks.needAdditionalPass.tap('DynamicDllPlugin', () => {
         // Run the procedures in order to execute our dll compilation
         // The process is very straightforward in it's conception:
@@ -215,7 +215,7 @@ export class DynamicDllPlugin {
   }
 
   registerDoneHook(compiler) {
-    compiler.hooks.done.tapPromise('DynamicDllPlugin', async stats => {
+    compiler.hooks.done.tapPromise('DynamicDllPlugin', async (stats) => {
       if (stats.compilation.needsDLLCompilation) {
         // Run the dlls compiler and increment
         // the performed compilations
@@ -341,7 +341,7 @@ export class DynamicDllPlugin {
     // that we rely in next ones.
     this.dllCompiler
       .getManifestPaths()
-      .forEach(chunkDllManifestPath => mainCompiler.inputFileSystem.purge(chunkDllManifestPath));
+      .forEach((chunkDllManifestPath) => mainCompiler.inputFileSystem.purge(chunkDllManifestPath));
 
     this.performedCompilations++;
 

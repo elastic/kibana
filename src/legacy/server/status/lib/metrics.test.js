@@ -40,7 +40,7 @@ import sinon from 'sinon';
 import { cGroups as cGroupsFsStub, setMockFiles, readFileMock } from './__mocks__/_fs_stubs';
 import { Metrics } from './metrics';
 
-describe('Metrics', function() {
+describe('Metrics', function () {
   fs.readFile.mockImplementation(readFileMock);
 
   const sampleConfig = {
@@ -51,7 +51,7 @@ describe('Metrics', function() {
       port: 5603,
     },
   };
-  const config = { get: path => _.get(sampleConfig, path) };
+  const config = { get: (path) => _.get(sampleConfig, path) };
 
   let metrics;
 

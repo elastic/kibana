@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "3KVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -15,9 +15,13 @@
           "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -40,7 +44,9 @@
           "full": "Windows 10",
           "name": "windows 10.0",
           "version": "10.0",
-          "variant" : "Windows Pro"
+          "Ext": {
+            "variant" : "Windows Pro"
+          }
         }
       }
     }
@@ -51,7 +57,7 @@
   "type": "doc",
   "value": {
     "id": "3aVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -64,9 +70,13 @@
           "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -88,7 +98,9 @@
           "full": "Windows Server 2016",
           "name": "windows 10.0",
           "version": "10.0",
-          "variant" : "Windows Server"
+          "Ext": {
+            "variant" : "Windows Server"
+          }
         }
       }
     }
@@ -99,7 +111,7 @@
   "type": "doc",
   "value": {
     "id": "3qVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -112,9 +124,13 @@
           "id": "023fa40c-411d-4188-a941-4147bfadd095"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "Default",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -134,7 +150,9 @@
           "full": "Windows 10",
           "name": "windows 10.0",
           "version": "10.0",
-          "variant" : "Windows Pro"
+          "Ext": {
+            "variant" : "Windows Pro"
+          }
         }
       }
     }
@@ -145,7 +163,7 @@
   "type": "doc",
   "value": {
     "id": "36VN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -158,9 +176,13 @@
           "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -183,7 +205,9 @@
           "full": "Windows Server 2016",
           "name": "windows 10.0",
           "version": "10.0",
-          "variant" : "Windows Server 2016"
+          "Ext": {
+            "variant" : "Windows Server 2016"
+          }
         }
       }
     }
@@ -194,7 +218,7 @@
   "type": "doc",
   "value": {
     "id": "4KVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -207,9 +231,13 @@
           "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -230,7 +258,9 @@
           "full": "Windows Server 2012",
           "name": "windows 6.2",
           "version": "6.2",
-          "variant" : "Windows Server 2012"
+          "Ext": {
+            "variant" : "Windows Server 2012"
+          }
         }
       }
     }
@@ -241,7 +271,7 @@
   "type": "doc",
   "value": {
     "id": "4aVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -254,9 +284,13 @@
           "id": "023fa40c-411d-4188-a941-4147bfadd095"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -277,7 +311,9 @@
           "full": "Windows Server 2012",
           "name": "windows 6.2",
           "version": "6.2",
-          "variant" : "Windows Server 2012"
+          "Ext": {
+            "variant" : "Windows Server 2012"
+          }
         }
       }
     }
@@ -288,7 +324,7 @@
   "type": "doc",
   "value": {
     "id": "4qVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -301,9 +337,13 @@
           "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -325,7 +365,9 @@
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
           "version": "6.3",
-          "variant" : "Windows Server 2012 R2"
+          "Ext": {
+            "variant" : "Windows Server 2012 R2"
+          }
         }
       }
     }
@@ -336,7 +378,7 @@
   "type": "doc",
   "value": {
     "id": "46VN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -349,9 +391,13 @@
           "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -372,7 +418,9 @@
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
           "version": "6.3",
-          "variant" : "Windows Server 2012 R2"
+          "Ext": {
+            "variant" : "Windows Server 2012 R2"
+          }
         }
       }
     }
@@ -383,7 +431,7 @@
   "type": "doc",
   "value": {
     "id": "5KVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -396,9 +444,13 @@
           "id": "023fa40c-411d-4188-a941-4147bfadd095"
         }
       },
-      "endpoint": {
+      "Endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -419,7 +471,9 @@
           "full": "Windows Server 2012",
           "name": "windows 6.2",
           "version": "6.2",
-          "variant" : "Windows Server 2012"
+          "Ext": {
+            "variant" : "Windows Server 2012"
+          }
         }
       }
     }

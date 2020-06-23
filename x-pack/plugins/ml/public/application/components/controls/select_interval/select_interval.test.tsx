@@ -26,7 +26,7 @@ describe('SelectInterval', () => {
     expect(defaultSelectedValue).toBe('auto');
   });
 
-  test('currently selected value is updated correctly on click', done => {
+  test('currently selected value is updated correctly on click', (done) => {
     const wrapper = mount(
       <MemoryRouter>
         <SelectInterval />

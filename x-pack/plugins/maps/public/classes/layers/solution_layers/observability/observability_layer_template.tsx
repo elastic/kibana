@@ -29,7 +29,7 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
 
     // Select metric when layer change invalidates selected metric.
     const metricOptions = getMetricOptionsForLayer(layer);
-    const selectedMetricOption = metricOptions.find(option => {
+    const selectedMetricOption = metricOptions.find((option) => {
       return option.value === this.state.metric;
     });
     if (!selectedMetricOption) {
@@ -53,13 +53,12 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
   };
 
   _previewLayer() {
-    this.props.previewLayer(
-      createLayerDescriptor({
-        layer: this.state.layer,
-        metric: this.state.metric,
-        display: this.state.display,
-      })
-    );
+    const layerDescriptor = createLayerDescriptor({
+      layer: this.state.layer,
+      metric: this.state.metric,
+      display: this.state.display,
+    });
+    this.props.previewLayers(layerDescriptor ? [layerDescriptor] : []);
   }
 
   render() {

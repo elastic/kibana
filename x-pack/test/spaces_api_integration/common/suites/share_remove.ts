@@ -71,9 +71,9 @@ export function shareRemoveTestSuiteFactory(esArchiver: any, supertest: SuperTes
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
-      cases = cases.map(x => ({ ...x, failure: 403 }));
+      cases = cases.map((x) => ({ ...x, failure: 403 }));
     }
-    return cases.map(x => ({
+    return cases.map((x) => ({
       title: getTestTitle({ ...x, type: TYPE }),
       responseStatusCode: x.failure ?? 204,
       request: createRequest(x),

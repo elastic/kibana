@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
 import { StickyContainer } from 'react-sticky';
-import { mockMoment, toJson } from '../../../../utils/testHelpers';
+import {
+  mountWithTheme,
+  mockMoment,
+  toJson,
+} from '../../../../utils/testHelpers';
 import { Timeline } from '.';
 
 describe('Timeline', () => {
@@ -25,7 +28,7 @@ describe('Timeline', () => {
         top: 100,
         left: 50,
         right: 50,
-        bottom: 0
+        bottom: 0,
       },
       animation: null,
       marks: [
@@ -33,24 +36,24 @@ describe('Timeline', () => {
           id: 'timeToFirstByte',
           offset: 100000,
           type: 'agentMark',
-          verticalLine: true
+          verticalLine: true,
         },
         {
           id: 'domInteractive',
           offset: 110000,
           type: 'agentMark',
-          verticalLine: true
+          verticalLine: true,
         },
         {
           id: 'domComplete',
           offset: 190000,
           type: 'agentMark',
-          verticalLine: true
-        }
-      ]
+          verticalLine: true,
+        },
+      ],
     };
 
-    const wrapper = mount(
+    const wrapper = mountWithTheme(
       <StickyContainer>
         <Timeline {...props} />
       </StickyContainer>
@@ -69,12 +72,12 @@ describe('Timeline', () => {
         top: 100,
         left: 50,
         right: 50,
-        bottom: 0
-      }
+        bottom: 0,
+      },
     };
 
     const mountTimeline = () =>
-      mount(
+      mountWithTheme(
         <StickyContainer>
           <Timeline {...props} />
         </StickyContainer>

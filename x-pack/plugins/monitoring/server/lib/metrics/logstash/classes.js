@@ -90,7 +90,7 @@ export class LogstashEventsLatencyClusterMetric extends LogstashClusterMetric {
       },
     };
 
-    this.calculation = bucket => {
+    this.calculation = (bucket) => {
       const timeInMillisDeriv = _.get(bucket, 'events_time_in_millis_deriv.normalized_value', null);
       const totalEventsDeriv = _.get(bucket, 'events_total_deriv.normalized_value', null);
 
@@ -189,7 +189,7 @@ export class LogstashEventsLatencyMetric extends LogstashMetric {
       },
     };
 
-    this.calculation = bucket => {
+    this.calculation = (bucket) => {
       const timeInMillisDeriv = _.get(bucket, 'events_time_in_millis_deriv.normalized_value', null);
       const totalEventsDeriv = _.get(bucket, 'events_total_deriv.normalized_value', null);
 
@@ -242,7 +242,7 @@ export class LogstashPipelineQueueSizeMetric extends LogstashMetric {
       },
     };
 
-    this.calculation = bucket => _.get(bucket, 'pipelines.total_queue_size_for_node.value');
+    this.calculation = (bucket) => _.get(bucket, 'pipelines.total_queue_size_for_node.value');
   }
 }
 
@@ -312,7 +312,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
     this.getDateHistogramSubAggs = ({ pageOfPipelines }) => {
       const termAggExtras = {};
       if (pageOfPipelines) {
-        termAggExtras.include = pageOfPipelines.map(pipeline => pipeline.id);
+        termAggExtras.include = pageOfPipelines.map((pipeline) => pipeline.id);
       }
       return {
         pipelines_nested: {
@@ -344,10 +344,10 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
       };
     };
 
-    this.calculation = bucket => {
+    this.calculation = (bucket) => {
       const pipelineNodesCounts = {};
       const pipelineBuckets = _.get(bucket, 'pipelines_nested.by_pipeline_id.buckets', []);
-      pipelineBuckets.forEach(pipelineBucket => {
+      pipelineBuckets.forEach((pipelineBucket) => {
         pipelineNodesCounts[pipelineBucket.key] = _.get(pipelineBucket, 'to_root.node_count.value');
       });
 

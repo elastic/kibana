@@ -113,7 +113,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       setSaveState(SAVE_STATE.NOT_SAVED);
 
       // mix existing groups from the server with the groups used across all jobs in the module.
-      const moduleGroups = [...response.jobs.map(j => j.config.groups || [])].flat();
+      const moduleGroups = [...response.jobs.map((j) => j.config.groups || [])].flat();
       setExistingGroups([...new Set([...existingGroups, ...moduleGroups])]);
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -176,7 +176,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
 
       setJobs(
-        jobs.map(job => {
+        jobs.map((job) => {
           return {
             ...job,
             datafeedResult: datafeedsResponse.find(({ id }) => id.endsWith(job.id)),
@@ -297,7 +297,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               {isFormVisible && (
                 <JobSettingsForm
                   onSubmit={save}
-                  onChange={formValues => {
+                  onChange={(formValues) => {
                     setJobPrefix(formValues.jobPrefix);
                   }}
                   saveState={saveState}

@@ -19,35 +19,27 @@
 
 import React from 'react';
 import {
-  EuiFormRow,
+  EuiButton,
   EuiFieldText,
-  EuiPanel,
-  EuiTextArea,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiTitle,
+  EuiPanel,
   EuiText,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
-import {
-  TodoEmbeddable,
-  TODO_EMBEDDABLE,
-  TodoInput,
-} from '../../../examples/embeddable_examples/public/todo';
-import {
-  EmbeddableStart,
-  EmbeddableRoot,
-  EmbeddableOutput,
-  ErrorEmbeddable,
-} from '../../../src/plugins/embeddable/public';
+import { TodoInput } from '../../../examples/embeddable_examples/public/todo';
+import { TodoEmbeddableFactory } from '../../../examples/embeddable_examples/public';
+import { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
 
 interface Props {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  todoEmbeddableFactory: TodoEmbeddableFactory;
 }
 
 interface State {
@@ -55,50 +47,27 @@ interface State {
   title?: string;
   icon?: string;
   loading: boolean;
+  input: TodoInput;
 }
 
 export class TodoEmbeddableExample extends React.Component<Props, State> {
-  private embeddable?: TodoEmbeddable | ErrorEmbeddable;
-
   constructor(props: Props) {
     super(props);
 
-    this.state = { loading: true };
-  }
-
-  public componentDidMount() {
-    const factory = this.props.getEmbeddableFactory<TodoInput, EmbeddableOutput, TodoEmbeddable>(
-      TODO_EMBEDDABLE
-    );
-
-    if (factory === undefined) {
-      throw new Error('Embeddable factory is undefined!');
-    }
-
-    factory
-      .create({
+    this.state = {
+      loading: true,
+      input: {
         id: '1',
         task: 'Take out the trash',
         icon: 'broom',
         title: 'Trash',
-      })
-      .then(embeddable => {
-        this.embeddable = embeddable;
-        this.setState({ loading: false });
-      });
-  }
-
-  public componentWillUnmount() {
-    if (this.embeddable) {
-      this.embeddable.destroy();
-    }
+      },
+    };
   }
 
   private onUpdateEmbeddableInput = () => {
-    if (this.embeddable) {
-      const { task, title, icon } = this.state;
-      this.embeddable.updateInput({ task, title, icon });
-    }
+    const { task, title, icon, input } = this.state;
+    this.setState({ input: { ...input, task: task ?? '', title, icon } });
   };
 
   public render() {
@@ -115,27 +84,14 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
           <EuiPageContentBody>
             <EuiText>
               This embeddable takes input parameters, task, title and icon. You can update them
-              using this form. In the code, pressing update will call
-              <pre>
-                <code>
-                  const &#123; task, title, icon &#125; = this.state;
-                  <br />
-                  this.embeddable.updateInput(&#123; task, title, icon &#125;);
-                </code>
-              </pre>
-              <p>
-                You may also notice this example uses `EmbeddableRoot` instead of the
-                `EmbeddableFactoryRenderer` helper component. This is because it needs a reference
-                to the embeddable to update it, and `EmbeddableFactoryRenderer` creates and holds
-                the embeddable instance internally.
-              </p>
+              using this form. Input changes will be passed inside `EmbeddableRenderer` as a prop
             </EuiText>
             <EuiFlexGroup>
               <EuiFlexItem grow={true}>
                 <EuiFormRow label="Title">
                   <EuiFieldText
                     data-test-subj="titleTodo"
-                    onChange={ev => this.setState({ title: ev.target.value })}
+                    onChange={(ev) => this.setState({ title: ev.target.value })}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -143,7 +99,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
                 <EuiFormRow label="Icon">
                   <EuiFieldText
                     data-test-subj="iconTodo"
-                    onChange={ev => this.setState({ icon: ev.target.value })}
+                    onChange={(ev) => this.setState({ icon: ev.target.value })}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -153,7 +109,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
                     fullWidth
                     resize="horizontal"
                     data-test-subj="taskTodo"
-                    onChange={ev => this.setState({ task: ev.target.value })}
+                    onChange={(ev) => this.setState({ task: ev.target.value })}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -169,7 +125,10 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiPanel data-test-subj="todoEmbeddable" paddingSize="none" role="figure">
-              <EmbeddableRoot embeddable={this.embeddable} loading={this.state.loading} />
+              <EmbeddableRenderer
+                factory={this.props.todoEmbeddableFactory}
+                input={this.state.input}
+              />
             </EuiPanel>
           </EuiPageContentBody>
         </EuiPageContent>

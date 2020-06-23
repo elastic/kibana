@@ -64,14 +64,15 @@ export class CollectorSet {
   };
 
   public getCollectorByType = (type: string) => {
-    return this.collectors.find(c => c.type === type);
+    return this.collectors.find((c) => c.type === type);
   };
 
   public isUsageCollector = (x: UsageCollector | any): x is UsageCollector => {
     return x instanceof UsageCollector;
   };
 
-  public areAllCollectorsReady = async (collectorSet = this) => {
+  public areAllCollectorsReady = async (collectorSet: CollectorSet = this) => {
+    // Kept this for runtime validation in JS code.
     if (!(collectorSet instanceof CollectorSet)) {
       throw new Error(
         `areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet
@@ -140,7 +141,7 @@ export class CollectorSet {
   };
 
   public bulkFetchUsage = async (callCluster: APICaller) => {
-    const usageCollectors = this.getFilteredCollectorSet(c => c instanceof UsageCollector);
+    const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
     return await this.bulkFetch(callCluster, usageCollectors.collectors);
   };
 

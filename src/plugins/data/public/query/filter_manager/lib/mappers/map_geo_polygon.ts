@@ -36,7 +36,7 @@ const getFormattedValueFn = (points: string[]) => {
 };
 
 function getParams(filter: GeoPolygonFilter) {
-  const key = Object.keys(filter.geo_polygon).filter(k => k !== 'ignore_unmapped')[0];
+  const key = Object.keys(filter.geo_polygon).filter((k) => k !== 'ignore_unmapped')[0];
   const params = filter.geo_polygon[key];
 
   return {

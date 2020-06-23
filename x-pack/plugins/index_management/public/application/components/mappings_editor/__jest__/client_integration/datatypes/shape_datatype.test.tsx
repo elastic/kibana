@@ -61,10 +61,7 @@ describe('Mappings editor: shape datatype', () => {
     await updateFieldAndCloseFlyout();
 
     // It should have the default parameters values added
-    updatedMappings.properties.myField = {
-      type: 'shape',
-      ...defaultShapeParameters,
-    };
+    updatedMappings.properties.myField = defaultShapeParameters;
 
     ({ data } = await getMappingsEditorData(component));
     expect(data).toEqual(updatedMappings);

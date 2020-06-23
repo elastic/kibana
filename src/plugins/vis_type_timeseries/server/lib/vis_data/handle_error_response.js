@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const handleErrorResponse = panel => error => {
+export const handleErrorResponse = (panel) => (error) => {
   if (error.isBoom && error.status === 401) throw error;
   const result = {};
   let errorResponse;

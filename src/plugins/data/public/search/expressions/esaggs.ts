@@ -115,7 +115,7 @@ const handleCourierRequest = async ({
     },
   });
 
-  requestSearchSource.setField('aggs', function() {
+  requestSearchSource.setField('aggs', function () {
     return aggs.toDsl(metricsAtAllLevels);
   });
 
@@ -134,7 +134,7 @@ const handleCourierRequest = async ({
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
       return allTimeFields
-        .map(fieldName => getTime(indexPattern, timeRange, { fieldName }))
+        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName }))
         .filter(isRangeFilter);
     });
   }

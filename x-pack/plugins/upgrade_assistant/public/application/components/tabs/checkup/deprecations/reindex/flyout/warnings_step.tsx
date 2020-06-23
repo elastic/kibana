@@ -96,7 +96,7 @@ export class WarningsFlyoutStep extends React.Component<
     const { checkedIds } = this.state;
 
     // Do not allow to proceed until all checkboxes are checked.
-    const blockAdvance = Object.values(checkedIds).filter(v => v).length < warnings.length;
+    const blockAdvance = Object.values(checkedIds).filter((v) => v).length < warnings.length;
 
     return (
       <Fragment>

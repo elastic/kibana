@@ -6,4 +6,4 @@
 
 export * from './types';
 
-export const BASE_ACTION_API_PATH = '/api/action';
+export const BASE_ACTION_API_PATH = '/api/actions';

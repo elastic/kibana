@@ -21,7 +21,7 @@ function isDuplicateStop(targetStop, iconStops) {
 }
 
 export function getFirstUnusedSymbol(symbolOptions, iconStops) {
-  const firstUnusedPreferredIconId = PREFERRED_ICONS.find(iconId => {
+  const firstUnusedPreferredIconId = PREFERRED_ICONS.find((iconId) => {
     const isSymbolBeingUsed = iconStops.some(({ icon }) => {
       return icon === iconId;
     });
@@ -56,7 +56,7 @@ export function IconStops({
   symbolOptions,
 }) {
   return iconStops.map(({ stop, icon }, index) => {
-    const onIconSelect = selectedIconId => {
+    const onIconSelect = (selectedIconId) => {
       const newIconStops = [...iconStops];
       newIconStops[index] = {
         ...iconStops[index],
@@ -64,7 +64,7 @@ export function IconStops({
       };
       onChange({ customMapStops: newIconStops });
     };
-    const onStopChange = newStopValue => {
+    const onStopChange = (newStopValue) => {
       const newIconStops = [...iconStops];
       newIconStops[index] = {
         ...iconStops[index],

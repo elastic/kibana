@@ -14,7 +14,7 @@ export function toQuery(search?: string): APMQueryParamsRaw {
 }
 
 export function fromQuery(query: Record<string, any>) {
-  const encodedQuery = url.encodeQuery(query, value =>
+  const encodedQuery = url.encodeQuery(query, (value) =>
     encodeURIComponent(value).replace(/%3A/g, ':')
   );
 

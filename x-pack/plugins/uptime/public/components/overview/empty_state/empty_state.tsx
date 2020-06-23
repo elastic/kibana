@@ -30,43 +30,46 @@ export const EmptyStateComponent = ({
   if (errors?.length) {
     return <EmptyStateError errors={errors} />;
   }
-  if (!loading && statesIndexStatus) {
-    const { indexExists, docCount } = statesIndexStatus;
-    if (!indexExists) {
-      return (
-        <DataOrIndexMissing
-          settings={settings}
-          headingMessage={
-            <FormattedMessage
-              id="xpack.uptime.emptyState.noIndexTitle"
-              defaultMessage="No indices found matching pattern {indexName}"
-              values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
-            />
-          }
-        />
-      );
-    } else if (indexExists && docCount === 0) {
-      return (
-        <DataOrIndexMissing
-          settings={settings}
-          headingMessage={
-            <FormattedMessage
-              id="xpack.uptime.emptyState.noDataMessage"
-              defaultMessage="No uptime data found in index {indexName}"
-              values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
-            />
-          }
-        />
-      );
-    }
-    /**
-     * We choose to render the children any time the count > 0, even if
-     * the component is loading. If we render the loading state for this component,
-     * it will blow away the state of child components and trigger an ugly
-     * jittery UX any time the components refresh. This way we'll keep the stale
-     * state displayed during the fetching process.
-     */
-    return <Fragment>{children}</Fragment>;
+  const { indexExists, docCount } = statesIndexStatus ?? {};
+
+  if (loading && (!indexExists || docCount === 0 || !statesIndexStatus)) {
+    return <EmptyStateLoading />;
   }
-  return <EmptyStateLoading />;
+
+  if (!indexExists) {
+    return (
+      <DataOrIndexMissing
+        settings={settings}
+        headingMessage={
+          <FormattedMessage
+            id="xpack.uptime.emptyState.noIndexTitle"
+            defaultMessage="No indices found matching pattern {indexName}"
+            values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
+          />
+        }
+      />
+    );
+  } else if (indexExists && docCount === 0) {
+    return (
+      <DataOrIndexMissing
+        settings={settings}
+        headingMessage={
+          <FormattedMessage
+            id="xpack.uptime.emptyState.noDataMessage"
+            defaultMessage="No uptime data found in index {indexName}"
+            values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
+          />
+        }
+      />
+    );
+  }
+  /**
+   * We choose to render the children any time the count > 0, even if
+   * the component is loading. If we render the loading state for this component,
+   * it will blow away the state of child components and trigger an ugly
+   * jittery UX any time the components refresh. This way we'll keep the stale
+   * state displayed during the fetching process.
+   */
+  return <Fragment>{children}</Fragment>;
+  // }
 };

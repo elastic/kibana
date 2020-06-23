@@ -65,7 +65,7 @@ function mapImportFailureToRetryObject({
   if (failure.error.type === 'missing_references') {
     const objReplaceReferences =
       replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [];
-    const indexPatternRefs = failure.error.references.filter(obj => obj.type === 'index-pattern');
+    const indexPatternRefs = failure.error.references.filter((obj) => obj.type === 'index-pattern');
     for (const reference of indexPatternRefs) {
       for (const unmatchedReference of unmatchedReferences) {
         const hasNewValue = !!unmatchedReference.newIndexPatternId;
@@ -133,7 +133,9 @@ export async function resolveImportErrors({
 
   // Loop until all issues are resolved
   while (
-    importFailures.some(failure => ['conflict', 'missing_references'].includes(failure.error.type))
+    importFailures.some((failure) =>
+      ['conflict', 'missing_references'].includes(failure.error.type)
+    )
   ) {
     // Ask for overwrites
     if (!isOverwriteAllChecked) {
@@ -149,12 +151,14 @@ export async function resolveImportErrors({
     }
 
     // Build retries array
-    const retries = importFailures.map(callMapImportFailure).filter(obj => !!obj) as RetryObject[];
+    const retries = importFailures
+      .map(callMapImportFailure)
+      .filter((obj) => !!obj) as RetryObject[];
     for (const { error, obj } of importFailures) {
       if (error.type !== 'missing_references') {
         continue;
       }
-      if (!retries.some(retryObj => retryObj.type === obj.type && retryObj.id === obj.id)) {
+      if (!retries.some((retryObj) => retryObj.type === obj.type && retryObj.id === obj.id)) {
         continue;
       }
       for (const { type, id } of error.blocking || []) {

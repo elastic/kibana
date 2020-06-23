@@ -209,7 +209,7 @@ export const policyNameAlreadyUsedErrorMessage = i18n.translate(
     defaultMessage: 'That policy name is already used.',
   }
 );
-export const validateLifecycle = state => {
+export const validateLifecycle = (state) => {
   // This method of deep copy does not always work but it should be fine here
   const errors = JSON.parse(JSON.stringify(ERROR_STRUCTURE));
   const policyName = getSelectedPolicyName(state);
@@ -236,7 +236,7 @@ export const validateLifecycle = state => {
   ) {
     errors[STRUCTURE_POLICY_NAME].push(policyNameMustBeDifferentErrorMessage);
   } else if (getSelectedOriginalPolicyName(state) !== getSelectedPolicyName(state)) {
-    const policyNames = getPolicies(state).map(policy => policy.name);
+    const policyNames = getPolicies(state).map((policy) => policy.name);
     if (policyNames.includes(getSelectedPolicyName(state))) {
       errors[STRUCTURE_POLICY_NAME].push(policyNameAlreadyUsedErrorMessage);
     }
@@ -254,7 +254,7 @@ export const validateLifecycle = state => {
   return errors;
 };
 
-export const getLifecycle = state => {
+export const getLifecycle = (state) => {
   const policyName = getSelectedPolicyName(state);
   const phases = Object.entries(getPhases(state)).reduce((accum, [phaseName, phase]) => {
     // Hot is ALWAYS enabled
@@ -270,7 +270,9 @@ export const getLifecycle = state => {
       if (phaseName === PHASE_DELETE) {
         accum[phaseName].actions = {
           ...accum[phaseName].actions,
-          delete: {},
+          delete: {
+            ...accum[phaseName].actions.delete,
+          },
         };
       }
     }

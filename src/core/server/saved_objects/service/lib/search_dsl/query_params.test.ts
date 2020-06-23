@@ -43,11 +43,11 @@ const MAPPINGS = {
 const ALL_TYPES = Object.keys(MAPPINGS.properties);
 // get all possible subsets (combination) of all types
 const ALL_TYPE_SUBSETS = ALL_TYPES.reduce(
-  (subsets, value) => subsets.concat(subsets.map(set => [...set, value])),
+  (subsets, value) => subsets.concat(subsets.map((set) => [...set, value])),
   [[] as string[]]
 )
-  .filter(x => x.length) // exclude empty set
-  .map(x => (x.length === 1 ? x[0] : x)); // if a subset is a single string, destructure it
+  .filter((x) => x.length) // exclude empty set
+  .map((x) => (x.length === 1 ? x[0] : x)); // if a subset is a single string, destructure it
 
 /**
  * Note: these tests cases are defined in the order they appear in the source code, for readability's sake
@@ -163,7 +163,7 @@ describe('#getQueryParams', () => {
           expect.arrayContaining([
             {
               bool: expect.objectContaining({
-                should: types.map(type => ({
+                should: types.map((type) => ({
                   bool: expect.objectContaining({
                     must: expect.arrayContaining([{ term: { type } }]),
                   }),
@@ -233,11 +233,11 @@ describe('#getQueryParams', () => {
         for (const typeOrTypes of ALL_TYPE_SUBSETS) {
           const result = getQueryParams({ mappings, registry, type: typeOrTypes, namespace });
           const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-          expectResult(result, ...types.map(x => createTypeClause(x, namespace)));
+          expectResult(result, ...types.map((x) => createTypeClause(x, namespace)));
         }
         // also test with no specified type/s
         const result = getQueryParams({ mappings, registry, type: undefined, namespace });
-        expectResult(result, ...ALL_TYPES.map(x => createTypeClause(x, namespace)));
+        expectResult(result, ...ALL_TYPES.map((x) => createTypeClause(x, namespace)));
       };
 
       it('filters results with "namespace" field when `namespace` is not specified', () => {
@@ -280,7 +280,7 @@ describe('#getQueryParams', () => {
     describe('`searchFields` parameter', () => {
       const getExpectedFields = (searchFields: string[], typeOrTypes: string | string[]) => {
         const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-        return searchFields.map(x => types.map(y => `${y}.${x}`)).flat();
+        return searchFields.map((x) => types.map((y) => `${y}.${x}`)).flat();
       };
 
       const test = (searchFields: string[]) => {

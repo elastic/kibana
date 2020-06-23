@@ -52,17 +52,6 @@ export class CoreApp {
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
-
-    coreSetup.savedObjects.registerType({
-      name: 'server',
-      hidden: false,
-      namespaceType: 'single',
-      mappings: {
-        properties: {
-          uuid: { type: 'keyword' },
-        },
-      },
-    });
   }
   private registerStaticDirs(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));

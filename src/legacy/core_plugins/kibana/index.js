@@ -26,28 +26,21 @@ import { exportApi } from './server/routes/api/export';
 import { getUiSettingDefaults } from './server/ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
-import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+
 import { kbnBaseUrl } from '../../../plugins/kibana_legacy/server';
 
 const mkdirAsync = promisify(Fs.mkdir);
 
-export default function(kibana) {
+export default function (kibana) {
   return new kibana.Plugin({
     id: 'kibana',
-    config: function(Joi) {
+    config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         index: Joi.string().default('.kibana'),
-        autocompleteTerminateAfter: Joi.number()
-          .integer()
-          .min(1)
-          .default(100000),
+        autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
         // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
-        autocompleteTimeout: Joi.number()
-          .integer()
-          .min(1)
-          .default(1000),
+        autocompleteTimeout: Joi.number().integer().min(1).default(1000),
       }).default();
     },
 
@@ -59,19 +52,7 @@ export default function(kibana) {
         main: 'plugins/kibana/kibana',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      links: [
-        {
-          id: 'kibana:stack_management',
-          title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Stack Management',
-          }),
-          order: 9003,
-          url: `${kbnBaseUrl}#/management`,
-          euiIconType: 'managementApp',
-          linkToLastSubUrl: false,
-          category: DEFAULT_APP_CATEGORIES.management,
-        },
-      ],
+      links: [],
 
       injectDefaultVars(server, options) {
         const mapConfig = server.config().get('map');
@@ -96,7 +77,7 @@ export default function(kibana) {
       uiSettingDefaults: getUiSettingDefaults(),
     },
 
-    preInit: async function(server) {
+    preInit: async function (server) {
       try {
         // Create the data directory (recursively, if the a parent dir doesn't exist).
         // If it already exists, does nothing.
@@ -108,7 +89,7 @@ export default function(kibana) {
       }
     },
 
-    init: async function(server) {
+    init: async function (server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
       // routes
       importApi(server);

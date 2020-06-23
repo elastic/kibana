@@ -145,11 +145,8 @@ export class AbstractESSource extends AbstractVectorSource {
     return searchSource;
   }
 
-  async getBoundsForFilters({ sourceQuery, query, timeFilters, filters, applyGlobalQuery }) {
-    const searchSource = await this.makeSearchSource(
-      { sourceQuery, query, timeFilters, filters, applyGlobalQuery },
-      0
-    );
+  async getBoundsForFilters(boundsFilters, registerCancelCallback) {
+    const searchSource = await this.makeSearchSource(boundsFilters, 0);
     searchSource.setField('aggs', {
       fitToBounds: {
         geo_bounds: {
@@ -160,13 +157,19 @@ export class AbstractESSource extends AbstractVectorSource {
 
     let esBounds;
     try {
-      const esResp = await searchSource.fetch();
+      const abortController = new AbortController();
+      registerCancelCallback(() => abortController.abort());
+      const esResp = await searchSource.fetch({ abortSignal: abortController.signal });
       if (!esResp.aggregations.fitToBounds.bounds) {
         // aggregations.fitToBounds is empty object when there are no matching documents
         return null;
       }
       esBounds = esResp.aggregations.fitToBounds.bounds;
     } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new DataRequestAbortError();
+      }
+
       return null;
     }
 
@@ -280,7 +283,7 @@ export class AbstractESSource extends AbstractVectorSource {
     registerCancelCallback,
     searchFilters
   ) {
-    const promises = dynamicStyleProps.map(dynamicStyleProp => {
+    const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
     });
 

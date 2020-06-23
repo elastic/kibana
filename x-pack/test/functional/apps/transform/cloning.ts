@@ -22,11 +22,11 @@ function getTransformConfig(): TransformPivotConfig {
   };
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('cloning', function() {
+  describe('cloning', function () {
     const transformConfig = getTransformConfig();
 
     before(async () => {
@@ -39,7 +39,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await transform.testResources.deleteIndexPattern(transformConfig.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfig.dest.index);
       await transform.api.deleteIndices(transformConfig.dest.index);
       await transform.api.cleanTransformIndices();
     });
@@ -52,7 +52,7 @@ export default function({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           // await transform.api.deleteIndices(<CLONE_DEST_INDEX>);
         });

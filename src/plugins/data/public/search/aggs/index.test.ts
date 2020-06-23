@@ -44,7 +44,7 @@ describe('AggTypesComponent', () => {
 
   describe('bucket aggs', () => {
     test('all extend BucketAggType', () => {
-      buckets.forEach(bucketAgg => {
+      buckets.forEach((bucketAgg) => {
         expect(isBucketAggType(bucketAgg)).toBeTruthy();
       });
     });
@@ -52,7 +52,7 @@ describe('AggTypesComponent', () => {
 
   describe('metric aggs', () => {
     test('all extend MetricAggType', () => {
-      metrics.forEach(metricAgg => {
+      metrics.forEach((metricAgg) => {
         expect(isMetricAggType(metricAgg)).toBeTruthy();
       });
     });

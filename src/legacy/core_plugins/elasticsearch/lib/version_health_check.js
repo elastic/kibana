@@ -20,7 +20,7 @@
 export const versionHealthCheck = (esPlugin, logWithMetadata, esNodesCompatibility$) => {
   esPlugin.status.yellow('Waiting for Elasticsearch');
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     esNodesCompatibility$.subscribe(({ isCompatible, message, kibanaVersion, warningNodes }) => {
       if (!isCompatible) {
         esPlugin.status.red(message);

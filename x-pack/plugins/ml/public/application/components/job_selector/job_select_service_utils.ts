@@ -15,10 +15,10 @@ export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {
   const groups: Dictionary<any> = {};
   const groupsMap: Dictionary<any> = {};
 
-  jobs.forEach(job => {
+  jobs.forEach((job) => {
     // Organize job by group
     if (job.groups !== undefined) {
-      job.groups.forEach(g => {
+      job.groups.forEach((g) => {
         if (groups[g] === undefined) {
           groups[g] = {
             id: g,
@@ -61,7 +61,7 @@ export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {
     }
   });
 
-  Object.keys(groups).forEach(groupId => {
+  Object.keys(groups).forEach((groupId) => {
     const group = groups[groupId];
     group.timeRange.widthPx = group.timeRange.toPx - group.timeRange.fromPx;
     group.timeRange.toMoment = moment(group.timeRange.to);
@@ -78,13 +78,13 @@ export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {
     });
   });
 
-  return { groups: Object.keys(groups).map(g => groups[g]), groupsMap };
+  return { groups: Object.keys(groups).map((g) => groups[g]), groupsMap };
 }
 
 export function getTimeRangeFromSelection(jobs: MlJobWithTimeRange[], selection: string[]) {
   if (jobs.length > 0) {
     const times: number[] = [];
-    jobs.forEach(job => {
+    jobs.forEach((job) => {
       if (selection.includes(job.job_id)) {
         if (job.timeRange.from !== undefined) {
           times.push(job.timeRange.from);
@@ -110,18 +110,15 @@ export function normalizeTimes(
   dateFormatTz: string,
   ganttBarWidth: number
 ) {
-  const jobsWithTimeRange = jobs.filter(job => {
+  const jobsWithTimeRange = jobs.filter((job) => {
     return job.timeRange.to !== undefined && job.timeRange.from !== undefined;
   });
 
-  const min = Math.min(...jobsWithTimeRange.map(job => +job.timeRange.from));
-  const max = Math.max(...jobsWithTimeRange.map(job => +job.timeRange.to));
-  const ganttScale = d3.scale
-    .linear()
-    .domain([min, max])
-    .range([1, ganttBarWidth]);
+  const min = Math.min(...jobsWithTimeRange.map((job) => +job.timeRange.from));
+  const max = Math.max(...jobsWithTimeRange.map((job) => +job.timeRange.to));
+  const ganttScale = d3.scale.linear().domain([min, max]).range([1, ganttBarWidth]);
 
-  jobs.forEach(job => {
+  jobs.forEach((job) => {
     if (job.timeRange.to !== undefined && job.timeRange.from !== undefined) {
       job.timeRange.fromPx = ganttScale(job.timeRange.from);
       job.timeRange.toPx = ganttScale(job.timeRange.to);

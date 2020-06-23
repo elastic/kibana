@@ -77,8 +77,8 @@ run(
 
     const extraPluginScanDirs = ([] as string[])
       .concat((flags['scan-dir'] as string | string[]) || [])
-      .map(p => Path.resolve(p));
-    if (!extraPluginScanDirs.every(s => typeof s === 'string')) {
+      .map((p) => Path.resolve(p));
+    if (!extraPluginScanDirs.every((s) => typeof s === 'string')) {
       throw createFlagError('expected --scan-dir to be a string');
     }
 

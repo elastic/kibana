@@ -10,5 +10,5 @@ export const TIMEPICKER_DEFAULTS = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
   refreshPaused: 'true',
-  refreshInterval: '0'
+  refreshInterval: '0',
 };

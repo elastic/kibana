@@ -74,7 +74,7 @@ export const createDatasourceHandler: RequestHandler<
   TypeOf<typeof CreateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const newData = { ...request.body };
   try {

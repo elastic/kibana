@@ -11,13 +11,15 @@ import { Feature } from '../../../../../features/public';
 import { KibanaPrivileges } from '../model';
 import { SecurityLicenseFeatures } from '../../..';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { featuresPluginMock } from '../../../../../features/server/mocks';
+
 export const createRawKibanaPrivileges = (
   features: Feature[],
   { allowSubFeaturePrivileges = true } = {}
 ) => {
-  const featuresService = {
-    getFeatures: () => features,
-  };
+  const featuresService = featuresPluginMock.createSetup();
+  featuresService.getFeatures.mockReturnValue(features);
 
   const licensingService = {
     getFeatures: () => ({ allowSubFeaturePrivileges } as SecurityLicenseFeatures),

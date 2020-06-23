@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { getPaths, foldLeftRight } from '../../siem/server/utils/build_validation/__mocks__/utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { exactCheck } from '../../siem/server/utils/build_validation/exact_check';
+export { NonEmptyString } from '../../security_solution/common/detection_engine/schemas/types/non_empty_string';
+export { DefaultUuid } from '../../security_solution/common/detection_engine/schemas/types/default_uuid';
+export { DefaultStringArray } from '../../security_solution/common/detection_engine/schemas/types/default_string_array';
+export { exactCheck } from '../../security_solution/common/exact_check';
+export { getPaths, foldLeftRight } from '../../security_solution/common/test_utils';
+export { validate } from '../../security_solution/common/validate';
+export { formatErrors } from '../../security_solution/common/format_errors';

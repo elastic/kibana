@@ -6,8 +6,8 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('security app - trial license', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('security app - trial license', function () {
     this.tags('ciGroup4');
 
     loadTestFile(require.resolve('./login_selector'));

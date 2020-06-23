@@ -43,9 +43,19 @@ export const baseCssDistFilename: string;
 export const darkCssDistFilename: string;
 
 /**
+ * Filename of the dark-theme css file in the distributable directory
+ */
+export const darkV8CssDistFilename: string;
+
+/**
  * Filename of the light-theme css file in the distributable directory
  */
 export const lightCssDistFilename: string;
+
+/**
+ * Filename of the light-theme css file in the distributable directory
+ */
+export const lightV8CssDistFilename: string;
 
 /**
  * Externals mapping inteded to be used in a webpack config

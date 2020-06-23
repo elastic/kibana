@@ -26,7 +26,6 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -38,11 +37,10 @@ export interface LensPluginSetupDependencies {
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
-  dashboard: DashboardStart;
+  embeddable: EmbeddableStart;
 }
 
 export class LensPlugin {

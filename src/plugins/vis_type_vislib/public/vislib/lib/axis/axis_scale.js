@@ -41,7 +41,7 @@ export class AxisScale {
 
   validateUserExtents(domain) {
     const config = this.axisConfig;
-    return domain.map(val => {
+    return domain.map((val) => {
       val = parseFloat(val);
       if (isNaN(val)) throw new Error(val + ' is not a valid number');
       if (config.isPercentage() && config.isUserDefined()) return val / 100;
@@ -72,7 +72,7 @@ export class AxisScale {
     opts.push(point);
 
     return d3[extent](
-      opts.reduce(function(opts, v) {
+      opts.reduce(function (opts, v) {
         if (!_.isNumber(v)) v = +v;
         if (!isNaN(v)) opts.push(v);
         return opts;
@@ -101,7 +101,7 @@ export class AxisScale {
     const y = moment(x);
     const method = n > 0 ? 'add' : 'subtract';
 
-    _.times(Math.abs(n), function() {
+    _.times(Math.abs(n), function () {
       y[method](interval);
     });
 
@@ -121,7 +121,7 @@ export class AxisScale {
           const isFirstAxis = config.get('id') === this.visConfig.get('valueAxes[0].id');
 
           if (matchingValueAxis || (!seriConfig.valueAxis && isFirstAxis)) {
-            const axisPoints = seri.values.map(val => {
+            const axisPoints = seri.values.map((val) => {
               if (val.y0) {
                 return val.y0 + val.y;
               }

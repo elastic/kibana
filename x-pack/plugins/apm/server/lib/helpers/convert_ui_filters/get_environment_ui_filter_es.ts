@@ -17,10 +17,10 @@ export function getEnvironmentUiFilterES(
 
   if (environment === ENVIRONMENT_NOT_DEFINED) {
     return {
-      bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } }
+      bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } },
     };
   }
   return {
-    term: { [SERVICE_ENVIRONMENT]: environment }
+    term: { [SERVICE_ENVIRONMENT]: environment },
   };
 }

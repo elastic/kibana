@@ -71,7 +71,7 @@ export default async (kbnServer, kibanaHapiServer, config) => {
     process.send(['WORKER_BROADCAST', { optimizeReady: ready }]);
   };
 
-  process.on('message', msg => {
+  process.on('message', (msg) => {
     if (msg && msg.optimizeReady === '?') sendReady();
   });
 

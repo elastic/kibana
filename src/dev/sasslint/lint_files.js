@@ -30,7 +30,7 @@ import { createFailError } from '@kbn/dev-utils';
  * @return {undefined}
  */
 export function lintFiles(log, files) {
-  const paths = files.map(file => file.getRelativePath());
+  const paths = files.map((file) => file.getRelativePath());
 
   const report = sassLint.lintFiles(
     paths.join(', '),

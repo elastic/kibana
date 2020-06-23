@@ -39,7 +39,7 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
     getScopedAnnotationsClient: (requestContext: RequestHandlerContext, request: KibanaRequest) => {
       return createAnnotationsClient({
         index,
-        apiCaller: core.elasticsearch.dataClient.asScoped(request).callAsCurrentUser,
+        apiCaller: requestContext.core.elasticsearch.legacy.client.callAsCurrentUser,
         logger,
         license: requestContext.licensing?.license,
       });

@@ -83,7 +83,7 @@ export class LayerPanel extends React.Component {
     let leftJoinFields;
     try {
       const leftFieldsInstances = await this.props.selectedLayer.getLeftJoinFields();
-      const leftFieldPromises = leftFieldsInstances.map(async field => {
+      const leftFieldPromises = leftFieldsInstances.map(async (field) => {
         return {
           name: field.getName(),
           label: await field.getLabel(),

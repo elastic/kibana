@@ -51,7 +51,7 @@ export const getSerialDiffMetricAgg = ({
       name: METRIC_TYPES.SERIAL_DIFF,
       title: serialDiffTitle,
       subtype: parentPipelineAggHelper.subtype,
-      makeLabel: agg => makeNestedLabel(agg, serialDiffLabel),
+      makeLabel: (agg) => makeNestedLabel(agg, serialDiffLabel),
       params: [...parentPipelineAggHelper.params()],
       getFormat: parentPipelineAggHelper.getFormat,
     },

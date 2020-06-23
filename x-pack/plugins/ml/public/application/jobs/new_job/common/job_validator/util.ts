@@ -189,16 +189,16 @@ export function checkForExistingJobAndGroupIds(
   }
 
   // check that groups that have been newly added in this job do not already exist as job ids
-  const newGroups = groupIds.filter(g => !existingJobsAndGroups.groupIds.includes(g));
-  if (existingJobsAndGroups.jobIds.some(g => newGroups.includes(g))) {
+  const newGroups = groupIds.filter((g) => !existingJobsAndGroups.groupIds.includes(g));
+  if (existingJobsAndGroups.jobIds.some((g) => newGroups.includes(g))) {
     messages.push({ id: 'job_group_id_already_exists' });
   }
 
   return {
     messages,
     valid: messages.length === 0,
-    contains: (id: string) => messages.some(m => id === m.id),
-    find: (id: string) => messages.find(m => id === m.id),
+    contains: (id: string) => messages.some((m) => id === m.id),
+    find: (id: string) => messages.find((m) => id === m.id),
   };
 }
 

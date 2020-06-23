@@ -17,7 +17,7 @@ describe.skip('asset', () => {
     const throwsErr = () => {
       return fn(null, { id: 'boo' });
     };
-    expect(throwsErr).to.throwException(err => {
+    expect(throwsErr).to.throwException((err) => {
       expect(err.message).to.be('Could not get the asset by ID: boo');
     });
   });

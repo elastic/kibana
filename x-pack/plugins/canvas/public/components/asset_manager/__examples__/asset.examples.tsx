@@ -27,7 +27,7 @@ const MARKER: AssetType = {
 };
 
 storiesOf('components/Assets/Asset', module)
-  .addDecorator(story => <div style={{ width: '215px' }}>{story()}</div>)
+  .addDecorator((story) => <div style={{ width: '215px' }}>{story()}</div>)
   .add('airplane', () => (
     <Asset
       asset={AIRPLANE}

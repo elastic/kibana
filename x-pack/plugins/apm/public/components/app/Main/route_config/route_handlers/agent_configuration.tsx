@@ -20,10 +20,10 @@ export function EditAgentConfigurationRouteHandler() {
   const { name, environment, pageStep } = toQuery(search);
 
   const res = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       return callApmApi({
         pathname: '/api/apm/settings/agent-configuration/view',
-        params: { query: { name, environment } }
+        params: { query: { name, environment } },
       });
     },
     [name, environment]

@@ -17,7 +17,7 @@ export const updateIndexSettingsError = createAction(
   'INDEX_MANAGEMENT_UPDATE_INDEX_SETTINGS_ERROR'
 );
 
-export const updateIndexSettings = ({ indexName, settings }) => async dispatch => {
+export const updateIndexSettings = ({ indexName, settings }) => async (dispatch) => {
   if (Object.keys(settings).length !== 0) {
     try {
       const { error, message } = await request(indexName, settings);

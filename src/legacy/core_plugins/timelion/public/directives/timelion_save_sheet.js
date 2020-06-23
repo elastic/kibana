@@ -21,7 +21,7 @@ import { uiModules } from 'ui/modules';
 import saveTemplate from 'plugins/timelion/partials/save_sheet.html';
 const app = uiModules.get('apps/timelion', []);
 
-app.directive('timelionSave', function() {
+app.directive('timelionSave', function () {
   return {
     replace: true,
     restrict: 'E',

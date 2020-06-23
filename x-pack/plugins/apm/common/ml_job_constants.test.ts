@@ -5,12 +5,11 @@
  */
 
 import {
-  getMlIndex,
   getMlJobId,
   getMlPrefix,
   getMlJobServiceName,
   getSeverity,
-  severity
+  severity,
 } from './ml_job_constants';
 
 describe('ml_job_constants', () => {
@@ -33,16 +32,6 @@ describe('ml_job_constants', () => {
     );
     expect(getMlJobId('my service name', 'my transaction type')).toBe(
       'my_service_name-my_transaction_type-high_mean_response_time'
-    );
-  });
-
-  it('getMlIndex', () => {
-    expect(getMlIndex('myServiceName')).toBe(
-      '.ml-anomalies-myservicename-high_mean_response_time'
-    );
-
-    expect(getMlIndex('myServiceName', 'myTransactionType')).toBe(
-      '.ml-anomalies-myservicename-mytransactiontype-high_mean_response_time'
     );
   });
 

@@ -7,11 +7,8 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
+import { USER } from '../../../../functional/services/ml/security_common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -101,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('create', function() {
+  describe('create', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -116,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(`/api/ml/anomaly_detectors/${testData.jobId}`)
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);
 

@@ -11,41 +11,45 @@ import { registerTestBed, TestBed } from '../../../../../../../../../test_utils'
 import { getChildFieldsName } from '../../../lib';
 import { MappingsEditor } from '../../../mappings_editor';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-  // which does not produce a valid component wrapper
-  EuiComboBox: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockComboBox'}
-      data-currentvalue={props.selectedOptions}
-      onChange={async (syntheticEvent: any) => {
-        props.onChange([syntheticEvent['0']]);
-      }}
-    />
-  ),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-currentvalue={props.value}
-      onChange={(e: any) => {
-        props.onChange(e.jsonContent);
-      }}
-    />
-  ),
-  // Mocking EuiSuperSelect to be able to easily change its value
-  // with a `myWrapper.simulate('change', { target: { value: 'someValue' } })`
-  EuiSuperSelect: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
-      value={props.valueOfSelected}
-      onChange={e => {
-        props.onChange(e.target.value);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // which does not produce a valid component wrapper
+    EuiComboBox: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
+        data-currentvalue={props.selectedOptions}
+        onChange={async (syntheticEvent: any) => {
+          props.onChange([syntheticEvent['0']]);
+        }}
+      />
+    ),
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+    // Mocking EuiSuperSelect to be able to easily change its value
+    // with a `myWrapper.simulate('change', { target: { value: 'someValue' } })`
+    EuiSuperSelect: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
+        value={props.valueOfSelected}
+        onChange={(e) => {
+          props.onChange(e.target.value);
+        }}
+      />
+    ),
+  };
+});
 
 export interface DomFields {
   [key: string]: {
@@ -108,7 +112,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   ): Promise<DomFields> => {
     const fields = find(
       fieldName ? (`${fieldName}.fieldsList.fieldsListItem` as TestSubjects) : 'fieldsListItem'
-    ).map(wrapper => wrapper); // convert to Array for our for of loop below
+    ).map((wrapper) => wrapper); // convert to Array for our for of loop below
 
     for (const field of fields) {
       const { hasChildren, testSubjectField } = await expandField(field);

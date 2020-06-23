@@ -11,7 +11,7 @@ import { CoreStart } from 'kibana/public';
 
 jest.useFakeTimers();
 
-const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 const mockSearch = jest.fn();
 let searchInterceptor: EnhancedSearchInterceptor;
 let mockCoreStart: MockedKeys<CoreStart>;

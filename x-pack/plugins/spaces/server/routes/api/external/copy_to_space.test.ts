@@ -14,7 +14,7 @@ import {
   createResolveSavedObjectsImportErrorsMock,
   createMockSavedObjectsService,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
   loggingServiceMock,
   httpServiceMock,
@@ -44,7 +44,7 @@ import {
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   beforeEach(() => {
     (exportSavedObjectsToStream as jest.Mock).mockReset();
@@ -54,7 +54,7 @@ describe('copy to space', () => {
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
@@ -78,7 +78,7 @@ describe('copy to space', () => {
       http: (httpService as unknown) as CoreSetup['http'],
       getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 

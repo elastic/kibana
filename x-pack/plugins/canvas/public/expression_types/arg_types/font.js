@@ -14,7 +14,7 @@ import { ArgTypesStrings } from '../../../i18n';
 
 const { Font: strings } = ArgTypesStrings;
 
-export const FontArgInput = props => {
+export const FontArgInput = (props) => {
   const { onValueChange, argValue, workpad } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -27,7 +27,7 @@ export const FontArgInput = props => {
     const newValue = set(
       argValue,
       ['chain', 0, 'arguments'],
-      mapValues(newSpec, v => [v])
+      mapValues(newSpec, (v) => [v])
     );
     return onValueChange(newValue);
   }

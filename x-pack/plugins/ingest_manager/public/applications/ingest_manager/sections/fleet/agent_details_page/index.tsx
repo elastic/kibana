@@ -31,7 +31,7 @@ import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from '.
 const Divider = styled.div`
   width: 0;
   height: 100%;
-  border-left: ${props => props.theme.eui.euiBorderThin};
+  border-left: ${(props) => props.theme.eui.euiBorderThin};
 `;
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
@@ -90,6 +90,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [agentData, agentId, getHref]
   );
 
@@ -140,9 +141,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [agentConfigData, agentData, getHref, isAgentConfigLoading]
   );
 

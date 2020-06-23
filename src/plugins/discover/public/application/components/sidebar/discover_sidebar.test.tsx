@@ -45,6 +45,9 @@ jest.mock('../../../kibana_services', () => ({
       visualize: {
         show: true,
       },
+      discover: {
+        save: false,
+      },
     },
     uiSettings: {
       get: (key: string) => {
@@ -59,7 +62,7 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 jest.mock('./lib/get_index_pattern_field_list', () => ({
-  getIndexPatternFieldList: jest.fn(indexPattern => indexPattern.fields),
+  getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
 }));
 
 function getCompProps() {
@@ -102,7 +105,7 @@ function getCompProps() {
   };
 }
 
-describe('discover sidebar', function() {
+describe('discover sidebar', function () {
   let props: DiscoverSidebarProps;
   let comp: ReactWrapper<DiscoverSidebarProps>;
 
@@ -111,7 +114,7 @@ describe('discover sidebar', function() {
     comp = mountWithIntl(<DiscoverSidebar {...props} />);
   });
 
-  it('should have Selected Fields and Available Fields with Popular Fields sections', function() {
+  it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
     const popular = findTestSubject(comp, 'fieldList-popular');
     const selected = findTestSubject(comp, 'fieldList-selected');
     const unpopular = findTestSubject(comp, 'fieldList-unpopular');
@@ -119,15 +122,15 @@ describe('discover sidebar', function() {
     expect(unpopular.children().length).toBe(7);
     expect(selected.children().length).toBe(1);
   });
-  it('should allow selecting fields', function() {
+  it('should allow selecting fields', function () {
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
-  it('should allow deselecting fields', function() {
+  it('should allow deselecting fields', function () {
     findTestSubject(comp, 'fieldToggle-extension').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
-  it('should allow adding filters', function() {
+  it('should allow adding filters', function () {
     findTestSubject(comp, 'field-extension-showDetails').simulate('click');
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();

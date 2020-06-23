@@ -151,7 +151,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
           );
         }
 
-        $scope.columns.forEach(function(column: any) {
+        $scope.columns.forEach(function (column: any) {
           const isFilterable =
             $scope.flattenedRow[column] !== undefined &&
             mapping(column) &&
@@ -170,11 +170,11 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         });
 
         let $cells = $el.children();
-        newHtmls.forEach(function(html, i) {
+        newHtmls.forEach(function (html, i) {
           const $cell = $cells.eq(i);
           if ($cell.data('discover:html') === html) return;
 
-          const reuse = _.find($cells.slice(i + 1), function(cell: any) {
+          const reuse = _.find($cells.slice(i + 1), function (cell: any) {
             return $.data(cell, 'discover:html') === html;
           });
 

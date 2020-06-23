@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { IndexPatternCreationConfig } from './config';
+export { IndexPatternCreationConfig, IndexPatternCreationOption } from './config';
 export { IndexPatternCreationManager } from './manager';

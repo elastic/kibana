@@ -36,7 +36,7 @@ const META_FIELD_NAMES: string[] = ['_seq_no', '_doc', '_uid'];
  */
 export function getFirstSortableField(indexPattern: IndexPattern, fieldNames: string[]) {
   const sortableFields = fieldNames.filter(
-    fieldName =>
+    (fieldName) =>
       META_FIELD_NAMES.includes(fieldName) ||
       // @ts-ignore
       (indexPattern.fields.getByName(fieldName) || { sortable: false }).sortable

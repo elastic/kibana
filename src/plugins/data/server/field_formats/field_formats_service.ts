@@ -42,7 +42,7 @@ export class FieldFormatsService {
         const uiConfigs = await uiSettings.getAll();
         const registeredUiSettings = uiSettings.getRegistered();
 
-        Object.keys(registeredUiSettings).forEach(key => {
+        Object.keys(registeredUiSettings).forEach((key) => {
           if (has(uiConfigs, key) && registeredUiSettings[key].type === 'json') {
             uiConfigs[key] = JSON.parse(uiConfigs[key]);
           }

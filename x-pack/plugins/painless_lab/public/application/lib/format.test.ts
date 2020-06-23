@@ -8,7 +8,7 @@ import { PayloadFormat } from '../types';
 import { formatRequestPayload } from './format';
 
 describe('formatRequestPayload', () => {
-  Object.values(PayloadFormat).forEach(format => {
+  Object.values(PayloadFormat).forEach((format) => {
     describe(`${format} formats`, () => {
       test('no script', () => {
         expect(formatRequestPayload({}, format)).toMatchSnapshot();

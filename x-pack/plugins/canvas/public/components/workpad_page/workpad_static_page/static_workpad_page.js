@@ -25,8 +25,8 @@ export class StaticWorkpadPage extends PureComponent {
         style={{ ...pageStyle, ...animationStyle, height, width }}
       >
         {elements
-          .filter(node => !isGroupId(node.id))
-          .map(element => (
+          .filter((node) => !isGroupId(node.id))
+          .map((element) => (
             <ElementWrapper key={element.id} element={element} />
           ))}
       </div>

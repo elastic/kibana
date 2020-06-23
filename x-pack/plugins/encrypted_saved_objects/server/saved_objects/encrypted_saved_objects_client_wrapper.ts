@@ -94,7 +94,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
     // sequential processing.
     const encryptedObjects = await Promise.all(
-      objects.map(async object => {
+      objects.map(async (object) => {
         if (!this.options.service.isRegistered(object.type)) {
           return object;
         }
@@ -137,7 +137,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
     // sequential processing.
     const encryptedObjects = await Promise.all(
-      objects.map(async object => {
+      objects.map(async (object) => {
         const { type, id, attributes } = object;
         if (!this.options.service.isRegistered(type)) {
           return object;

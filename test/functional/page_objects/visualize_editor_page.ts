@@ -475,7 +475,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       const $ = await selectField.parseDomContent();
       const optionsText = $('option')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
       const optionIndex = optionsText.indexOf(optionText);
 
       if (optionIndex === -1) {
@@ -500,6 +500,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
 
     public async toggleGridCategoryLines() {
       return await testSubjects.click('showCategoryLines');
+    }
+
+    public async toggleValuesOnChart() {
+      return await testSubjects.click('showValuesOnChart');
     }
 
     public async setGridValueAxis(axis: string) {

@@ -8,7 +8,7 @@ import url from 'url';
 export const getTraceUrl = ({
   traceId,
   rangeFrom,
-  rangeTo
+  rangeTo,
 }: {
   traceId: string;
   rangeFrom: string;
@@ -16,6 +16,6 @@ export const getTraceUrl = ({
 }) => {
   return url.format({
     pathname: `/link-to/trace/${traceId}`,
-    query: { rangeFrom, rangeTo }
+    query: { rangeFrom, rangeTo },
   });
 };

@@ -20,13 +20,13 @@ type Props = (PropsServiceName | PropsJobId) & {
   external?: boolean;
 };
 
-export const MLJobLink: React.FC<Props> = props => {
+export const MLJobLink: React.FC<Props> = (props) => {
   const jobId =
     'jobId' in props
       ? props.jobId
       : getMlJobId(props.serviceName, props.transactionType);
   const query = {
-    ml: { jobIds: [jobId] }
+    ml: { jobIds: [jobId] },
   };
 
   return (

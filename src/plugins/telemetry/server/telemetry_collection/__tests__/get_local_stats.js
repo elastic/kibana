@@ -28,7 +28,7 @@ import { getLocalStats, handleLocalStats } from '../get_local_stats';
 
 const mockUsageCollection = (kibanaUsage = {}) => ({
   bulkFetch: () => kibanaUsage,
-  toObject: data => data,
+  toObject: (data) => data,
 });
 
 const getMockServer = (getCluster = sinon.stub()) => ({

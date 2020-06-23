@@ -43,10 +43,10 @@ export class Axis extends ErrorHandler {
 
     this.stack = d3.layout
       .stack()
-      .x(d => {
+      .x((d) => {
         return d.x;
       })
-      .y(d => {
+      .y((d) => {
         if (
           typeof this.axisConfig.get('scale.offset') === 'function' &&
           this.axisConfig.get('scale.offset').name === 'expand'
@@ -65,8 +65,8 @@ export class Axis extends ErrorHandler {
 
   _stackNegAndPosVals(data) {
     const cache = {};
-    data.forEach(series => {
-      series.forEach(value => {
+    data.forEach((series) => {
+      series.forEach((value) => {
         if (!cache[value.x]) cache[value.x] = [0, 0];
         value.y0 = cache[value.x][value.y < 0 ? 0 : 1];
         cache[value.x][value.y < 0 ? 0 : 1] += value.y;
@@ -78,18 +78,13 @@ export class Axis extends ErrorHandler {
   render() {
     const elSelector = this.axisConfig.get('elSelector');
     const rootEl = this.axisConfig.get('rootEl');
-    d3.select(rootEl)
-      .selectAll(elSelector)
-      .call(this.draw());
+    d3.select(rootEl).selectAll(elSelector).call(this.draw());
   }
 
   destroy() {
     const elSelector = this.axisConfig.get('elSelector');
     const rootEl = this.axisConfig.get('rootEl');
-    $(rootEl)
-      .find(elSelector)
-      .find('svg')
-      .remove();
+    $(rootEl).find(elSelector).find('svg').remove();
     this.axisTitle.destroy();
   }
 
@@ -98,11 +93,7 @@ export class Axis extends ErrorHandler {
     const position = this.axisConfig.get('position');
     const axisFormatter = this.axisConfig.get('labels.axisFormatter');
 
-    const d3Axis = d3.svg
-      .axis()
-      .scale(scale)
-      .tickFormat(axisFormatter)
-      .orient(position);
+    const d3Axis = d3.svg.axis().scale(scale).tickFormat(axisFormatter).orient(position);
 
     if (this.axisConfig.isTimeDomain()) {
       // use custom overwritten tick function on time domains to get nice
@@ -128,11 +119,7 @@ export class Axis extends ErrorHandler {
   }
 
   tickScale(length) {
-    const yTickScale = d3.scale
-      .linear()
-      .clamp(true)
-      .domain([20, 40, 1000])
-      .range([0, 3, 11]);
+    const yTickScale = d3.scale.linear().clamp(true).domain([20, 40, 1000]).range([0, 3, 11]);
 
     return Math.ceil(yTickScale(length));
   }
@@ -152,7 +139,7 @@ export class Axis extends ErrorHandler {
     const position = config.get('position');
     const axisPadding = 5;
 
-    return function(selection) {
+    return function (selection) {
       const text = selection.selectAll('.tick text');
       const lengths = [];
 
@@ -160,15 +147,9 @@ export class Axis extends ErrorHandler {
         lengths.push(
           (() => {
             if (config.isHorizontal()) {
-              return d3
-                .select(this.parentNode)
-                .node()
-                .getBBox().height;
+              return d3.select(this.parentNode).node().getBBox().height;
             } else {
-              return d3
-                .select(this.parentNode)
-                .node()
-                .getBBox().width;
+              return d3.select(this.parentNode).node().getBBox().width;
             }
           })()
         );
@@ -186,9 +167,7 @@ export class Axis extends ErrorHandler {
         }
         if (config.get('type') === 'value') {
           const spacerNodes = $(chartEl).find(`.visAxis__spacer--y-${position}`);
-          const elHeight = $(chartEl)
-            .find(`.visAxis__column--${position}`)
-            .height();
+          const elHeight = $(chartEl).find(`.visAxis__column--${position}`).height();
           spacerNodes.height(elHeight);
         }
       } else {
@@ -213,7 +192,7 @@ export class Axis extends ErrorHandler {
     const config = this.axisConfig;
     const style = config.get('style');
 
-    return function(selection) {
+    return function (selection) {
       const n = selection[0].length;
       if (
         config.get('show') &&
@@ -222,7 +201,7 @@ export class Axis extends ErrorHandler {
       ) {
         self.axisTitle.render(selection);
       }
-      selection.each(function() {
+      selection.each(function () {
         const el = this;
         const div = d3.select(el);
         const width = $(el).width();
@@ -269,7 +248,7 @@ export class Axis extends ErrorHandler {
         self.axisTitle.render(selection);
       }
 
-      svgs.forEach(svg => svg.call(self.adjustSize()));
+      svgs.forEach((svg) => svg.call(self.adjustSize()));
     };
   }
 }

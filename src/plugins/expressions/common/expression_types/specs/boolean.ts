@@ -27,8 +27,8 @@ export const boolean: ExpressionTypeDefinition<'boolean', boolean> = {
   name,
   from: {
     null: () => false,
-    number: n => Boolean(n),
-    string: s => Boolean(s),
+    number: (n) => Boolean(n),
+    string: (s) => Boolean(s),
   },
   to: {
     render: (value): ExpressionValueRender<{ text: string }> => {

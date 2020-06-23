@@ -33,12 +33,12 @@ function mergeSelection(
   const selectedIds: string[] = [];
   const alreadySelected: string[] = [];
 
-  groupObjs.forEach(group => {
+  groupObjs.forEach((group) => {
     selectedIds.push(group.groupId);
     alreadySelected.push(...group.jobIds);
   });
 
-  jobIds.forEach(jobId => {
+  jobIds.forEach((jobId) => {
     // Add jobId if not already included in group selection
     if (alreadySelected.includes(jobId) === false) {
       selectedIds.push(jobId);
@@ -53,7 +53,7 @@ export function getInitialGroupsMap(selectedGroups: GroupObj[]): GroupsMap {
   const map: GroupsMap = {};
 
   if (selectedGroups.length) {
-    selectedGroups.forEach(group => {
+    selectedGroups.forEach((group) => {
       map[group.groupId] = group.jobIds;
     });
   }

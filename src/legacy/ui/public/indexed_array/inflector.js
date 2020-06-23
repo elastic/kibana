@@ -39,7 +39,7 @@ export function inflector(prefix, postfix) {
     if (key.indexOf('.') !== -1) {
       inflected = key
         .split('.')
-        .map(function(step, i) {
+        .map(function (step, i) {
           return i === 0 ? step : upFirst(step, true);
         })
         .join('');

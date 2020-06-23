@@ -27,7 +27,7 @@ export const TopCategories: FC = () => {
   async function loadTopCats() {
     const results = await ml.jobs.topCategories(jobCreator.jobId, NUMBER_OF_CATEGORY_EXAMPLES);
     setTableRow(
-      results.categories.map(c => ({
+      results.categories.map((c) => ({
         count: c.count,
         example: c.category.examples?.length ? c.category.examples[0] : '',
       }))

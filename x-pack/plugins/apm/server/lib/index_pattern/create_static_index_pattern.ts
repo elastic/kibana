@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import apmIndexPattern from '../../tutorial/index_pattern.json';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server/saved_objects';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import {
+  apmIndexPattern,
+  APM_STATIC_INDEX_PATTERN_ID,
+} from '../../../../../../src/plugins/apm_oss/server';
 import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
 import { APMRequestHandlerContext } from '../../routes/typings';
@@ -37,7 +38,7 @@ export async function createStaticIndexPattern(
       'index-pattern',
       {
         ...apmIndexPattern.attributes,
-        title: apmIndexPatternTitle
+        title: apmIndexPatternTitle,
       },
       { id: APM_STATIC_INDEX_PATTERN_ID, overwrite: false }
     );

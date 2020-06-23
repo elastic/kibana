@@ -39,6 +39,11 @@ export interface SecurityLicenseFeatures {
   readonly allowAccessAgreement: boolean;
 
   /**
+   * Indicates whether we allow logging of audit events.
+   */
+  readonly allowAuditLogging: boolean;
+
+  /**
    * Indicates whether we allow users to define document level security in roles.
    */
   readonly allowRoleDocumentLevelSecurity: boolean;

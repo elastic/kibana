@@ -48,7 +48,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
       setNewsFetchResult(fetchResult);
     }
 
-    const subscription = apiFetchResult.subscribe(res => handleStatusChange(res));
+    const subscription = apiFetchResult.subscribe((res) => handleStatusChange(res));
     return () => subscription.unsubscribe();
   }, [apiFetchResult]);
 

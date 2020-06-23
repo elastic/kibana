@@ -56,12 +56,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       const $ = await chartTypeField.parseDomContent();
       return $('button')
         .toArray()
-        .map(chart =>
-          $(chart)
-            .findTestSubject('visTypeTitle')
-            .text()
-            .trim()
-        );
+        .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
     }
 
     public async waitForVisualizationSelectPage() {

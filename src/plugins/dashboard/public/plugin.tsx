@@ -25,17 +25,17 @@ import { i18n } from '@kbn/i18n';
 import {
   App,
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
-  PluginInitializerContext,
   Plugin,
+  PluginInitializerContext,
   SavedObjectsClientContract,
-  AppUpdater,
   ScopedHistory,
 } from 'src/core/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 
@@ -52,35 +52,38 @@ import {
 } from '../../kibana_react/public';
 import { createKbnUrlTracker, Storage } from '../../kibana_utils/public';
 import {
+  initAngularBootstrap,
   KibanaLegacySetup,
   KibanaLegacyStart,
-  initAngularBootstrap,
 } from '../../kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import {
-  DashboardContainerFactory,
-  ExpandPanelAction,
-  ExpandPanelActionContext,
-  ReplacePanelAction,
-  ReplacePanelActionContext,
-  ClonePanelAction,
-  ClonePanelActionContext,
+  ACTION_CLONE_PANEL,
   ACTION_EXPAND_PANEL,
   ACTION_REPLACE_PANEL,
+  ClonePanelAction,
+  ClonePanelActionContext,
+  DASHBOARD_CONTAINER_TYPE,
+  DashboardContainerFactory,
+  DashboardContainerFactoryDefinition,
+  ExpandPanelAction,
+  ExpandPanelActionContext,
   RenderDeps,
-  ACTION_CLONE_PANEL,
+  ReplacePanelAction,
+  ReplacePanelActionContext,
 } from './application';
 import {
-  DashboardAppLinkGeneratorState,
-  DASHBOARD_APP_URL_GENERATOR,
   createDashboardUrlGenerator,
+  DASHBOARD_APP_URL_GENERATOR,
+  DashboardAppLinkGeneratorState,
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
+import { createDashboardContainerByValueRenderer } from './application';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -121,6 +124,7 @@ export interface DashboardStart {
     embeddableType: string;
   }) => void | undefined;
   dashboardUrlGenerator?: DashboardUrlGenerator;
+  DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -167,15 +171,26 @@ export class DashboardPlugin
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
 
-      const useHideChrome = () => {
+      const useHideChrome = ({ toggleChrome } = { toggleChrome: true }) => {
         React.useEffect(() => {
-          coreStart.chrome.setIsVisible(false);
-          return () => coreStart.chrome.setIsVisible(true);
-        }, []);
+          if (toggleChrome) {
+            coreStart.chrome.setIsVisible(false);
+          }
+
+          return () => {
+            if (toggleChrome) {
+              coreStart.chrome.setIsVisible(true);
+            }
+          };
+        }, [toggleChrome]);
       };
 
-      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
-        useHideChrome();
+      const ExitFullScreenButton: React.FC<
+        ExitFullScreenButtonProps & {
+          toggleChrome: boolean;
+        }
+      > = ({ toggleChrome, ...props }) => {
+        useHideChrome({ toggleChrome });
         return <ExitFullScreenButtonUi {...props} />;
       };
       return {
@@ -191,7 +206,10 @@ export class DashboardPlugin
       };
     };
 
-    const factory = new DashboardContainerFactory(getStartServices);
+    const factory = new DashboardContainerFactoryDefinition(
+      getStartServices,
+      () => this.currentHistory!
+    );
     embeddable.registerEmbeddableFactory(factory.type, factory);
 
     const placeholderFactory = new PlaceholderEmbeddableFactory();
@@ -228,7 +246,7 @@ export class DashboardPlugin
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
-      order: -1001,
+      order: 2500,
       euiIconType: 'dashboardApp',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
@@ -290,7 +308,7 @@ export class DashboardPlugin
     kibanaLegacy.forwardApp(
       DashboardConstants.DASHBOARD_ID,
       DashboardConstants.DASHBOARDS_ID,
-      path => {
+      (path) => {
         const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
         if (!id && !tail) {
           // unrecognized sub url
@@ -307,7 +325,7 @@ export class DashboardPlugin
     kibanaLegacy.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
       DashboardConstants.DASHBOARDS_ID,
-      path => {
+      (path) => {
         const [, tail] = /(\?.*)/.exec(path) || [];
         // carry over query if it exists
         return `#/list${tail || ''}`;
@@ -377,10 +395,17 @@ export class DashboardPlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
+    const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
+      DASHBOARD_CONTAINER_TYPE
+    )! as DashboardContainerFactory;
+
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
+      DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
+        factory: dashboardContainerFactory,
+      }),
     };
   }
 

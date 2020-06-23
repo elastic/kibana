@@ -35,7 +35,7 @@ export const createStubStats = (): StubStats =>
     archivedIndex: sinon.stub(),
     getTestSummary() {
       const summary: Record<string, number> = {};
-      Object.keys(this).forEach(key => {
+      Object.keys(this).forEach((key) => {
         if (this[key].callCount) {
           summary[key] = this[key].callCount;
         }
@@ -74,7 +74,7 @@ const createEsClientError = (errorType: string) => {
 };
 
 const indexAlias = (aliases: Record<string, any>, index: string) =>
-  Object.keys(aliases).find(k => aliases[k] === index);
+  Object.keys(aliases).find((k) => aliases[k] === index);
 
 type StubClient = Client;
 
@@ -133,15 +133,15 @@ export const createStubClient = (
       }),
       delete: sinon.spy(async ({ index }) => {
         const indices = Array.isArray(index) ? index : [index];
-        if (indices.every(ix => existingIndices.includes(ix))) {
+        if (indices.every((ix) => existingIndices.includes(ix))) {
           // Delete aliases associated with our indices
-          indices.forEach(ix => {
-            const alias = Object.keys(aliases).find(k => aliases[k] === ix);
+          indices.forEach((ix) => {
+            const alias = Object.keys(aliases).find((k) => aliases[k] === ix);
             if (alias) {
               delete aliases[alias];
             }
           });
-          indices.forEach(ix => existingIndices.splice(existingIndices.indexOf(ix), 1));
+          indices.forEach((ix) => existingIndices.splice(existingIndices.indexOf(ix), 1));
           return { ok: true };
         } else {
           throw createEsClientError('index_not_found_exception');

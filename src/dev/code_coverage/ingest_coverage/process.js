@@ -46,11 +46,11 @@ const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
 const preamble = pipe(statsAndstaticSiteUrl, rootDirAndOrigPath, buildId, addPrePopulatedTimeStamp);
 const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
-const transform = jsonSummaryPath => log => vcsInfo => {
+const transform = (jsonSummaryPath) => (log) => (vcsInfo) => {
   const objStream = jsonStream(jsonSummaryPath).on('done', noop);
   const itemizeVcsInfo = itemizeVcs(vcsInfo);
 
-  const jsonSummary$ = _ => objStream.on('node', '!.*', _);
+  const jsonSummary$ = (_) => objStream.on('node', '!.*', _);
 
   fromEventPattern(jsonSummary$)
     .pipe(
@@ -60,7 +60,7 @@ const transform = jsonSummaryPath => log => vcsInfo => {
       map(ciRunUrl),
       map(addJsonSummaryPath(jsonSummaryPath)),
       map(addTestRunnerAndStaticSiteUrl),
-      concatMap(x => of(x).pipe(delay(ms)))
+      concatMap((x) => of(x).pipe(delay(ms)))
     )
     .subscribe(ingest(log));
 };
@@ -73,8 +73,8 @@ function rootDirAndOrigPath(obj) {
   };
 }
 
-const mutateVcsInfo = vcsInfo => x => vcsInfo.push(x.trimStart().trimEnd());
-const vcsInfoLines$ = vcsInfoFilePath => {
+const mutateVcsInfo = (vcsInfo) => (x) => vcsInfo.push(x.trimStart().trimEnd());
+const vcsInfoLines$ = (vcsInfoFilePath) => {
   const rl = readline.createInterface({ input: createReadStream(vcsInfoFilePath) });
   return fromEvent(rl, 'line').pipe(takeUntil(fromEvent(rl, 'close')));
 };
@@ -88,7 +88,7 @@ export const prok = ({ jsonSummaryPath, vcsInfoFilePath }, log) => {
   const vcsInfo = [];
   vcsInfoLines$(vcsInfoFilePath).subscribe(
     mutateVcsInfo(vcsInfo),
-    err => log.error(err),
+    (err) => log.error(err),
     always(xformWithPath(vcsInfo))
   );
 };

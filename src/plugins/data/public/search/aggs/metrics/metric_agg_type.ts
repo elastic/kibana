@@ -84,7 +84,7 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
     this.getFormat =
       config.getFormat ||
-      (agg => {
+      ((agg) => {
         const { fieldFormats } = dependencies.getInternalStartServices();
         const field = agg.getField();
         return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);

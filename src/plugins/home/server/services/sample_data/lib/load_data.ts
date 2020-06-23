@@ -52,7 +52,7 @@ export function loadData(path: any, bulkInsert: (docs: any[]) => Promise<void>) 
       reject(err);
     };
 
-    lineStream.on('line', async line => {
+    lineStream.on('line', async (line) => {
       if (line.length === 0 || line.charAt(0) === '#') {
         return;
       }

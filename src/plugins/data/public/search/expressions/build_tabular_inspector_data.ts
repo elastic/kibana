@@ -40,8 +40,8 @@ export async function buildTabularInspectorData(
   table: TabbedTable,
   queryFilter: { addFilters: (filter: any) => void }
 ) {
-  const aggConfigs = table.columns.map(column => column.aggConfig);
-  const rows = table.rows.map(row => {
+  const aggConfigs = table.columns.map((column) => column.aggConfig);
+  const rows = table.rows.map((row) => {
     return table.columns.reduce<Record<string, FormattedData>>((prev, cur, colIndex) => {
       const value = row[cur.id];
       const fieldFormatter = cur.aggConfig.fieldFormatter('text');
@@ -60,7 +60,7 @@ export async function buildTabularInspectorData(
         isCellContentFilterable &&
         ((value: { raw: unknown }) => {
           const rowIndex = rows.findIndex(
-            row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
+            (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
           const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
 
@@ -72,7 +72,7 @@ export async function buildTabularInspectorData(
         isCellContentFilterable &&
         ((value: { raw: unknown }) => {
           const rowIndex = rows.findIndex(
-            row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
+            (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
           const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
 
@@ -80,7 +80,7 @@ export async function buildTabularInspectorData(
             const notOther = value.raw !== '__other__';
             const notMissing = value.raw !== '__missing__';
             if (Array.isArray(filter)) {
-              filter.forEach(f => set(f, 'meta.negate', notOther && notMissing));
+              filter.forEach((f) => set(f, 'meta.negate', notOther && notMissing));
             } else {
               set(filter, 'meta.negate', notOther && notMissing);
             }

@@ -17,10 +17,10 @@ export function asInteger(value: number) {
 export function tpmUnit(type?: string) {
   return type === 'request'
     ? i18n.translate('xpack.apm.formatters.requestsPerMinLabel', {
-        defaultMessage: 'rpm'
+        defaultMessage: 'rpm',
       })
     : i18n.translate('xpack.apm.formatters.transactionsPerMinLabel', {
-        defaultMessage: 'tpm'
+        defaultMessage: 'tpm',
       });
 }
 
@@ -34,5 +34,13 @@ export function asPercent(
   }
 
   const decimal = numerator / denominator;
+
+  // 33.2 => 33%
+  // 3.32 => 3.3%
+  // 0 => 0%
+  if (Math.abs(decimal) >= 0.1 || decimal === 0) {
+    return numeral(decimal).format('0%');
+  }
+
   return numeral(decimal).format('0.0%');
 }

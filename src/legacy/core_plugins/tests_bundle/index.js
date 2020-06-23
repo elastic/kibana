@@ -30,9 +30,9 @@ import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
 import findSourceFiles from './find_source_files';
 import { createTestEntryTemplate } from './tests_entry_template';
 
-export default kibana => {
+export default (kibana) => {
   return new kibana.Plugin({
-    config: Joi => {
+    config: (Joi) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         instrument: Joi.boolean().default(false),
@@ -58,8 +58,8 @@ export default kibana => {
         const testingPluginIds = config.get('tests_bundle.pluginId');
 
         if (testingPluginIds) {
-          testingPluginIds.split(',').forEach(pluginId => {
-            const plugin = plugins.find(plugin => plugin.id === pluginId);
+          testingPluginIds.split(',').forEach((pluginId) => {
+            const plugin = plugins.find((plugin) => plugin.id === pluginId);
 
             if (!plugin) {
               throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
@@ -134,20 +134,17 @@ export default kibana => {
           async handler(_, h) {
             const cssFiles = await globby(
               testingPluginIds
-                ? testingPluginIds.split(',').map(id => `built_assets/css/plugins/${id}/**/*.css`)
+                ? testingPluginIds.split(',').map((id) => `built_assets/css/plugins/${id}/**/*.css`)
                 : `built_assets/css/**/*.css`,
               { cwd: fromRoot('.'), absolute: true }
             );
 
             const stream = replacePlaceholder(
-              new MultiStream(cssFiles.map(path => createReadStream(path))),
+              new MultiStream(cssFiles.map((path) => createReadStream(path))),
               '/built_assets/css/'
             );
 
-            return h
-              .response(stream)
-              .code(200)
-              .type('text/css');
+            return h.response(stream).code(200).type('text/css');
           },
         });
 

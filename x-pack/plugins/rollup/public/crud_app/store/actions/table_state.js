@@ -6,28 +6,28 @@
 
 import { FILTER_CHANGED, PAGE_CHANGED, PAGE_SIZE_CHANGED, SORT_CHANGED } from '../action_types';
 
-export const filterChanged = ({ filter }) => dispatch => {
+export const filterChanged = ({ filter }) => (dispatch) => {
   dispatch({
     type: FILTER_CHANGED,
     payload: { filter },
   });
 };
 
-export const pageChanged = ({ pageNumber }) => dispatch => {
+export const pageChanged = ({ pageNumber }) => (dispatch) => {
   dispatch({
     type: PAGE_CHANGED,
     payload: { pageNumber },
   });
 };
 
-export const pageSizeChanged = ({ pageSize }) => dispatch => {
+export const pageSizeChanged = ({ pageSize }) => (dispatch) => {
   dispatch({
     type: PAGE_SIZE_CHANGED,
     payload: { pageSize },
   });
 };
 
-export const sortChanged = ({ sortField, isSortAscending }) => dispatch => {
+export const sortChanged = ({ sortField, isSortAscending }) => (dispatch) => {
   dispatch({
     type: SORT_CHANGED,
     payload: { sortField, isSortAscending },

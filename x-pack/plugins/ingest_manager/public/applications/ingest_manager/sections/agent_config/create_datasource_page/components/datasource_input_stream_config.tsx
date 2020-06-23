@@ -43,7 +43,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
   const advancedVars: RegistryVarsEntry[] = [];
 
   if (packageInputStream.vars && packageInputStream.vars.length) {
-    packageInputStream.vars.forEach(varDef => {
+    packageInputStream.vars.forEach((varDef) => {
       if (isAdvancedVar(varDef)) {
         advancedVars.push(varDef);
       } else {
@@ -81,7 +81,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
             </EuiFlexGroup>
           }
           checked={datasourceInputStream.enabled}
-          onChange={e => {
+          onChange={(e) => {
             const enabled = e.target.checked;
             updateDatasourceInputStream({
               enabled,
@@ -99,7 +99,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {requiredVars.map(varDef => {
+          {requiredVars.map((varDef) => {
             const { name: varName, type: varType } = varDef;
             const value = datasourceInputStream.vars![varName].value;
             return (
@@ -143,7 +143,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                 </div>
               </EuiFlexItem>
               {isShowingAdvanced
-                ? advancedVars.map(varDef => {
+                ? advancedVars.map((varDef) => {
                     const { name: varName, type: varType } = varDef;
                     const value = datasourceInputStream.vars![varName].value;
                     return (

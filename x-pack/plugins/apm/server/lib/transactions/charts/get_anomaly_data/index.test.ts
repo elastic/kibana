@@ -26,12 +26,12 @@ describe('getAnomalySeries', () => {
       setup: {
         start: 0,
         end: 500000,
-        client: { search: clientSpy } as any,
-        internalClient: { search: clientSpy } as any,
+        client: { search: () => {} } as any,
+        internalClient: { search: () => {} } as any,
         config: new Proxy(
           {},
           {
-            get: () => 'myIndex'
+            get: () => 'myIndex',
           }
         ) as APMConfig,
         uiFiltersES: [],
@@ -43,31 +43,37 @@ describe('getAnomalySeries', () => {
           'apm_oss.transactionIndices': 'myIndex',
           'apm_oss.metricsIndices': 'myIndex',
           apmAgentConfigurationIndex: 'myIndex',
-          apmCustomLinkIndex: 'myIndex'
+          apmCustomLinkIndex: 'myIndex',
         },
-        dynamicIndexPattern: null as any
-      }
+        dynamicIndexPattern: null as any,
+        ml: {
+          mlSystem: {
+            mlAnomalySearch: clientSpy,
+            mlCapabilities: async () => ({ isPlatinumOrTrialLicense: true }),
+          },
+        } as any,
+      },
     });
   });
 
   it('should remove buckets lower than threshold and outside date range from anomalyScore', () => {
     expect(avgAnomalies!.anomalyScore).toEqual([
       { x0: 15000, x: 25000 },
-      { x0: 25000, x: 35000 }
+      { x0: 25000, x: 35000 },
     ]);
   });
 
   it('should remove buckets outside date range from anomalyBoundaries', () => {
     expect(
       avgAnomalies!.anomalyBoundaries!.filter(
-        bucket => bucket.x < 100 || bucket.x > 100000
+        (bucket) => bucket.x < 100 || bucket.x > 100000
       ).length
     ).toBe(0);
   });
 
   it('should remove buckets with null from anomalyBoundaries', () => {
     expect(
-      avgAnomalies!.anomalyBoundaries!.filter(p => p.y === null).length
+      avgAnomalies!.anomalyBoundaries!.filter((p) => p.y === null).length
     ).toBe(0);
   });
 

@@ -46,7 +46,7 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
 
 const getEventLoopDelay = (): Promise<number> => {
   const bench = new Bench();
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setImmediate(() => {
       return resolve(bench.elapsed());
     });

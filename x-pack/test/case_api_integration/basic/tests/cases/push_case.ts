@@ -16,7 +16,7 @@ import {
   deleteComments,
   deleteConfiguration,
   getConfiguration,
-  getConnector,
+  getServiceNowConnector,
 } from '../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -37,12 +37,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should push a case', async () => {
       const { body: connector } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getConnector())
+        .send(getServiceNowConnector())
         .expect(200);
 
-      actionsRemover.add('default', connector.id, 'action');
+      actionsRemover.add('default', connector.id, 'action', 'actions');
 
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
@@ -73,12 +73,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('pushes a comment appropriately', async () => {
       const { body: connector } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getConnector())
+        .send(getServiceNowConnector())
         .expect(200);
 
-      actionsRemover.add('default', connector.id, 'action');
+      actionsRemover.add('default', connector.id, 'action', 'actions');
 
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)

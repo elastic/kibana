@@ -23,7 +23,7 @@ export const getConfigurationOutput = (update = false): Partial<CasesConfigureRe
   };
 };
 
-export const getConnector = () => ({
+export const getServiceNowConnector = () => ({
   name: 'ServiceNow Connector',
   actionTypeId: '.servicenow',
   secrets: {
@@ -43,6 +43,38 @@ export const getConnector = () => ({
           source: 'description',
           target: 'description',
           actionType: 'append',
+        },
+        {
+          source: 'comments',
+          target: 'comments',
+          actionType: 'append',
+        },
+      ],
+    },
+  },
+});
+
+export const getJiraConnector = () => ({
+  name: 'Jira Connector',
+  actionTypeId: '.jira',
+  secrets: {
+    email: 'elastic@elastic.co',
+    apiToken: 'token',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    projectKey: 'pkey',
+    casesConfiguration: {
+      mapping: [
+        {
+          source: 'title',
+          target: 'summary',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          actionType: 'overwrite',
         },
         {
           source: 'comments',

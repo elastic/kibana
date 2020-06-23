@@ -28,13 +28,13 @@ export const DATA_ARCHIVE_PATH = path.resolve(
   '../../../functional/fixtures/es_archiver/dashboard/current/data'
 );
 
-export default function({ getService, getPageObjects, loadTestFile }) {
+export default function ({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  describe('pluggable panel actions', function() {
+  describe('pluggable panel actions', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
       await esArchiver.load(KIBANA_ARCHIVE_PATH);
@@ -46,7 +46,7 @@ export default function({ getService, getPageObjects, loadTestFile }) {
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    after(async function() {
+    after(async function () {
       await PageObjects.dashboard.clearSavedObjectsFromAppLinks();
       await esArchiver.unload(KIBANA_ARCHIVE_PATH);
       await esArchiver.unload(DATA_ARCHIVE_PATH);

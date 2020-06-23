@@ -42,7 +42,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       </EuiCodeBlock>
       <EuiSpacer size="m" />
       <EuiCopy textToCopy={command}>
-        {copy => (
+        {(copy) => (
           <EuiButton iconType="copy" fill onClick={copy}>
             <FormattedMessage
               id="xpack.ingestManager.enrollmentInstructions.copyButton"

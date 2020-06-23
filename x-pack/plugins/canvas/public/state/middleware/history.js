@@ -22,8 +22,8 @@ function getHistoryState(state) {
 
 export const historyMiddleware = ({ dispatch, getState }) => {
   // iterate over routes, injecting redux to action handlers
-  const reduxInject = routes => {
-    return routes.map(route => {
+  const reduxInject = (routes) => {
+    return routes.map((route) => {
       if (route.children) {
         return {
           ...route,
@@ -96,7 +96,7 @@ export const historyMiddleware = ({ dispatch, getState }) => {
     }
   });
 
-  return next => action => {
+  return (next) => (action) => {
     const oldState = getState();
 
     // deal with history actions

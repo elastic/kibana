@@ -19,7 +19,7 @@ export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {
     }),
     description: getSpacesFeatureDescription(),
     icon: 'spacesApp',
-    path: '/app/kibana#/management/kibana/spaces',
+    path: '/app/management/kibana/spaces',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN,
   };

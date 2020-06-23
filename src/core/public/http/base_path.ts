@@ -49,7 +49,7 @@ export class BasePath {
 
   public prepend = (path: string): string => {
     if (!this.basePath) return path;
-    return modifyUrl(path, parts => {
+    return modifyUrl(path, (parts) => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
         parts.pathname = `${this.basePath}${parts.pathname}`;
       }

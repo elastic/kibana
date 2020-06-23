@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -14,6 +14,7 @@ import {
   deleteSignalsIndex,
   deleteAllRulesStatuses,
   getSimpleRule,
+  waitFor,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -51,7 +52,17 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       // wait for Task Manager to execute the rule and update status
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await waitFor(async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [resBody.id] })
+          .expect(200);
+        return (
+          body[resBody.id].current_status?.status === 'succeeded' ||
+          body[resBody.id].current_status?.status === 'going to run'
+        );
+      });
 
       // query the single rule from _find
       const { body } = await supertest

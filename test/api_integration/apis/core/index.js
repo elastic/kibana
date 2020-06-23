@@ -18,7 +18,7 @@
  */
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('core', () => {
@@ -40,7 +40,7 @@ export default function({ getService }) {
         await supertest
           .get('/app/kibana')
           .set('accept-encoding', 'gzip')
-          .then(response => {
+          .then((response) => {
             expect(response.headers).to.have.property('content-encoding', 'gzip');
           });
       });
@@ -50,7 +50,7 @@ export default function({ getService }) {
           .get('/app/kibana')
           .set('accept-encoding', 'gzip')
           .set('referer', 'https://some-host.com')
-          .then(response => {
+          .then((response) => {
             expect(response.headers).to.have.property('content-encoding', 'gzip');
           });
       });
@@ -60,7 +60,7 @@ export default function({ getService }) {
           .get('/app/kibana')
           .set('accept-encoding', 'gzip')
           .set('referer', 'https://other.some-host.com')
-          .then(response => {
+          .then((response) => {
             expect(response.headers).not.to.have.property('content-encoding');
           });
       });

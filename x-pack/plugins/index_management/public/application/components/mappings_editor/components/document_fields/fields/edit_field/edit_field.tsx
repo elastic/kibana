@@ -64,7 +64,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
 
   return (
     <UpdateFieldProvider>
-      {updateField => (
+      {(updateField) => (
         <Form form={form} onSubmit={getSubmitForm(updateField)}>
           <EuiFlyout
             data-test-subj="mappingsEditorFieldEdit"

@@ -9,7 +9,7 @@ import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash/function/debounce', () => fn => fn);
+jest.mock('lodash/function/debounce', () => (fn) => fn);
 
 const { setup } = pageHelpers.jobClone;
 const {
@@ -80,7 +80,7 @@ describe('Cloning a rollup job through create job wizard', () => {
 
     expect(tableCellValuesTerms.length).toBe(terms.length);
     for (const [keyword] of tableCellValuesTerms) {
-      expect(terms.find(term => term === keyword)).toBe(keyword);
+      expect(terms.find((term) => term === keyword)).toBe(keyword);
     }
 
     await actions.clickNextStep();
@@ -99,7 +99,7 @@ describe('Cloning a rollup job through create job wizard', () => {
 
     expect(tableCellValuesHisto.length).toBe(histogramsTerms.length);
     for (const [keyword] of tableCellValuesHisto) {
-      expect(histogramsTerms.find(term => term === keyword)).toBe(keyword);
+      expect(histogramsTerms.find((term) => term === keyword)).toBe(keyword);
     }
 
     await actions.clickNextStep();
@@ -123,10 +123,10 @@ describe('Cloning a rollup job through create job wizard', () => {
       let checkedCountActual = 0;
       const checkedCountExpected = checkedMetrics.length;
 
-      checkboxColumn.find('input').forEach(el => {
+      checkboxColumn.find('input').forEach((el) => {
         const props = el.props();
         const shouldBeChecked = checkedMetrics.some(
-          checkedMetric => props['data-test-subj'] === `rollupJobMetricsCheckbox-${checkedMetric}`
+          (checkedMetric) => props['data-test-subj'] === `rollupJobMetricsCheckbox-${checkedMetric}`
         );
         if (shouldBeChecked) ++checkedCountActual;
         expect(props.checked).toBe(shouldBeChecked);

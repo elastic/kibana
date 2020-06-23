@@ -10,11 +10,11 @@ import { useUrlParams } from './useUrlParams';
 export function useTransactionBreakdown() {
   const {
     urlParams: { serviceName, start, end, transactionName, transactionType },
-    uiFilters
+    uiFilters,
   } = useUrlParams();
 
   const { data = { kpis: [], timeseries: [] }, error, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({
           pathname:
@@ -26,9 +26,9 @@ export function useTransactionBreakdown() {
               end,
               transactionName,
               transactionType,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -38,6 +38,6 @@ export function useTransactionBreakdown() {
   return {
     data,
     status,
-    error
+    error,
   };
 }

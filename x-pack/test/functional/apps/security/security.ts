@@ -8,14 +8,14 @@ import expect from '@kbn/expect';
 import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const spaces = getService('spaces');
 
-  describe('Security', function() {
+  describe('Security', function () {
     this.tags('includeFirefox');
     describe('Login Page', () => {
       before(async () => {

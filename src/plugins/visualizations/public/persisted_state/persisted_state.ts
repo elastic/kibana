@@ -91,7 +91,7 @@ export class PersistedState extends EventEmitter {
   }
 
   clearAllKeys() {
-    Object.getOwnPropertyNames(this._changedState).forEach(key => {
+    Object.getOwnPropertyNames(this._changedState).forEach((key) => {
       this.set(key, null);
     });
   }
@@ -229,7 +229,7 @@ export class PersistedState extends EventEmitter {
     const sourceObj = merge({}, this._changedState);
 
     // handler arguments are (targetValue, sourceValue, key, target, source)
-    const mergeMethod = function(targetValue: any, sourceValue: any, mergeKey: string) {
+    const mergeMethod = function (targetValue: any, sourceValue: any, mergeKey: string) {
       // if not initial state, skip default merge method (ie. return value, see note below)
       if (!initialState && isEqual(keyPath, self.getIndex(mergeKey))) {
         // use the sourceValue or fall back to targetValue

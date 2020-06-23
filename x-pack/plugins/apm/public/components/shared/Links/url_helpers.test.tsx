@@ -10,7 +10,7 @@ describe('toQuery', () => {
   it('should parse string to object', () => {
     expect(toQuery('?foo=bar&name=john%20doe')).toEqual({
       foo: 'bar',
-      name: 'john doe'
+      name: 'john doe',
     });
   });
 });
@@ -21,7 +21,7 @@ describe('fromQuery', () => {
       fromQuery({
         a: true,
         b: 5000,
-        c: ':'
+        c: ':',
       })
     ).toEqual('a=true&b=5000&c=:');
   });
@@ -32,7 +32,7 @@ describe('fromQuery', () => {
         a: '@',
         b: '.',
         c: ';',
-        d: ' '
+        d: ' ',
       })
     ).toEqual('a=%40&b=.&c=%3B&d=%20');
   });
@@ -41,7 +41,7 @@ describe('fromQuery', () => {
     expect(
       fromQuery({
         a: undefined,
-        b: null
+        b: null,
       })
     ).toEqual('a=&b=');
   });
@@ -49,7 +49,7 @@ describe('fromQuery', () => {
   it('should handle arrays', () => {
     expect(
       fromQuery({
-        arr: ['a', 'b']
+        arr: ['a', 'b'],
       })
     ).toEqual('arr=a%2Cb');
   });
@@ -58,7 +58,7 @@ describe('fromQuery', () => {
     expect(
       fromQuery({
         traceId: 'bar',
-        transactionId: 'john doe'
+        transactionId: 'john doe',
       })
     ).toEqual('traceId=bar&transactionId=john%20doe');
   });
@@ -67,7 +67,7 @@ describe('fromQuery', () => {
     expect(
       fromQuery({
         rangeFrom: '2019-03-03T12:00:00.000Z',
-        rangeTo: '2019-03-05T12:00:00.000Z'
+        rangeTo: '2019-03-05T12:00:00.000Z',
       })
     ).toEqual(
       'rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z'
@@ -79,7 +79,7 @@ describe('fromQuery', () => {
       fromQuery({
         flyoutDetailTab: undefined,
         refreshPaused: true,
-        refreshInterval: 5000
+        refreshInterval: 5000,
       })
     ).toEqual('flyoutDetailTab=&refreshPaused=true&refreshInterval=5000');
   });

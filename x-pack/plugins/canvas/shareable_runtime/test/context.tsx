@@ -59,7 +59,7 @@ export const Context = ({
 }: Props) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
-  renderFunctions.forEach(rendererFn => {
+  renderFunctions.forEach((rendererFn) => {
     const renderer = rendererFn();
     renderers[renderer.name] = renderer;
   });

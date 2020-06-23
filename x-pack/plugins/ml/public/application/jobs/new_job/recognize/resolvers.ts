@@ -66,8 +66,8 @@ export const checkForSavedObjects = async (objects: KibanaObjects): Promise<Kiba
         perPage: 1000,
       });
 
-      acc[type] = objects[type].map(obj => {
-        const find = savedObjects.find(savedObject => savedObject.attributes.title === obj.title);
+      acc[type] = objects[type].map((obj) => {
+        const find = savedObjects.find((savedObject) => savedObject.attributes.title === obj.title);
         return {
           ...obj,
           exists: !!find,

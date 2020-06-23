@@ -26,7 +26,7 @@ import { search } from '../../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
 export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
-  return next => doc => {
+  return (next) => (doc) => {
     const { timeField, interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
 

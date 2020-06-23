@@ -24,7 +24,7 @@ export function fetchEffectFactory<T, R, S, F>(
   success: (response: R) => Action<S>,
   fail: (error: IHttpFetchError) => Action<F>
 ) {
-  return function*(action: Action<T>) {
+  return function* (action: Action<T>) {
     try {
       const response = yield call(fetch, action.payload);
       if (response instanceof Error) {

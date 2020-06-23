@@ -37,24 +37,24 @@ export function QueryActionsProvider(Promise) {
     indexPatterns
   );
 
-  const setFailedStatus = state => (subject, details = {}) =>
+  const setFailedStatus = (state) => (subject, details = {}) =>
     (state.loadingStatus[subject] = {
       status: LOADING_STATUS.FAILED,
       reason: FAILURE_REASONS.UNKNOWN,
       ...details,
     });
 
-  const setLoadedStatus = state => subject =>
+  const setLoadedStatus = (state) => (subject) =>
     (state.loadingStatus[subject] = {
       status: LOADING_STATUS.LOADED,
     });
 
-  const setLoadingStatus = state => subject =>
+  const setLoadingStatus = (state) => (subject) =>
     (state.loadingStatus[subject] = {
       status: LOADING_STATUS.LOADING,
     });
 
-  const fetchAnchorRow = state => () => {
+  const fetchAnchorRow = (state) => () => {
     const {
       queryParameters: { indexPatternId, anchorId, sort, tieBreakerField },
     } = state;
@@ -72,12 +72,12 @@ export function QueryActionsProvider(Promise) {
     return Promise.try(() =>
       fetchAnchor(indexPatternId, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
     ).then(
-      anchorDocument => {
+      (anchorDocument) => {
         setLoadedStatus(state)('anchor');
         state.rows.anchor = anchorDocument;
         return anchorDocument;
       },
-      error => {
+      (error) => {
         setFailedStatus(state)('anchor', { error });
         getServices().toastNotifications.addDanger({
           title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
@@ -125,12 +125,12 @@ export function QueryActionsProvider(Promise) {
         filters
       )
     ).then(
-      documents => {
+      (documents) => {
         setLoadedStatus(state)(type);
         state.rows[type] = documents;
         return documents;
       },
-      error => {
+      (error) => {
         setFailedStatus(state)(type, { error });
         getServices().toastNotifications.addDanger({
           title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
@@ -143,36 +143,36 @@ export function QueryActionsProvider(Promise) {
     );
   };
 
-  const fetchContextRows = state => () =>
+  const fetchContextRows = (state) => () =>
     Promise.all([
       fetchSurroundingRows('predecessors', state),
       fetchSurroundingRows('successors', state),
     ]);
 
-  const fetchAllRows = state => () =>
+  const fetchAllRows = (state) => () =>
     Promise.try(fetchAnchorRow(state)).then(fetchContextRows(state));
 
-  const fetchContextRowsWithNewQueryParameters = state => queryParameters => {
+  const fetchContextRowsWithNewQueryParameters = (state) => (queryParameters) => {
     setQueryParameters(state)(queryParameters);
     return fetchContextRows(state)();
   };
 
-  const fetchAllRowsWithNewQueryParameters = state => queryParameters => {
+  const fetchAllRowsWithNewQueryParameters = (state) => (queryParameters) => {
     setQueryParameters(state)(queryParameters);
     return fetchAllRows(state)();
   };
 
-  const fetchGivenPredecessorRows = state => count => {
+  const fetchGivenPredecessorRows = (state) => (count) => {
     setPredecessorCount(state)(count);
     return fetchSurroundingRows('predecessors', state);
   };
 
-  const fetchGivenSuccessorRows = state => count => {
+  const fetchGivenSuccessorRows = (state) => (count) => {
     setSuccessorCount(state)(count);
     return fetchSurroundingRows('successors', state);
   };
 
-  const setAllRows = state => (predecessorRows, anchorRow, successorRows) =>
+  const setAllRows = (state) => (predecessorRows, anchorRow, successorRows) =>
     (state.rows.all = [
       ...(predecessorRows || []),
       ...(anchorRow ? [anchorRow] : []),

@@ -1,7 +1,6 @@
 {
   "nodeVersion": "system",
   "baseUrl": "http://localhost:5701",
-  "video": false,
   "trashAssetsBeforeRuns": false,
   "fileServerFolder": "../",
   "fixturesFolder": "./cypress/fixtures",
@@ -9,6 +8,8 @@
   "pluginsFile": "./cypress/plugins/index.js",
   "screenshotsFolder": "./cypress/screenshots",
   "supportFile": "./cypress/support/index.ts",
+  "video": true,
+  "videoCompression": false,
   "videosFolder": "./cypress/videos",
   "useRelativeSnapshots": true,
   "reporter": "junit",

@@ -58,6 +58,6 @@ export abstract class SavedObjectsManagementAction {
 
   protected finish() {
     this.record = null;
-    this.callbacks.forEach(callback => callback());
+    this.callbacks.forEach((callback) => callback());
   }
 }

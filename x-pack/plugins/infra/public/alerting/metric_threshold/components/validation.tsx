@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isNumber } from 'lodash';
 import {
   MetricExpressionParams,
   Comparator,
@@ -106,3 +105,5 @@ export function validateMetricThreshold({
 
   return validationResult;
 }
+
+const isNumber = (value: unknown): value is number => typeof value === 'number';

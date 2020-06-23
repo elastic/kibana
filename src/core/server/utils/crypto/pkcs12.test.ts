@@ -65,7 +65,7 @@ describe('#readPkcs12Keystore', () => {
   };
 
   const expectCA = (pkcs12ReadResult: Pkcs12ReadResult, ca = [pemCA]) => {
-    const result = pkcs12ReadResult.ca?.map(x => reformatPem(x));
+    const result = pkcs12ReadResult.ca?.map((x) => reformatPem(x));
     expect(result).toEqual(ca);
   };
 
@@ -199,7 +199,7 @@ describe('#readPkcs12Keystore', () => {
 describe('#readPkcs12Truststore', () => {
   it('reads all certificates into one CA array and discards any certificates that have keys', () => {
     const ca = readPkcs12Truststore(ES_P12_PATH, ES_P12_PASSWORD);
-    const result = ca?.map(x => reformatPem(x));
+    const result = ca?.map((x) => reformatPem(x));
     expect(result).toEqual([pemCA]);
   });
 });

@@ -27,8 +27,8 @@ export function collectFns(ast: ExpressionAstNode, cb: (functionName: string) =>
     cb(cFunction);
 
     // recurse the arguments and update the set along the way
-    Object.keys(cArguments).forEach(argName => {
-      cArguments[argName].forEach(subAst => {
+    Object.keys(cArguments).forEach((argName) => {
+      cArguments[argName].forEach((subAst) => {
         if (subAst != null) {
           collectFns(subAst, cb);
         }

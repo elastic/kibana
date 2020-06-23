@@ -13,7 +13,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );

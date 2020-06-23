@@ -11,7 +11,7 @@ export const PaletteSwatch = ({ colors, gradient }) => {
   let colorBoxes;
 
   if (!gradient) {
-    colorBoxes = colors.map(color => (
+    colorBoxes = colors.map((color) => (
       <div
         key={color}
         className="canvasPaletteSwatch__box"

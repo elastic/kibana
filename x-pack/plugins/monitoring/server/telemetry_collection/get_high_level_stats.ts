@@ -153,7 +153,7 @@ function groupInstancesByCluster<T extends { cluster_uuid?: string }>(
   const clusterMap = new Map<string, InternalClusterMap>();
 
   // hits are sorted arbitrarily by product UUID
-  instances.map(instance => {
+  instances.map((instance) => {
     const clusterUuid = instance._source.cluster_uuid;
     const version: string | undefined = get(
       instance,

@@ -63,19 +63,12 @@ function slackHandler(request: SlackRequest, h: any) {
         error: 'rate_limited',
       };
 
-      return h
-        .response(response)
-        .type('application/json')
-        .header('retry-after', '1')
-        .code(429);
+      return h.response(response).type('application/json').header('retry-after', '1').code(429);
   }
 
   return htmlResponse(h, 400, 'unknown request to slack simulator');
 }
 
 function htmlResponse(h: any, code: number, text: string) {
-  return h
-    .response(text)
-    .type('text/html')
-    .code(code);
+  return h.response(text).type('text/html').code(code);
 }

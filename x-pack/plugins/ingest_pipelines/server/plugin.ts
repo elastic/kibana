@@ -11,7 +11,7 @@ import { PLUGIN_ID, PLUGIN_MIN_LICENSE_TYPE } from '../common/constants';
 
 import { License } from './services';
 import { ApiRoutes } from './routes';
-import { isEsError } from './lib';
+import { isEsError } from './shared_imports';
 import { Dependencies } from './types';
 
 export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
@@ -25,7 +25,7 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
     this.apiRoutes = new ApiRoutes();
   }
 
-  public setup({ http, elasticsearch }: CoreSetup, { licensing }: Dependencies) {
+  public setup({ http }: CoreSetup, { licensing, security }: Dependencies) {
     this.logger.debug('ingest_pipelines: setup');
 
     const router = http.createRouter();
@@ -47,6 +47,9 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
     this.apiRoutes.setup({
       router,
       license: this.license,
+      config: {
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
+      },
       lib: {
         isEsError,
       },

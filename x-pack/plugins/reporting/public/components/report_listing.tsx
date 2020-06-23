@@ -191,13 +191,13 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private onSelectionChange = (jobs: Job[]) => {
-    this.setState(current => ({ ...current, selectedJobs: jobs }));
+    this.setState((current) => ({ ...current, selectedJobs: jobs }));
   };
 
   private removeRecord = (record: Job) => {
     const { jobs } = this.state;
-    const filtered = jobs.filter(j => j.id !== record.id);
-    this.setState(current => ({ ...current, jobs: filtered }));
+    const filtered = jobs.filter((j) => j.id !== record.id);
+    this.setState((current) => ({ ...current, jobs: filtered }));
   };
 
   private renderDeleteButton = () => {
@@ -266,7 +266,7 @@ class ReportListingUi extends Component<Props, State> {
     } catch (fetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
         this.props.toasts.addDanger(this.state.badLicenseMessage);
-        this.props.redirect('kibana#/management');
+        this.props.redirect('management');
         return;
       }
 

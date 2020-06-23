@@ -16,7 +16,7 @@ import {
 } from './types';
 import { executeActions } from '../lib/alerts/license_expiration.lib';
 import { PreparedAlert, getPreparedAlert } from '../lib/alerts/get_prepared_alert';
-import { alertsMock, AlertServicesMock } from '../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../alerts/server/mocks';
 
 jest.mock('../lib/alerts/license_expiration.lib', () => ({
   executeActions: jest.fn(),
@@ -112,9 +112,7 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should fire actions if going to expire', async () => {
-    const expiryDateMS = moment()
-      .add(7, 'days')
-      .valueOf();
+    const expiryDateMS = moment().add(7, 'days').valueOf();
     const license = {
       status: 'active',
       type: 'gold',
@@ -134,9 +132,7 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should fire actions if the user fixed their license', async () => {
-    const expiryDateMS = moment()
-      .add(365, 'days')
-      .valueOf();
+    const expiryDateMS = moment().add(365, 'days').valueOf();
     const license = {
       status: 'active',
       type: 'gold',
@@ -157,9 +153,7 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should not fire actions for trial license that expire in more than 14 days', async () => {
-    const expiryDateMS = moment()
-      .add(20, 'days')
-      .valueOf();
+    const expiryDateMS = moment().add(20, 'days').valueOf();
     const license = {
       status: 'active',
       type: 'trial',
@@ -173,9 +167,7 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should fire actions for trial license that in 14 days or less', async () => {
-    const expiryDateMS = moment()
-      .add(7, 'days')
-      .valueOf();
+    const expiryDateMS = moment().add(7, 'days').valueOf();
     const license = {
       status: 'active',
       type: 'trial',

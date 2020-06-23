@@ -18,7 +18,7 @@ export const getSectionsWithRows = (
   apmDoc: Transaction | APMError | Span
 ) => {
   return sections
-    .map(section => {
+    .map((section) => {
       const sectionData: Record<string, unknown> = get(apmDoc, section.key);
       const filteredData:
         | Record<string, unknown>
@@ -40,7 +40,7 @@ export const filterSectionsByTerm = (
     return sections;
   }
   return sections
-    .map(section => {
+    .map((section) => {
       const { rows = [] } = section;
       const filteredRows = rows.filter(({ key, value }) => {
         const valueAsString = String(value).toLowerCase();

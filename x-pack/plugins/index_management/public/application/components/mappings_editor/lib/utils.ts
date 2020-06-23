@@ -30,7 +30,6 @@ import {
   MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
-import { State } from '../reducer';
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
@@ -111,7 +110,7 @@ const replaceAliasPathByAliasId = (
   Object.entries(byId).forEach(([id, field]) => {
     if (field.source.type === 'alias') {
       const aliasTargetField = Object.values(byId).find(
-        _field => _field.path.join('.') === field.source.path
+        (_field) => _field.path.join('.') === field.source.path
       );
 
       if (aliasTargetField) {
@@ -292,7 +291,7 @@ const replaceAliasIdByAliasPath = (
   Object.entries(aliases).forEach(([targetId, aliasesIds]) => {
     const path = updatedById[targetId] ? updatedById[targetId].path.join('.') : '';
 
-    aliasesIds.forEach(id => {
+    aliasesIds.forEach((id) => {
       const aliasField = updatedById[id];
       if (!aliasField) {
         return;
@@ -313,7 +312,7 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
   const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
 
   const deNormalizePaths = (ids: string[], to: Fields = {}) => {
-    ids.forEach(id => {
+    ids.forEach((id) => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;
       const field: Omit<Field, 'name'> = normalizedField;
@@ -356,8 +355,8 @@ export const updateFieldsPathAfterFieldNameChange = (
 
     if (_field.hasChildFields || _field.hasMultiFields) {
       _field
-        .childFields!.map(fieldId => byId[fieldId])
-        .forEach(childField => {
+        .childFields!.map((fieldId) => byId[fieldId])
+        .forEach((childField) => {
           updateFieldPath(childField, [..._paths, name]);
         });
     }
@@ -381,8 +380,8 @@ export const getAllChildFields = (
   const getChildFields = (_field: NormalizedField, to: NormalizedField[] = []) => {
     if (_field.hasChildFields || _field.hasMultiFields) {
       _field
-        .childFields!.map(fieldId => byId[fieldId])
-        .forEach(childField => {
+        .childFields!.map((fieldId) => byId[fieldId])
+        .forEach((childField) => {
           to.push(childField);
           getChildFields(childField, to);
         });
@@ -411,13 +410,13 @@ export const getAllDescendantAliases = (
   }
 
   if (hasAliases) {
-    fields.aliases[field.id].forEach(id => {
+    fields.aliases[field.id].forEach((id) => {
       aliasesIds.push(id);
     });
   }
 
   if (field.childFields) {
-    field.childFields.forEach(id => {
+    field.childFields.forEach((id) => {
       if (!fields.byId[id]) {
         return;
       }
@@ -455,14 +454,14 @@ export const filterTypesForMultiField = <T extends string = string>(
   options: ComboBoxOption[]
 ): ComboBoxOption[] =>
   options.filter(
-    option => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
+    (option) => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
   );
 
 export const filterTypesForNonRootFields = <T extends string = string>(
   options: ComboBoxOption[]
 ): ComboBoxOption[] =>
   options.filter(
-    option => TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL.includes(option.value as MainType) === false
+    (option) => TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL.includes(option.value as MainType) === false
   );
 
 /**
@@ -484,7 +483,7 @@ export const buildFieldTreeFromIds = (
   byId: NormalizedFields['byId'],
   render: (field: NormalizedField) => JSX.Element | string
 ): TreeItem[] =>
-  fieldsIds.map(id => {
+  fieldsIds.map((id) => {
     const field = byId[id];
     const children = field.childFields
       ? buildFieldTreeFromIds(field.childFields, byId, render)
@@ -516,24 +515,6 @@ export const shouldDeleteChildFieldsAfterTypeChange = (
 
 export const canUseMappingsEditor = (maxNestedDepth: number) =>
   maxNestedDepth < MAX_DEPTH_DEFAULT_EDITOR;
-
-const stateWithValidity: Array<keyof State> = ['configuration', 'fieldsJsonEditor', 'fieldForm'];
-
-export const isStateValid = (state: State): boolean | undefined =>
-  Object.entries(state)
-    .filter(([key]) => stateWithValidity.includes(key as keyof State))
-    .reduce((isValid, { 1: value }) => {
-      if (value === undefined) {
-        return isValid;
-      }
-
-      // If one section validity of the state is "undefined", the mappings validity is also "undefined"
-      if (isValid === undefined || value.isValid === undefined) {
-        return undefined;
-      }
-
-      return isValid && value.isValid;
-    }, true as undefined | boolean);
 
 /**
  * This helper removes all the keys on an object with an "undefined" value.

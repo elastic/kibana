@@ -22,7 +22,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
       navLinksBuilder = new NavLinksBuilder(features);
     });
 
-    SpaceScenarios.forEach(scenario => {
+    SpaceScenarios.forEach((scenario) => {
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({ spaceId: scenario.id });
         switch (scenario.id) {

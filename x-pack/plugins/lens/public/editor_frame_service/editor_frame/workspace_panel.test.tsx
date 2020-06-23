@@ -21,11 +21,17 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import {
+  DataPublicPluginStart,
+  esFilters,
+  IFieldType,
+  IIndexPattern,
+} from '../../../../../../src/plugins/data/public';
 import { TriggerId, UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 
 describe('workspace_panel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -34,6 +40,7 @@ describe('workspace_panel', () => {
 
   let expressionRendererMock: jest.Mock<React.ReactElement, [ReactExpressionRendererProps]>;
   let uiActionsMock: jest.Mocked<UiActionsStart>;
+  let dataMock: jest.Mocked<DataPublicPluginStart>;
   let trigger: jest.Mocked<TriggerContract<TriggerId>>;
 
   let instance: ReactWrapper<WorkspacePanelProps>;
@@ -41,6 +48,7 @@ describe('workspace_panel', () => {
   beforeEach(() => {
     trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract<TriggerId>>;
     uiActionsMock = uiActionsPluginMock.createStartContract();
+    dataMock = dataPluginMock.createStartContract();
     uiActionsMock.getTrigger.mockReturnValue(trigger);
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
@@ -69,7 +77,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
-        plugins={{ uiActions: uiActionsMock }}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -92,7 +100,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
-        plugins={{ uiActions: uiActionsMock }}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -115,7 +123,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
-        plugins={{ uiActions: uiActionsMock }}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -152,7 +160,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
-        plugins={{ uiActions: uiActionsMock }}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -240,7 +248,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
-        plugins={{ uiActions: uiActionsMock }}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -292,7 +300,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
-        plugins={{ uiActions: uiActionsMock }}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -348,7 +356,7 @@ describe('workspace_panel', () => {
       .mockReturnValueOnce('datasource')
       .mockReturnValueOnce('datasource second');
 
-    expressionRendererMock = jest.fn(_arg => <span />);
+    expressionRendererMock = jest.fn((_arg) => <span />);
 
     await act(async () => {
       instance = mount(
@@ -372,7 +380,7 @@ describe('workspace_panel', () => {
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
-          plugins={{ uiActions: uiActionsMock }}
+          plugins={{ uiActions: uiActionsMock, data: dataMock }}
         />
       );
     });
@@ -404,7 +412,7 @@ describe('workspace_panel', () => {
       .mockReturnValueOnce('datasource')
       .mockReturnValueOnce('datasource second');
 
-    expressionRendererMock = jest.fn(_arg => <span />);
+    expressionRendererMock = jest.fn((_arg) => <span />);
     await act(async () => {
       instance = mount(
         <InnerWorkspacePanel
@@ -427,7 +435,7 @@ describe('workspace_panel', () => {
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
-          plugins={{ uiActions: uiActionsMock }}
+          plugins={{ uiActions: uiActionsMock, data: dataMock }}
         />
       );
     });
@@ -482,7 +490,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
-        plugins={{ uiActions: uiActionsMock }}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -520,7 +528,7 @@ describe('workspace_panel', () => {
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
-          plugins={{ uiActions: uiActionsMock }}
+          plugins={{ uiActions: uiActionsMock, data: dataMock }}
         />
       );
     });
@@ -564,7 +572,7 @@ describe('workspace_panel', () => {
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
-          plugins={{ uiActions: uiActionsMock }}
+          plugins={{ uiActions: uiActionsMock, data: dataMock }}
         />
       );
     });
@@ -573,7 +581,7 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
-    expressionRendererMock.mockImplementation(_ => {
+    expressionRendererMock.mockImplementation((_) => {
       return <span />;
     });
 
@@ -620,7 +628,7 @@ describe('workspace_panel', () => {
             dispatch={mockDispatch}
             ExpressionRenderer={expressionRendererMock}
             core={coreMock.createSetup()}
-            plugins={{ uiActions: uiActionsMock }}
+            plugins={{ uiActions: uiActionsMock, data: dataMock }}
           />
         </ChildDragDropProvider>
       );

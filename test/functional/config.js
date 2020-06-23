@@ -20,7 +20,7 @@
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
   return {
@@ -40,6 +40,7 @@ export default async function({ readConfigFile }) {
     ],
     pageObjects,
     services,
+
     servers: commonConfig.get('servers'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
@@ -83,9 +84,12 @@ export default async function({ readConfigFile }) {
         pathname: '/app/dashboards',
         hash: '/list',
       },
+      management: {
+        pathname: '/app/management',
+      },
+      /** @obsolete "management" should be instead of "settings" **/
       settings: {
-        pathname: '/app/kibana',
-        hash: '/management',
+        pathname: '/app/management',
       },
       timelion: {
         pathname: '/app/timelion',

@@ -81,7 +81,7 @@ export async function setupIngestManager(
   }
   for (const installedPackage of installedPackages) {
     const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
-      packageName => installedPackage.name === packageName
+      (packageName) => installedPackage.name === packageName
     );
     if (!packageShouldBeInstalled) {
       continue;
@@ -111,8 +111,8 @@ export async function setupFleet(
       cluster: ['monitor', 'manage_api_key'],
       indices: [
         {
-          names: ['logs-*', 'metrics-*', 'events-*'],
-          privileges: ['write', 'create_index'],
+          names: ['logs-*', 'metrics-*', 'events-*', '.ds-logs-*', '.ds-metrics-*', '.ds-events-*'],
+          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],
     },
@@ -134,6 +134,8 @@ export async function setupFleet(
       },
     },
   });
+
+  await outputService.invalidateCache();
 
   // save fleet admin user
   const defaultOutputId = await outputService.getDefaultOutputId(soClient);

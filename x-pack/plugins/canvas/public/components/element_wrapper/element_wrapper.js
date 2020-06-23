@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Positionable } from '../positionable';
 import { ElementContent } from '../element_content';
 
-export const ElementWrapper = props => {
+export const ElementWrapper = (props) => {
   const { renderable, transformMatrix, width, height, state, handlers } = props;
 
   return (

@@ -110,7 +110,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
               disabled={disabled}
               showTimeSelect
               selected={startTimeValue}
-              onChange={date => setStartTime(selectedDateToParam(date))}
+              onChange={(date) => setStartTime(selectedDateToParam(date))}
               placeholder={startTimeDefaultDescription}
               maxDate={now}
             />
@@ -132,20 +132,12 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
               disabled={disabled}
               showTimeSelect
               selected={endTimeValue}
-              onChange={date => setEndTime(selectedDateToParam(date))}
+              onChange={(date) => setEndTime(selectedDateToParam(date))}
               placeholder={endTimeDefaultDescription}
               openToDate={now}
               minDate={startTimeValue}
-              minTime={
-                selectedEndTimeIsToday
-                  ? now
-                  : moment()
-                      .hour(0)
-                      .minutes(0)
-              }
-              maxTime={moment()
-                .hour(23)
-                .minutes(59)}
+              minTime={selectedEndTimeIsToday ? now : moment().hour(0).minutes(0)}
+              maxTime={moment().hour(23).minutes(59)}
             />
           </EuiFormControlLayout>
         </EuiFlexGroup>
@@ -155,7 +147,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
 };
 
 const getStartTimeValidationErrorMessages = (validationErrors: TimeRangeValidationError[]) =>
-  validationErrors.flatMap(validationError => {
+  validationErrors.flatMap((validationError) => {
     switch (validationError.error) {
       case 'INVALID_TIME_RANGE':
         return [
@@ -169,7 +161,7 @@ const getStartTimeValidationErrorMessages = (validationErrors: TimeRangeValidati
   });
 
 const getEndTimeValidationErrorMessages = (validationErrors: TimeRangeValidationError[]) =>
-  validationErrors.flatMap(validationError => {
+  validationErrors.flatMap((validationError) => {
     switch (validationError.error) {
       case 'INVALID_TIME_RANGE':
         return [

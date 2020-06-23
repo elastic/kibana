@@ -9,7 +9,7 @@ import { loadIndexSettings as request } from '../../services';
 import { notificationService } from '../../services/notification';
 import { loadIndexDataSuccess } from './load_index_data';
 
-export const editIndexSettings = ({ indexName }) => async dispatch => {
+export const editIndexSettings = ({ indexName }) => async (dispatch) => {
   let indexSettings;
   try {
     indexSettings = await request(indexName);

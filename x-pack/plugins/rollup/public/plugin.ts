@@ -16,9 +16,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-// @ts-ignore
-import { CRUD_APP_BASE_PATH } from './crud_app/constants';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
 // @ts-ignore
@@ -71,32 +69,29 @@ export class RollupPlugin implements Plugin {
             'Summarize and store historical data in a smaller index for future analysis.',
         }),
         icon: 'indexRollupApp',
-        path: `#${CRUD_APP_BASE_PATH}/job_list`,
+        path: `/app/management/data/rollup_jobs/job_list`,
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
       });
     }
 
-    const esSection = management.sections.getSection('elasticsearch');
-    if (esSection) {
-      esSection.registerApp({
-        id: 'rollup_jobs',
-        title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
-        order: 5,
-        async mount(params) {
-          params.setBreadcrumbs([
-            {
-              text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
-                defaultMessage: 'Rollup Jobs',
-              }),
-            },
-          ]);
-          const { renderApp } = await import('./application');
+    management.sections.getSection(ManagementSectionId.Data).registerApp({
+      id: 'rollup_jobs',
+      title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
+      order: 4,
+      async mount(params) {
+        params.setBreadcrumbs([
+          {
+            text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
+              defaultMessage: 'Rollup Jobs',
+            }),
+          },
+        ]);
+        const { renderApp } = await import('./application');
 
-          return renderApp(core, params);
-        },
-      });
-    }
+        return renderApp(core, params);
+      },
+    });
   }
 
   start(core: CoreStart) {

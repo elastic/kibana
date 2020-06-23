@@ -8,7 +8,7 @@ import { getBucketSize } from '../../../helpers/get_bucket_size';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMlBucketSize } from './get_ml_bucket_size';
@@ -19,7 +19,7 @@ export async function getAnomalySeries({
   transactionType,
   transactionName,
   timeSeriesDates,
-  setup
+  setup,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -42,10 +42,21 @@ export async function getAnomalySeries({
     return;
   }
 
+  // don't fetch anomalies if the ML plugin is not setup
+  if (!setup.ml) {
+    return;
+  }
+
+  // don't fetch anomalies if required license is not satisfied
+  const mlCapabilities = await setup.ml.mlSystem.mlCapabilities();
+  if (!mlCapabilities.isPlatinumOrTrialLicense) {
+    return;
+  }
+
   const mlBucketSize = await getMlBucketSize({
     serviceName,
     transactionType,
-    setup
+    setup,
   });
 
   const { start, end } = setup;
@@ -56,7 +67,7 @@ export async function getAnomalySeries({
     transactionType,
     intervalString,
     mlBucketSize,
-    setup
+    setup,
   });
 
   return esResponse

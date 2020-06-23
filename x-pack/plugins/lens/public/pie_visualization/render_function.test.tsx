@@ -17,7 +17,7 @@ describe('PieVisualization component', () => {
   let convertSpy: jest.Mock;
 
   beforeEach(() => {
-    convertSpy = jest.fn(x => x);
+    convertSpy = jest.fn((x) => x);
     getFormatSpy = jest.fn();
     getFormatSpy.mockReturnValue({ convert: convertSpy });
   });
@@ -114,10 +114,9 @@ describe('PieVisualization component', () => {
     test('it calls filter callback with the given context', () => {
       const defaultArgs = getDefaultArgs();
       const component = shallow(<PieComponent args={{ ...args }} {...defaultArgs} />);
-      component
-        .find(Settings)
-        .first()
-        .prop('onElementClick')!([[[{ groupByRollup: 6, value: 6 }], {} as SeriesIdentifier]]);
+      component.find(Settings).first().prop('onElementClick')!([
+        [[{ groupByRollup: 6, value: 6 }], {} as SeriesIdentifier],
+      ]);
 
       expect(defaultArgs.onClickValue.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
