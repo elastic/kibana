@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }) {
   describe('async search with scripted fields', function () {
     this.tags(['skipFirefox']);
 
-    before(async function() {
-      await esArchiver.load('kibana_scripted_fields_on_logstash'); // TODO, save a new .kibana index with the index pattern with scripted field already there
+    before(async function () {
+      await esArchiver.load('kibana_scripted_fields_on_logstash');
       await esArchiver.loadIfNeeded('logstash_functional');
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await kibanaServer.uiSettings.update({
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await queryBar.setQuery('php* OR *jpg OR *css*');
       await testSubjects.click('querySubmitButton');
-      await retry.tryForTime(30000, async function() {
+      await retry.tryForTime(30000, async function () {
         expect(await PageObjects.discover.getHitCount()).to.be('13,301');
       });
     });
