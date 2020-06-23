@@ -251,12 +251,28 @@ export class AlertsAuthorization {
 
   private asFiltersByAlertTypeAndConsumer(alertTypes: Set<RegistryAlertTypeWithAuth>): string[] {
     return Array.from(alertTypes).reduce<string[]>((filters, { id, authorizedConsumers }) => {
+      ensureFieldIsSafeForQuery('alertTypeId', id);
       filters.push(
         `(alert.attributes.alertTypeId:${id} and (${authorizedConsumers
-          .map((consumer) => `alert.attributes.consumer:${consumer}`)
+          .map((consumer) => {
+            ensureFieldIsSafeForQuery('alertTypeId', id);
+            return `alert.attributes.consumer:${consumer}`;
+          })
           .join(' or ')}))`
       );
       return filters;
     }, []);
   }
+}
+
+export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
+  const invalid = value.match(/[>=<\*:]+/g);
+  if (invalid) {
+    throw new Error(
+      `expected ${field} not to include invalid character${
+        invalid.length > 1 ? `s` : ``
+      }: ${invalid?.join(`, `)}`
+    );
+  }
+  return true;
 }

@@ -8,7 +8,7 @@ import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
 import { PluginStartContract as FeaturesStartContract, Feature } from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
-import { AlertsAuthorization } from './alerts_authorization';
+import { AlertsAuthorization, ensureFieldIsSafeForQuery } from './alerts_authorization';
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 
@@ -771,5 +771,29 @@ describe('filterByAlertTypeAuthorization', () => {
               },
             }
           `);
+  });
+});
+
+describe('ensureFieldIsSafeForQuery', () => {
+  test('throws if field contains character that isnt safe in a KQL query', () => {
+    expect(() => ensureFieldIsSafeForQuery('id', 'alert-*')).toThrowError(
+      `expected id not to include invalid character: *`
+    );
+
+    expect(() => ensureFieldIsSafeForQuery('id', '<=""')).toThrowError(
+      `expected id not to include invalid character: <=`
+    );
+
+    expect(() => ensureFieldIsSafeForQuery('id', '<"" or >=""')).toThrowError(
+      `expected id not to include invalid characters: <, >=`
+    );
+
+    expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrowError(
+      `expected id not to include invalid character: :`
+    );
+  });
+
+  test('doesnt throws if field is safe as part of a KQL query', () => {
+    expect(() => ensureFieldIsSafeForQuery('id', '123-0456-678')).not.toThrow();
   });
 });
