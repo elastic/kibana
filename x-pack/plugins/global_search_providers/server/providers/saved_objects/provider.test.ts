@@ -107,6 +107,7 @@ describe('savedObjectsResultProvider', () => {
       page: 1,
       perPage: defaultOption.maxResults,
       search: 'term',
+      preference: 'pref',
       searchFields: ['title', 'description'],
       type: ['typeA', 'typeB'],
     });

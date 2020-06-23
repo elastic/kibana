@@ -12,7 +12,7 @@ import { mapToResults } from './map_object_to_result';
 export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider => {
   return {
     id: 'savedObjects',
-    find: (term, { aborted$, maxResults }, { core }) => {
+    find: (term, { aborted$, maxResults, preference }, { core }) => {
       const { typeRegistry, client } = core.savedObjects;
 
       const searchableTypes = typeRegistry
@@ -23,11 +23,11 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
         ...new Set(searchableTypes.map((type) => type.management!.defaultSearchField!)),
       ];
 
-      // TODO: add preference once https://github.com/elastic/kibana/pull/68620 lands
       const responsePromise = client.find({
         page: 1,
         perPage: maxResults,
         search: term,
+        preference,
         searchFields,
         type: searchableTypes.map((type) => type.name),
       });
