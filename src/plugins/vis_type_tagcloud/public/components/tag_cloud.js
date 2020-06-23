@@ -147,6 +147,7 @@ export class TagCloud extends EventEmitter {
       }
       await this._updateDOM(job);
       const cloudBBox = this._svgGroup[0][0].getBBox();
+      console.log(this._svgGroup[0][0].getBBox());
       this._cloudWidth = cloudBBox.width;
       this._cloudHeight = cloudBBox.height;
       this._allInViewBox =

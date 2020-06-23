@@ -453,6 +453,7 @@
     "is-path-inside": "^2.1.0",
     "istanbul-instrumenter-loader": "3.0.1",
     "jest": "^24.9.0",
+    "jest-canvas-mock": "^2.2.0",
     "jest-cli": "^24.9.0",
     "jest-raw-loader": "^1.0.1",
     "jimp": "^0.9.6",
