@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Subject } from 'rxjs';
-import { KibanaRequest, Auditor } from 'src/core/server';
-import { AuditableEvent, AuditEvent } from '../types';
+import { KibanaRequest, Auditor, AuditableEvent } from 'src/core/server';
+import { AuditEvent } from '../types';
 
 import { SecurityPluginSetup } from '../../../security/server';
 import { SpacesPluginSetup } from '../../../spaces/server';

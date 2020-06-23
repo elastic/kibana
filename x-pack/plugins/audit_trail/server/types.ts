@@ -5,15 +5,6 @@
  */
 
 /**
- * Event to enhance with request context. Provided by an external plugin.
- * @public
- */
-export interface AuditableEvent {
-  message: string;
-  type: string;
-}
-
-/**
  * Event enhanced with request context data. Provided to an external consumer.
  * @public
  */
