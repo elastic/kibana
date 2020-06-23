@@ -6,7 +6,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { useKibana } from '../../../shared_imports';
 
@@ -21,19 +20,31 @@ interface PipelineErrors {
   errors: PipelineError[];
 }
 
+interface ErrorNode {
+  reason: string;
+  processor_type?: string;
+  suppressed?: ErrorNode[];
+}
+
 interface ErrorAttributesObject {
   attributes: {
     error: {
-      root_cause: [
-        {
-          reason: string;
-          processor_type?: string;
-          suppressed?: Array<{ reason: string; processor_type?: string }>;
-        }
-      ];
+      root_cause: [ErrorNode];
     };
   };
 }
+
+const flattenErrorsTree = (node: ErrorNode): PipelineError[] => {
+  const result: PipelineError[] = [];
+  const recurse = (_node: ErrorNode) => {
+    result.push({ reason: _node.reason, processorType: _node.processor_type });
+    if (_node.suppressed && Array.isArray(_node.suppressed)) {
+      _node.suppressed.forEach(recurse);
+    }
+  };
+  recurse(node);
+  return result;
+};
 
 const toKnownError = (error: unknown): PipelineErrors => {
   if (
@@ -42,15 +53,8 @@ const toKnownError = (error: unknown): PipelineErrors => {
     (error as any).attributes?.error?.root_cause?.[0]
   ) {
     const errorAttributes = error as ErrorAttributesObject;
-    const result: PipelineErrors = { errors: [] };
     const rootCause = errorAttributes.attributes.error.root_cause[0];
-    result.errors.push({ reason: rootCause.reason, processorType: rootCause.processor_type });
-    if (rootCause.suppressed && Array.isArray(rootCause.suppressed)) {
-      rootCause.suppressed.forEach((e: any) =>
-        result.errors.push({ reason: e.reason, processorType: e.processor_type })
-      );
-    }
-    return result;
+    return { errors: flattenErrorsTree(rootCause) };
   }
 
   if (typeof error === 'string') {
