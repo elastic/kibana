@@ -186,6 +186,8 @@ export function PanelHeader({
       </span>
     );
   };
+
+  const showPlaceholderTitle = !!placeholderTitle && !title;
   return (
     <figcaption
       className={classes}
@@ -197,7 +199,7 @@ export function PanelHeader({
         className="embPanel__title embPanel__dragger"
       >
         {showTitle ? (
-          placeholderTitle ? (
+          showPlaceholderTitle ? (
             getPlaceholderTitle()
           ) : (
             getTitle()
