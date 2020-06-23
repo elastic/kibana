@@ -13,7 +13,7 @@ import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_manag
 import { ml } from '../../../../../services/ml_api_service';
 import { DataFrameAnalyticsId } from '../../../../common/analytics';
 
-export const PROGRESS_REFRESH_INTERVAL_MS = 2000;
+export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 
 export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -27,8 +27,12 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
     services: { notifications },
   } = useMlKibana();
 
-  const getCurrentStats = () => {
-    async function startProgressBar() {
+  useEffect(() => {
+    setInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
       try {
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
         const jobStats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
@@ -39,10 +43,10 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
           const progressStats = getDataFrameAnalyticsProgressPhase(jobStats);
           setCurrentProgress(progressStats);
           if (
-            progressStats.currentPhase <= progressStats.totalPhases &&
-            progressStats.progress < 100
+            progressStats.currentPhase === progressStats.totalPhases &&
+            progressStats.progress === 100
           ) {
-            setTimeout(startProgressBar, PROGRESS_REFRESH_INTERVAL_MS);
+            clearInterval(interval);
           }
         }
       } catch (e) {
@@ -52,18 +56,11 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
             values: { jobId },
           })
         );
+        clearInterval(interval);
       }
-    }
+    }, PROGRESS_REFRESH_INTERVAL_MS);
 
-    startProgressBar();
-  };
-
-  useEffect(() => {
-    setInitialized(true);
-  }, []);
-
-  useEffect(() => {
-    getCurrentStats();
+    return () => clearInterval(interval);
   }, [initialized]);
 
   if (currentProgress === undefined) return null;
