@@ -13,7 +13,7 @@ set -e
 TIMELINES=${1:-../rules/prepackaged_timelines/index.ndjson}
 
 # Example to import and overwrite everything from ./rules/prepackaged_timelines/index.ndjson
-# ./import_rules.sh
+# ./add_prepackaged_timelines.sh
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
