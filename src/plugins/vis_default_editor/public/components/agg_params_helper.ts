@@ -111,7 +111,11 @@ function getAggParamsToRender({
       const aggType = agg.type.type;
       const aggName = agg.type.name;
       const aggParams = get(aggParamsMap, [aggType, aggName], {});
-      paramEditor = get(aggParams, param.name) || get(aggParamsMap, ['common', param.type]);
+      paramEditor = get(aggParams, param.name);
+    }
+
+    if (!paramEditor) {
+      paramEditor = get(aggParamsMap, ['common', param.type]);
     }
 
     // show params with an editor component
