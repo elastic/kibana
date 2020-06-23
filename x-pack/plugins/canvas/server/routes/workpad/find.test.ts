@@ -5,12 +5,7 @@
  */
 
 import { initializeFindWorkpadsRoute } from './find';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import {
   savedObjectsClientMock,
   httpServiceMock,
@@ -31,7 +26,7 @@ describe('Find workpad', () => {
 
   beforeEach(() => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
     initializeFindWorkpadsRoute({
       router,
       logger: loggingServiceMock.create().get(),

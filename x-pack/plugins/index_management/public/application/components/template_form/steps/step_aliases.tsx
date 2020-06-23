@@ -18,119 +18,119 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { Forms } from '../../../../shared_imports';
 import { documentationService } from '../../../services/documentation';
-import { StepProps } from '../types';
 import { useJsonStep } from './use_json_step';
 
-export const StepAliases: React.FunctionComponent<StepProps> = ({
-  template,
-  setDataGetter,
-  onStepValidityChange,
-}) => {
-  const { content, setContent, error } = useJsonStep({
-    prop: 'aliases',
-    defaultValue: template?.template.aliases,
-    setDataGetter,
-    onStepValidityChange,
-  });
+interface Props {
+  defaultValue: { [key: string]: any };
+  onChange: (content: Forms.Content) => void;
+}
 
-  return (
-    <div data-test-subj="stepAliases">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2 data-test-subj="stepTitle">
+export const StepAliases: React.FunctionComponent<Props> = React.memo(
+  ({ defaultValue, onChange }) => {
+    const { jsonContent, setJsonContent, error } = useJsonStep({
+      defaultValue,
+      onChange,
+    });
+
+    return (
+      <div data-test-subj="stepAliases">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2 data-test-subj="stepTitle">
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepAliases.stepTitle"
+                  defaultMessage="Aliases (optional)"
+                />
+              </h2>
+            </EuiTitle>
+
+            <EuiSpacer size="s" />
+
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepAliases.aliasesDescription"
+                  defaultMessage="Set up aliases to associate with your indices."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              flush="right"
+              href={documentationService.getTemplatesDocumentationLink()}
+              target="_blank"
+              iconType="help"
+            >
               <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepAliases.stepTitle"
-                defaultMessage="Aliases (optional)"
+                id="xpack.idxMgmt.templateForm.stepAliases.docsButtonLabel"
+                defaultMessage="Index Templates docs"
               />
-            </h2>
-          </EuiTitle>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-          <EuiSpacer size="s" />
+        <EuiSpacer size="l" />
 
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepAliases.aliasesDescription"
-                defaultMessage="Set up aliases to associate with your indices."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={documentationService.getTemplatesDocumentationLink()}
-            target="_blank"
-            iconType="help"
-          >
+        {/* Aliases code editor */}
+        <EuiFormRow
+          label={
             <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepAliases.docsButtonLabel"
-              defaultMessage="Index Templates docs"
+              id="xpack.idxMgmt.templateForm.stepAliases.fieldAliasesLabel"
+              defaultMessage="Aliases"
             />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
-
-      {/* Aliases code editor */}
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.stepAliases.fieldAliasesLabel"
-            defaultMessage="Aliases"
-          />
-        }
-        helpText={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.stepAliases.aliasesEditorHelpText"
-            defaultMessage="Use JSON format: {code}"
-            values={{
-              code: (
-                <EuiCode>
-                  {JSON.stringify({
-                    my_alias: {},
-                  })}
-                </EuiCode>
-              ),
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.idxMgmt.templateForm.stepAliases.aliasesEditorHelpText"
+              defaultMessage="Use JSON format: {code}"
+              values={{
+                code: (
+                  <EuiCode>
+                    {JSON.stringify({
+                      my_alias: {},
+                    })}
+                  </EuiCode>
+                ),
+              }}
+            />
+          }
+          isInvalid={Boolean(error)}
+          error={error}
+          fullWidth
+        >
+          <EuiCodeEditor
+            mode="json"
+            theme="textmate"
+            width="100%"
+            height="500px"
+            setOptions={{
+              showLineNumbers: false,
+              tabSize: 2,
             }}
+            editorProps={{
+              $blockScrolling: Infinity,
+            }}
+            showGutter={false}
+            minLines={6}
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.templateForm.stepAliases.fieldAliasesAriaLabel',
+              {
+                defaultMessage: 'Aliases code editor',
+              }
+            )}
+            value={jsonContent}
+            onChange={setJsonContent}
+            data-test-subj="aliasesEditor"
           />
-        }
-        isInvalid={Boolean(error)}
-        error={error}
-        fullWidth
-      >
-        <EuiCodeEditor
-          mode="json"
-          theme="textmate"
-          width="100%"
-          height="500px"
-          setOptions={{
-            showLineNumbers: false,
-            tabSize: 2,
-          }}
-          editorProps={{
-            $blockScrolling: Infinity,
-          }}
-          showGutter={false}
-          minLines={6}
-          aria-label={i18n.translate(
-            'xpack.idxMgmt.templateForm.stepAliases.fieldAliasesAriaLabel',
-            {
-              defaultMessage: 'Aliases code editor',
-            }
-          )}
-          value={content}
-          onChange={(updated: string) => {
-            setContent(updated);
-          }}
-          data-test-subj="aliasesEditor"
-        />
-      </EuiFormRow>
-    </div>
-  );
-};
+        </EuiFormRow>
+      </div>
+    );
+  }
+);

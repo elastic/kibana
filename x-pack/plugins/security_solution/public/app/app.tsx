@@ -4,88 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHashHistory, History } from 'history';
+import { History } from 'history';
 import React, { memo, useMemo, FC } from 'react';
 import { ApolloProvider } from 'react-apollo';
-import { Store } from 'redux';
+import { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { BehaviorSubject } from 'rxjs';
-import { pluck } from 'rxjs/operators';
 
-import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-
-import { DEFAULT_DARK_MODE } from '../../common/constants';
+import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
-import { compose } from '../common/lib/compose/kibana_compose';
-import { AppFrontendLibs, AppApolloClient } from '../common/lib/lib';
-import { StartServices } from '../types';
-import { PageRouter } from './routes';
-import { createStore, createInitialState } from '../common/store';
-import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
-import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
+import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
+import { AppFrontendLibs } from '../common/lib/lib';
+import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
+import { State } from '../common/store';
 
 import { ApolloClientContext } from '../common/utils/apollo_context';
-import { SecuritySubPlugins } from './types';
-
-interface AppPluginRootComponentProps {
-  apolloClient: AppApolloClient;
-  history: History;
-  store: Store;
-  subPluginRoutes: React.ReactElement[];
-  theme: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-}
-
-const AppPluginRootComponent: React.FC<AppPluginRootComponentProps> = ({
-  apolloClient,
-  theme,
-  store,
-  subPluginRoutes,
-  history,
-}) => (
-  <ManageGlobalToaster>
-    <ManageGlobalTimeline>
-      <ReduxStoreProvider store={store}>
-        <ApolloProvider client={apolloClient}>
-          <ApolloClientContext.Provider value={apolloClient}>
-            <ThemeProvider theme={theme}>
-              <MlCapabilitiesProvider>
-                <PageRouter history={history} subPluginRoutes={subPluginRoutes} />
-              </MlCapabilitiesProvider>
-            </ThemeProvider>
-            <ErrorToastDispatcher />
-            <GlobalToaster />
-          </ApolloClientContext.Provider>
-        </ApolloProvider>
-      </ReduxStoreProvider>
-    </ManageGlobalTimeline>
-  </ManageGlobalToaster>
-);
-
-const AppPluginRoot = memo(AppPluginRootComponent);
+import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
+import { StartServices } from '../types';
+import { PageRouter } from './routes';
 
 interface StartAppComponent extends AppFrontendLibs {
-  subPlugins: SecuritySubPlugins;
+  children: React.ReactNode;
+  history: History;
+  store: Store<State, Action>;
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
-  const { routes: subPluginRoutes, store: subPluginsStore } = subPlugins;
+const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, history, store }) => {
   const { i18n } = useKibana().services;
-  const history = createHashHistory();
-  const libs$ = new BehaviorSubject(libs);
-
-  const store = createStore(
-    createInitialState(subPluginsStore.initialState),
-    subPluginsStore.reducer,
-    libs$.pipe(pluck('apolloClient')),
-    subPluginsStore.middlewares
-  );
 
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   const theme = useMemo(
@@ -99,13 +49,23 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
   return (
     <EuiErrorBoundary>
       <i18n.Context>
-        <AppPluginRoot
-          apolloClient={libs.apolloClient}
-          history={history}
-          store={store}
-          subPluginRoutes={subPluginRoutes}
-          theme={theme}
-        />
+        <ManageGlobalToaster>
+          <ManageGlobalTimeline>
+            <ReduxStoreProvider store={store}>
+              <ApolloProvider client={apolloClient}>
+                <ApolloClientContext.Provider value={apolloClient}>
+                  <ThemeProvider theme={theme}>
+                    <MlCapabilitiesProvider>
+                      <PageRouter history={history}>{children}</PageRouter>
+                    </MlCapabilitiesProvider>
+                  </ThemeProvider>
+                  <ErrorToastDispatcher />
+                  <GlobalToaster />
+                </ApolloClientContext.Provider>
+              </ApolloProvider>
+            </ReduxStoreProvider>
+          </ManageGlobalTimeline>
+        </ManageGlobalToaster>
       </i18n.Context>
     </EuiErrorBoundary>
   );
@@ -113,21 +73,30 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
 
 const StartApp = memo(StartAppComponent);
 
-interface SiemAppComponentProps {
+interface SecurityAppComponentProps extends AppFrontendLibs {
+  children: React.ReactNode;
+  history: History;
   services: StartServices;
-  subPlugins: SecuritySubPlugins;
+  store: Store<State, Action>;
 }
 
-const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ services, subPlugins }) => (
+const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
+  children,
+  apolloClient,
+  history,
+  services,
+  store,
+}) => (
   <KibanaContextProvider
     services={{
-      appName: 'siem',
-      storage: new Storage(localStorage),
+      appName: APP_NAME,
       ...services,
     }}
   >
-    <StartApp subPlugins={subPlugins} {...compose(services)} />
+    <StartApp apolloClient={apolloClient} history={history} store={store}>
+      {children}
+    </StartApp>
   </KibanaContextProvider>
 );
 
-export const SiemApp = memo(SiemAppComponent);
+export const SecurityApp = memo(SecurityAppComponent);
