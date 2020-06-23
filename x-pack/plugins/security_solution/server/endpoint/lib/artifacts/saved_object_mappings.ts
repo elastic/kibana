@@ -37,9 +37,8 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
 
 export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
-    // manifest schema version
-    schemaVersion: {
-      type: 'keyword',
+    created: {
+      type: 'date',
     },
     // array of doc ids
     ids: {

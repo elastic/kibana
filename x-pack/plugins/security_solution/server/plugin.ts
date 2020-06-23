@@ -20,7 +20,7 @@ import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
-import { ExceptionListClient, ListPluginSetup } from '../../lists/server';
+import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -44,7 +44,7 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerAlertRoutes } from './endpoint/alerts/routes';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
-import { ArtifactService, ManifestService } from './endpoint/services';
+import { ArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
@@ -243,21 +243,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
-    const artifactService = new ArtifactService({ savedObjectsClient });
 
-    let exceptionListClient: ExceptionListClient | undefined;
+    let manifestManager: ManifestManager | undefined;
     if (this.lists) {
-      exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
+      const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
+      const artifactClient = new ArtifactClient(savedObjectsClient);
+      manifestManager = new ManifestManager({
+        savedObjectsClient,
+        artifactClient,
+        exceptionListClient,
+        logger: this.logger,
+      });
     }
 
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager.agentService,
-      artifactService,
-      exceptionListClient,
-      manifestService: new ManifestService({
-        artifactService,
-        savedObjectsClient,
-      }),
+      manifestManager,
     });
 
     if (this.exceptionsPackagerTask) {

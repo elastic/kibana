@@ -18,14 +18,16 @@ export interface ManifestDiff {
 }
 
 export class Manifest {
-  private entries: ManifestEntry[];
+  private created: Date;
+  private entries: Record<string, ManifestEntry>;
   private schemaVersion: string;
 
   // For concurrency control
   private version: string | undefined;
 
-  constructor(schemaVersion: string) {
-    this.entries = [];
+  constructor(created: Date, schemaVersion: string) {
+    this.created = created;
+    this.entries = {};
     this.schemaVersion = schemaVersion;
   }
 
@@ -33,7 +35,7 @@ export class Manifest {
     artifacts: InternalArtifactSchema[],
     schemaVersion: string
   ): Manifest {
-    const manifest = new Manifest(schemaVersion);
+    const manifest = new Manifest(Date.now(), schemaVersion);
     artifacts.forEach((artifact) => {
       manifest.addEntry(artifact);
     });
@@ -53,43 +55,41 @@ export class Manifest {
   }
 
   public addEntry(artifact: InternalArtifactSchema) {
-    this.entries.push(new ManifestEntry(artifact));
+    const entry = new ManifestEntry(artifact);
+    this.entries[entry.getDocId()] = entry;
   }
 
-  public contains(artifact: InternalArtifactSchema): boolean {
-    for (const entry of this.entries) {
-      if (artifact.identifier === entry.getIdentifier() && artifact.sha256 === entry.getSha256()) {
-        return true;
-      }
-    }
-    return false;
+  public contains(artifactId: string): boolean {
+    return artifactId in this.entries;
   }
 
-  public getEntries(): ManifestEntry[] {
+  public getEntries(): Record<string, ManifestEntry> {
     return this.entries;
   }
 
-  public getArtifact(id: string): InternalArtifactSchema {
-    for (const entry of this.entries) {
-      if (entry.getDocId() === id) {
-        return entry.getArtifact();
-      }
-    }
+  public getArtifact(artifactId: string): InternalArtifactSchema {
+    return this.entries[artifactId].getArtifact();
   }
 
-  // Returns artifacts that are superceded in this manifest.
-  public diff(manifest: Manifest): ManifestDiff[] {
-    const diffs: string[] = [];
+  public copy(): Manifest {
+    const manifest = new Manifest(this.created, this.schemaVersion);
+    manifest.entries = { ...this.entries };
+    manifest.version = this.version;
+    return manifest;
+  }
 
-    for (const entry of manifest.getEntries()) {
-      if (!this.contains(entry.getArtifact())) {
-        diffs.push({ type: 'delete', id: entry.getDocId() });
+  public diff(manifest: Manifest): ManifestDiff[] {
+    const diffs: ManifestDiff[] = [];
+
+    for (const id in manifest.getEntries()) {
+      if (!this.contains(id)) {
+        diffs.push({ type: 'delete', id });
       }
     }
 
-    for (const entry of this.entries) {
-      if (!manifest.contains(entry.getArtifact())) {
-        diffs.push({ type: 'add', id: entry.getDocId() });
+    for (const id in this.entries) {
+      if (!manifest.contains(id)) {
+        diffs.push({ type: 'add', id });
       }
     }
 
@@ -103,17 +103,17 @@ export class Manifest {
       artifacts: {},
     };
 
-    this.entries.forEach((entry) => {
+    for (const entry of Object.values(this.entries)) {
       manifestObj.artifacts[entry.getIdentifier()] = entry.getRecord();
-    });
+    }
 
     return manifestObj as ManifestSchema;
   }
 
   public toSavedObject(): InternalManifestSchema {
     return {
-      schemaVersion: this.schemaVersion as ManifestSchemaVersion,
-      ids: this.entries.map((entry) => entry.getDocId()),
+      created: this.created,
+      ids: Object.keys(this.entries),
     };
   }
 }

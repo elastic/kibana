@@ -11,7 +11,6 @@ import {
 } from '../../../../../../plugins/task_manager/server';
 import { EndpointAppContext } from '../../types';
 import { ExceptionsCache } from './cache';
-import { refreshManifest } from './refresh';
 
 const PackagerTaskConstants = {
   TIMEOUT: '1m',
@@ -42,7 +41,9 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
     return `${PackagerTaskConstants.TYPE}:${PackagerTaskConstants.VERSION}`;
   };
 
-  const logger = context.endpointAppContext.logFactory.get(getTaskId());
+  const logger = context.endpointAppContext.logFactory.get(
+    `endpoint_manifest_refresh_${getTaskId()}`
+  );
 
   const run = async (taskId: string) => {
     // Check that this task is current
@@ -52,11 +53,18 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       return;
     }
 
+    const manifestManager = context.endpointAppContext.service.getManifestManager();
+
+    if (manifestManager === undefined) {
+      logger.debug('Manifest Manager not available.');
+      return;
+    }
+
     try {
-      // await refreshManifest(context.endpointAppContext, false);
       // TODO: change this to 'false' when we hook up the ingestManager callback
-      await refreshManifest(context.endpointAppContext, true);
+      await manifestManager.refresh(true);
     } catch (err) {
+      logger.error(err);
       logger.debug('Manifest not created yet, nothing to do.');
     }
   };
@@ -71,7 +79,8 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
             taskType: PackagerTaskConstants.TYPE,
             scope: ['securitySolution'],
             schedule: {
-              interval: context.endpointAppContext.config.packagerTaskInterval,
+              // TODO: change this to '60s' before merging
+              interval: '5s',
             },
             state: {},
             params: { version: PackagerTaskConstants.VERSION },

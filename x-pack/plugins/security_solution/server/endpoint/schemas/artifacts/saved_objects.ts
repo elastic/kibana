@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { body, created, encoding, identifier, manifestSchemaVersion, sha256, size } from './common';
+import { body, created, encoding, identifier, sha256, size } from './common';
 
 export const internalArtifactSchema = t.exact(
   t.type({
@@ -22,7 +22,7 @@ export type InternalArtifactSchema = t.TypeOf<typeof internalArtifactSchema>;
 
 export const internalManifestSchema = t.exact(
   t.type({
-    schemaVersion: manifestSchemaVersion,
+    created,
     ids: t.array(identifier),
   })
 );
