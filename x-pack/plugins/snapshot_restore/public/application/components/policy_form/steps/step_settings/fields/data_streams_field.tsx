@@ -24,7 +24,6 @@ import {
 
 import { SlmPolicyPayload, SnapshotConfig } from '../../../../../../../common/types';
 import { PolicyValidation } from '../../../../../services/validation';
-import { indicesToArray } from '../../../../../../../common/lib';
 
 interface Props {
   isManagedPolicy: boolean;
@@ -34,20 +33,6 @@ interface Props {
   errors: PolicyValidation['errors'];
 }
 
-const hasSelectedSubsetOfDataStreams = (dataStreams: string[], selectedDataStreams: string[]) => {
-  return selectedDataStreams.length && dataStreams.length > selectedDataStreams.length;
-};
-
-const getArrayOfSelectedDataStreams = (
-  dataStreams: string[],
-  indices?: string[] | string
-): string[] => {
-  const arrayOfIndices = indicesToArray(indices);
-  return dataStreams.filter((d) => {
-    return arrayOfIndices.some((i) => i.startsWith(d));
-  });
-};
-
 export const DataStreamsField: FunctionComponent<Props> = ({
   isManagedPolicy,
   dataStreams,
@@ -55,15 +40,9 @@ export const DataStreamsField: FunctionComponent<Props> = ({
   onUpdate,
   errors,
 }) => {
-  const arrayOfSelectedDataStreams = getArrayOfSelectedDataStreams(
-    dataStreams,
-    policy.config?.indices
-  );
   const { config = {} } = policy;
-  const [isAllDataStreams, setIsAllDataStreams] = useState<boolean>(
-    () => !hasSelectedSubsetOfDataStreams(dataStreams, arrayOfSelectedDataStreams)
-  );
-  const [dataStreamsSelection, setDataStreamsSelection] = useState<SnapshotConfig['indices']>([
+  const [isAllDataStreams, setIsAllDataStreams] = useState<boolean>(() => !config.dataStreams);
+  const [dataStreamsSelection, setDataStreamsSelection] = useState<SnapshotConfig['dataStreams']>([
     ...dataStreams,
   ]);
 
@@ -74,10 +53,10 @@ export const DataStreamsField: FunctionComponent<Props> = ({
         label: dataStream,
         checked:
           isAllDataStreams ||
-          // If indices is a string, we default to custom input mode, so we mark individual data streams
+          // If dataStreams is a string, we default to custom input mode, so we mark individual data streams
           // as selected if user goes back to list mode
-          typeof config.indices === 'string' ||
-          arrayOfSelectedDataStreams.includes(dataStream)
+          typeof config.dataStreams === 'string' ||
+          (Array.isArray(config.dataStreams) && config.dataStreams.includes(dataStream))
             ? 'on'
             : undefined,
       })
@@ -94,7 +73,7 @@ export const DataStreamsField: FunctionComponent<Props> = ({
       }
       checked={isAllDataStreams}
       disabled={isManagedPolicy}
-      data-test-subj="allIndicesToggle"
+      data-test-subj="allDataStreamsToggle"
       onChange={(e) => {
         const isChecked = e.target.checked;
         setIsAllDataStreams(isChecked);
@@ -168,9 +147,9 @@ export const DataStreamsField: FunctionComponent<Props> = ({
                     id="xpack.snapshotRestore.policyForm.stepSettings.selectDataStreamsHelpText"
                     defaultMessage="{count} {count, plural, one {data stream} other {data streams}} will be backed up. {selectOrDeselectAllLink}"
                     values={{
-                      count: arrayOfSelectedDataStreams.length,
+                      count: config.dataStreams?.length,
                       selectOrDeselectAllLink:
-                        arrayOfSelectedDataStreams.length > 0 ? (
+                        config.dataStreams && config.dataStreams.length > 0 ? (
                           <EuiLink
                             data-test-subj="deselectDataStreamLink"
                             onClick={() => {
@@ -207,8 +186,8 @@ export const DataStreamsField: FunctionComponent<Props> = ({
                     }}
                   />
                 }
-                isInvalid={Boolean(errors.indices)}
-                error={errors.indices}
+                isInvalid={Boolean(errors.dataStreams)}
+                error={errors.dataStreams}
               >
                 {
                   <EuiSelectable

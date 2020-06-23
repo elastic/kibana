@@ -8,7 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { SlmPolicyEs } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
 import { getManagedPolicyNames } from '../../lib';
-import { RouteDependencies } from '../../types';
+import { RouteDependencies, ResolveIndexResponseFromES } from '../../types';
 import { addBasePath } from '../helpers';
 import { nameParameterSchema, policySchema } from './validate_schemas';
 
@@ -232,44 +232,28 @@ export function registerPolicyRoutes({
       const { callAsCurrentUser } = ctx.snapshotRestore!.client;
 
       try {
-        const indices: {
-          [indexName: string]: { data_stream?: string };
-        } = await callAsCurrentUser('transport.request', {
-          method: 'GET',
-          path: `/*`,
-          query: {
-            expand_wildcards: 'all,hidden',
-          },
-        });
-
-        // TODO: This needs to be revisited once https://github.com/elastic/kibana/issues/64858 is
-        // because we will have a better endpoint for retrieving index, data stream and alias information.
-        const indicesAndDataStreams = Object.entries(indices).reduce<{
-          indices: string[];
-          dataStreams: Record<string, undefined>;
-        }>(
-          (acc, [name, { data_stream: dataStream }]) => {
-            if (dataStream) {
-              return {
-                ...acc,
-                dataStreams: {
-                  ...acc.dataStreams,
-                  [dataStream]: undefined,
-                },
-              };
-            }
-            return {
-              ...acc,
-              indices: acc.indices.concat(name),
-            };
-          },
-          { indices: [], dataStreams: {} }
+        const resolvedIndicesResponse: ResolveIndexResponseFromES = await callAsCurrentUser(
+          'transport.request',
+          {
+            method: 'GET',
+            path: `_resolve/index/*`,
+            query: {
+              expand_wildcards: 'all,hidden',
+            },
+          }
         );
 
         return res.ok({
           body: {
-            indices: indicesAndDataStreams.indices.sort(),
-            dataStreams: Object.keys(indicesAndDataStreams.dataStreams).sort(),
+            indices: resolvedIndicesResponse.indices
+              .flatMap((index) => {
+                if (index.data_stream) {
+                  return [];
+                }
+                return index.name;
+              })
+              .sort(),
+            dataStreams: resolvedIndicesResponse.data_streams.map(({ name }) => name).sort(),
           },
         });
       } catch (e) {

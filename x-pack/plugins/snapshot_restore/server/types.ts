@@ -31,4 +31,20 @@ export interface RouteDependencies {
   };
 }
 
+/**
+ * An object representing a resolved index, data stream or alias
+ */
+interface DataObjectFromES {
+  name: string;
+  // per https://github.com/elastic/elasticsearch/pull/57626
+  attributes: Array<'open' | 'closed' | 'hidden' | 'frozen'>;
+  data_stream?: string;
+}
+
+export interface ResolveIndexResponseFromES {
+  indices: DataObjectFromES[];
+  aliases: DataObjectFromES[];
+  data_streams: Array<Omit<DataObjectFromES, 'data_stream'>>;
+}
+
 export type CallAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];

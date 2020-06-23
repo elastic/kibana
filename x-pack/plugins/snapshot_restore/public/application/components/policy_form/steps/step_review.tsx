@@ -22,7 +22,7 @@ import {
 import { serializePolicy } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
 import { StepProps } from './';
-import { CollapsibleIndicesList } from '../../collapsible_indices_list';
+import { CollapsibleIndicesList, CollapsibleDataStreamsList } from '../../collapsible_lists';
 
 export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   policy,
@@ -30,8 +30,9 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
 }) => {
   const { i18n } = useServices();
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const { indices, includeGlobalState, ignoreUnavailable, partial } = config || {
+  const { indices, includeGlobalState, ignoreUnavailable, partial, dataStreams } = config || {
     indices: undefined,
+    dataStreams: undefined,
     includeGlobalState: undefined,
     ignoreUnavailable: undefined,
     partial: undefined,
@@ -154,6 +155,19 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               <CollapsibleIndicesList indices={indices} />
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiDescriptionList textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.dataStreamsLabel"
+                defaultMessage="Data Streams"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <CollapsibleDataStreamsList dataStreams={dataStreams} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>

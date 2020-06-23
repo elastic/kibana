@@ -24,7 +24,7 @@ import {
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
 import { StepProps } from './';
-import { CollapsibleIndicesList } from '../../collapsible_indices_list';
+import { CollapsibleIndicesList } from '../../collapsible_lists/collapsible_indices_list';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   restoreSettings,

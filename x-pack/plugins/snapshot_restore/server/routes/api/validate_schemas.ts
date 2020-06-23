@@ -11,6 +11,7 @@ export const nameParameterSchema = schema.object({
 
 const snapshotConfigSchema = schema.object({
   indices: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  dataStreams: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   ignoreUnavailable: schema.maybe(schema.boolean()),
   includeGlobalState: schema.maybe(schema.boolean()),
   partial: schema.maybe(schema.boolean()),

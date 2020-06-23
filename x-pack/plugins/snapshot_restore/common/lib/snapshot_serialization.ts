@@ -137,7 +137,7 @@ export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): Snapsho
   } = snapshotConfig;
 
   const indicesArray = indicesToArray(indices);
-  const dataStreamsArray = indicesToArray(dataStreams).map((d) => `${d}-*`);
+  const dataStreamsArray = indicesToArray(dataStreams);
 
   const snapshotConfigEs: SnapshotConfigEs = {
     indices: indicesArray.concat(dataStreamsArray),
