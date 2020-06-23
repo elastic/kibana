@@ -15,6 +15,10 @@ export class DocumentationService {
     this.esDocBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
   }
 
+  public getEsDocsBasePath() {
+    return this.esDocBasePath;
+  }
+
   public getIngestNodeUrl() {
     return `${this.esDocBasePath}/ingest.html`;
   }

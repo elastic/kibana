@@ -21,6 +21,11 @@ export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
+export const REMOVE_COLUMN = '[data-test-subj="remove-column"]';
+
+export const RESET_FIELDS =
+  '[data-test-subj="events-viewer-panel"] [data-test-subj="reset-fields"]';
+
 export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
 
@@ -29,6 +34,8 @@ export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count
 export const TIMELINE = (id: string) => {
   return `[data-test-subj="title-${id}"]`;
 };
+
+export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 

@@ -6,7 +6,7 @@ beta[]
 
 The *Alerts and Actions* UI lets you <<alert-management, see and control all the alerts>> in a space, and provides tools to <<connector-management, create and manage connectors>> so that alerts can trigger actions like notification, indexing, and ticketing. 
 
-To manage alerting and connectors, go to *Management > {kib} > Alerts and Actions*.
+To manage alerting and connectors, open the menu, then go to *Stack Management > {kib} > Alerts and Actions*.
 
 [role="screenshot"]
 image:management/alerting/images/alerts-and-actions-ui.png[Example alert listing in the Alerts and Actions UI]

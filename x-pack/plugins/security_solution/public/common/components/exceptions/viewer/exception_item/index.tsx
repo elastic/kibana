@@ -18,7 +18,11 @@ import styled from 'styled-components';
 import { ExceptionDetails } from './exception_details';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedEntries, getFormattedComments } from '../../helpers';
-import { FormattedEntry, ExceptionListItemSchema, ApiProps } from '../../types';
+import { FormattedEntry } from '../../types';
+import {
+  ExceptionIdentifiers,
+  ExceptionListItemSchema,
+} from '../../../../../../public/lists_plugin_deps';
 
 const MyFlexItem = styled(EuiFlexItem)`
   &.comments--show {
@@ -28,10 +32,10 @@ const MyFlexItem = styled(EuiFlexItem)`
 `;
 
 interface ExceptionItemProps {
-  loadingItemIds: ApiProps[];
+  loadingItemIds: ExceptionIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
-  onDeleteException: (arg: ApiProps) => void;
+  onDeleteException: (arg: ExceptionIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
 }
 

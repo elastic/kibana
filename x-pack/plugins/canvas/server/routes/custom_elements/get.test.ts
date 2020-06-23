@@ -6,12 +6,7 @@
 
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeGetCustomElementRoute } from './get';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import {
   savedObjectsClientMock,
   httpServiceMock,
@@ -32,7 +27,7 @@ describe('GET custom element', () => {
 
   beforeEach(() => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
     initializeGetCustomElementRoute({
       router,
       logger: loggingServiceMock.create().get(),
