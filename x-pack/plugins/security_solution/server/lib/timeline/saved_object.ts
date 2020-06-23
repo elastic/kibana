@@ -70,7 +70,8 @@ export interface Timeline {
     timelineId: string | null,
     version: string | null,
     timeline: SavedTimeline,
-    timelineType?: TimelineTypeLiteralWithNull
+    timelineType?: TimelineTypeLiteralWithNull,
+    isImmutable?: boolean
   ) => Promise<ResponseTimeline>;
 
   deleteTimeline: (request: FrameworkRequest, timelineIds: string[]) => Promise<void>;
