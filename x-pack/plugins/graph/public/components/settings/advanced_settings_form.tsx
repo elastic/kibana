@@ -38,11 +38,15 @@ export function AdvancedSettingsForm({
   }
 
   function getNumberUpdater<K extends NumberKeys<AdvancedSettings>>(key: K) {
-    return function ({ target: { valueAsNumber } }: { target: { valueAsNumber: number | '' } }) {
+    return function ({
+      target: { valueAsNumber, value },
+    }: {
+      target: { valueAsNumber: number; value: string };
+    }) {
       // if the value is valid, then update the central store, otherwise only the local store
-      if (valueAsNumber === '' || Number.isNaN(valueAsNumber)) {
+      if (Number.isNaN(valueAsNumber)) {
         // localstate update
-        return updateFormState({ ...formState, [key]: valueAsNumber });
+        return updateFormState({ ...formState, [key]: value });
       }
       // do not worry about local store here, the useEffect will pick that up and sync it
       updateSetting(key, valueAsNumber);
@@ -167,7 +171,7 @@ export function AdvancedSettingsForm({
                 defaultMessage:
                   'Max number of documents in a sample that can contain the same value for the',
               })}{' '}
-              <em>{formState.sampleDiversityField!.name}</em>{' '}
+              <em>{formState.sampleDiversityField.name}</em>{' '}
               {i18n.translate(
                 'xpack.graph.settings.advancedSettings.maxValuesInputHelpText.fieldText',
                 {

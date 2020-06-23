@@ -181,7 +181,7 @@ describe('settings', () => {
     it('should let the user edit and empty the field to input a new number', () => {
       act(() => {
         input('Sample size').prop('onChange')!({
-          target: { valueAsNumber: '' },
+          target: { value: '', valueAsNumber: NaN },
         } as React.ChangeEvent<HTMLInputElement>);
       });
       // Central state should not be called
@@ -189,7 +189,7 @@ describe('settings', () => {
         updateSettings(
           expect.objectContaining({
             timeoutMillis: 10000,
-            sampleSize: '',
+            sampleSize: NaN,
           })
         )
       );
