@@ -25,6 +25,12 @@ let uiSettings;
 export const setUiSettings = (coreUiSettings) => (uiSettings = coreUiSettings);
 export const getUiSettings = () => uiSettings;
 
-let getInjectedVar;
-export const setInjectedVarFunc = (getInjectedVarFunc) => (getInjectedVar = getInjectedVarFunc);
-export const getInjectedVarFunc = () => getInjectedVar;
+let kibanaVersion;
+export const setKibanaVersion = (version) => (kibanaVersion = version);
+export const getKibanaVersion = () => kibanaVersion;
+
+let mapsLegacyConfig;
+export const setMapsLegacyConfig = (config) => (mapsLegacyConfig = config);
+export const getMapsLegacyConfig = () => mapsLegacyConfig;
+
+export const getEmsTileLayerId = () => getMapsLegacyConfig().emsTileLayerId;

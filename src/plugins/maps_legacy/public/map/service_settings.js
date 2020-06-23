@@ -21,22 +21,20 @@ import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { EMSClient } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
-import { getInjectedVarFunc } from '../kibana_services';
+import { getKibanaVersion } from '../kibana_services';
 import { ORIGIN } from '../common/constants/origin';
 
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 export class ServiceSettings {
   constructor(mapConfig, tilemapsConfig) {
-    const getInjectedVar = getInjectedVarFunc();
     this._mapConfig = mapConfig;
     this._tilemapsConfig = tilemapsConfig;
-    const kbnVersion = getInjectedVar('version');
 
     this._showZoomMessage = true;
     this._emsClient = new EMSClient({
       language: i18n.getLocale(),
-      appVersion: kbnVersion,
+      appVersion: getKibanaVersion(),
       appName: 'kibana',
       fileApiUrl: this._mapConfig.emsFileApiUrl,
       tileApiUrl: this._mapConfig.emsTileApiUrl,
