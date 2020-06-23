@@ -12,7 +12,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import {
   Setup,
   SetupTimeRange,

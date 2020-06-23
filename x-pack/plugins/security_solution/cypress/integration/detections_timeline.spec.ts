@@ -15,12 +15,12 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
-import { DETECTIONS } from '../urls/navigation';
+import { ALERTS_URL } from '../urls/navigation';
 
 describe('Detections timeline', () => {
   beforeEach(() => {
     esArchiverLoad('timeline_alerts');
-    loginAndWaitForPage(DETECTIONS);
+    loginAndWaitForPage(ALERTS_URL);
   });
 
   afterEach(() => {
