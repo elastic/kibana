@@ -11,7 +11,6 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { DocumentTitle } from '../../components/document_title';
-import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
 import { Header } from '../../components/header';
