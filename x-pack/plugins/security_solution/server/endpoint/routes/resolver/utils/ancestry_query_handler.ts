@@ -114,11 +114,7 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
   async search(client: IScopedClusterClient) {
     while (this.hasMore()) {
       const info = this.buildQuery();
-      if (info) {
-        this.handleResponse(await this.query.search(client, info.ids));
-      } else {
-        break;
-      }
+      this.handleResponse(await this.query.search(client, info.ids));
     }
     return this.getResults();
   }

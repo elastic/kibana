@@ -24,6 +24,8 @@ import { MultiSearcher, QueryInfo } from '../queries/multi_searcher';
 import { AncestryQueryHandler } from './ancestry_query_handler';
 import { RelatedEventsQueryHandler } from './events_query_handler';
 import { RelatedAlertsQueryHandler } from './alerts_query_handler';
+import { ChildrenQueryHandler } from './children_query_handler';
+import { LifecycleQueryHandler } from './lifecycle_query_handler';
 
 export interface TreeOptions {
   children: number;
@@ -123,9 +125,17 @@ export class Fetcher {
     );
 
     const alertsHandler = new RelatedAlertsQueryHandler(
-      options.events,
+      options.alerts,
       this.id,
-      options.afterEvent,
+      options.afterAlert,
+      this.indexPattern,
+      this.endpointID
+    );
+
+    const childrenHandler = new ChildrenQueryHandler(
+      options.children,
+      this.id,
+      options.afterChild,
       this.indexPattern,
       this.endpointID
     );
@@ -141,10 +151,29 @@ export class Fetcher {
     // then
     // stats
     const msearch = new MultiSearcher(this.client);
-    let queries: QueryInfo[] = [eventsHandler.buildQuery(), alertsHandler.buildQuery()];
+
+    let queries: QueryInfo[] = [
+      eventsHandler.buildQuery(),
+      alertsHandler.buildQuery(),
+      childrenHandler.buildQuery(),
+    ];
     if (ancestryHandler.hasMore()) {
       queries.push(ancestryHandler.buildQuery());
     }
+    await msearch.search(queries);
+
+    queries = [];
+    const childrenLifecycleHandler = new LifecycleQueryHandler(
+      childrenHandler.getResults().map(entityId),
+      this.indexPattern,
+      this.endpointID
+    );
+
+    if (ancestryHandler.hasMore()) {
+      queries.push(ancestryHandler.buildQuery());
+    }
+
+    queries.push(childrenLifecycleHandler.buildQuery());
     await msearch.search(queries);
 
     while (ancestryHandler.hasMore()) {

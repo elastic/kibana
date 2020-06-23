@@ -12,6 +12,7 @@ import {
   ResolverTree,
   ChildNode,
   ResolverRelatedAlerts,
+  ResolverChildren,
 } from '../../../../../common/endpoint/types';
 
 /**
@@ -72,6 +73,13 @@ export function createAncestry(): ResolverAncestry {
  */
 export function createLifecycle(entityID: string, lifecycle: ResolverEvent[]): LifecycleNode {
   return { entityID, lifecycle };
+}
+
+export function createChildren(
+  nodes: ChildNode[] = [],
+  nextChild: string | null = null
+): ResolverChildren {
+  return { childNodes: nodes, nextChild };
 }
 
 /**

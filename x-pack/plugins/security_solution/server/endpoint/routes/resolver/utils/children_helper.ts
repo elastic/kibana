@@ -38,7 +38,7 @@ export class ChildrenNodesHelper {
     cacheCopy.delete(this.rootID);
     return {
       childNodes: Array.from(cacheCopy.values()),
-      nextChild: rootNextChild,
+      nextChild: rootNextChild || null,
     };
   }
 
