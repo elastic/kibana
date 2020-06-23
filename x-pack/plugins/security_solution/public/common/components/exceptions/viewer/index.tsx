@@ -14,17 +14,13 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { Panel } from '../../../../common/components/panel';
 import { Loader } from '../../../../common/components/loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import {
-  ExceptionListType,
-  ExceptionListItemSchema,
-  ApiProps,
-  Filter,
-  SetExceptionsProps,
-} from '../types';
+import { ExceptionListType, Filter } from '../types';
 import { allExceptionItemsReducer, State } from './reducer';
 import {
   useExceptionList,
   ExceptionIdentifiers,
+  ExceptionListItemSchema,
+  UseExceptionListSuccess,
   useApi,
 } from '../../../../../public/lists_plugin_deps';
 import { ExceptionsViewerPagination } from './exceptions_pagination';
@@ -107,11 +103,11 @@ const ExceptionsViewerComponent = ({
       lists: newLists,
       exceptions: newExceptions,
       pagination: newPagination,
-    }: SetExceptionsProps) => {
+    }: UseExceptionListSuccess) => {
       dispatch({
         type: 'setExceptions',
         lists: newLists,
-        exceptions: (newExceptions as unknown) as ExceptionListItemSchema[],
+        exceptions: newExceptions,
         pagination: newPagination,
       });
     },
@@ -199,7 +195,7 @@ const ExceptionsViewerComponent = ({
   );
 
   const setLoadingItemIds = useCallback(
-    (items: ApiProps[]): void => {
+    (items: ExceptionIdentifiers[]): void => {
       dispatch({
         type: 'updateLoadingItemIds',
         items,
@@ -209,7 +205,7 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleDeleteException = useCallback(
-    ({ id, namespaceType }: ApiProps) => {
+    ({ id, namespaceType }: ExceptionIdentifiers) => {
       setLoadingItemIds([{ id, namespaceType }]);
 
       deleteExceptionItem({
@@ -247,7 +243,7 @@ const ExceptionsViewerComponent = ({
   // Used in utility bar info text
   const ruleSettingsUrl = useMemo((): string => {
     return services.application.getUrlForApp(
-      `security#/detections/rules/id/${encodeURI(ruleId)}/edit`
+      `security/detections/rules/id/${encodeURI(ruleId)}/edit`
     );
   }, [ruleId, services.application]);
 
