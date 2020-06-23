@@ -72,10 +72,8 @@ describe('import timelines', () => {
       };
     });
 
-    jest.doMock('./utils/import_timelines', () => {
-      const originalModule = jest.requireActual('./utils/import_timelines');
+    jest.doMock('./utils/get_timelines_from_stream', () => {
       return {
-        ...originalModule,
         getTupleDuplicateErrorsAndUniqueTimeline: mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue(
           [mockDuplicateIdErrors, mockUniqueParsedObjects]
         ),
@@ -139,7 +137,10 @@ describe('import timelines', () => {
     test('should Create a new timeline savedObject with given timeline', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistTimeline.mock.calls[0][3]).toEqual(mockParsedTimelineObject);
+      expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
+        ...mockParsedTimelineObject,
+        status: undefined,
+      });
     });
 
     test('should Create a new timeline savedObject with given draft timeline', async () => {
@@ -263,6 +264,8 @@ describe('import timelines', () => {
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
         errors: [
           {
             id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',

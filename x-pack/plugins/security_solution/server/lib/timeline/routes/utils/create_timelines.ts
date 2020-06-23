@@ -21,13 +21,15 @@ export const saveTimelines = (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,
   timelineSavedObjectId?: string | null,
-  timelineVersion?: string | null
+  timelineVersion?: string | null,
+  isImmutable?: boolean
 ): Promise<ResponseTimeline> => {
   return timelineLib.persistTimeline(
     frameworkRequest,
     timelineSavedObjectId ?? null,
     timelineVersion ?? null,
-    timeline
+    timeline,
+    isImmutable
   );
 };
 
@@ -79,13 +81,15 @@ export const createTimelines = async (
   timelineVersion?: string | null,
   pinnedEventIds?: string[] | null,
   notes?: NoteResult[],
-  existingNoteIds?: string[]
+  existingNoteIds?: string[],
+  isImmutable?: boolean
 ): Promise<ResponseTimeline> => {
   const responseTimeline = await saveTimelines(
     frameworkRequest,
     timeline,
     timelineSavedObjectId,
-    timelineVersion
+    timelineVersion,
+    isImmutable
   );
   const newTimelineSavedObjectId = responseTimeline.timeline.savedObjectId;
   const newTimelineVersion = responseTimeline.timeline.version;

@@ -33,6 +33,7 @@ import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_sav
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from './saved_object_mappings';
 import { draftTimelineDefaults } from './default_timeline';
+import { AuthenticatedUser } from '../../../../security/server';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -240,16 +241,18 @@ export const persistTimeline = async (
   request: FrameworkRequest,
   timelineId: string | null,
   version: string | null,
-  timeline: SavedTimeline
+  timeline: SavedTimeline,
+  isImmutable?: boolean
 ): Promise<ResponseTimeline> => {
   const savedObjectsClient = request.context.core.savedObjects.client;
+  const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
   try {
     if (timelineId == null) {
       // Create new timeline
       const newTimeline = convertSavedObjectToSavedTimeline(
         await savedObjectsClient.create(
           timelineSavedObjectType,
-          pickSavedTimeline(timelineId, timeline, request.user)
+          pickSavedTimeline(timelineId, timeline, userInfo)
         )
       );
       return {

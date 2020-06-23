@@ -26,3 +26,9 @@ export const createMockConfig = () => ({
     to: 'now',
   },
 });
+
+export const mockGetCurrentUser = {
+  user: {
+    username: 'mockUser',
+  },
+};

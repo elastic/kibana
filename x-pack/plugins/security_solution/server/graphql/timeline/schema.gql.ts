@@ -133,6 +133,7 @@ export const timelineSchema = gql`
   enum TimelineStatus {
     active
     draft
+    immutable
   }
 
   input TimelineInput {

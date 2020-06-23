@@ -12,9 +12,6 @@ set -e
 # Uses a defaults if no argument is specified
 TIMELINES=${1:-../rules/prepackaged_timelines/index.ndjson}
 
-# Generate ndjson for prepackage timelines.
-sh ./regen_prepackage_timelines_index.sh
-
 # Example to import and overwrite everything from ./rules/prepackaged_timelines/index.ndjson
 # ./import_rules.sh
 curl -s -k \

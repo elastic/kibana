@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import { has, chunk, omit } from 'lodash/fp';
 import { Readable } from 'stream';
 
+import { KibanaResponseFactory } from 'src/core/server';
 import { TimelineType, TimelineStatus, SavedTimeline } from '../../../../../common/types/timeline';
 import { validate } from '../../../../../common/validate';
-import { importRulesSchema } from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { NoteResult } from '../../../../graphql/types';
 import { HapiReadableStream } from '../../../detection_engine/rules/types';
 import { createBulkErrorObject, BulkError } from '../../../detection_engine/routes/utils';
@@ -20,12 +19,11 @@ import { FrameworkRequest } from '../../../framework';
 import { PromiseFromStreams } from '../import_timelines_route';
 import { createTimelinesStreamFromNdJson } from '../../create_timelines_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
-import { KibanaResponse } from '../../../../../../../../src/core/server/http/router';
-export interface ImportTimelinesSchema {
-  success: boolean;
-  success_count: number;
-  errors: BulkError[];
-}
+import {
+  ImportTimelineResultSchema,
+  importTimelineResultSchema,
+} from '../schemas/import_timelines_schema';
+import { getTupleDuplicateErrorsAndUniqueTimeline } from './get_timelines_from_stream';
 
 export type ImportedTimeline = SavedTimeline & {
   savedObjectId: string | null;
@@ -39,50 +37,13 @@ interface ImportRegular {
   timeline_id: string;
   status_code: number;
   message?: string;
+  action: 'createViaImport' | 'updateViaImport';
 }
 
 export type ImportTimelineResponse = ImportRegular | BulkError;
 export interface ImportTimelinesRequestParams {
   body: { file: HapiReadableStream };
 }
-
-export const getTupleDuplicateErrorsAndUniqueTimeline = (
-  timelines: PromiseFromStreams[],
-  isOverwrite: boolean
-): [BulkError[], PromiseFromStreams[]] => {
-  const { errors, timelinesAcc } = timelines.reduce(
-    (acc, parsedTimeline) => {
-      if (parsedTimeline instanceof Error) {
-        acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
-      } else {
-        const { savedObjectId } = parsedTimeline;
-        if (savedObjectId != null) {
-          if (acc.timelinesAcc.has(savedObjectId) && !isOverwrite) {
-            acc.errors.set(
-              uuid.v4(),
-              createBulkErrorObject({
-                id: savedObjectId,
-                statusCode: 400,
-                message: `More than one timeline with savedObjectId: "${savedObjectId}" found`,
-              })
-            );
-          }
-          acc.timelinesAcc.set(savedObjectId, parsedTimeline);
-        } else {
-          acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
-        }
-      }
-
-      return acc;
-    }, // using map (preserves ordering)
-    {
-      errors: new Map<string, BulkError>(),
-      timelinesAcc: new Map<string, PromiseFromStreams>(),
-    }
-  );
-
-  return [Array.from(errors.values()), Array.from(timelinesAcc.values())];
-};
 
 export const isImportRegular = (
   importTimelineResponse: ImportTimelineResponse
@@ -117,9 +78,10 @@ const CHUNK_PARSED_OBJECT_SIZE = 10;
 export const importTimelines = async (
   file: Readable,
   maxTimelineImportExportSize: number,
-  response: KibanaResponse,
-  frameworkRequest: FrameworkRequest
-) => {
+  response: KibanaResponseFactory,
+  frameworkRequest: FrameworkRequest,
+  isImmutable?: boolean
+): Promise<ImportTimelineResultSchema | string> => {
   const readStream = createTimelinesStreamFromNdJson(maxTimelineImportExportSize);
   const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([file, ...readStream]);
 
@@ -127,6 +89,7 @@ export const importTimelines = async (
     parsedObjects,
     false
   );
+
   const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
   let importTimelineResponse: ImportTimelineResponse[] = [];
 
@@ -189,12 +152,14 @@ export const importTimelines = async (
                   null, // timelineVersion
                   pinnedEventIds,
                   isHandlingTemplateTimeline ? globalNotes : [...globalNotes, ...eventNotes],
-                  [] // existing note ids
+                  [], // existing note ids
+                  isImmutable
                 );
 
                 resolve({
                   timeline_id: newTimeline.timeline.savedObjectId,
                   status_code: 200,
+                  action: 'updateViaImport',
                 });
               } else if (
                 timeline &&
@@ -223,12 +188,14 @@ export const importTimelines = async (
                   timeline.version, // timelineVersion
                   pinnedEventIds,
                   globalNotes,
-                  [] // existing note ids
+                  [], // existing note ids
+                  isImmutable
                 );
 
                 resolve({
                   timeline_id: newTimeline.timeline.savedObjectId,
                   status_code: 200,
+                  action: 'updateViaImport',
                 });
               } else {
                 resolve(
@@ -268,18 +235,23 @@ export const importTimelines = async (
       return false;
     }
   });
-  const importTimelinesRes: ImportTimelinesSchema = {
+  const timelinesInstalled = importTimelineResponse.filter(
+    (resp) => isImportRegular(resp) && resp.action === 'createViaImport'
+  );
+  const timelinesUpdated = importTimelineResponse.filter(
+    (resp) => isImportRegular(resp) && resp.action === 'updateViaImport'
+  );
+  const importTimelinesRes: ImportTimelineResultSchema = {
     success: errorsResp.length === 0,
     success_count: successes.length,
     errors: errorsResp,
+    timelines_installed: timelinesInstalled.length,
+    timelines_updated: timelinesUpdated.length,
   };
-  const [validated, errors] = validate(importTimelinesRes, importRulesSchema);
-  if (errors != null) {
-    // const siemResponse = buildSiemResponse(response);
-    // return siemResponse.error({ statusCode: 500, body: errors });
-    return new Error(errors);
+  const [validated, errors] = validate(importTimelinesRes, importTimelineResultSchema);
+  if (errors != null || validated == null) {
+    return errors || 'Import timeline error';
   } else {
     return validated;
-    // return response.ok({ body: validated ?? {} });
   }
 };

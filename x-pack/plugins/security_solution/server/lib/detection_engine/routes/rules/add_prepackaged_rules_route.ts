@@ -19,11 +19,11 @@ import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { getPrepackagedTimelines } from '../../rules/get_prepackaged_timelines';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
-import { importTimelines as installPrepackagedTimelines } from '../../../timeline/routes/utils/import_timelines';
 import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
+import { ImportTimelineResultSchema } from '../../../timeline/routes/schemas/import_timelines_schema';
+import { installPrepackagedTimelines } from '../../rules/install_prepacked_timelines';
 
 export const addPrepackedRulesRoute = (
   router: IRouter,
@@ -57,7 +57,6 @@ export const addPrepackedRulesRoute = (
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
         const signalsIndex = siemClient.getSignalsIndex();
-        const templatesToInstall = await getPrepackagedTimelines();
 
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
           const signalsIndexExists = await getIndexExists(
@@ -74,19 +73,21 @@ export const addPrepackedRulesRoute = (
         const result = await Promise.all([
           installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex),
           installPrepackagedTimelines(
-            templatesToInstall,
             config.maxTimelineImportExportSize,
             response,
-            frameworkRequest
+            frameworkRequest,
+            true
           ),
         ]);
-        const prepackagedTimelinesResult = result[1];
+        const prepackagedTimelinesResult =
+          typeof result[1] !== 'string' ? result[1] : ({} as ImportTimelineResultSchema);
         await updatePrepackagedRules(alertsClient, savedObjectsClient, rulesToUpdate, signalsIndex);
+
         const prepackagedRulesOutput: PrePackagedRulesSchema = {
           rules_installed: rulesToInstall.length,
           rules_updated: rulesToUpdate.length,
-          timelines_installed: prepackagedTimelinesResult?.success_count ?? 0,
-          timelines_updated: prepackagedTimelinesResult?.updated ?? 0,
+          timelines_installed: prepackagedTimelinesResult?.timelines_installed ?? 0,
+          timelines_updated: prepackagedTimelinesResult?.timelines_updated ?? 0,
         };
         const [validated, rulesErrors] = validate(prepackagedRulesOutput, prePackagedRulesSchema);
         if (rulesErrors != null) {
