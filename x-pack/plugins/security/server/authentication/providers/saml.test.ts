@@ -163,7 +163,7 @@ describe('SAMLAuthenticationProvider', () => {
           { requestId: 'some-request-id', redirectURL: '', realm: 'test-realm' }
         )
       ).resolves.toEqual(
-        AuthenticationResult.redirectTo('/base-path/', {
+        AuthenticationResult.redirectTo('/mock-server-basepath/', {
           state: {
             accessToken: 'user-initiated-login-token',
             refreshToken: 'user-initiated-login-refresh-token',
@@ -192,7 +192,7 @@ describe('SAMLAuthenticationProvider', () => {
           samlResponse: 'saml-response-xml',
         })
       ).resolves.toEqual(
-        AuthenticationResult.redirectTo('/base-path/', {
+        AuthenticationResult.redirectTo('/mock-server-basepath/', {
           state: {
             accessToken: 'idp-initiated-login-token',
             refreshToken: 'idp-initiated-login-refresh-token',
@@ -351,7 +351,7 @@ describe('SAMLAuthenticationProvider', () => {
               state
             )
           ).resolves.toEqual(
-            AuthenticationResult.redirectTo('/base-path/', {
+            AuthenticationResult.redirectTo('/mock-server-basepath/', {
               state: {
                 username: 'user',
                 accessToken: 'new-valid-token',
@@ -723,7 +723,7 @@ describe('SAMLAuthenticationProvider', () => {
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.redirectTo(
           '/mock-server-basepath/internal/security/saml/capture-url-fragment',
-          { state: { redirectURL: '/base-path/s/foo/some-path', realm: 'test-realm' } }
+          { state: { redirectURL: '/mock-server-basepath/s/foo/some-path', realm: 'test-realm' } }
         )
       );
 
@@ -753,7 +753,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
       expect(mockOptions.logger.warn).toHaveBeenCalledWith(
-        'Max URL path size should not exceed 100b but it was 107b. URL is not captured.'
+        'Max URL path size should not exceed 100b but it was 118b. URL is not captured.'
       );
     });
 
@@ -998,7 +998,7 @@ describe('SAMLAuthenticationProvider', () => {
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.redirectTo(
           '/mock-server-basepath/internal/security/saml/capture-url-fragment',
-          { state: { redirectURL: '/base-path/s/foo/some-path', realm: 'test-realm' } }
+          { state: { redirectURL: '/mock-server-basepath/s/foo/some-path', realm: 'test-realm' } }
         )
       );
 
@@ -1054,7 +1054,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
       expect(mockOptions.logger.warn).toHaveBeenCalledWith(
-        'Max URL path size should not exceed 100b but it was 107b. URL is not captured.'
+        'Max URL path size should not exceed 100b but it was 118b. URL is not captured.'
       );
     });
 
@@ -1124,7 +1124,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
     });
 
-    it('redirects to /security/logged_out if `redirect` field in SAML logout response is null.', async () => {
+    it('redirects to `loggedOut` URL if `redirect` field in SAML logout response is null.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
@@ -1138,9 +1138,7 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken,
           realm: 'test-realm',
         })
-      ).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
-      );
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
@@ -1148,7 +1146,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
     });
 
-    it('redirects to /security/logged_out if `redirect` field in SAML logout response is not defined.', async () => {
+    it('redirects to `loggedOut` URL if `redirect` field in SAML logout response is not defined.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
@@ -1162,9 +1160,7 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken,
           realm: 'test-realm',
         })
-      ).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
-      );
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
@@ -1174,7 +1170,7 @@ describe('SAMLAuthenticationProvider', () => {
 
     it('relies on SAML logout if query string is not empty, but does not include SAMLRequest.', async () => {
       const request = httpServerMock.createKibanaRequest({
-        query: { Whatever: 'something unrelated' },
+        query: { Whatever: 'something unrelated', SAMLResponse: 'xxx yyy' },
       });
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
@@ -1188,9 +1184,7 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken,
           realm: 'test-realm',
         })
-      ).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
-      );
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
@@ -1210,9 +1204,7 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken: 'x-saml-refresh-token',
           realm: 'test-realm',
         })
-      ).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
-      );
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
@@ -1220,13 +1212,13 @@ describe('SAMLAuthenticationProvider', () => {
       });
     });
 
-    it('redirects to /security/logged_out if `redirect` field in SAML invalidate response is null.', async () => {
+    it('redirects to `loggedOut` URL if `redirect` field in SAML invalidate response is null.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       await expect(provider.logout(request)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
       );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
@@ -1235,19 +1227,29 @@ describe('SAMLAuthenticationProvider', () => {
       });
     });
 
-    it('redirects to /security/logged_out if `redirect` field in SAML invalidate response is not defined.', async () => {
+    it('redirects to `loggedOut` URL if `redirect` field in SAML invalidate response is not defined.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: undefined });
 
       await expect(provider.logout(request)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
       );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
         body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
       });
+    });
+
+    it('redirects to `loggedOut` URL if SAML logout response is received.', async () => {
+      const request = httpServerMock.createKibanaRequest({ query: { SAMLResponse: 'xxx yyy' } });
+
+      await expect(provider.logout(request)).resolves.toEqual(
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+      );
+
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('redirects user to the IdP if SLO is supported by IdP in case of SP initiated logout.', async () => {
