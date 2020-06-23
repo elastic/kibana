@@ -16,6 +16,7 @@ export async function indexHostsAndAlerts(
   metadataIndex: string,
   policyIndex: string,
   eventIndex: string,
+  alertIndex: string,
   alertsPerHost: number,
   options: TreeOptions = {}
 ) {
@@ -23,7 +24,7 @@ export async function indexHostsAndAlerts(
   for (let i = 0; i < numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
     await indexHostDocs(numDocs, client, metadataIndex, policyIndex, generator);
-    await indexAlerts(client, eventIndex, generator, alertsPerHost, options);
+    await indexAlerts(client, eventIndex, alertIndex, generator, alertsPerHost, options);
   }
   await client.indices.refresh({
     index: eventIndex,
@@ -65,7 +66,8 @@ async function indexHostDocs(
 
 async function indexAlerts(
   client: Client,
-  index: string,
+  eventIndex: string,
+  alertIndex: string,
   generator: EndpointDocGenerator,
   numAlerts: number,
   options: TreeOptions = {}
@@ -82,9 +84,14 @@ async function indexAlerts(
     }
     const body = resolverDocs.reduce(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (array: Array<Record<string, any>>, doc) => (
-        array.push({ create: { _index: index } }, doc), array
-      ),
+      (array: Array<Record<string, any>>, doc) => {
+        let index = eventIndex;
+        if (doc.event.kind === 'alert') {
+          index = alertIndex;
+        }
+        array.push({ create: { _index: index } }, doc);
+        return array;
+      },
       []
     );
     await client.bulk({ body, refresh: 'true' });

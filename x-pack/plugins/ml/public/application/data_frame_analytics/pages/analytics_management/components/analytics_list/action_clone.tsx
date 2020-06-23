@@ -344,7 +344,7 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
 }
 
 interface CloneActionProps {
-  item: DeepReadonly<DataFrameAnalyticsListRow>;
+  item: DataFrameAnalyticsListRow;
   createAnalyticsForm: CreateAnalyticsFormProps;
 }
 

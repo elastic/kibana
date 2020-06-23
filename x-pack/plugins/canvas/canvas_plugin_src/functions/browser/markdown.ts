@@ -10,7 +10,7 @@ import {
   Style,
   ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/common';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { Handlebars } from '../../../common/lib/handlebars';
 import { getFunctionHelp } from '../../../i18n';
 

@@ -6,12 +6,12 @@
 
 import { parse } from 'query-string';
 import { get } from 'lodash';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getInitialState } from '../state/initial_state';
 import { getWindow } from './get_window';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { historyProvider } from './history_provider';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { routerProvider } from './router_provider';
 import { createTimeInterval, isValidTimeInterval, getTimeInterval } from './time_interval';
 import { AppState, AppStateKeys } from '../../types';
