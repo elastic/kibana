@@ -25,7 +25,7 @@ interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
 }
 
-export class RoutingExamplePlugin implements Plugin<void, void, SetupDeps, {}> {
+export class RoutingExamplePlugin implements Plugin<{}, {}, SetupDeps, {}> {
   public setup(core: CoreSetup, { developerExamples }: SetupDeps) {
     core.application.register({
       id: 'routingExample',
@@ -62,9 +62,12 @@ export class RoutingExamplePlugin implements Plugin<void, void, SetupDeps, {}> {
         },
       ],
     });
+    return {};
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    return {};
+  }
 
   public stop() {}
 }

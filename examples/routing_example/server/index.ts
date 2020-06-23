@@ -21,4 +21,4 @@ import { PluginInitializer } from 'kibana/server';
 
 import { RoutingExamplePlugin } from './plugin';
 
-export const plugin: PluginInitializer<void, void> = () => new RoutingExamplePlugin();
+export const plugin: PluginInitializer<{}, {}> = () => new RoutingExamplePlugin();

@@ -46,6 +46,7 @@ export function GetMessageRouteExample({ getMessageById }: Props) {
 
     if (isError(response)) {
       setError(response);
+      setMessage('');
     } else {
       setError(undefined);
       setMessage(response);
@@ -75,7 +76,7 @@ export function GetMessageRouteExample({ getMessageById }: Props) {
             {error.message}
           </EuiCallOut>
         ) : null}
-        {message ? (
+        {message !== '' ? (
           <p>
             Message is: <pre>{message}</pre>
           </p>

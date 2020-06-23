@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { PluginInitializer } from 'kibana/public';
 import { RoutingExamplePlugin } from './plugin';
 
-export const plugin = () => new RoutingExamplePlugin();
+export const plugin: PluginInitializer<{}, {}> = () => new RoutingExamplePlugin();

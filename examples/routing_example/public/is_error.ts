@@ -18,5 +18,5 @@
  */
 
 export function isError<T>(error: T | Error): error is Error {
-  return (error as Error).message !== undefined;
+  return error instanceof Error;
 }

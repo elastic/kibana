@@ -25,7 +25,7 @@ import {
   registerGetMessageByIdRoute,
 } from './routes';
 
-export class RoutingExamplePlugin implements Plugin {
+export class RoutingExamplePlugin implements Plugin<{}, {}> {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
 
@@ -34,9 +34,13 @@ export class RoutingExamplePlugin implements Plugin {
     registerGetRandomNumberBetweenRoute(router);
     registerPostMessageRoute(router);
     registerGetMessageByIdRoute(router);
+
+    return {};
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    return {};
+  }
 
   public stop() {}
 }

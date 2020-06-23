@@ -23,7 +23,7 @@ import { IRouter } from '../../../../src/core/server';
 
 /**
  *
- * @param router Regisers a get route that returns a random number between one and ten. It has no input
+ * @param router Registers a get route that returns a random number between one and ten. It has no input
  * parameters, and returns a random number in the body.
  */
 export function registerGetRandomNumberRoute(router: IRouter) {
