@@ -91,7 +91,7 @@ export class ManifestManager {
     return artifacts;
   }
 
-  public async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
+  private async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
     const manifestClient = new ManifestClient(this.savedObjectsClient, schemaVersion);
 
     let manifestSo: InternalManifestSchema;

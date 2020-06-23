@@ -11,12 +11,7 @@ import {
 } from '../../../../../../../src/core/server/mocks';
 import { registerAlertRoutes } from '../routes';
 import { alertingIndexGetQuerySchema } from '../../../../common/endpoint_alerts/schema/alert_index';
-import {
-  createMockAgentService,
-  createMockArtifactService,
-  createMockManifestService,
-  createMockExceptionListClient,
-} from '../../mocks';
+import { createMockAgentService, createMockManifestManager } from '../../mocks';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 
@@ -35,9 +30,7 @@ describe('test alerts route', () => {
     endpointAppContextService = new EndpointAppContextService();
     endpointAppContextService.start({
       agentService: createMockAgentService(),
-      artifactService: createMockArtifactService(),
-      manifestService: createMockManifestService(),
-      exceptionListClient: createMockExceptionListClient(),
+      manifestManager: createMockManifestManager(),
     });
 
     registerAlertRoutes(routerMock, {

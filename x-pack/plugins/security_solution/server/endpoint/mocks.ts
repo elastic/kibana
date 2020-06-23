@@ -11,7 +11,7 @@ import { AgentService, IngestManagerStartContract } from '../../../ingest_manage
 
 import { ExceptionListClient } from '../../../lists/server';
 
-import { ArtifactService, ManifestService } from './services';
+import { ArtifactClient, ManifestManager } from './services';
 
 /**
  * Creates a mock AgentService
@@ -23,20 +23,22 @@ export const createMockAgentService = (): jest.Mocked<AgentService> => {
 };
 
 /**
- * Creates a mock ArtifactService
+ * Creates a mock ArtifactClient
  */
-export const createMockArtifactService = (): jest.Mocked<ArtifactService> => {
+export const createMockArtifactClient = (): jest.Mocked<ArtifactClient> => {
   return {
-    // TODO
+    getArtifact: 'TODO',
+    createArtifact: 'TODO',
+    deleteArtifact: 'TODO',
   };
 };
 
 /**
- * Creates a mock ManifestService
+ * Creates a mock ManifestManager
  */
-export const createMockManifestService = (): jest.Mocked<ManifestService> => {
+export const createMockManifestManager = (): jest.Mocked<ManifestManager> => {
   return {
-    // TODO
+    refresh: 'TODO',
   };
 };
 
@@ -45,7 +47,7 @@ export const createMockManifestService = (): jest.Mocked<ManifestService> => {
  */
 export const createMockExceptionListClient = (): jest.Mocked<ExceptionListClient> => {
   return {
-    // TODO
+    findExceptionListItem: 'TODO',
   };
 };
 

@@ -10,12 +10,8 @@ describe('test endpoint app context services', () => {
     const endpointAppContextService = new EndpointAppContextService();
     expect(() => endpointAppContextService.getAgentService()).toThrow(Error);
   });
-  it('should throw error on getArtifactService if start is not called', async () => {
+  it('should throw error on getManifestManager if start is not called', async () => {
     const endpointAppContextService = new EndpointAppContextService();
-    expect(() => endpointAppContextService.getArtifactService()).toThrow(Error);
-  });
-  it('should throw error on getManifestService if start is not called', async () => {
-    const endpointAppContextService = new EndpointAppContextService();
-    expect(() => endpointAppContextService.getManifestService()).toThrow(Error);
+    expect(() => endpointAppContextService.getManifestManager()).toThrow(Error);
   });
 });
