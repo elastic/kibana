@@ -66,6 +66,7 @@ exports[`ShowLicenseInfo shallow renders without errors 1`] = `
     </p>
     <span
       onClick={[Function]}
+      onKeyDown={[Function]}
     >
       <EuiButton
         color="primary"
