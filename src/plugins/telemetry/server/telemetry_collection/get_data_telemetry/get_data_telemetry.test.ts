@@ -125,7 +125,7 @@ describe('get_data_telemetry', () => {
     });
   });
 
-  describe('getIngestSolutions', () => {
+  describe('getDataTelemetry', () => {
     test('it returns the base payload (all 0s) because no indices are found', async () => {
       const callCluster = mockCallCluster();
       await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([]);
