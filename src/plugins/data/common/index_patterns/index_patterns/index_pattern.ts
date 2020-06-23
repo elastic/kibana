@@ -20,6 +20,7 @@
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectAttributes } from 'src/core/public';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
 import {
@@ -299,7 +300,7 @@ export class IndexPattern implements IIndexPattern {
     const response = {
       version: savedObject._version,
       found: savedObject._version ? true : false,
-      ...(_.cloneDeep(savedObject.attributes) as Record<string, any>),
+      ...(_.cloneDeep(savedObject.attributes) as SavedObjectAttributes),
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
