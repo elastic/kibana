@@ -10,9 +10,9 @@ import { Dispatch } from 'redux';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public/';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { setZoomScale, setFullscreen, selectToplevelNodes } from '../../../state/actions/transient';
 import {
   setWriteable,

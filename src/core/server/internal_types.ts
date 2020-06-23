@@ -34,6 +34,7 @@ import { InternalMetricsServiceSetup } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
+import { InternalLoggingServiceSetup } from './logging';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -48,6 +49,7 @@ export interface InternalCoreSetup {
   uuid: UuidServiceSetup;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
+  logging: InternalLoggingServiceSetup;
 }
 
 /**
