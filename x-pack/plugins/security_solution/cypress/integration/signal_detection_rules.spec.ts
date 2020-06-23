@@ -26,7 +26,7 @@ import {
   waitForRuleToBeActivated,
 } from '../tasks/alert_detection_rules';
 
-import { DETECTIONS } from '../urls/navigation';
+import { ALERTS_URL } from '../urls/navigation';
 
 describe('Detection rules', () => {
   before(() => {
@@ -38,7 +38,7 @@ describe('Detection rules', () => {
   });
 
   it('Sorts by activated rules', () => {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertDetectionRules();

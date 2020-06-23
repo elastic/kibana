@@ -5,9 +5,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { WrapperPage } from '../../common/components/wrapper_page';
@@ -20,6 +21,7 @@ import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
 import * as i18n from './translations';
 
 const ConfigureCasesPageComponent: React.FC = () => {
+  const history = useHistory();
   const userPermissions = useGetUserSavedObjectPermissions();
   const search = useGetUrlSearch(navTabs.case);
 
@@ -27,12 +29,14 @@ const ConfigureCasesPageComponent: React.FC = () => {
     () => ({
       href: getCaseUrl(search),
       text: i18n.BACK_TO_ALL,
+      pageId: SecurityPageName.case,
     }),
     [search]
   );
 
   if (userPermissions != null && !userPermissions.read) {
-    return <Redirect to={getCaseUrl(search)} />;
+    history.push(getCaseUrl(search));
+    return null;
   }
 
   const HeaderWrapper = styled.div`
@@ -51,7 +55,7 @@ const ConfigureCasesPageComponent: React.FC = () => {
           <ConfigureCases userCanCrud={userPermissions?.crud ?? false} />
         </WhitePageWrapper>
       </WrapperPage>
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.case} />
     </>
   );
 };
