@@ -41,6 +41,41 @@ describe('when on the hosts page', () => {
     expect(table).not.toBeNull();
   });
 
+  describe('when there are policies, but no hosts', () => {
+    beforeEach(() => {
+      reactTestingLibrary.act(() => {
+        const hostListData = mockHostResultList({ total: 0 });
+        coreStart.http.get.mockReturnValue(Promise.resolve(hostListData));
+        const hostAction: AppAction = {
+          type: 'serverReturnedHostList',
+          payload: hostListData,
+        };
+        store.dispatch(hostAction);
+
+        jest.clearAllMocks();
+
+        const policyListData = mockPolicyResultList({ total: 3 });
+        coreStart.http.get.mockReturnValue(Promise.resolve(policyListData));
+        const policyAction: AppAction = {
+          type: 'serverReturnedPoliciesForOnboarding',
+          payload: {
+            policyItems: policyListData.items,
+          },
+        };
+        store.dispatch(policyAction);
+      });
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should show the no hosts empty state', async () => {
+      const renderResult = render();
+      const emptyEndpointsTable = await renderResult.findByTestId('emptyEndpointsTable');
+      expect(emptyEndpointsTable).not.toBeNull();
+    });
+  });
+
   describe('when there is no selected host in the url', () => {
     it('should not show the flyout', () => {
       const renderResult = render();

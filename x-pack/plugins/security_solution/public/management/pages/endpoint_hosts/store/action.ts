@@ -42,15 +42,15 @@ interface ServerFailedToReturnHostPolicyResponse {
   payload: ServerApiError;
 }
 
-interface ServerReturnEndpointPolicies {
-  type: 'serverReturnEndpointPolicies';
+interface ServerReturnedPoliciesForOnboarding {
+  type: 'serverReturnedPoliciesForOnboarding';
   payload: {
     policyItems: GetPolicyListResponse['items'];
   };
 }
 
-interface ServerFailedToReturnEndpointPolicies {
-  type: 'serverFailedToReturnEndpointPolicies';
+interface ServerFailedToReturnPoliciesForOnboarding {
+  type: 'serverFailedToReturnPoliciesForOnboarding';
   payload: ServerApiError;
 }
 
@@ -68,6 +68,6 @@ export type HostAction =
   | ServerFailedToReturnHostDetails
   | ServerReturnedHostPolicyResponse
   | ServerFailedToReturnHostPolicyResponse
-  | ServerReturnEndpointPolicies
-  | ServerFailedToReturnEndpointPolicies
+  | ServerReturnedPoliciesForOnboarding
+  | ServerFailedToReturnPoliciesForOnboarding
   | UserSelectedEndpointPolicy;

@@ -67,13 +67,13 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       detailsError: action.payload,
       detailsLoading: false,
     };
-  } else if (action.type === 'serverReturnEndpointPolicies') {
+  } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
     return {
       ...state,
       policyItems: action.payload.policyItems,
       loading: false,
     };
-  } else if (action.type === 'serverFailedToReturnEndpointPolicies') {
+  } else if (action.type === 'serverFailedToReturnPoliciesForOnboarding') {
     return {
       ...state,
       error: action.payload,

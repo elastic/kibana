@@ -53,14 +53,14 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
             });
 
             dispatch({
-              type: 'serverReturnEndpointPolicies',
+              type: 'serverReturnedPoliciesForOnboarding',
               payload: {
                 policyItems: policyDataResponse.items,
               },
             });
           } catch (error) {
             dispatch({
-              type: 'serverFailedToReturnEndpointPolicies',
+              type: 'serverFailedToReturnPoliciesForOnboarding',
               payload: error.body ?? error,
             });
             return;

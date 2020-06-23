@@ -132,6 +132,7 @@ const EndpointsEmptyState = React.memo<{
               height={100}
               listProps={{ bordered: true, singleSelection: true }}
               onChange={handleSelectableOnChange}
+              data-test-sub="onboardingPolicySelect"
             >
               {(list) =>
                 loading ? (
