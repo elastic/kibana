@@ -665,7 +665,7 @@ describe('rules_schema', () => {
       expect(message.schema).toEqual(expected);
     });
 
-    test('it should NOT validate a type of "query" when it has extra data', () => {
+    test('it should NOT validate when "exceptions_list" is not expected type', () => {
       const payload: Omit<RulesSchema, 'exceptions_list'> & {
         exceptions_list?: string;
       } = { ...getRulesSchemaMock(), exceptions_list: 'invalid_data' };

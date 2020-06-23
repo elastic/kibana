@@ -78,7 +78,7 @@ import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
-import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types';
+import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
@@ -193,7 +193,7 @@ export interface CreateRulesOptions {
   references: References;
   note: NoteOrUndefined;
   version: Version;
-  exceptionsList: ListArrayOrUndefined;
+  exceptionsList: ListArray;
   actions: RuleAlertAction[];
 }
 
@@ -229,7 +229,7 @@ export interface UpdateRulesOptions {
   references: References;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListArrayOrUndefined;
+  exceptionsList: ListArray;
   actions: RuleAlertAction[];
 }
 
