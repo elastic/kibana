@@ -24,7 +24,7 @@ import {
   SavedObjectsImportOptions,
 } from './types';
 import { validateReferences } from './validate_references';
-import { checkConflicts } from './check_conflicts';
+import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
 
 /**
@@ -60,10 +60,10 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
-  const checkConflictsOptions = { savedObjectsClient, typeRegistry, namespace };
-  const { filteredObjects, errors: conflictErrors, importIdMap } = await checkConflicts(
+  const checkOriginConflictsOptions = { savedObjectsClient, typeRegistry, namespace };
+  const { filteredObjects, errors: conflictErrors, importIdMap } = await checkOriginConflicts(
     validateReferencesResult.filteredObjects,
-    checkConflictsOptions
+    checkOriginConflictsOptions
   );
   errorAccumulator = [...errorAccumulator, ...conflictErrors];
 

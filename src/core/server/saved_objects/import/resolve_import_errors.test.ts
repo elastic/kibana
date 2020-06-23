@@ -35,7 +35,7 @@ import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
 import { validateRetries } from './validate_retries';
 import { collectSavedObjects } from './collect_saved_objects';
 import { validateReferences } from './validate_references';
-import { getImportIdMapForRetries } from './check_conflicts';
+import { getImportIdMapForRetries } from './check_origin_conflicts';
 import { splitOverwrites } from './split_overwrites';
 import { createSavedObjects } from './create_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
@@ -44,7 +44,7 @@ jest.mock('./validate_retries');
 jest.mock('./create_objects_filter');
 jest.mock('./collect_saved_objects');
 jest.mock('./validate_references');
-jest.mock('./check_conflicts');
+jest.mock('./check_origin_conflicts');
 jest.mock('./split_overwrites');
 jest.mock('./create_saved_objects');
 
@@ -101,7 +101,7 @@ describe('#importSavedObjectsFromStream', () => {
   /**
    * These tests use minimal mocks which don't look realistic, but are sufficient to exercise the code paths correctly. For example, for an
    * object to be imported successfully it would need to be obtained from `collectSavedObjects`, passed to `validateReferences`, passed to
-   * `checkConflicts`, passed to `createSavedObjects`, and returned from that. However, for each of the tests below, we skip the
+   * `getImportIdMapForRetries`, passed to `createSavedObjects`, and returned from that. However, for each of the tests below, we skip the
    * intermediate steps in the interest of brevity.
    */
   describe('module calls', () => {
@@ -170,7 +170,7 @@ describe('#importSavedObjectsFromStream', () => {
       );
     });
 
-    test('checks conflicts', async () => {
+    test('gets import ID map for retries', async () => {
       const retries = [createRetry()];
       const options = setupOptions(retries);
       const filteredObjects = [createObject()];

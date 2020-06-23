@@ -27,7 +27,7 @@ import {
 import { validateReferences } from './validate_references';
 import { validateRetries } from './validate_retries';
 import { createSavedObjects } from './create_saved_objects';
-import { getImportIdMapForRetries } from './check_conflicts';
+import { getImportIdMapForRetries } from './check_origin_conflicts';
 import { SavedObject } from '../types';
 
 /**

@@ -26,7 +26,7 @@ import {
 } from '../types';
 import { ISavedObjectTypeRegistry } from '..';
 
-interface CheckConflictsOptions {
+interface CheckOriginConflictsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
@@ -79,10 +79,10 @@ const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
  *  - A `Left` result indicates that one or more conflict destinations exist in this namespace, none of which exactly match this object's ID
  *    ("inexact match").
  */
-const checkConflict = async (
+const checkOriginConflict = async (
   object: SavedObject<{ title?: string }>,
   importIds: Set<string>,
-  options: CheckConflictsOptions
+  options: CheckOriginConflictsOptions
 ): Promise<Either<{ title?: string }>> => {
   const { savedObjectsClient, typeRegistry, namespace } = options;
   const { type, originId } = object;
@@ -135,27 +135,29 @@ const checkConflict = async (
  *        will allow `createSavedObjects` to modify the ID before creating the object (thus ensuring a conflict during).
  *     B. Otherwise, this is an "ambiguous conflict" result; return an error.
  */
-export async function checkConflicts(
+export async function checkOriginConflicts(
   objects: Array<SavedObject<{ title?: string }>>,
-  options: CheckConflictsOptions
+  options: CheckOriginConflictsOptions
 ) {
   // Check each object for possible destination conflicts.
   const importIds = new Set<string>(objects.map(({ type, id }) => `${type}:${id}`));
-  const checkConflictResults = await Promise.all(
-    objects.map((object) => checkConflict(object, importIds, options))
+  const checkOriginConflictResults = await Promise.all(
+    objects.map((object) => checkOriginConflict(object, importIds, options))
   );
 
   // Get a map of all inexact matches that share the same destination(s).
-  const ambiguousConflictSourcesMap = checkConflictResults.filter(isLeft).reduce((acc, cur) => {
-    const key = getAmbiguousConflictSourceKey(cur.value);
-    const value = acc.get(key) ?? [];
-    return acc.set(key, [...value, cur.value.object]);
-  }, new Map<string, Array<SavedObject<{ title?: string }>>>());
+  const ambiguousConflictSourcesMap = checkOriginConflictResults
+    .filter(isLeft)
+    .reduce((acc, cur) => {
+      const key = getAmbiguousConflictSourceKey(cur.value);
+      const value = acc.get(key) ?? [];
+      return acc.set(key, [...value, cur.value.object]);
+    }, new Map<string, Array<SavedObject<{ title?: string }>>>());
 
   const errors: SavedObjectsImportError[] = [];
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
-  checkConflictResults.forEach((result) => {
+  checkOriginConflictResults.forEach((result) => {
     if (!isLeft(result)) {
       filteredObjects.push(result.value);
       return;

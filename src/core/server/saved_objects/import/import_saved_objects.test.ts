@@ -32,12 +32,12 @@ import { importSavedObjectsFromStream } from './import_saved_objects';
 
 import { collectSavedObjects } from './collect_saved_objects';
 import { validateReferences } from './validate_references';
-import { checkConflicts } from './check_conflicts';
+import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
 
 jest.mock('./collect_saved_objects');
 jest.mock('./validate_references');
-jest.mock('./check_conflicts');
+jest.mock('./check_origin_conflicts');
 jest.mock('./create_saved_objects');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
@@ -49,7 +49,7 @@ describe('#importSavedObjectsFromStream', () => {
     // mock empty output of each of these mocked modules so the import doesn't throw an error
     getMockFn(collectSavedObjects).mockResolvedValue({ errors: [], collectedObjects: [] });
     getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects: [] });
-    getMockFn(checkConflicts).mockResolvedValue({
+    getMockFn(checkOriginConflicts).mockResolvedValue({
       errors: [],
       filteredObjects: [],
       importIdMap: new Map(),
@@ -80,7 +80,7 @@ describe('#importSavedObjectsFromStream', () => {
   /**
    * These tests use minimal mocks which don't look realistic, but are sufficient to exercise the code paths correctly. For example, for an
    * object to be imported successfully it would need to be obtained from `collectSavedObjects`, passed to `validateReferences`, passed to
-   * `checkConflicts`, passed to `createSavedObjects`, and returned from that. However, for each of the tests below, we skip the
+   * `checkOriginConflicts`, passed to `createSavedObjects`, and returned from that. However, for each of the tests below, we skip the
    * intermediate steps in the interest of brevity.
    */
   describe('module calls', () => {
@@ -110,21 +110,28 @@ describe('#importSavedObjectsFromStream', () => {
       );
     });
 
-    test('checks conflicts', async () => {
+    test('checks origin conflicts', async () => {
       const options = setupOptions();
       const filteredObjects = [createObject()];
       getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
 
       await importSavedObjectsFromStream(options);
-      const checkConflictsOptions = { savedObjectsClient, typeRegistry, namespace };
-      expect(checkConflicts).toHaveBeenCalledWith(filteredObjects, checkConflictsOptions);
+      const checkOriginConflictsOptions = { savedObjectsClient, typeRegistry, namespace };
+      expect(checkOriginConflicts).toHaveBeenCalledWith(
+        filteredObjects,
+        checkOriginConflictsOptions
+      );
     });
 
     test('creates saved objects', async () => {
       const options = setupOptions();
       const filteredObjects = [createObject()];
       const importIdMap = new Map();
-      getMockFn(checkConflicts).mockResolvedValue({ errors: [], filteredObjects, importIdMap });
+      getMockFn(checkOriginConflicts).mockResolvedValue({
+        errors: [],
+        filteredObjects,
+        importIdMap,
+      });
 
       await importSavedObjectsFromStream(options);
       const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
@@ -173,7 +180,7 @@ describe('#importSavedObjectsFromStream', () => {
         collectedObjects: [],
       });
       getMockFn(validateReferences).mockResolvedValue({ errors: [errors[1]], filteredObjects: [] });
-      getMockFn(checkConflicts).mockResolvedValue({
+      getMockFn(checkOriginConflicts).mockResolvedValue({
         errors: [errors[2]],
         filteredObjects: [],
         importIdMap: new Map(),

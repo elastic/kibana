@@ -25,13 +25,13 @@ import {
   SavedObjectsImportRetry,
   SavedObjectsImportError,
 } from '../types';
-import { checkConflicts, getImportIdMapForRetries } from './check_conflicts';
+import { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_conflicts';
 import { savedObjectsClientMock } from '../../mocks';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { ISavedObjectTypeRegistry } from '..';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
-type CheckConflictsOptions = Parameters<typeof checkConflicts>[1];
+type CheckOriginConflictsOptions = Parameters<typeof checkOriginConflicts>[1];
 type GetImportIdMapForRetriesOptions = Parameters<typeof getImportIdMapForRetries>[1];
 
 /**
@@ -52,7 +52,7 @@ beforeEach(() => {
   mockUuidv4.mockClear();
 });
 
-describe('#checkConflicts', () => {
+describe('#checkOriginConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   let find: typeof savedObjectsClient['find'];
@@ -64,7 +64,7 @@ describe('#checkConflicts', () => {
     saved_objects: objects,
   });
 
-  const setupOptions = (namespace?: string): CheckConflictsOptions => {
+  const setupOptions = (namespace?: string): CheckOriginConflictsOptions => {
     savedObjectsClient = savedObjectsClientMock.create();
     find = savedObjectsClient.find;
     find.mockResolvedValue(getResultMock()); // mock zero hits response by default
@@ -97,7 +97,7 @@ describe('#checkConflicts', () => {
       const objects = [otherObj, otherObjWithOriginId];
       const options = setupOptions();
 
-      await checkConflicts(objects, options);
+      await checkOriginConflicts(objects, options);
       expect(find).not.toHaveBeenCalled();
     });
 
@@ -105,14 +105,14 @@ describe('#checkConflicts', () => {
       const objects = [multiNsObj, otherObj, multiNsObjWithOriginId, otherObjWithOriginId];
       const options1 = setupOptions();
 
-      await checkConflicts(objects, options1);
+      await checkOriginConflicts(objects, options1);
       expect(find).toHaveBeenCalledTimes(2);
       expectFindArgs(1, multiNsObj, '');
       expectFindArgs(2, multiNsObjWithOriginId, '');
 
       find.mockClear();
       const options2 = setupOptions('some-namespace');
-      await checkConflicts(objects, options2);
+      await checkOriginConflicts(objects, options2);
       expect(find).toHaveBeenCalledTimes(2);
       expectFindArgs(1, multiNsObj, 'some-namespace:');
       expectFindArgs(2, multiNsObjWithOriginId, 'some-namespace:');
@@ -123,7 +123,7 @@ describe('#checkConflicts', () => {
       const namespace = 'some-namespace';
       const options = setupOptions(namespace);
 
-      await checkConflicts(objects, options);
+      await checkOriginConflicts(objects, options);
       expect(find).toHaveBeenCalledTimes(1);
       expect(find).toHaveBeenCalledWith(expect.objectContaining({ namespace }));
     });
@@ -136,7 +136,7 @@ describe('#checkConflicts', () => {
       ];
       const options = setupOptions();
 
-      await checkConflicts(objects, options);
+      await checkOriginConflicts(objects, options);
       const escapedId = `some\\"weird\\\\id`;
       const expectedQuery = `"${MULTI_NS_TYPE}:${escapedId}" | "${escapedId}"`;
       expect(find).toHaveBeenCalledTimes(2);
@@ -178,14 +178,17 @@ describe('#checkConflicts', () => {
         const options = setupOptions();
 
         // don't need to mock find results for obj3 and obj4, "no match" is the default find result in this test suite
-        const checkConflictsResult = await checkConflicts([obj1, obj2, obj3, obj4], options);
+        const checkOriginConflictsResult = await checkOriginConflicts(
+          [obj1, obj2, obj3, obj4],
+          options
+        );
 
         const expectedResult = {
           filteredObjects: [obj1, obj2, obj3, obj4],
           importIdMap: new Map(),
           errors: [],
         };
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
       test('returns object when an exact match is detected (1 hit)', async () => {
@@ -197,13 +200,13 @@ describe('#checkConflicts', () => {
         mockFindResult(obj1); // find for obj1: the result is an exact match
         mockFindResult(obj2); // find for obj2: the result is an exact match
 
-        const checkConflictsResult = await checkConflicts([obj1, obj2], options);
+        const checkOriginConflictsResult = await checkOriginConflicts([obj1, obj2], options);
         const expectedResult = {
           filteredObjects: [obj1, obj2],
           importIdMap: new Map(),
           errors: [],
         };
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
       test('returns object when an exact match is detected (2+ hits)', async () => {
@@ -217,13 +220,13 @@ describe('#checkConflicts', () => {
         mockFindResult(obj1, objA); // find for obj1: the first result is an exact match, so the second result is ignored
         mockFindResult(objB, obj2); // find for obj2: the second result is an exact match, so the first result is ignored
 
-        const checkConflictsResult = await checkConflicts([obj1, obj2], options);
+        const checkOriginConflictsResult = await checkOriginConflicts([obj1, obj2], options);
         const expectedResult = {
           filteredObjects: [obj1, obj2],
           importIdMap: new Map(),
           errors: [],
         };
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
       test('returns object when an inexact match is detected (1 hit) with a destination that is exactly matched by another object', async () => {
@@ -240,13 +243,16 @@ describe('#checkConflicts', () => {
         mockFindResult(obj3); // find for obj3: the result is an exact match
         mockFindResult(obj3); // find for obj4: the result is an inexact match with one destination that is exactly matched by obj3 so it is ignored -- accordingly, obj4 has no match
 
-        const checkConflictsResult = await checkConflicts([obj1, obj2, obj3, obj4], options);
+        const checkOriginConflictsResult = await checkOriginConflicts(
+          [obj1, obj2, obj3, obj4],
+          options
+        );
         const expectedResult = {
           filteredObjects: [obj1, obj2, obj3, obj4],
           importIdMap: new Map(),
           errors: [],
         };
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
       test('returns object when an inexact match is detected (2+ hits) with destinations that are all exactly matched by another object', async () => {
@@ -260,13 +266,13 @@ describe('#checkConflicts', () => {
         mockFindResult(obj1, obj2); // find for obj2: the second result is an exact match, so the first result is ignored
         mockFindResult(obj1, obj2); // find for obj3: the result is an inexact match with two destinations that are exactly matched by obj1 and obj2 so they are ignored -- accordingly, obj3 has no match
 
-        const checkConflictsResult = await checkConflicts([obj1, obj2, obj3], options);
+        const checkOriginConflictsResult = await checkOriginConflicts([obj1, obj2, obj3], options);
         const expectedResult = {
           filteredObjects: [obj1, obj2, obj3],
           importIdMap: new Map(),
           errors: [],
         };
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
     });
 
@@ -282,7 +288,7 @@ describe('#checkConflicts', () => {
         mockFindResult(objA); // find for obj1: the result is an inexact match with one destination
         mockFindResult(objB); // find for obj2: the result is an inexact match with one destination
 
-        const checkConflictsResult = await checkConflicts([obj1, obj2], options);
+        const checkOriginConflictsResult = await checkOriginConflicts([obj1, obj2], options);
         const expectedResult = {
           filteredObjects: [obj1, obj2],
           importIdMap: new Map([
@@ -291,7 +297,7 @@ describe('#checkConflicts', () => {
           ]),
           errors: [],
         };
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
       test('returns object with a `importIdMap` entry when an inexact match is detected (2+ hits), with n-1 destinations that are exactly matched by another object', async () => {
@@ -310,7 +316,10 @@ describe('#checkConflicts', () => {
         mockFindResult(objB, obj3); // find for obj3: the second result is an exact match, so the first result is ignored
         mockFindResult(objB, obj3); // find for obj4: the result is an inexact match with two destinations, but the second destination is exactly matched by obj3 so it is ignored -- accordingly, obj4 has an inexact match with one destination (objB)
 
-        const checkConflictsResult = await checkConflicts([obj1, obj2, obj3, obj4], options);
+        const checkOriginConflictsResult = await checkOriginConflicts(
+          [obj1, obj2, obj3, obj4],
+          options
+        );
         const expectedResult = {
           filteredObjects: [obj1, obj2, obj3, obj4],
           importIdMap: new Map([
@@ -319,7 +328,7 @@ describe('#checkConflicts', () => {
           ]),
           errors: [],
         };
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
     });
 
@@ -339,7 +348,10 @@ describe('#checkConflicts', () => {
         mockFindResult(objB); // find for obj3: the result is an inexact match with one destination
         mockFindResult(objB); // find for obj4: the result is an inexact match with one destination
 
-        const checkConflictsResult = await checkConflicts([obj1, obj2, obj3, obj4], options);
+        const checkOriginConflictsResult = await checkOriginConflicts(
+          [obj1, obj2, obj3, obj4],
+          options
+        );
         const expectedResult = {
           filteredObjects: [obj1, obj2, obj3, obj4],
           importIdMap: new Map([
@@ -351,7 +363,7 @@ describe('#checkConflicts', () => {
           errors: [],
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(4);
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
       test('returns ambiguous_conflict error when an inexact match is detected (2+ hits)', async () => {
@@ -367,7 +379,7 @@ describe('#checkConflicts', () => {
         mockFindResult(objA, objB); // find for obj1: the result is an inexact match with two destinations
         mockFindResult(objC, objD); // find for obj2: the result is an inexact match with two destinations
 
-        const checkConflictsResult = await checkConflicts([obj1, obj2], options);
+        const checkOriginConflictsResult = await checkOriginConflicts([obj1, obj2], options);
         const expectedResult = {
           filteredObjects: [],
           importIdMap: new Map(),
@@ -377,7 +389,7 @@ describe('#checkConflicts', () => {
           ],
         };
         expect(mockUuidv4).not.toHaveBeenCalled();
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
       test('returns object with a `importIdMap` entry when multiple inexact matches are detected that target the same multiple destinations', async () => {
@@ -397,7 +409,10 @@ describe('#checkConflicts', () => {
         mockFindResult(objC, objD); // find for obj3: the result is an inexact match with two destinations
         mockFindResult(objC, objD); // find for obj4: the result is an inexact match with two destinations
 
-        const checkConflictsResult = await checkConflicts([obj1, obj2, obj3, obj4], options);
+        const checkOriginConflictsResult = await checkOriginConflicts(
+          [obj1, obj2, obj3, obj4],
+          options
+        );
         const expectedResult = {
           filteredObjects: [obj1, obj2, obj3, obj4],
           importIdMap: new Map([
@@ -409,7 +424,7 @@ describe('#checkConflicts', () => {
           errors: [],
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(4);
-        expect(checkConflictsResult).toEqual(expectedResult);
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
     });
 
@@ -441,7 +456,7 @@ describe('#checkConflicts', () => {
       mockFindResult(objD, objE); // find for obj8: the result is an inexact match with two destinations
 
       const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8];
-      const checkConflictsResult = await checkConflicts(objects, options);
+      const checkOriginConflictsResult = await checkOriginConflicts(objects, options);
       const expectedResult = {
         filteredObjects: [obj1, obj2, obj3, obj4, obj5, obj7, obj8],
         importIdMap: new Map([
@@ -452,7 +467,7 @@ describe('#checkConflicts', () => {
         errors: [createAmbiguousConflictError(obj6, [objB, objC])],
       };
       expect(mockUuidv4).toHaveBeenCalledTimes(2);
-      expect(checkConflictsResult).toEqual(expectedResult);
+      expect(checkOriginConflictsResult).toEqual(expectedResult);
     });
   });
 });
@@ -504,7 +519,9 @@ describe('#getImportIdMapForRetries', () => {
     ];
     const options = setupOptions(retries);
 
-    const checkConflictsResult = await getImportIdMapForRetries(objects, options);
-    expect(checkConflictsResult).toEqual(new Map([[`${obj6.type}:${obj6.id}`, { id: 'id-Y' }]]));
+    const checkOriginConflictsResult = await getImportIdMapForRetries(objects, options);
+    expect(checkOriginConflictsResult).toEqual(
+      new Map([[`${obj6.type}:${obj6.id}`, { id: 'id-Y' }]])
+    );
   });
 });
