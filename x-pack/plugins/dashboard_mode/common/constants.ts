@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CONFIG_DASHBOARD_ONLY_MODE_ROLES = 'xpackDashboardMode:roles';
+export const UI_SETTINGS = {
+  CONFIG_DASHBOARD_ONLY_MODE_ROLES: 'xpackDashboardMode:roles',
+};
