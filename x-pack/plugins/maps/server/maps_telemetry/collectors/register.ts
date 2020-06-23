@@ -7,7 +7,7 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry } from '../maps_telemetry';
 // @ts-ignore
-import { APP_ID } from '../../../common/constants';
+import { TELEMETRY_TYPE } from '../../../common/constants';
 import { MapsConfigType } from '../../../config';
 
 export function registerMapsUsageCollector(
@@ -19,7 +19,7 @@ export function registerMapsUsageCollector(
   }
 
   const mapsUsageCollector = usageCollection.makeUsageCollector({
-    type: APP_ID,
+    type: TELEMETRY_TYPE,
     isReady: () => true,
     fetch: async () => await getMapsTelemetry(config),
   });
