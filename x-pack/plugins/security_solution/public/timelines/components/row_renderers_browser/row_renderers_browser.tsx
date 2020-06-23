@@ -4,19 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiOutsideClickDetector, EuiInMemoryTable } from '@elastic/eui';
-import React, {  useCallback, useMemo, useState, useRef } from 'react';
-import { noop, xorBy } from 'lodash/fp';
+/* eslint-disable react/display-name */
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiOutsideClickDetector,
+  EuiInMemoryTable,
+  EuiSpacer,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiButton,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { xorBy } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { RowRendererId } from '../../../../common/types/timeline';
-import { rowRenderers } from '../timeline/body/renderers';
-import { BrowserFields } from '../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
+// import { rowRenderers } from '../timeline/body/renderers';
 
-import { Header } from './header';
-import { PANES_FLEX_GROUP_WIDTH } from './helpers';
-import { FieldBrowserProps, OnHideFieldBrowser } from './types';
+import { FieldBrowserProps } from './types';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
   background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
@@ -24,8 +34,6 @@ const FieldsBrowserContainer = styled.div<{ width: number }>`
     ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
   left: 0;
-  padding: ${({ theme }) => theme.eui.paddingSizes.s} ${({ theme }) => theme.eui.paddingSizes.s}
-    ${({ theme }) => theme.eui.paddingSizes.m};
   position: absolute;
   top: calc(100% + ${({ theme }) => theme.eui.euiSize});
   width: ${({ width }) => width}px;
@@ -33,71 +41,22 @@ const FieldsBrowserContainer = styled.div<{ width: number }>`
 `;
 FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
 
-const PanesFlexGroup = styled(EuiFlexGroup)`
-  width: ${PANES_FLEX_GROUP_WIDTH}px;
+const CloseButtonIcon = styled(EuiButtonIcon)`
+  position: absolute;
+  right: 0;
+  top: 0;
 `;
-PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 interface RowRendererOption {
   id: RowRendererId;
   name: string;
   description: string;
-  example: React.ReactNode;
+  example?: React.ReactNode;
 }
 
-type Props = Pick<
-  FieldBrowserProps,
-  | 'browserFields'
-  | 'isEventViewer'
-  | 'height'
-  | 'onFieldSelected'
-  | 'onUpdateColumns'
-  | 'timelineId'
-  | 'width'
-> & {
-  /**
-   * The current timeline column headers
-   */
-  columnHeaders: ColumnHeaderOptions[];
+type Props = Pick<FieldBrowserProps, 'height' | 'timelineId' | 'width'> & {
   excludedRowRendererIds: RowRendererId[];
-  /**
-   * A map of categoryId -> metadata about the fields in that category,
-   * filtered such that the name of every field in the category includes
-   * the filter input (as a substring).
-   */
-  filteredBrowserFields: BrowserFields;
-  /**
-   * When true, a busy spinner will be shown to indicate the field browser
-   * is searching for fields that match the specified `searchInput`
-   */
-  isSearching: boolean;
-  /** The text displayed in the search input */
-  searchInput: string;
-  /**
-   * The category selected on the left-hand side of the field browser
-   */
-  selectedCategoryId: string;
-  /**
-   * Invoked when the user clicks on the name of a category in the left-hand
-   * side of the field browser
-   */
-  onCategorySelected: (categoryId: string) => void;
-  /**
-   * Hides the field browser when invoked
-   */
-  onHideFieldBrowser: OnHideFieldBrowser;
-  /**
-   * Invoked when the user clicks outside of the field browser
-   */
   onOutsideClick: () => void;
-  /**
-   * Invoked when the user types in the search input
-   */
-  onSearchInputChange: (newSearchInput: string) => void;
-  /**
-   * Invoked to add or remove a column from the timeline
-   */
-  toggleColumn: (column: ColumnHeaderOptions) => void;
   setExcludedRowRendererIds: (excludedRowRendererIds: RowRendererId[]) => void;
 };
 
@@ -107,12 +66,8 @@ type Props = Pick<
  */
 const FieldsBrowserComponent: React.FC<Props> = ({
   excludedRowRendererIds = [],
-  filteredBrowserFields,
-  isEventViewer,
   setExcludedRowRendererIds,
-  onFieldSelected,
   onOutsideClick,
-  timelineId,
   width,
 }) => {
   const columns = [
@@ -127,16 +82,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
       name: 'Description',
       truncateText: true,
     },
-    {
-      field: 'category',
-      name: 'Category',
-      truncateText: true,
-    },
-    {
-      field: 'example',
-      name: 'Example',
-      render: () => <div>EXAMPLE</div>,
-    },
   ];
 
   const search = {
@@ -144,23 +89,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
       incremental: true,
       schema: true,
     },
-    // filters: !filters
-    //   ? undefined
-    //   : [
-    //       {
-    //         type: 'is',
-    //         field: 'online',
-    //         name: 'Online',
-    //         negatedName: 'Offline',
-    //       },
-    //       {
-    //         type: 'field_value_selection',
-    //         field: 'nationality',
-    //         name: 'Nationality',
-    //         multiSelect: false,
-    //         options: [],
-    //       },
-    //     ],
   };
 
   const renderers: RowRendererOption[] = [
@@ -168,84 +96,74 @@ const FieldsBrowserComponent: React.FC<Props> = ({
       id: 'auditd',
       name: 'Auditd',
       description: 'Auditd Row Renderer',
-      example: () => <></>,
     },
     {
       id: 'auditd_file',
       name: 'Auditd File',
       description: 'Auditd Row Renderer',
-      example: () => <></>,
     },
     {
       id: 'system',
       name: 'System',
       description: 'System Row Renderer',
-      example: () => <></>,
     },
 
     {
       id: 'system_endgame_process',
       name: 'System Endgame Process',
       description: 'Endgame Process Row Renderer',
-      example: () => <></>,
     },
 
     {
       id: 'system_fin',
       name: 'System FIM',
       description: 'FIM Row Renderer',
-      example: () => <></>,
     },
 
     {
       id: 'system_file',
       name: 'System File',
       description: 'System File Row Renderer',
-      example: () => <></>,
     },
 
     {
       id: 'system_socket',
       name: 'System Socket',
       description: 'Auditd Row Renderer',
-      example: () => <></>,
     },
 
     {
       id: 'system_security_event',
       name: 'System Security Event',
       description: 'Auditd Row Renderer',
-      example: () => <></>,
     },
 
     {
       id: 'system_dns',
       name: 'System DNS',
       description: 'Auditd Row Renderer',
-      example: () => <></>,
     },
     {
       id: 'suricata',
       name: 'Suricata',
       description: 'Auditd Row Renderer',
-      example: () => <></>,
     },
     {
       id: 'zeek',
       name: 'Zeek',
       description: 'Auditd Row Renderer',
-      example: () => <></>,
     },
     {
       id: 'netflow',
       name: 'Netflow',
       description: 'Auditd Row Renderer',
-      example: () => <></>,
     },
   ];
 
   const notExcludedRowRenderers = useMemo(() => {
     if (excludedRowRendererIds.includes('all')) return [];
+
+    console.error('test', excludedRowRendererIds);
 
     return renderers;
     // return renderers.filter((renderer) => excludedRowRendererIds.includes(renderer.id));
@@ -254,9 +172,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   const selectionValue = {
     selectable: () => true,
     selectableMessage: () => '',
-    onSelectionChange: (selection) => {
-      console.error('selection', selection);
-
+    onSelectionChange: (selection: RowRendererOption[]) => {
       if (!selection || !selection.length) return setExcludedRowRendererIds(['all']);
 
       const excludedRowRenderers = xorBy('id', renderers, selection);
@@ -266,35 +182,67 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     initialSelected: notExcludedRowRenderers,
   };
 
-  console.error('rowRenderers', rowRenderers);
-
-  const tableRef = useRef();
+  const handleDisableAll = useCallback(() => setExcludedRowRendererIds(['all']), [
+    setExcludedRowRendererIds,
+  ]);
+  const handleEnableAll = useCallback(() => setExcludedRowRendererIds([]), [
+    setExcludedRowRendererIds,
+  ]);
 
   return (
     <EuiOutsideClickDetector
       data-test-subj="outside-click-detector"
-      onOutsideClick={onFieldSelected != null ? noop : onOutsideClick}
+      onOutsideClick={onOutsideClick}
       isDisabled={false}
     >
       <FieldsBrowserContainer data-test-subj="fields-browser-container" width={width}>
-        <Header
-          data-test-subj="header"
-          filteredBrowserFields={filteredBrowserFields}
-          isEventViewer={isEventViewer}
-          onOutsideClick={onOutsideClick}
-          timelineId={timelineId}
-        />
+        <CloseButtonIcon color="text" onClick={onOutsideClick} iconType="cross" />
 
-        <EuiInMemoryTable
-          ref={tableRef}
-          items={renderers}
-          itemId="id"
-          columns={columns}
-          search={search}
-          sorting={true}
-          isSelectable={true}
-          selection={selectionValue}
-        />
+        <EuiModalHeader>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            direction="row"
+            gutterSize="none"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiModalHeaderTitle>{'Customize Row Renderers'}</EuiModalHeaderTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutter="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty data-test-subj="disable-all" onClick={handleDisableAll}>
+                    {'Disable All'}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButton fill data-test-subj="enable-all" onClick={handleEnableAll}>
+                    {'Enable All'}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalHeader>
+
+        <EuiSpacer />
+
+        <EuiModalBody>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiInMemoryTable
+                items={renderers}
+                itemId="id"
+                columns={columns}
+                search={search}
+                sorting={true}
+                isSelectable={true}
+                selection={selectionValue}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalBody>
       </FieldsBrowserContainer>
     </EuiOutsideClickDetector>
   );

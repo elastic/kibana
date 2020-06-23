@@ -49,5 +49,7 @@ export const pickSavedTimeline = (
     savedTimeline.status = TimelineStatus.active;
   }
 
-  if (!savedTimeline.showRowRe) return savedTimeline;
+  savedTimeline.excludedRowRendererIds = savedTimeline.excludedRowRendererIds ?? [];
+
+  return savedTimeline;
 };

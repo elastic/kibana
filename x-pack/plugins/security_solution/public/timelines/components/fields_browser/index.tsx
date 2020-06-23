@@ -17,8 +17,6 @@ import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory }
 import * as i18n from './translations';
 import { FieldBrowserProps } from './types';
 
-const fieldsButtonClassName = 'fields-button';
-
 /** wait this many ms after the user completes typing before applying the filter input */
 export const INPUT_TIMEOUT = 250;
 
@@ -143,47 +141,42 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   );
 
   return (
-    <>
-      <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
-        <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
-          <EuiButtonEmpty
-            className={fieldsButtonClassName}
-            data-test-subj="show-field-browser"
-            iconType="list"
-            onClick={toggleShow}
-            size="xs"
-          >
-            {i18n.FIELDS}
-          </EuiButtonEmpty>
-        </EuiToolTip>
+    <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
+      <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
+        <EuiButtonEmpty
+          data-test-subj="show-field-browser"
+          iconType="list"
+          onClick={toggleShow}
+          size="xs"
+        >
+          {i18n.FIELDS}
+        </EuiButtonEmpty>
+      </EuiToolTip>
 
-        {show && (
-          <FieldsBrowser
-            browserFields={browserFieldsWithDefaultCategory}
-            columnHeaders={columnHeaders}
-            filteredBrowserFields={
-              filteredBrowserFields != null
-                ? filteredBrowserFields
-                : browserFieldsWithDefaultCategory
-            }
-            height={height}
-            isEventViewer={isEventViewer}
-            isSearching={isSearching}
-            onCategorySelected={updateSelectedCategoryId}
-            onFieldSelected={onFieldSelected}
-            onHideFieldBrowser={hideFieldBrowser}
-            onOutsideClick={show ? hideFieldBrowser : noop}
-            onSearchInputChange={updateFilter}
-            onUpdateColumns={updateColumnsAndSelectCategoryId}
-            searchInput={filterInput}
-            selectedCategoryId={selectedCategoryId}
-            timelineId={timelineId}
-            toggleColumn={toggleColumn}
-            width={width}
-          />
-        )}
-      </FieldsBrowserButtonContainer>
-    </>
+      {show && (
+        <FieldsBrowser
+          browserFields={browserFieldsWithDefaultCategory}
+          columnHeaders={columnHeaders}
+          filteredBrowserFields={
+            filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
+          }
+          height={height}
+          isEventViewer={isEventViewer}
+          isSearching={isSearching}
+          onCategorySelected={updateSelectedCategoryId}
+          onFieldSelected={onFieldSelected}
+          onHideFieldBrowser={hideFieldBrowser}
+          onOutsideClick={show ? hideFieldBrowser : noop}
+          onSearchInputChange={updateFilter}
+          onUpdateColumns={updateColumnsAndSelectCategoryId}
+          searchInput={filterInput}
+          selectedCategoryId={selectedCategoryId}
+          timelineId={timelineId}
+          toggleColumn={toggleColumn}
+          width={width}
+        />
+      )}
+    </FieldsBrowserButtonContainer>
   );
 };
 

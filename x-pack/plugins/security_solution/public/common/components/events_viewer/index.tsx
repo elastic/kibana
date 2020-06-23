@@ -38,7 +38,6 @@ export interface OwnProps {
 type Props = OwnProps & PropsFromRedux;
 
 const StatefulEventsViewerComponent: React.FC<Props> = ({
-  createTimeline,
   columns,
   dataProviders,
   deletedEventIds,
@@ -56,8 +55,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   query,
   removeColumn,
   start,
-  showCheckboxes,
-  showRowRenderers,
   sort,
   updateItemsPerPage,
   upsertColumn,
@@ -67,15 +64,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
   );
 
-  useEffect(() => {
-    if (createTimeline != null) {
-      createTimeline({ id, columns, sort, itemsPerPage, showCheckboxes, showRowRenderers });
-    }
-    return () => {
+  useEffect(
+    () => () => {
       deleteEventQuery({ id, inputId: 'global' });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    },
+    [deleteEventQuery, id]
+  );
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
     (itemsChangedPerPage) => updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }),
@@ -145,18 +139,18 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       deletedEventIds,
+      excludedRowRendererIds,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       sort,
-      showCheckboxes,
-      showRowRenderers,
     } = events;
 
     return {
       columns,
       dataProviders,
       deletedEventIds,
+      excludedRowRendererIds,
       filters: getGlobalFiltersQuerySelector(state),
       id,
       isLive: input.policy.kind === 'interval',
@@ -165,15 +159,12 @@ const makeMapStateToProps = () => {
       kqlMode,
       query: getGlobalQuerySelector(state),
       sort,
-      showCheckboxes,
-      showRowRenderers,
     };
   };
   return mapStateToProps;
 };
 
 const mapDispatchToProps = {
-  createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   removeColumn: timelineActions.removeColumn,
@@ -192,6 +183,7 @@ export const StatefulEventsViewer = connector(
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.defaultIndices, nextProps.defaultIndices) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
       prevProps.deletedEventIds === nextProps.deletedEventIds &&
       prevProps.end === nextProps.end &&
       deepEqual(prevProps.filters, nextProps.filters) &&
@@ -203,8 +195,6 @@ export const StatefulEventsViewer = connector(
       deepEqual(prevProps.sort, nextProps.sort) &&
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
-      prevProps.showCheckboxes === nextProps.showCheckboxes &&
-      prevProps.showRowRenderers === nextProps.showRowRenderers &&
       prevProps.start === nextProps.start &&
       prevProps.utilityBar === nextProps.utilityBar
   )

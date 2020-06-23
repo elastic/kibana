@@ -58,6 +58,7 @@ export const createTimeline = actionCreator<{
     start: number;
     end: number;
   };
+  excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;

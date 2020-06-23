@@ -177,11 +177,11 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
 
       if (!excludedRowRendererIds) return rowRenderers;
 
-      console.error('dupa', rowRenderers, excludedRowRendererIds);
-      console.error(
-        'enabled',
-        rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id))
-      );
+      // console.error('dupa', rowRenderers, excludedRowRendererIds);
+      // console.error(
+      //   'enabled',
+      //   rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id))
+      // );
 
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, showRowRenderers]);
@@ -250,6 +250,7 @@ const makeMapStateToProps = () => {
   const getNotesByIds = appSelectors.notesByIdsSelector();
   const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
+    console.error('mapStateTimeline', timeline, id);
     const {
       columns,
       eventIdToNoteIds,

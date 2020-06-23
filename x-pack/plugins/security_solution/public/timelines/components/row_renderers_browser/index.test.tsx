@@ -12,7 +12,7 @@ import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
+import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './constants';
 
 import { StatefulFieldsBrowserComponent } from '.';
 

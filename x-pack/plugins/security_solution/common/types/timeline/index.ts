@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-empty-interface */
 
 import * as runtimeTypes from 'io-ts';
 import { SavedObjectsClient } from 'kibana/server';
@@ -151,24 +151,71 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
 
-export const RowRendererIdRuntimeType = runtimeTypes.keyof({
-  auditd: null,
-  auditd_file: null,
-  netflow: null,
-  plain: null,
-  suricata: null,
-  system: null,
-  system_dns: null,
-  system_endgame_process: null,
-  system_file: null,
-  system_fin: null,
-  system_security_event: null,
-  system_socket: null,
-  zeek: null,
-  all: null,
-});
+const stringEnum = <T>(enumObj: T, enumName = 'enum') =>
+  new runtimeTypes.Type<T[keyof T], string>(
+    enumName,
+    (u): u is T[keyof T] => Object.values(enumObj).includes(u),
+    (u, c) =>
+      Object.values(enumObj).includes(u)
+        ? runtimeTypes.success(u as T[keyof T])
+        : runtimeTypes.failure(u, c),
+    (a) => (a as unknown) as string
+  );
 
-export type RowRendererId = runtimeTypes.TypeOf<typeof RowRendererIdRuntimeType>;
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fin = 'system_fin',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
+  all = 'all',
+}
+
+export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
+
+// export const RowRendererIdRuntimeType = stringEnum({
+//   auditd: 'auditd',
+//   auditd_file: 'auditd_file',
+//   netflow: 'netflow',
+//   plain: 'plain',
+//   suricata: 'suricata',
+//   system: 'system',
+//   system_dns: 'system_dns',
+//   system_endgame_process: 'system_endgame_process',
+//   system_file: 'system_file',
+//   system_fin: 'system_fin',
+//   system_security_event: 'system_security_event',
+//   system_socket: 'system_socket',
+//   zeek: 'zeek',
+//   all: 'all',
+// });
+
+// export const RowRendererIdRuntimeType = runtimeTypes.keyof({
+//   auditd: null,
+//   auditd_file: null,
+//   netflow: null,
+//   plain: null,
+//   suricata: null,
+//   system: null,
+//   system_dns: null,
+//   system_endgame_process: null,
+//   system_file: null,
+//   system_fin: null,
+//   system_security_event: null,
+//   system_socket: null,
+//   zeek: null,
+//   all: null,
+// });
+
+// export type RowRendererId = runtimeTypes.TypeOf<typeof RowRendererIdRuntimeType>;
 
 /*
  *  Timeline Types
@@ -194,7 +241,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
   eventType: unionWithNullType(runtimeTypes.string),
-  excludedRowRendererIds: unionWithNullType(RowRendererIdRuntimeType),
+  excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
   filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
   kqlMode: unionWithNullType(runtimeTypes.string),

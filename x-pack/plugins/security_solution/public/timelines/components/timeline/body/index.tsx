@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React, { useMemo, useRef } from 'react';
 
 import { BrowserFields } from '../../../../common/containers/source';
@@ -131,30 +132,35 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        <div>
-          <StatefulFieldsBrowser
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            data-test-subj="field-browser"
-            height={FIELD_BROWSER_HEIGHT}
-            isEventViewer={isEventViewer}
-            onUpdateColumns={onUpdateColumns}
-            timelineId={id}
-            toggleColumn={toggleColumn}
-            width={FIELD_BROWSER_WIDTH}
-          />
-          <StatefulRowRenderersBrowser
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            data-test-subj="row-renderers-browser"
-            height={FIELD_BROWSER_HEIGHT}
-            isEventViewer={isEventViewer}
-            onUpdateColumns={onUpdateColumns}
-            timelineId={id}
-            toggleColumn={toggleColumn}
-            width={FIELD_BROWSER_WIDTH}
-          />
-        </div>
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <StatefulFieldsBrowser
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              data-test-subj="field-browser"
+              height={FIELD_BROWSER_HEIGHT}
+              isEventViewer={isEventViewer}
+              onUpdateColumns={onUpdateColumns}
+              timelineId={id}
+              toggleColumn={toggleColumn}
+              width={FIELD_BROWSER_WIDTH}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StatefulRowRenderersBrowser
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              data-test-subj="row-renderers-browser"
+              height={FIELD_BROWSER_HEIGHT}
+              isEventViewer={isEventViewer}
+              onUpdateColumns={onUpdateColumns}
+              timelineId={id}
+              toggleColumn={toggleColumn}
+              width={FIELD_BROWSER_WIDTH}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="xs" />
         <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
