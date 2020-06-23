@@ -8,6 +8,8 @@ exports[`Ip Details it matches the snapshot 1`] = `
   >
     <Component />
   </WithSource>
-  <withRouter(undefined) />
+  <withRouter(undefined)
+    pageName="network"
+  />
 </Fragment>
 `;

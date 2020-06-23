@@ -9,7 +9,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     id="telemetry.telemetryOptedInNoticeDescription"
     values={
       Object {
-        "disableLink": <ForwardRef
+        "disableLink": <EuiLink
           href="management/kibana/settings"
           onClick={[Function]}
         >
@@ -18,8 +18,8 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
             id="telemetry.telemetryOptedInDisableUsage"
             values={Object {}}
           />
-        </ForwardRef>,
-        "privacyStatementLink": <ForwardRef
+        </EuiLink>,
+        "privacyStatementLink": <EuiLink
           href="https://www.elastic.co/legal/privacy-statement"
           onClick={[Function]}
           rel="noopener"
@@ -30,7 +30,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
             id="telemetry.telemetryOptedInPrivacyStatement"
             values={Object {}}
           />
-        </ForwardRef>,
+        </EuiLink>,
       }
     }
   />

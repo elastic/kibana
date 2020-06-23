@@ -23,7 +23,7 @@ import { LocalizedDateTooltip } from '../../../common/components/localized_date_
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
 import { PropertyActions } from '../property_actions';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import * as i18n from './translations';
 
 const MySpinner = styled(EuiLoadingSpinner)`
@@ -94,7 +94,7 @@ export const UserActionTitle = ({
 
   const handleAnchorLink = useCallback(() => {
     copy(
-      `${window.location.origin}${window.location.pathname}#${SiemPageName.case}/${caseId}/${id}${urlSearch}`
+      `${window.location.origin}${window.location.pathname}#${SecurityPageName.case}/${caseId}/${id}${urlSearch}`
     );
   }, [caseId, id, urlSearch]);
 

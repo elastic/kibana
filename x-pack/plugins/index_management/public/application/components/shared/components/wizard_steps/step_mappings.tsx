@@ -15,23 +15,23 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { Forms } from '../../../../shared_imports';
-import { documentationService } from '../../../services/documentation';
+import { Forms } from '../../../../../shared_imports';
 import {
   MappingsEditor,
   OnUpdateHandler,
   LoadMappingsFromJsonButton,
   IndexSettings,
-} from '../../mappings_editor';
+} from '../../../mappings_editor';
 
 interface Props {
   defaultValue: { [key: string]: any };
   onChange: (content: Forms.Content) => void;
   indexSettings?: IndexSettings;
+  esDocsBase: string;
 }
 
 export const StepMappings: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue, onChange, indexSettings }) => {
+  ({ defaultValue, onChange, indexSettings, esDocsBase }) => {
     const [mappings, setMappings] = useState(defaultValue);
 
     const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
@@ -58,7 +58,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
             <EuiTitle>
               <h2 data-test-subj="stepTitle">
                 <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepMappings.stepTitle"
+                  id="xpack.idxMgmt.formWizard.stepMappings.stepTitle"
                   defaultMessage="Mappings (optional)"
                 />
               </h2>
@@ -69,7 +69,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepMappings.mappingsDescription"
+                  id="xpack.idxMgmt.formWizard.stepMappings.mappingsDescription"
                   defaultMessage="Define how to store and index documents."
                 />
               </p>
@@ -86,12 +86,12 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
                 <EuiButtonEmpty
                   size="s"
                   flush="right"
-                  href={documentationService.getMappingDocumentationLink()}
+                  href={`${esDocsBase}/mapping.html`}
                   target="_blank"
                   iconType="help"
                 >
                   <FormattedMessage
-                    id="xpack.idxMgmt.templateForm.stepMappings.docsButtonLabel"
+                    id="xpack.idxMgmt.formWizard.stepMappings.docsButtonLabel"
                     defaultMessage="Mapping docs"
                   />
                 </EuiButtonEmpty>
