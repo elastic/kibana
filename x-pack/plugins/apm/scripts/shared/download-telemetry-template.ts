@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { Octokit } from '@octokit/rest';
 
 export async function downloadTelemetryTemplate({
@@ -19,7 +18,6 @@ export async function downloadTelemetryTemplate({
     owner: 'elastic',
     repo: 'telemetry',
     path: 'config/templates/xpack-phone-home.json',
-    // @ts-ignore
     mediaType: {
       format: 'application/vnd.github.VERSION.raw',
     },

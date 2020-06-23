@@ -19,7 +19,8 @@ import { stampLogger } from '../shared/stamp-logger';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
-import mapping from '../../mappings.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { apmTelemetry } from '../../server/saved_objects/apm_telemetry';
 import { generateSampleDocuments } from './generate-sample-documents';
 import { readKibanaConfig } from '../shared/read-kibana-config';
 import { getHttpAuth } from '../shared/get-http-auth';
@@ -39,7 +40,7 @@ async function uploadData() {
     githubToken,
   });
 
-  const kibanaMapping = mapping['apm-telemetry'];
+  const kibanaMapping = apmTelemetry.mappings;
 
   const config = readKibanaConfig();
 
