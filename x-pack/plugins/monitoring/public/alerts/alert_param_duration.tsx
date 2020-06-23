@@ -45,12 +45,13 @@ interface Props {
   name: string;
   duration: string;
   label: string;
+  errors: string[];
   setAlertParams: (property: string, value: any) => void;
 }
 
 const parseRegex = /(\d+)(\w+)/;
 export const AlertParamDuration: React.FC<Props> = (props: Props) => {
-  const { name, label, setAlertParams } = props;
+  const { name, label, setAlertParams, errors } = props;
   const parsed = parseRegex.exec(props.duration);
   const defaultValue = parsed && parsed[1] ? parseInt(parsed[1], 10) : 1;
   const defaultUnit = parsed && parsed[2] ? parsed[2] : TIME_UNITS.MINUTE;
@@ -68,13 +69,19 @@ export const AlertParamDuration: React.FC<Props> = (props: Props) => {
   }, [unit, value]);
 
   return (
-    <EuiFormRow label={label}>
+    <EuiFormRow label={label} error={errors} isInvalid={errors.length > 0}>
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiFieldNumber
             compressed
             value={value}
-            onChange={(e) => setValue(parseInt(e.target.value, 10))}
+            onChange={(e) => {
+              let newValue = parseInt(e.target.value, 10);
+              if (isNaN(newValue)) {
+                newValue = 0;
+              }
+              setValue(newValue);
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={4}>

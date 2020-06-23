@@ -10,14 +10,15 @@ interface Props {
   name: string;
   percentage: number;
   label: string;
+  errors: string[];
   setAlertParams: (property: string, value: any) => void;
 }
 export const AlertParamPercentage: React.FC<Props> = (props: Props) => {
-  const { name, label, setAlertParams } = props;
+  const { name, label, setAlertParams, errors } = props;
   const [value, setValue] = React.useState(props.percentage);
 
   return (
-    <EuiFormRow label={label}>
+    <EuiFormRow label={label} error={errors} isInvalid={errors.length > 0}>
       <EuiFieldNumber
         compressed
         value={value}
@@ -27,7 +28,10 @@ export const AlertParamPercentage: React.FC<Props> = (props: Props) => {
           </EuiText>
         }
         onChange={(e) => {
-          const newValue = parseInt(e.target.value, 10) || 0;
+          let newValue = parseInt(e.target.value, 10);
+          if (isNaN(newValue)) {
+            newValue = 0;
+          }
           setValue(newValue);
           setAlertParams(name, newValue);
         }}

@@ -69,13 +69,9 @@ export const AlertStatus: React.FC<Props> = (props: Props) => {
       >
         {nextStepsUi}
       </EuiCallOut>
-      {alert.isLegacy ? null : (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <EuiButton onClick={() => setShowFlyout(true)}>View alert configuration</EuiButton>
-          {flyoutUi}
-        </Fragment>
-      )}
+      <EuiSpacer size="m" />
+      <EuiButton onClick={() => setShowFlyout(true)}>View alert configuration</EuiButton>
+      {flyoutUi}
     </Fragment>
   );
 };

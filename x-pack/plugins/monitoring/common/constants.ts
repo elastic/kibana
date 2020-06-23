@@ -256,6 +256,18 @@ export const ALERTS = [
 ];
 
 /**
+ * A list of all legacy alerts, which means they are powered by watcher
+ */
+export const LEGACY_ALERTS = [
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CLUSTER_HEALTH,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+];
+
+/**
  * Matches the id for the built-in in email action type
  * See x-pack/plugins/actions/server/builtin_action_types/email.ts
  */

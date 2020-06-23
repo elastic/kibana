@@ -26,6 +26,7 @@ import {
 } from '../common/constants';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import { createCpuUsageAlertType } from './alerts/cpu_usage';
+import { createLegacyAlertTypes } from './alerts/legacy_alert';
 
 export class MonitoringPlugin
   implements Plugin<boolean, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
@@ -66,6 +67,10 @@ export class MonitoringPlugin
     }
 
     plugins.triggers_actions_ui.alertTypeRegistry.register(createCpuUsageAlertType());
+    const legacyAlertTypes = createLegacyAlertTypes();
+    for (const legacyAlertType of legacyAlertTypes) {
+      plugins.triggers_actions_ui.alertTypeRegistry.register(legacyAlertType);
+    }
 
     const app: App = {
       id,

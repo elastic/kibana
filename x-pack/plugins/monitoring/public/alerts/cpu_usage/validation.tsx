@@ -11,5 +11,18 @@ import { ValidationResult } from '../../../../triggers_actions_ui/public/types';
 
 export function validate(opts: any): ValidationResult {
   const validationResult = { errors: {} };
+
+  const errors: { [key: string]: string[] } = {
+    duration: [],
+    threshold: [],
+  };
+  if (!opts.duration) {
+    errors.duration.push('A valid duration is required.');
+  }
+  if (isNaN(opts.threshold)) {
+    errors.threshold.push('A valid number is required.');
+  }
+
+  validationResult.errors = errors;
   return validationResult;
 }
