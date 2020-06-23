@@ -15,10 +15,11 @@ import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
 import { MVTSingleLayerVectorSourceEditor } from './mvt_single_layer_vector_source_editor';
 import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
+import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
 
 export interface Props {
   tooltipFields: MVTFields[];
-  onChange: (fields: MVTFields[]) => void;
+  onChange: (...args: OnSourceChangeArgs) => void;
   source: MVTSingleLayerVectorSource;
 }
 
@@ -54,23 +55,18 @@ export class UpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  _handleLayerNameInputChange = (layerName: string) => {
-    this.props.onChange({ propName: 'layerName', value: layerName });
-  };
-
-  _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
-    this.props.onChange({ propName: 'fields', value: fields });
-  };
-
-  _handleZoomRangeChange = ({
-    minSourceZoom,
-    maxSourceZoom,
-  }: {
+  _handleChange = (state: {
+    layerName: string;
+    fields: MVTFieldDescriptor[];
     minSourceZoom: number;
     maxSourceZoom: number;
   }) => {
-    this.props.onChange({ propName: 'minSourceZoom', value: minSourceZoom });
-    this.props.onChange({ propName: 'maxSourceZoom', value: maxSourceZoom });
+    this.props.onChange(
+      { propName: 'layerName', value: state.layerName },
+      { propName: 'fields', value: state.fields },
+      { propName: 'minSourceZoom', value: state.minSourceZoom },
+      { propName: 'maxSourceZoom', value: state.maxSourceZoom }
+    );
   };
 
   _renderSourceSettingsCard() {
@@ -91,9 +87,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           </EuiTitle>
           <EuiSpacer size="m" />
           <MVTSingleLayerSourceSettings
-            handleLayerNameInputChange={this._handleLayerNameInputChange}
-            handleFieldChange={this._handleFieldChange}
-            handleZoomRangeChange={this._handleZoomRangeChange}
+            handleChange={this._handleChange}
             layerName={this.props.source.getLayerName() || ''}
             fields={fields}
             minSourceZoom={this.props.source.getMinZoom()}

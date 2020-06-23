@@ -54,7 +54,7 @@ export class LayerPanel extends React.Component {
     this._isMounted = false;
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate() {
     this.loadImmutableSourceProperties();
   }
 
@@ -105,8 +105,11 @@ export class LayerPanel extends React.Component {
     }
   }
 
-  _onSourceChange = ({ propName, value, newLayerType }) => {
-    this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value, newLayerType);
+  _onSourceChange = (...args) => {
+    for (let i = 0; i < args.length; i++) {
+      const { propName, value, newLayerType } = args[i];
+      this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value, newLayerType);
+    }
   };
 
   _renderFilterSection() {

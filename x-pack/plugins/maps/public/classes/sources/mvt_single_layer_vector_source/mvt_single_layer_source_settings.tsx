@@ -8,15 +8,26 @@
 import React, { Fragment, Component, ChangeEvent } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
 import { MVTFieldConfigEditor } from './mvt_field_config_editor';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
+export type MVTSettings = {
+  layerName: string;
+  fields: MVTFieldDescriptor[];
+  minSourceZoom: number;
+  maxSourceZoom: number;
+};
+
+export interface State {
+  currentSettings: MVTSettings;
+  prevSettings: MVTSettings;
+}
+
 export interface Props {
-  handleLayerNameInputChange: (layerName: string) => void;
-  handleFieldChange: (fields: MVTFieldDescriptor[]) => void;
-  handleZoomRangeChange: ({ minSourceZoom: number, maxSourceZoom: number }) => void;
+  handleChange: (args: State) => void;
   layerName: string;
   fields: MVTFieldDescriptor[];
   minSourceZoom: number;
@@ -24,19 +35,49 @@ export interface Props {
 }
 
 export class MVTSingleLayerSourceSettings extends Component<Props, State> {
+  state = {
+    currentSettings: null,
+    prevSettings: null,
+  };
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const newSettings = {
+      layerName: nextProps.layerName,
+      fields: nextProps.fields,
+      minSourceZoom: nextProps.minSourceZoom,
+      maxSourceZoom: nextProps.maxSourceZoom,
+    };
+
+    if (_.isEqual(newSettings, prevState.prevSettings)) {
+      return null;
+    }
+
+    return {
+      prevSettings: newSettings,
+      currentSettings: newSettings,
+    };
+  }
+
+  _handleChange = _.debounce(() => {
+    this.props.handleChange(this.state.currentSettings);
+  }, 200);
+
   _handleLayerNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const layerName = e.target.value;
-    this.props.handleLayerNameInputChange(layerName);
+    const currentSettings = { ...this.state.currentSettings, layerName };
+    this.setState({ currentSettings }, this._handleChange);
   };
 
   _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
-    this.props.handleFieldChange(fields);
+    const currentSettings = { ...this.state.currentSettings, fields };
+    this.setState({ currentSettings }, this._handleChange);
   };
 
   _handleZoomRangeChange = (e: Value) => {
     const minSourceZoom = parseInt(e[0] as string, 10);
     const maxSourceZoom = parseInt(e[1] as string, 10);
-    this.props.handleZoomRangeChange({ minSourceZoom, maxSourceZoom });
+    const currentSettings = { ...this.state.currentSettings, minSourceZoom, maxSourceZoom };
+    this.setState({ currentSettings }, this._handleChange);
   };
 
   render() {
@@ -50,7 +91,10 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
             }
           )}
         >
-          <EuiFieldText value={this.props.layerName} onChange={this._handleLayerNameInputChange} />
+          <EuiFieldText
+            value={this.state.currentSettings.layerName}
+            onChange={this._handleLayerNameInputChange}
+          />
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate(
@@ -60,14 +104,20 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
             }
           )}
         >
-          <MVTFieldConfigEditor fields={this.props.fields} onChange={this._handleFieldChange} />
+          <MVTFieldConfigEditor
+            fields={this.state.currentSettings.fields}
+            onChange={this._handleFieldChange}
+          />
         </EuiFormRow>
         <ValidatedDualRange
           label=""
           formRowDisplay="columnCompressed"
           min={MIN_ZOOM}
           max={MAX_ZOOM}
-          value={[this.props.minSourceZoom, this.props.maxSourceZoom]}
+          value={[
+            this.state.currentSettings.minSourceZoom,
+            this.state.currentSettings.maxSourceZoom,
+          ]}
           showInput="inputWithPopover"
           showRange
           showLabels

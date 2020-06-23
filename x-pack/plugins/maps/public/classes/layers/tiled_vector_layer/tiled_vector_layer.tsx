@@ -149,12 +149,16 @@ export class TiledVectorLayer extends VectorLayer {
     }
     const sourceMeta: TiledSingleLayerVectorSourceDescriptor = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
 
+    if (sourceMeta.layerName === '') {
+      return;
+    }
+
     this._setMbPointsProperties(mbMap, sourceMeta.layerName);
     this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
   }
 
   _requiresPrevSourceCleanup(mbMap: unknown): boolean {
-    // @ts-ignore
+    // @ts-expect-error
     const mbTileSource = mbMap.getSource(this._getMbSourceId());
     if (!mbTileSource) {
       return false;

@@ -66,34 +66,13 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
     );
   };
 
-  _handleLayerNameInputChange = (layerName: string) => {
-    this.setState(
-      {
-        layerName,
-      },
-      () => this._sourceConfigChange()
-    );
-  };
-
-  _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
-    this.setState(
-      {
-        fields,
-      },
-      () => this._sourceConfigChange()
-    );
-  };
-
-  _handleZoomRangeChange = ({
-    minSourceZoom,
-    maxSourceZoom,
-  }: {
+  _handleChange = (state: {
+    layerName: string;
+    fields: MVTFieldDescriptor[];
     minSourceZoom: number;
     maxSourceZoom: number;
   }) => {
-    if (this.state.minSourceZoom !== minSourceZoom || this.state.maxSourceZoom !== maxSourceZoom) {
-      this.setState({ minSourceZoom, maxSourceZoom }, () => this._sourceConfigChange());
-    }
+    this.setState(state, () => this._sourceConfigChange());
   };
 
   render() {
@@ -108,9 +87,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
         </EuiFormRow>
 
         <MVTSingleLayerSourceSettings
-          handleLayerNameInputChange={this._handleLayerNameInputChange}
-          handleFieldChange={this._handleFieldChange}
-          handleZoomRangeChange={this._handleZoomRangeChange}
+          handleChange={this._handleChange}
           layerName={this.state.layerName}
           fields={this.state.fields}
           minSourceZoom={this.state.minSourceZoom}

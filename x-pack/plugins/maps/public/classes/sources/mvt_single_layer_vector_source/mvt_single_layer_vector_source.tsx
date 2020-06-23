@@ -69,7 +69,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   renderSourceSettingsEditor({ onChange }) {
-    // console.log('render source settings editor', onChange);
     return (
       <UpdateSourceEditor onChange={onChange} tooltipFields={this._tooltipFields} source={this} />
     );
