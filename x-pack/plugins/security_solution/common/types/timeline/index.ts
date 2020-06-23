@@ -9,7 +9,7 @@
 import * as runtimeTypes from 'io-ts';
 import { SavedObjectsClient } from 'kibana/server';
 
-import { unionWithNullType } from '../../utility_types';
+import { stringEnum, unionWithNullType } from '../../utility_types';
 import { NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
 import { PinnedEventToReturnSavedObjectRuntimeType, PinnedEventSavedObject } from './pinned_event';
 
@@ -151,17 +151,6 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
 
-const stringEnum = <T>(enumObj: T, enumName = 'enum') =>
-  new runtimeTypes.Type<T[keyof T], string>(
-    enumName,
-    (u): u is T[keyof T] => Object.values(enumObj).includes(u),
-    (u, c) =>
-      Object.values(enumObj).includes(u)
-        ? runtimeTypes.success(u as T[keyof T])
-        : runtimeTypes.failure(u, c),
-    (a) => (a as unknown) as string
-  );
-
 export enum RowRendererId {
   auditd = 'auditd',
   auditd_file = 'auditd_file',
@@ -180,42 +169,6 @@ export enum RowRendererId {
 }
 
 export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
-
-// export const RowRendererIdRuntimeType = stringEnum({
-//   auditd: 'auditd',
-//   auditd_file: 'auditd_file',
-//   netflow: 'netflow',
-//   plain: 'plain',
-//   suricata: 'suricata',
-//   system: 'system',
-//   system_dns: 'system_dns',
-//   system_endgame_process: 'system_endgame_process',
-//   system_file: 'system_file',
-//   system_fin: 'system_fin',
-//   system_security_event: 'system_security_event',
-//   system_socket: 'system_socket',
-//   zeek: 'zeek',
-//   all: 'all',
-// });
-
-// export const RowRendererIdRuntimeType = runtimeTypes.keyof({
-//   auditd: null,
-//   auditd_file: null,
-//   netflow: null,
-//   plain: null,
-//   suricata: null,
-//   system: null,
-//   system_dns: null,
-//   system_endgame_process: null,
-//   system_file: null,
-//   system_fin: null,
-//   system_security_event: null,
-//   system_socket: null,
-//   zeek: null,
-//   all: null,
-// });
-
-// export type RowRendererId = runtimeTypes.TypeOf<typeof RowRendererIdRuntimeType>;
 
 /*
  *  Timeline Types

@@ -93,75 +93,75 @@ const FieldsBrowserComponent: React.FC<Props> = ({
 
   const renderers: RowRendererOption[] = [
     {
-      id: 'auditd',
+      id: RowRendererId.auditd,
       name: 'Auditd',
       description: 'Auditd Row Renderer',
     },
     {
-      id: 'auditd_file',
+      id: RowRendererId.auditd_file,
       name: 'Auditd File',
       description: 'Auditd Row Renderer',
     },
     {
-      id: 'system',
+      id: RowRendererId.system,
       name: 'System',
       description: 'System Row Renderer',
     },
 
     {
-      id: 'system_endgame_process',
+      id: RowRendererId.system_endgame_process,
       name: 'System Endgame Process',
       description: 'Endgame Process Row Renderer',
     },
 
     {
-      id: 'system_fin',
+      id: RowRendererId.system_fin,
       name: 'System FIM',
       description: 'FIM Row Renderer',
     },
 
     {
-      id: 'system_file',
+      id: RowRendererId.system_file,
       name: 'System File',
       description: 'System File Row Renderer',
     },
 
     {
-      id: 'system_socket',
+      id: RowRendererId.system_socket,
       name: 'System Socket',
       description: 'Auditd Row Renderer',
     },
 
     {
-      id: 'system_security_event',
+      id: RowRendererId.system_security_event,
       name: 'System Security Event',
       description: 'Auditd Row Renderer',
     },
 
     {
-      id: 'system_dns',
+      id: RowRendererId.system_dns,
       name: 'System DNS',
       description: 'Auditd Row Renderer',
     },
     {
-      id: 'suricata',
+      id: RowRendererId.suricata,
       name: 'Suricata',
       description: 'Auditd Row Renderer',
     },
     {
-      id: 'zeek',
+      id: RowRendererId.zeek,
       name: 'Zeek',
       description: 'Auditd Row Renderer',
     },
     {
-      id: 'netflow',
+      id: RowRendererId.netflow,
       name: 'Netflow',
       description: 'Auditd Row Renderer',
     },
   ];
 
   const notExcludedRowRenderers = useMemo(() => {
-    if (excludedRowRendererIds.includes('all')) return [];
+    if (excludedRowRendererIds.includes(RowRendererId.all)) return [];
 
     console.error('test', excludedRowRendererIds);
 
@@ -173,7 +173,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     selectable: () => true,
     selectableMessage: () => '',
     onSelectionChange: (selection: RowRendererOption[]) => {
-      if (!selection || !selection.length) return setExcludedRowRendererIds(['all']);
+      if (!selection || !selection.length) return setExcludedRowRendererIds([RowRendererId.all]);
 
       const excludedRowRenderers = xorBy('id', renderers, selection);
 
@@ -182,7 +182,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     initialSelected: notExcludedRowRenderers,
   };
 
-  const handleDisableAll = useCallback(() => setExcludedRowRendererIds(['all']), [
+  const handleDisableAll = useCallback(() => setExcludedRowRendererIds([RowRendererId.all]), [
     setExcludedRowRendererIds,
   ]);
   const handleEnableAll = useCallback(() => setExcludedRowRendererIds([]), [

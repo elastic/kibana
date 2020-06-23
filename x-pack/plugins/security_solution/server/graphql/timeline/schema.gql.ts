@@ -140,6 +140,7 @@ export const timelineSchema = gql`
     auditd
     auditd_file
     netflow
+    plain
     suricata
     system
     system_dns

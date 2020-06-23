@@ -6,6 +6,8 @@
 
 import React from 'react';
 
+import { RowRendererId } from '../../../../../../common/types/timeline';
+
 import { RowRenderer } from './row_renderer';
 
 const PlainRowRenderer = () => <></>;
@@ -13,7 +15,7 @@ const PlainRowRenderer = () => <></>;
 PlainRowRenderer.displayName = 'PlainRowRenderer';
 
 export const plainRowRenderer: RowRenderer = {
-  id: 'plain',
+  id: RowRendererId.plain,
   isInstance: (_) => true,
   renderRow: PlainRowRenderer,
 };

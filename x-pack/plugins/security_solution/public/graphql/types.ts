@@ -347,6 +347,7 @@ export enum RowRendererId {
   auditd = 'auditd',
   auditd_file = 'auditd_file',
   netflow = 'netflow',
+  plain = 'plain',
   suricata = 'suricata',
   system = 'system',
   system_dns = 'system_dns',

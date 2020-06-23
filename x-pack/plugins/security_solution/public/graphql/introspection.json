@@ -10098,6 +10098,7 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
+          { "name": "plain", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
             "name": "suricata",
             "description": "",
