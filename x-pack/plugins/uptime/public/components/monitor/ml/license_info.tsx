@@ -55,17 +55,18 @@ export const ShowLicenseInfo = () => {
         iconType="help"
       >
         <p>{labels.START_TRAIL_DESC}</p>
-        <EuiButton
-          color="primary"
-          target="_blank"
-          onClick={startLicenseTrial}
-          isLoading={loading}
-          href={basePath + `/app/management/stack/license_management/home`}
-        >
-          {labels.START_TRAIL}
-        </EuiButton>
+        <span onClick={startLicenseTrial} onKeyDown={() => {}}>
+          <EuiButton
+            color="primary"
+            isLoading={loading}
+            target="_blank"
+            href={basePath + `/app/management/stack/license_management/home`}
+          >
+            {labels.START_TRAIL}
+          </EuiButton>
+        </span>
       </EuiCallOut>
-      <EuiSpacer/>
+      <EuiSpacer />
     </>
   );
 };
