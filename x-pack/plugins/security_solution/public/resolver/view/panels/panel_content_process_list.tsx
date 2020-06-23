@@ -117,10 +117,10 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     [pushToQueryParams, handleBringIntoViewClick]
   );
 
-  const { processNodePositions } = useSelector(selectors.allProcessNodePositions);
+  const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
   const processTableView: ProcessTableView[] = useMemo(
     () =>
-      processNodePositions.map(({ entity: processEvent }) => {
+      [...processNodePositions.keys()].map((processEvent) => {
         let dateTime;
         const eventTime = event.eventTimestamp(processEvent);
         const name = event.eventName(processEvent);

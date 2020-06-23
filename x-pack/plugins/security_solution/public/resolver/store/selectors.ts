@@ -151,14 +151,6 @@ export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoa
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
 
 /**
- * All the process nodes and edge lines used in resolver, used for the pan to functionality in the side panel
- */
-export const allProcessNodePositions = composeSelectors(
-  dataStateSelector,
-  dataSelectors.allProcessNodePositions
-);
-
-/**
  * An array containing all the processes currently in the Resolver than can be graphed
  */
 export const graphableProcesses = composeSelectors(
@@ -180,7 +172,7 @@ function composeSelectors<OuterState, InnerState, ReturnValue>(
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
   dataStateSelector,
-  dataSelectors.processNodePositionsAndEdgeLineSegments
+  dataSelectors.visibleProcessNodePositionsAndEdgeLineSegments
 );
 
 const currentBoundingBox = createSelector(

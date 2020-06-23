@@ -5,7 +5,8 @@
  */
 
 import rbush from 'rbush';
-import { createSelector } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect';
+import { isEqual } from 'lodash/fp';
 import {
   DataState,
   IndexedProcessTree,
@@ -527,27 +528,9 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
      */
     const transformedEdgeLineSegments: EdgeLineSegment[] = [];
     const transformedPositions = new Map<ResolverEvent, Vector2>();
-    const processNodeViewWidth = 360;
-    const processNodeViewHeight = 120;
-
-    const tree: rbush<IndexedEntity> = new rbush();
-    const processesToIndex: IndexedProcessNode[] = [];
-    const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
 
     for (const [processEvent, position] of positions) {
       transformedPositions.set(processEvent, applyMatrix3(position, isometricTransformMatrix));
-      const transformedPosition = applyMatrix3(position, isometricTransformMatrix);
-      const [nodeX, nodeY] = transformedPosition;
-      const indexedEvent: IndexedProcessNode = {
-        minX: nodeX - 0.5 * processNodeViewWidth,
-        minY: nodeY - 0.5 * processNodeViewHeight,
-        maxX: nodeX + 0.5 * processNodeViewWidth,
-        maxY: nodeY + 0.5 * processNodeViewHeight,
-        position: transformedPosition,
-        entity: processEvent,
-        type: 'processNode',
-      };
-      processesToIndex.push(indexedEvent);
     }
 
     for (const edgeLineSegment of edgeLineSegments) {
@@ -562,63 +545,89 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
           applyMatrix3(endPoint, isometricTransformMatrix),
         ],
       };
-
-      const {
-        points: [[x1, y1], [x2, y2]],
-      } = transformedSegment;
-      const indexedLineSegment: IndexedEdgeLineSegment = {
-        minX: Math.min(x1, x2),
-        minY: Math.min(y1, y2),
-        maxX: Math.max(x1, x2),
-        maxY: Math.max(y1, y2),
-        entity: transformedSegment,
-        type: 'edgeLine',
-      };
-      edgeLineSegmentsToIndex.push(indexedLineSegment);
       if (metadata) transformedSegment.metadata = metadata;
 
       transformedEdgeLineSegments.push(transformedSegment);
     }
 
-    tree.load([...processesToIndex, ...edgeLineSegmentsToIndex]);
+    return {
+      processNodePositions: transformedPositions,
+      edgeLineSegments: transformedEdgeLineSegments,
+    };
+  }
+);
 
-    return (boundingBox?: AABB) => {
-      let entities;
-      if (boundingBox) {
-        const {
-          minimum: [minX, minY],
-          maximum: [maxX, maxY],
-        } = boundingBox;
-        entities = tree.search({
-          minX,
-          minY,
-          maxX,
-          maxY,
-        });
-      } else {
-        entities = tree.all();
-      }
-      const processNodePositions = entities.filter(
+const indexedProcessNodePositionsAndEdgeLineSegments = createSelector(
+  processNodePositionsAndEdgeLineSegments,
+  function visibleProcessNodePositionsAndEdgeLineSegments({
+    /* eslint-disable no-shadow */
+    processNodePositions,
+    edgeLineSegments,
+    /* eslint-enable no-shadow */
+  }) {
+    const tree: rbush<IndexedEntity> = new rbush();
+    const processesToIndex: IndexedProcessNode[] = [];
+    const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
+
+    const processNodeViewWidth = 720;
+    const processNodeViewHeight = 240;
+    const lineSegmentPadding = 30;
+    for (const [processEvent, position] of processNodePositions) {
+      const [nodeX, nodeY] = position;
+      const indexedEvent: IndexedProcessNode = {
+        minX: nodeX - 0.5 * processNodeViewWidth,
+        minY: nodeY - 0.5 * processNodeViewHeight,
+        maxX: nodeX + 0.5 * processNodeViewWidth,
+        maxY: nodeY + 0.5 * processNodeViewHeight,
+        position,
+        entity: processEvent,
+        type: 'processNode',
+      };
+      processesToIndex.push(indexedEvent);
+    }
+    for (const edgeLineSegment of edgeLineSegments) {
+      const {
+        points: [[x1, y1], [x2, y2]],
+      } = edgeLineSegment;
+      const indexedLineSegment: IndexedEdgeLineSegment = {
+        minX: Math.min(x1, x2) - lineSegmentPadding,
+        minY: Math.min(y1, y2) - lineSegmentPadding,
+        maxX: Math.max(x1, x2) + lineSegmentPadding,
+        maxY: Math.max(y1, y2) + lineSegmentPadding,
+        entity: edgeLineSegment,
+        type: 'edgeLine',
+      };
+      edgeLineSegmentsToIndex.push(indexedLineSegment);
+    }
+    tree.load([...processesToIndex, ...edgeLineSegmentsToIndex]);
+    return tree;
+  }
+);
+
+export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
+  indexedProcessNodePositionsAndEdgeLineSegments,
+  function visibleProcessNodePositionsAndEdgeLineSegments(tree) {
+    return defaultMemoize((boundingBox: AABB) => {
+      const {
+        minimum: [minX, minY],
+        maximum: [maxX, maxY],
+      } = boundingBox;
+      const entities = tree.search({
+        minX,
+        minY,
+        maxX,
+        maxY,
+      });
+      const visibleProcessNodePositions = entities.filter(
         (entity): entity is IndexedProcessNode => entity.type === 'processNode'
       );
       const connectingEdgeLineSegments = entities.filter(
         (entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine'
       );
       return {
-        processNodePositions,
+        processNodePositions: visibleProcessNodePositions,
         connectingEdgeLineSegments,
       };
-    };
-  }
-);
-
-export const allProcessNodePositions = createSelector(
-  processNodePositionsAndEdgeLineSegments,
-  function allProcessNodePositions(
-    /* eslint-disable no-shadow */
-    processNodePositionsAndEdgeLineSegments
-    /* eslint-enable no-shadow */
-  ) {
-    return processNodePositionsAndEdgeLineSegments();
+    }, isEqual);
   }
 );
