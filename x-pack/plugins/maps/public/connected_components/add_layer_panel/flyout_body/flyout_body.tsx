@@ -19,18 +19,18 @@ type Props = RenderWizardArguments & {
 
 export const FlyoutBody = (props: Props) => {
   function renderContent() {
-    if (!props.layerWizard) {
+    if (!props.layerWizard || !props.currentStepId) {
       return <LayerWizardSelect onSelect={props.onWizardSelect} />;
     }
 
     const renderWizardArgs = {
       previewLayers: props.previewLayers,
       mapColors: props.mapColors,
-      isIndexingTriggered: props.isIndexingTriggered,
-      onRemove: props.onRemove,
-      onIndexReady: props.onIndexReady,
-      importSuccessHandler: props.importSuccessHandler,
-      importErrorHandler: props.importErrorHandler,
+      currentStepId: props.currentStepId,
+      enableNextBtn: props.enableNextBtn,
+      disableNextBtn: props.disableNextBtn,
+      startStepLoading: props.startStepLoading,
+      stopStepLoading: props.stopStepLoading,
     };
 
     const backButton = props.isIndexingTriggered ? null : (

@@ -10,14 +10,14 @@ import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../common/constants';
 
 export type RenderWizardArguments = {
-  previewLayers: (layerDescriptors: LayerDescriptor[], isIndexingSource?: boolean) => void;
+  previewLayers: (layerDescriptors: LayerDescriptor[]) => void;
   mapColors: string[];
-  // upload arguments
-  isIndexingTriggered: boolean;
-  onRemove: () => void;
-  onIndexReady: (indexReady: boolean) => void;
-  importSuccessHandler: (indexResponses: unknown) => void;
-  importErrorHandler: (indexResponses: unknown) => void;
+  // multi-step arguments for wizards that supply 'prerequisiteSteps'
+  currentStepId: string | null;
+  enableNextBtn: () => void;
+  disableNextBtn: () => void;
+  startStepLoading: () => void;
+  stopStepLoading: () => void;
 };
 
 export type LayerWizard = {
@@ -25,7 +25,7 @@ export type LayerWizard = {
   checkVisibility?: () => Promise<boolean>;
   description: string;
   icon: string;
-  isIndexingSource?: boolean;
+  prerequisiteSteps?: Array<{ id: stirng; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
 };

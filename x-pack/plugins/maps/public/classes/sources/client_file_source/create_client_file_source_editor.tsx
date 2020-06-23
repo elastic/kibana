@@ -1,0 +1,154 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import { IFieldType } from 'src/plugins/data/public';
+import {
+  ES_GEO_FIELD_TYPE,
+  DEFAULT_MAX_RESULT_WINDOW,
+  SCALING_TYPES,
+} from '../../../../common/constants';
+import { getFileUploadComponent } from '../../../kibana_services';
+// @ts-ignore
+import { GeojsonFileSource } from './geojson_file_source';
+import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+// @ts-ignore
+import { createDefaultLayerDescriptor } from '../es_search_source';
+
+export const INDEX_STEP_ID = 'INDEX_STEP_ID';
+
+enum INDEXING_STAGE {
+  READY = 'READY',
+  TRIGGERED = 'TRIGGERED',
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
+}
+
+interface State {
+  indexingStage: INDEXING_STAGE | null;
+}
+
+export class ClientFileCreateSourceEditor extends Component<RenderWizardArguments, State> {
+  private _isMounted: boolean = false;
+
+  state = {
+    indexingStage: null,
+  };
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidUpdate() {
+    // trigger indexing when wizard step advances to next step
+    if (
+      this.props.currentStepId !== INDEX_STEP_ID &&
+      this.state.indexingStage === INDEXING_STAGE.READY
+    ) {
+      this.setState({ indexingStage: INDEXING_STAGE.TRIGGERED });
+      this.props.startStepLoading();
+    }
+  }
+
+  _onFileUpload = (geojsonFile: unknown, name: string) => {
+    if (!this._isMounted) {
+      return;
+    }
+
+    if (!geojsonFile) {
+      this.props.previewLayers([]);
+      return;
+    }
+
+    const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
+    const layerDescriptor = VectorLayer.createDescriptor(
+      { sourceDescriptor },
+      this.props.mapColors
+    );
+    this.props.previewLayers([layerDescriptor]);
+  };
+
+  _onIndexingComplete = (indexResponses: { indexDataResp: unknown; indexPatternResp: unknown }) => {
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.props.stopStepLoading();
+
+    const { indexDataResp, indexPatternResp } = indexResponses;
+
+    // @ts-ignore
+    const indexCreationFailed = !(indexDataResp && indexDataResp.success);
+    // @ts-ignore
+    const allDocsFailed = indexDataResp.failures.length === indexDataResp.docCount;
+    // @ts-ignore
+    const indexPatternCreationFailed = !(indexPatternResp && indexPatternResp.success);
+    if (indexCreationFailed || allDocsFailed || indexPatternCreationFailed) {
+      this.setState({ indexingStage: INDEXING_STAGE.ERROR });
+      return;
+    }
+
+    // @ts-ignore
+    const { fields, id: indexPatternId } = indexPatternResp;
+    const geoField = fields.find((field: IFieldType) =>
+      [ES_GEO_FIELD_TYPE.GEO_POINT as string, ES_GEO_FIELD_TYPE.GEO_SHAPE as string].includes(
+        field.type
+      )
+    );
+    if (!indexPatternId || !geoField) {
+      this.setState({ indexingStage: INDEXING_STAGE.ERROR });
+      this.props.previewLayers([]);
+    } else {
+      const esSearchSourceConfig = {
+        indexPatternId,
+        geoField: geoField.name,
+        // Only turn on bounds filter for large doc counts
+        // @ts-ignore
+        filterByMapBounds: indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW,
+        scalingType:
+          geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT
+            ? SCALING_TYPES.CLUSTERS
+            : SCALING_TYPES.LIMIT,
+      };
+      this.setState({ indexingStage: INDEXING_STAGE.SUCCESS });
+      this.props.enableNextBtn();
+      this.props.previewLayers([
+        createDefaultLayerDescriptor(esSearchSourceConfig, this.props.mapColors),
+      ]);
+    }
+  };
+
+  _onIndexReady = (indexReady: boolean) => {
+    if (!this._isMounted) {
+      return;
+    }
+    this.setState({ indexingStage: indexReady ? INDEXING_STAGE.READY : null });
+    if (indexReady) {
+      this.props.enableNextBtn();
+    } else {
+      this.props.disableNextBtn();
+    }
+  };
+
+  render() {
+    const FileUpload = getFileUploadComponent();
+    return (
+      <FileUpload
+        appName={'Maps'}
+        isIndexingTriggered={this.state.indexingStage === INDEXING_STAGE.TRIGGERED}
+        onFileUpload={this._onFileUpload}
+        onIndexReady={this._onIndexReady}
+        transformDetails={'geo'}
+        onIndexingComplete={this._onIndexingComplete}
+      />
+    );
+  }
+}
