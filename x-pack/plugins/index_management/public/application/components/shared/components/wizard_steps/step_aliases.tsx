@@ -19,31 +19,31 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Forms } from '../../../../shared_imports';
-import { documentationService } from '../../../services/documentation';
+import { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 
 interface Props {
   defaultValue: { [key: string]: any };
   onChange: (content: Forms.Content) => void;
+  esDocsBase: string;
 }
 
-export const StepSettings: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue, onChange }) => {
+export const StepAliases: React.FunctionComponent<Props> = React.memo(
+  ({ defaultValue, onChange, esDocsBase }) => {
     const { jsonContent, setJsonContent, error } = useJsonStep({
       defaultValue,
       onChange,
     });
 
     return (
-      <div data-test-subj="stepSettings">
+      <div data-test-subj="stepAliases">
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle>
               <h2 data-test-subj="stepTitle">
                 <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepSettings.stepTitle"
-                  defaultMessage="Index settings (optional)"
+                  id="xpack.idxMgmt.formWizard.stepAliases.stepTitle"
+                  defaultMessage="Aliases (optional)"
                 />
               </h2>
             </EuiTitle>
@@ -53,8 +53,8 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepSettings.settingsDescription"
-                  defaultMessage="Define the behavior of your indices."
+                  id="xpack.idxMgmt.formWizard.stepAliases.aliasesDescription"
+                  defaultMessage="Set up aliases to associate with your indices."
                 />
               </p>
             </EuiText>
@@ -64,13 +64,13 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={documentationService.getSettingsDocumentationLink()}
+              href={`${esDocsBase}/indices-aliases.html`}
               target="_blank"
               iconType="help"
             >
               <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepSettings.docsButtonLabel"
-                defaultMessage="Index settings docs"
+                id="xpack.idxMgmt.formWizard.stepAliases.docsButtonLabel"
+                defaultMessage="Index Aliases docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -78,20 +78,26 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
 
         <EuiSpacer size="l" />
 
-        {/* Settings code editor */}
+        {/* Aliases code editor */}
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepSettings.fieldIndexSettingsLabel"
-              defaultMessage="Index settings"
+              id="xpack.idxMgmt.formWizard.stepAliases.fieldAliasesLabel"
+              defaultMessage="Aliases"
             />
           }
           helpText={
             <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepSettings.settingsEditorHelpText"
+              id="xpack.idxMgmt.formWizard.stepAliases.aliasesEditorHelpText"
               defaultMessage="Use JSON format: {code}"
               values={{
-                code: <EuiCode>{JSON.stringify({ number_of_replicas: 1 })}</EuiCode>,
+                code: (
+                  <EuiCode>
+                    {JSON.stringify({
+                      my_alias: {},
+                    })}
+                  </EuiCode>
+                ),
               }}
             />
           }
@@ -114,14 +120,14 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
             showGutter={false}
             minLines={6}
             aria-label={i18n.translate(
-              'xpack.idxMgmt.templateForm.stepSettings.fieldIndexSettingsAriaLabel',
+              'xpack.idxMgmt.formWizard.stepAliases.fieldAliasesAriaLabel',
               {
-                defaultMessage: 'Index settings editor',
+                defaultMessage: 'Aliases code editor',
               }
             )}
             value={jsonContent}
             onChange={setJsonContent}
-            data-test-subj="settingsEditor"
+            data-test-subj="aliasesEditor"
           />
         </EuiFormRow>
       </div>

@@ -42,8 +42,10 @@ import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoi
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { getManagementUrl } from '../../../common/routing';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
+import { SecurityPageName } from '../../../../app/types';
+import { useFormatUrl } from '../../../../common/components/link_to';
+import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
 import { useEndpointPackageInfo } from './ingest_hooks';
@@ -127,6 +129,7 @@ export const PolicyList = React.memo(() => {
   const { services, notifications } = useKibana();
   const history = useHistory();
   const location = useLocation();
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
 
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
@@ -155,14 +158,9 @@ export const PolicyList = React.memo(() => {
       // of the cancel and submit buttons and redirect the user back to endpoint policy
       path: `#/integrations${packageInfo ? `/endpoint-${packageInfo.version}/add-datasource` : ''}`,
       state: {
-        onCancelNavigateTo: [
-          'securitySolution',
-          { path: getManagementUrl({ name: 'policyList' }) },
-        ],
-        onCancelUrl: services.application?.getUrlForApp('securitySolution', {
-          path: getManagementUrl({ name: 'policyList' }),
-        }),
-        onSaveNavigateTo: ['securitySolution', { path: getManagementUrl({ name: 'policyList' }) }],
+        onCancelNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onCancelUrl: formatUrl(getPoliciesPath()),
+        onSaveNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
       },
     }
   );
@@ -265,12 +263,8 @@ export const PolicyList = React.memo(() => {
         }),
         // eslint-disable-next-line react/display-name
         render: (name: string, item: Immutable<PolicyData>) => {
-          const routePath = getManagementUrl({
-            name: 'policyDetails',
-            policyId: item.id,
-            excludePrefix: true,
-          });
-          const routeUrl = getManagementUrl({ name: 'policyDetails', policyId: item.id });
+          const routePath = getPolicyDetailPath(item.id, search);
+          const routeUrl = formatUrl(routePath);
           return (
             <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
               <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
@@ -382,7 +376,7 @@ export const PolicyList = React.memo(() => {
         ],
       },
     ],
-    [services.application, handleDeleteOnClick]
+    [services.application, handleDeleteOnClick, formatUrl, search]
   );
 
   return (
@@ -461,7 +455,7 @@ export const PolicyList = React.memo(() => {
           handleTableChange,
           paginationSetup,
         ])}
-        <SpyRoute />
+        <SpyRoute pageName={SecurityPageName.management} />
       </ManagementPageView>
     </>
   );

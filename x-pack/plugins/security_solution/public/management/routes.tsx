@@ -5,14 +5,16 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { ManagementContainer } from './pages';
-import { MANAGEMENT_ROUTING_ROOT_PATH } from './common/constants';
+import { NotFoundPage } from '../app/404';
 
 /**
  * Returns the React Router Routes for the management area
  */
-export const managementRoutes = () => [
-  // Mounts the Management interface on `/management`
-  <Route path={MANAGEMENT_ROUTING_ROOT_PATH} component={ManagementContainer} />,
-];
+export const ManagementRoutes = () => (
+  <Switch>
+    <Route path="/" component={ManagementContainer} />
+    <Route render={() => <NotFoundPage />} />
+  </Switch>
+);

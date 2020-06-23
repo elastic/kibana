@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createDashboardModeRequestInterceptor } from './dashboard_mode_request_interceptor';
+export { StepAliases } from './step_aliases';
+export { StepMappings } from './step_mappings';
+export { StepSettings } from './step_settings';
