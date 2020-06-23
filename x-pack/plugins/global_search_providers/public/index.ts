@@ -9,5 +9,3 @@ import { GlobalSearchProvidersPlugin, GlobalSearchProvidersPluginSetupDeps } fro
 
 export const plugin: PluginInitializer<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}> = () =>
   new GlobalSearchProvidersPlugin();
-
-export { GlobalSearchProvidersPluginSetup, GlobalSearchProvidersPluginStart };

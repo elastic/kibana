@@ -6,7 +6,6 @@
 
 import { CoreSetup, Plugin } from 'src/core/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
-import { GlobalSearchProvidersPluginSetup, GlobalSearchProvidersPluginStart } from './types';
 import { createApplicationResultProvider } from './providers';
 
 export interface GlobalSearchProvidersPluginSetupDeps {
@@ -16,17 +15,15 @@ export interface GlobalSearchProvidersPluginSetupDeps {
 export class GlobalSearchProvidersPlugin
   implements Plugin<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}> {
   setup(
-    {
-      getStartServices,
-    }: CoreSetup<GlobalSearchProvidersPluginStartDeps, GlobalSearchProvidersPluginStart>,
+    { getStartServices }: CoreSetup<{}, {}>,
     { globalSearch }: GlobalSearchProvidersPluginSetupDeps
-  ): GlobalSearchProvidersPluginSetup {
+  ) {
     const applicationPromise = getStartServices().then(([core]) => core.application);
     globalSearch.registerResultProvider(createApplicationResultProvider(applicationPromise));
     return {};
   }
 
-  start(): GlobalSearchProvidersPluginStart {
+  start() {
     return {};
   }
 }
