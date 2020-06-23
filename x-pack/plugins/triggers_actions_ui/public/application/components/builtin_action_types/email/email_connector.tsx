@@ -12,6 +12,7 @@ import {
   EuiFieldPassword,
   EuiSwitch,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
@@ -196,6 +197,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiLink target="_blank" href={'https://support.google.com/a/answer/176600?hl=en'} external>
         {i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.helpLink',
