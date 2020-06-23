@@ -23,7 +23,7 @@ const mockAuthorizationAction = (type: string, app: string, operation: string) =
   `${type}/${app}/${operation}`;
 function mockAuthorization() {
   const authorization = securityMock.createSetup().authz;
-  // typescript is havingtrouble inferring jest's automocking
+  // typescript is having trouble inferring jest's automocking
   (authorization.actions.alerting.get as jest.MockedFunction<
     typeof authorization.actions.alerting.get
   >).mockImplementation(mockAuthorizationAction);
@@ -128,6 +128,8 @@ describe('ensureAuthorized', () => {
       mockAuthorizationAction('myType', 'myApp', 'create'),
     ]);
 
+    expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
     expect(auditLogger.alertsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "some-user",
@@ -168,6 +170,8 @@ describe('ensureAuthorized', () => {
       mockAuthorizationAction('myType', 'myApp', 'create'),
     ]);
 
+    expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
     expect(auditLogger.alertsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "some-user",
@@ -214,6 +218,8 @@ describe('ensureAuthorized', () => {
       mockAuthorizationAction('myType', 'myApp', 'create'),
     ]);
 
+    expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
     expect(auditLogger.alertsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "some-user",
@@ -260,6 +266,8 @@ describe('ensureAuthorized', () => {
       `"Unauthorized to create a \\"myType\\" alert for \\"myOtherApp\\""`
     );
 
+    expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(auditLogger.alertsAuthorizationFailure).toHaveBeenCalledTimes(1);
     expect(auditLogger.alertsAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "some-user",
@@ -306,6 +314,8 @@ describe('ensureAuthorized', () => {
       `"Unauthorized to create a \\"myType\\" alert by \\"myApp\\""`
     );
 
+    expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(auditLogger.alertsAuthorizationFailure).toHaveBeenCalledTimes(1);
     expect(auditLogger.alertsAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "some-user",
@@ -352,6 +362,8 @@ describe('ensureAuthorized', () => {
       `"Unauthorized to create a \\"myType\\" alert for \\"myOtherApp\\""`
     );
 
+    expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(auditLogger.alertsAuthorizationFailure).toHaveBeenCalledTimes(1);
     expect(auditLogger.alertsAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "some-user",
@@ -399,6 +411,22 @@ describe('getFindAuthorizationFilter', () => {
     expect(() => ensureAlertTypeIsAuthorized('someMadeUpType', 'myApp')).not.toThrow();
 
     expect(filter).toEqual(undefined);
+  });
+
+  test('ensureAlertTypeIsAuthorized is no-op when there is no authorization api', async () => {
+    const alertAuthorization = new AlertsAuthorization({
+      request,
+      alertTypeRegistry,
+      features,
+      auditLogger,
+    });
+
+    const { ensureAlertTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter();
+
+    ensureAlertTypeIsAuthorized('someMadeUpType', 'myApp');
+
+    expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
   });
 
   test('creates a filter based on the privileged types', async () => {
@@ -476,12 +504,14 @@ describe('getFindAuthorizationFilter', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     const { ensureAlertTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter();
-    await expect(() => {
+    expect(() => {
       ensureAlertTypeIsAuthorized('myAppAlertType', 'myOtherApp');
     }).toThrowErrorMatchingInlineSnapshot(
       `"Unauthorized to find a \\"myAppAlertType\\" alert for \\"myOtherApp\\""`
     );
 
+    expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(auditLogger.alertsAuthorizationFailure).toHaveBeenCalledTimes(1);
     expect(auditLogger.alertsAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "some-user",
@@ -540,10 +570,12 @@ describe('getFindAuthorizationFilter', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     const { ensureAlertTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter();
-    await expect(() => {
+    expect(() => {
       ensureAlertTypeIsAuthorized('myAppAlertType', 'myOtherApp');
     }).not.toThrow();
 
+    expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
     expect(auditLogger.alertsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "some-user",
