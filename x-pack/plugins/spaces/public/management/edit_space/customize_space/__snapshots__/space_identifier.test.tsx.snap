@@ -34,7 +34,7 @@ exports[`renders without crashing 1`] = `
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
           values={Object {}}
         />
-        <ForwardRef
+        <EuiLink
           aria-label="Customize the URL identifier"
           onClick={[Function]}
         >
@@ -43,7 +43,7 @@ exports[`renders without crashing 1`] = `
             id="xpack.spaces.management.spaceIdentifier.customizeSpaceLinkText"
             values={Object {}}
           />
-        </ForwardRef>
+        </EuiLink>
       </p>
     }
     labelType="label"

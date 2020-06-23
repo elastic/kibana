@@ -23,8 +23,8 @@ export const DefaultMaxSignalsNumber: DefaultMaxSignalsNumberC = new t.Type<
 >(
   'DefaultMaxSignals',
   t.number.is,
-  (input): Either<t.Errors, number> => {
-    return input == null ? t.success(DEFAULT_MAX_SIGNALS) : max_signals.decode(input);
+  (input, context): Either<t.Errors, number> => {
+    return input == null ? t.success(DEFAULT_MAX_SIGNALS) : max_signals.validate(input, context);
   },
   t.identity
 );

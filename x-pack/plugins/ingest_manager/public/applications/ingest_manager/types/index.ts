@@ -99,3 +99,5 @@ export {
   InstallationStatus,
   Installable,
 } from '../../../../common';
+
+export * from './intra_app_route_state';

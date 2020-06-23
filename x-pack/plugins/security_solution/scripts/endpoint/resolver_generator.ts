@@ -8,10 +8,9 @@ import * as path from 'path';
 import yargs from 'yargs';
 import * as url from 'url';
 import fetch from 'node-fetch';
-import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { EndpointDocGenerator, Event } from '../../common/endpoint/generate_data';
+import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 
 main();
 
@@ -201,59 +200,26 @@ async function main() {
     seed = Math.random().toString();
     console.log(`No seed supplied, using random seed: ${seed}`);
   }
-  const random = seedrandom(seed);
   const startTime = new Date().getTime();
-  for (let i = 0; i < argv.numHosts; i++) {
-    const generator = new EndpointDocGenerator(random);
-    const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
-
-    const timestamp = new Date().getTime();
-    for (let j = 0; j < argv.numDocs; j++) {
-      generator.updateHostData();
-      generator.updatePolicyId();
-      await client.index({
-        index: argv.metadataIndex,
-        body: generator.generateHostMetadata(timestamp - timeBetweenDocs * (argv.numDocs - j - 1)),
-        op_type: 'create',
-      });
-      await client.index({
-        index: argv.policyIndex,
-        body: generator.generatePolicyResponse(
-          timestamp - timeBetweenDocs * (argv.numDocs - j - 1)
-        ),
-        op_type: 'create',
-      });
+  await indexHostsAndAlerts(
+    client,
+    seed,
+    argv.numHosts,
+    argv.numDocs,
+    argv.metadataIndex,
+    argv.policyIndex,
+    argv.eventIndex,
+    argv.alertsPerHost,
+    {
+      ancestors: argv.ancestors,
+      generations: argv.generations,
+      children: argv.children,
+      relatedEvents: argv.relatedEvents,
+      relatedAlerts: argv.relatedAlerts,
+      percentWithRelated: argv.percentWithRelated,
+      percentTerminated: argv.percentTerminated,
+      alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
     }
-
-    const alertGenerator = generator.alertsGenerator(
-      argv.alertsPerHost,
-      argv.ancestors,
-      argv.generations,
-      argv.children,
-      argv.relatedEvents,
-      argv.relatedAlerts,
-      argv.percentWithRelated,
-      argv.percentTerminated,
-      argv.maxChildrenPerNode
-    );
-    let result = alertGenerator.next();
-    while (!result.done) {
-      let k = 0;
-      const resolverDocs: Event[] = [];
-      while (k < 1000 && !result.done) {
-        resolverDocs.push(result.value);
-        result = alertGenerator.next();
-        k++;
-      }
-      const body = resolverDocs.reduce(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (array: Array<Record<string, any>>, doc) => (
-          array.push({ create: { _index: argv.eventIndex } }, doc), array
-        ),
-        []
-      );
-      await client.bulk({ body, refresh: 'true' });
-    }
-  }
+  );
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
 }

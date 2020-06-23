@@ -66,7 +66,7 @@ image:images/Dashboard_add_new_visualization.png[Example add new visualization t
 +
 For information on how to create visualizations, see <<visualize,Visualize>>.
 +
-For information on how to create Maps, see <<maps,Elastic Maps>>.
+For information on how to create maps, see <<maps,Maps>>.
 
 To add an existing element:
 

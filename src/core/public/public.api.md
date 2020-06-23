@@ -607,6 +607,9 @@ export interface DocLinksSetup {
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly dashboard: {
+            readonly drilldowns: string;
+        };
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
