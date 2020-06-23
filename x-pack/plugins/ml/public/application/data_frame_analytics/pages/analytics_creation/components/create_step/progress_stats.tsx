@@ -28,34 +28,31 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
   } = useMlKibana();
 
   const getCurrentStats = () => {
-    function startProgressBar() {
-      const interval = setInterval(async () => {
-        try {
-          const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
-          const jobStats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
-            ? analyticsStats.data_frame_analytics[0]
-            : undefined;
+    async function startProgressBar() {
+      try {
+        const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+        const jobStats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
+          ? analyticsStats.data_frame_analytics[0]
+          : undefined;
 
-          if (jobStats !== undefined) {
-            const progressStats = getDataFrameAnalyticsProgressPhase(jobStats);
-            setCurrentProgress(progressStats);
-            if (
-              progressStats.currentPhase === progressStats.totalPhases &&
-              progressStats.progress === 100
-            ) {
-              clearInterval(interval);
-            }
+        if (jobStats !== undefined) {
+          const progressStats = getDataFrameAnalyticsProgressPhase(jobStats);
+          setCurrentProgress(progressStats);
+          if (
+            progressStats.currentPhase < progressStats.totalPhases &&
+            progressStats.progress <= 100
+          ) {
+            setTimeout(startProgressBar, PROGRESS_REFRESH_INTERVAL_MS);
           }
-        } catch (e) {
-          notifications.toasts.addDanger(
-            i18n.translate('xpack.ml.dataframe.analytics.create.analyticsProgressErrorMessage', {
-              defaultMessage: 'An error occurred getting progress stats for analytics job {jobId}',
-              values: { jobId },
-            })
-          );
-          clearInterval(interval);
         }
-      }, PROGRESS_REFRESH_INTERVAL_MS);
+      } catch (e) {
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.ml.dataframe.analytics.create.analyticsProgressErrorMessage', {
+            defaultMessage: 'An error occurred getting progress stats for analytics job {jobId}',
+            values: { jobId },
+          })
+        );
+      }
     }
 
     startProgressBar();
@@ -74,11 +71,22 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
   return (
     <>
       <EuiSpacer />
+      <EuiText size="m">
+        <strong>
+          {i18n.translate('xpack.ml.dataframe.analytics.create.analyticsProgressTitle', {
+            defaultMessage: 'Progress',
+          })}
+        </strong>
+      </EuiText>
+      <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiText size="m">
+          <EuiText size="s">
             <strong>
-              Phase {currentProgress.currentPhase}/{currentProgress.totalPhases}
+              {i18n.translate('xpack.ml.dataframe.analytics.create.analyticsProgressPhaseTitle', {
+                defaultMessage: 'Phase',
+              })}{' '}
+              {currentProgress.currentPhase}/{currentProgress.totalPhases}
             </strong>
           </EuiText>
         </EuiFlexItem>
@@ -92,7 +100,7 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="m">{`${currentProgress.progress}%`}</EuiText>
+          <EuiText size="s">{`${currentProgress.progress}%`}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
