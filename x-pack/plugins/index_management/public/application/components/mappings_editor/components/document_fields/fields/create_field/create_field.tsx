@@ -56,7 +56,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     });
 
     return subscription.unsubscribe;
-  }, [form, dispatch]);
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cancel = () => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });

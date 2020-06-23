@@ -127,13 +127,13 @@ test('handles dependencies of dependencies', async () => {
   expect(mockInstallInDir.mock.calls).toMatchSnapshot('install in dir');
   expect(logWriter.messages).toMatchInlineSnapshot(`
     Array [
-      " info [kibana] running yarn",
+       info [kibana] running yarn,
       "",
       "",
-      " info [bar] running yarn",
+       info [bar] running yarn,
       "",
       "",
-      " info [foo] running yarn",
+       info [foo] running yarn,
       "",
       "",
     ]
@@ -174,7 +174,7 @@ test('does not run installer if no deps in package', async () => {
   expect(mockInstallInDir.mock.calls).toMatchSnapshot('install in dir');
   expect(logWriter.messages).toMatchInlineSnapshot(`
     Array [
-      " info [kibana] running yarn",
+       info [kibana] running yarn,
       "",
       "",
     ]

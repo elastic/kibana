@@ -24,7 +24,9 @@ describe('default_version_number', () => {
     const decoded = DefaultVersionNumber.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "DefaultVersionNumber"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -33,7 +35,9 @@ describe('default_version_number', () => {
     const decoded = DefaultVersionNumber.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "DefaultVersionNumber"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -42,7 +46,9 @@ describe('default_version_number', () => {
     const decoded = DefaultVersionNumber.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "DefaultVersionNumber"',
+    ]);
     expect(message.schema).toEqual({});
   });
 

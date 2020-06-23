@@ -5,3 +5,5 @@
  */
 
 export { TabAliases, TabMappings, TabSettings } from './details_panel';
+
+export { StepAliases, StepMappings, StepSettings } from './wizard_steps';
