@@ -25,6 +25,7 @@ import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getGeoFields, getSourceFields, getTermsFields } from '../../../index_pattern_util';
 import { getEmsFileLayers } from '../../../meta';
 import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../kibana_services';
+import { createEmsChoroplethLayerDescriptor } from './create_choropleth_layer_descriptor';
 
 export enum BOUNDARIES_SOURCE {
   ELASTICSEARCH = 'ELASTICSEARCH',
@@ -56,6 +57,7 @@ interface State {
   leftGeoField: string | null;
   leftJoinField: string | null;
   rightIndexPatternId: string | null;
+  rightIndexPatternTitle: string | null;
   rightTermsFields: IFieldType[];
   rightJoinField: string | null;
 }
@@ -73,6 +75,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     leftGeoField: null,
     leftJoinField: null,
     rightIndexPatternId: null,
+    rightIndexPatternTitle: null,
     rightTermsFields: [],
     rightJoinField: null,
   };
@@ -86,7 +89,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   }
 
   _loadRightFields = async (indexPatternId) => {
-    this.setState({ rightTermsFields: [] });
+    this.setState({ rightTermsFields: [], rightIndexPatternTitle: null });
 
     let indexPattern;
     try {
@@ -103,6 +106,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
     this.setState({
       rightTermsFields: getTermsFields(indexPattern.fields),
+      rightIndexPatternTitle: indexPattern.title,
     });
   };
 
@@ -213,15 +217,21 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
   _previewLayer() {
     if (!this._isLeftConfigComplete() || !this._isRightConfigComplete()) {
-      return;
+      return [];
     }
 
-    /* const layerDescriptor = createLayerDescriptor({
-      layer: this.state.layer,
-      metric: this.state.metric,
-      display: this.state.display,
-    });
-    this.props.previewLayers(layerDescriptor ? [layerDescriptor] : []);*/
+    const layerDescriptor =
+      this.state.leftSource === BOUNDARIES_SOURCE.ELASTICSEARCH
+        ? null
+        : createEmsChoroplethLayerDescriptor({
+            emsFileId: this.state.leftEmsFileId,
+            emsField: this.state.leftJoinField,
+            rightIndexPatternId: this.state.rightIndexPatternId,
+            rightIndexPatternTitle: this.state.rightIndexPatternTitle,
+            rightTermField: this.state.rightJoinField,
+          });
+
+    this.props.previewLayers([layerDescriptor]);
   }
 
   _renderLeftSourceForm() {
