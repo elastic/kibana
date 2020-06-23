@@ -19,7 +19,7 @@ function tail<T = any>(array: T[]) {
   return array[array.length - 1];
 }
 
-async function safeCall<T>(fn: () => T): Promise<T | undefined> {
+async function safeCall<T>(fn: () => T | Promise<T>): Promise<T | undefined> {
   try {
     return await fn();
   } catch {
@@ -50,7 +50,7 @@ export class AuditTrailClient implements Auditor {
   }
 
   async add(event: AuditableEvent) {
-    const user = await safeCall(() => this.deps.getCurrentUser(this.request));
+    const user = this.deps.getCurrentUser(this.request);
     const space = await safeCall(() => this.deps.getActiveSpace(this.request));
 
     this.event$.next({
