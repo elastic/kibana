@@ -61,7 +61,7 @@ export interface RegistryPackage {
   removable?: boolean;
   format_version: string;
   datasets?: Dataset[];
-  datasources?: RegistryDatasource[];
+  config_templates?: RegistryConfigTemplate[];
   download: string;
   path: string;
 }
@@ -75,7 +75,7 @@ interface RegistryImage {
   size?: string;
   type?: string;
 }
-export interface RegistryDatasource {
+export interface RegistryConfigTemplate {
   name: string;
   title: string;
   description: string;
@@ -87,7 +87,6 @@ export interface RegistryInput {
   title: string;
   description?: string;
   vars?: RegistryVarsEntry[];
-  streams: RegistryStream[];
 }
 
 export interface RegistryStream {
@@ -97,7 +96,7 @@ export interface RegistryStream {
   description?: string;
   enabled?: boolean;
   vars?: RegistryVarsEntry[];
-  template?: string;
+  template_path: string;
 }
 
 export type RequirementVersion = string;
@@ -123,7 +122,7 @@ export type RegistrySearchResult = Pick<
   | 'download'
   | 'path'
   | 'datasets'
-  | 'datasources'
+  | 'config_templates'
 >;
 
 export type ScreenshotItem = RegistryImage;
@@ -170,15 +169,14 @@ export type ElasticsearchAssetTypeToParts = Record<
 >;
 
 export interface Dataset {
-  title: string;
-  path: string;
-  id: string;
-  release: string;
-  ingest_pipeline: string;
-  vars?: RegistryVarsEntry[];
   type: string;
+  name: string;
+  title: string;
+  release: string;
   streams?: RegistryStream[];
   package: string;
+  path: string;
+  ingest_pipeline: string;
 }
 
 // EPR types this as `[]map[string]interface{}`
