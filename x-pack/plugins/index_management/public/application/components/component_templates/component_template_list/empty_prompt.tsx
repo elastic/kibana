@@ -6,8 +6,9 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
+// import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
 export const EmptyPrompt: FunctionComponent = () => {
@@ -38,6 +39,14 @@ export const EmptyPrompt: FunctionComponent = () => {
           </EuiLink>
         </p>
       }
+      // TODO implement
+      // actions={
+      //   <EuiButton {...reactRouterNavigate(history, '/create_component_template')} iconType="plusInCircle" fill>
+      //     {i18n.translate('xpack.idxMgmt.home.componentTemplates.emptyPromptButtonLabel', {
+      //       defaultMessage: 'Create a component template',
+      //     })}
+      //   </EuiButton>
+      // }
     />
   );
 };

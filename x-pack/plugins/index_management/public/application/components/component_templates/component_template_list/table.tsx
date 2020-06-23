@@ -85,6 +85,17 @@ export const ComponentTable: FunctionComponent<Props> = ({
             defaultMessage: 'Reload',
           })}
         </EuiButton>,
+        <EuiButton
+          fill
+          iconType="plusInCircle"
+          data-test-subj="createPipelineButton"
+          key="createPipelineButton"
+          // {...reactRouterNavigate(history, '/create')}
+        >
+          {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.createButtonLabel', {
+            defaultMessage: 'Create a component template',
+          })}
+        </EuiButton>,
       ],
       box: {
         incremental: true,

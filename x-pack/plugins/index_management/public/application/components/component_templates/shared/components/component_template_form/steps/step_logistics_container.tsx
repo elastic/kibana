@@ -6,18 +6,17 @@
 import React from 'react';
 
 import { Forms } from '../../../../shared_imports';
-import { documentationService } from '../../../services/documentation';
-import { StepAliases } from '../../shared';
 import { WizardContent } from '../template_form';
+import { StepLogistics } from './step_logistics';
 
-export const StepAliasesContainer = () => {
-  const { defaultValue, updateContent } = Forms.useContent<WizardContent>('aliases');
+interface Props {
+  isEditing?: boolean;
+}
+
+export const StepLogisticsContainer = ({ isEditing = false }: Props) => {
+  const { defaultValue, updateContent } = Forms.useContent<WizardContent>('logistics');
 
   return (
-    <StepAliases
-      defaultValue={defaultValue}
-      onChange={updateContent}
-      esDocsBase={documentationService.getEsDocsBase()}
-    />
+    <StepLogistics defaultValue={defaultValue} onChange={updateContent} isEditing={isEditing} />
   );
 };

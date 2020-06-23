@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  TabAliases,
-  TabMappings,
-  TabSettings,
-  StepAliasesContainer,
-  StepMappingsContainer,
-  StepSettingsContainer,
-  CommonWizardSteps,
-} from './components';
+export { ComponentTemplateForm } from './component_template_form';

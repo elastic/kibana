@@ -18,7 +18,28 @@ export {
   Error,
   useAuthorizationContext,
   NotAuthorizedSection,
+  Forms,
 } from '../../../../../../../src/plugins/es_ui_shared/public';
+
+export {
+  serializers,
+  fieldValidators,
+} from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
+
+export {
+  FormSchema,
+  FIELD_TYPES,
+  VALIDATION_TYPES,
+  FieldConfig,
+  useForm,
+  Form,
+  getUseField,
+} from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+
+export {
+  getFormRow,
+  Field,
+} from '../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export { TabMappings, TabSettings, TabAliases } from '../shared';
 
@@ -27,3 +48,5 @@ export {
   ComponentTemplateDeserialized,
   ComponentTemplateListItem,
 } from '../../../../common';
+
+export { serializeComponentTemplate } from '../../../../common/lib';

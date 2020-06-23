@@ -8,32 +8,30 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { TemplateDeserialized, CREATE_LEGACY_TEMPLATE_BY_DEFAULT } from '../../../../common';
-import { serializers, Forms } from '../../../shared_imports';
-import { SectionError } from '../section_error';
+import { serializers, Forms, ComponentTemplateDeserialized } from '../../../shared_imports';
+// import { SectionError } from '../section_error';
 import { StepLogisticsContainer, StepReviewContainer } from './steps';
 import {
   CommonWizardSteps,
   StepSettingsContainer,
   StepMappingsContainer,
   StepAliasesContainer,
-} from '../shared';
-import { documentationService } from '../../services/documentation';
+} from '../../../../shared';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
 
 interface Props {
-  onSave: (template: TemplateDeserialized) => void;
+  onSave: (componentTemplate: ComponentTemplateDeserialized) => void;
   clearSaveError: () => void;
   isSaving: boolean;
   saveError: any;
-  defaultValue?: TemplateDeserialized;
+  defaultValue?: ComponentTemplateDeserialized;
   isEditing?: boolean;
 }
 
 export interface WizardContent extends CommonWizardSteps {
-  logistics: Omit<TemplateDeserialized, '_kbnMeta' | 'template'>;
+  logistics: Omit<ComponentTemplateDeserialized, '_kbnMeta' | 'template'>;
 }
 
 export type WizardSection = keyof WizardContent | 'review';
@@ -41,48 +39,48 @@ export type WizardSection = keyof WizardContent | 'review';
 const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
   logistics: {
     id: 'logistics',
-    label: i18n.translate('xpack.idxMgmt.templateForm.steps.logisticsStepName', {
+    label: i18n.translate('xpack.idxMgmt.componentTemplateForm.steps.logisticsStepName', {
       defaultMessage: 'Logistics',
     }),
   },
   settings: {
     id: 'settings',
-    label: i18n.translate('xpack.idxMgmt.templateForm.steps.settingsStepName', {
+    label: i18n.translate('xpack.idxMgmt.componentTemplateForm.steps.settingsStepName', {
       defaultMessage: 'Index settings',
     }),
   },
   mappings: {
     id: 'mappings',
-    label: i18n.translate('xpack.idxMgmt.templateForm.steps.mappingsStepName', {
+    label: i18n.translate('xpack.idxMgmt.componentTemplateForm.steps.mappingsStepName', {
       defaultMessage: 'Mappings',
     }),
   },
   aliases: {
     id: 'aliases',
-    label: i18n.translate('xpack.idxMgmt.templateForm.steps.aliasesStepName', {
+    label: i18n.translate('xpack.idxMgmt.componentTemplateForm.steps.aliasesStepName', {
       defaultMessage: 'Aliases',
     }),
   },
   review: {
     id: 'review',
-    label: i18n.translate('xpack.idxMgmt.templateForm.steps.summaryStepName', {
-      defaultMessage: 'Review template',
+    label: i18n.translate('xpack.idxMgmt.componentTemplateForm.steps.summaryStepName', {
+      defaultMessage: 'Review component template',
     }),
   },
 };
 
-export const TemplateForm = ({
+export const ComponentTemplateForm = ({
   defaultValue = {
     name: '',
-    indexPatterns: [],
+    _meta: {},
     template: {
       settings: {},
       mappings: {},
       aliases: {},
     },
     _kbnMeta: {
-      isManaged: false,
-      isLegacy: CREATE_LEGACY_TEMPLATE_BY_DEFAULT,
+      // TODO
+      usedBy: [],
     },
   },
   isEditing,
@@ -93,7 +91,6 @@ export const TemplateForm = ({
 }: Props) => {
   const {
     template: { settings, mappings, aliases },
-    _kbnMeta,
     ...logistics
   } = defaultValue;
 
@@ -107,36 +104,37 @@ export const TemplateForm = ({
   const i18nTexts = {
     save: isEditing ? (
       <FormattedMessage
-        id="xpack.idxMgmt.templateForm.saveButtonLabel"
-        defaultMessage="Save template"
+        id="xpack.idxMgmt.componentTemplateForm.saveButtonLabel"
+        defaultMessage="Save component template"
       />
     ) : (
       <FormattedMessage
-        id="xpack.idxMgmt.templateForm.createButtonLabel"
-        defaultMessage="Create template"
+        id="xpack.idxMgmt.componentTemplateForm.createButtonLabel"
+        defaultMessage="Create component template"
       />
     ),
   };
 
+  // TODO implement
   const apiError = saveError ? (
     <>
-      <SectionError
+      {/* <SectionError
         title={
           <FormattedMessage
-            id="xpack.idxMgmt.templateForm.saveTemplateError"
-            defaultMessage="Unable to create template"
+            id="xpack.idxMgmt.componentTemplateForm.saveTemplateError"
+            defaultMessage="Unable to create component template"
           />
         }
         error={saveError}
-        data-test-subj="saveTemplateError"
-      />
+        data-test-subj="saveComponentTemplateError"
+      /> */}
       <EuiSpacer size="m" />
     </>
   ) : null;
 
-  const buildTemplateObject = (initialTemplate: TemplateDeserialized) => (
+  const buildTemplateObject = (initialTemplate: ComponentTemplateDeserialized) => (
     wizardData: WizardContent
-  ): TemplateDeserialized => ({
+  ): ComponentTemplateDeserialized => ({
     ...initialTemplate,
     ...wizardData.logistics,
     template: {
@@ -150,12 +148,12 @@ export const TemplateForm = ({
     async (wizardData: WizardContent) => {
       const template = buildTemplateObject(defaultValue)(wizardData);
 
-      // We need to strip empty string, otherwise if the "order" or "version"
-      // are not set, they will be empty string and ES expect a number for those parameters.
+      // We need to strip empty strings, otherwise if the "version" is not set,
+      // it will be an empty string and ES expects a number.
       onSave(
         stripEmptyFields(template, {
           types: ['string'],
-        }) as TemplateDeserialized
+        }) as ComponentTemplateDeserialized
       );
 
       clearSaveError();
@@ -180,16 +178,19 @@ export const TemplateForm = ({
         <StepLogisticsContainer isEditing={isEditing} />
       </FormWizardStep>
 
+      {/* TODO fix doc link */}
       <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
-        <StepSettingsContainer esDocsBase={documentationService.getEsDocsBase()} />
+        <StepSettingsContainer esDocsBase="#" />
       </FormWizardStep>
 
+      {/* TODO fix doc link */}
       <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>
-        <StepMappingsContainer esDocsBase={documentationService.getEsDocsBase()} />
+        <StepMappingsContainer esDocsBase="#" />
       </FormWizardStep>
 
+      {/* TODO fix doc link */}
       <FormWizardStep id={wizardSections.aliases.id} label={wizardSections.aliases.label}>
-        <StepAliasesContainer esDocsBase={documentationService.getEsDocsBase()} />
+        <StepAliasesContainer esDocsBase="#" />
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
