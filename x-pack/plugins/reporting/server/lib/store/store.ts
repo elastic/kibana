@@ -128,7 +128,7 @@ export class ReportingStore {
         process_expiration: new Date(0), // use epoch so the job query works
         created_at: new Date(),
         attempts: 0,
-        max_attempts: report.maxAttempts,
+        max_attempts: report.max_attempts,
         status: statuses.JOB_STATUS_PENDING,
         browser_type: report.browser_type,
       },
@@ -151,7 +151,7 @@ export class ReportingStore {
       jobtype: type,
       created_by: options.created_by,
       browser_type: options.browser_type,
-      maxAttempts: options.max_attempts,
+      max_attempts: options.max_attempts,
       timeout: options.timeout,
       priority: 10, // unused
     });

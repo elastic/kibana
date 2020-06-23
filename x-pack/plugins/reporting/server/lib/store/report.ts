@@ -15,7 +15,7 @@ interface Payload {
   payload: unknown;
   browser_type: string;
   priority: number;
-  maxAttempts: number;
+  max_attempts: number;
   timeout: number;
 }
 
@@ -30,7 +30,7 @@ export class Report {
 
   public readonly priority: number;
   // queue stuff, to be removed with Task Manager integration
-  public readonly maxAttempts: number;
+  public readonly max_attempts: number;
   public readonly timeout: number;
 
   public _index: string;
@@ -47,7 +47,7 @@ export class Report {
     this.payload = opts.payload;
     this.browser_type = opts.browser_type;
     this.priority = opts.priority;
-    this.maxAttempts = opts.maxAttempts;
+    this.max_attempts = opts.max_attempts;
     this.timeout = opts.timeout;
     this.id = puid.generate();
 
@@ -77,7 +77,7 @@ export class Report {
       created_by: this.created_by,
       payload: this.payload,
       timeout: this.timeout,
-      max_attempts: this.maxAttempts,
+      max_attempts: this.max_attempts,
       priority: this.priority,
       browser_type: this.browser_type,
     };
