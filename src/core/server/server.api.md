@@ -579,6 +579,72 @@ export const config: {
             ignoreVersionMismatch: import("@kbn/config-schema/target/types/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
+    logging: {
+        appenders: import("@kbn/config-schema").Type<Readonly<{} & {
+            layout: Readonly<{} & {
+                kind: "json";
+            }> | Readonly<{
+                pattern?: string | undefined;
+                highlight?: boolean | undefined;
+            } & {
+                kind: "pattern";
+            }>;
+            kind: "console";
+        }> | Readonly<{} & {
+            path: string;
+            layout: Readonly<{} & {
+                kind: "json";
+            }> | Readonly<{
+                pattern?: string | undefined;
+                highlight?: boolean | undefined;
+            } & {
+                kind: "pattern";
+            }>;
+            kind: "file";
+        }> | Readonly<{
+            legacyLoggingConfig?: any;
+        } & {
+            kind: "legacy-appender";
+        }>>;
+        loggers: import("@kbn/config-schema").ObjectType<{
+            appenders: import("@kbn/config-schema").Type<string[]>;
+            context: import("@kbn/config-schema").Type<string>;
+            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
+        }>;
+        loggerContext: import("@kbn/config-schema").ObjectType<{
+            appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
+                layout: Readonly<{} & {
+                    kind: "json";
+                }> | Readonly<{
+                    pattern?: string | undefined;
+                    highlight?: boolean | undefined;
+                } & {
+                    kind: "pattern";
+                }>;
+                kind: "console";
+            }> | Readonly<{} & {
+                path: string;
+                layout: Readonly<{} & {
+                    kind: "json";
+                }> | Readonly<{
+                    pattern?: string | undefined;
+                    highlight?: boolean | undefined;
+                } & {
+                    kind: "pattern";
+                }>;
+                kind: "file";
+            }> | Readonly<{
+                legacyLoggingConfig?: any;
+            } & {
+                kind: "legacy-appender";
+            }>>>;
+            loggers: import("@kbn/config-schema").Type<Readonly<{} & {
+                context: string;
+                appenders: string[];
+                level: import("./logging/log_level").LogLevelId;
+            }>[]>;
+        }>;
+    };
 };
 
 // @public

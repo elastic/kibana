@@ -62,7 +62,12 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
 import { MetricsServiceSetup } from './metrics';
 import { StatusServiceSetup } from './status';
-import { LoggingServiceSetup } from './logging';
+import {
+  LoggingServiceSetup,
+  appendersSchema,
+  loggerContextConfigSchema,
+  loggerSchema,
+} from './logging';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -462,5 +467,10 @@ export {
 export const config = {
   elasticsearch: {
     schema: elasticsearchConfigSchema,
+  },
+  logging: {
+    appenders: appendersSchema,
+    loggers: loggerSchema,
+    loggerContext: loggerContextConfigSchema,
   },
 };

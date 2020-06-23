@@ -55,7 +55,12 @@ const levelSchema = schema.oneOf(
   }
 );
 
-const loggerSchema = schema.object({
+/**
+ * Config schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.
+ *
+ * @public
+ */
+export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
   context: schema.string(),
   level: levelSchema,
@@ -93,6 +98,12 @@ export const config = {
 
 export type LoggingConfigType = TypeOf<typeof config.schema>;
 
+/**
+ * Config schema for validating the inputs to the {@link LoggingServiceStart.configure} API.
+ * See {@link LoggerContextConfigType}.
+ *
+ * @public
+ */
 export const loggerContextConfigSchema = schema.object({
   appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
     defaultValue: new Map<string, AppenderConfigType>(),

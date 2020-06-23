@@ -26,6 +26,8 @@ export {
   LoggingConfigType,
   LoggerContextConfigInput,
   LoggerConfigType,
+  loggerContextConfigSchema,
+  loggerSchema,
 } from './logging_config';
 export { LoggingSystem, ILoggingSystem } from './logging_system';
 export {
@@ -33,4 +35,4 @@ export {
   LoggingServiceSetup,
   LoggingService,
 } from './logging_service';
-export { AppenderConfigType } from './appenders/appenders';
+export { appendersSchema, AppenderConfigType } from './appenders/appenders';
