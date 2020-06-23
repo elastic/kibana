@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createDashboardModeRequestInterceptor } from './dashboard_mode_request_interceptor';
+export { setupDashboardModeRequestInterceptor } from './dashboard_mode_request_interceptor';
