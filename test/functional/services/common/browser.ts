@@ -529,5 +529,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
       return this.getScrollLeft();
     }
+
+    public async switchToFrame(idOrElement: number | WebElementWrapper) {
+      const _id = idOrElement instanceof WebElementWrapper ? idOrElement._webElement : idOrElement;
+      await driver.switchTo().frame(_id);
+    }
   })();
 }

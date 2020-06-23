@@ -87,3 +87,9 @@ export const CONTAINER_ID = 'container.id';
 export const POD_NAME = 'kubernetes.pod.name';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
+
+// RUM Labels
+export const TRANSACTION_URL = 'transaction.page.url';
+export const CLIENT_GEO = 'client.geo';
+export const USER_AGENT_DEVICE = 'user_agent.device.name';
+export const USER_AGENT_OS = 'user_agent.os.name';

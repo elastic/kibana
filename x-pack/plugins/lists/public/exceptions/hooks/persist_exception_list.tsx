@@ -6,7 +6,8 @@
 
 import { Dispatch, useEffect, useState } from 'react';
 
-import { addExceptionList as persistExceptionList } from '../api';
+import { UpdateExceptionListSchema } from '../../../common/schemas';
+import { addExceptionList, updateExceptionList } from '../api';
 import { AddExceptionList, PersistHookProps } from '../types';
 
 interface PersistReturnExceptionList {
@@ -33,6 +34,8 @@ export const usePersistExceptionList = ({
   const [exceptionList, setExceptionList] = useState<AddExceptionList | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isUpdateExceptionList = (item: unknown): item is UpdateExceptionListSchema =>
+    Boolean(item && (item as UpdateExceptionListSchema).id != null);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -43,7 +46,11 @@ export const usePersistExceptionList = ({
       if (exceptionList != null) {
         try {
           setIsLoading(true);
-          await persistExceptionList({ http, list: exceptionList, signal: abortCtrl.signal });
+          if (isUpdateExceptionList(exceptionList)) {
+            await updateExceptionList({ http, list: exceptionList, signal: abortCtrl.signal });
+          } else {
+            await addExceptionList({ http, list: exceptionList, signal: abortCtrl.signal });
+          }
           if (isSubscribed) {
             setIsSaved(true);
           }

@@ -2176,6 +2176,7 @@ describe('find()', () => {
               },
             ],
           },
+          score: 1,
           references: [
             {
               name: 'action_0',

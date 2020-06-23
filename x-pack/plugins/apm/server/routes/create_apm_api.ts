@@ -13,6 +13,7 @@ import {
   errorDistributionRoute,
   errorGroupsRoute,
   errorsRoute,
+  errorRateRoute,
 } from './errors';
 import {
   serviceAgentNameRoute,
@@ -58,6 +59,7 @@ import {
   transactionsLocalFiltersRoute,
   serviceNodesLocalFiltersRoute,
   uiFiltersEnvironmentsRoute,
+  rumOverviewLocalFiltersRoute,
 } from './ui_filters';
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
@@ -69,6 +71,11 @@ import {
   listCustomLinksRoute,
   customLinkTransactionRoute,
 } from './settings/custom_link';
+import {
+  rumClientMetricsRoute,
+  rumPageViewsTrendRoute,
+  rumPageLoadDistributionRoute,
+} from './rum_client';
 
 const createApmApi = () => {
   const api = createApi()
@@ -81,6 +88,7 @@ const createApmApi = () => {
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
     .add(errorsRoute)
+    .add(errorRateRoute)
 
     // Services
     .add(serviceAgentNameRoute)
@@ -146,7 +154,13 @@ const createApmApi = () => {
     .add(updateCustomLinkRoute)
     .add(deleteCustomLinkRoute)
     .add(listCustomLinksRoute)
-    .add(customLinkTransactionRoute);
+    .add(customLinkTransactionRoute)
+
+    // Rum Overview
+    .add(rumOverviewLocalFiltersRoute)
+    .add(rumPageViewsTrendRoute)
+    .add(rumPageLoadDistributionRoute)
+    .add(rumClientMetricsRoute);
 
   return api;
 };
