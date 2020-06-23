@@ -18,15 +18,15 @@ jest.mock('react-router-dom', () => ({
 
 // Jest can't access variables outside the scope of the mock factory function except to
 // reassign them, so we can't make these both part of the same object
-let PREFILL_NODETYPE;
-let PREFILL_METRIC;
+let PREFILL_NODETYPE: WaffleOptionsState['nodeType'] | undefined;
+let PREFILL_METRIC: WaffleOptionsState['metric'] | undefined;
 jest.mock('../../../../alerting/use_alert_prefill', () => ({
   useAlertPrefillContext: () => ({
     inventoryPrefill: {
-      setNodeType(nodeType: string) {
+      setNodeType(nodeType: WaffleOptionsState['nodeType']) {
         PREFILL_NODETYPE = nodeType;
       },
-      setMetric(metric: { type: string }) {
+      setMetric(metric: WaffleOptionsState['metric']) {
         PREFILL_METRIC = metric;
       },
     },
@@ -46,7 +46,7 @@ describe('useWaffleOptions', () => {
 
     const newOptions = {
       nodeType: 'pod',
-      metriic: { type: 'memory' },
+      metric: { type: 'memory' },
     } as WaffleOptionsState;
     act(() => {
       result.current.changeNodeType(newOptions.nodeType);

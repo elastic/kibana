@@ -643,7 +643,9 @@ const previewOptions = [
     }),
   },
 ];
-const previewDOMOptions = previewOptions.map((o) => omit(o, 'shortText'));
+const previewDOMOptions: Array<{ text: string; value: string }> = previewOptions.map((o) =>
+  omit(o, 'shortText')
+);
 
 const firedTimeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTime', {
   defaultMessage: 'time',

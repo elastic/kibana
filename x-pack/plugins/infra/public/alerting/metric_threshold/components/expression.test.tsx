@@ -12,13 +12,13 @@ import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/ap
 import { AlertContextMeta } from '../types';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import React from 'react';
-import { Expressions, defaultExpression } from './expression';
+import { Expressions } from './expression';
 import { act } from 'react-dom/test-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
 
 jest.mock('../../../containers/source/use_source_via_http', () => ({
-  useSourceViaHttp: (any) => ({
+  useSourceViaHttp: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),
