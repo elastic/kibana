@@ -24,7 +24,7 @@ import {
   KibanaContextProvider,
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
-import { px, unit, units } from '../style/variables';
+import { px, units } from '../style/variables';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
@@ -34,7 +34,6 @@ import { ConfigSchema } from '..';
 import 'react-vis/dist/style.css';
 
 const MainContainer = styled.div`
-  min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
   height: 100%;
 `;

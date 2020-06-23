@@ -7,7 +7,7 @@ import { isNumber } from 'lodash';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SetupTimeRange, Setup } from '../../helpers/setup_request';
 import { ESFilter } from '../../../../typings/elasticsearch';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
