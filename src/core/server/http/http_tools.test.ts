@@ -17,11 +17,14 @@
  * under the License.
  */
 
-jest.mock('fs', () => ({
-  // Hapi Inert patches native methods
-  ...jest.requireActual('fs'),
-  readFileSync: jest.fn(),
-}));
+jest.mock('fs', () => {
+  const original = jest.requireActual('fs');
+  return {
+    // Hapi Inert patches native methods
+    ...original,
+    readFileSync: jest.fn(),
+  };
+});
 
 import supertest from 'supertest';
 import { Request, ResponseToolkit } from 'hapi';

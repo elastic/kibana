@@ -6,6 +6,9 @@
 
 import { getBreadcrumbs } from './utils';
 
+const getUrlForAppMock = (appId: string, options?: { path?: string; absolute?: boolean }) =>
+  `${appId}${options?.path ?? ''}`;
+
 describe('getBreadcrumbs', () => {
   it('returns default value for incorrect params', () => {
     expect(
@@ -17,8 +20,9 @@ describe('getBreadcrumbs', () => {
           search: '',
           pathName: 'pathName',
         },
-        []
+        [],
+        getUrlForAppMock
       )
-    ).toEqual([{ href: '#/link-to/detections', text: 'Alerts' }]);
+    ).toEqual([{ href: 'securitySolution:alerts', text: 'Alerts' }]);
   });
 });
