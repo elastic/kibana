@@ -13,12 +13,14 @@ import { ComponentStrings } from '../../../i18n';
 const { PalettePicker: strings } = ComponentStrings;
 
 interface RequiredProps {
+  id?: string;
   onChange?: (palette: ColorPalette) => void;
   palette: ColorPalette;
   clearable?: false;
 }
 
 interface ClearableProps {
+  id?: string;
   onChange?: (palette: ColorPalette | null) => void;
   palette: ColorPalette | null;
   clearable: true;
@@ -50,6 +52,7 @@ export const PalettePicker: FC<Props> = (props) => {
 
     return (
       <EuiColorPalettePicker
+        id={props.id}
         compressed={true}
         palettes={colorPalettes}
         onChange={onPickerChange}
@@ -72,6 +75,7 @@ export const PalettePicker: FC<Props> = (props) => {
 
   return (
     <EuiColorPalettePicker
+      id={props.id}
       compressed={true}
       palettes={colorPalettes}
       onChange={onPickerChange}
@@ -81,6 +85,7 @@ export const PalettePicker: FC<Props> = (props) => {
 };
 
 PalettePicker.propTypes = {
+  id: PropTypes.string,
   palette: PropTypes.object,
   onChange: PropTypes.func,
   clearable: PropTypes.bool,

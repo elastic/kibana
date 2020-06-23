@@ -20,9 +20,10 @@ interface Props {
   onValueChange: (value: ExpressionAstExpression) => void;
   argValue: ExpressionAstExpression;
   renderError: () => void;
+  argId?: string;
 }
 
-export const PaletteArgInput: FC<Props> = ({ onValueChange, argValue, renderError }) => {
+export const PaletteArgInput: FC<Props> = ({ onValueChange, argId, argValue, renderError }) => {
   // TODO: This is weird, its basically a reimplementation of what the interpretter would return.
   // Probably a better way todo this, and maybe a better way to handle template type objects in general?
   const astToPalette = ({ chain }: { chain: ExpressionAstFunction[] }): ColorPalette | null => {
@@ -83,10 +84,11 @@ export const PaletteArgInput: FC<Props> = ({ onValueChange, argValue, renderErro
     return null;
   }
 
-  return <PalettePicker palette={palette} onChange={handleChange} />;
+  return <PalettePicker id={argId} palette={palette} onChange={handleChange} />;
 };
 
 PaletteArgInput.propTypes = {
+  argId: PropTypes.string,
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   renderError: PropTypes.func,
