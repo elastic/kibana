@@ -50,11 +50,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   const deleteDataStream = (name: string) => {
     return es.dataManagement
-      .deleteComposableIndexTemplate({
+      .deleteDataStream({
         name,
       })
       .then(() =>
-        es.dataManagement.deleteDataStream({
+        es.dataManagement.deleteComposableIndexTemplate({
           name,
         })
       );
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(dataStreams).to.eql([
             {
               name: testDataStreamName,
-              timeStampField: '@timestamp',
+              timeStampField: { name: '@timestamp', mapping: { type: 'date' } },
               indices: [
                 {
                   name: indexName,
