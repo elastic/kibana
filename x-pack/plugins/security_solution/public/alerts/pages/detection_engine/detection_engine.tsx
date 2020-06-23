@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { useHistory } from 'react-router-dom';
+import { SecurityPageName } from '../../../app/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { GlobalTime } from '../../../common/containers/global_time';
 import {
   indicesExistOrDataTemporarilyUnavailable,
@@ -36,6 +39,8 @@ import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
+import { LinkButton } from '../../../common/components/links';
+import { useFormatUrl } from '../../../common/components/link_to';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
@@ -51,8 +56,9 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     signalIndexName,
     hasIndexWrite,
   } = useUserInfo();
-
+  const history = useHistory();
   const [lastAlerts] = useAlertInfo({});
+  const { formatUrl } = useFormatUrl(SecurityPageName.alerts);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -63,6 +69,14 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]
+  );
+
+  const goToRules = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      history.push(getRulesUrl());
+    },
+    [history]
   );
 
   const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
@@ -110,14 +124,15 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
                   }
                   title={i18n.PAGE_TITLE}
                 >
-                  <EuiButton
+                  <LinkButton
                     fill
-                    href={getRulesUrl()}
+                    onClick={goToRules}
+                    href={formatUrl(getRulesUrl())}
                     iconType="gear"
                     data-test-subj="manage-alert-detection-rules"
                   >
                     {i18n.BUTTON_MANAGE_RULES}
-                  </EuiButton>
+                  </LinkButton>
                 </DetectionEngineHeaderPage>
 
                 <GlobalTime>
@@ -138,6 +153,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
                         />
                         <EuiSpacer size="l" />
                         <AlertsTable
+                          timelineId={TimelineId.alertsPage}
                           loading={loading}
                           hasIndexWrite={hasIndexWrite ?? false}
                           canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
@@ -159,7 +175,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
           );
         }}
       </WithSource>
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.alerts} />
     </>
   );
 };

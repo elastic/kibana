@@ -81,6 +81,7 @@ export default {
   coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
   moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
+  testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,ts,tsx}'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',

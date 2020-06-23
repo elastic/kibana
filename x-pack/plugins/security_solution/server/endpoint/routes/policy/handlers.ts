@@ -5,6 +5,7 @@
  */
 import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
+import { policyIndexPattern } from '../../../../common/endpoint/constants';
 import { GetPolicyResponseSchema } from '../../../../common/endpoint/schema/policy';
 import { EndpointAppContext } from '../../types';
 import { getPolicyResponseByHostId } from './service';
@@ -14,12 +15,8 @@ export const getHostPolicyResponseHandler = function (
 ): RequestHandler<undefined, TypeOf<typeof GetPolicyResponseSchema.query>, undefined> {
   return async (context, request, response) => {
     try {
-      const index = await endpointAppContext.service
-        .getIndexPatternRetriever()
-        .getPolicyResponseIndexPattern(context);
-
       const doc = await getPolicyResponseByHostId(
-        index,
+        policyIndexPattern,
         request.query.hostId,
         context.core.elasticsearch.legacy.client
       );

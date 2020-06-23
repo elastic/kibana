@@ -5,7 +5,6 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import ApolloClient from 'apollo-client';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
@@ -15,6 +14,7 @@ import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { useApolloClient } from '../../common/utils/apollo_context';
 
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import { NEW_TEMPLATE_TIMELINE } from '../components/timeline/properties/translations';
@@ -22,27 +22,23 @@ import { NewTemplateTimeline } from '../components/timeline/properties/new_templ
 import { NewTimeline } from '../components/timeline/properties/helpers';
 
 import * as i18n from './translations';
+import { SecurityPageName } from '../../app/types';
 
 const TimelinesContainer = styled.div`
   width: 100%;
 `;
 
-interface TimelinesProps<TCache = object> {
-  apolloClient: ApolloClient<TCache>;
-}
-
-type OwnProps = TimelinesProps;
-
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
+export const TimelinesPageComponent: React.FC = () => {
   const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
   const onImportTimelineBtnClick = useCallback(() => {
     setImportDataModalToggle(true);
   }, [setImportDataModalToggle]);
 
+  const apolloClient = useApolloClient();
   const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.securitySolution.crud;
+  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
 
   return (
     <>
@@ -87,7 +83,7 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
 
         <TimelinesContainer>
           <StatefulOpenTimeline
-            apolloClient={apolloClient}
+            apolloClient={apolloClient!}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             isModal={false}
             importDataModalToggle={importDataModalToggle && capabilitiesCanUserCRUD}
@@ -98,7 +94,7 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
         </TimelinesContainer>
       </WrapperPage>
 
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.timelines} />
     </>
   );
 };
