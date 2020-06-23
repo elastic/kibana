@@ -263,7 +263,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (this.exceptionsPackagerTask) {
       // TODO: register callback to initialize manifest
-      // https://github.com/elastic/kibana/pull/69428
+      // PR: https://github.com/elastic/kibana/pull/69428
 
       this.exceptionsPackagerTask
         .getTaskRunner({

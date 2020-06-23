@@ -43,6 +43,7 @@ export function registerDownloadExceptionListRoute(
 
       // TODO: authenticate api key
       // https://github.com/elastic/kibana/issues/69329
+      // PR: https://github.com/elastic/kibana/pull/69650
 
       const validateResponse = (resp: object): object => {
         const [validated, errors] = validate(resp, downloadArtifactResponseSchema);

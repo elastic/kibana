@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHash } from 'crypto';
-
 import { Logger, SavedObjectsClient } from '../../../../../../../../src/core/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import {
   ArtifactConstants,
   ManifestConstants,
   Manifest,
-  GetFullEndpointExceptionList,
-  CompressExceptionList,
+  buildArtifact,
 } from '../../../lib/artifacts';
 import { InternalArtifactSchema, InternalManifestSchema } from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
@@ -39,25 +36,21 @@ export class ManifestManager {
     this.logger = context.logger;
   }
 
-  private async dispatchAndUpdate(manifest: Manifest) {
-    const manifestClient = new ManifestClient(this.savedObjectsClient, manifest.getSchemaVersion());
+  private async getManifestClient(schemaVersion: string): ManifestClient {
+    return new ManifestClient(this.savedObjectsClient, schemaVersion);
+  }
+
+  private async dispatch(manifest: Manifest) {
+    const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
 
     // TODO: dispatch and only update if successful
 
     if (manifest.getVersion() === undefined) {
       await manifestClient.createManifest(manifest.toSavedObject());
     } else {
-      try {
-        await manifestClient.updateManifest(manifest.toSavedObject(), {
-          version: manifest.getVersion(),
-        });
-      } catch (err) {
-        if (err.status === 409) {
-          // TODO: log and return
-        } else {
-          throw err;
-        }
-      }
+      await manifestClient.updateManifest(manifest.toSavedObject(), {
+        version: manifest.getVersion(),
+      });
     }
   }
 
@@ -67,32 +60,16 @@ export class ManifestManager {
     const artifacts: InternalArtifactSchema[] = [];
 
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
-      const exceptions = await GetFullEndpointExceptionList(
-        this.exceptionListClient,
-        os,
-        schemaVersion
-      );
-      const compressedExceptions: Buffer = await CompressExceptionList(exceptions);
+      const artifact = buildArtifact(this.exceptionListClient, os, schemaVersion);
 
-      const sha256 = createHash('sha256')
-        .update(compressedExceptions.toString('utf8'), 'utf8')
-        .digest('hex');
-
-      artifacts.push({
-        identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
-        sha256,
-        encoding: 'xz',
-        created: Date.now(),
-        body: compressedExceptions.toString('binary'),
-        size: Buffer.from(JSON.stringify(exceptions)).byteLength,
-      });
+      artifacts.push(artifact);
     }
 
     return artifacts;
   }
 
   private async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
-    const manifestClient = new ManifestClient(this.savedObjectsClient, schemaVersion);
+    const manifestClient = this.getManifestClient(schemaVersion);
 
     let manifestSo: InternalManifestSchema;
     try {
@@ -172,7 +149,7 @@ export class ManifestManager {
     if (diffs.length > 0) {
       try {
         this.logger.debug('Dispatching new manifest');
-        await this.dispatchAndUpdate(newManifest);
+        await this.dispatch(newManifest);
       } catch (err) {
         this.logger.error(err);
         return;

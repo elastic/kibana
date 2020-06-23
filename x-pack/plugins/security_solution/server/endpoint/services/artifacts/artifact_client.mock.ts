@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ArtifactService } from './artifact_service';
+import { ArtifactClient } from './artifact_client';
 import { getInternalArtifactSchemaMock } from '../../schemas';
 
-export class ArtifactServiceMock extends ArtifactService {
+export class ArtifactClientMock extends ArtifactClient {
   public getArtifact = jest.fn().mockResolvedValue(getInternalArtifactSchemaMock());
   public createArtifact = jest.fn().mockResolvedValue(getInternalArtifactSchemaMock());
   public deleteArtifact = jest.fn().mockResolvedValue(getInternalArtifactSchemaMock());

@@ -4,31 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createHash } from 'crypto';
+
 import lzma from 'lzma-native';
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
+import {
+  TranslatedExceptionList,
+  TranslatedEntryNested,
+  TranslatedEntryMatch,
+  TranslatedEntryMatchAny,
+} from '../../schemas';
+import { ArtifactConstants } from './common';
 
-export interface EndpointExceptionList {
-  exceptions_list: ExceptionsList[];
+export async function buildArtifact(
+  exceptionListClient: ExceptionListClient,
+  os: string,
+  schemaVersion: string
+): InternalArtifactSchema {
+  const exceptions = await GetFullEndpointExceptionList(exceptionListClient, os, schemaVersion);
+  const compressedExceptions: Buffer = await CompressExceptionList(exceptions);
+
+  const sha256 = createHash('sha256')
+    .update(compressedExceptions.toString('utf8'), 'utf8')
+    .digest('hex');
+
+  return {
+    identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
+    sha256,
+    encoding: 'xz',
+    created: Date.now(),
+    body: compressedExceptions.toString('binary'),
+    size: Buffer.from(JSON.stringify(exceptions)).byteLength,
+  };
 }
 
-export interface ExceptionsList {
-  type: string;
-  entries: EntryElement[];
-}
-
-export interface EntryElement {
-  field: string;
-  operator: string;
-  entry: EntryEntry;
-}
-
-export interface EntryEntry {
-  exact_caseless?: string;
-  exact_caseless_any?: string[];
-}
-
-export async function GetFullEndpointExceptionList(
+async function GetFullEndpointExceptionList(
   eClient: ExceptionListClient,
   os: string, // TODO: make type
   schemaVersion: string
@@ -64,52 +75,60 @@ export async function GetFullEndpointExceptionList(
   return exceptions;
 }
 
+function translateEntry(schemaVersion: string, entry: ExceptionListItemSchema) {
+  const type = entry.type;
+  const translatedEntry: TranslatedEntry = {
+    field: entry.field,
+    type: entry.type,
+  };
+  if (entry.type === 'nested') {
+    translatedEntry.entries = [];
+    entry.entries.forEach((nestedEntry) => {
+      translatedEntry.entries.push(translateEntry(schemaVersion, nestedEntry));
+    });
+  } else if (entry.type === 'match') {
+    // TODO: sync with pedro, when to use cased/caseless
+  } else if (entry.type === 'match_any') {
+    // TODO: sync with pedro, when to use cased/caseless
+  } else {
+    // TODO: log and return
+  }
+}
+
 /**
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exc
  */
-export function translateToEndpointExceptions(
+function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
-): ExceptionsList[] {
-  const translated: ExceptionsList[] = [];
+): TranslatedExceptionList {
+  const translatedList: TranslatedExceptionList = {
+    type: exc.type,
+    entries: [],
+  };
 
   if (schemaVersion === '1.0.0') {
     // Transform to endpoint format
-    exc.data.forEach((item) => {
-      const endpointItem: ExceptionsList = {
-        type: item.type,
-        entries: [],
-      };
-      item.entries.forEach((entry) => {
+    exc.data.forEach((list) => {
+      list.entries.forEach((entry) => {
         // TODO case sensitive?
-        const e: EntryEntry = {};
-        if (entry.match) {
-          e.exact_caseless = entry.match;
-        }
-
-        if (entry.match_any) {
-          e.exact_caseless_any = entry.match_any;
-        }
-
-        endpointItem.entries.push({
-          field: entry.field,
-          operator: entry.operator,
-          entry: e,
-        });
+        translatedList.entries.push(translateEntry(entry));
       });
-      translated.push(endpointItem);
     });
   } else {
     throw new Error('unsupported schemaVersion');
   }
-  return translated;
+
+  // TODO: validate
+
+  return translatedList;
 }
 
 /**
  * Compresses the exception list
  */
-export function CompressExceptionList(exceptionList: EndpointExceptionList): Promise<Buffer> {
+function CompressExceptionList(exceptionList: TranslatedExceptionList): Promise<Buffer> {
   return lzma.compress(JSON.stringify(exceptionList), (res: Buffer) => {
     return res;
   });

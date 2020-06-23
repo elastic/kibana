@@ -6,7 +6,8 @@
 
 import { InternalArtifactSchema, InternalManifestSchema } from './saved_objects';
 
-export const getInternalArtifactSchemaMock = (): InternalArtifactSchema => ({
+// TODO: os type
+export const getInternalArtifactMock = (os?: string): InternalArtifactSchema => ({
   identifier: '',
   sha256: '',
   encoding: '',
@@ -15,7 +16,9 @@ export const getInternalArtifactSchemaMock = (): InternalArtifactSchema => ({
   size: '',
 });
 
-export const getInternalManifestSchemaMock = (): InternalManifestSchema => ({
+export const getInternalArtifactsMock = (): InternalArtifactSchema[] => [{}, {}];
+
+export const getInternalManifestMock = (): InternalManifestSchema => ({
   created: Date.now(),
   ids: [],
 });
