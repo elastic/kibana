@@ -45,8 +45,15 @@ export function registerDownloadExceptionListRoute(
       // https://github.com/elastic/kibana/issues/69329
       // PR: https://github.com/elastic/kibana/pull/69650
 
-      const validateResponse = (resp: object): object => {
-        const [validated, errors] = validate(resp, downloadArtifactResponseSchema);
+      const buildAndValidateResponse = (artName: string, body: string): object => {
+        const artifact = {
+          body: Buffer.from(body, 'binary'),
+          headers: {
+            'content-encoding': 'xz',
+            'content-disposition': `attachment; filename=${artName}.xz`,
+          },
+        };
+        const [validated, errors] = validate(artifact, downloadArtifactResponseSchema);
         if (errors != null) {
           return res.internalError({ body: errors });
         } else {
@@ -58,36 +65,25 @@ export function registerDownloadExceptionListRoute(
       const cacheResp = cache.get(id);
 
       if (cacheResp) {
-        // CACHE HIT
         logger.debug(`Cache HIT artifact ${id}`);
-        const downloadResponse = {
-          body: Buffer.from(cacheResp, 'binary'),
-          headers: {
-            'content-encoding': 'xz',
-            'content-disposition': `attachment; filename=${req.params.identifier}.xz`,
-          },
-        };
-        return validateResponse(downloadResponse);
+        return buildAndValidateResponse(req.params.identifier, cacheResp);
       } else {
-        // CACHE MISS
         logger.debug(`Cache MISS artifact ${id}`);
         return soClient
           .get<InternalArtifactSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
           .then((artifact) => {
-            const outBuffer = Buffer.from(artifact.attributes.body, 'binary');
             cache.set(id, artifact.attributes.body);
-
-            const downloadResponse = {
-              body: outBuffer,
-              headers: {
-                'content-encoding': 'xz',
-                'content-disposition': `attachment; filename=${artifact.attributes.identifier}.xz`,
-              },
-            };
-            return validateResponse(downloadResponse);
+            return buildAndValidateResponse(
+              artifact.attributes.identifier,
+              artifact.attributes.body
+            );
           })
           .catch((err) => {
-            return res.internalError({ body: err });
+            if (err?.output?.statusCode === 404) {
+              return res.notFound({ body: `No artifact found for ${id}` });
+            } else {
+              return res.internalError({ body: err });
+            }
           });
       }
     }
