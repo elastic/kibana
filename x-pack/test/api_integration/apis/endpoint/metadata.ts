@@ -63,9 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/api/endpoint/metadata/1fdca33f-799f-49f4-939c-ea4383c77671')
           .send()
           .expect(400);
-        expect(body.message).to.eql(
-          '1fdca33f-799f-49f4-939c-ea4383c77671 represent an unerolled host'
-        );
+        expect(body.message).to.eql('the requested endpoint is unerolled');
       });
     });
 

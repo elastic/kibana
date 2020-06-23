@@ -143,7 +143,7 @@ export async function getHostData(
     id
   );
   if (unenrolledHostId) {
-    throw Boom.badRequest(`${id} represent an unerolled host`);
+    throw Boom.badRequest(`the requested endpoint is unerolled`);
   }
   const query = getESQueryHostMetadataByID(id, metadataIndexPattern);
   const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
