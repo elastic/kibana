@@ -4,29 +4,135 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { useKibana } from '../../../shared_imports';
 
 interface Props {
-  errorMessage: string;
+  error: unknown;
+}
+interface PipelineError {
+  reason: string;
+  processorType?: string;
+}
+interface PipelineErrors {
+  errors: PipelineError[];
 }
 
-export const PipelineFormError: React.FunctionComponent<Props> = ({ errorMessage }) => {
+interface ErrorAttributesObject {
+  attributes: {
+    error: {
+      root_cause: [
+        {
+          reason: string;
+          processor_type?: string;
+          suppressed?: Array<{ reason: string; processor_type?: string }>;
+        }
+      ];
+    };
+  };
+}
+
+const toKnownError = (error: unknown): PipelineErrors => {
+  if (
+    typeof error === 'object' &&
+    error != null &&
+    (error as any).attributes?.error?.root_cause?.[0]
+  ) {
+    const errorAttributes = error as ErrorAttributesObject;
+    const result: PipelineErrors = { errors: [] };
+    const rootCause = errorAttributes.attributes.error.root_cause[0];
+    result.errors.push({ reason: rootCause.reason, processorType: rootCause.processor_type });
+    if (rootCause.suppressed && Array.isArray(rootCause.suppressed)) {
+      rootCause.suppressed.forEach((e: any) =>
+        result.errors.push({ reason: e.reason, processorType: e.processor_type })
+      );
+    }
+    return result;
+  }
+
+  if (typeof error === 'string') {
+    return { errors: [{ reason: error }] };
+  }
+
+  if (
+    error instanceof Error ||
+    (typeof error === 'object' && error != null && (error as any).message)
+  ) {
+    return { errors: [{ reason: (error as any).message }] };
+  }
+
+  return { errors: [{ reason: 'An unknown error occurred.' }] };
+};
+
+const title = i18n.translate('xpack.ingestPipelines.form.savePipelineError', {
+  defaultMessage: 'Unable to create pipeline',
+});
+
+export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => {
+  const { services } = useKibana();
+  const [isShowingAllErrors, setIsShowingAllErrors] = useState<boolean>(false);
+  const safeErrorResult = toKnownError(error);
+  const hasMoreErrors = safeErrorResult.errors.length > 5;
+  const results = isShowingAllErrors ? safeErrorResult.errors : safeErrorResult.errors.slice(0, 5);
+
+  const renderErrorListItem = ({ processorType, reason }: PipelineError) => {
+    return (
+      <>
+        {processorType
+          ? i18n.translate('xpack.ingestPipelines.form.savePipelineError.processorLabel', {
+              defaultMessage: '{type} processor',
+              values: { type: processorType },
+            })
+          : undefined}
+        &nbsp;
+        {reason}
+      </>
+    );
+  };
+
+  useEffect(() => {
+    services.notifications.toasts.addDanger({ title });
+  }, [services, error]);
   return (
     <>
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.ingestPipelines.form.savePipelineError"
-            defaultMessage="Unable to create pipeline"
-          />
-        }
-        color="danger"
-        iconType="alert"
-        data-test-subj="savePipelineError"
-      >
-        <p>{errorMessage}</p>
+      <EuiCallOut title={title} color="danger" iconType="alert" data-test-subj="savePipelineError">
+        {results.length > 1 ? (
+          <ul>
+            {results.map((e, idx) => (
+              <li key={idx}>{renderErrorListItem(e)}</li>
+            ))}
+          </ul>
+        ) : (
+          renderErrorListItem(results[0])
+        )}
+        {hasMoreErrors ? (
+          <EuiFlexGroup
+            direction="column"
+            responsive={false}
+            gutterSize="s"
+            justifyContent="center"
+            alignItems="flexEnd"
+          >
+            <EuiFlexItem grow={false}>
+              {isShowingAllErrors ? (
+                <EuiButton onClick={() => setIsShowingAllErrors(false)} color="danger" fill={false}>
+                  {i18n.translate('xpack.ingestPipelines.form.savePipelineError.showFewerButton', {
+                    defaultMessage: 'Show fewer errors',
+                  })}
+                </EuiButton>
+              ) : (
+                <EuiButton onClick={() => setIsShowingAllErrors(true)} color="danger" fill={false}>
+                  {i18n.translate('xpack.ingestPipelines.form.savePipelineError.showAllButton', {
+                    defaultMessage: 'Show all errors',
+                  })}
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : undefined}
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

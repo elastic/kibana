@@ -52,7 +52,12 @@ export const registerUpdateRoute = ({
         if (isEsError(error)) {
           return res.customError({
             statusCode: error.statusCode,
-            body: error,
+            body: error.body
+              ? {
+                  message: error.message,
+                  attributes: error.body,
+                }
+              : error,
           });
         }
 

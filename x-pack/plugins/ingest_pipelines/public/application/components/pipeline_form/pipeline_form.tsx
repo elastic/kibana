@@ -116,7 +116,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         error={form.getErrors()}
       >
         {/* Request error */}
-        {saveError && <PipelineFormError errorMessage={saveError.message} />}
+        {saveError && <PipelineFormError error={saveError} />}
 
         {/* All form fields */}
         <PipelineFormFields
