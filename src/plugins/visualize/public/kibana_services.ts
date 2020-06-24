@@ -56,6 +56,7 @@ export interface VisualizeKibanaServices {
   embeddable: EmbeddableStart;
   I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
+  restorePreviousUrl: () => void;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
   scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;

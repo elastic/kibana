@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
-import { getFormatService, getNotifications } from './kibana_services';
+import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider } from '../../maps_legacy/public';
@@ -38,6 +38,7 @@ export function createRegionMapVisualization({
     }
 
     async render(esResponse, visParams) {
+      getKibanaLegacy().loadFontAwesome();
       await super.render(esResponse, visParams);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();

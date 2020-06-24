@@ -69,12 +69,13 @@ export interface RenderDeps {
   embeddable: EmbeddableStart;
   localStorage: Storage;
   share?: SharePluginStart;
-  config: KibanaLegacyStart['config'];
   usageCollection?: UsageCollectionSetup;
   navigateToDefaultApp: KibanaLegacyStart['navigateToDefaultApp'];
+  navigateToLegacyKibanaUrl: KibanaLegacyStart['navigateToLegacyKibanaUrl'];
   scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
+  restorePreviousUrl: () => void;
 }
 
 let angularModuleInstance: IModule | null = null;

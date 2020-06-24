@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './local_application_service';
+import './font_awesome.scss';
