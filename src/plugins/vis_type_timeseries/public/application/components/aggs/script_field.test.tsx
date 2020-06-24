@@ -26,9 +26,11 @@ import { StandardAgg } from './std_agg';
 import { StandardDeviationAgg } from './std_deviation';
 import { TopHitAgg } from './top_hit';
 import { ScriptField } from './script_field';
-import { FIELDS, METRIC, SERIES, PANEL, SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
+import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
+import { AggComponent } from './types';
 
-const runTestFor = (Component, aggType) => {
+const runTestFor = (Component: AggComponent, aggType: string) => {
   describe(aggType, () => {
     const metric = {
       ...METRIC,

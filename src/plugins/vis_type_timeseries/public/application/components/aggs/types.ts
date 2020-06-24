@@ -17,7 +17,19 @@
  * under the License.
  */
 
-export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
-export const SCRIPTED_FIELD_VALUE = '__SCRIPT__';
+import React from 'react';
+import { FIELDS } from '../../../test_utils';
 
-// Tests Constants
+export interface AggComponentProps {
+  onAdd: () => void;
+  onChange: () => void;
+  onDelete: () => void;
+  panel: object;
+  fields: typeof FIELDS;
+  model: object;
+  series: object;
+  siblings: object[];
+  dragHandleProps: object;
+}
+
+export type AggComponent = React.FC<AggComponentProps>;

@@ -17,7 +17,6 @@
  * under the License.
  */
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
   htmlIdGenerator,
   EuiSpacer,
@@ -27,14 +26,20 @@ import {
   EuiFormRow,
   EuiCode,
 } from '@elastic/eui';
-import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SCRIPTED_FIELD_VALUE } from 'src/plugins/vis_type_timeseries/common/constants';
 
-export const ScriptField = ({ model, onChange }) => {
+interface Props {
+  model: { type: string; field: string; script: string };
+  onChange: (event: React.SyntheticEvent) => void;
+}
+
+export const ScriptField = ({ model, onChange }: Props) => {
   if (model.type === 'count' || model.field !== SCRIPTED_FIELD_VALUE) {
     return null;
   }
+
   const htmlId = htmlIdGenerator();
 
   return (
@@ -71,9 +76,4 @@ export const ScriptField = ({ model, onChange }) => {
       </EuiFlexGroup>
     </>
   );
-};
-
-ScriptField.propTypes = {
-  model: PropTypes.object,
-  onChange: PropTypes.func,
 };

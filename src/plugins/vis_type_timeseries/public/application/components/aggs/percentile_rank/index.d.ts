@@ -17,7 +17,5 @@
  * under the License.
  */
 
-export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
-export const SCRIPTED_FIELD_VALUE = '__SCRIPT__';
-
-// Tests Constants
+import { AggComponent } from '../types';
+export declare const PercentileRankAgg: AggComponent;
