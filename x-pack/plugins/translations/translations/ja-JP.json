@@ -10703,7 +10703,6 @@
     "xpack.ml.newJob.wizard.validateJob.queryIsInvalidEsQuery": "データフィードクエリは有効な Elasticsearch クエリでなければなりません。",
     "xpack.ml.overview.analyticsList.createFirstJobMessage": "最初のデータフレーム分析ジョブを作成",
     "xpack.ml.overview.analyticsList.createJobButtonText": "ジョブを作成",
-    "xpack.ml.overview.analyticsList.emptyPromptText": "データフレーム分析は、様々なデータ分析を行い結果と共に注釈に追加することができます。ジョブは注釈付きデータと共に、ソースデータのコピーを新規インデックスに保存します。",
     "xpack.ml.overview.analyticsList.errorPromptTitle": "データフレーム分析リストの取得中にエラーが発生しました。",
     "xpack.ml.overview.analyticsList.id": "ID",
     "xpack.ml.overview.analyticsList.manageJobsButtonText": "ジョブの管理",
