@@ -40,7 +40,6 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { DashboardStart } from '../../dashboard/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
@@ -50,7 +49,7 @@ export interface VisualizePluginStartDependencies {
   navigation: NavigationStart;
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
-  dashboard: DashboardStart;
+  embeddable: EmbeddableStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
   embeddable: EmbeddableStart;
@@ -134,11 +133,11 @@ export class VisualizePlugin
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
+          embeddable: pluginsStart.embeddable,
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
-          dashboard: pluginsStart.dashboard,
           scopedHistory: () => this.currentHistory!,
           savedObjects: pluginsStart.savedObjects,
           embeddable: pluginsStart.embeddable,
