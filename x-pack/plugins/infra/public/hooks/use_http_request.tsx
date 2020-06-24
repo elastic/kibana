@@ -28,13 +28,13 @@ export function useHTTPRequest<Response>(
   const [request, makeRequest] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: (reqBody?: string | null) => {
+      createPromise: () => {
         if (!fetchService) {
           throw new Error('HTTP service is unavailable');
         }
         return fetchService(pathname, {
           method,
-          body: reqBody || body,
+          body,
         });
       },
       onResolve: (resp) => setResponse(decode(resp)),

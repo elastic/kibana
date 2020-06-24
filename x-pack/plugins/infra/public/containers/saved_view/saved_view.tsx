@@ -15,6 +15,7 @@ import { metricsExplorerViewSavedObjectName } from '../../../common/saved_object
 import { inventoryViewSavedObjectName } from '../../../common/saved_objects/inventory_view';
 import { useSourceConfigurationFormState } from '../../components/source_configuration/source_configuration_form_state';
 import { useGetSavedObject } from '../../hooks/use_get_saved_object';
+import { useUpdateSavedObject } from '../../hooks/use_update_saved_object';
 
 export type SavedView<ViewState> = ViewState & {
   name: string;
@@ -33,6 +34,7 @@ export type ViewType =
 interface Props {
   defaultViewState: SavedView<any>;
   viewType: ViewType;
+  shouldLoadDefault: boolean;
 }
 
 export const useSavedView = (props: Props) => {
@@ -48,6 +50,7 @@ export const useSavedView = (props: Props) => {
   const [currentView, setCurrentView] = useState<SavedView<any> | null>(null);
   const [loadingDefaultView, setLoadingDefaultView] = useState<boolean | null>(null);
   const { create, error: errorOnCreate, createdId } = useCreateSavedObject(viewType);
+  const { update, error: errorOnUpdate, updatedId } = useUpdateSavedObject(viewType);
   const { deleteObject, deletedId } = useDeleteSavedObject(viewType);
   const { getObject, data: currentViewSavedObject } = useGetSavedObject(viewType);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -105,6 +108,26 @@ export const useSavedView = (props: Props) => {
     [create, hasView]
   );
 
+  const updateView = useCallback(
+    (id, d: { [p: string]: any }) => {
+      const doSave = async () => {
+        const exists = await hasView(d.name);
+        if (exists) {
+          setCreateError(
+            i18n.translate('xpack.infra.savedView.errorOnCreate.duplicateViewName', {
+              defaultMessage: `A view with that name already exists.`,
+            })
+          );
+          return;
+        }
+        update(id, d);
+      };
+      setCreateError(null);
+      doSave();
+    },
+    [update, hasView]
+  );
+
   const defaultViewId = useMemo(() => {
     if (!source || !source.configuration) {
       return '';
@@ -149,14 +172,9 @@ export const useSavedView = (props: Props) => {
   }, [defaultViewState, savedObjects, viewType, defaultViewId, mapToView]);
 
   const loadDefaultView = useCallback(() => {
-    // 0 viewId means default.
-    if (!currentView && defaultViewId !== '0') {
-      setLoadingDefaultView(true);
-      getObject(defaultViewId);
-    } else {
-      setLoadingDefaultView(false);
-    }
-  }, [defaultViewId, setLoadingDefaultView, getObject, currentView]);
+    setLoadingDefaultView(true);
+    getObject(defaultViewId);
+  }, [setLoadingDefaultView, getObject, defaultViewId]);
 
   useEffect(() => {
     if (currentViewSavedObject) {
@@ -165,13 +183,50 @@ export const useSavedView = (props: Props) => {
     }
   }, [currentViewSavedObject, defaultViewId, mapToView]);
 
+  const setDefault = useCallback(() => {
+    setCurrentView({
+      name: i18n.translate('xpack.infra.savedView.defaultViewNameHosts', {
+        defaultMessage: 'Hosts',
+      }),
+      id: '0',
+      isDefault: !defaultViewId || defaultViewId === '0', // If there is no default view then hosts is the default
+      ...defaultViewState,
+    });
+  }, [setCurrentView, defaultViewId, defaultViewState]);
+
+  useEffect(() => {
+    // const shouldLoadDefault = props.shouldLoadDefault;
+
+    const shouldLoadDefault = true;
+    if (loadingDefaultView || currentView) {
+      return;
+    }
+
+    if (shouldLoadDefault && !currentView && defaultViewId !== '0') {
+      loadDefaultView();
+    } else {
+      setDefault();
+      setLoadingDefaultView(false);
+    }
+  }, [
+    loadDefaultView,
+    props.shouldLoadDefault,
+    setDefault,
+    loadingDefaultView,
+    currentView,
+    defaultViewId,
+  ]);
+
   return {
     views,
     saveView,
     defaultViewId,
     loading,
+    updateView,
+    updatedId,
     deletedId,
     createdId,
+    errorOnUpdate,
     errorOnFind,
     errorOnCreate: createError,
     makeDefault,

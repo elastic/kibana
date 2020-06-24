@@ -7,6 +7,7 @@
 import { EuiButton, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
+import { Location } from 'history';
 
 import { FilterBar } from './components/filter_bar';
 
@@ -24,6 +25,7 @@ import { Layout } from './components/layout';
 import { useLinkProps } from '../../../hooks/use_link_props';
 import { SavedView } from '../../../containers/saved_view/saved_view';
 import { useWaffleViewState } from './hooks/use_waffle_view_state';
+import { useHistory } from '../../../utils/history_context';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -36,7 +38,13 @@ export const SnapshotPage = () => {
   } = useContext(Source.Context);
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
+
+  const history = useHistory();
+  const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
+  const queryString = history?.location ? getQueryStringFromLocation(history.location) : '';
+
   const { defaultViewState } = useWaffleViewState();
+
   const tutorialLinkProps = useLinkProps({
     app: 'home',
     hash: '/tutorial_directory/metrics',
@@ -60,7 +68,11 @@ export const SnapshotPage = () => {
         ) : metricIndicesExist ? (
           <>
             <FilterBar />
-            <SavedView.Provider viewType={'inventory-view'} defaultViewState={defaultViewState}>
+            <SavedView.Provider
+              shouldLoadDefault={!queryString}
+              viewType={'inventory-view'}
+              defaultViewState={defaultViewState}
+            >
               <Layout />
             </SavedView.Provider>
           </>

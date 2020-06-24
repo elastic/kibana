@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiBadge } from '@elastic/eui';
-import { SavedView } from '../../hooks/use_saved_view';
+import { SavedView } from '../../containers/saved_view/saved_view';
 
 interface Props<ViewState> {
   views: Array<SavedView<ViewState>>;
@@ -33,6 +33,7 @@ interface Props<ViewState> {
 }
 
 interface DeleteConfimationProps {
+  isDisabled?: boolean;
   confirmedAction(): void;
 }
 const DeleteConfimation = (props: DeleteConfimationProps) => {
@@ -49,6 +50,7 @@ const DeleteConfimation = (props: DeleteConfimationProps) => {
             <FormattedMessage defaultMessage="cancel" id="xpack.infra.waffle.savedViews.cancel" />
           </EuiButtonEmpty>
           <EuiButton
+            disabled={props.isDisabled}
             fill={true}
             iconType="trash"
             color="danger"
@@ -67,7 +69,7 @@ const DeleteConfimation = (props: DeleteConfimationProps) => {
   );
 };
 
-export function SavedViewListFlyout<ViewState>({
+export function SavedViewManageViewsFlyout<ViewState>({
   close,
   views,
   defaultViewId,
@@ -94,6 +96,7 @@ export function SavedViewListFlyout<ViewState>({
     (item: SavedView<ViewState>) => {
       return (
         <DeleteConfimation
+          isDisabled={item.isDefault}
           confirmedAction={() => {
             deleteView(item.id);
           }}
@@ -108,21 +111,10 @@ export function SavedViewListFlyout<ViewState>({
       const isDefault = item.id === defaultViewId;
       return (
         <>
-          {isDefault && (
-            <EuiBadge>
-              <FormattedMessage
-                defaultMessage="Default"
-                id="xpack.infra.openView.actionNames.default"
-              />
-            </EuiBadge>
-          )}
-
-          {!isDefault && (
-            <EuiButtonEmpty
-              iconType={isDefault ? 'starFilled' : 'starEmpty'}
-              onClick={() => makeDefault(item.id)}
-            />
-          )}
+          <EuiButtonEmpty
+            iconType={isDefault ? 'starFilled' : 'starEmpty'}
+            onClick={() => makeDefault(item.id)}
+          />
         </>
       );
     },
@@ -147,7 +139,7 @@ export function SavedViewListFlyout<ViewState>({
           render: renderMakeDefaultction,
         },
         {
-          available: (item: SavedView<ViewState>) => !item.isDefault,
+          available: (item: SavedView<ViewState>) => true,
           render: renderDeleteAction,
         },
       ],
@@ -159,7 +151,10 @@ export function SavedViewListFlyout<ViewState>({
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2>
-            <FormattedMessage defaultMessage="Load views" id="xpack.infra.openView.flyoutHeader" />
+            <FormattedMessage
+              defaultMessage="Manage saved views"
+              id="xpack.infra.openView.flyoutHeader"
+            />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>

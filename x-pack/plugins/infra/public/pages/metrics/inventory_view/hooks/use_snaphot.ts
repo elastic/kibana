@@ -22,6 +22,16 @@ import {
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
 
+interface SnapshotData {
+  filterQuery: string | null | undefined;
+  metric: { type: SnapshotMetricType };
+  groupBy: SnapshotGroupBy;
+  nodeType: InventoryItemType;
+  sourceId: string;
+  currentTime: number;
+  accountId: string;
+  region: string;
+}
 export function useSnapshot(
   filterQuery: string | null | undefined,
   metric: { type: SnapshotMetricType },
@@ -46,7 +56,6 @@ export function useSnapshot(
     lookbackSize: 20,
   };
 
-  // const load = useCallback
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
     '/api/metrics/snapshot',
     'POST',
@@ -64,31 +73,11 @@ export function useSnapshot(
     decodeResponse
   );
 
-  const reload = useCallback(
-    (params?: Partial<SnapshotRequest>) => {
-      makeRequest(
-        JSON.stringify({
-          metric,
-          groupBy,
-          nodeType,
-          timerange,
-          filterQuery,
-          sourceId,
-          accountId,
-          region,
-          includeTimeseries: true,
-          ...params,
-        })
-      );
-    },
-    [makeRequest, metric, groupBy, nodeType, timerange, filterQuery, sourceId, accountId, region]
-  );
-
   return {
     error: (error && error.message) || null,
     loading,
     nodes: response ? response.nodes : [],
     interval: response ? response.interval : '60s',
-    reload,
+    reload: makeRequest,
   };
 }
