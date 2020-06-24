@@ -211,7 +211,7 @@ Refer to {kibana-ref}/maps.html[Maps].
 [[q_glos]]
 == Q
 
-[[glossary-query-bar]] space ::
+[[glossary-query-bar]] query bar ::
 // tag::query-bar-def[]
 A text field that enables you to submit a query expression that specifies what
 information you want to retrieve and interact with.
