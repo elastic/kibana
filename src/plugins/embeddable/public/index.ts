@@ -22,7 +22,6 @@ import './index.scss';
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
-export { EMBEDDABLE_ORIGINATING_APP_PARAM } from './types';
 export {
   ACTION_ADD_PANEL,
   ACTION_APPLY_FILTER,
@@ -73,6 +72,9 @@ export {
   RangeSelectTriggerContextTimeRangeFilterEvent,
   isRangeSelectTriggerContextTimeRangeFilterEvent,
   isValueClickTriggerContext,
+  EmbeddableStateTransfer,
+  EmbeddableOriginatingAppState,
+  EmbeddablePackageState,
   EmbeddableRenderer,
   EmbeddableRendererProps,
 } from './lib';
@@ -86,4 +88,5 @@ export {
   EmbeddableStart,
   EmbeddableSetupDependencies,
   EmbeddableStartDependencies,
+  EmbeddablePanelHOC,
 } from './plugin';
