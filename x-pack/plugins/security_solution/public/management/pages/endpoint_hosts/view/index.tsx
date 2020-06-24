@@ -133,9 +133,23 @@ export const HostList = () => {
     }
   );
 
-  const handleDeployEndpointsClick = useNavigateToAppEventHandler('ingestManager', {
-    path: `#/configs/${selectedPolicyId}`,
-  });
+  // const handleDeployEndpointsClick = useNavigateToAppEventHandler('ingestManager', {
+  //   path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
+  // });
+
+  const handleDeployEndpointsClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
+    'ingestManager',
+    {
+      path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
+      state: {
+        onCancelNavigateTo: [
+          'securitySolution:management',
+          { path: getEndpointListPath({ name: 'endpointList' }) },
+        ],
+        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
+      },
+    }
+  );
 
   const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
     return policyItems.map((item) => {

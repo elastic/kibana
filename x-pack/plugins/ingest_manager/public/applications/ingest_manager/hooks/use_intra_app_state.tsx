@@ -57,9 +57,13 @@ export function useIntraAppState<S = AnyIntraAppRouteState>():
     // once so that it does not impact navigation to the page from within the
     // ingest app. side affect is that the browser back button would not work
     // consistently either.
-    if (location.pathname === intraAppState.forRoute && !wasHandled.has(intraAppState)) {
+
+    if (
+      location.pathname + location.search === intraAppState.forRoute &&
+      !wasHandled.has(intraAppState)
+    ) {
       wasHandled.add(intraAppState);
       return intraAppState.routeState as S;
     }
-  }, [intraAppState, location.pathname]);
+  }, [intraAppState, location.pathname, location.search]);
 }

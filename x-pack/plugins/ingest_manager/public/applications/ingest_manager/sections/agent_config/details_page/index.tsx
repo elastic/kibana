@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useState } from 'react';
-import { Redirect, useRouteMatch, Switch, Route, useHistory } from 'react-router-dom';
+import React, { useMemo, useState, useCallback } from 'react';
+import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
@@ -21,14 +21,16 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { AgentConfig } from '../../../types';
+import queryString from 'query-string';
+import { AgentConfig, CreateDatasourceRouteState } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
-import { useGetOneAgentConfig, useLink, useBreadcrumbs } from '../../../hooks';
+import { useGetOneAgentConfig, useLink, useBreadcrumbs, useCore } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { LinkedAgentCount, AgentConfigActionMenu } from '../components';
 import { ConfigDatasourcesView, ConfigSettingsView } from './components';
+import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
 const Divider = styled.div`
   width: 0;
@@ -48,7 +50,13 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const [redirectToAgentConfigList] = useState<boolean>(false);
   const agentStatusRequest = useGetAgentStatus(configId);
   const { refreshAgentStatus } = agentStatusRequest;
+  const {
+    application: { navigateToApp },
+  } = useCore();
+  const routeState = useIntraAppState<CreateDatasourceRouteState>();
   const agentStatus = agentStatusRequest.data?.results;
+  const openEnrollmentFlyoutOpenByDefault =
+    queryString.parse(useLocation().search).openEnrollmentFlyout === 'true';
 
   const headerLeftContent = useMemo(
     () => (
@@ -94,6 +102,12 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     ),
     [getHref, agentConfig, configId]
   );
+
+  const enrollmentCancelClickHandler = useCallback(() => {
+    if (routeState && routeState.onCancelNavigateTo) {
+      navigateToApp(routeState.onCancelNavigateTo[0], routeState.onCancelNavigateTo[1]);
+    }
+  }, [routeState, navigateToApp]);
 
   const headerRightContent = useMemo(
     () => (
@@ -155,6 +169,8 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                 onCopySuccess={(newAgentConfig: AgentConfig) => {
                   history.push(getPath('configuration_details', { configId: newAgentConfig.id }));
                 }}
+                enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
+                onCancelEnrollment={enrollmentCancelClickHandler}
               />
             ),
           },
