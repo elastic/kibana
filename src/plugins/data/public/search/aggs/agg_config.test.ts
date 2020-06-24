@@ -25,11 +25,7 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import {
-  Field as IndexPatternField,
-  IndexPattern,
-  IIndexPatternFieldList,
-} from '../../index_patterns';
+import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
 import { FieldFormatsStart } from '../../field_formats';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
@@ -376,7 +372,7 @@ describe('AggConfig', () => {
 
   describe('#toSerializedFieldFormat', () => {
     beforeEach(() => {
-      indexPattern.fields.getByName = identity as IIndexPatternFieldList['getByName'];
+      indexPattern.fields.getByName = identity as any;
     });
 
     it('works with aggs that have a special format type', () => {

@@ -18,14 +18,13 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import { fieldFormats, IFieldFormat } from '../../../../../../plugins/data/public';
+import { IFieldFormat } from '../../../../../../plugins/data/public';
 import { SerializedFieldFormat } from '../../../../../../plugins/expressions/common/types';
 
 type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
-const createFormat = fieldFormats.serialize;
 const getFormat: FormatFactory = (mapping?) => {
   return npStart.plugins.data.fieldFormats.deserialize(mapping as any);
 };
 
-export { getFormat, createFormat, FormatFactory };
+export { getFormat, FormatFactory };
