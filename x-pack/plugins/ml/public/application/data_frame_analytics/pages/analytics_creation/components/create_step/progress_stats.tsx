@@ -51,6 +51,8 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
           ) {
             clearInterval(interval);
           }
+        } else {
+          clearInterval(interval);
         }
       } catch (e) {
         notifications.toasts.addDanger(

@@ -86,7 +86,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
       )}
       <EuiSpacer size="s" />
       <Messages messages={requestMessages} />
-      {showProgress && <ProgressStats jobId={jobId} />}
+      {isJobCreated === true && showProgress && <ProgressStats jobId={jobId} />}
       {isJobCreated === true && <BackToListPanel />}
     </Fragment>
   );
