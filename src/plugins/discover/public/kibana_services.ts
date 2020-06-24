@@ -59,9 +59,23 @@ export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<Doc
   'DocViewsRegistry'
 );
 /**
- * Makes sure discover and context are using one instance of history
+ * Makes sure discover and context are using one instance of history.
  */
 export const getHistory = _.once(() => createHashHistory());
+
+/**
+ * Discover & context are using same hash history instance,
+ * When getting back to discover internal history.location could get out of sync with window.location
+ * This helper function syncs window.location state to internal hash history
+ *
+ * Using this on discover mount also workarounds possible issues with async hash event: https://github.com/elastic/kibana/pull/65163
+ * This helper is temp until: https://github.com/elastic/kibana/issues/65161 resolved
+ */
+export const ensureHashHistoryLocation = () => {
+  const h = getHistory();
+  Object.assign(h.location, createHashHistory().location);
+  return h;
+};
 
 export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHistory>(
   'scopedHistory'
