@@ -9,8 +9,13 @@ import { DataAction } from './action';
 import { dataReducer } from './reducer';
 import { DataState } from '../../types';
 import { LegacyEndpointEvent, ResolverEvent } from '../../../../common/endpoint/types';
-import { graphableProcesses, processNodePositionsAndEdgeLineSegments } from './selectors';
+import {
+  graphableProcesses,
+  processNodePositionsAndEdgeLineSegments,
+  limitsReached,
+} from './selectors';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
+import { EndpointDocGenerator, Tree } from '../../../../common/endpoint/generate_data';
 
 describe('resolver graph layout', () => {
   let processA: LegacyEndpointEvent;
@@ -116,7 +121,7 @@ describe('resolver graph layout', () => {
       const events: ResolverEvent[] = [];
       const action: DataAction = {
         type: 'serverReturnedResolverData',
-        payload: { events, stats: new Map() },
+        payload: { events, stats: new Map(), lineageLimits: { children: null, ancestors: null } },
       };
       store.dispatch(action);
     });
@@ -133,7 +138,7 @@ describe('resolver graph layout', () => {
       const events = [processA];
       const action: DataAction = {
         type: 'serverReturnedResolverData',
-        payload: { events, stats: new Map() },
+        payload: { events, stats: new Map(), lineageLimits: { children: null, ancestors: null } },
       };
       store.dispatch(action);
     });
@@ -150,7 +155,7 @@ describe('resolver graph layout', () => {
       const events = [processA, processB];
       const action: DataAction = {
         type: 'serverReturnedResolverData',
-        payload: { events, stats: new Map() },
+        payload: { events, stats: new Map(), lineageLimits: { children: null, ancestors: null } },
       };
       store.dispatch(action);
     });
@@ -177,7 +182,7 @@ describe('resolver graph layout', () => {
       ];
       const action: DataAction = {
         type: 'serverReturnedResolverData',
-        payload: { events, stats: new Map() },
+        payload: { events, stats: new Map(), lineageLimits: { children: null, ancestors: null } },
       };
       store.dispatch(action);
     });
@@ -196,6 +201,51 @@ describe('resolver graph layout', () => {
     });
     it('renders right', () => {
       expect(processNodePositionsAndEdgeLineSegments(store.getState())).toMatchSnapshot();
+    });
+  });
+});
+
+describe('resolver graph with too much lineage', () => {
+  let generator: EndpointDocGenerator;
+  let store: Store<DataState, DataAction>;
+  let allEvents: ResolverEvent[];
+  let childrenCursor: string;
+  let ancestorCursor: string;
+
+  beforeEach(() => {
+    generator = new EndpointDocGenerator('seed');
+    allEvents = generator.generateTree({ ancestors: 1, generations: 2, children: 2 }).allEvents;
+    childrenCursor = 'aValidChildursor';
+    ancestorCursor = 'aValidAncestorCursor';
+    store = createStore(dataReducer, undefined);
+  });
+
+  describe('should select from state properly', () => {
+    it('has the correct ancestor cursor', () => {
+      const action: DataAction = {
+        type: 'serverReturnedResolverData',
+        payload: {
+          events: allEvents,
+          stats: new Map(),
+          lineageLimits: { children: childrenCursor, ancestors: ancestorCursor },
+        },
+      };
+      store.dispatch(action);
+      const { ancestors } = limitsReached(store.getState());
+      expect(ancestors).toEqual(ancestorCursor);
+    });
+    it('has the correct children cursor', () => {
+      const action: DataAction = {
+        type: 'serverReturnedResolverData',
+        payload: {
+          events: allEvents,
+          stats: new Map(),
+          lineageLimits: { children: childrenCursor, ancestors: ancestorCursor },
+        },
+      };
+      store.dispatch(action);
+      const { children } = limitsReached(store.getState());
+      expect(children).toEqual(childrenCursor);
     });
   });
 });
