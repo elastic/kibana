@@ -125,7 +125,7 @@ that are essential for visualizing geospatial data.
 [[g_glos]]
 == G
 
-[[glossary-GeoJSON]] GeoJSON ::
+[[glossary-geojson]] GeoJSON ::
 // tag::GeoJSON-def[]
 An open-standard file format for storing geospatial vector data.
 // end::GeoJSON-def[]
