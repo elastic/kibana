@@ -17,15 +17,15 @@ import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
 import { StatsQuery } from '../queries/stats';
-import { createLifecycle } from './node';
+import { createLifecycle, createChildren } from './node';
 import { ChildrenNodesHelper } from './children_helper';
 import { TotalsPaginationBuilder } from './totals_pagination';
 import { MultiSearcher, QueryInfo } from '../queries/multi_searcher';
 import { AncestryQueryHandler } from './ancestry_query_handler';
 import { RelatedEventsQueryHandler } from './events_query_handler';
 import { RelatedAlertsQueryHandler } from './alerts_query_handler';
-import { ChildrenQueryHandler } from './children_query_handler';
-import { LifecycleQueryHandler } from './lifecycle_query_handler';
+import { ChildrenStartQueryHandler } from './children_start_query_handler';
+import { LifecycleQueryHandler } from './children_lifecycle_query_handler';
 
 export interface TreeOptions {
   children: number;
@@ -37,9 +37,11 @@ export interface TreeOptions {
   afterChild?: string;
 }
 
-export interface SingleQueryHandler<T> {
-  buildQuery(): QueryInfo;
-  // TODO make this just T
+interface QueryBuilder {
+  nextQuery(): QueryInfo | undefined;
+}
+
+export interface SingleQueryHandler<T> extends QueryBuilder {
   getResults(): T | undefined;
   search(client: IScopedClusterClient): Promise<T>;
 }
@@ -102,6 +104,13 @@ export class Fetcher {
   }
 
   private async searchWithAncestryArray(options: TreeOptions, originNode: LifecycleNode) {
+    const addQueryToList = (queryHandler: QueryBuilder, queries: QueryInfo[]) => {
+      const queryInfo = queryHandler.nextQuery();
+      if (queryInfo !== undefined) {
+        queries.push(queryInfo);
+      }
+    };
+
     const ancestryHandler = new AncestryQueryHandler(
       options.ancestors,
       this.indexPattern,
@@ -125,63 +134,48 @@ export class Fetcher {
       this.endpointID
     );
 
-    const childrenHandler = new ChildrenQueryHandler(
+    const childrenHandler = new ChildrenStartQueryHandler(
       options.children,
       this.id,
       options.afterChild,
       this.indexPattern,
       this.endpointID
     );
-    // if ancestryQuery -> queries.push()
-    // if eventsQuery -> queries.push()
-    // if alertsQuery -> queries.push()
-    // if childrenNodesQurey -> queries.push()
-    // then
-    // if ancestryQuery -> push
-    // if lifecycle for children query -> push
-    // then
-    // loop if ancestryQuery -> push
-    // then
-    // stats
+
     const msearch = new MultiSearcher(this.client);
 
-    let queries: QueryInfo[] = [
-      eventsHandler.buildQuery(),
-      alertsHandler.buildQuery(),
-      childrenHandler.buildQuery(),
-    ];
+    let queries: QueryInfo[] = [];
+    addQueryToList(eventsHandler, queries);
+    addQueryToList(alertsHandler, queries);
+    addQueryToList(childrenHandler, queries);
+
     if (ancestryHandler.hasMore()) {
-      queries.push(ancestryHandler.buildQuery());
+      addQueryToList(ancestryHandler, queries);
     }
     await msearch.search(queries);
 
-    queries = [];
-    // TODO need to loop this too
+    while (ancestryHandler.hasMore() || childrenHandler.hasMore()) {
+      queries = [];
+      addQueryToList(ancestryHandler, queries);
+      addQueryToList(childrenHandler, queries);
+      await msearch.search(queries);
+    }
+
+    const childrenTotalsHelper = childrenHandler.getResults();
+
     const childrenLifecycleHandler = new LifecycleQueryHandler(
-      childrenHandler.getResults().map(entityId),
+      childrenTotalsHelper,
       this.indexPattern,
       this.endpointID
     );
 
-    if (ancestryHandler.hasMore()) {
-      queries.push(ancestryHandler.buildQuery());
-    }
-
-    queries.push(childrenLifecycleHandler.buildQuery());
-    await msearch.search(queries);
-
-    while (ancestryHandler.hasMore()) {
-      queries = [];
-      const ancestryQuery = ancestryHandler.buildQuery();
-      queries.push(ancestryQuery);
-
-      await msearch.search(queries);
-    }
+    childrenLifecycleHandler.search(this.client);
 
     const tree = new Tree(this.id, {
       ancestry: ancestryHandler.getResults(),
       relatedEvents: eventsHandler.getResults(),
       relatedAlerts: alertsHandler.getResults(),
+      children: childrenLifecycleHandler.getResults(),
     });
 
     return this.stats(tree);
@@ -210,11 +204,32 @@ export class Fetcher {
    * @param after a cursor to use as the starting point for retrieving children
    */
   public async children(limit: number, after?: string): Promise<ResolverChildren> {
-    const helper = new ChildrenNodesHelper(this.id);
+    const originNode = await this.getNode(this.id);
+    if (!originNode) {
+      return createChildren();
+    }
 
-    await this.doChildren(helper, [this.id], limit, after);
+    if (!ancestryArray(originNode.lifecycle[0])) {
+      const helper = await this.findChildrenWithoutAncestry(this.id, limit, after);
 
-    return helper.getNodes();
+      return helper.getNodes();
+    }
+
+    const childrenHandler = new ChildrenStartQueryHandler(
+      limit,
+      this.id,
+      after,
+      this.indexPattern,
+      this.endpointID
+    );
+    const helper = await childrenHandler.search(this.client);
+    const childrenLifecycleHandler = new LifecycleQueryHandler(
+      helper,
+      this.indexPattern,
+      this.endpointID
+    );
+
+    return childrenLifecycleHandler.search(this.client);
   }
 
   /**
@@ -273,35 +288,35 @@ export class Fetcher {
     return createLifecycle(entityID, results);
   }
 
-  private async doChildren(
-    cache: ChildrenNodesHelper,
-    ids: string[],
-    limit: number,
-    after?: string
-  ) {
-    if (ids.length === 0) {
-      return;
-    }
-
-    const childrenQuery = new ChildrenQuery(
-      TotalsPaginationBuilder.createBuilder(limit, after),
+  private async findChildrenWithoutAncestry(id: string, limit: number, after?: string) {
+    let nodesLeft = limit;
+    let childIDs = [id];
+    let childrenQuery = new ChildrenQuery(
+      TotalsPaginationBuilder.createBuilder(nodesLeft, after),
       this.indexPattern,
       this.endpointID
     );
-    const lifecycleQuery = new LifecycleQuery(this.indexPattern, this.endpointID);
+    const cache = new ChildrenNodesHelper(id);
 
-    const { totals, results } = await childrenQuery.search(this.client, ids);
-    if (results.length === 0) {
-      return;
+    while (childIDs.length > 0) {
+      const { totals, results } = await childrenQuery.search(this.client, childIDs);
+      if (results.length === 0) {
+        break;
+      }
+      childIDs = results.map(entityId);
+
+      cache.addPagination(totals, results);
+      nodesLeft = limit - cache.getNumNodes();
+      childrenQuery = new ChildrenQuery(
+        TotalsPaginationBuilder.createBuilder(nodesLeft),
+        this.indexPattern,
+        this.endpointID
+      );
     }
-
-    const childIDs = results.map(entityId);
-    const children = await lifecycleQuery.search(this.client, childIDs);
-
-    cache.addChildren(totals, children);
-    const nodesLeft = limit - childIDs.length;
-
-    await this.doChildren(cache, childIDs, nodesLeft);
+    const lifecycleQuery = new LifecycleQuery(this.indexPattern, this.endpointID);
+    const children = await lifecycleQuery.search(this.client, cache.getEntityIDs());
+    cache.addLifecycleEvents(children);
+    return cache;
   }
 
   private async doAncestors(limit: number, originNode: LifecycleNode) {

@@ -81,7 +81,7 @@ export interface ChildNode extends LifecycleNode {
    *  null because we know it does not have children during this query.
    * 2. If the max level was reached we do not know if this node has children or not so we'll mark it as null
    */
-  nextChild?: string | null;
+  nextChild: string | null;
 }
 
 /**

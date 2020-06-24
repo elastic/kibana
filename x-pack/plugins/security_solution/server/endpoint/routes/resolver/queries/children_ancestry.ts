@@ -6,15 +6,15 @@
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
-import { PaginationBuilder } from '../utils/pagination';
+import { TotalsPaginationBuilder, PaginatedResults } from '../utils/totals_pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
  * Builds a query for retrieving descendants of a node.
  */
-export class ChildrenAncestryQuery extends ResolverQuery<ResolverEvent[]> {
+export class ChildrenAncestryQuery extends ResolverQuery<PaginatedResults> {
   constructor(
-    private readonly pagination: PaginationBuilder,
+    private readonly pagination: TotalsPaginationBuilder,
     indexPattern: string,
     endpointID?: string
   ) {
@@ -45,11 +45,14 @@ export class ChildrenAncestryQuery extends ResolverQuery<ResolverEvent[]> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields('event.id'),
+      ...this.pagination.buildQueryFields(entityIDs.length, 'event.id', 'process.parent.entity_id'),
     };
   }
 
-  formatResponse(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
-    return ResolverQuery.getResults(response);
+  formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
+    return {
+      results: ResolverQuery.getResults(response),
+      totals: TotalsPaginationBuilder.getTotals(response.aggregations),
+    };
   }
 }

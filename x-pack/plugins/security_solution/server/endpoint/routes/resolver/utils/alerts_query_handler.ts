@@ -39,7 +39,11 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
     );
   };
 
-  buildQuery(): QueryInfo {
+  nextQuery(): QueryInfo | undefined {
+    if (this.getResults()) {
+      return;
+    }
+
     return {
       query: this.query,
       ids: this.entityID,
@@ -52,6 +56,11 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
   }
 
   async search(client: IScopedClusterClient) {
+    const results = this.getResults();
+    if (results) {
+      return results;
+    }
+
     this.handleResponse(await this.query.search(client, this.entityID));
     return this.getResults() || createRelatedAlerts(this.entityID);
   }

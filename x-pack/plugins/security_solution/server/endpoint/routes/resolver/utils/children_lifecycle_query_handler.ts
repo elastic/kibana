@@ -6,64 +6,53 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { entityId } from '../../../../../common/endpoint/models/event';
-import {
-  ResolverEvent,
-  LifecycleNode,
-  ResolverChildren,
-} from '../../../../../common/endpoint/types';
+import { ResolverEvent, ResolverChildren } from '../../../../../common/endpoint/types';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
-import { createLifecycle } from './node';
+import { ChildrenNodesHelper } from './children_helper';
+import { createChildren } from './node';
 
 // TODO change the name to reflect children nodes
 export class LifecycleQueryHandler implements SingleQueryHandler<ResolverChildren> {
-  // TODO change this to be ResolverChildren
-  private lifecycle: ResolverEvent[] = [];
+  private lifecycle: ResolverChildren | undefined;
   private readonly query: LifecycleQuery;
-  // TODO need to take in nextChild
   constructor(
-    private readonly entityIDs: string[],
+    private readonly childrenHelper: ChildrenNodesHelper,
     indexPattern: string,
     legacyEndpointID: string | undefined
   ) {
     this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
   }
 
-  private static toMapOfNodes(results: ResolverEvent[]) {
-    return results.reduce((nodes: Map<string, LifecycleNode>, event: ResolverEvent) => {
-      const nodeId = entityId(event);
-      let node = nodes.get(nodeId);
-      if (!node) {
-        node = createLifecycle(nodeId, []);
-      }
-
-      node.lifecycle.push(event);
-      return nodes.set(nodeId, node);
-    }, new Map());
-  }
-
   handleResponse = (response: SearchResponse<ResolverEvent>) => {
-    this.lifecycle = LifecycleQueryHandler.toMapOfNodes(
-      this.query.formatResponse(response)
-    ).values();
+    this.childrenHelper.addLifecycleEvents(this.query.formatResponse(response));
+    this.lifecycle = this.childrenHelper.getNodes();
   };
 
-  buildQuery(): QueryInfo {
+  nextQuery(): QueryInfo | undefined {
+    if (this.getResults()) {
+      return;
+    }
+
     return {
       query: this.query,
-      ids: this.entityIDs,
+      ids: this.childrenHelper.getEntityIDs(),
       handler: this.handleResponse,
     };
   }
 
-  getResults() {
+  getResults(): ResolverChildren | undefined {
     return this.lifecycle;
   }
 
   async search(client: IScopedClusterClient) {
-    this.handleResponse(await this.query.search(client, this.entityIDs));
-    return this.getResults();
+    const results = this.getResults();
+    if (results) {
+      return results;
+    }
+
+    this.handleResponse(await this.query.search(client, this.childrenHelper.getEntityIDs()));
+    return this.getResults() || createChildren();
   }
 }

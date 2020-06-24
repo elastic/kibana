@@ -70,12 +70,16 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     }, new Map());
   }
 
+  private setNoMore() {
+    this.ancestry.nextAncestor = null;
+    this.ancestorsToFind = [];
+    this.levels = 0;
+  }
+
   handleResponse = (searchResp: SearchResponse<ResolverEvent>) => {
     const results = this.query.formatResponse(searchResp);
     if (results.length === 0) {
-      this.ancestry.nextAncestor = null;
-      this.ancestorsToFind = [];
-      this.levels = 0;
+      this.setNoMore();
       return;
     }
 
@@ -99,12 +103,14 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     return this.levels > 0 && this.ancestorsToFind.length > 0;
   }
 
-  buildQuery(): QueryInfo {
-    return {
-      query: this.query,
-      ids: this.ancestorsToFind,
-      handler: this.handleResponse,
-    };
+  nextQuery(): QueryInfo | undefined {
+    if (this.hasMore()) {
+      return {
+        query: this.query,
+        ids: this.ancestorsToFind,
+        handler: this.handleResponse,
+      };
+    }
   }
 
   getResults() {
@@ -113,7 +119,10 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
 
   async search(client: IScopedClusterClient) {
     while (this.hasMore()) {
-      const info = this.buildQuery();
+      const info = this.nextQuery();
+      if (!info) {
+        break;
+      }
       this.handleResponse(await this.query.search(client, info.ids));
     }
     return this.getResults();
