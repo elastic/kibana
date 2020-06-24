@@ -88,7 +88,7 @@ export const toastDrilldownsCRUDError = i18n.translate(
 );
 
 export const insufficientLicenseLevel = i18n.translate(
-  'xpack.uiActionsEnhanced.drildown.components.flyoutDrilldownWizard.insufficientLicenseLevelError',
+  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.insufficientLicenseLevelError',
   {
     defaultMessage: 'Insufficient license level',
     description:
@@ -98,7 +98,7 @@ export const insufficientLicenseLevel = i18n.translate(
 
 export const invalidDrilldownType = (type: string) =>
   i18n.translate(
-    'xpack.uiActionsEnhanced.drildown.components.flyoutDrilldownWizard.invalidDrilldownType',
+    'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.invalidDrilldownType',
     {
       defaultMessage: "Drilldown type {type} doesn't exist",
       values: {
