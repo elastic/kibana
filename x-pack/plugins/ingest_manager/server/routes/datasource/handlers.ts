@@ -87,7 +87,10 @@ export const createDatasourceHandler: RequestHandler<
 
       for (const callback of externalCallbacks) {
         try {
-          updatedNewData = await callback(updatedNewData);
+          // ensure that the returned value by the callback passes schema validation
+          updatedNewData = CreateDatasourceRequestSchema.body.validate(
+            await callback(updatedNewData)
+          );
         } catch (error) {
           // Log the error, but keep going and process the other callbacks
           logger.error('An external registered [datasourceCreate] callback failed when executed');
@@ -95,6 +98,10 @@ export const createDatasourceHandler: RequestHandler<
         }
       }
 
+      // The type `NewDatasource` and the `DatasourceBaseSchema` are incompatible.
+      // `NewDatasrouce` defines `namespace` as optional string, which means that `undefined` is a
+      // valid value, however, the schema defines it as string with a minimum length of 1.
+      // Here, we need to cast the value back to the schema type and ignore the TS error.
       // @ts-ignore
       newData = updatedNewData as typeof CreateDatasourceRequestSchema.body;
     }
