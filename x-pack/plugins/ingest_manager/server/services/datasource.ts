@@ -295,7 +295,7 @@ async function _assignPackageStreamToStream(
 
   const [pkgStream] = await getAssetsDataForPackageKey(
     { pkgName: pkgInfo.name, pkgVersion: pkgInfo.version },
-    (path: string) => path.endsWith('streamFromPkg.template_path'),
+    (path: string) => path.endsWith(streamFromPkg.template_path),
     dataset
   );
 
