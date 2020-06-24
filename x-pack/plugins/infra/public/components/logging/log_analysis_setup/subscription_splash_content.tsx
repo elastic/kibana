@@ -50,14 +50,14 @@ export const SubscriptionSplashContent: React.FC = () => {
     title = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.startTrialTitle"
-        defaultMessage="Start a free 14 day Platinum subscription trial"
+        defaultMessage="To access anomaly detection, start a free trial"
       />
     );
 
     description = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.startTrialDescription"
-        defaultMessage="Run Machine Learning jobs to view detected anomalies in your logs with our anomaly detection feature—part of the Platinum Elastic Stack subscription."
+        defaultMessage="Our free, 14-day trial includes machine learning features, which enable you to detect anomalies in your logs."
       />
     );
 
@@ -69,7 +69,7 @@ export const SubscriptionSplashContent: React.FC = () => {
       >
         <FormattedMessage
           id="xpack.infra.logs.logAnalysis.splash.startTrialCta"
-          defaultMessage="Start free trial"
+          defaultMessage="Start trial"
         />
       </EuiButton>
     );
@@ -77,14 +77,14 @@ export const SubscriptionSplashContent: React.FC = () => {
     title = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionTitle"
-        defaultMessage="Update to a Platinum subscription"
+        defaultMessage="To access anomaly detection, upgrade to a Platinum Subscription"
       />
     );
 
     description = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionDescription"
-        defaultMessage="Run Machine Learning jobs to view detected anomalies in your logs with our anomaly detection feature—part of the Platinum Elastic Stack subscription."
+        defaultMessage="You must have a Platinum Subscription to use machine learning features."
       />
     );
 
@@ -92,7 +92,7 @@ export const SubscriptionSplashContent: React.FC = () => {
       <EuiButton fullWidth={false} fill href="https://www.elastic.co/subscriptions">
         <FormattedMessage
           id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionCta"
-          defaultMessage="Update subscription"
+          defaultMessage="Upgrade subscription"
         />
       </EuiButton>
     );
