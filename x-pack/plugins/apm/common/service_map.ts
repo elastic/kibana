@@ -34,16 +34,6 @@ export interface Connection {
   destination: ConnectionNode;
 }
 
-export interface ServiceAnomaly {
-  anomaly_score: number;
-  anomaly_severity: string;
-  actual_value: number;
-  typical_value: number;
-  ml_job_id: string;
-}
-
-export type ServiceNode = ConnectionNode & Partial<ServiceAnomaly>;
-
 export interface ServiceNodeMetrics {
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
