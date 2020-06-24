@@ -10464,8 +10464,6 @@
     "xpack.ml.newJob.recognize.useDedicatedIndexLabel": "専用インデックスを使用",
     "xpack.ml.newJob.recognize.useFullDataLabel": "完全な {indexPatternTitle} データを使用",
     "xpack.ml.newJob.recognize.usingSavedSearchDescription": "保存検索を使用すると、データフィードで使用されるクエリが、{moduleId} モジュールでデフォルトで提供されるものと異なるものになります。",
-    "xpack.ml.newJob.recognize.viewResultsAriaLabel": "結果を表示",
-    "xpack.ml.newJob.recognize.viewResultsLinkText": "結果を表示",
     "xpack.ml.newJob.recognize.visualizationsLabel": "ビジュアライゼーション",
     "xpack.ml.newJob.simple.createWatchView.emailAddressPlaceholder": "メールアドレス",
     "xpack.ml.newJob.simple.createWatchView.nowLabel": "今 - {selectInterval}",
