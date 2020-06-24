@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Breadcrumb as EuiBreadcrumb, IconType } from '@elastic/eui';
+import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
