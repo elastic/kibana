@@ -5,7 +5,7 @@
  */
 
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   elasticsearchServiceMock,
 } from '../../../../../../src/core/server/mocks';
@@ -17,7 +17,7 @@ export type MockAuthenticationProviderOptions = ReturnType<
 export function mockAuthenticationProviderOptions(options?: { name: string }) {
   return {
     client: elasticsearchServiceMock.createClusterClient(),
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
     basePath: httpServiceMock.createBasePath(),
     tokens: { refresh: jest.fn(), invalidate: jest.fn() },
     name: options?.name ?? 'basic1',
