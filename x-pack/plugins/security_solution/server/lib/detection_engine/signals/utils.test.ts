@@ -33,9 +33,6 @@ import {
   mockLogger,
 } from './__mocks__/es_results';
 
-// @ts-ignore
-const replacer = (_, value) => (value === 'undefined' ? null : value);
-
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
   const unix = moment(anchor).valueOf();
