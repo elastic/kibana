@@ -32,14 +32,17 @@ import { Adapters } from '../../../../../plugins/inspector/public';
 import { IAggConfigs } from '../aggs';
 import { ISearchSource } from '../search_source';
 import { tabifyAggResponse } from '../tabify';
-import { Filter, Query, TimeRange, IIndexPattern, isRangeFilter } from '../../../common';
-import { FilterManager, calculateBounds, getTime } from '../../query';
 import {
-  getFieldFormats,
-  getIndexPatterns,
-  getQueryService,
-  getSearchService,
-} from '../../services';
+  calculateBounds,
+  Filter,
+  getTime,
+  IIndexPattern,
+  isRangeFilter,
+  Query,
+  TimeRange,
+} from '../../../common';
+import { FilterManager } from '../../query';
+import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
 

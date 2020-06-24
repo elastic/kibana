@@ -16,16 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { parse } from 'query-string';
+
+import { parseQueryString } from './parse_querystring';
 
 /** @internal */
-export function parseQueryString() {
-  // window.location.search is an empty string
-  // get search from href
-  const hrefSplit = window.location.href.split('?');
-  if (hrefSplit.length <= 1) {
-    return {};
+export function getForceNow() {
+  const forceNow = parseQueryString().forceNow as string;
+  if (!forceNow) {
+    return;
   }
 
-  return parse(hrefSplit[1], { sort: false });
+  const ticks = Date.parse(forceNow);
+  if (isNaN(ticks)) {
+    throw new Error(`forceNow query parameter, ${forceNow}, can't be parsed by Date.parse`);
+  }
+  return new Date(ticks);
 }

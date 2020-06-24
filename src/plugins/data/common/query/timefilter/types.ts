@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Moment } from 'moment';
+
 export interface RefreshInterval {
   pause: boolean;
   value: number;
@@ -26,4 +28,9 @@ export interface TimeRange {
   from: string;
   to: string;
   mode?: 'absolute' | 'relative';
+}
+
+export interface TimeRangeBounds {
+  min: Moment | undefined;
+  max: Moment | undefined;
 }
