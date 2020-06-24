@@ -5,6 +5,7 @@
  */
 
 import { boolean } from 'io-ts';
+import { i18n } from '@kbn/i18n';
 
 import { useState } from 'react';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -30,6 +31,13 @@ export function useTrialStatus(): UseTrialStatusState {
       },
       onResolve: (response) => {
         setIsTrialAvailable(response);
+      },
+      onReject: (error) => {
+        services.notifications.toasts.addDanger(
+          i18n.translate('xpack.infra.trialStatus.trialStatusNetworkErrorMessage', {
+            defaultMessage: 'We could not determine if the trial license is available',
+          })
+        );
       },
     },
     [services]
