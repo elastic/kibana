@@ -31,16 +31,6 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
             .find('.euiTableCellContent')
             .text()
             .trim(),
-          sourceIndex: $tr
-            .findTestSubject('transformListColumnSourceIndex')
-            .find('.euiTableCellContent')
-            .text()
-            .trim(),
-          destinationIndex: $tr
-            .findTestSubject('transformListColumnDestinationIndex')
-            .find('.euiTableCellContent')
-            .text()
-            .trim(),
           status: $tr
             .findTestSubject('transformListColumnStatus')
             .find('.euiTableCellContent')

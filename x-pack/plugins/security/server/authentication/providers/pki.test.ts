@@ -547,14 +547,14 @@ describe('PKIAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({ accessToken: 'foo' });
     });
 
-    it('redirects to `/logged_out` page if access token is invalidated successfully.', async () => {
+    it('redirects to `loggedOut` URL if access token is invalidated successfully.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const state = { accessToken: 'foo', peerCertificateFingerprint256: '2A:7A:C2:DD' };
 
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
       await expect(provider.logout(request, state)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
       );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
