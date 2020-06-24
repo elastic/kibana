@@ -92,10 +92,9 @@ export function defineSAMLRoutes({
       {
         path,
         validate: {
-          body: schema.object({
-            SAMLResponse: schema.string(),
-            RelayState: schema.maybe(schema.string()),
-          }),
+          body: schema.object(
+            { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },
+            { unknowns: 'ignore' })
         },
         options: { authRequired: false, xsrfRequired: false },
       },
@@ -115,6 +114,7 @@ export function defineSAMLRoutes({
             value: {
               type: SAMLLogin.LoginWithSAMLResponse,
               samlResponse: request.body.SAMLResponse,
+              relayState: request.body.RelayState,
             },
           });
 
