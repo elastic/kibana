@@ -21,14 +21,14 @@ import {
   TranslatedEntryMatch,
   TranslatedEntryMatchAny,
   TranslatedEntryNested,
-  FinalTranslatedExceptionList,
+  WrappedTranslatedExceptionList,
   InternalArtifactSchema,
-  finalExceptionList,
+  wrappedExceptionList,
 } from '../../schemas';
 import { ArtifactConstants } from '.';
 
 export async function buildArtifact(
-  exceptions: FinalTranslatedExceptionList,
+  exceptions: WrappedTranslatedExceptionList,
   os: string,
   schemaVersion: string
 ): Promise<InternalArtifactSchema> {
@@ -52,8 +52,8 @@ export async function getFullEndpointExceptionList(
   eClient: ExceptionListClient,
   os: string,
   schemaVersion: string
-): Promise<FinalTranslatedExceptionList> {
-  const exceptions: FinalTranslatedExceptionList = { exceptions_list: [] }; // todo type
+): Promise<WrappedTranslatedExceptionList> {
+  const exceptions: WrappedTranslatedExceptionList = { exceptions_list: [] };
   let numResponses = 0;
   let page = 1;
 
@@ -81,11 +81,11 @@ export async function getFullEndpointExceptionList(
     }
   } while (numResponses > 0);
 
-  const [validated, errors] = validate(exceptions, finalExceptionList);
+  const [validated, errors] = validate(exceptions, wrappedExceptionList);
   if (errors != null) {
     throw new Error(errors);
   }
-  return validated as FinalTranslatedExceptionList;
+  return validated as WrappedTranslatedExceptionList;
 }
 
 /**
@@ -163,7 +163,7 @@ function translateEntry(
 /**
  * Compresses the exception list
  */
-function compressExceptionList(exceptionList: TranslatedExceptionList): Promise<Buffer> {
+function compressExceptionList(exceptionList: WrappedTranslatedExceptionList): Promise<Buffer> {
   return lzma.compress(JSON.stringify(exceptionList), (res: Buffer) => {
     return res;
   });
