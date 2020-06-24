@@ -19,7 +19,7 @@
 import { take } from 'rxjs/operators';
 
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 
@@ -110,7 +110,7 @@ describe('KibanaMigrator', () => {
 function mockOptions(): KibanaMigratorOptions {
   const callCluster = jest.fn();
   return {
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
     savedObjectValidations: {},
     typeRegistry: createRegistry([
