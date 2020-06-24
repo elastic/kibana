@@ -7,10 +7,10 @@
 import { ElasticsearchServiceSetup } from 'src/core/server';
 import { LevelLogger } from '../';
 import { ReportingCore } from '../../';
-import { Report } from './report';
-import { mapping } from './mapping';
-import { indexTimestamp } from './index_timestamp';
 import { LayoutInstance } from '../../export_types/common/layouts';
+import { indexTimestamp } from './index_timestamp';
+import { mapping } from './mapping';
+import { Report } from './report';
 
 export const statuses = {
   JOB_STATUS_PENDING: 'pending',
@@ -28,11 +28,12 @@ interface AddReportOpts {
   max_attempts: number;
 }
 
-interface UpdateOptions {
+interface UpdateQuery {
   index: string;
   id: string;
   if_seq_no: unknown;
   if_primary_term: unknown;
+  body: { doc: Partial<Report> };
 }
 
 /*
@@ -165,13 +166,13 @@ export class ReportingStore {
     return report;
   }
 
-  public async updateReport(opts: UpdateOptions, doc: Partial<Report>): Promise<Report> {
+  public async updateReport(query: UpdateQuery): Promise<Report> {
     return this.client.callAsInternalUser('update', {
-      index: opts.index,
-      id: opts.id,
-      if_seq_no: opts.if_seq_no,
-      if_primary_term: opts.if_primary_term,
-      body: { doc },
+      index: query.index,
+      id: query.id,
+      if_seq_no: query.if_seq_no,
+      if_primary_term: query.if_primary_term,
+      body: { doc: query.body.doc },
     });
   }
 }
