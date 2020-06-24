@@ -14,6 +14,7 @@ import {
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
   PolicyData,
+  EndpointStatus,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
 
@@ -209,7 +210,7 @@ interface HostInfo {
   };
   host: Host;
   Endpoint: {
-    status: string;
+    status: EndpointStatus;
     policy: {
       applied: {
         id: string;
@@ -334,7 +335,7 @@ export class EndpointDocGenerator {
         os: this.randomChoice(OS),
       },
       Endpoint: {
-        status: 'enrolled',
+        status: EndpointStatus.ENROLLED,
         policy: {
           applied: this.randomChoice(APPLIED_POLICIES),
         },

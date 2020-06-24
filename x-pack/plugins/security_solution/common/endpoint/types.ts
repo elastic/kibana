@@ -276,7 +276,7 @@ export interface AlertEvent {
     type: string;
   };
   Endpoint: {
-    status: string;
+    status: EndpointStatus;
     policy: {
       applied: {
         id: string;
@@ -351,7 +351,23 @@ export interface AlertEvent {
 }
 
 /**
- * The status of the host
+ * The status of the Endpoint Agent as reported by the Agent or the
+ * Security solution app using events from fleet.
+ */
+export enum EndpointStatus {
+  /**
+   * Agent is enrolled with Fleet
+   */
+  ENROLLED = 'enrolled',
+
+  /**
+   * Agent is unenrrolled from Fleet
+   */
+  UNENROLLED = 'unenrolled',
+}
+
+/**
+ * The status of the host, which is mapped to the Elastic Agent status in Fleet
  */
 export enum HostStatus {
   /**
@@ -387,6 +403,7 @@ export type HostMetadata = Immutable<{
     };
   };
   Endpoint: {
+    status: EndpointStatus;
     policy: {
       applied: {
         id: string;

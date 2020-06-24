@@ -14,6 +14,7 @@ import {
 import { elasticsearchServiceMock } from '../../../../../../../../src/core/server/mocks';
 import { SearchResponse } from 'elasticsearch';
 import { metadataMirrorIndexPattern } from '../../../../../common/endpoint/constants';
+import { EndpointStatus } from '../../../../../common/endpoint/types';
 
 const noUnenrolledEndpoint = () =>
   Promise.resolve(({
@@ -34,7 +35,7 @@ describe('test find all unenrolled HostId', () => {
         bool: {
           filter: {
             term: {
-              'Endpoint.status': 'unenrolled',
+              'Endpoint.status': EndpointStatus.UNENROLLED,
             },
           },
         },
@@ -106,7 +107,7 @@ describe('test find unenrolled endpoint host id by hostId', () => {
           },
           filter: {
             term: {
-              'Endpoint.status': 'unenrolled',
+              'Endpoint.status': EndpointStatus.UNENROLLED,
             },
           },
         },

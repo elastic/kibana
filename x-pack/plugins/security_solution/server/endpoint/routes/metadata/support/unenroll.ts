@@ -7,6 +7,7 @@
 import { APICaller, IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { metadataMirrorIndexPattern } from '../../../../../common/endpoint/constants';
+import { EndpointStatus } from '../../../../../common/endpoint/types';
 
 const KEEPALIVE = '10s';
 
@@ -36,7 +37,7 @@ export async function findUnenrolledHostByHostId(
           },
           filter: {
             term: {
-              'Endpoint.status': 'unenrolled',
+              'Endpoint.status': EndpointStatus.UNENROLLED,
             },
           },
         },
@@ -70,7 +71,7 @@ export async function findAllUnenrolledHostIds(client: IScopedClusterClient): Pr
         bool: {
           filter: {
             term: {
-              'Endpoint.status': 'unenrolled',
+              'Endpoint.status': EndpointStatus.UNENROLLED,
             },
           },
         },
