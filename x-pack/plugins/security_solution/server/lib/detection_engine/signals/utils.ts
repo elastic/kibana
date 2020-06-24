@@ -289,7 +289,7 @@ export const getSignalTimeTuples = ({
     from: moment.Moment | undefined;
     maxSignals: number;
   }> = [];
-  if (gap != null && gap > 0 && previousStartedAt != null) {
+  if (gap != null && gap.asMilliseconds() > 0 && previousStartedAt != null) {
     const fromUnit = ruleParamsFrom[ruleParamsFrom.length - 1];
     if (isValidUnit(fromUnit)) {
       const unit = fromUnit; // only seconds (s), minutes (m) or hours (h)
