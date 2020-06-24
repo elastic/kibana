@@ -7,7 +7,28 @@
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 
 import { xpackMocks } from '../../../../mocks';
-import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
+import {
+  AgentService,
+  IngestManagerStartContract,
+  ExternalCallback,
+} from '../../../ingest_manager/server';
+import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
+import { createDatasourceServiceMock } from '../../../ingest_manager/server/mocks';
+
+/**
+ * Crates a mocked input contract for the `EndpointAppContextService#start()` method
+ */
+export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
+  EndpointAppContextServiceStartContract
+> => {
+  return {
+    agentService: createMockAgentService(),
+    registerIngestCallback: jest.fn<
+      ReturnType<IngestManagerStartContract['registerExternalCallback']>,
+      Parameters<IngestManagerStartContract['registerExternalCallback']>
+    >(),
+  };
+};
 
 import { ExceptionListClient } from '../../../lists/server';
 
@@ -66,6 +87,8 @@ export const createMockIngestManagerStartContract = (
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
     agentService: createMockAgentService(),
+    registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
+    datasourceService: createDatasourceServiceMock(),
   };
 };
 

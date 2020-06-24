@@ -144,6 +144,7 @@ export class ManifestManager {
         const artifact = newManifest.getArtifact(diff.id);
         try {
           await this.artifactClient.createArtifact(artifact);
+          // Cache the compressed body of the artifact
           this.cache.set(`${artifact.identifier}-${artifact.sha256}`, artifact.body);
         } catch (err) {
           if (err.status === 409) {

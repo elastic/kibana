@@ -3,8 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AgentService } from '../../../ingest_manager/server';
-import { ManifestManager } from './services';
+import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
+import { handleDatasourceCreate } from './ingest_integration';
+
+export type EndpointAppContextServiceStartContract = Pick<
+  IngestManagerStartContract,
+  'agentService'
+> & {
+  registerIngestCallback: IngestManagerStartContract['registerExternalCallback'];
+};
 
 /**
  * A singleton that holds shared services that are initialized during the start up phase
@@ -14,12 +21,9 @@ export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
 
-  public start(dependencies: {
-    agentService: AgentService;
-    manifestManager: ManifestManager | undefined;
-  }) {
+  public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
-    this.manifestManager = dependencies.manifestManager;
+    dependencies.registerIngestCallback('datasourceCreate', handleDatasourceCreate);
   }
 
   public stop() {}

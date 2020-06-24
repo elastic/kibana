@@ -28,7 +28,6 @@ import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockAgentService } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
-import { getManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
 import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
@@ -37,23 +36,23 @@ const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
     {
       entries: [
         {
-          type: 'exact_caseless',
-          value: 'Elastic, N.V.',
-          field: 'actingProcess.file.signer',
+          field: 'some.not.nested.field',
           operator: 'included',
-        },
-        {
-          type: 'exact_caseless_any',
-          value: ['process', 'malware'],
-          field: 'event.category',
-          operator: 'included',
+          type: 'exact_cased',
+          value: 'some value',
         },
       ],
-      type: 'simple',
+      field: 'some.field',
+      type: 'nested',
+    },
+    {
+      field: 'some.not.nested.field',
+      operator: 'included',
+      type: 'exact_cased',
+      value: 'some value',
     },
   ],
 };
-
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockClusterClient: jest.Mocked<IClusterClient>;

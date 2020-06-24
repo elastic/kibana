@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
+import { Mappings, IndexSettings, Aliases } from '../../../../../../common';
 
-import { PalettePicker as Component } from './palette_picker';
-
-export const PalettePicker = pure(Component);
+export interface CommonWizardSteps {
+  settings?: IndexSettings;
+  mappings?: Mappings;
+  aliases?: Aliases;
+}

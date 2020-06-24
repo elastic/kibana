@@ -258,21 +258,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager.agentService,
-      manifestManager,
+      registerIngestCallback: plugins.ingestManager.registerExternalCallback,
     });
-
-    if (this.exceptionsPackagerTask) {
-      // TODO: register callback to initialize manifest
-      // PR: https://github.com/elastic/kibana/pull/69428
-
-      this.exceptionsPackagerTask
-        .getTaskRunner({
-          taskManager: plugins.taskManager,
-        })
-        .run();
-    } else {
-      this.logger.debug('Exceptions Packager not available.');
-    }
 
     return {};
   }
