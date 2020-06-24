@@ -50,7 +50,6 @@ async function fetchIndexSettings(indexPatternTitle) {
       toastDisplayed = true;
       toasts.addWarning(warningMsg);
     }
-
     console.warn(warningMsg);
     return {
       maxResultWindow: DEFAULT_MAX_RESULT_WINDOW,
