@@ -1,5 +1,5 @@
 [[search]]
-== Searching your data
+== Search data
 Many Kibana apps embed a query bar for real-time search, including
 *Discover*, *Visualize*, and *Dashboard*.
 
@@ -83,14 +83,14 @@ query language you can also submit queries using the {ref}/query-dsl.html[Elasti
 
 
 [[save-open-search]]
-=== Saving searches
+=== Save a search
 A saved search persists your current view of Discover for later retrieval and reuse. You can reload a saved search into Discover, add it to a dashboard, and use it as the basis for a <<visualize, visualization>>.
 
 A saved search includes the query text, filters, and optionally, the time filter. A saved search also includes the selected columns in the document table, the sort order, and the current index pattern.
 
 [role="xpack"]
 [[discover-read-only-access]]
-==== Read only access
+==== Read-only access
 When you have insufficient privileges to save searches, the following indicator in Kibana will be
 displayed and the *Save* button won't be visible. For more information on granting access to
 Kibana see <<xpack-security-authorization>>.
@@ -104,7 +104,9 @@ To save the current search:
 . Click *Save* in the Kibana toolbar.
 . Enter a name for the search and click *Save*.
 
-You can import, export and delete saved searches from *Management/Kibana/Saved Objects*.
+To import, export and delete saved searches:
+. Open the menu, then click *Stack Management.
+. From the {kib} menu, click *Saved Ojbects*.
 
 ==== Open a saved search
 To load a saved search into Discover:
@@ -117,7 +119,7 @@ selected, opening the saved search changes the selected index pattern. The query
 used for the saved search will also be automatically selected.
 
 [[save-load-delete-query]]
-=== Saving queries
+=== Save a query
 A saved query is a portable collection of query text and filters that you can reuse in <<discover, Discover>>, <<visualize, Visualize>>, and <<dashboard, Dashboard>>. Save a query when you want to:
 
 * Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter
@@ -127,7 +129,7 @@ A saved query is a portable collection of query text and filters that you can re
 Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved search>> instead.
 
 [role="xpack"]
-==== Read only access
+==== Read-only access
 If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover. For more information, see <<xpack-security-authorization, Granting access to Kibana>>
 
 ==== Save a query

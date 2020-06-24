@@ -109,6 +109,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       isManagedTimeline(ACTIVE_TIMELINE_REDUX_ID)
         ? getManageTimelineById(ACTIVE_TIMELINE_REDUX_ID)
         : { documentType: null, id: null, indexToAdd: null },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [getManageTimelineById]
   );
 

@@ -55,6 +55,7 @@ export const useRule = (id: string | undefined): ReturnRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   return [loading, rule];

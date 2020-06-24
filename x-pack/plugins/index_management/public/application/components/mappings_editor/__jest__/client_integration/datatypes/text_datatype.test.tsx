@@ -77,13 +77,12 @@ describe.skip('Mappings editor: text datatype', () => {
 
     // It should have the default parameters values added
     updatedMappings.properties.myField = {
-      type: 'text',
       ...defaultTextParameters,
     };
 
     ({ data } = await getMappingsEditorData(component));
     expect(data).toEqual(updatedMappings);
-  });
+  }, 10000);
 
   test('analyzer parameter: default values', async () => {
     const defaultMappings = {
@@ -211,7 +210,7 @@ describe.skip('Mappings editor: text datatype', () => {
     expect(indexAnalyzerValue).toBe('standard');
     expect(searchAnalyzerValue).toBe('simple');
     expect(searchQuoteAnalyzerValue).toBe('whitespace');
-  }, 10000);
+  }, 50000);
 
   test('analyzer parameter: custom analyzer (external plugin)', async () => {
     const defaultMappings = {
@@ -304,7 +303,7 @@ describe.skip('Mappings editor: text datatype', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  });
+  }, 100000);
 
   test('analyzer parameter: custom analyzer (from index settings)', async () => {
     const indexSettings = {
@@ -395,5 +394,5 @@ describe.skip('Mappings editor: text datatype', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  });
+  }, 50000);
 });

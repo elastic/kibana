@@ -25,7 +25,10 @@ import { isObject, get } from 'lodash/fp';
  * @param decoded The decoded either which has either an existing error or the
  * decoded object which could have additional keys stripped from it.
  */
-export const exactCheck = <T>(original: T, decoded: Either<t.Errors, T>): Either<t.Errors, T> => {
+export const exactCheck = <T>(
+  original: unknown,
+  decoded: Either<t.Errors, T>
+): Either<t.Errors, T> => {
   const onLeft = (errors: t.Errors): Either<t.Errors, T> => left(errors);
   const onRight = (decodedValue: T): Either<t.Errors, T> => {
     const differences = findDifferencesRecursive(original, decodedValue);
@@ -44,8 +47,12 @@ export const exactCheck = <T>(original: T, decoded: Either<t.Errors, T>): Either
   return pipe(decoded, fold(onLeft, onRight));
 };
 
-export const findDifferencesRecursive = <T>(original: T, decodedValue: T): string[] => {
-  if (decodedValue == null) {
+export const findDifferencesRecursive = <T>(original: unknown, decodedValue: T): string[] => {
+  if (decodedValue === null && original === null) {
+    // both the decodedValue and the original are null which indicates that they are equal
+    // so do not report differences
+    return [];
+  } else if (decodedValue == null) {
     try {
       // It is null and painful when the original contains an object or an array
       // the the decoded value does not have.

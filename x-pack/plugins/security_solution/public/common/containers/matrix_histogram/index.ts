@@ -17,7 +17,7 @@ import { inputsModel } from '../../store';
 import { MatrixHistogramGqlQuery } from './index.gql_query';
 import { GetMatrixHistogramQuery, MatrixOverTimeHistogramData } from '../../../graphql/types';
 
-export const useQuery = <Hit, Aggs, TCache = object>({
+export const useQuery = ({
   endDate,
   errorMessage,
   filterQuery,
@@ -102,6 +102,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     defaultIndex,
     errorMessage,

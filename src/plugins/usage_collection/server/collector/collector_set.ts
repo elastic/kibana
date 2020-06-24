@@ -71,7 +71,8 @@ export class CollectorSet {
     return x instanceof UsageCollector;
   };
 
-  public areAllCollectorsReady = async (collectorSet = this) => {
+  public areAllCollectorsReady = async (collectorSet: CollectorSet = this) => {
+    // Kept this for runtime validation in JS code.
     if (!(collectorSet instanceof CollectorSet)) {
       throw new Error(
         `areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet

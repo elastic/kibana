@@ -38,11 +38,14 @@ import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoi
 import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page_view';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { getManagementUrl } from '../../../common/routing';
+import { SecurityPageName } from '../../../../app/types';
+import { getPoliciesPath } from '../../../common/routing';
+import { useFormatUrl } from '../../../../common/components/link_to';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const { notifications } = useKibana();
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -68,11 +71,13 @@ export const PolicyDetails = React.memo(() => {
             }
           ),
           body: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
-              defaultMessage="Policy {name} has been updated."
-              values={{ name: policyName }}
-            />
+            <span data-test-subj="policyDetailsSuccessMessage">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
+                defaultMessage="Policy {name} has been updated."
+                values={{ name: policyName }}
+              />
+            </span>
           ),
         });
       } else {
@@ -87,9 +92,7 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [notifications.toasts, policyName, policyUpdateStatus]);
 
-  const handleBackToListOnClick = useNavigateByRouterEventHandler(
-    getManagementUrl({ name: 'policyList', excludePrefix: true })
-  );
+  const handleBackToListOnClick = useNavigateByRouterEventHandler(getPoliciesPath());
 
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);
@@ -116,10 +119,10 @@ export const PolicyDetails = React.memo(() => {
           <EuiLoadingSpinner size="xl" />
         ) : policyApiError ? (
           <EuiCallOut color="danger" title={policyApiError?.error}>
-            {policyApiError?.message}
+            <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
         ) : null}
-        <SpyRoute />
+        <SpyRoute pageName={SecurityPageName.management} />
       </ManagementPageView>
     );
   }
@@ -131,7 +134,7 @@ export const PolicyDetails = React.memo(() => {
         iconType="arrowLeft"
         contentProps={{ style: { paddingLeft: '0' } }}
         onClick={handleBackToListOnClick}
-        href={getManagementUrl({ name: 'policyList' })}
+        href={formatUrl(getPoliciesPath(search))}
       >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.details.backToListTitle"
@@ -224,7 +227,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiSpacer size="l" />
         <LinuxEvents />
       </ManagementPageView>
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.management} />
     </>
   );
 });

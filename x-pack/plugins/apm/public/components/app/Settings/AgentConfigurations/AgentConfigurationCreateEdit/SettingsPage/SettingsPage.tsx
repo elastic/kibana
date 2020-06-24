@@ -37,9 +37,9 @@ import { useUiTracker } from '../../../../../../../../observability/public';
 import { SettingFormRow } from './SettingFormRow';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 
-function removeEmpty<T>(obj: T): T {
+function removeEmpty(obj: { [key: string]: any }) {
   return Object.fromEntries(
-    Object.entries(obj).filter(([k, v]) => v != null && v !== '')
+    Object.entries(obj).filter(([_, v]) => v != null && v !== '')
   );
 }
 
@@ -223,7 +223,7 @@ export function SettingsPage({
               }}
             >
               <EuiHealth color="warning" />
-              <EuiText>
+              <EuiText color="ghost">
                 {i18n.translate('xpack.apm.unsavedChanges', {
                   defaultMessage:
                     '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',

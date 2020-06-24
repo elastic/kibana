@@ -108,6 +108,7 @@ const TlsTableComponent = React.memo<TlsTableProps>(
       [sort, type, tableType, updateNetworkTable]
     );
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const columns = useMemo(() => getTlsColumns(tlsTableId), [tlsTableId]);
 
     return (

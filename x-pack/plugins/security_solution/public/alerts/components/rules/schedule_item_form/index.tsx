@@ -78,6 +78,7 @@ export const ScheduleItem = ({
       setTimeType(e.target.value);
       field.setValue(`${timeVal}${e.target.value}`);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [timeVal]
   );
 
@@ -87,6 +88,7 @@ export const ScheduleItem = ({
       setTimeVal(sanitizedValue);
       field.setValue(`${sanitizedValue}${timeType}`);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [timeType]
   );
 
@@ -111,6 +113,7 @@ export const ScheduleItem = ({
         setTimeType(filterTimeType[0]);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field.value]);
 
   // EUI missing some props

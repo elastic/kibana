@@ -8,7 +8,6 @@ import { EndpointAppContextService } from './endpoint_app_context_services';
 describe('test endpoint app context services', () => {
   it('should throw error if start is not called', async () => {
     const endpointAppContextService = new EndpointAppContextService();
-    expect(() => endpointAppContextService.getIndexPatternRetriever()).toThrow(Error);
     expect(() => endpointAppContextService.getAgentService()).toThrow(Error);
   });
 });

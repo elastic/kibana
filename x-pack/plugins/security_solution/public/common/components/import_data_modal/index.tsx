@@ -109,6 +109,7 @@ export const ImportDataModalComponent = ({
         errorToToaster({ title: errorMessage, error, dispatchToaster });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFiles, overwrite]);
 
   const handleCloseModal = useCallback(() => {

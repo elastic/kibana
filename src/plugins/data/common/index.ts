@@ -27,3 +27,4 @@ export * from './search';
 export * from './search/aggs';
 export * from './types';
 export * from './utils';
+export * from './field_mapping';

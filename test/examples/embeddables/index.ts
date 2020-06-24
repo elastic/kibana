@@ -26,19 +26,18 @@ export default function ({
   loadTestFile,
 }: PluginFunctionalProviderContext) {
   const browser = getService('browser');
-  const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('embeddable explorer', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
-      await PageObjects.common.navigateToApp('settings');
-      await appsMenu.clickLink('Embeddable explorer');
+      await PageObjects.common.navigateToApp('embeddableExplorer');
     });
 
     loadTestFile(require.resolve('./hello_world_embeddable'));
     loadTestFile(require.resolve('./todo_embeddable'));
     loadTestFile(require.resolve('./list_container'));
     loadTestFile(require.resolve('./adding_children'));
+    loadTestFile(require.resolve('./dashboard'));
   });
 }

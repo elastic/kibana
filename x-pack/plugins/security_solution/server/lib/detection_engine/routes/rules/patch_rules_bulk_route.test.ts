@@ -9,7 +9,6 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  typicalPayload,
   getFindResultWithSingleHit,
   getPatchBulkRequest,
   getResult,
@@ -18,6 +17,7 @@ import {
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { patchRulesBulkRoute } from './patch_rules_bulk_route';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -153,20 +153,27 @@ describe('patch_rules_bulk', () => {
       const request = requestMock.create({
         method: 'patch',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-        body: [{ ...typicalPayload(), rule_id: undefined }],
+        body: [{ ...getCreateRulesSchemaMock(), rule_id: undefined }],
       });
-      const result = server.validate(request);
+      const response = await server.inject(request, context);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because ["value" must contain at least one of [id, rule_id]]'
-      );
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: {
+            message: 'id or rule_id should have been defined',
+            status_code: 404,
+          },
+          rule_id: '(unknown id)',
+        },
+      ]);
     });
 
     test('allows query rule type', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-        body: [{ ...typicalPayload(), type: 'query' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'query' }],
       });
       const result = server.validate(request);
 
@@ -177,12 +184,12 @@ describe('patch_rules_bulk', () => {
       const request = requestMock.create({
         method: 'patch',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-        body: [{ ...typicalPayload(), type: 'unknown_type' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'unknown_type' }],
       });
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
+        'Invalid value "unknown_type" supplied to "type"'
       );
     });
   });

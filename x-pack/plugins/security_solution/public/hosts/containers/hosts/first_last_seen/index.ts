@@ -79,6 +79,7 @@ export function useFirstLastSeenHostQuery<TCache = object>(
     const signal = abortCtrl.signal;
     fetchFirstLastSeenHost(signal);
     return () => abortCtrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { firstSeen, lastSeen, loading, errorMessage };

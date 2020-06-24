@@ -37,7 +37,7 @@ export const markdown = () => ({
       argType: 'toggle',
       default: false,
       options: {
-        labelValue: 'Open all links in a new tab',
+        labelValue: strings.getOpenLinksInNewTabLabelName(),
       },
     },
   ],

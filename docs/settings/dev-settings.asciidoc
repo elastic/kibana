@@ -1,6 +1,6 @@
 [role="xpack"]
 [[dev-settings-kb]]
-=== Development tools settings in Kibana
+=== Development tools settings in {kib}
 ++++
 <titleabbrev>Development tools settings</titleabbrev>
 ++++
@@ -21,7 +21,7 @@ They are enabled by default.
 
 [float]
 [[profiler-settings]]
-==== {searchprofiler} Settings
+==== {searchprofiler} settings
 
 [cols="2*<"]
 |===

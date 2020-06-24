@@ -7,14 +7,12 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type RiskScoreC = t.Type<number, number, unknown>;
-
 /**
  * Types the risk score as:
  *   - Natural Number (positive integer and not a float),
  *   - Between the values [0 and 100] inclusive.
  */
-export const RiskScore: RiskScoreC = new t.Type<number, number, unknown>(
+export const RiskScore = new t.Type<number, number, unknown>(
   'RiskScore',
   t.number.is,
   (input, context): Either<t.Errors, number> => {
@@ -24,3 +22,5 @@ export const RiskScore: RiskScoreC = new t.Type<number, number, unknown>(
   },
   t.identity
 );
+
+export type RiskScoreC = typeof RiskScore;

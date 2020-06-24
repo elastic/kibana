@@ -210,6 +210,7 @@ export const useGetCaseUserActions = (
         abortCtrl.abort();
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [caseUserActionsState, caseConnectorId]
   );
 
@@ -217,6 +218,7 @@ export const useGetCaseUserActions = (
     if (!isEmpty(caseId)) {
       fetchCaseUserActions(caseId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId, caseConnectorId]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };

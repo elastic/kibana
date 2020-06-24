@@ -6,7 +6,6 @@
 
 import { compose, withProps } from 'recompose';
 import { NumberFormatArgInput as Component, Props as ComponentProps } from './number_format';
-// @ts-ignore untyped local lib
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';

@@ -16,7 +16,6 @@ import {
   Query,
   FilterManager,
   SavedQuery,
-  SavedQueryTimeFilter,
 } from '../../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../../common/containers/source';
@@ -111,6 +110,7 @@ export const QueryBarDefineRule = ({
       isSubscribed = false;
       subscriptions.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field.value]);
 
   useEffect(() => {
@@ -143,10 +143,11 @@ export const QueryBarDefineRule = ({
     return () => {
       isSubscribed = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field.value]);
 
   const onSubmitQuery = useCallback(
-    (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
+    (newQuery: Query) => {
       const { query } = field.value as FieldValueQueryBar;
       if (!deepEqual(query, newQuery)) {
         field.setValue({ ...(field.value as FieldValueQueryBar), query: newQuery });
@@ -179,6 +180,7 @@ export const QueryBarDefineRule = ({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [field.value]
   );
 
@@ -214,7 +216,7 @@ export const QueryBarDefineRule = ({
     [browserFields, field, indexPattern]
   );
 
-  const onMutation = (event: unknown, observer: unknown) => {
+  const onMutation = () => {
     if (resizeParentContainer != null) {
       const suggestionContainer = document.getElementById('kbnTypeahead__items');
       if (suggestionContainer != null) {

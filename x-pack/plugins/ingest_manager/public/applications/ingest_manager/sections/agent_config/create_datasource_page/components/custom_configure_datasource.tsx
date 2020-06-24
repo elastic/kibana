@@ -12,7 +12,8 @@ import { CreateDatasourceFrom } from '../types';
 export interface CustomConfigureDatasourceProps {
   packageName: string;
   from: CreateDatasourceFrom;
-  datasource: NewDatasource | (NewDatasource & { id: string });
+  datasource: NewDatasource;
+  datasourceId?: string;
 }
 
 /**

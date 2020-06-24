@@ -168,7 +168,6 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
 } from '../common/field_formats';
 
 import { DateFormat } from './field_formats';
@@ -178,8 +177,6 @@ export { baseFormattersPublic } from './field_formats';
 export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
-
-  serialize: serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
@@ -341,8 +338,6 @@ export {
   SYNC_SEARCH_STRATEGY,
   getEsPreference,
   getSearchErrorType,
-  ISearchContext,
-  TSearchStrategyProvider,
   ISearchStrategy,
   ISearch,
   ISearchOptions,
@@ -360,6 +355,7 @@ export {
   ISearchSource,
   parseSearchSourceJSON,
   injectSearchSourceReferences,
+  getSearchParamsFromRequest,
   extractSearchSourceReferences,
   SearchSourceFields,
   EsQuerySortValue,
@@ -443,6 +439,8 @@ export {
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
 } from '../common';
+
+export * from '../common/field_mapping';
 
 /*
  * Plugin setup

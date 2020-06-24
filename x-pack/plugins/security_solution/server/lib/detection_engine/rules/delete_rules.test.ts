@@ -49,7 +49,7 @@ describe('deleteRules', () => {
     expect(result).toEqual({ id: notificationId });
   });
 
-  it('should call alertsClient.delete if ruleId was null', async () => {
+  it('should call alertsClient.delete if ruleId was undefined', async () => {
     (readRules as jest.Mock).mockResolvedValue({
       id: null,
     });
@@ -57,7 +57,7 @@ describe('deleteRules', () => {
     const result = await deleteRules({
       alertsClient,
       id: notificationId,
-      ruleId: null,
+      ruleId: undefined,
     });
 
     expect(alertsClient.delete).toHaveBeenCalledWith(
@@ -68,7 +68,7 @@ describe('deleteRules', () => {
     expect(result).toEqual({ id: null });
   });
 
-  it('should return null if alertsClient.delete rejects with 404 if ruleId was null', async () => {
+  it('should return null if alertsClient.delete rejects with 404 if ruleId was undefined', async () => {
     (readRules as jest.Mock).mockResolvedValue({
       id: null,
     });
@@ -82,7 +82,7 @@ describe('deleteRules', () => {
     const result = await deleteRules({
       alertsClient,
       id: notificationId,
-      ruleId: null,
+      ruleId: undefined,
     });
 
     expect(alertsClient.delete).toHaveBeenCalledWith(
@@ -93,7 +93,7 @@ describe('deleteRules', () => {
     expect(result).toEqual(null);
   });
 
-  it('should return error object if alertsClient.delete rejects with status different than 404 and if ruleId was null', async () => {
+  it('should return error object if alertsClient.delete rejects with status different than 404 and if ruleId was undefined', async () => {
     (readRules as jest.Mock).mockResolvedValue({
       id: null,
     });
@@ -111,7 +111,7 @@ describe('deleteRules', () => {
       await deleteRules({
         alertsClient,
         id: notificationId,
-        ruleId: null,
+        ruleId: undefined,
       });
     } catch (error) {
       errorResult = error;
@@ -125,7 +125,7 @@ describe('deleteRules', () => {
     expect(errorResult).toEqual(errorObject);
   });
 
-  it('should return null if ruleId and id was null', async () => {
+  it('should return null if ruleId and id was undefined', async () => {
     (readRules as jest.Mock).mockResolvedValue({
       id: null,
     });
@@ -133,7 +133,7 @@ describe('deleteRules', () => {
     const result = await deleteRules({
       alertsClient,
       id: undefined,
-      ruleId: null,
+      ruleId: undefined,
     });
 
     expect(result).toEqual(null);

@@ -61,7 +61,7 @@ type ActionManageTimeline =
   | {
       type: 'SET_TIMELINE_FILTER_MANAGER';
       id: string;
-      payload: FilterManager;
+      payload: { filterManager: FilterManager };
     };
 
 export const timelineDefaults = {
@@ -161,7 +161,7 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
       dispatch({
         type: 'SET_TIMELINE_FILTER_MANAGER',
         id,
-        payload: filterManager,
+        payload: { filterManager },
       });
     },
     []
@@ -190,6 +190,7 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
       initializeTimeline({ id });
       return { ...timelineDefaults, id };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [state]
   );
   const isManagedTimeline = useCallback((id: string): boolean => state[id] != null, [state]);

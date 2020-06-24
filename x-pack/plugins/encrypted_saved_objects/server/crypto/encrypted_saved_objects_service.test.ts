@@ -12,7 +12,7 @@ import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';
 
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { encryptedSavedObjectsAuditLoggerMock } from '../audit/index.mock';
 
 let service: EncryptedSavedObjectsService;
@@ -28,7 +28,7 @@ beforeEach(() => {
 
   service = new EncryptedSavedObjectsService(
     'encryption-key-abc',
-    loggingServiceMock.create().get(),
+    loggingSystemMock.create().get(),
     mockAuditLogger
   );
 });
@@ -222,7 +222,7 @@ describe('#encryptAttributes', () => {
 
     service = new EncryptedSavedObjectsService(
       'encryption-key-abc',
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       mockAuditLogger
     );
   });
@@ -916,7 +916,7 @@ describe('#decryptAttributes', () => {
     it('fails if encrypted with another encryption key', async () => {
       service = new EncryptedSavedObjectsService(
         'encryption-key-abc*',
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         mockAuditLogger
       );
 

@@ -103,6 +103,11 @@ export const getPercentileRanksMetricAgg = ({
           fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER)
         );
       },
+      getSerializedFormat(agg) {
+        return {
+          id: 'percent',
+        };
+      },
       getValue(agg, bucket) {
         return getPercentileValue(agg, bucket) / 100;
       },

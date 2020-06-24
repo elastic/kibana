@@ -5,7 +5,8 @@
  */
 
 import { getRulesToInstall } from './get_rules_to_install';
-import { getResult, mockPrepackagedRule } from '../routes/__mocks__/request_responses';
+import { getResult } from '../routes/__mocks__/request_responses';
+import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
 
 describe('get_rules_to_install', () => {
   test('should return empty array if both rule sets are empty', () => {
@@ -14,7 +15,7 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return empty array if the two rule ids match', () => {
-    const ruleFromFileSystem = mockPrepackagedRule();
+    const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem.rule_id = 'rule-1';
 
     const installedRule = getResult();
@@ -24,7 +25,7 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return the rule to install if the id of the two rules do not match', () => {
-    const ruleFromFileSystem = mockPrepackagedRule();
+    const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem.rule_id = 'rule-1';
 
     const installedRule = getResult();
@@ -34,10 +35,10 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return two rules to install if both the ids of the two rules do not match', () => {
-    const ruleFromFileSystem1 = mockPrepackagedRule();
+    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem1.rule_id = 'rule-1';
 
-    const ruleFromFileSystem2 = mockPrepackagedRule();
+    const ruleFromFileSystem2 = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem2.rule_id = 'rule-2';
 
     const installedRule = getResult();
@@ -47,13 +48,13 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return two rules of three to install if both the ids of the two rules do not match but the third does', () => {
-    const ruleFromFileSystem1 = mockPrepackagedRule();
+    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem1.rule_id = 'rule-1';
 
-    const ruleFromFileSystem2 = mockPrepackagedRule();
+    const ruleFromFileSystem2 = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem2.rule_id = 'rule-2';
 
-    const ruleFromFileSystem3 = mockPrepackagedRule();
+    const ruleFromFileSystem3 = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem3.rule_id = 'rule-3';
 
     const installedRule = getResult();

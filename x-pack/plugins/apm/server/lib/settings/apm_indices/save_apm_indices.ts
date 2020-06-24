@@ -28,6 +28,6 @@ export async function saveApmIndices(
 function removeEmpty(apmIndices: Partial<ApmIndicesConfig>) {
   return Object.entries(apmIndices)
     .map(([key, value]) => [key, value?.trim()])
-    .filter(([key, value]) => !!value)
+    .filter(([_, value]) => !!value)
     .reduce((obj, [key, value]) => ({ ...obj, [key as string]: value }), {});
 }

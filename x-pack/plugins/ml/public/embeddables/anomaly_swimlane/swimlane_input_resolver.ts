@@ -24,7 +24,7 @@ import {
   AnomalySwimlaneServices,
 } from './anomaly_swimlane_embeddable';
 import { MlStartDependencies } from '../../plugin';
-import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
@@ -51,12 +51,12 @@ export function useSwimlaneInputResolver(
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number
-) {
+): [string | undefined, OverallSwimlaneData | undefined, TimeBuckets, Error | null | undefined] {
   const [{ uiSettings }, , { explorerService, anomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
-  const [swimlaneType, setSwimlaneType] = useState<string>();
-  const [error, setError] = useState();
+  const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>();
+  const [error, setError] = useState<Error | null>();
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
 

@@ -114,6 +114,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
       [sort, type, updateNetworkTable]
     );
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [
       flowTarget,
       usersTableId,

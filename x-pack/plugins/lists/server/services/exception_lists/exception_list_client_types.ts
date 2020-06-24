@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
-  CommentOrUndefined,
+  CommentsPartialArray,
   Description,
   DescriptionOrUndefined,
   EntriesArray,
@@ -88,7 +88,7 @@ export interface GetExceptionListItemOptions {
 
 export interface CreateExceptionListItemOptions {
   _tags: _Tags;
-  comment: CommentOrUndefined;
+  comments: CommentsPartialArray;
   entries: EntriesArray;
   itemId: ItemId;
   listId: ListId;
@@ -102,7 +102,7 @@ export interface CreateExceptionListItemOptions {
 
 export interface UpdateExceptionListItemOptions {
   _tags: _TagsOrUndefined;
-  comment: CommentOrUndefined;
+  comments: CommentsPartialArray;
   entries: EntriesArrayOrUndefined;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;

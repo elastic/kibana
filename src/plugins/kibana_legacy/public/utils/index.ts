@@ -19,7 +19,7 @@
 
 export * from './migrate_legacy_query';
 export * from './system_api';
-export * from './url_overflow_service';
+export * from './normalize_path';
 // @ts-ignore
 export { KbnAccessibleClickProvider } from './kbn_accessible_click';
 // @ts-ignore

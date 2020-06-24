@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RequestHandler } from 'kibana/server';
+import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import { EndpointAppContext } from '../../../types';
 import { searchESForAlerts } from '../lib';
 import { getRequestData, mapToAlertResultList } from './lib';
@@ -18,14 +19,11 @@ export const alertListHandlerWrapper = function (
     res
   ) => {
     try {
-      const indexPattern = await endpointAppContext.service
-        .getIndexPatternRetriever()
-        .getEventIndexPattern(ctx);
       const reqData = await getRequestData(req, endpointAppContext);
       const response = await searchESForAlerts(
         ctx.core.elasticsearch.legacy.client,
         reqData,
-        indexPattern
+        alertsIndexPattern
       );
       const mappedBody = await mapToAlertResultList(ctx, endpointAppContext, reqData, response);
       return res.ok({ body: mappedBody });

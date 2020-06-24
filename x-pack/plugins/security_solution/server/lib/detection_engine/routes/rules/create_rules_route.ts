@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
-
+import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import {
+  createRulesSchema,
+  CreateRulesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/create_rules_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -13,42 +18,48 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { readRules } from '../../rules/read_rules';
-import { RuleAlertParamsRest } from '../../types';
 import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
-import { createRulesSchema } from '../schemas/create_rules_schema';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { PartialFilter } from '../../types';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation<RuleAlertParamsRest>(createRulesSchema),
+        body: buildRouteValidation<typeof createRulesSchema, CreateRulesSchemaDecoded>(
+          createRulesSchema
+        ),
       },
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+      const validationErrors = createRuleValidateTypeDependents(request.body);
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
       const {
-        actions,
+        actions: actionsRest,
         anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
         from,
-        query,
-        language,
+        query: queryOrUndefined,
+        language: languageOrUndefined,
         output_index: outputIndex,
         saved_id: savedId,
         timeline_id: timelineId,
         timeline_title: timelineTitle,
         meta,
         machine_learning_job_id: machineLearningJobId,
-        filters,
+        filters: filtersRest,
         rule_id: ruleId,
         index,
         interval,
@@ -63,11 +74,21 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         type,
         references,
         note,
-        exceptions_list,
+        exceptions_list: exceptionsList,
       } = request.body;
-      const siemResponse = buildSiemResponse(response);
-
       try {
+        const query =
+          type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+
+        const language =
+          type !== 'machine_learning' && languageOrUndefined == null
+            ? 'kuery'
+            : languageOrUndefined;
+
+        // TODO: Fix these either with an is conversion or by better typing them within io-ts
+        const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
+        const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
+
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
@@ -89,7 +110,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           });
         }
         if (ruleId != null) {
-          const rule = await readRules({ alertsClient, ruleId });
+          const rule = await readRules({ alertsClient, ruleId, id: undefined });
           if (rule != null) {
             return siemResponse.error({
               statusCode: 409,
@@ -114,7 +135,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           meta,
           machineLearningJobId,
           filters,
-          ruleId: ruleId ?? uuid.v4(),
+          ruleId,
           index,
           interval,
           maxSignals,
@@ -128,7 +149,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           references,
           note,
           version: 1,
-          exceptions_list,
+          exceptionsList,
           actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it,
         });
 

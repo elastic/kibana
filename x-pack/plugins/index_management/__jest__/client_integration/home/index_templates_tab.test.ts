@@ -188,7 +188,7 @@ describe('Index Templates tab', () => {
 
       expect(server.requests.length).toBe(totalRequests + 1);
       expect(server.requests[server.requests.length - 1].url).toBe(
-        `${API_BASE_PATH}/index-templates`
+        `${API_BASE_PATH}/index_templates`
       );
     });
 
@@ -318,7 +318,7 @@ describe('Index Templates tab', () => {
         const latestRequest = server.requests[server.requests.length - 1];
 
         expect(latestRequest.method).toBe('POST');
-        expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete-index-templates`);
+        expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete_index_templates`);
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
           templates: [{ name: legacyTemplates[0].name, isLegacy }],
         });
@@ -432,18 +432,18 @@ describe('Index Templates tab', () => {
           // Navigate and verify all tabs
           actions.selectDetailsTab('settings');
           expect(exists('summaryTab')).toBe(false);
-          expect(exists('settingsTab')).toBe(true);
+          expect(exists('settingsTabContent')).toBe(true);
 
           actions.selectDetailsTab('aliases');
           expect(exists('summaryTab')).toBe(false);
-          expect(exists('settingsTab')).toBe(false);
-          expect(exists('aliasesTab')).toBe(true);
+          expect(exists('settingsTabContent')).toBe(false);
+          expect(exists('aliasesTabContent')).toBe(true);
 
           actions.selectDetailsTab('mappings');
           expect(exists('summaryTab')).toBe(false);
-          expect(exists('settingsTab')).toBe(false);
-          expect(exists('aliasesTab')).toBe(false);
-          expect(exists('mappingsTab')).toBe(true);
+          expect(exists('settingsTabContent')).toBe(false);
+          expect(exists('aliasesTabContent')).toBe(false);
+          expect(exists('mappingsTabContent')).toBe(true);
         });
 
         test('should show an info callout if data is not present', async () => {

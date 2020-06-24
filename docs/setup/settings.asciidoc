@@ -1,5 +1,5 @@
 [[settings]]
-== Configuring {kib}
+== Configure {kib}
 
 The {kib} server reads properties from the `kibana.yml` file on startup. The
 location of this file differs depending on how you installed {kib}. For example,
@@ -633,9 +633,10 @@ include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
 include::{kib-repo-dir}/settings/dev-settings.asciidoc[]
 include::{kib-repo-dir}/settings/graph-settings.asciidoc[]
-include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/ingest-manager-settings.asciidoc[]
 include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
 include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
 include::{kib-repo-dir}/settings/ml-settings.asciidoc[]
 include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
 include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]

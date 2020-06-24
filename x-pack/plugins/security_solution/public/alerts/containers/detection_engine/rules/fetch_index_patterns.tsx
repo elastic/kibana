@@ -94,6 +94,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indices]);
 
   return [{ browserFields, isLoading, indices, indicesExists, indexPatterns }, setIndices];

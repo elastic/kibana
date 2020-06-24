@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
-  const appsMenu = getService('appsMenu');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common']);
   const log = getService('log');
@@ -38,7 +37,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       before(async () => {
         base = await PageObjects.common.getHostPort();
-        await appsMenu.clickLink('State containers example - browser history routing');
+        await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
       });
 
       it('links are rendered correctly and state is preserved in links', async () => {
@@ -119,7 +118,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     describe('TODO app with hash history ', async () => {
       before(async () => {
-        await appsMenu.clickLink('State containers example - hash history routing');
+        await PageObjects.common.navigateToApp('stateContainersExampleHashHistory', {
+          insertTimestamp: false,
+        });
       });
 
       it('Links are rendered correctly and state is preserved in links', async () => {

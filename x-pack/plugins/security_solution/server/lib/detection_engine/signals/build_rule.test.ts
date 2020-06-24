@@ -6,7 +6,7 @@
 
 import { buildRule } from './build_rule';
 import { sampleRuleAlertParams, sampleRuleGuid } from './__mocks__/es_results';
-import { OutputRuleAlertRest } from '../types';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 
 describe('buildRule', () => {
   beforeEach(() => {
@@ -40,7 +40,7 @@ describe('buildRule', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
-    const expected: Partial<OutputRuleAlertRest> = {
+    const expected: Partial<RulesSchema> = {
       actions: [],
       created_by: 'elastic',
       description: 'Detecting root and admin users',
@@ -61,6 +61,7 @@ describe('buildRule', () => {
       rule_id: 'rule-1',
       severity: 'high',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      threat: [],
       to: 'now',
       type: 'query',
       note: '',
@@ -133,7 +134,7 @@ describe('buildRule', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
-    const expected: Partial<OutputRuleAlertRest> = {
+    const expected: Partial<RulesSchema> = {
       actions: [],
       created_by: 'elastic',
       description: 'Detecting root and admin users',
@@ -154,6 +155,7 @@ describe('buildRule', () => {
       rule_id: 'rule-1',
       severity: 'high',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      threat: [],
       to: 'now',
       type: 'query',
       note: '',
@@ -215,7 +217,7 @@ describe('buildRule', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
-    const expected: Partial<OutputRuleAlertRest> = {
+    const expected: Partial<RulesSchema> = {
       actions: [],
       created_by: 'elastic',
       description: 'Detecting root and admin users',
@@ -237,6 +239,7 @@ describe('buildRule', () => {
       rule_id: 'rule-1',
       severity: 'high',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      threat: [],
       to: 'now',
       type: 'query',
       updated_by: 'elastic',

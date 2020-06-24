@@ -43,6 +43,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     filters,
     id,
     isLive,
+    isTimelineExists,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
@@ -78,6 +79,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
       (providerId: string, andProviderId?: string) =>
         removeProvider!({ id, providerId, andProviderId }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -89,6 +91,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -100,6 +103,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -114,11 +118,13 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           value,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -141,13 +147,15 @@ const StatefulTimelineComponent = React.memo<Props>(
           });
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [columns, id]
     );
 
     useEffect(() => {
-      if (createTimeline != null) {
+      if (createTimeline != null && !isTimelineExists) {
         createTimeline({ id, columns: defaultHeaders, show: false });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -241,6 +249,7 @@ const makeMapStateToProps = () => {
       filters: timelineFilter,
       id,
       isLive: input.policy.kind === 'interval',
+      isTimelineExists: getTimeline(state, id) != null,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,

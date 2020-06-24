@@ -16,7 +16,8 @@ describe('timeseriesTransformer', () => {
   beforeEach(async () => {
     res = await timeseriesTransformer({
       timeseriesResponse,
-      bucketSize: 12,
+      bucketSize: 120,
+      durationAsMinutes: 10,
     });
   });
 
@@ -79,7 +80,7 @@ describe('getTpmBuckets', () => {
             {
               key_as_string: '',
               key: 1,
-              doc_count: 500,
+              doc_count: 100,
             },
             {
               key_as_string: '',
@@ -95,23 +96,31 @@ describe('getTpmBuckets', () => {
         },
       },
     ];
-    const bucketSize = 10;
-    expect(getTpmBuckets(buckets as any, bucketSize)).toEqual([
+
+    expect(
+      getTpmBuckets({
+        transactionResultBuckets: buckets,
+        bucketSize: 120,
+        durationAsMinutes: 10,
+      })
+    ).toEqual([
       {
+        avg: 90,
         dataPoints: [
           { x: 0, y: 0 },
-          { x: 1, y: 1200 },
-          { x: 2, y: 1800 },
-          { x: 3, y: 2400 },
+          { x: 1, y: 100 },
+          { x: 2, y: 150 },
+          { x: 3, y: 200 },
         ],
         key: 'HTTP 4xx',
       },
       {
+        avg: 50,
         dataPoints: [
           { x: 0, y: 0 },
-          { x: 1, y: 3000 },
-          { x: 2, y: 600 },
-          { x: 3, y: 1800 },
+          { x: 1, y: 50 },
+          { x: 2, y: 50 },
+          { x: 3, y: 150 },
         ],
         key: 'HTTP 5xx',
       },

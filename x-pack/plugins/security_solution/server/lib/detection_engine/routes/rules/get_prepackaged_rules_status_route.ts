@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { validate } from '../../../../../common/validate';
 import {
   PrePackagedRulesStatusSchema,
   prePackagedRulesStatusSchema,
@@ -16,7 +17,6 @@ import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { validate } from './validate';
 
 export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
   router.get(
@@ -44,6 +44,7 @@ export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
           sortField: 'enabled',
           sortOrder: 'desc',
           filter: 'alert.attributes.tags:"__internal_immutable:false"',
+          fields: undefined,
         });
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);

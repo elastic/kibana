@@ -19,6 +19,6 @@ export async function createWatch({
   return callApi(http, {
     method: 'PUT',
     pathname: `/api/watcher/watch/${id}`,
-    body: { type: 'json', id, watch },
+    body: { type: 'json', id, watch, isNew: true, isActive: true },
   });
 }

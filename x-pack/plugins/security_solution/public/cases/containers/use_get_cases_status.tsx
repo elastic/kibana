@@ -69,10 +69,12 @@ export const useGetCasesStatus = (): UseGetCasesStatus => {
       didCancel = true;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [casesStatusState]);
 
   useEffect(() => {
     fetchCasesStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

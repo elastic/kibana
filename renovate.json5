@@ -67,6 +67,14 @@
         ],
       },
       {
+        groupSlug: '@testing-library/dom',
+        groupName: '@testing-library/dom related packages',
+        packageNames: [
+          '@testing-library/dom',
+          '@types/testing-library__dom',
+        ],
+      },
+      {
         groupSlug: 'angular',
         groupName: 'angular related packages',
         packagePatterns: [
@@ -416,14 +424,6 @@
         packageNames: [
           'history',
           '@types/history',
-        ],
-      },
-      {
-        groupSlug: 'indent-string',
-        groupName: 'indent-string related packages',
-        packageNames: [
-          'indent-string',
-          '@types/indent-string',
         ],
       },
       {
@@ -1065,14 +1065,6 @@
           '@types/mini-css-extract-plugin',
           'chokidar',
           '@types/chokidar',
-        ],
-      },
-      {
-        groupSlug: 'wrap-ansi',
-        groupName: 'wrap-ansi related packages',
-        packageNames: [
-          'wrap-ansi',
-          '@types/wrap-ansi',
         ],
       },
       {

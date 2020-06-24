@@ -118,10 +118,12 @@ export const useGetCase = (caseId: string): UseGetCase => {
       didCancel = true;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId]);
 
   useEffect(() => {
     callFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId]);
   return { ...state, fetchCase: callFetch, updateCase };
 };

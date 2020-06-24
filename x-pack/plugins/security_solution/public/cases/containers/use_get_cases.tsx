@@ -184,8 +184,10 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
       abortCtrl.abort();
       didCancel = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => fetchCases(state.filterOptions, state.queryParams), [
     state.queryParams,
     state.filterOptions,
@@ -224,11 +226,13 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
         didCancel = true;
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [state.filterOptions, state.queryParams]
   );
 
   const refetchCases = useCallback(() => {
     fetchCases(state.filterOptions, state.queryParams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.filterOptions, state.queryParams]);
 
   return {
