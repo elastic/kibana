@@ -245,10 +245,12 @@ describe('When calling datasource', () => {
 
       describe('and a callback throws an exception', () => {
         const callbackThree: ExternalCallback[1] = jest.fn(async (ds) => {
+          callbackCallingOrder.push('three');
           throw new Error('callbackThree threw error on purpose');
         });
 
         const callbackFour: ExternalCallback[1] = jest.fn(async (ds) => {
+          callbackCallingOrder.push('four');
           return {
             ...ds,
             inputs: [
@@ -274,8 +276,7 @@ describe('When calling datasource', () => {
           const request = getCreateKibanaRequest();
           await routeHandler(context, request, response);
           expect(response.ok).toHaveBeenCalled();
-          expect(callbackThree).toHaveBeenCalled();
-          expect(callbackFour).toHaveBeenCalled();
+          expect(callbackCallingOrder).toEqual(['one', 'two', 'three', 'four']);
         });
 
         it('should log errors', async () => {
