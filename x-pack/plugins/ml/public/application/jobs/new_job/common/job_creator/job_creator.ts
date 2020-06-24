@@ -155,7 +155,7 @@ export class JobCreator {
   }
 
   protected _setBucketSpanMs(bucketSpan: BucketSpan) {
-    const bs = parseInterval(bucketSpan);
+    const bs = parseInterval(bucketSpan, true);
     this._bucketSpanMs = bs === null ? 0 : bs.asMilliseconds();
   }
 

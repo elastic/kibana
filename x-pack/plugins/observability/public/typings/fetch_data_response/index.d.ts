@@ -4,17 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Percentage {
-  label: string;
-  pct: number;
-  color?: string;
-}
-interface Bytes {
-  label: string;
-  bytes: number;
-  color?: string;
-}
-interface Numeral {
+interface Stat {
+  type: 'number' | 'percent' | 'bytesPerSecond';
   label: string;
   value: number;
   color?: string;
@@ -37,18 +28,18 @@ export interface FetchDataResponse {
 }
 
 export interface LogsFetchDataResponse extends FetchDataResponse {
-  stats: Record<string, Numeral>;
+  stats: Record<string, Stat>;
   series: Record<string, Series>;
 }
 
 export interface MetricsFetchDataResponse extends FetchDataResponse {
   stats: {
-    hosts: Numeral;
-    cpu: Percentage;
-    memory: Percentage;
-    disk: Percentage;
-    inboundTraffic: Bytes;
-    outboundTraffic: Bytes;
+    hosts: Stat;
+    cpu: Stat;
+    memory: Stat;
+    disk: Stat;
+    inboundTraffic: Stat;
+    outboundTraffic: Stat;
   };
   series: {
     inboundTraffic: Series;
@@ -58,9 +49,9 @@ export interface MetricsFetchDataResponse extends FetchDataResponse {
 
 export interface UptimeFetchDataResponse extends FetchDataResponse {
   stats: {
-    monitors: Numeral;
-    up: Numeral;
-    down: Numeral;
+    monitors: Stat;
+    up: Stat;
+    down: Stat;
   };
   series: {
     up: Series;
@@ -70,8 +61,8 @@ export interface UptimeFetchDataResponse extends FetchDataResponse {
 
 export interface ApmFetchDataResponse extends FetchDataResponse {
   stats: {
-    services: Numeral;
-    transactions: Numeral;
+    services: Stat;
+    transactions: Stat;
   };
   series: {
     transactions: Series;
