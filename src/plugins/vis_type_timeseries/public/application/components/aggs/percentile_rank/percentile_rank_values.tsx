@@ -23,7 +23,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { MultiValueRow } from './multi_value_row';
 
 interface PercentileRankValuesProps {
-  model: any[];
+  model: Array<string | null>;
   disableDelete: boolean;
   disableAdd: boolean;
   showOnlyLastRow: boolean;
@@ -69,7 +69,7 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
         renderRow({
           rowModel: {
             id: model.length - 1,
-            value: last(model),
+            value: last(model) || '',
           },
           disableAddRow: true,
           disableDeleteRow: true,
@@ -80,7 +80,7 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
           renderRow({
             rowModel: {
               id,
-              value,
+              value: value || '',
             },
             disableAddRow: disableAdd,
             disableDeleteRow: disableDelete || array.length < 2,

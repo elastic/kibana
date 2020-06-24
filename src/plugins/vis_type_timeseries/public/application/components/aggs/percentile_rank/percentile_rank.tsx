@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import { assign } from 'lodash';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -69,12 +68,11 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
 
-  const handlePercentileRankValuesChange = (values: Array<string | null> | null | undefined) => {
-    handleChange(
-      assign({}, model, {
-        values,
-      })
-    );
+  const handlePercentileRankValuesChange = (values: MetricsItemsSchema['values']) => {
+    handleChange({
+      ...model,
+      values,
+    });
   };
 
   return (

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -52,7 +52,7 @@ export const MultiValueRow = ({
 }: MultiValueRowProps) => {
   const htmlId = htmlIdGenerator();
 
-  const onFieldNumberChange = (event: any) =>
+  const onFieldNumberChange = (event: ChangeEvent<HTMLInputElement>) =>
     onChange({
       ...model,
       value: get(event, 'target.value'),
@@ -72,7 +72,7 @@ export const MultiValueRow = ({
         <EuiFlexItem grow={false}>
           <EuiFieldNumber
             value={model.value === '' ? '' : Number(model.value)}
-            placeholder={'0'}
+            placeholder="0"
             onChange={onFieldNumberChange}
           />
         </EuiFlexItem>

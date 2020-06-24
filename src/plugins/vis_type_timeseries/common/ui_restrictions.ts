@@ -44,11 +44,9 @@ export interface UIRestrictions {
   [restriction: string]: boolean;
 }
 
-export interface TimeseriesUIRestrictions {
-  [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: Record<string, UIRestrictions>;
-  [RESTRICTIONS_KEYS.WHITE_LISTED_METRICS]: Record<string, UIRestrictions>;
-  [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: Record<string, UIRestrictions>;
-}
+export type TimeseriesUIRestrictions = {
+  [key in RESTRICTIONS_KEYS]: Record<string, UIRestrictions>;
+};
 
 /**
  * Default value for the UIRestriction
