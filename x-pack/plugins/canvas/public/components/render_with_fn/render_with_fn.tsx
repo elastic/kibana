@@ -5,6 +5,8 @@
  */
 
 import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
+import { useDebounce } from 'react-use';
+
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
@@ -22,10 +24,8 @@ interface Props {
   reuseNode: boolean;
   handlers: RendererHandlers;
   config: Record<string, any>;
-  size: {
-    height: number;
-    width: number;
-  };
+  height: number;
+  width: number;
 }
 
 const style = { height: '100%', width: '100%' };
@@ -36,7 +36,8 @@ export const RenderWithFn: FC<Props> = ({
   reuseNode = false,
   handlers: incomingHandlers,
   config,
-  size,
+  width,
+  height,
 }) => {
   const { services } = useKibana();
   const onError = services.canvas.notify.error;
@@ -73,10 +74,7 @@ export const RenderWithFn: FC<Props> = ({
     firstRender.current = true;
   }, [domNode]);
 
-  // Invoke the resize handler when the size prop changes.
-  useEffect(() => {
-    handlers.current.resize(size);
-  }, [size]);
+  useDebounce(() => handlers.current.resize({ height, width }), 150, [height, width]);
 
   useEffect(
     () => () => {
