@@ -5,7 +5,7 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { SlmPolicyEs } from '../../../common/types';
+import { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
 import { getManagedPolicyNames } from '../../lib';
 import { RouteDependencies, ResolveIndexResponseFromES } from '../../types';
@@ -243,18 +243,14 @@ export function registerPolicyRoutes({
           }
         );
 
+        const body: PolicyIndicesResponse = {
+          indices: resolvedIndicesResponse.indices
+            .map(({ name, data_stream }) => ({ name, dataStream: data_stream }))
+            .sort((a, b) => a.name.localeCompare(b.name)),
+        };
+
         return res.ok({
-          body: {
-            indices: resolvedIndicesResponse.indices
-              .flatMap((index) => {
-                if (index.data_stream) {
-                  return [];
-                }
-                return index.name;
-              })
-              .sort(),
-            dataStreams: resolvedIndicesResponse.data_streams.map(({ name }) => name).sort(),
-          },
+          body,
         });
       } catch (e) {
         if (isEsError(e)) {

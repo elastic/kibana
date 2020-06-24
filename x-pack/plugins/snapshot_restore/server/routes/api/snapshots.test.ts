@@ -14,7 +14,6 @@ const defaultSnapshot = {
   uuid: undefined,
   versionId: undefined,
   version: undefined,
-  dataStreams: [],
   indices: [],
   includeGlobalState: undefined,
   state: undefined,

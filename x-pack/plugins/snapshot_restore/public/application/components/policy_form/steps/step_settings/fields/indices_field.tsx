@@ -23,14 +23,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload, SnapshotConfig } from '../../../../../../../common/types';
+import { Index, SlmPolicyPayload, SnapshotConfig } from '../../../../../../../common/types';
 import { useServices } from '../../../../../app_context';
 import { PolicyValidation } from '../../../../../services/validation';
+import { DataStreamBadge } from './data_stream_badge';
 
 interface Props {
   isManagedPolicy: boolean;
   policy: SlmPolicyPayload;
-  indices: string[];
+  indices: Index[];
   onUpdate: (arg: { indices?: string[] | string }) => void;
   errors: PolicyValidation['errors'];
 }
@@ -45,19 +46,22 @@ export const IndicesField: FunctionComponent<Props> = ({
   const { i18n } = useServices();
   const { config = {} } = policy;
   const [isAllIndices, setIsAllIndices] = useState<boolean>(!Boolean(config.indices));
-  const [indicesSelection, setIndicesSelection] = useState<SnapshotConfig['indices']>([...indices]);
+  const [indicesSelection, setIndicesSelection] = useState<SnapshotConfig['indices']>(() => [
+    ...indices.map((i) => i.name),
+  ]);
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
   const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(() => {
     return indices.map(
       (index): EuiSelectableOption => ({
-        label: index,
+        label: index.name,
+        append: index.dataStream ? <DataStreamBadge dataStream={index.dataStream} /> : undefined,
         checked:
           isAllIndices ||
           // If indices is a string, we default to custom input mode, so we mark individual indices
           // as selected if user goes back to list mode
           typeof config.indices === 'string' ||
-          (Array.isArray(config.indices) && config.indices.includes(index))
+          (Array.isArray(config.indices) && config.indices.includes(index.name))
             ? 'on'
             : undefined,
       })
@@ -231,8 +235,9 @@ export const IndicesField: FunctionComponent<Props> = ({
                                 indicesOptions.forEach((option: EuiSelectableOption) => {
                                   option.checked = 'on';
                                 });
-                                onUpdate({ indices: [...indices] });
-                                setIndicesSelection([...indices]);
+                                const indicesNames = indices.map((i) => i.name);
+                                onUpdate({ indices: [...indicesNames] });
+                                setIndicesSelection([...indicesNames]);
                               }}
                             >
                               <FormattedMessage
@@ -275,7 +280,24 @@ export const IndicesField: FunctionComponent<Props> = ({
                   </EuiSelectable>
                 ) : (
                   <EuiComboBox
-                    options={indices.map((index) => ({ label: index }))}
+                    options={indices.map((index) => ({ label: index.name, value: index }))}
+                    renderOption={({ value }) => {
+                      return value!.dataStream ? (
+                        <EuiFlexGroup
+                          responsive={false}
+                          justifyContent="spaceBetween"
+                          alignItems="center"
+                          gutterSize="none"
+                        >
+                          <EuiFlexItem>{value!.name}</EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <DataStreamBadge dataStream={value!.dataStream} />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      ) : (
+                        value!.name
+                      );
+                    }}
                     placeholder={i18n.translate(
                       'xpack.snapshotRestore.policyForm.stepSettings.indicesPatternPlaceholder',
                       {

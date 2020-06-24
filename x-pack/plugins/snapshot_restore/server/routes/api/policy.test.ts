@@ -334,13 +334,14 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
           {
             name: 'barIndex',
             attributes: ['open'],
+            data_stream: 'testDataStream',
           },
         ],
         aliases: [],
         data_streams: [
           {
             name: 'testDataStream',
-            backing_indices: '.ds-test-data-stream-000001',
+            backing_indices: 'barIndex',
             timestamp_field: '@timestamp',
           },
         ],
@@ -349,7 +350,6 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
       const expectedResponse = {
         indices: ['barIndex', 'fooIndex'],
-        dataStreams: ['testDataStream'],
       };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
@@ -362,7 +362,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       };
       router.callAsCurrentUserResponses = [mockEsResponse];
 
-      const expectedResponse = { indices: [], dataStreams: [] };
+      const expectedResponse = { indices: [] };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 

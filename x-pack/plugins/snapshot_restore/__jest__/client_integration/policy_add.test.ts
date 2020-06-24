@@ -114,20 +114,6 @@ describe('<PolicyAdd />', () => {
 
           expect(form.getErrorsMessages()).toEqual(['You must select at least one index.']);
         });
-        test('should not require any data streams to be included', async () => {
-          const { find, form, component } = testBed;
-
-          await act(async () => {
-            form.toggleEuiSwitch('allDataStreamsToggle', false);
-            await nextTick();
-            component.update();
-          });
-
-          // Deselect all indices from list
-          find('deselectDataStreamLink').simulate('click');
-
-          expect(form.getErrorsMessages()).toEqual([]);
-        });
       });
 
       describe('retention (step 3)', () => {

@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CollapsibleIndicesList } from './collapsible_indices_list';
+export interface Index {
+  name: string;
+  dataStream?: string;
+}
+
+export interface PolicyIndicesResponse {
+  indices: Index[];
+}
