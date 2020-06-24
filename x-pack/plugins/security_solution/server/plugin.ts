@@ -88,7 +88,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
-    this.exceptionsCache = new ExceptionsCache(this.logger);
+    this.exceptionsCache = new ExceptionsCache(5); // TODO
 
     this.logger.debug('plugin initialized');
   }

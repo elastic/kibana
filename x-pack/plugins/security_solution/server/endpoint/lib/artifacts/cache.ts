@@ -4,31 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const DEFAULT_MAX_SIZE = 10;
+
 export class ExceptionsCache {
   private cache: Map<string, string>;
-  private requested: string[];
+  private queue: string[];
+  private maxSize: number;
 
-  constructor() {
+  constructor(maxSize: number) {
     this.cache = new Map();
-    this.requested = [];
-  }
-
-  clean() {
-    for (const v of this.cache.keys()) {
-      if (!this.requested.includes(v)) {
-        this.cache.delete(v);
-      }
-    }
-    this.requested = [];
+    this.queue = [];
+    this.maxSize = maxSize || DEFAULT_MAX_SIZE;
   }
 
   set(id: string, body: string) {
-    this.clean();
+    if (this.queue.length + 1 > this.maxSize) {
+      const entry = this.queue.shift();
+      if (entry !== undefined) {
+        this.cache.delete(entry);
+      }
+    }
+    this.queue.push(id);
     this.cache.set(id, body);
   }
 
   get(id: string): string | undefined {
-    this.requested.push(id);
     return this.cache.get(id);
   }
 }

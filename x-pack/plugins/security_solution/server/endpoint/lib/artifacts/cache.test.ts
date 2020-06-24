@@ -11,7 +11,7 @@ describe('ExceptionsCache tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    cache = new ExceptionsCache();
+    cache = new ExceptionsCache(3);
   });
 
   test('it should cache', async () => {
@@ -27,16 +27,17 @@ describe('ExceptionsCache tests', () => {
   });
 
   test('it should handle cache clean', async () => {
-    cache.set('test', 'body');
-    const cacheResp = cache.get('test');
-    expect(cacheResp).toEqual('body');
+    cache.set('1', 'a');
+    cache.set('2', 'b');
+    cache.set('3', 'c');
+    const cacheResp = cache.get('1');
+    expect(cacheResp).toEqual('a');
 
-    // Clean will remove all entries from the cache that have not been called by `get` since the last time it was cleaned
-    cache.clean();
-
-    // Need to call clean again to simulate a ttl period has gone by without `test` being
-    cache.clean();
-    const cacheRespCleaned = cache.get('test');
-    expect(cacheRespCleaned).toEqual(undefined);
+    cache.set('4', 'd');
+    const secondResp = cache.get('1');
+    expect(secondResp).toEqual(undefined);
+    expect(cache.get('2')).toEqual('b');
+    expect(cache.get('3')).toEqual('c');
+    expect(cache.get('4')).toEqual('d');
   });
 });

@@ -41,7 +41,7 @@ export class ManifestManager {
     this.cache = context.cache;
   }
 
-  private async getManifestClient(schemaVersion: string): Promise<ManifestClient> {
+  private getManifestClient(schemaVersion: string): ManifestClient {
     return new ManifestClient(this.savedObjectsClient, schemaVersion);
   }
 

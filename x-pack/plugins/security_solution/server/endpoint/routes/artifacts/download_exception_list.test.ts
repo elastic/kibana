@@ -73,7 +73,7 @@ describe('test alerts route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
-    cache = new ExceptionsCache();
+    cache = new ExceptionsCache(5);
 
     endpointAppContextService.start({
       agentService: createMockAgentService(),
