@@ -88,7 +88,7 @@ export const SetupGuide: React.FC<ISetupGuideProps> = ({
                   <p>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.setupGuide.step1.instruction1"
-                      defaultMessage="Within your {configFile} file, set {configSetting} to the URL of your {productName} instance. For example:"
+                      defaultMessage="In your {configFile} file, set {configSetting} to the URL of your {productName} instance. For example:"
                       values={{
                         productName,
                         configFile: <EuiCode>config/kibana.yml</EuiCode>,
@@ -117,7 +117,7 @@ export const SetupGuide: React.FC<ISetupGuideProps> = ({
                   <p>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.setupGuide.step2.instruction2"
-                      defaultMessage="If you’re using {elasticsearchNativeAuthLink} within {productName} - you’re all set! All users should be able to use {productName} in Kibana automatically, inheriting the existing access and permissions they have within {productName}."
+                      defaultMessage="If you’re using {elasticsearchNativeAuthLink} in {productName}, you’re all set. Your users can now access {productName} in Kibana with their current {productName} access and permissions."
                       values={{
                         productName,
                         elasticsearchNativeAuthLink: elasticsearchNativeAuthLink ? (
@@ -178,7 +178,7 @@ export const SetupGuide: React.FC<ISetupGuideProps> = ({
                       <p>
                         <FormattedMessage
                           id="xpack.enterpriseSearch.troubleshooting.differentAuth.description"
-                          defaultMessage="This plugin does not currently support {productName} and Kibana operating on different authentication methods (for example, {productName} using a different SAML provider than Kibana)."
+                          defaultMessage="This plugin does not currently support {productName} and Kibana operating on different authentication methods, for example, {productName} using a different SAML provider than Kibana."
                           values={{ productName }}
                         />
                       </p>
@@ -189,7 +189,7 @@ export const SetupGuide: React.FC<ISetupGuideProps> = ({
                     buttonContent={i18n.translate(
                       'xpack.enterpriseSearch.troubleshooting.standardAuth.title',
                       {
-                        defaultMessage: '{productName} on Standard authentication',
+                        defaultMessage: '{productName} on Standard authentication is not supported',
                         values: { productName },
                       }
                     )}
@@ -200,7 +200,7 @@ export const SetupGuide: React.FC<ISetupGuideProps> = ({
                       <p>
                         <FormattedMessage
                           id="xpack.enterpriseSearch.troubleshooting.standardAuth.description"
-                          defaultMessage="{productName} operating on {standardAuthLink} is currently not fully supported by this plugin. Users created in {productName} must be granted Kibana access. Users created in Kibana will not see {productName} in the navigation menu."
+                          defaultMessage="This plugin does not fully support {productName} on {standardAuthLink}. Users created in {productName} must have Kibana access. Users created in Kibana will not see {productName} in the navigation menu."
                           values={{
                             productName,
                             standardAuthLink: standardAuthLink ? (

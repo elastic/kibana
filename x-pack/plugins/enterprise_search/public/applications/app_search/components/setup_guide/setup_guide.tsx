@@ -47,7 +47,7 @@ export const SetupGuide: React.FC = () => (
       <p>
         <FormattedMessage
           id="xpack.enterpriseSearch.appSearch.setupGuide.description"
-          defaultMessage="Elastic App Search provides user-friendly tools to design and deploy a powerful search to your websites or web/mobile applications."
+          defaultMessage="Elastic App Search provides tools to design and deploy a powerful search to your websites and mobile applications."
         />
       </p>
     </EuiTitle>
@@ -56,7 +56,7 @@ export const SetupGuide: React.FC = () => (
       <p>
         <FormattedMessage
           id="xpack.enterpriseSearch.appSearch.setupGuide.notConfigured"
-          defaultMessage="App Search has not been configured in your Kibana instance yet. To get started, follow the instructions on this page."
+          defaultMessage="App Search is not configured in your Kibana instance yet."
         />
       </p>
     </EuiText>
