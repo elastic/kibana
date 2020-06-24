@@ -21,56 +21,54 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
       hasSelectedHost(state) !== true
     ) {
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
+      let hostResponse;
+
       try {
-        const response = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
+        hostResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
           }),
         });
-        response.request_page_index = Number(pageIndex);
+        hostResponse.request_page_index = Number(pageIndex);
 
-        if (response.hosts.length > 0) {
-          dispatch({
-            type: 'serverReturnedHostList',
-            payload: response,
-          });
-        } else {
-          const http = coreStart.http;
-          try {
-            const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificDatasources(
-              http,
-              {
-                query: {
-                  perPage: 50,
-                  page: 1,
-                },
-              }
-            );
-
-            dispatch({
-              type: 'serverReturnedHostList',
-              payload: response,
-            });
-
-            dispatch({
-              type: 'serverReturnedPoliciesForOnboarding',
-              payload: {
-                policyItems: policyDataResponse.items,
-              },
-            });
-          } catch (error) {
-            dispatch({
-              type: 'serverFailedToReturnPoliciesForOnboarding',
-              payload: error.body ?? error,
-            });
-            return;
-          }
-        }
+        dispatch({
+          type: 'serverReturnedHostList',
+          payload: hostResponse,
+        });
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnHostList',
           payload: error,
         });
+      }
+
+      // No hosts, so we should check to see if there are policies for onboarding
+      if (hostResponse && hostResponse.hosts.length === 0) {
+        const http = coreStart.http;
+        try {
+          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificDatasources(
+            http,
+            {
+              query: {
+                perPage: 50, // Since this is an oboarding flow, we'll cap at 50 policies.
+                page: 1,
+              },
+            }
+          );
+
+          dispatch({
+            type: 'serverReturnedPoliciesForOnboarding',
+            payload: {
+              policyItems: policyDataResponse.items,
+            },
+          });
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnPoliciesForOnboarding',
+            payload: error.body ?? error,
+          });
+          return;
+        }
       }
     }
     if (action.type === 'userChangedUrl' && hasSelectedHost(state) === true) {
