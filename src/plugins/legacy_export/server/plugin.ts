@@ -17,17 +17,26 @@
  * under the License.
  */
 
-export function injectMetaAttributes(savedObject, savedObjectsManagement) {
-  const result = {
-    ...savedObject,
-    meta: savedObject.meta || {},
-  };
+import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
+import { registerRoutes } from './routes';
 
-  // Add extra meta information
-  result.meta.icon = savedObjectsManagement.getIcon(savedObject.type);
-  result.meta.title = savedObjectsManagement.getTitle(savedObject);
-  result.meta.editUrl = savedObjectsManagement.getEditUrl(savedObject);
-  result.meta.inAppUrl = savedObjectsManagement.getInAppUrl(savedObject);
+export class LegacyExportPlugin implements Plugin<{}, {}> {
+  private readonly kibanaVersion: string;
 
-  return result;
+  constructor(context: PluginInitializerContext) {
+    this.kibanaVersion = context.env.packageInfo.version;
+  }
+
+  public setup({ http }: CoreSetup) {
+    const router = http.createRouter();
+    registerRoutes(router, this.kibanaVersion);
+
+    return {};
+  }
+
+  public start() {
+    return {};
+  }
+
+  public stop() {}
 }

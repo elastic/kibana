@@ -17,29 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
-import { importDashboards } from '../../../lib/import/import_dashboards';
+import { PluginInitializer } from 'src/core/server';
+import { LegacyExportPlugin } from './plugin';
 
-export function importApi(server) {
-  server.route({
-    path: '/api/kibana/dashboards/import',
-    method: ['POST'],
-    config: {
-      validate: {
-        payload: Joi.object().keys({
-          objects: Joi.array(),
-          version: Joi.string(),
-        }),
-        query: Joi.object().keys({
-          force: Joi.boolean().default(false),
-          exclude: [Joi.string(), Joi.array().items(Joi.string())],
-        }),
-      },
-      tags: ['api'],
-    },
-
-    handler: async (req) => {
-      return await importDashboards(req);
-    },
-  });
-}
+export const plugin: PluginInitializer<{}, {}> = (context) => new LegacyExportPlugin(context);

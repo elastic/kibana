@@ -21,8 +21,6 @@ import Fs from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
-import { importApi } from './server/routes/api/import';
-import { exportApi } from './server/routes/api/export';
 import { getUiSettingDefaults } from './server/ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
@@ -91,9 +89,6 @@ export default function (kibana) {
 
     init: async function (server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
-      // routes
-      importApi(server);
-      exportApi(server);
       registerCspCollector(usageCollection, server);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },

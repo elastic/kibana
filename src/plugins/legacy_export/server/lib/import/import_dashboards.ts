@@ -17,21 +17,19 @@
  * under the License.
  */
 
-import { flatten } from 'lodash';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
-export async function importDashboards(req) {
-  const { payload } = req;
-  const overwrite = 'force' in req.query && req.query.force !== false;
-  const exclude = flatten([req.query.exclude]);
-
-  const savedObjectsClient = req.getSavedObjectsClient();
-
+export async function importDashboards(
+  savedObjectsClient: SavedObjectsClientContract,
+  objects: SavedObject[],
+  { overwrite, exclude }: { overwrite: boolean; exclude: string[] }
+) {
   // The server assumes that documents with no migrationVersion are up to date.
   // That assumption enables Kibana and other API consumers to not have to build
   // up migrationVersion prior to creating new objects. But it means that imports
   // need to set migrationVersion to something other than undefined, so that imported
   // docs are not seen as automatically up-to-date.
-  const docs = payload.objects
+  const docs = objects
     .filter((item) => !exclude.includes(item.type))
     .map((doc) => ({ ...doc, migrationVersion: doc.migrationVersion || {} }));
 
