@@ -655,6 +655,7 @@ describe('config schema', () => {
                 saml: {
                   saml1: { order: 0, realm: 'saml1' },
                   saml2: { order: 1, realm: 'saml2', maxRedirectURLSize: '1kb' },
+                  saml3: { order: 2, realm: 'saml3', useRelayStateDeepLink: true },
                 },
               },
             },
@@ -670,6 +671,7 @@ describe('config schema', () => {
                 "order": 0,
                 "realm": "saml1",
                 "showInSelector": true,
+                "useRelayStateDeepLink": false,
               },
               "saml2": Object {
                 "enabled": true,
@@ -679,6 +681,17 @@ describe('config schema', () => {
                 "order": 1,
                 "realm": "saml2",
                 "showInSelector": true,
+                "useRelayStateDeepLink": false,
+              },
+              "saml3": Object {
+                "enabled": true,
+                "maxRedirectURLSize": ByteSizeValue {
+                  "valueInBytes": 2048,
+                },
+                "order": 2,
+                "realm": "saml3",
+                "showInSelector": true,
+                "useRelayStateDeepLink": true,
               },
             },
           }
@@ -767,6 +780,7 @@ describe('config schema', () => {
               "order": 3,
               "realm": "saml3",
               "showInSelector": true,
+              "useRelayStateDeepLink": false,
             },
             "saml1": Object {
               "enabled": true,
@@ -776,6 +790,7 @@ describe('config schema', () => {
               "order": 1,
               "realm": "saml1",
               "showInSelector": true,
+              "useRelayStateDeepLink": false,
             },
             "saml2": Object {
               "enabled": true,
@@ -785,6 +800,7 @@ describe('config schema', () => {
               "order": 2,
               "realm": "saml2",
               "showInSelector": true,
+              "useRelayStateDeepLink": false,
             },
           },
         }

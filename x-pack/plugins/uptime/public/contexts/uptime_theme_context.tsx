@@ -7,10 +7,16 @@
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React, { createContext, useMemo } from 'react';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { UptimeAppColors } from '../uptime_app';
 
 export interface UptimeThemeContextValues {
   colors: UptimeAppColors;
+  chartTheme: {
+    baseTheme?: Theme;
+    theme?: PartialTheme;
+  };
 }
 
 /**
@@ -25,6 +31,10 @@ const defaultContext: UptimeThemeContextValues = {
     success: euiLightVars.euiColorSuccess,
     warning: euiLightVars.euiColorWarning,
     gray: euiLightVars.euiColorLightShade,
+  },
+  chartTheme: {
+    baseTheme: LIGHT_THEME,
+    theme: EUI_CHARTS_THEME_LIGHT.theme,
   },
 };
 
@@ -58,8 +68,12 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
   const value = useMemo(() => {
     return {
       colors,
+      chartTheme: {
+        baseTheme: darkMode ? DARK_THEME : LIGHT_THEME,
+        theme: darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
+      },
     };
-  }, [colors]);
+  }, [colors, darkMode]);
 
   return <UptimeThemeContext.Provider value={value} children={children} />;
 };
