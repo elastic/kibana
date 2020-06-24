@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  TabAliases,
-  TabMappings,
-  TabSettings,
-  StepAliasesContainer,
-  StepMappingsContainer,
-  StepSettingsContainer,
-  CommonWizardSteps,
-} from './components';
+import { Mappings, IndexSettings, Aliases } from '../../../../../../common';
+
+export interface CommonWizardSteps {
+  settings?: IndexSettings;
+  mappings?: Mappings;
+  aliases?: Aliases;
+}
