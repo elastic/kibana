@@ -8,8 +8,6 @@ import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from '
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { loggingServiceMock } from '../../../../../../../src/core/server/logging/logging_service.mock';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -72,7 +70,7 @@ describe('query builder', () => {
         const query = await kibanaRequestToMetadataListESQuery(
           mockRequest,
           {
-            logFactory: loggingServiceMock.create(),
+            logFactory: loggingSystemMock.create(),
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
@@ -209,7 +207,7 @@ describe('query builder', () => {
         const query = await kibanaRequestToMetadataListESQuery(
           mockRequest,
           {
-            logFactory: loggingServiceMock.create(),
+            logFactory: loggingSystemMock.create(),
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
