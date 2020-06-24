@@ -276,7 +276,6 @@ export interface AlertEvent {
     type: string;
   };
   Endpoint: {
-    status: EndpointStatus;
     policy: {
       applied: {
         id: string;
@@ -358,12 +357,12 @@ export enum EndpointStatus {
   /**
    * Agent is enrolled with Fleet
    */
-  ENROLLED = 'enrolled',
+  enrolled = 'enrolled',
 
   /**
    * Agent is unenrrolled from Fleet
    */
-  UNENROLLED = 'unenrolled',
+  unenrolled = 'unenrolled',
 }
 
 /**

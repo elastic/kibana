@@ -10,6 +10,7 @@ import { metadataMirrorIndexPattern } from '../../../../../common/endpoint/const
 import { EndpointStatus } from '../../../../../common/endpoint/types';
 
 const KEEPALIVE = '10s';
+const SIZE = 1000;
 
 export interface HostId {
   host: {
@@ -32,14 +33,18 @@ export async function findUnenrolledHostByHostId(
       _source: ['host.id'],
       query: {
         bool: {
-          must: {
-            term: { 'host.id': hostId },
-          },
-          filter: {
-            term: {
-              'Endpoint.status': EndpointStatus.UNENROLLED,
+          filter: [
+            {
+              term: {
+                'Endpoint.status': EndpointStatus.unenrolled,
+              },
             },
-          },
+            {
+              term: {
+                'host.id': hostId,
+              },
+            },
+          ],
         },
       },
     },
@@ -51,9 +56,7 @@ export async function findUnenrolledHostByHostId(
   const newHits = response.hits?.hits || [];
 
   if (newHits.length > 0) {
-    const hostIds = newHits
-      .flatMap((data) => data as HitSource)
-      .map((hitSource: HitSource) => hitSource._source);
+    const hostIds = newHits.map((hitSource: HitSource) => hitSource._source);
     return hostIds[0];
   } else {
     return undefined;
@@ -65,13 +68,13 @@ export async function findAllUnenrolledHostIds(client: IScopedClusterClient): Pr
     index: metadataMirrorIndexPattern,
     scroll: KEEPALIVE,
     body: {
-      size: 100,
+      size: SIZE,
       _source: ['host.id'],
       query: {
         bool: {
           filter: {
             term: {
-              'Endpoint.status': EndpointStatus.UNENROLLED,
+              'Endpoint.status': EndpointStatus.unenrolled,
             },
           },
         },
@@ -95,9 +98,7 @@ export async function fetchAllUnenrolledHostIdsWithScroll(
   const scrollId = response._scroll_id;
 
   if (newHits.length > 0) {
-    const hostIds: HostId[] = newHits
-      .flatMap((data) => data as HitSource)
-      .map((hitSource: HitSource) => hitSource._source);
+    const hostIds: HostId[] = newHits.map((hitSource: HitSource) => hitSource._source);
     hits.push(...hostIds);
 
     const innerResponse = await client('scroll', {

@@ -337,7 +337,7 @@ describe('test endpoint route', () => {
           hits: {
             hits: [
               {
-                _index: 'metrics-endpoint.metadata_mirror-default-1',
+                _index: 'metrics-endpoint.metadata_mirror-default',
                 _id: 'S5M1yHIBLSMVtiLw6Wpr',
                 _score: 0.0,
                 _source: {
@@ -386,7 +386,7 @@ function createSearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostM
       hits: hostMetadata
         ? [
             {
-              _index: 'metrics-endpoint.metadata-default-1',
+              _index: 'metrics-endpoint.metadata-default',
               _id: '8FhM0HEBYyRTvb6lOQnw',
               _score: null,
               _source: hostMetadata,
@@ -401,7 +401,7 @@ function createSearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostM
                     max_score: null,
                     hits: [
                       {
-                        _index: 'metrics-endpoint.metadata-default-1',
+                        _index: 'metrics-endpoint.metadata-default',
                         _id: 'W6Vo1G8BYQH1gtPUgYkC',
                         _score: null,
                         _source: hostMetadata,

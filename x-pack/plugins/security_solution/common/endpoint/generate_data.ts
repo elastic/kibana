@@ -335,7 +335,7 @@ export class EndpointDocGenerator {
         os: this.randomChoice(OS),
       },
       Endpoint: {
-        status: EndpointStatus.ENROLLED,
+        status: EndpointStatus.enrolled,
         policy: {
           applied: this.randomChoice(APPLIED_POLICIES),
         },

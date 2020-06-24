@@ -29,13 +29,13 @@ describe('test find all unenrolled HostId', () => {
     index: metadataMirrorIndexPattern,
     scroll: '10s',
     body: {
-      size: 100,
+      size: 1000,
       _source: ['host.id'],
       query: {
         bool: {
           filter: {
             term: {
-              'Endpoint.status': EndpointStatus.UNENROLLED,
+              'Endpoint.status': EndpointStatus.unenrolled,
             },
           },
         },
@@ -94,22 +94,23 @@ describe('test find unenrolled endpoint host id by hostId', () => {
       Promise.resolve(createSearchResponse(firstEndpointHostId, 'initialScrollId'))
     );
     const endpointHostId = await findUnenrolledHostByHostId(mockScopedClient, firstEndpointHostId);
-
     expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body).toEqual({
       size: 1,
       _source: ['host.id'],
       query: {
         bool: {
-          must: {
-            term: {
-              'host.id': firstEndpointHostId,
+          filter: [
+            {
+              term: {
+                'Endpoint.status': EndpointStatus.unenrolled,
+              },
             },
-          },
-          filter: {
-            term: {
-              'Endpoint.status': EndpointStatus.UNENROLLED,
+            {
+              term: {
+                'host.id': firstEndpointHostId,
+              },
             },
-          },
+          ],
         },
       },
     });
