@@ -133,11 +133,11 @@ describe('ML - validateJob', () => {
     });
   };
   it('invalid bucket span formats', () => {
-    const invalidBucketSpanFormats = ['a', '10', '$'];
+    const invalidBucketSpanFormats = ['a', '10', '$', '500ms', '1w', '2M', '1y'];
     return bucketSpanFormatTests(invalidBucketSpanFormats, 'bucket_span_invalid');
   });
   it('valid bucket span formats', () => {
-    const validBucketSpanFormats = ['1s', '4h', '10d', '6w', '2m', '3y'];
+    const validBucketSpanFormats = ['5000ms', '1s', '2m', '4h', '10d'];
     return bucketSpanFormatTests(validBucketSpanFormats, 'bucket_span_valid');
   });
 
