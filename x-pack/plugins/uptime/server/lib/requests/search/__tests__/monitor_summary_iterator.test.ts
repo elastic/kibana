@@ -69,8 +69,6 @@ const makeMonitorGroups = (count: number): MonitorSummary[] => {
       state: {
         timestamp: '123',
         url: {},
-        tls: { not_before: null, not_after: null },
-        observer: { geo: { name: ['a-location'] } },
         summaryPings: [],
         summary: { up: 1, down: 0 },
       },

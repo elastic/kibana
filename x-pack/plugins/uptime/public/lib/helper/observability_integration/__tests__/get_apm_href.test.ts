@@ -26,8 +26,6 @@ describe('getApmHref', () => {
             duration: 123,
           }),
         ],
-        tls: { not_before: null, not_after: null },
-        observer: { geo: { name: [] } },
         timestamp: '123',
         url: {
           full: 'https://www.elastic.co/',

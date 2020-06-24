@@ -33,8 +33,6 @@ describe('MonitorListDrawer component', () => {
           down: 0,
         },
         timestamp: '123',
-        tls: { not_after: null, not_before: null },
-        observer: { geo: { name: [] } },
         url: {
           domain: 'expired.badssl.com',
           full: 'https://expired.badssl.com',

@@ -51,8 +51,6 @@ const testFooSummary: MonitorSummary = {
   monitor_id: 'foo',
   state: {
     summaryPings: testFooPings,
-    tls: { not_before: null, not_after: null },
-    observer: { geo: { name: [] } },
     summary: {
       up: 1,
       down: 2,
@@ -87,8 +85,6 @@ const testBarSummary: MonitorSummary = {
   monitor_id: 'bar',
   state: {
     summaryPings: testBarPings,
-    tls: { not_before: null, not_after: null },
-    observer: { geo: { name: [] } },
     summary: {
       up: 2,
       down: 0,

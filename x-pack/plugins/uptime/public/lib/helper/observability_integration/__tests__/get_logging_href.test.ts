@@ -37,11 +37,6 @@ describe('getLoggingHref', () => {
       state: {
         summary: {},
         summaryPings: [ping],
-        tls: {
-          not_after: null,
-          not_before: null,
-        },
-        observer: { geo: { name: [] } },
         timestamp: '123',
         url: {},
       },

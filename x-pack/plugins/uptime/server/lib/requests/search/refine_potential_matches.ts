@@ -38,15 +38,10 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
     const monitorSummaryState: MonitorSummaryState = {
       timestamp: '',
       summaryPings: [],
-      observer: { geo: { name: [] } },
       summary: {
         status: 'up',
         up: 0,
         down: 0,
-      },
-      tls: {
-        not_after: null,
-        not_before: null,
       },
       url: {},
     };

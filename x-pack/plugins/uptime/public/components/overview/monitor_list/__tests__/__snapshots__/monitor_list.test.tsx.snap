@@ -130,11 +130,6 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
             Object {
               "monitor_id": "foo",
               "state": Object {
-                "observer": Object {
-                  "geo": Object {
-                    "name": Array [],
-                  },
-                },
                 "summary": Object {
                   "down": 2,
                   "up": 1,
@@ -181,21 +176,12 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                   },
                 ],
                 "timestamp": "123",
-                "tls": Object {
-                  "not_after": null,
-                  "not_before": null,
-                },
                 "url": Object {},
               },
             },
             Object {
               "monitor_id": "bar",
               "state": Object {
-                "observer": Object {
-                  "geo": Object {
-                    "name": Array [],
-                  },
-                },
                 "summary": Object {
                   "down": 0,
                   "up": 2,
@@ -229,10 +215,6 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                   },
                 ],
                 "timestamp": "125",
-                "tls": Object {
-                  "not_after": null,
-                  "not_before": null,
-                },
                 "url": Object {},
               },
             },
@@ -379,11 +361,6 @@ exports[`MonitorList component renders error list 1`] = `
             Object {
               "monitor_id": "foo",
               "state": Object {
-                "observer": Object {
-                  "geo": Object {
-                    "name": Array [],
-                  },
-                },
                 "summary": Object {
                   "down": 2,
                   "up": 1,
@@ -430,21 +407,12 @@ exports[`MonitorList component renders error list 1`] = `
                   },
                 ],
                 "timestamp": "123",
-                "tls": Object {
-                  "not_after": null,
-                  "not_before": null,
-                },
                 "url": Object {},
               },
             },
             Object {
               "monitor_id": "bar",
               "state": Object {
-                "observer": Object {
-                  "geo": Object {
-                    "name": Array [],
-                  },
-                },
                 "summary": Object {
                   "down": 0,
                   "up": 2,
@@ -478,10 +446,6 @@ exports[`MonitorList component renders error list 1`] = `
                   },
                 ],
                 "timestamp": "125",
-                "tls": Object {
-                  "not_after": null,
-                  "not_before": null,
-                },
                 "url": Object {},
               },
             },
@@ -558,11 +522,6 @@ exports[`MonitorList component renders loading state 1`] = `
             Object {
               "monitor_id": "foo",
               "state": Object {
-                "observer": Object {
-                  "geo": Object {
-                    "name": Array [],
-                  },
-                },
                 "summary": Object {
                   "down": 2,
                   "up": 1,
@@ -609,21 +568,12 @@ exports[`MonitorList component renders loading state 1`] = `
                   },
                 ],
                 "timestamp": "123",
-                "tls": Object {
-                  "not_after": null,
-                  "not_before": null,
-                },
                 "url": Object {},
               },
             },
             Object {
               "monitor_id": "bar",
               "state": Object {
-                "observer": Object {
-                  "geo": Object {
-                    "name": Array [],
-                  },
-                },
                 "summary": Object {
                   "down": 0,
                   "up": 2,
@@ -657,10 +607,6 @@ exports[`MonitorList component renders loading state 1`] = `
                   },
                 ],
                 "timestamp": "125",
-                "tls": Object {
-                  "not_after": null,
-                  "not_before": null,
-                },
                 "url": Object {},
               },
             },
@@ -1455,11 +1401,6 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
             Object {
               "monitor_id": "foo",
               "state": Object {
-                "observer": Object {
-                  "geo": Object {
-                    "name": Array [],
-                  },
-                },
                 "summary": Object {
                   "down": 2,
                   "up": 1,
@@ -1506,21 +1447,12 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
                   },
                 ],
                 "timestamp": "123",
-                "tls": Object {
-                  "not_after": null,
-                  "not_before": null,
-                },
                 "url": Object {},
               },
             },
             Object {
               "monitor_id": "bar",
               "state": Object {
-                "observer": Object {
-                  "geo": Object {
-                    "name": Array [],
-                  },
-                },
                 "summary": Object {
                   "down": 0,
                   "up": 2,
@@ -1554,10 +1486,6 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
                   },
                 ],
                 "timestamp": "125",
-                "tls": Object {
-                  "not_after": null,
-                  "not_before": null,
-                },
                 "url": Object {},
               },
             },

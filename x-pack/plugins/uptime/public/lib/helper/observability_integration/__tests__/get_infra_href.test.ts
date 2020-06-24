@@ -34,11 +34,6 @@ describe('getInfraHref', () => {
         summary: {},
         url: {},
         timestamp: '123',
-        observer: { geo: { name: [] } },
-        tls: {
-          not_before: null,
-          not_after: null,
-        },
       },
     };
   });

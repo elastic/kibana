@@ -65,11 +65,6 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
       Object {
         "monitor_id": "foo",
         "state": Object {
-          "observer": Object {
-            "geo": Object {
-              "name": Array [],
-            },
-          },
           "summary": Object {
             "down": 0,
             "up": 1,
@@ -129,10 +124,6 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
             },
           ],
           "timestamp": "123",
-          "tls": Object {
-            "not_after": null,
-            "not_before": null,
-          },
           "url": Object {
             "domain": "expired.badssl.com",
             "full": "https://expired.badssl.com",
@@ -209,11 +200,6 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
       Object {
         "monitor_id": "foo",
         "state": Object {
-          "observer": Object {
-            "geo": Object {
-              "name": Array [],
-            },
-          },
           "summary": Object {
             "down": 0,
             "up": 1,
@@ -234,10 +220,6 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
             },
           ],
           "timestamp": "123",
-          "tls": Object {
-            "not_after": null,
-            "not_before": null,
-          },
           "url": Object {
             "domain": "expired.badssl.com",
             "full": "https://expired.badssl.com",
