@@ -9,14 +9,28 @@ import { getTranslatedExceptionListMock } from './lists.mock';
 import { buildArtifact } from '../../lib/artifacts/lists';
 import { ArtifactConstants } from './common';
 
-export const getInternalArtifactMock = async (os?: string): Promise<InternalArtifactSchema> => {
-  const osParam = os === undefined ? 'linux' : os;
-  return buildArtifact(getTranslatedExceptionListMock(os), osParam, '1.0.0');
+export const getInternalArtifactMock = async (
+  os: string,
+  schemaVersion: string
+): Promise<InternalArtifactSchema> => {
+  return buildArtifact(getTranslatedExceptionListMock(), os, schemaVersion);
 };
 
-export const getInternalArtifactsMock = async (): Promise<InternalArtifactSchema[]> => {
-  return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map(async (os) => {
-    await buildArtifact(getTranslatedExceptionListMock(os), os, '1.0.0');
+export const getInternalArtifactMockWithDiffs = async (
+  os: string,
+  schemaVersion: string
+): Promise<InternalArtifactSchema> => {
+  const mock = getTranslatedExceptionListMock();
+  mock.exceptions_list.pop();
+  return buildArtifact(mock, os, schemaVersion);
+};
+
+export const getInternalArtifactsMock = async (
+  os: string,
+  schemaVersion: string
+): Promise<InternalArtifactSchema[]> => {
+  return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map(async () => {
+    await buildArtifact(getTranslatedExceptionListMock(), os, schemaVersion);
   });
 };
 
