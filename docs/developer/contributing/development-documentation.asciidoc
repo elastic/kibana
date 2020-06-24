@@ -7,6 +7,7 @@ Docs should be written during development and accompany PRs when relevant. There
 ==== Developer services documentation
 
 Documentation about specific services a plugin offers should be encapsulated in:
+
 * README.asciidoc at the base of the plugin folder.
 * Typescript comments for all public services.
 
@@ -31,4 +32,3 @@ node scripts/docs.js --open
 
 General developer guildlines and documentation, like this right here, should be written in http://asciidoc.org/[asciidoc]
 at {kib-repo}/tree/master/docs/developer[https://github.com/elastic/kibana/tree/master/docs/developer]
-
