@@ -504,7 +504,6 @@ export type FieldFormatInstanceType = (new (params?: any, getConfig?: FieldForma
 export const fieldFormats: {
     FieldFormat: typeof FieldFormat;
     FieldFormatsRegistry: typeof FieldFormatsRegistry;
-    serialize: (agg: import("./search").AggConfig) => import("../../expressions").SerializedFieldFormat<object>;
     DEFAULT_CONVERTER_COLOR: {
         range: string;
         regex: string;

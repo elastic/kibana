@@ -20,12 +20,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { SerializedFieldFormat } from '../../../../plugins/expressions/public';
-import {
-  IAggConfig,
-  fieldFormats,
-  search,
-  TimefilterContract,
-} from '../../../../plugins/data/public';
+import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
@@ -113,11 +108,9 @@ const getSchemas = (
       'max_bucket',
     ].includes(agg.type.name);
 
-    const format = fieldFormats.serialize(
-      hasSubAgg
-        ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
-        : agg
-    );
+    const formatAgg = hasSubAgg
+      ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
+      : agg;
 
     const params: SchemaConfigParams = {};
 
@@ -130,7 +123,7 @@ const getSchemas = (
 
     return {
       accessor,
-      format,
+      format: formatAgg.toSerializedFieldFormat(),
       params,
       label,
       aggType: agg.type.name,
