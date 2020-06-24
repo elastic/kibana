@@ -8,7 +8,7 @@ import { createAction } from 'redux-actions';
 import { without, includes } from 'lodash';
 import { createThunk } from '../../lib/create_thunk';
 import { getWorkpadColors } from '../selectors/workpad';
-// @ts-ignore
+// @ts-expect-error
 import { fetchAllRenderables } from './elements';
 import { CanvasWorkpad } from '../../../types';
 
