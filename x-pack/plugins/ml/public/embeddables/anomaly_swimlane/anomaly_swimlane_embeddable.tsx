@@ -32,7 +32,7 @@ export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
 export const getDefaultPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
-    defaultMessage: 'ML anomaly swimlane for {jobIds}',
+    defaultMessage: 'ML anomaly swim lane for {jobIds}',
     values: { jobIds: jobIds.join(', ') },
   });
 

@@ -15,7 +15,7 @@ import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/com
 export class EventsQuery extends ResolverQuery<PaginatedResults> {
   constructor(
     private readonly pagination: PaginationBuilder,
-    indexPattern: string,
+    indexPattern: string | string[],
     endpointID?: string
   ) {
     super(indexPattern, endpointID);
