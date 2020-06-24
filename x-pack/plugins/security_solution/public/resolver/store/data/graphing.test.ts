@@ -15,7 +15,7 @@ import {
   limitsReached,
 } from './selectors';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
-import { EndpointDocGenerator, Tree } from '../../../../common/endpoint/generate_data';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
 describe('resolver graph layout', () => {
   let processA: LegacyEndpointEvent;
