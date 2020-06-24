@@ -391,6 +391,39 @@ describe('plugins discovery system', () => {
     );
   });
 
+  it('works with symlinks', async () => {
+    const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext);
+
+    const pluginFolder = resolve(KIBANA_ROOT, '..', 'ext-plugins');
+
+    mockFs(
+      {
+        [KIBANA_ROOT]: {
+          src: {
+            plugins: {},
+          },
+          plugins: mockFs.symlink({
+            path: '../ext-plugins',
+          }),
+          'x-pack': {
+            plugins: {},
+          },
+        },
+        [pluginFolder]: {
+          plugin_a: Plugins.valid('pluginA'),
+          plugin_b: Plugins.valid('pluginB'),
+        },
+      },
+      { createCwd: false }
+    );
+
+    const plugins = await plugin$.pipe(toArray()).toPromise();
+    const pluginNames = plugins.map((plugin) => plugin.name);
+
+    expect(pluginNames).toHaveLength(2);
+    expect(pluginNames).toEqual(expect.arrayContaining(['pluginA', 'pluginB']));
+  });
+
   it('logs a warning about --plugin-path when used in development', async () => {
     const extraPluginTestPath = resolve(process.cwd(), 'my-extra-plugin');
 
