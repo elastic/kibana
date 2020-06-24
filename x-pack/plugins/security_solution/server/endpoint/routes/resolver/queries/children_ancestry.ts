@@ -25,6 +25,7 @@ export class ChildrenAncestryQuery extends ResolverQuery<PaginatedResults> {
     throw new Error('Legacy query for children ancestry is not supported');
   }
 
+  // TODO use ancestry array here
   protected query(entityIDs: string[]): JsonObject {
     return {
       query: {
