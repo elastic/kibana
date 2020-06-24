@@ -27,7 +27,7 @@ const mockNodeCrypto: jest.Mocked<Crypto> = {
 beforeEach(() => {
   service = new EncryptedSavedObjectsService(
     mockNodeCrypto,
-    loggingServiceMock.create().get(),
+    loggingSystemMock.create().get(),
     mockAuditLogger
   );
 
