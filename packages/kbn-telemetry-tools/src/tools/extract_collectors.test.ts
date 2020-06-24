@@ -24,7 +24,7 @@ import { parseTelemetryRC } from './config';
 
 describe('extractCollectors', () => {
   it('extracts collectors given rc file', async () => {
-    const configRoot = path.join(__dirname, '__fixture__');
+    const configRoot = path.join(process.cwd(), 'src', 'fixtures', 'telemetry_collectors');
     const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
     if (!tsConfig) {
       throw new Error('Could not find a valid tsconfig.json.');

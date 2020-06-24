@@ -23,7 +23,13 @@ import { getDescriptor, TelemetryKinds } from './serializer';
 import { traverseNodes } from './ts_parser';
 
 export function loadFixtureProgram(fixtureName: string) {
-  const fixturePath = path.resolve(__dirname, '__fixture__', `${fixtureName}.ts`);
+  const fixturePath = path.resolve(
+    process.cwd(),
+    'src',
+    'fixtures',
+    'telemetry_collectors',
+    `${fixtureName}.ts`
+  );
   const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
   if (!tsConfig) {
     throw new Error('Could not find a valid tsconfig.json.');

@@ -18,7 +18,15 @@
  */
 
 import { ParsedUsageCollection } from './ts_parser';
-import { AllowedSchemaTypes } from '../../../../src/plugins/usage_collection/server';
+
+export type AllowedSchemaTypes =
+  | 'keyword'
+  | 'text'
+  | 'number'
+  | 'boolean'
+  | 'long'
+  | 'date'
+  | 'float';
 
 export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
   switch (type) {

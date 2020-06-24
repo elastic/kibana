@@ -19,18 +19,29 @@
 
 import * as _ from 'lodash';
 import * as ts from 'typescript';
-import mockSchema from './__fixture__/mock_schema.json';
 import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
 import { checkCompatibleTypeDescriptor, checkMatchingMapping } from './check_collector_integrity';
+import * as path from 'path';
+import { readFile } from 'fs';
+import { promisify } from 'util';
+const read = promisify(readFile);
+
+async function parseJsonFile(relativePath: string) {
+  const schemaPath = path.resolve(__dirname, '__fixture__', relativePath);
+  const fileContent = await read(schemaPath, 'utf8');
+  return JSON.parse(fileContent);
+}
 
 describe('checkMatchingMapping', () => {
-  it('returns no diff on matching parsedCollections and stored mapping', () => {
+  it('returns no diff on matching parsedCollections and stored mapping', async () => {
+    const mockSchema = await parseJsonFile('mock_schema.json');
     const diffs = checkMatchingMapping([parsedWorkingCollector], mockSchema);
     expect(diffs).toEqual({});
   });
 
   describe('Collector change', () => {
-    it('returns diff on mismatching parsedCollections and stored mapping', () => {
+    it('returns diff on mismatching parsedCollections and stored mapping', async () => {
+      const mockSchema = await parseJsonFile('mock_schema.json');
       const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
       const fieldMapping = { type: 'number' };
       malformedParsedCollector[1].schema.value.flat = fieldMapping;
@@ -45,7 +56,8 @@ describe('checkMatchingMapping', () => {
       });
     });
 
-    it('returns diff on unknown parsedCollections', () => {
+    it('returns diff on unknown parsedCollections', async () => {
+      const mockSchema = await parseJsonFile('mock_schema.json');
       const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
       const collectorName = 'New Collector in town!';
       const collectorMapping = { some_usage: { type: 'number' } };

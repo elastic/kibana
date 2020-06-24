@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet } from '../../../../../src/plugins/usage_collection/server/collector';
-import { loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { CollectorSet } from '../../plugins/usage_collection/server/collector';
+import { loggerMock } from '../../core/server/logging/logger.mock';
 import { externallyDefinedSchema } from './constants';
 
 const { makeUsageCollector } = new CollectorSet({
-  logger: loggingServiceMock.createLogger(),
+  logger: loggerMock.create(),
   maximumWaitTimeForAllCollectorsInS: 0,
 });
 

@@ -16,14 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  CollectorSet,
-  UsageCollector,
-} from '../../../../../src/plugins/usage_collection/server/collector';
-import { loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { CollectorSet, UsageCollector } from '../../plugins/usage_collection/server/collector';
+import { loggerMock } from '../../core/server/logging/logger.mock';
 
 const collectorSet = new CollectorSet({
-  logger: loggingServiceMock.createLogger(),
+  logger: loggerMock.create(),
   maximumWaitTimeForAllCollectorsInS: 0,
 });
 

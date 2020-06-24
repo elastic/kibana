@@ -27,7 +27,13 @@ import { parsedImportedUsageInterface } from './__fixture__/parsed_imported_usag
 import { parsedImportedSchemaCollector } from './__fixture__/parsed_imported_schema';
 
 export function loadFixtureProgram(fixtureName: string) {
-  const fixturePath = path.resolve(__dirname, '__fixture__', `${fixtureName}.ts`);
+  const fixturePath = path.resolve(
+    process.cwd(),
+    'src',
+    'fixtures',
+    'telemetry_collectors',
+    `${fixtureName}.ts`
+  );
   const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
   if (!tsConfig) {
     throw new Error('Could not find a valid tsconfig.json.');

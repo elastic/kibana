@@ -16,38 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import moment, { Moment } from 'moment';
-import { MakeSchemaFrom } from '../../../../../src/plugins/usage_collection/server';
+import { CollectorSet } from '../../plugins/usage_collection/server/collector';
+import { loggerMock } from '../../core/server/logging/logger.mock';
+import { Usage } from './constants';
 
-export interface Usage {
-  locale: string;
-}
+const { makeUsageCollector } = new CollectorSet({
+  logger: loggerMock.create(),
+  maximumWaitTimeForAllCollectorsInS: 0,
+});
 
-export interface WithUnion {
-  prop1: string | null;
-  prop2: string | null | undefined;
-  prop3?: string | null;
-  prop4: 'opt1' | 'opt2';
-  prop5: 123 | 431;
-}
-
-export interface WithMoment {
-  prop1: Moment;
-  prop2: moment.Moment;
-  prop3: Moment[];
-  prop4: Date[];
-}
-
-export interface WithConflictingUnion {
-  prop1: 123 | 'str';
-}
-
-export interface WithUnsupportedUnion {
-  prop1: 123 | Moment;
-}
-
-export const externallyDefinedSchema: MakeSchemaFrom<{ locale: string }> = {
-  locale: {
-    type: 'keyword',
+export const myCollector = makeUsageCollector<Usage>({
+  type: 'imported_usage_interface_collector',
+  isReady: () => true,
+  fetch() {
+    return {
+      locale: 'en',
+    };
   },
-};
+  schema: {
+    locale: {
+      type: 'keyword',
+    },
+  },
+});

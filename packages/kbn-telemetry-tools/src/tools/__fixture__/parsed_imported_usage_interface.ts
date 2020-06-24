@@ -22,7 +22,7 @@ import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedImportedUsageInterface: ParsedUsageCollection[] = [
   [
-    'packages/kbn-telemetry-tools/src/tools/__fixture__/imported_usage_interface.ts',
+    'src/fixtures/telemetry_collectors/imported_usage_interface.ts',
     {
       collectorName: 'imported_usage_interface_collector',
       schema: {

@@ -21,7 +21,7 @@ import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedNestedCollector: ParsedUsageCollection = [
-  'packages/kbn-telemetry-tools/src/tools/__fixture__/nested_collector.ts',
+  'src/fixtures/telemetry_collectors/nested_collector.ts',
   {
     collectorName: 'my_nested_collector',
     schema: {
