@@ -31,7 +31,10 @@ export class Manifest {
     this.created = created;
     this.entries = {};
 
-    const [validated, errors] = validate(schemaVersion, manifestSchemaVersion);
+    const [validated, errors] = validate(
+      (schemaVersion as unknown) as object,
+      manifestSchemaVersion
+    );
     if (errors != null) {
       throw new Error(`Invalid manifest version: ${schemaVersion}`);
     }
@@ -42,7 +45,7 @@ export class Manifest {
     artifacts: InternalArtifactSchema[],
     schemaVersion: string
   ): Manifest {
-    const manifest = new Manifest(Date.now(), schemaVersion);
+    const manifest = new Manifest(new Date(), schemaVersion);
     artifacts.forEach((artifact) => {
       manifest.addEntry(artifact);
     });

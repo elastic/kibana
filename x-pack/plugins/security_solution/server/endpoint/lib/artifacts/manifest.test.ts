@@ -10,7 +10,6 @@ import {
   getInternalArtifactMockWithDiffs,
 } from '../../schemas';
 import { Manifest } from './manifest';
-import { ManifestEntry } from './manifest_entry';
 
 describe('manifest', () => {
   describe('Manifest object sanity checks', () => {
@@ -34,20 +33,20 @@ describe('manifest', () => {
       manifest1.setVersion('abcd');
 
       const newArtifactLinux = await getInternalArtifactMockWithDiffs('linux', '1.0.0');
-      manifest2 = new Manifest(Date.now(), '1.0.0');
+      manifest2 = new Manifest(new Date(), '1.0.0');
       manifest2.addEntry(newArtifactLinux);
       manifest2.addEntry(artifactMacos);
       manifest2.addEntry(artifactWindows);
     });
 
     test('Can create manifest with valid schema version', () => {
-      const manifest = new Manifest(Date.now(), '1.0.0');
+      const manifest = new Manifest(new Date(), '1.0.0');
       expect(manifest).toBeInstanceOf(Manifest);
     });
 
     test('Cannot create manifest with invalid schema version', () => {
       expect(() => {
-        new Manifest(Date.now(), 'abcd');
+        new Manifest(new Date(), 'abcd');
       }).toThrow();
     });
 
@@ -79,7 +78,7 @@ describe('manifest', () => {
     });
 
     test('Manifest cannot be converted to endpoint format without a version', async () => {
-      const manifest = new Manifest(Date.now(), '1.0.0');
+      const manifest = new Manifest(new Date(), '1.0.0');
       manifest.addEntry(await getInternalArtifactMock('linux', '1.0.0'));
       manifest.addEntry(await getInternalArtifactMock('macos', '1.0.0'));
       manifest.addEntry(await getInternalArtifactMock('windows', '1.0.0'));

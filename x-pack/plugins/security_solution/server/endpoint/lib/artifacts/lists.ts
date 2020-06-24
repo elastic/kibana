@@ -17,15 +17,15 @@ import {
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
+  InternalArtifactSchema,
   TranslatedEntry,
   TranslatedEntryMatch,
   TranslatedEntryMatchAny,
   TranslatedEntryNested,
   WrappedTranslatedExceptionList,
-  InternalArtifactSchema,
   wrappedExceptionList,
 } from '../../schemas';
-import { ArtifactConstants } from '.';
+import { ArtifactConstants } from './common';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
