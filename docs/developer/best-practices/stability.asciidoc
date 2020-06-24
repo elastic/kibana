@@ -55,8 +55,7 @@ storeinSessions?)
 Refer to the list of browsers and OS {kib} supports
 https://www.elastic.co/support/matrix
 
-Does the feature work efficiently on the below listed browsers - chrome
-- Firefox - Safari - IE11
+Does the feature work efficiently on the list of supported browsers? 
 
 [float]
 ==== Upgrade Scenarios - Migration scenarios- 
