@@ -451,7 +451,7 @@ describe('getFindAuthorizationFilter', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchInlineSnapshot(
-      `"((alert.attributes.alertTypeId:myAppAlertType and (alert.attributes.consumer:alerts or alert.attributes.consumer:myApp or alert.attributes.consumer:myOtherApp)) or (alert.attributes.alertTypeId:alertingAlertType and (alert.attributes.consumer:alerts or alert.attributes.consumer:myApp or alert.attributes.consumer:myOtherApp)))"`
+      `"((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp)) or (alert.attributes.alertTypeId:alertingAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp)))"`
     );
 
     expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();

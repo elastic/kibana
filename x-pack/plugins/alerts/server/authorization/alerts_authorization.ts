@@ -256,10 +256,10 @@ export class AlertsAuthorization {
     return Array.from(alertTypes).reduce<string[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('alertTypeId', id);
       filters.push(
-        `(alert.attributes.alertTypeId:${id} and (${authorizedConsumers
+        `(alert.attributes.alertTypeId:${id} and alert.attributes.consumer:(${authorizedConsumers
           .map((consumer) => {
             ensureFieldIsSafeForQuery('alertTypeId', id);
-            return `alert.attributes.consumer:${consumer}`;
+            return consumer;
           })
           .join(' or ')}))`
       );
