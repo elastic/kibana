@@ -4,42 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { API_BASE_PATH as LICENSE_MANAGEMENT_API_BASE_PATH } from '../../../license_management/common/constants';
-
-export enum TrialStatusLoadState {
-  Loading = 'loading',
-  Ok = 'ok',
-  Error = 'error',
-}
+import { useTrackedPromise } from '../utils/use_tracked_promise';
 
 interface UseTrialStatusState {
-  loadState: TrialStatusLoadState;
+  loadState: 'uninitialized' | 'pending' | 'resolved' | 'rejected';
   isTrialAvailable: boolean;
+  checkTrialAvailability: () => void;
 }
 
 export function useTrialStatus(): UseTrialStatusState {
   const { services } = useKibana();
-
-  const [loadState, setLoadState] = useState<TrialStatusLoadState>(TrialStatusLoadState.Loading);
   const [isTrialAvailable, setIsTrialAvailable] = useState<boolean>(false);
 
-  useEffect(() => {
-    async function fetchTrial() {
-      try {
-        const response = await services.http.get(`${LICENSE_MANAGEMENT_API_BASE_PATH}/start_trial`);
+  const [loadState, checkTrialAvailability] = useTrackedPromise(
+    {
+      createPromise: async () => {
+        return await services.http.get(`${LICENSE_MANAGEMENT_API_BASE_PATH}/start_trial`);
+      },
+      onResolve: (response) => {
         setIsTrialAvailable(response);
-        setLoadState(TrialStatusLoadState.Ok);
-      } catch {
-        setLoadState(TrialStatusLoadState.Error);
-      }
-    }
-    fetchTrial();
-  }, [services.http]);
+      },
+    },
+    [services]
+  );
 
   return {
-    loadState,
+    loadState: loadState.state,
     isTrialAvailable,
+    checkTrialAvailability,
   };
 }

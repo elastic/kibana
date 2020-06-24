@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPage,
@@ -24,13 +24,17 @@ import { LoadingPage } from '../../loading_page';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled } from '../../../../../observability/public';
-import { useTrialStatus, TrialStatusLoadState } from '../../../hooks/use_trial_state';
+import { useTrialStatus } from '../../../hooks/use_trial_state';
 
 export const SubscriptionSplashContent: React.FC = () => {
   const { services } = useKibana();
-  const { loadState, isTrialAvailable } = useTrialStatus();
+  const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
 
-  if (loadState === TrialStatusLoadState.Loading) {
+  useEffect(() => {
+    checkTrialAvailability();
+  }, [checkTrialAvailability]);
+
+  if (loadState === 'pending') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.logAnalysis.splash.loadingMessage', {
@@ -40,7 +44,7 @@ export const SubscriptionSplashContent: React.FC = () => {
     );
   }
 
-  const canStartTrial = isTrialAvailable && loadState === TrialStatusLoadState.Ok;
+  const canStartTrial = isTrialAvailable && loadState === 'resolved';
 
   let title;
   let description;
