@@ -5,7 +5,7 @@
  */
 
 import { RefObject } from 'react';
-// @ts-ignore Unlinked Webpack Type
+// @ts-expect-error Unlinked Webpack Type
 import ContainerStyle from 'types/interpreter';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
