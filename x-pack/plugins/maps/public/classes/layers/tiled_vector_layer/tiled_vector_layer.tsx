@@ -203,13 +203,22 @@ export class TiledVectorLayer extends VectorLayer {
     meta: { mbProperties: GeoJsonProperties }
   ): Feature | null {
     const geometry = this._source.getFeatureGeometry(id, meta.mbProperties);
+    const properties = this._source.getFeatureProperties(id, meta.mbProperties);
     if (geometry === null) {
-      return null;
+      return {
+        type: 'Feature',
+        properties,
+        id,
+        geometry: {
+          type: 'Point',
+          coordinates: [0, 0],
+        },
+      };
     }
 
     return {
       type: 'Feature',
-      properties: this._source.getFeatureProperties(id, meta.mbProperties),
+      properties,
       geometry,
       id,
     };

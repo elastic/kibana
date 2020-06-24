@@ -64,6 +64,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   ) {
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);
+
     this._tooltipFields = this._descriptor.tooltipProperties
       .map((fieldName) => {
         return this.getFieldByName(fieldName);

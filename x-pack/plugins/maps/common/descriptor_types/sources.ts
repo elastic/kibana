@@ -91,6 +91,7 @@ export type KibanaTilemapSourceDescriptor = AbstractSourceDescriptor;
 
 export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
+  layers: string;
   styles: string;
   attributionText: string;
   attributionUrl: string;
