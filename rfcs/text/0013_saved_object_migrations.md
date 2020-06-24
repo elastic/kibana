@@ -208,7 +208,7 @@ Note:
 3. Fail the migration if:
    1. `.kibana_current` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001`
    2. The source index contains documents that belong to an unknown Saved Object type (from a disabled plugin). Log an error explaining that the plugin that created these documents needs to be enabled again or that these objects should be deleted. See section (4.2.1.4).
-4. Mark the source index as read-only and wait for all in-flight operations to drain (requires new functionality in Elasticsearch). This prevents any further writes from outdated nodes. Assuming this API is similar to the existing `/<index>/_close` API, we expect to receive `"acknowledged" : true` and `"shards_acknowledged" : true`. If all shards don’t acknowledge within the timeout, retry the operation until it succeeds.
+4. Mark the source index as read-only and wait for all in-flight operations to drain (requires https://github.com/elastic/elasticsearch/pull/58094). This prevents any further writes from outdated nodes. Assuming this API is similar to the existing `/<index>/_close` API, we expect to receive `"acknowledged" : true` and `"shards_acknowledged" : true`. If all shards don’t acknowledge within the timeout, retry the operation until it succeeds.
 5. Clone the source index into a new target index which has writes enabled. All nodes on the same version will use the same fixed index name e.g. `.kibana_7.10.0_001`. The `001` postfix can be changed with the configuration option i.e. `migrations.target_index_postfix: '002'`
    1. `POST /.kibana_n/_clone/.kibana_7.10.0_001?wait_for_active_shards=all {"settings": {"index.blocks.write": true}}`. Ignore errors if the clone already exists.
    2. Wait for the cloning to complete `GET /_cluster/health/.kibana_7.10.0_001?wait_for_status=green&timeout=60s` If cloning doesn’t complete within the 60s timeout, log a warning for visibility and poll again.
@@ -222,7 +222,7 @@ Note:
 7. Transform documents by reading batches from the source index then transforming and updating them with optimistic concurrency control.
    1. Ignore any version conflict errors.
    2. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents. If any failures occured, log the complete list of documents that failed to transform. Fail the migration.
-8. Mark the migration as complete by doing a single atomic operation (new Elasticsearch functionality) that:
+8. Mark the migration as complete by doing a single atomic operation (requires https://github.com/elastic/elasticsearch/pull/58100) that:
    1. Checks that `.kibana-current` alias is still pointing to the source index
    2. Points the `.kibana-7.10.0`  and `.kibana_current` aliases to the target index.
    3. If this fails with a "required alias [.kibana_current] does not exist" error fetch `.kibana_current` again:
