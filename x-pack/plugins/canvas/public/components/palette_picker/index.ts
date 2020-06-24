@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-
-import { PalettePicker as Component } from './palette_picker';
-
-export const PalettePicker = pure(Component);
+export { PalettePicker } from './palette_picker';
