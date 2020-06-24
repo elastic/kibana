@@ -20,7 +20,7 @@ import {
   Logger,
   PluginInitializerContext,
   LegacyAPICaller,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
 } from 'src/core/server';
 
 import { Index } from '../../index_management/server';
@@ -34,7 +34,7 @@ import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 
 interface CrossClusterReplicationContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {

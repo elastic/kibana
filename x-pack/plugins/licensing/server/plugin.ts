@@ -16,7 +16,7 @@ import {
   Plugin,
   PluginInitializerContext,
   ILegacyClusterClient,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   ScopeableRequest,
 } from 'src/core/server';
 
@@ -100,8 +100,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     const pollingFrequency = config.api_polling_frequency;
 
     async function callAsInternalUser(
-      ...args: Parameters<IScopedClusterClient['callAsInternalUser']>
-    ): ReturnType<IScopedClusterClient['callAsInternalUser']> {
+      ...args: Parameters<ILegacyScopedClusterClient['callAsInternalUser']>
+    ): ReturnType<ILegacyScopedClusterClient['callAsInternalUser']> {
       const [coreStart] = await core.getStartServices();
       const client = coreStart.elasticsearch.legacy.client;
       return await client.callAsInternalUser(...args);
@@ -109,11 +109,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
     const client: ILegacyClusterClient = {
       callAsInternalUser,
-      asScoped(request?: ScopeableRequest): IScopedClusterClient {
+      asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient {
         return {
           async callAsCurrentUser(
-            ...args: Parameters<IScopedClusterClient['callAsCurrentUser']>
-          ): ReturnType<IScopedClusterClient['callAsCurrentUser']> {
+            ...args: Parameters<ILegacyScopedClusterClient['callAsCurrentUser']>
+          ): ReturnType<ILegacyScopedClusterClient['callAsCurrentUser']> {
             const [coreStart] = await core.getStartServices();
             const _client = coreStart.elasticsearch.legacy.client;
             return await _client.asScoped(request).callAsCurrentUser(...args);

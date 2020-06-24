@@ -12,7 +12,7 @@ import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
   ILegacyClusterClient,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
@@ -38,11 +38,11 @@ declare module 'src/core/server' {
 }
 
 export interface Services {
-  callCluster: IScopedClusterClient['callAsCurrentUser'];
+  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   getScopedCallCluster(
     clusterClient: ILegacyClusterClient
-  ): IScopedClusterClient['callAsCurrentUser'];
+  ): ILegacyScopedClusterClient['callAsCurrentUser'];
 }
 
 export interface AlertServices extends Services {

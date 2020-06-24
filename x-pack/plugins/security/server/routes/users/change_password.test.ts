@@ -9,7 +9,7 @@ import { ObjectType } from '@kbn/config-schema';
 import {
   ILegacyClusterClient,
   IRouter,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   kibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
@@ -27,7 +27,7 @@ describe('Change password', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
-  let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
+  let mockScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
   let mockContext: RequestHandlerContext;

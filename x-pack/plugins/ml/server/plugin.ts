@@ -9,7 +9,7 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
@@ -52,7 +52,7 @@ import { registerKibanaSettings } from './lib/register_settings';
 declare module 'kibana/server' {
   interface RequestHandlerContext {
     ml?: {
-      mlClient: IScopedClusterClient;
+      mlClient: ILegacyScopedClusterClient;
     };
   }
 }

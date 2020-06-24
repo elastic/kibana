@@ -8,7 +8,7 @@ import {
   CoreSetup,
   ILegacyCustomClusterClient,
   Plugin,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   Logger,
   PluginInitializerContext,
 } from 'src/core/server';
@@ -23,7 +23,7 @@ import { License } from './services';
 declare module 'kibana/server' {
   interface RequestHandlerContext {
     transform?: {
-      dataClient: IScopedClusterClient;
+      dataClient: ILegacyScopedClusterClient;
     };
   }
 }

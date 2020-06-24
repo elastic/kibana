@@ -19,7 +19,7 @@ import {
   Logger,
   KibanaRequest,
   PluginInitializerContext,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   LegacyAPICaller,
   SharedGlobalConfig,
 } from 'src/core/server';
@@ -41,7 +41,7 @@ import { getCapabilitiesForRollupIndices } from './lib/map_capabilities';
 import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_fields';
 
 interface RollupContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();

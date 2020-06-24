@@ -16,7 +16,7 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   ILegacyCustomClusterClient,
 } from 'src/core/server';
 
@@ -28,7 +28,7 @@ import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch';
 
 export interface DataManagementContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 export interface IndexManagementPluginSetup {

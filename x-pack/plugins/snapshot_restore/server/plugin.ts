@@ -17,7 +17,7 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
 } from 'kibana/server';
 
 import { PLUGIN } from '../common';
@@ -30,7 +30,7 @@ import { Dependencies } from './types';
 import { SnapshotRestoreConfig } from './config';
 
 export interface SnapshotRestoreContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {

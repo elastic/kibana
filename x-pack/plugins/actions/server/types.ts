@@ -10,7 +10,7 @@ import { ActionsClient } from './actions_client';
 import { LicenseType } from '../../licensing/common/types';
 import {
   ILegacyClusterClient,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
@@ -23,11 +23,11 @@ export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 export interface Services {
-  callCluster: IScopedClusterClient['callAsCurrentUser'];
+  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   getScopedCallCluster(
     clusterClient: ILegacyClusterClient
-  ): IScopedClusterClient['callAsCurrentUser'];
+  ): ILegacyScopedClusterClient['callAsCurrentUser'];
 }
 
 declare module 'src/core/server' {

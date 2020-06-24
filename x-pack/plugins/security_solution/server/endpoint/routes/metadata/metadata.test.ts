@@ -6,7 +6,7 @@
 import {
   ILegacyClusterClient,
   IRouter,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
@@ -38,7 +38,7 @@ describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
-  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeHandler: RequestHandler<any, any, any>;
