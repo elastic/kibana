@@ -6,7 +6,7 @@
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
@@ -19,6 +19,7 @@ import { DatatableVisualization } from './datatable_visualization';
 import { PieVisualization } from './pie_visualization';
 import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
+import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
@@ -26,8 +27,6 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
-import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -43,7 +42,7 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
-  dashboard: DashboardStart;
+  embeddable: EmbeddableStart;
 }
 
 export class LensPlugin {

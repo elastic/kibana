@@ -90,7 +90,7 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
 
 export const createDataStreamPayload = (name: string): DataStream => ({
   name,
-  timeStampField: '@timestamp',
+  timeStampField: { name: '@timestamp', mapping: { type: 'date' } },
   indices: [
     {
       name: 'indexName',
