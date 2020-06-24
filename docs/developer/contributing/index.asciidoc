@@ -38,7 +38,7 @@ We are still to develop a proper process to accept any contributed translations.
 Part of this process only applies to maintainers, since it requires
 access to GitHub labels.
 
-{ kib} publishes https://www.elastic.co/guide/en/kibana/current/release-notes.html[Release Notes] for major and minor releases. 
+{kib} publishes https://www.elastic.co/guide/en/kibana/current/release-notes.html[Release Notes] for major and minor releases. 
 The Release Notes summarize what the PRs accomplish in language that is meaningful to users.
  To generate the Release Notes, the team runs a script against this repo to collect the merged PRs against the release.
 
