@@ -4,4 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RenderToDom } from './render_to_dom';
+export class ElementHandlers {
+  resize() {}
+
+  destroy() {}
+
+  onResize(fn) {
+    this.resize = fn;
+  }
+
+  onDestroy(fn) {
+    this.destroy = fn;
+  }
+}
