@@ -17,38 +17,35 @@ export const CheckMonitorType = t.intersection([
   }),
 ]);
 
-export const StateType = t.type({
-  timestamp: t.string,
-  url: t.partial({
-    domain: t.string,
-    full: t.string,
-    path: t.string,
-    port: t.number,
-    scheme: t.string,
-  }),
-  tls: t.type({
-    not_after: t.union([t.string, t.null]),
-    not_before: t.union([t.string, t.null]),
-  }),
-  summaryPings: t.array(PingType),
-  observer: t.type({
-    geo: t.type({
-      name: t.array(t.string),
+export const StateType = t.intersection([
+  t.type({
+    timestamp: t.string,
+    url: t.partial({
+      domain: t.string,
+      full: t.string,
+      path: t.string,
+      port: t.number,
+      scheme: t.string,
+    }),
+    summaryPings: t.array(PingType),
+    summary: t.partial({
+      status: t.string,
+      up: t.number,
+      down: t.number,
     }),
   }),
-  summary: t.partial({
-    status: t.string,
-    up: t.number,
-    down: t.number,
-    geo: t.partial({
-      name: t.string,
-      location: t.partial({
-        lat: t.number,
-        lon: t.number,
+  t.partial({
+    tls: t.partial({
+      not_after: t.union([t.string, t.null]),
+      not_before: t.union([t.string, t.null]),
+    }),
+    observer: t.type({
+      geo: t.type({
+        name: t.array(t.string),
       }),
     }),
   }),
-});
+]);
 
 export type MonitorSummaryState = t.TypeOf<typeof StateType>;
 

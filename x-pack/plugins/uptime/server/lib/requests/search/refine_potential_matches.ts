@@ -53,20 +53,20 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
 
     for (const locBucket of monBucket.location.buckets) {
       const location = locBucket.key;
-      const latestSource = locBucket.summaries.latest.hits.hits[0]._source;
-      const latestStillMatchingSource = locBucket.latest_matching.top.hits.hits[0]?._source;
+      const latest = locBucket.summaries.latest.hits.hits[0];
+      const latestStillMatching = locBucket.latest_matching.top.hits.hits[0];
       // If the most recent document still matches the most recent document matching the current filters
       // we can include this in the result
       //
       // We just check if the timestamp is greater. Note this may match an incomplete check group
       // that has not yet sent a summary doc
       if (
-        latestStillMatchingSource &&
-        latestStillMatchingSource['@timestamp'] >= latestSource['@timestamp']
+        latestStillMatching &&
+        latestStillMatching._source['@timestamp'] >= latest._source['@timestamp']
       ) {
         matched = true;
       }
-      const status = latestSource.summary.down > 0 ? 'down' : 'up';
+      const status = latest._source.summary.down > 0 ? 'down' : 'up';
 
       // This monitor doesn't match, so just skip ahead and don't add it to the output
       // Only skip in case of up statusFilter, for a monitor to be up, all checks should be up
@@ -74,19 +74,27 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
         continue MonitorLoop;
       }
 
-      monitorSummaryState.summaryPings.push(latestSource);
-      monitorSummaryState.url = latestSource.url;
-      monitorSummaryState.observer.geo.name.push(location);
-      if (latestSource['@timestamp'] > monitorSummaryState.timestamp) {
-        monitorSummaryState.timestamp = latestSource['@timestamp'];
+      monitorSummaryState.summaryPings.push({
+        docId: latest._id,
+        timestamp: latest._source['@timestamp'],
+        ...latest._source,
+      });
+      monitorSummaryState.url = latest._source.url;
+      if (monitorSummaryState.observer?.geo?.name) {
+        monitorSummaryState.observer.geo.name.push(location);
       }
-      monitorSummaryState.tls.not_after = latestSource.tls?.certificate_not_valid_after;
-      monitorSummaryState.tls.not_before = latestSource.tls?.certificate_not_valid_before;
+      if (latest._source['@timestamp'] > monitorSummaryState.timestamp) {
+        monitorSummaryState.timestamp = latest._source['@timestamp'];
+      }
+      monitorSummaryState.tls = {
+        not_before: latest._source.tls?.certificate_not_valid_before,
+        not_after: latest._source.tls?.certificate_not_valid_after,
+      };
       if (monitorSummaryState.summary) {
         // unnecessary if, for type checker
-        monitorSummaryState.summary.up += latestSource.summary.up;
-        monitorSummaryState.summary.down += latestSource.summary.down;
-        if (latestSource.summary.down > 0) {
+        monitorSummaryState.summary.up += latest._source.summary.up;
+        monitorSummaryState.summary.down += latest._source.summary.down;
+        if (latest._source.summary.down > 0) {
           monitorSummaryState.summary.status = 'down';
         }
       }

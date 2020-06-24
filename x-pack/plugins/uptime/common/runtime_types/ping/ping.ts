@@ -123,7 +123,11 @@ export const PingType = t.intersection([
     observer: t.partial({
       geo: t.partial({
         name: t.string,
-        location: t.partial({ lat: t.number, lon: t.number }),
+        location: t.union([
+          t.string,
+          t.partial({ lat: t.number, lon: t.number }),
+          t.partial({ lat: t.string, lon: t.string }),
+        ]),
       }),
     }),
     resolve: t.partial({
