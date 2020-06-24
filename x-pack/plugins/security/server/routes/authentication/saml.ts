@@ -94,7 +94,8 @@ export function defineSAMLRoutes({
         validate: {
           body: schema.object(
             { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },
-            { unknowns: 'ignore' })
+            { unknowns: 'ignore' }
+          ),
         },
         options: { authRequired: false, xsrfRequired: false },
       },
