@@ -2112,7 +2112,8 @@
                               },
                               "name": "endpoint",
                               "version": "0.1.0",
-                              "internal": false
+                              "internal": false,
+                              "removable": false
                             },
                             "references": [],
                             "updated_at": "2020-05-15T20:08:11.739Z",
@@ -2661,7 +2662,8 @@
                               },
                               "name": "system",
                               "version": "0.1.0",
-                              "internal": false
+                              "internal": false,
+                              "removable": false
                             },
                             "references": [],
                             "updated_at": "2020-05-15T20:08:08.708Z",
