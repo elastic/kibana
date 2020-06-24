@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/63621
-  describe('endpoint list', function () {
+  describe.skip('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     before(async () => {
@@ -27,7 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(title).to.equal('Endpoints');
     });
 
-    it.skip('displays table data', async () => {
+    it('displays table data', async () => {
       const expectedData = [
         [
           'Hostname',
