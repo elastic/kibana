@@ -84,7 +84,7 @@ affiliation across geopolitical boundaries).
 The data source for a map, Canvas element, and visualizations.
 // end::data-source-def[]
 
-[glossary-data-source]] diversity field ::
+[glossary-diversity-field]] diversity field ::
 // tag::data-source-def[]
 A field for which only a certain number of documents will be accepted in your
 graph to avoid bias. For example, if you select "nationality" as a
