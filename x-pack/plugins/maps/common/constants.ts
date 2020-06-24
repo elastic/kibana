@@ -34,10 +34,10 @@ export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
-export function createNewMapPath() {
+export function getNewMapPath() {
   return MAP_BASE_URL;
 }
-export function createMapPath(id: string) {
+export function getExistingMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
