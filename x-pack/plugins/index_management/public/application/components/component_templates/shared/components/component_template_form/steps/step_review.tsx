@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { WizardSection } from '../component_template_form';
 import {
   ComponentTemplateDeserialized,
   serializers,
@@ -52,154 +51,163 @@ const getDescriptionText = (data: any) => {
 };
 
 interface Props {
-  template: ComponentTemplateDeserialized;
-  navigateToStep: (stepId: WizardSection) => void;
+  componentTemplate: ComponentTemplateDeserialized;
 }
 
-export const StepReview: React.FunctionComponent<Props> = React.memo(
-  ({ template, navigateToStep }) => {
-    const { name, version } = template!;
+export const StepReview: React.FunctionComponent<Props> = React.memo(({ componentTemplate }) => {
+  const { name, version } = componentTemplate!;
 
-    const serializedComponentTemplate = serializeComponentTemplate(
-      stripEmptyFields(template!, {
-        types: ['string'],
-      }) as ComponentTemplateDeserialized
-    );
+  const serializedComponentTemplate = serializeComponentTemplate(
+    stripEmptyFields(componentTemplate!, {
+      types: ['string', 'object'],
+    }) as ComponentTemplateDeserialized
+  );
 
-    const {
-      template: {
-        mappings: serializedMappings,
-        settings: serializedSettings,
-        aliases: serializedAliases,
-      },
-    } = serializedComponentTemplate;
+  const {
+    template: {
+      mappings: serializedMappings,
+      settings: serializedSettings,
+      aliases: serializedAliases,
+    },
+    _meta: serializedMeta,
+  } = serializedComponentTemplate;
 
-    const SummaryTab = () => (
-      <div data-test-subj="summaryTab">
-        <EuiSpacer size="m" />
+  const SummaryTab = () => (
+    <div data-test-subj="summaryTab">
+      <EuiSpacer size="m" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiDescriptionList textStyle="reverse">
-              {/* Version */}
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.versionLabel"
-                  defaultMessage="Version"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {version ? version : <NoneDescriptionText />}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiDescriptionList textStyle="reverse">
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.settingsLabel"
-                  defaultMessage="Index settings"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getDescriptionText(serializedSettings)}
-              </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.mappingLabel"
-                  defaultMessage="Mappings"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getDescriptionText(serializedMappings)}
-              </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.aliasesLabel"
-                  defaultMessage="Aliases"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getDescriptionText(serializedAliases)}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    );
-
-    const RequestTab = () => {
-      const endpoint = `PUT _component_template/${name || '<componentTemplateName>'}`;
-      const templateString = JSON.stringify(serializedComponentTemplate, null, 2);
-      const request = `${endpoint}\n${templateString}`;
-
-      // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
-      // levels. This way we prevent that happening for very large requests.
-      const language = request.length < 60000 ? 'json' : undefined;
-
-      return (
-        <div data-test-subj="requestTab">
-          <EuiSpacer size="m" />
-
-          <EuiText>
-            <p>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiDescriptionList textStyle="reverse">
+            {/* Version */}
+            <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateForm.stepReview.requestTab.descriptionText"
-                defaultMessage="This request will create the following component template."
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.versionLabel"
+                defaultMessage="Version"
               />
-            </p>
-          </EuiText>
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {version ? version : <NoneDescriptionText />}
+            </EuiDescriptionListDescription>
 
-          <EuiSpacer size="m" />
+            {/* Metadata */}
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.metaLabel"
+                defaultMessage="Metadata"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {serializedMeta ? (
+                <EuiCodeBlock language="json">
+                  {JSON.stringify(serializedMeta, null, 2)}
+                </EuiCodeBlock>
+              ) : (
+                <NoneDescriptionText />
+              )}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
 
-          <EuiCodeBlock language={language} isCopyable>
-            {request}
-          </EuiCodeBlock>
-        </div>
-      );
-    };
+        <EuiFlexItem>
+          <EuiDescriptionList textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.settingsLabel"
+                defaultMessage="Index settings"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {getDescriptionText(serializedSettings)}
+            </EuiDescriptionListDescription>
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.mappingLabel"
+                defaultMessage="Mappings"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {getDescriptionText(serializedMappings)}
+            </EuiDescriptionListDescription>
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.aliasesLabel"
+                defaultMessage="Aliases"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {getDescriptionText(serializedAliases)}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+
+  const RequestTab = () => {
+    const endpoint = `PUT _component_template/${name || '<componentTemplateName>'}`;
+    const templateString = JSON.stringify(serializedComponentTemplate, null, 2);
+    const request = `${endpoint}\n${templateString}`;
+
+    // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
+    // levels. This way we prevent that happening for very large requests.
+    const language = request.length < 60000 ? 'json' : undefined;
 
     return (
-      <div data-test-subj="stepSummary">
-        <EuiTitle>
-          <h2 data-test-subj="stepTitle">
+      <div data-test-subj="requestTab">
+        <EuiSpacer size="m" />
+
+        <EuiText>
+          <p>
             <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateForm.stepReview.stepTitle"
-              defaultMessage="Review details for '{templateName}'"
-              values={{ templateName: name }}
+              id="xpack.idxMgmt.componentTemplateForm.stepReview.requestTab.descriptionText"
+              defaultMessage="This request will create the following component template."
             />
-          </h2>
-        </EuiTitle>
+          </p>
+        </EuiText>
 
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
 
-        <EuiTabbedContent
-          data-test-subj="summaryTabContent"
-          tabs={[
-            {
-              id: 'summary',
-              name: i18n.translate(
-                'xpack.idxMgmt.componentTemplateForm.stepReview.summaryTabTitle',
-                {
-                  defaultMessage: 'Summary',
-                }
-              ),
-              content: <SummaryTab />,
-            },
-            {
-              id: 'request',
-              name: i18n.translate(
-                'xpack.idxMgmt.componentTemplateForm.stepReview.requestTabTitle',
-                {
-                  defaultMessage: 'Request',
-                }
-              ),
-              content: <RequestTab />,
-            },
-          ]}
-        />
+        <EuiCodeBlock language={language} isCopyable>
+          {request}
+        </EuiCodeBlock>
       </div>
     );
-  }
-);
+  };
+
+  return (
+    <div data-test-subj="stepSummary">
+      <EuiTitle>
+        <h2 data-test-subj="stepTitle">
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateForm.stepReview.stepTitle"
+            defaultMessage="Review details for '{templateName}'"
+            values={{ templateName: name }}
+          />
+        </h2>
+      </EuiTitle>
+
+      <EuiSpacer size="l" />
+
+      <EuiTabbedContent
+        data-test-subj="summaryTabContent"
+        tabs={[
+          {
+            id: 'summary',
+            name: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepReview.summaryTabTitle', {
+              defaultMessage: 'Summary',
+            }),
+            content: <SummaryTab />,
+          },
+          {
+            id: 'request',
+            name: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepReview.requestTabTitle', {
+              defaultMessage: 'Request',
+            }),
+            content: <RequestTab />,
+          },
+        ]}
+      />
+    </div>
+  );
+});

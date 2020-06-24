@@ -13,4 +13,7 @@ export const componentTemplateSchema = {
   }),
   version: schema.maybe(schema.number()),
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  _kbnMeta: schema.object({
+    usedBy: schema.arrayOf(schema.string()),
+  }),
 };

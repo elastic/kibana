@@ -52,13 +52,14 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
     );
 
     const [isMetaVisible, setIsMetaVisible] = useState<boolean>(
-      Boolean(Object.keys(defaultValue._meta).length)
+      Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)
     );
 
     useEffect(() => {
       const validate = async () => {
         return (await form.submit()).isValid;
       };
+
       onChange({
         isValid: form.isValid,
         validate,
@@ -95,7 +96,9 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
+
         <EuiSpacer size="l" />
+
         {/* Name with optional version field */}
         <FormRow
           title={
@@ -110,7 +113,9 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameDescription"
                 defaultMessage="A unique identifier for this component template."
               />
+
               <EuiSpacer size="m" />
+
               <EuiSwitch
                 label={
                   <FormattedMessage
@@ -170,7 +175,9 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                   ),
                 }}
               />
+
               <EuiSpacer size="m" />
+
               <EuiSwitch
                 label={
                   <FormattedMessage

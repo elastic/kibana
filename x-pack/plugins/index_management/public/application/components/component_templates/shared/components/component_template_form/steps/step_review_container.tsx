@@ -6,20 +6,19 @@
 import React from 'react';
 
 import { Forms, ComponentTemplateDeserialized } from '../../../../shared_imports';
-import { WizardContent, WizardSection } from '../component_template_form';
+import { WizardContent } from '../component_template_form';
 import { StepReview } from './step_review';
 
 interface Props {
-  getTemplateData: (wizardContent: WizardContent) => ComponentTemplateDeserialized;
+  getComponentTemplateData: (wizardContent: WizardContent) => ComponentTemplateDeserialized;
 }
 
-export const StepReviewContainer = React.memo(({ getTemplateData }: Props) => {
-  const { navigateToStep } = Forms.useFormWizardContext<WizardSection>();
+export const StepReviewContainer = React.memo(({ getComponentTemplateData }: Props) => {
   const { getData } = Forms.useMultiContentContext<WizardContent>();
 
   const wizardContent = getData();
   // Build the final template object, providing the wizard content data
-  const template = getTemplateData(wizardContent);
+  const componentTemplate = getComponentTemplateData(wizardContent);
 
-  return <StepReview template={template} navigateToStep={navigateToStep} />;
+  return <StepReview componentTemplate={componentTemplate} />;
 });

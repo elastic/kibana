@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ComponentTemplateDeserialized } from '../shared_imports';
 import { ComponentTemplateForm } from '../shared';
+import { useComponentTemplatesContext } from '../component_templates_context';
 
 export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -16,18 +17,24 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  // TODO implement
-  const onSave = async (template: ComponentTemplateDeserialized) => {
-    // const { name } = template;
-    // setIsSaving(true);
-    // setSaveError(null);
-    // const { error } = await saveTemplate(template);
-    // setIsSaving(false);
-    // if (error) {
-    //   setSaveError(error);
-    //   return;
-    // }
-    // history.push(getTemplateDetailsLink(name, template._kbnMeta.isLegacy));
+  const { api } = useComponentTemplatesContext();
+
+  const onSave = async (componentTemplate: ComponentTemplateDeserialized) => {
+    const { name } = componentTemplate;
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    const { error } = await api.createComponentTemplate(componentTemplate);
+
+    setIsSaving(false);
+
+    if (error) {
+      setSaveError(error);
+      return;
+    }
+
+    history.push(`/component_templates/${encodeURIComponent(name)}`);
   };
 
   const clearSaveError = () => {

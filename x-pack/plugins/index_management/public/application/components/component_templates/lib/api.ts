@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ComponentTemplateListItem, ComponentTemplateDeserialized } from '../shared_imports';
-import { UIM_COMPONENT_TEMPLATE_DELETE_MANY, UIM_COMPONENT_TEMPLATE_DELETE } from '../constants';
+import {
+  ComponentTemplateListItem,
+  ComponentTemplateDeserialized,
+  ComponentTemplateSerialized,
+} from '../shared_imports';
+import {
+  UIM_COMPONENT_TEMPLATE_DELETE_MANY,
+  UIM_COMPONENT_TEMPLATE_DELETE,
+  UIM_COMPONENT_TEMPLATE_CREATE,
+} from '../constants';
 import { UseRequestHook, SendRequestHook } from './request';
 
 export const getApi = (
@@ -44,9 +52,22 @@ export const getApi = (
     });
   }
 
+  async function createComponentTemplate(componentTemplate: ComponentTemplateSerialized) {
+    const result = await sendRequest({
+      path: `${apiBasePath}/component_templates`,
+      method: 'post',
+      body: JSON.stringify(componentTemplate),
+    });
+
+    trackMetric('count', UIM_COMPONENT_TEMPLATE_CREATE);
+
+    return result;
+  }
+
   return {
     useLoadComponentTemplates,
     deleteComponentTemplates,
     useLoadComponentTemplate,
+    createComponentTemplate,
   };
 };

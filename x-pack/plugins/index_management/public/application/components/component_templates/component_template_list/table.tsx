@@ -90,7 +90,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           iconType="plusInCircle"
           data-test-subj="createPipelineButton"
           key="createPipelineButton"
-          // {...reactRouterNavigate(history, '/create')}
+          {...reactRouterNavigate(history, '/create_component_template')}
         >
           {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.createButtonLabel', {
             defaultMessage: 'Create a component template',

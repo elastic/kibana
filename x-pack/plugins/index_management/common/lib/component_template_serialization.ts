@@ -86,7 +86,6 @@ export function deserializeComponenTemplateList(
   return componentTemplateListItem;
 }
 
-// TODO add test
 export function serializeComponentTemplate(
   componentTemplateDeserialized: ComponentTemplateDeserialized
 ): ComponentTemplateSerialized {

@@ -6,10 +6,9 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { serializers, Forms, ComponentTemplateDeserialized } from '../../../shared_imports';
-// import { SectionError } from '../section_error';
 import { StepLogisticsContainer, StepReviewContainer } from './steps';
 import {
   CommonWizardSteps,
@@ -17,6 +16,7 @@ import {
   StepMappingsContainer,
   StepAliasesContainer,
 } from '../../../../shared';
+import { useComponentTemplatesContext } from '../../../component_templates_context';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
@@ -72,14 +72,13 @@ const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
 export const ComponentTemplateForm = ({
   defaultValue = {
     name: '',
-    _meta: {},
     template: {
       settings: {},
       mappings: {},
       aliases: {},
     },
+    _meta: {},
     _kbnMeta: {
-      // TODO
       usedBy: [],
     },
   },
@@ -93,6 +92,8 @@ export const ComponentTemplateForm = ({
     template: { settings, mappings, aliases },
     ...logistics
   } = defaultValue;
+
+  const { documentation } = useComponentTemplatesContext();
 
   const wizardDefaultValue: WizardContent = {
     logistics,
@@ -115,19 +116,21 @@ export const ComponentTemplateForm = ({
     ),
   };
 
-  // TODO implement
   const apiError = saveError ? (
     <>
-      {/* <SectionError
+      <EuiCallOut
         title={
           <FormattedMessage
             id="xpack.idxMgmt.componentTemplateForm.saveTemplateError"
             defaultMessage="Unable to create component template"
           />
         }
-        error={saveError}
+        color="danger"
+        iconType="alert"
         data-test-subj="saveComponentTemplateError"
-      /> */}
+      >
+        <div>{saveError.message || saveError.statusText}</div>
+      </EuiCallOut>
       <EuiSpacer size="m" />
     </>
   ) : null;
@@ -148,11 +151,10 @@ export const ComponentTemplateForm = ({
     async (wizardData: WizardContent) => {
       const template = buildTemplateObject(defaultValue)(wizardData);
 
-      // We need to strip empty strings, otherwise if the "version" is not set,
-      // it will be an empty string and ES expects a number.
+      // This will strip an empty string if "version" is not set, as well as an empty "_meta" object
       onSave(
         stripEmptyFields(template, {
-          types: ['string'],
+          types: ['string', 'object'],
         }) as ComponentTemplateDeserialized
       );
 
@@ -178,23 +180,20 @@ export const ComponentTemplateForm = ({
         <StepLogisticsContainer isEditing={isEditing} />
       </FormWizardStep>
 
-      {/* TODO fix doc link */}
       <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
-        <StepSettingsContainer esDocsBase="#" />
+        <StepSettingsContainer esDocsBase={documentation.esDocsBase} />
       </FormWizardStep>
 
-      {/* TODO fix doc link */}
       <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>
-        <StepMappingsContainer esDocsBase="#" />
+        <StepMappingsContainer esDocsBase={documentation.esDocsBase} />
       </FormWizardStep>
 
-      {/* TODO fix doc link */}
       <FormWizardStep id={wizardSections.aliases.id} label={wizardSections.aliases.label}>
-        <StepAliasesContainer esDocsBase="#" />
+        <StepAliasesContainer esDocsBase={documentation.esDocsBase} />
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
-        <StepReviewContainer getTemplateData={buildTemplateObject(defaultValue)} />
+        <StepReviewContainer getComponentTemplateData={buildTemplateObject(defaultValue)} />
       </FormWizardStep>
     </FormWizard>
   );

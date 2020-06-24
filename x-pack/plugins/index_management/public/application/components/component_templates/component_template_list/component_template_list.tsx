@@ -44,7 +44,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   }, [trackMetric]);
 
   if (data && data.length === 0) {
-    return <EmptyPrompt />;
+    return <EmptyPrompt history={history} />;
   }
 
   let content: React.ReactNode;
