@@ -170,7 +170,11 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                   history.push(getPath('configuration_details', { configId: newAgentConfig.id }));
                 }}
                 enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
-                onCancelEnrollment={enrollmentCancelClickHandler}
+                onCancelEnrollment={
+                  routeState && routeState.onCancelNavigateTo
+                    ? enrollmentCancelClickHandler
+                    : undefined
+                }
               />
             ),
           },

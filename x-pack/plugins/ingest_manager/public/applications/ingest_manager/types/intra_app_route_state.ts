@@ -22,6 +22,16 @@ export interface CreateDatasourceRouteState {
 }
 
 /**
+ * Supported routing state for the agent config details page routes with deploy agents action
+ */
+export interface AgentConfigDetailsDeployAgentAction {
+  /** On cancel, navigate to the given app */
+  onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+}
+
+/**
  * All possible Route states.
  */
-export type AnyIntraAppRouteState = CreateDatasourceRouteState;
+export type AnyIntraAppRouteState =
+  | CreateDatasourceRouteState
+  | AgentConfigDetailsDeployAgentAction;

@@ -37,7 +37,10 @@ import { PolicyEmptyState, EndpointsEmptyState } from '../../../components/manag
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useEndpointPackageInfo } from '../../policy/view/ingest_hooks';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
+import {
+  CreateDatasourceRouteState,
+  AgentConfigDetailsDeployAgentAction,
+} from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
 import {
   getEndpointListPath,
@@ -133,23 +136,17 @@ export const HostList = () => {
     }
   );
 
-  // const handleDeployEndpointsClick = useNavigateToAppEventHandler('ingestManager', {
-  //   path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
-  // });
-
-  const handleDeployEndpointsClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
-    'ingestManager',
-    {
-      path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
-      state: {
-        onCancelNavigateTo: [
-          'securitySolution:management',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
-        ],
-        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
-      },
-    }
-  );
+  const handleDeployEndpointsClick = useNavigateToAppEventHandler<
+    AgentConfigDetailsDeployAgentAction
+  >('ingestManager', {
+    path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
+    state: {
+      onCancelNavigateTo: [
+        'securitySolution:management',
+        { path: getEndpointListPath({ name: 'endpointList' }) },
+      ],
+    },
+  });
 
   const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
     return policyItems.map((item) => {
