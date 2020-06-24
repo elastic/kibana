@@ -60,7 +60,6 @@ export interface VisualizeKibanaServices {
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
   scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;
-  embeddable: EmbeddableStart;
   featureFlagConfig: ConfigSchema;
 }
 

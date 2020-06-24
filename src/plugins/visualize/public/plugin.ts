@@ -52,7 +52,6 @@ export interface VisualizePluginStartDependencies {
   embeddable: EmbeddableStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
-  embeddable: EmbeddableStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -146,7 +145,6 @@ export class VisualizePlugin
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
           scopedHistory: () => this.currentHistory!,
           savedObjects: pluginsStart.savedObjects,
-          embeddable: pluginsStart.embeddable,
           featureFlagConfig: this.initializerContext.config.get<FeatureFlagConfig>(),
           restorePreviousUrl,
         };
