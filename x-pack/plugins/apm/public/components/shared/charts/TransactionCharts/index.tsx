@@ -106,7 +106,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
       return null;
     }
 
-    const linkedJobId = ''; // TODO link to ML job id for the selected environment
+    const linkedJobId = ''; // TODO [APM ML] link to ML job id for the selected environment
 
     const hasKuery = !isEmpty(kuery);
     const icon = hasKuery ? (
