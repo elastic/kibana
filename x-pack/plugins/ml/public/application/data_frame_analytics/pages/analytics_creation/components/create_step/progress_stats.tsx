@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -17,11 +17,14 @@ export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 
 export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
-  const [currentProgress, setCurrentProgress] = useState<{
-    currentPhase: number;
-    progress: number;
-    totalPhases: number;
-  }>(undefined);
+  const [currentProgress, setCurrentProgress] = useState<
+    | {
+        currentPhase: number;
+        progress: number;
+        totalPhases: number;
+      }
+    | undefined
+  >(undefined);
 
   const {
     services: { notifications },
