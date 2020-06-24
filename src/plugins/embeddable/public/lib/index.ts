@@ -24,3 +24,4 @@ export * from './actions';
 export * from './triggers';
 export * from './containers';
 export * from './panel';
+export * from './state_transfer';
