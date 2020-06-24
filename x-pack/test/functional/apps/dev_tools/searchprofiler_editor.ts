@@ -23,9 +23,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('searchProfilerEditor')).to.be(true);
     });
 
-    // after(async () => {
-    //   await security.testUser.restoreDefaults();
-    // });
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
 
     it('correctly parses triple quotes in JSON', async () => {
       // The below inputs are written to work _with_ ace's autocomplete unlike console's unit test
