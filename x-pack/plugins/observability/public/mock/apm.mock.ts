@@ -18,8 +18,8 @@ const response: ApmFetchDataResponse = {
   }),
   appLink: '/app/apm',
   stats: {
-    services: { label: 'Services', value: 11 },
-    transactions: { label: 'Transactions', value: 312000, color: 'euiColorVis1' },
+    services: { label: 'Services', value: 11, type: 'number' },
+    transactions: { label: 'Transactions', value: 312000, type: 'number', color: 'euiColorVis1' },
   },
   series: {
     transactions: {

@@ -46,8 +46,6 @@ export const Home = () => {
     ]);
   }, [core]);
 
-  const apps = appsSection.filter((app) => app.id !== 'alert');
-
   return (
     <WithHeaderLayout
       restrictWidth={1200}
@@ -79,7 +77,7 @@ export const Home = () => {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFlexGrid columns={2}>
-                {apps.map((app) => (
+                {appsSection.map((app) => (
                   <EuiFlexItem key={app.id}>
                     <EuiCardWithoutPadding
                       display="plain"

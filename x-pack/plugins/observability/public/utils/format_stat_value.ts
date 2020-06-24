@@ -5,24 +5,16 @@
  */
 
 import numeral from '@elastic/numeral';
-import { Numeral, Percentage, Bytes } from '../typings/fetch_data_response';
-
-type Stat = Numeral | Percentage | Bytes;
-
-function isBytes(stat: Stat): stat is Bytes {
-  return (stat as Bytes).bytes !== undefined;
-}
-
-function isPercentage(stat: Stat): stat is Percentage {
-  return (stat as Percentage).pct !== undefined;
-}
+import { Stat } from '../typings/fetch_data_response';
 
 export function formatStatValue(stat: Stat) {
-  if (isBytes(stat)) {
-    return `${stat.bytes} Mb/s`;
-  } else if (isPercentage(stat)) {
-    return numeral(stat.pct).format('0.0%');
-  } else {
-    return numeral(stat.value).format('0a');
+  const { value, type } = stat;
+  switch (type) {
+    case 'bytesPerSecond':
+      return `${numeral(value).format('0.0b')}/s`;
+    case 'number':
+      return numeral(value).format('0a');
+    case 'percent':
+      return numeral(value).format('0.0%');
   }
 }

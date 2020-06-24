@@ -4,27 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { formatStatValue } from './format_stat_value';
+import { Stat } from '../typings/fetch_data_response';
 
 describe('formatStatValue', () => {
-  it('formats value as numeral', () => {
+  it('formats value as number', () => {
     const stat = {
+      type: 'number',
       label: 'numeral stat',
       value: 1000,
-    };
+    } as Stat;
     expect(formatStatValue(stat)).toEqual('1k');
   });
   it('formats value as bytes', () => {
-    const stat = {
-      label: 'bytes stat',
-      bytes: 11.4,
-    };
-    expect(formatStatValue(stat)).toEqual('11.4 Mb/s');
+    expect(
+      formatStatValue({
+        type: 'bytesPerSecond',
+        label: 'bytes stat',
+        value: 1,
+      } as Stat)
+    ).toEqual('1.0B/s');
+    expect(
+      formatStatValue({
+        type: 'bytesPerSecond',
+        label: 'bytes stat',
+        value: 1048576,
+      } as Stat)
+    ).toEqual('1.0MB/s');
+    expect(
+      formatStatValue({
+        type: 'bytesPerSecond',
+        label: 'bytes stat',
+        value: 1073741824,
+      } as Stat)
+    ).toEqual('1.0GB/s');
   });
-  it('formats value as percentage', () => {
+  it('formats value as percent', () => {
     const stat = {
-      label: 'bytes stat',
-      pct: 0.841,
-    };
+      type: 'percent',
+      label: 'percent stat',
+      value: 0.841,
+    } as Stat;
     expect(formatStatValue(stat)).toEqual('84.1%');
   });
 });

@@ -7,7 +7,6 @@ import React from 'react';
 import * as t from 'io-ts';
 import { Home } from '../pages/home';
 import { Overview } from '../pages/overview';
-import { jsonRt } from './json_rt';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -27,23 +26,10 @@ export const routes = {
     params: {},
   },
   '/overview': {
-    handler: ({ query }: { query: any }) => {
-      console.log('### caue: query', query);
+    handler: ({ query }: any) => {
       return <Overview routeParams={{ query }} />;
     },
     params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-      }),
-    },
-  },
-  '/overview/:id': {
-    handler: ({ query, path }: { query: any; path: any }) => {
-      return <Overview />;
-    },
-    params: {
-      path: t.type({ id: jsonRt.pipe(t.number) }),
       query: t.partial({
         rangeFrom: t.string,
         rangeTo: t.string,

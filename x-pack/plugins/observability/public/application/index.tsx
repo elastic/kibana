@@ -20,20 +20,12 @@ const App = () => {
         {Object.keys(routes).map((key) => {
           const path = key as keyof typeof routes;
           const route = routes[path];
-          return (
-            <Route
-              key={path}
-              path={path}
-              exact={true}
-              component={() => {
-                const { query, path: pathParams } = useUrlParams<typeof path>(route);
-                return route.handler({ query, path: pathParams });
-              }}
-            />
-          );
+          const Wrapper = () => {
+            const { query, path: pathParams } = useUrlParams<typeof path>(route);
+            return route.handler({ query, path: pathParams });
+          };
+          return <Route key={path} path={path} exact={true} component={Wrapper} />;
         })}
-        {/* <Route path="/" exact={true} component={Home} />
-        <Route path="/overview" exact={true} component={Overview} /> */}
       </Switch>
     </>
   );

@@ -14,9 +14,9 @@ const response: UptimeFetchDataResponse = {
   title: 'Uptime',
   appLink: '/app/uptime',
   stats: {
-    monitors: { label: 'Monitors', value: 5 },
-    down: { label: 'Down', value: 115 },
-    up: { label: 'Up', value: 582 },
+    monitors: { label: 'Monitors', value: 5, type: 'number' },
+    down: { label: 'Down', value: 115, type: 'number' },
+    up: { label: 'Up', value: 582, type: 'number' },
   },
   series: {
     down: {

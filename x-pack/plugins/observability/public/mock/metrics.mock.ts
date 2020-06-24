@@ -18,12 +18,12 @@ const response: MetricsFetchDataResponse = {
   }),
   appLink: '/app/apm',
   stats: {
-    hosts: { label: 'Hosts', value: 11 },
-    cpu: { label: 'CPU usage', pct: 80 },
-    memory: { label: 'Memory Usage', pct: 36.2 },
-    disk: { label: 'Disk Usage', pct: 32.4 },
-    inboundTraffic: { label: 'Inbount traffic', bytes: 1024 },
-    outboundTraffic: { label: 'Outbount traffic', bytes: 1024 },
+    hosts: { label: 'Hosts', value: 11, type: 'number' },
+    cpu: { label: 'CPU usage', value: 0.8, type: 'percent' },
+    memory: { label: 'Memory Usage', value: 0.362, type: 'percent' },
+    disk: { label: 'Disk Usage', value: 0.324, type: 'percent' },
+    inboundTraffic: { label: 'Inbount traffic', value: 1024, type: 'bytesPerSecond' },
+    outboundTraffic: { label: 'Outbount traffic', value: 1024, type: 'bytesPerSecond' },
   },
   series: {
     outboundTraffic: {

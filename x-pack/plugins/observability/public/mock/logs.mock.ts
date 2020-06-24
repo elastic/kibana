@@ -18,9 +18,9 @@ const response: LogsFetchDataResponse = {
   }),
   appLink: '/app/logs',
   stats: {
-    unknown: { label: 'Unknown', value: 73777 },
-    'kibana.log': { label: 'Kibana.log', value: 1018 },
-    'nginx.access': { label: 'Nginx.access', value: 5528 },
+    unknown: { label: 'Unknown', value: 73777, type: 'number' },
+    'kibana.log': { label: 'Kibana.log', value: 1018, type: 'number' },
+    'nginx.access': { label: 'Nginx.access', value: 5528, type: 'number' },
   },
   series: {
     unknown: {
