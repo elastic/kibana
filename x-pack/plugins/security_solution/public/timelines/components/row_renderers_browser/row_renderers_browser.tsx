@@ -211,13 +211,13 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutter="xs">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty data-test-subj="disable-all" onClick={handleDisableAll}>
+                  <EuiButtonEmpty size="s" data-test-subj="disable-all" onClick={handleDisableAll}>
                     {'Disable All'}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiButton fill data-test-subj="enable-all" onClick={handleEnableAll}>
+                  <EuiButton fill size="s" data-test-subj="enable-all" onClick={handleEnableAll}>
                     {'Enable All'}
                   </EuiButton>
                 </EuiFlexItem>
@@ -225,8 +225,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeader>
-
-        <EuiSpacer />
 
         <EuiModalBody>
           <EuiFlexGroup>
