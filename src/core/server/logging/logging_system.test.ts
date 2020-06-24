@@ -113,10 +113,10 @@ test('appends records via multiple appenders.', () => {
         default: { kind: 'console', layout: { kind: 'pattern' } },
         file: { kind: 'file', layout: { kind: 'pattern' }, path: 'path' },
       },
-      loggers: [
-        { appenders: ['file'], context: 'tests', level: 'warn' },
-        { context: 'tests.child', level: 'error' },
-      ],
+      loggers: {
+        tests: { appenders: ['file'], level: 'warn' },
+        'tests.child': { level: 'error' },
+      },
     })
   );
 
@@ -200,7 +200,7 @@ test('setContextConfig() updates config with relative contexts', () => {
         { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: new Map([['grandchild', { appenders: ['default', 'custom'], level: 'debug' }]]),
   });
 
   testsLogger.warn('tests log to default!');
@@ -238,7 +238,7 @@ test('custom context configs are applied on subsequent calls to update()', () =>
         { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: new Map([['grandchild', { appenders: ['default', 'custom'], level: 'debug' }]]),
   });
 
   // Calling upgrade after setContextConfig should not throw away the context-specific config
@@ -280,7 +280,7 @@ test('subsequent calls to setContextConfig() for the same context override the p
         { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: new Map([['grandchild', { appenders: ['default', 'custom'], level: 'debug' }]]),
   });
 
   // Call again, this time with level: 'warn' and a different pattern
@@ -294,7 +294,7 @@ test('subsequent calls to setContextConfig() for the same context override the p
         },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'warn' }],
+    loggers: new Map([['grandchild', { appenders: ['default', 'custom'], level: 'warn' }]]),
   });
 
   const logger = system.get('tests', 'child', 'grandchild');
@@ -328,7 +328,7 @@ test('subsequent calls to setContextConfig() for the same context can disable th
         { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: new Map([['grandchild', { appenders: ['default', 'custom'], level: 'debug' }]]),
   });
 
   // Call again, this time no customizations (effectively disabling)

@@ -16,5 +16,5 @@ export interface LoggerContextConfigInput
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [appenders](./kibana-plugin-core-server.loggercontextconfiginput.appenders.md) | <code>Record&lt;string, AppenderConfigType&gt; &#124; Map&lt;string, AppenderConfigType&gt;</code> |  |
-|  [loggers](./kibana-plugin-core-server.loggercontextconfiginput.loggers.md) | <code>LoggerConfigType[]</code> |  |
+|  [loggers](./kibana-plugin-core-server.loggercontextconfiginput.loggers.md) | <code>Record&lt;string, LoggerConfigType&gt; &#124; Map&lt;string, LoggerConfigType&gt;</code> |  |
 

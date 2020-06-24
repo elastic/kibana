@@ -98,10 +98,12 @@ export class LoggingSystem implements LoggerFactory {
     this.contextConfigs.set(context, {
       ...contextConfig,
       // Automatically prepend the base context to the logger sub-contexts
-      loggers: contextConfig.loggers.map((l) => ({
-        ...l,
-        context: LoggingConfig.getLoggerContext([context, l.context]),
-      })),
+      loggers: new Map(
+        [...contextConfig.loggers].map(([subContext, l]) => [
+          LoggingConfig.getLoggerContext([context, subContext]),
+          l,
+        ])
+      ),
     });
 
     // If we already have a base config, apply the config. If not, custom context configs
@@ -152,8 +154,8 @@ export class LoggingSystem implements LoggerFactory {
   }
 
   private applyBaseConfig(newBaseConfig: LoggingConfig) {
-    const computedConfig = [...this.contextConfigs.values()].reduce(
-      (baseConfig, contextConfig) => baseConfig.extend(contextConfig),
+    const computedConfig = [...this.contextConfigs.values()].reduce<LoggingConfig>(
+      (accConfig, contextConfig) => accConfig.extend(contextConfig),
       newBaseConfig
     );
 

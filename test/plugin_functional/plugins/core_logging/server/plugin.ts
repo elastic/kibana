@@ -47,13 +47,13 @@ const CUSTOM_LOGGING_CONFIG: LoggerContextConfigInput = {
     },
   },
 
-  loggers: [
-    { context: 'debug_json', appenders: ['customJsonFile'], level: 'debug' },
-    { context: 'debug_pattern', appenders: ['customPatternFile'], level: 'debug' },
-    { context: 'info_json', appenders: ['customJsonFile'], level: 'info' },
-    { context: 'info_pattern', appenders: ['customPatternFile'], level: 'info' },
-    { context: 'all', appenders: ['customJsonFile', 'customPatternFile'], level: 'debug' },
-  ],
+  loggers: {
+    debug_json: { appenders: ['customJsonFile'], level: 'debug' },
+    debug_pattern: { appenders: ['customPatternFile'], level: 'debug' },
+    info_json: { appenders: ['customJsonFile'], level: 'info' },
+    info_pattern: { appenders: ['customPatternFile'], level: 'info' },
+    all: { appenders: ['customJsonFile', 'customPatternFile'], level: 'debug' },
+  },
 };
 
 export class CoreLoggingPlugin implements Plugin {

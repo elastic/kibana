@@ -20,7 +20,7 @@ import { of, Subject } from 'rxjs';
 
 import { LoggingService, InternalLoggingServiceSetup } from './logging_service';
 import { loggingSystemMock } from './logging_system.mock';
-import { LoggerContextConfigType } from './logging_config';
+import { LoggerContextConfigInput } from './logging_config';
 
 describe('LoggingService', () => {
   let loggingSystem: ReturnType<typeof loggingSystemMock.create>;
@@ -38,13 +38,13 @@ describe('LoggingService', () => {
 
   describe('setup', () => {
     it('forwards configuration changes to logging system', () => {
-      const config1: LoggerContextConfigType = {
-        appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['console'], level: 'warn' }],
+      const config1: LoggerContextConfigInput = {
+        appenders: {},
+        loggers: { subcontext: { appenders: ['console'], level: 'warn' } },
       };
-      const config2: LoggerContextConfigType = {
-        appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['default'], level: 'all' }],
+      const config2: LoggerContextConfigInput = {
+        appenders: {},
+        loggers: { subcontext: { appenders: ['default'], level: 'all' } },
       };
 
       setup.configure(['test', 'context'], of(config1, config2));
@@ -61,14 +61,14 @@ describe('LoggingService', () => {
     });
 
     it('stops forwarding first observable when called a second time', () => {
-      const updates$ = new Subject<LoggerContextConfigType>();
-      const config1: LoggerContextConfigType = {
-        appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['console'], level: 'warn' }],
+      const updates$ = new Subject<LoggerContextConfigInput>();
+      const config1: LoggerContextConfigInput = {
+        appenders: {},
+        loggers: { subcontext: { appenders: ['console'], level: 'warn' } },
       };
-      const config2: LoggerContextConfigType = {
-        appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['default'], level: 'all' }],
+      const config2: LoggerContextConfigInput = {
+        appenders: {},
+        loggers: { subcontext: { appenders: ['default'], level: 'all' } },
       };
 
       setup.configure(['test', 'context'], updates$);
@@ -85,10 +85,10 @@ describe('LoggingService', () => {
 
   describe('stop', () => {
     it('stops forwarding updates to logging system', () => {
-      const updates$ = new Subject<LoggerContextConfigType>();
-      const config1: LoggerContextConfigType = {
-        appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['console'], level: 'warn' }],
+      const updates$ = new Subject<LoggerContextConfigInput>();
+      const config1: LoggerContextConfigInput = {
+        appenders: {},
+        loggers: { subcontext: { appenders: ['console'], level: 'warn' } },
       };
 
       setup.configure(['test', 'context'], updates$);

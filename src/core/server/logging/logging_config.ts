@@ -20,10 +20,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { AppenderConfigType, Appenders } from './appenders/appenders';
 
-// We need this helper for the types to be correct
-// (otherwise it assumes an array of A|B instead of a tuple [A,B])
-const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
-
 /**
  * Separator string that used within nested context name (eg. plugins.pid).
  */
@@ -62,20 +58,19 @@ const levelSchema = schema.oneOf(
  */
 export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  context: schema.string(),
   level: levelSchema,
 });
-
 /** @public */
 export type LoggerConfigType = TypeOf<typeof loggerSchema>;
+
 export const config = {
   path: 'logging',
   schema: schema.object({
     appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
       defaultValue: new Map<string, AppenderConfigType>(),
     }),
-    loggers: schema.arrayOf(loggerSchema, {
-      defaultValue: [],
+    loggers: schema.mapOf(schema.string(), loggerSchema, {
+      defaultValue: new Map<string, LoggerConfigType>(),
     }),
     root: schema.object(
       {
@@ -109,7 +104,9 @@ export const loggerContextConfigSchema = schema.object({
     defaultValue: new Map<string, AppenderConfigType>(),
   }),
 
-  loggers: schema.arrayOf(loggerSchema, { defaultValue: [] }),
+  loggers: schema.mapOf(schema.string(), loggerSchema, {
+    defaultValue: new Map<string, LoggerConfigType>(),
+  }),
 });
 
 /** @public */
@@ -118,7 +115,7 @@ export type LoggerContextConfigType = TypeOf<typeof loggerContextConfigSchema>;
 export interface LoggerContextConfigInput {
   // config-schema knows how to handle either Maps or Records
   appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
-  loggers?: LoggerConfigType[];
+  loggers?: Record<string, LoggerConfigType> | Map<string, LoggerConfigType>;
 }
 
 /**
@@ -189,15 +186,9 @@ export class LoggingConfig {
    * @param contextConfig
    */
   public extend(contextConfig: LoggerContextConfigType) {
-    // Use a Map to de-dupe any loggers for the same context. contextConfig overrides existing config.
-    const mergedLoggers = new Map<string, LoggerConfigType>([
-      ...this.configType.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
-      ...contextConfig.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
-    ]);
-
     const mergedConfig: LoggingConfigType = {
       appenders: new Map([...this.configType.appenders, ...contextConfig.appenders]),
-      loggers: [...mergedLoggers.values()],
+      loggers: new Map([...this.configType.loggers, ...contextConfig.loggers]),
       root: this.configType.root,
     };
 
@@ -213,16 +204,12 @@ export class LoggingConfig {
   private fillLoggersConfig(loggingConfig: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
-    const loggers = [
-      { context: ROOT_CONTEXT_NAME, ...loggingConfig.root },
+    const loggers: Map<string, LoggerConfigType> = new Map([
+      [ROOT_CONTEXT_NAME, loggingConfig.root],
       ...loggingConfig.loggers,
-    ];
+    ]);
 
-    const loggerConfigByContext = new Map(
-      loggers.map((loggerConfig) => toTuple(loggerConfig.context, loggerConfig))
-    );
-
-    for (const [loggerContext, loggerConfig] of loggerConfigByContext) {
+    for (const [loggerContext, loggerConfig] of loggers) {
       // Ensure logger config only contains valid appenders.
       const unsupportedAppenderKey = loggerConfig.appenders.find(
         (appenderKey) => !this.appenders.has(appenderKey)
@@ -234,7 +221,7 @@ export class LoggingConfig {
         );
       }
 
-      const appenders = getAppenders(loggerConfig, loggerConfigByContext);
+      const appenders = getAppenders(loggerContext, loggerConfig, loggers);
 
       // We expect `appenders` to never be empty at this point, since the `root` context config should always
       // have at least one appender that is enforced by the config schema validation.
@@ -253,10 +240,11 @@ export class LoggingConfig {
  * appenders from the parent context config.
  */
 function getAppenders(
+  loggerContext: string,
   loggerConfig: LoggerConfigType,
   loggerConfigByContext: Map<string, LoggerConfigType>
 ) {
-  let currentContext = loggerConfig.context;
+  let currentContext = loggerContext;
   let appenders = loggerConfig.appenders;
 
   while (appenders.length === 0) {

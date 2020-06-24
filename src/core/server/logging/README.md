@@ -164,16 +164,16 @@ logging:
     level: error
 
   loggers:
-    - context: plugins
+    plugins:
       appenders: [custom]
       level: warn
-    - context: plugins.myPlugin
+    plugins.myPlugin:
       level: info
-    - context: server
+    server:
       level: fatal
-    - context: optimize
+    optimize:
       appenders: [console]
-    - context: telemetry
+    telemetry:
       level: all
       appenders: [json-file-appender]
 ```
@@ -259,7 +259,7 @@ define a custom one.
 ```yaml
 logging:
   loggers:
-    - context: plugins.myPlugin
+    plugins.myPlugin:
       appenders: [console]
 ```
 Logs in a *file* if given file path. You should define a custom appender with `kind: file` 
@@ -273,7 +273,7 @@ logging:
       layout:
         kind: pattern
   loggers:
-    - context: plugins.myPlugin
+    plugins.myPlugin:
       appenders: [file]
 ``` 
 #### logging.json
@@ -285,7 +285,7 @@ Suppresses all logging output other than error messages. With new logging, confi
 with adjusting minimum required [logging level](#log-level).
 ```yaml
   loggers:
-    - context: plugins.myPlugin
+    plugins.myPlugin:
       appenders: [console]
       level: error
 # or for all output

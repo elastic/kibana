@@ -3,7 +3,7 @@
 exports[`\`schema\` creates correct schema with defaults. 1`] = `
 Object {
   "appenders": Map {},
-  "loggers": Array [],
+  "loggers": Map {},
   "root": Object {
     "appenders": Array [
       "default",

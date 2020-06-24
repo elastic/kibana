@@ -608,7 +608,6 @@ export const config: {
         }>>;
         loggers: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<string[]>;
-            context: import("@kbn/config-schema").Type<string>;
             level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
         }>;
         loggerContext: import("@kbn/config-schema").ObjectType<{
@@ -638,11 +637,10 @@ export const config: {
             } & {
                 kind: "legacy-appender";
             }>>>;
-            loggers: import("@kbn/config-schema").Type<Readonly<{} & {
-                context: string;
+            loggers: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
                 appenders: string[];
                 level: import("./logging/log_level").LogLevelId;
-            }>[]>;
+            }>>>;
         }>;
     };
 };
@@ -1353,7 +1351,7 @@ export interface LoggerContextConfigInput {
     // (undocumented)
     appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
     // (undocumented)
-    loggers?: LoggerConfigType[];
+    loggers?: Record<string, LoggerConfigType> | Map<string, LoggerConfigType>;
 }
 
 // @public

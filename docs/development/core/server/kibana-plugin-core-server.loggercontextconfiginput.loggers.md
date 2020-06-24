@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-loggers?: LoggerConfigType[];
+loggers?: Record<string, LoggerConfigType> | Map<string, LoggerConfigType>;
 ```
