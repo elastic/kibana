@@ -21,8 +21,14 @@ import { EuiProgress } from '@elastic/eui';
 
 interface Props {
   percent: number;
+  count: number;
+  value: string;
 }
 
-export function StringFieldProgressBar({ percent }: Props) {
-  return <EuiProgress value={percent} max={100} color="secondary" aria-hidden={true} size="s" />;
+export function StringFieldProgressBar({ value, percent, count }: Props) {
+  const tooltipContent = `${value}: ${count} (${percent}%)`;
+
+  return (
+    <EuiProgress value={percent} max={100} color="secondary" aria-label={tooltipContent} size="s" />
+  );
 }

@@ -17,14 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import {
-  EuiText,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
@@ -53,29 +46,31 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
     }
   );
 
-  const tooltipContent = `${bucket.value}: ${bucket.count} (${bucket.percent}%)`;
-
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" responsive={false} gutterSize="s">
         <EuiFlexItem className="dscFieldDetails__barContainer" grow={1}>
-          <EuiToolTip content={tooltipContent} delay="long" position="right">
-            <>
-              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={1} className="eui-textTruncate">
-                  <EuiText size="xs" className="eui-textTruncate">
-                    {bucket.display === '' ? emptyTxt : bucket.display}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} className="eui-textTruncate">
-                  <EuiText color="secondary" size="xs" className="eui-textTruncate">
-                    {bucket.percent}%
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <StringFieldProgressBar percent={bucket.percent} />
-            </>
-          </EuiToolTip>
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={1} className="eui-textTruncate">
+              <EuiText
+                title={bucket.display === '' ? emptyTxt : bucket.display}
+                size="xs"
+                className="eui-textTruncate"
+              >
+                {bucket.display === '' ? emptyTxt : bucket.display}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="eui-textTruncate">
+              <EuiText color="secondary" size="xs" className="eui-textTruncate">
+                {bucket.percent}%
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <StringFieldProgressBar
+            value={bucket.value}
+            percent={bucket.percent}
+            count={bucket.count}
+          />
         </EuiFlexItem>
         {field.filterable && (
           <EuiFlexItem grow={false}>
