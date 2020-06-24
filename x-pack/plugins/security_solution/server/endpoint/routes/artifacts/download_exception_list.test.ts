@@ -22,12 +22,13 @@ import {
   loggingServiceMock,
 } from 'src/core/server/mocks';
 import { ExceptionsCache } from '../../lib/artifacts/cache';
-import { CompressExceptionList } from '../../lib/artifacts/lists';
+import { compressExceptionList } from '../../lib/artifacts/lists';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockAgentService } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
+import { getManifestManagerMock } from '../../services/artifacts';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
 const expectedEndpointExceptions = {
@@ -73,7 +74,7 @@ describe('test alerts route', () => {
 
     endpointAppContextService.start({
       agentService: createMockAgentService(),
-      manifestManager: undefined,
+      manifestManager: getManifestManagerMock(),
     });
 
     registerDownloadExceptionListRoute(
@@ -94,7 +95,7 @@ describe('test alerts route', () => {
       params: { sha256: '123456' },
     });
 
-    const mockCompressedArtifact = await CompressExceptionList(expectedEndpointExceptions);
+    const mockCompressedArtifact = await compressExceptionList(expectedEndpointExceptions);
 
     const mockArtifact = {
       id: '2468',
@@ -183,7 +184,7 @@ describe('test alerts route', () => {
     });
 
     // Add to the download cache
-    const mockCompressedArtifact = await CompressExceptionList(expectedEndpointExceptions);
+    const mockCompressedArtifact = await compressExceptionList(expectedEndpointExceptions);
     const cacheKey = `${mockArtifactName}-${mockSha}`;
     cache.set(cacheKey, mockCompressedArtifact.toString('binary'));
 

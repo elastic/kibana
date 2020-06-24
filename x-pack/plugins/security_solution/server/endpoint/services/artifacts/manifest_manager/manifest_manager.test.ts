@@ -5,7 +5,7 @@
  */
 
 import { ManifestManager } from './manifest_manager';
-import { ManifestManagerMock } from './manifest_manager.mock';
+import { getManifestManagerMock } from './manifest_manager.mock';
 
 describe('manifest_manager', () => {
   describe('ManifestManager sanity checks', () => {

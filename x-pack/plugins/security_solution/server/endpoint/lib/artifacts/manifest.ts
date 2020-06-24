@@ -9,6 +9,7 @@ import {
   InternalArtifactSchema,
   InternalManifestSchema,
   ManifestSchema,
+  ManifestSchemaVersion,
   manifestSchema,
   manifestSchemaVersion,
 } from '../../schemas/artifacts';
@@ -22,7 +23,7 @@ export interface ManifestDiff {
 export class Manifest {
   private created: Date;
   private entries: Record<string, ManifestEntry>;
-  private schemaVersion: string;
+  private schemaVersion: ManifestSchemaVersion;
 
   // For concurrency control
   private version: string | undefined;
@@ -43,7 +44,7 @@ export class Manifest {
 
   public static fromArtifacts(
     artifacts: InternalArtifactSchema[],
-    schemaVersion: string
+    schemaVersion: ManifestSchemaVersion
   ): Manifest {
     const manifest = new Manifest(new Date(), schemaVersion);
     artifacts.forEach((artifact) => {
@@ -52,7 +53,7 @@ export class Manifest {
     return manifest;
   }
 
-  public getSchemaVersion(): string {
+  public getSchemaVersion(): ManifestSchemaVersion {
     return this.schemaVersion;
   }
 
@@ -100,7 +101,7 @@ export class Manifest {
   }
 
   public toEndpointFormat(): ManifestSchema {
-    const manifestObj = {
+    const manifestObj: ManifestSchema = {
       manifestVersion: this.version,
       schemaVersion: this.schemaVersion,
       artifacts: {},
@@ -115,12 +116,12 @@ export class Manifest {
       throw new Error(errors);
     }
 
-    return validated;
+    return validated as ManifestSchema;
   }
 
   public toSavedObject(): InternalManifestSchema {
     return {
-      created: this.created,
+      created: this.created.getTime(),
       ids: Object.keys(this.entries),
     };
   }

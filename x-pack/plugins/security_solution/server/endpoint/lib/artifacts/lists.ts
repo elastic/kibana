@@ -92,7 +92,7 @@ export async function getFullEndpointExceptionList(
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exc
  */
-function translateToEndpointExceptions(
+export function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
 ): TranslatedEntry[] {
@@ -163,7 +163,9 @@ function translateEntry(
 /**
  * Compresses the exception list
  */
-function compressExceptionList(exceptionList: WrappedTranslatedExceptionList): Promise<Buffer> {
+export function compressExceptionList(
+  exceptionList: WrappedTranslatedExceptionList
+): Promise<Buffer> {
   return lzma.compress(JSON.stringify(exceptionList), (res: Buffer) => {
     return res;
   });
