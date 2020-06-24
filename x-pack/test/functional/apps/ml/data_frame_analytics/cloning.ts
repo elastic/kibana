@@ -168,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it('continues to the additional options step', async () => {
+        it('should continue to the additional options step', async () => {
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
         });
 
@@ -178,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it('continues to the details step', async () => {
+        it('should continue to the details step', async () => {
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
         });
 
@@ -190,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
         });
 
-        it('continues to the create step', async () => {
+        it('should continue to the create step', async () => {
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
         });
 
@@ -202,11 +202,11 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(cloneJobId);
         });
 
-        it('finishes analytics processing', async () => {
+        it('should finish analytics processing', async () => {
           await ml.dataFrameAnalytics.waitForAnalyticsCompletion(cloneJobId);
         });
 
-        it('displays the created job in the analytics table', async () => {
+        it('should display the created job in the analytics table', async () => {
           await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId);

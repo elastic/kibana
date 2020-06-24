@@ -8,13 +8,13 @@ import React, { FC, Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { getNumberValue } from './advanced_step_form';
+import { AdvancedParamErrors, getNumberValue } from './advanced_step_form';
 import { ANALYSIS_ADVANCED_FIELDS } from '../../../../common/analytics';
 
 const MAX_TREES_LIMIT = 2000;
 
 interface Props extends CreateAnalyticsFormProps {
-  advancedParamErrors: any;
+  advancedParamErrors: AdvancedParamErrors;
 }
 
 export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors }) => {

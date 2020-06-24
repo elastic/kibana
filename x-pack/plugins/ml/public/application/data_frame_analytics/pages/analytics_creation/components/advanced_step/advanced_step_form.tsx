@@ -27,7 +27,7 @@ import {
 } from '../../../../common/analytics';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
-import { getExplainData } from '../shared';
+import { fetchExplainData } from '../shared';
 import { ContinueButton } from '../continue_button';
 import { OutlierHyperParameters } from './outlier_hyper_parameters';
 
@@ -35,16 +35,17 @@ export function getNumberValue(value?: number) {
   return value === undefined ? '' : +value;
 }
 
+export type AdvancedParamErrors = {
+  [key in ANALYSIS_ADVANCED_FIELDS]?: string;
+};
+
 export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
   state,
   setCurrentStep,
 }) => {
-  const [advancedParamErrors, setAdvancedParamErrors] = useState<
-    {
-      [key in ANALYSIS_ADVANCED_FIELDS]?: string;
-    }
-  >({});
+  const [advancedParamErrors, setAdvancedParamErrors] = useState<AdvancedParamErrors>({});
+  const [fetchingAdvancedParamErrors, setFetchingAdvancedParamErrors] = useState<boolean>(false);
 
   const { setFormState } = actions;
   const { form, isJobCreated } = state;
@@ -78,14 +79,16 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const mmlInvalid = modelMemoryLimitValidationResult !== null;
 
-  const isStepInvalid = mmlInvalid || Object.keys(advancedParamErrors).length > 0;
+  const isStepInvalid =
+    mmlInvalid ||
+    Object.keys(advancedParamErrors).length > 0 ||
+    fetchingAdvancedParamErrors === true;
 
   useEffect(() => {
+    setFetchingAdvancedParamErrors(true);
     (async function () {
-      const { success, errorMessage } = await getExplainData(form);
-      const paramErrors: {
-        [key in ANALYSIS_ADVANCED_FIELDS]?: string;
-      } = {};
+      const { success, errorMessage } = await fetchExplainData(form);
+      const paramErrors: AdvancedParamErrors = {};
 
       if (!success) {
         // Check which field is invalid
@@ -95,6 +98,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
           }
         });
       }
+      setFetchingAdvancedParamErrors(false);
       setAdvancedParamErrors(paramErrors);
     })();
   }, [

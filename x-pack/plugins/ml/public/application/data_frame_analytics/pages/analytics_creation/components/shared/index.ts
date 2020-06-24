@@ -5,4 +5,4 @@
  */
 
 export { Messages } from './messages';
-export { getExplainData } from './get_explain_data';
+export { fetchExplainData } from './fetch_explain_data';

@@ -41,7 +41,7 @@ import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
 import { MemoizedAnalysisFieldsTable } from './analysis_fields_table';
 import { DataGrid } from '../../../../../components/data_grid';
-import { getExplainData } from '../shared';
+import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import { useSavedSearch } from './use_saved_search';
@@ -172,7 +172,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       setLoadingFieldOptions(true);
     }
 
-    const { success, expectedMemory, fieldSelection, errorMessage } = await getExplainData(form);
+    const { success, expectedMemory, fieldSelection, errorMessage } = await fetchExplainData(form);
 
     if (success) {
       if (shouldUpdateEstimatedMml) {

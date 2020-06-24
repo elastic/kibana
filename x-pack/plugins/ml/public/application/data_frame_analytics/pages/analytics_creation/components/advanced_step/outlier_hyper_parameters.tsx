@@ -9,10 +9,10 @@ import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { OUTLIER_ANALYSIS_METHOD, ANALYSIS_ADVANCED_FIELDS } from '../../../../common/analytics';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { getNumberValue } from './advanced_step_form';
+import { AdvancedParamErrors, getNumberValue } from './advanced_step_form';
 
 interface Props extends CreateAnalyticsFormProps {
-  advancedParamErrors: any;
+  advancedParamErrors: AdvancedParamErrors;
 }
 
 export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedParamErrors }) => {
