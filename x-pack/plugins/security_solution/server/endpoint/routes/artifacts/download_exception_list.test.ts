@@ -19,7 +19,7 @@ import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 import { ExceptionsCache } from '../../lib/artifacts/cache';
 import { compressExceptionList } from '../../lib/artifacts/lists';
@@ -28,20 +28,23 @@ import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockAgentService } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
-import { getManifestManagerMock } from '../../services/artifacts';
+import { getManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
+import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
-const expectedEndpointExceptions = {
+const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
   exceptions_list: [
     {
       entries: [
         {
-          entry: { exact_caseless: 'Elastic, N.V.' },
+          type: 'exact_caseless',
+          value: 'Elastic, N.V.',
           field: 'actingProcess.file.signer',
           operator: 'included',
         },
         {
-          entry: { exact_caseless_any: ['process', 'malware'] },
+          type: 'exact_caseless_any',
+          value: ['process', 'malware'],
           field: 'event.category',
           operator: 'included',
         },
@@ -71,17 +74,16 @@ describe('test alerts route', () => {
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
     cache = new ExceptionsCache();
-    loggingServiceMock.createSetupContract();
 
     endpointAppContextService.start({
       agentService: createMockAgentService(),
-      manifestManager: getManifestManagerMock(),
+      manifestManager: undefined,
     });
 
     registerDownloadExceptionListRoute(
       routerMock,
       {
-        logFactory: loggingServiceMock.create(),
+        logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
       },
