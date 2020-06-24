@@ -20,9 +20,10 @@ import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 
 import { ElasticsearchErrorHelpers } from './errors';
-import { GetAuthHeaders, isRealRequest, LegacyRequest } from '../../http';
-import { filterHeaders, Headers, KibanaRequest, ensureRawRequest } from '../../http/router';
+import { GetAuthHeaders, isRealRequest } from '../../http';
+import { filterHeaders, ensureRawRequest } from '../../http/router';
 import { Logger } from '../../logging';
+import { ScopeableRequest } from '../types';
 import {
   ElasticsearchClientConfig,
   parseElasticsearchClientConfig,
@@ -80,15 +81,6 @@ const callAPI = async (
 };
 
 /**
- * Fake request object created manually by Kibana plugins.
- * @public
- */
-export interface FakeRequest {
-  /** Headers used for authentication against Elasticsearch */
-  headers: Headers;
-}
-
-/**
  * Represents an Elasticsearch cluster API client created by the platform.
  * It allows to call API on behalf of the internal Kibana user and
  * the actual user that is derived from the request headers (via `asScoped(...)`).
@@ -109,15 +101,6 @@ export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScope
  * @public
  */
 export type ICustomClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
-
-/**
- A user credentials container.
- * It accommodates the necessary auth credentials to impersonate the current user.
- *
- * @public
- * See {@link KibanaRequest}.
- */
-export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
 
 /**
  * {@inheritDoc IClusterClient}
@@ -246,9 +229,7 @@ export class ClusterClient implements IClusterClient {
     }
   }
 
-  private getHeaders(
-    request?: KibanaRequest | LegacyRequest | FakeRequest
-  ): Record<string, string | string[] | undefined> {
+  private getHeaders(request?: ScopeableRequest): Record<string, string | string[] | undefined> {
     if (!isRealRequest(request)) {
       return request && request.headers ? request.headers : {};
     }

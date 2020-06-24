@@ -35,7 +35,6 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import {
   ClusterClient,
-  ScopeableRequest,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
@@ -43,7 +42,11 @@ import {
 } from './legacy';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
-import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './types';
+import {
+  InternalElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
+  ScopeableRequest,
+} from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 

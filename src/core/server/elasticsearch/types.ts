@@ -18,6 +18,8 @@
  */
 
 import { Observable } from 'rxjs';
+import { Headers } from '../http/router';
+import { LegacyRequest, KibanaRequest } from '../http';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchClientConfig, IClusterClient, ICustomClusterClient } from './legacy';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
@@ -134,3 +136,21 @@ export interface ElasticsearchStatusMeta {
   warningNodes: NodesVersionCompatibility['warningNodes'];
   incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
 }
+
+/**
+ * Fake request object created manually by Kibana plugins.
+ * @public
+ */
+export interface FakeRequest {
+  /** Headers used for authentication against Elasticsearch */
+  headers: Headers;
+}
+
+/**
+ A user credentials container.
+ * It accommodates the necessary auth credentials to impersonate the current user.
+ *
+ * @public
+ * See {@link KibanaRequest}.
+ */
+export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;

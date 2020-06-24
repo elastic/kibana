@@ -16,13 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export {
-  ClusterClient,
-  FakeRequest,
-  IClusterClient,
-  ICustomClusterClient,
-  ScopeableRequest,
-} from './cluster_client';
+export { ClusterClient, IClusterClient, ICustomClusterClient } from './cluster_client';
 export { IScopedClusterClient, ScopedClusterClient, Headers } from './scoped_cluster_client';
 export { ElasticsearchClientConfig } from './elasticsearch_client_config';
 export { retryCallCluster, migrationsRetryCallCluster } from './retry_call_cluster';

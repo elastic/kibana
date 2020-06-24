@@ -25,5 +25,7 @@ export {
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   InternalElasticsearchServiceSetup,
+  FakeRequest,
+  ScopeableRequest,
 } from './types';
 export * from './legacy';
