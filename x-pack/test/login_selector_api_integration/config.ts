@@ -127,7 +127,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           oidc: { oidc1: { order: 3, realm: 'oidc1' } },
           saml: {
             saml1: { order: 1, realm: 'saml1' },
-            saml2: { order: 5, realm: 'saml2', maxRedirectURLSize: '100b' },
+            saml2: {
+              order: 5,
+              realm: 'saml2',
+              maxRedirectURLSize: '100b',
+              useRelayStateDeepLink: true,
+            },
           },
         })}`,
       ],
