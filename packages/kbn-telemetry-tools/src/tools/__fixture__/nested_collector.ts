@@ -19,8 +19,8 @@
 import {
   CollectorSet,
   UsageCollector,
-} from '../../../../src/plugins/usage_collection/server/collector';
-import { loggingServiceMock } from '../../../../src/core/server/mocks';
+} from '../../../../../src/plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 
 const collectorSet = new CollectorSet({
   logger: loggingServiceMock.createLogger(),

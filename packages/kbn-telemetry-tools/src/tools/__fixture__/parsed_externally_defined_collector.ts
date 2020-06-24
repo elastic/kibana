@@ -22,7 +22,7 @@ import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedExternallyDefinedCollector: ParsedUsageCollection[] = [
   [
-    'src/dev/telemetry/__fixture__/externally_defined_collector.ts',
+    'packages/kbn-telemetry-tools/src/tools/__fixture__/externally_defined_collector.ts',
     {
       collectorName: 'from_variable_collector',
       schema: {
@@ -44,7 +44,7 @@ export const parsedExternallyDefinedCollector: ParsedUsageCollection[] = [
     },
   ],
   [
-    'src/dev/telemetry/__fixture__/externally_defined_collector.ts',
+    'packages/kbn-telemetry-tools/src/tools/__fixture__/externally_defined_collector.ts',
     {
       collectorName: 'from_fn_collector',
       schema: {

@@ -3,7 +3,7 @@
 exports[`extractCollectors extracts collectors given rc file 1`] = `
 Array [
   Array [
-    "src/dev/telemetry/__fixture__/externally_defined_collector.ts",
+    "packages/kbn-telemetry-tools/src/tools/__fixture__/externally_defined_collector.ts",
     Object {
       "collectorName": "from_variable_collector",
       "fetch": Object {
@@ -25,7 +25,7 @@ Array [
     },
   ],
   Array [
-    "src/dev/telemetry/__fixture__/externally_defined_collector.ts",
+    "packages/kbn-telemetry-tools/src/tools/__fixture__/externally_defined_collector.ts",
     Object {
       "collectorName": "from_fn_collector",
       "fetch": Object {
@@ -47,7 +47,7 @@ Array [
     },
   ],
   Array [
-    "src/dev/telemetry/__fixture__/imported_schema.ts",
+    "packages/kbn-telemetry-tools/src/tools/__fixture__/imported_schema.ts",
     Object {
       "collectorName": "with_imported_schema",
       "fetch": Object {
@@ -69,7 +69,7 @@ Array [
     },
   ],
   Array [
-    "src/dev/telemetry/__fixture__/imported_usage_interface.ts",
+    "packages/kbn-telemetry-tools/src/tools/__fixture__/imported_usage_interface.ts",
     Object {
       "collectorName": "imported_usage_interface_collector",
       "fetch": Object {
@@ -91,7 +91,7 @@ Array [
     },
   ],
   Array [
-    "src/dev/telemetry/__fixture__/nested_collector.ts",
+    "packages/kbn-telemetry-tools/src/tools/__fixture__/nested_collector.ts",
     Object {
       "collectorName": "my_nested_collector",
       "fetch": Object {
@@ -113,7 +113,7 @@ Array [
     },
   ],
   Array [
-    "src/dev/telemetry/__fixture__/working_collector.ts",
+    "packages/kbn-telemetry-tools/src/tools/__fixture__/working_collector.ts",
     Object {
       "collectorName": "my_working_collector",
       "fetch": Object {

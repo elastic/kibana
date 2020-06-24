@@ -17,7 +17,7 @@ export function registerMapsUsageCollector(
   }
 
   const mapsUsageCollector = usageCollection.makeUsageCollector({
-    type: 'maps-telemetry',
+    type: 'maps',
     isReady: () => true,
     fetch: async () => await getMapsTelemetry(config),
   });

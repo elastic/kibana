@@ -128,7 +128,7 @@ export function registerMyPluginUsageCollector(
 
 ## Schema Field
 
-The `schema` field is a proscribed data model that eliminates maintenance of mappings in the telemetry cluster. Simply define a schema field that specifies every possible field reported by the collector. Whenever the `schema` field is set or changed. Please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
+The `schema` field is a proscribed data model assists with detecting changes in usage collector payloads. To define the collector schema add a schema field that specifies every possible field reported when registering the collector. Whenever the `schema` field is set or changed please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
 
 ### Allowed Schema Types
 

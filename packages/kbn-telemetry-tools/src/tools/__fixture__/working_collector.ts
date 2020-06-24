@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet } from '../../../../src/plugins/usage_collection/server/collector';
-import { loggingServiceMock } from '../../../../src/core/server/mocks';
+import { CollectorSet } from '../../../../../src/plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 
 const { makeUsageCollector } = new CollectorSet({
   logger: loggingServiceMock.createLogger(),

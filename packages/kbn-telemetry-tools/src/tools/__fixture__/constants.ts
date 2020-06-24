@@ -17,7 +17,7 @@
  * under the License.
  */
 import moment, { Moment } from 'moment';
-import { MakeSchemaFrom } from '../../../../src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '../../../../../src/plugins/usage_collection/server';
 
 export interface Usage {
   locale: string;

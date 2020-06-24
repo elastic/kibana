@@ -21,7 +21,7 @@ import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedWorkingCollector: ParsedUsageCollection = [
-  'src/dev/telemetry/__fixture__/working_collector.ts',
+  'packages/kbn-telemetry-tools/src/tools/__fixture__/working_collector.ts',
   {
     collectorName: 'my_working_collector',
     schema: {
