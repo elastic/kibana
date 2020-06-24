@@ -1037,11 +1037,11 @@ const updateTypeAndProvider = (
               ? {
                   ...andProvider,
                   type,
-                  name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
+                  name: type === DataProviderType.template ? `${andProvider.queryMatch.field}` : '',
                   queryMatch: {
-                    ...provider.queryMatch,
+                    ...andProvider.queryMatch,
                     value:
-                      type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
+                      type === DataProviderType.template ? `{${andProvider.queryMatch.field}}` : '',
                   },
                 }
               : andProvider
@@ -1075,7 +1075,7 @@ export const updateTimelineProviderType = ({
   const timeline = timelineById[id];
 
   if (timeline.timelineType !== TimelineType.template && type === DataProviderType.template) {
-    // Not timeline template cannot have template type providers
+    // Not supported, timeline template cannot have template type providers
     return timelineById;
   }
 
