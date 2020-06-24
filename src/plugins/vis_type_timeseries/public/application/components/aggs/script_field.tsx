@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SCRIPTED_FIELD_VALUE } from 'src/plugins/vis_type_timeseries/common/constants';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 
 interface Props {
   model: { type: string; field: string; script: string };
