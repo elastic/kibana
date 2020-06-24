@@ -39,7 +39,7 @@ export class AnomalySwimlaneEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
-      defaultMessage: 'ML Anomaly Swimlane',
+      defaultMessage: 'ML Anomaly Swim Lane',
     });
   }
 
