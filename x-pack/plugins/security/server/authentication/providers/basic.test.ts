@@ -107,7 +107,7 @@ describe('BasicAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/base-path/login?next=%2Fbase-path%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+          '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
         )
       );
     });
@@ -186,7 +186,7 @@ describe('BasicAuthenticationProvider', () => {
 
     it('always redirects to the login page.', async () => {
       await expect(provider.logout(httpServerMock.createKibanaRequest(), {})).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/base-path/login?msg=LOGGED_OUT')
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
     });
 
@@ -199,7 +199,9 @@ describe('BasicAuthenticationProvider', () => {
           {}
         )
       ).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED')
+        DeauthenticationResult.redirectTo(
+          '/mock-server-basepath/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED'
+        )
       );
     });
   });
