@@ -185,7 +185,10 @@ export function TransactionOverview() {
                     }}
                   />
 
-                  <ElasticDocsLink section="/kibana" path="TODO">
+                  <ElasticDocsLink
+                    section="/kibana"
+                    path="/troubleshooting.html#troubleshooting-too-many-transactions"
+                  >
                     {i18n.translate(
                       'xpack.apm.transactionCardinalityWarning.docsLink',
                       { defaultMessage: 'Learn more in the docs' }
