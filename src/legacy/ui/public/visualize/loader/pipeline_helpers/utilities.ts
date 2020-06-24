@@ -17,5 +17,15 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { buildPipeline } from '../../../../../../plugins/visualizations/public/legacy/build_pipeline';
+import { npStart } from 'ui/new_platform';
+import { fieldFormats, IFieldFormat } from '../../../../../../plugins/data/public';
+import { SerializedFieldFormat } from '../../../../../../plugins/expressions/common/types';
+
+type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
+
+const createFormat = fieldFormats.serialize;
+const getFormat: FormatFactory = (mapping?) => {
+  return npStart.plugins.data.fieldFormats.deserialize(mapping as any);
+};
+
+export { getFormat, createFormat, FormatFactory };
