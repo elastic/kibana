@@ -18,8 +18,30 @@
  */
 
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
+import { DATA_DATASETS_INDEX_PATTERNS, DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
 
 describe('get_data_telemetry', () => {
+  describe('DATA_DATASETS_INDEX_PATTERNS', () => {
+    DATA_DATASETS_INDEX_PATTERNS.forEach((entry, index, array) => {
+      describe(`Pattern ${entry.pattern}`, () => {
+        test('there should only be one in DATA_DATASETS_INDEX_PATTERNS_UNIQUE', () => {
+          expect(
+            DATA_DATASETS_INDEX_PATTERNS_UNIQUE.filter(({ pattern }) => pattern === entry.pattern)
+          ).toHaveLength(1);
+        });
+
+        // This test is to make us sure that we don't update one of the duplicated entries and forget about any other repeated ones
+        test('when a document is duplicated, the duplicates should be identical', () => {
+          array.slice(0, index).forEach((previousEntry) => {
+            if (entry.pattern === previousEntry.pattern) {
+              expect(entry).toStrictEqual(previousEntry);
+            }
+          });
+        });
+      });
+    });
+  });
+
   describe('buildDataTelemetryPayload', () => {
     test('return the base object when no indices provided', () => {
       expect(buildDataTelemetryPayload([])).toStrictEqual([]);
@@ -50,11 +72,6 @@ describe('get_data_telemetry', () => {
           { name: 'filebeat-12314', docCount: 100, sizeInBytes: 10 },
           { name: 'metricbeat-1234', docCount: 100, sizeInBytes: 10, isECS: false },
           { name: '.app-search-1234', docCount: 0 },
-          // Matching pattern with datasetName and datasetType set but shipper unknown
-          { name: 'my_logs_custom', docCount: 1000, sizeInBytes: 10 },
-          { name: 'my_logs', docCount: 100, sizeInBytes: 10, isECS: true },
-          { name: 'logs_custom' },
-          { name: 'logs-custom-index-1234' },
           // New Indexing strategy: everything can be inferred from the constant_keyword values
           {
             name: 'logs-nginx.access-default-000001',
@@ -105,13 +122,6 @@ describe('get_data_telemetry', () => {
           pattern_name: 'app-search',
           index_count: 1,
           doc_count: 0,
-        },
-        {
-          pattern_name: 'third-party-logs',
-          index_count: 4,
-          ecs_index_count: 1,
-          doc_count: 1100,
-          size_in_bytes: 20,
         },
         {
           dataset: { name: 'nginx.access', type: 'logs' },

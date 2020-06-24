@@ -18,7 +18,11 @@
  */
 
 import { APICaller } from 'kibana/server';
-import { DATA_DATASETS_INDEX_PATTERNS, DataPatternName, DataTelemetryType } from './constants';
+import {
+  DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
+  DataPatternName,
+  DataTelemetryType,
+} from './constants';
 
 export interface DataTelemetryBasePayload {
   index_count: number;
@@ -78,7 +82,7 @@ function findMatchingDescriptors({
   }
 
   // Otherwise, try with the list of known index patterns
-  return DATA_DATASETS_INDEX_PATTERNS.filter(({ pattern }) => {
+  return DATA_DATASETS_INDEX_PATTERNS_UNIQUE.filter(({ pattern }) => {
     if (!pattern.startsWith('.') && name.startsWith('.')) {
       // avoid system indices caught by very fuzzy index patterns (i.e.: *log* would catch `.kibana-log-...`)
       return false;
@@ -109,8 +113,8 @@ function increaseCounters(
 }
 
 export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTelemetryPayload {
-  const startingDotPatternsUntilTheFirstAsterisk = DATA_DATASETS_INDEX_PATTERNS.map(({ pattern }) =>
-    pattern.replace(/^\.(.+)\*.*$/g, '.$1')
+  const startingDotPatternsUntilTheFirstAsterisk = DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(
+    ({ pattern }) => pattern.replace(/^\.(.+)\*.*$/g, '.$1')
   ).filter(Boolean);
 
   // Filter out the system indices unless they are required by the patterns
@@ -190,7 +194,7 @@ interface IndexMappings {
 export async function getDataTelemetry(callCluster: APICaller) {
   try {
     const index = [
-      ...DATA_DATASETS_INDEX_PATTERNS.map(({ pattern }) => pattern),
+      ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
       '*-*-*-*', // Include new indexing strategy indices {type}-{dataset}-{namespace}-{rollover_counter}
     ];
     const [indexMappings, indexStats]: [IndexMappings, IndexStats] = await Promise.all([

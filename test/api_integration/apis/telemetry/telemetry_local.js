@@ -41,11 +41,11 @@ export default function ({ getService }) {
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
     before('create some telemetry-data tracked indices', async () => {
-      return es.indices.create({ index: 'telemetry_tests_logs' });
+      return es.indices.create({ index: 'filebeat-telemetry_tests_logs' });
     });
 
     after('cleanup telemetry-data tracked indices', () => {
-      return es.indices.delete({ index: 'telemetry_tests_logs' });
+      return es.indices.delete({ index: 'filebeat-telemetry_tests_logs' });
     });
 
     it('should pull local stats and validate data types', async () => {
@@ -85,7 +85,8 @@ export default function ({ getService }) {
       expect(stats.stack_stats.data).to.be.an('object');
       expect(stats.stack_stats.data).to.be.an('array');
       expect(stats.stack_stats.data[0]).to.be.an('object');
-      expect(stats.stack_stats.data[0].pattern_name).to.be('third-party-logs');
+      expect(stats.stack_stats.data[0].pattern_name).to.be('filebeat');
+      expect(stats.stack_stats.data[0].shipper).to.be('filebeat');
       expect(stats.stack_stats.data[0].index_count).to.be(1);
       expect(stats.stack_stats.data[0].doc_count).to.be(0);
       expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);

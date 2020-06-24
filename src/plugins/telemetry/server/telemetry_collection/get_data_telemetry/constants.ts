@@ -28,45 +28,6 @@ export type DataPatternName = typeof DATA_DATASETS_INDEX_PATTERNS[number]['patte
 // TODO: Ideally this list should be updated from an external public URL (similar to the newsfeed)
 // But it's good to have a minimum list shipped with the build.
 export const DATA_DATASETS_INDEX_PATTERNS = [
-  // Security - Elastic
-  { pattern: 'auditbeat-*', patternName: 'auditbeat', shipper: 'auditbeat' },
-  { pattern: 'winlogbeat-*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
-  { pattern: 'packetbeat-*', patternName: 'packetbeat', shipper: 'packetbeat' },
-  // Security - 3rd party
-  { pattern: '*tomcat*', patternName: 'tomcat' },
-  { pattern: '*apache*', patternName: 'apache' }, // Already in Observability (keeping it in here for documentation)
-  { pattern: '*artifactory*', patternName: 'artifactory' },
-  { pattern: '*aruba*', patternName: 'aruba' },
-  { pattern: '*barracuda*', patternName: 'barracuda' },
-  { pattern: '*cef*', patternName: 'cef' },
-  { pattern: '*checkpoint*', patternName: 'checkpoint' },
-  { pattern: '*cisco*', patternName: 'cisco' },
-  { pattern: '*citrix*', patternName: 'citrix' },
-  { pattern: '*cyberark*', patternName: 'cyberark' },
-  { pattern: '*cylance*', patternName: 'cylance' },
-  { pattern: '*fortinet*', patternName: 'fortinet' },
-  { pattern: '*infoblox*', patternName: 'infoblox' },
-  { pattern: '*kaspersky*', patternName: 'kaspersky' },
-  { pattern: '*mcafee*', patternName: 'mcafee' },
-  { pattern: '*paloaltonetworks*', patternName: 'paloaltonetworks' },
-  { pattern: '*pan*', patternName: 'paloaltonetworks' },
-  { pattern: '*rsa*', patternName: 'rsa' },
-  { pattern: '*snort*', patternName: 'snort' },
-  { pattern: '*sonicwall*', patternName: 'sonicwall' },
-  { pattern: '*sophos*', patternName: 'sophos' },
-  { pattern: '*squid*', patternName: 'squid' },
-  { pattern: '*symantec*', patternName: 'symantec' },
-  { pattern: '*tippingpoint*', patternName: 'tippingpoint' },
-  { pattern: '*trendmicro*', patternName: 'trendmicro' },
-  { pattern: '*tripwire*', patternName: 'tripwire' },
-  { pattern: '*zscaler*', patternName: 'zscaler' },
-  { pattern: '*zeek*', patternName: 'zeek' },
-  { pattern: '*sigma_doc*', patternName: 'sigma_doc' },
-  { pattern: '*bro*', patternName: 'bro' },
-  { pattern: '*suricata*', patternName: 'suricata' },
-  { pattern: '*fsf*', patternName: 'fsf' },
-  { pattern: '*wazuh*', patternName: 'wazuh' },
-
   // Enterprise Search - Elastic
   { pattern: '.ent-search-*', patternName: 'enterprise-search' },
   { pattern: '.app-search-*', patternName: 'app-search' },
@@ -75,14 +36,14 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*magento*', patternName: 'magento' },
   { pattern: '*shopify*', patternName: 'shopify' },
   { pattern: '*wordpress*', patternName: 'wordpress' },
-  { pattern: '*wp*', patternName: 'wordpress' },
+  { pattern: '*wp*', patternName: 'wordpress' }, // TODO: Too vague?
   { pattern: '*drupal*', patternName: 'drupal' },
   { pattern: '*joomla*', patternName: 'joomla' },
   { pattern: '*search*', patternName: 'search' },
-  { pattern: '*wix*', patternName: 'wix' },
+  { pattern: '*wix*', patternName: 'wix' }, // TODO: Too vague?
   { pattern: '*sharepoint*', patternName: 'sharepoint' },
   { pattern: '*squarespace*', patternName: 'squarespace' },
-  { pattern: '*aem*', patternName: 'aem' },
+  { pattern: '*aem*', patternName: 'aem' }, // TODO: Too vague?
   { pattern: '*sitecore*', patternName: 'sitecore' },
   { pattern: '*weebly*', patternName: 'weebly' },
   { pattern: '*acquia*', patternName: 'acquia' },
@@ -101,5 +62,54 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'fluentbit*', patternName: 'fluentbit' },
   { pattern: '*nginx*', patternName: 'nginx' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
-  { pattern: '*logs*', patternName: 'third-party-logs' },
+  // { pattern: '*logs*', patternName: 'third-party-logs' }, Disabled for now
+
+  // Security - Elastic
+  { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
+  { pattern: 'endgame-*', patternName: 'endgame', shipper: 'endgame' },
+  { pattern: 'auditbeat-*', patternName: 'auditbeat', shipper: 'auditbeat' },
+  { pattern: 'winlogbeat-*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
+  { pattern: 'packetbeat-*', patternName: 'packetbeat', shipper: 'packetbeat' },
+  { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
+  // Security - 3rd party
+  { pattern: '*apache*', patternName: 'apache' }, // Already in Observability (keeping it in here for documentation)
+  { pattern: '*tomcat*', patternName: 'tomcat' },
+  { pattern: '*artifactory*', patternName: 'artifactory' },
+  { pattern: '*aruba*', patternName: 'aruba' },
+  { pattern: '*barracuda*', patternName: 'barracuda' },
+  { pattern: '*bluecoat*', patternName: 'bluecoat' },
+  { pattern: '*cef*', patternName: 'cef' }, // TODO: Too vague?
+  { pattern: '*checkpoint*', patternName: 'checkpoint' },
+  { pattern: '*cisco*', patternName: 'cisco' },
+  { pattern: '*citrix*', patternName: 'citrix' },
+  { pattern: '*cyberark*', patternName: 'cyberark' },
+  { pattern: '*cylance*', patternName: 'cylance' },
+  { pattern: '*fireeye*', patternName: 'fireeye' },
+  { pattern: '*fortinet*', patternName: 'fortinet' },
+  { pattern: '*infoblox*', patternName: 'infoblox' },
+  { pattern: '*kaspersky*', patternName: 'kaspersky' },
+  { pattern: '*mcafee*', patternName: 'mcafee' },
+  { pattern: '*paloaltonetworks*', patternName: 'paloaltonetworks' },
+  { pattern: '*pan*', patternName: 'paloaltonetworks' }, // TODO: Too vague?
+  { pattern: '*rsa*', patternName: 'rsa' }, // TODO: Too vague?
+  { pattern: '*snort*', patternName: 'snort' }, // TODO: Too vague?
+  { pattern: '*sonicwall*', patternName: 'sonicwall' },
+  { pattern: '*sophos*', patternName: 'sophos' },
+  { pattern: '*squid*', patternName: 'squid' }, // TODO: Too vague?
+  { pattern: '*symantec*', patternName: 'symantec' },
+  { pattern: '*tippingpoint*', patternName: 'tippingpoint' },
+  { pattern: '*trendmicro*', patternName: 'trendmicro' },
+  { pattern: '*tripwire*', patternName: 'tripwire' },
+  { pattern: '*zscaler*', patternName: 'zscaler' },
+  { pattern: '*zeek*', patternName: 'zeek' },
+  { pattern: '*sigma_doc*', patternName: 'sigma_doc' },
+  { pattern: '*bro*', patternName: 'bro' }, // TODO: Too vague?
+  { pattern: '*suricata*', patternName: 'suricata' },
+  { pattern: '*fsf*', patternName: 'fsf' }, // TODO: Too vague?
+  { pattern: '*wazuh*', patternName: 'wazuh' },
 ] as const;
+
+// Get the unique list of index patterns (some are duplicated for documentation purposes)
+export const DATA_DATASETS_INDEX_PATTERNS_UNIQUE = DATA_DATASETS_INDEX_PATTERNS.filter(
+  (entry, index, array) => !array.slice(0, index).find(({ pattern }) => entry.pattern === pattern)
+);
