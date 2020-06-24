@@ -20,7 +20,7 @@ Handle errors
 try {
   await client.asScoped(request).callAsCurrentUser(...);
 } catch (err) {
-  if (ElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
+  if (LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
     const authHeader = err.output.headers['WWW-Authenticate'];
   }
 

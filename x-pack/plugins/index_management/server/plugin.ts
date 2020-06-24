@@ -17,7 +17,7 @@ import {
   Logger,
   PluginInitializerContext,
   IScopedClusterClient,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
 } from 'src/core/server';
 
 import { PLUGIN } from '../common';
@@ -48,7 +48,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
   private readonly license: License;
   private readonly logger: Logger;
   private readonly indexDataEnricher: IndexDataEnricher;
-  private dataManagementESClient?: ICustomClusterClient;
+  private dataManagementESClient?: ILegacyCustomClusterClient;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();

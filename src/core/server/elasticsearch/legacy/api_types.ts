@@ -151,7 +151,7 @@ import {
  *
  * @public
  */
-export interface CallAPIOptions {
+export interface LegacyCallAPIOptions {
   /**
    * Indicates whether `401 Unauthorized` errors returned from the Elasticsearch API
    * should be wrapped into `Boom` error instances with properly set `WWW-Authenticate`
@@ -166,154 +166,154 @@ export interface CallAPIOptions {
 }
 
 /** @public */
-export interface APICaller {
+export interface LegacyAPICaller {
   /* eslint-disable */
-  (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: CallAPIOptions): ReturnType<Client['bulk']>;
-  (endpoint: 'clearScroll', params: ClearScrollParams, options?: CallAPIOptions): ReturnType<Client['clearScroll']>;
-  (endpoint: 'count', params: CountParams, options?: CallAPIOptions): ReturnType<Client['count']>;
-  (endpoint: 'create', params: CreateDocumentParams, options?: CallAPIOptions): ReturnType<Client['create']>;
-  (endpoint: 'delete', params: DeleteDocumentParams, options?: CallAPIOptions): ReturnType<Client['delete']>;
-  (endpoint: 'deleteByQuery', params: DeleteDocumentByQueryParams, options?: CallAPIOptions): ReturnType<Client['deleteByQuery']>;
-  (endpoint: 'deleteScript', params: DeleteScriptParams, options?: CallAPIOptions): ReturnType<Client['deleteScript']>;
-  (endpoint: 'deleteTemplate', params: DeleteTemplateParams, options?: CallAPIOptions): ReturnType<Client['deleteTemplate']>;
-  (endpoint: 'exists', params: ExistsParams, options?: CallAPIOptions): ReturnType<Client['exists']>;
-  (endpoint: 'explain', params: ExplainParams, options?: CallAPIOptions): ReturnType<Client['explain']>;
-  (endpoint: 'fieldStats', params: FieldStatsParams, options?: CallAPIOptions): ReturnType<Client['fieldStats']>;
+  (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: LegacyCallAPIOptions): ReturnType<Client['bulk']>;
+  (endpoint: 'clearScroll', params: ClearScrollParams, options?: LegacyCallAPIOptions): ReturnType<Client['clearScroll']>;
+  (endpoint: 'count', params: CountParams, options?: LegacyCallAPIOptions): ReturnType<Client['count']>;
+  (endpoint: 'create', params: CreateDocumentParams, options?: LegacyCallAPIOptions): ReturnType<Client['create']>;
+  (endpoint: 'delete', params: DeleteDocumentParams, options?: LegacyCallAPIOptions): ReturnType<Client['delete']>;
+  (endpoint: 'deleteByQuery', params: DeleteDocumentByQueryParams, options?: LegacyCallAPIOptions): ReturnType<Client['deleteByQuery']>;
+  (endpoint: 'deleteScript', params: DeleteScriptParams, options?: LegacyCallAPIOptions): ReturnType<Client['deleteScript']>;
+  (endpoint: 'deleteTemplate', params: DeleteTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['deleteTemplate']>;
+  (endpoint: 'exists', params: ExistsParams, options?: LegacyCallAPIOptions): ReturnType<Client['exists']>;
+  (endpoint: 'explain', params: ExplainParams, options?: LegacyCallAPIOptions): ReturnType<Client['explain']>;
+  (endpoint: 'fieldStats', params: FieldStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['fieldStats']>;
   // Generic types cannot be properly looked up with ReturnType. Hard code these explicitly.
-  <T>(endpoint: 'get', params: GetParams, options?: CallAPIOptions): Promise<GetResponse<T>>;
-  (endpoint: 'getScript', params: GetScriptParams, options?: CallAPIOptions): ReturnType<Client['getScript']>;
-  (endpoint: 'getSource', params: GetSourceParams, options?: CallAPIOptions): ReturnType<Client['getSource']>;
-  (endpoint: 'getTemplate', params: GetTemplateParams, options?: CallAPIOptions): ReturnType<Client['getTemplate']>;
+  <T>(endpoint: 'get', params: GetParams, options?: LegacyCallAPIOptions): Promise<GetResponse<T>>;
+  (endpoint: 'getScript', params: GetScriptParams, options?: LegacyCallAPIOptions): ReturnType<Client['getScript']>;
+  (endpoint: 'getSource', params: GetSourceParams, options?: LegacyCallAPIOptions): ReturnType<Client['getSource']>;
+  (endpoint: 'getTemplate', params: GetTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['getTemplate']>;
   // Generic types cannot be properly looked up with ReturnType. Hard code these explicitly.
-  <T>(endpoint: 'index', params: IndexDocumentParams<T>, options?: CallAPIOptions): ReturnType<Client['index']>;
-  (endpoint: 'info', params: InfoParams, options?: CallAPIOptions): ReturnType<Client['info']>;
+  <T>(endpoint: 'index', params: IndexDocumentParams<T>, options?: LegacyCallAPIOptions): ReturnType<Client['index']>;
+  (endpoint: 'info', params: InfoParams, options?: LegacyCallAPIOptions): ReturnType<Client['info']>;
   // Generic types cannot be properly looked up with ReturnType. Hard code these explicitly.
-  <T>(endpoint: 'mget', params: MGetParams, options?: CallAPIOptions): Promise<MGetResponse<T>>;
-  <T>(endpoint: 'msearch', params: MSearchParams, options?: CallAPIOptions): Promise<MSearchResponse<T>>;
-  <T>(endpoint: 'msearchTemplate', params: MSearchTemplateParams, options?: CallAPIOptions): Promise<MSearchResponse<T>>;
-  (endpoint: 'mtermvectors', params: MTermVectorsParams, options?: CallAPIOptions): ReturnType<Client['mtermvectors']>;
-  (endpoint: 'ping', params: PingParams, options?: CallAPIOptions): ReturnType<Client['ping']>;
-  (endpoint: 'putScript', params: PutScriptParams, options?: CallAPIOptions): ReturnType<Client['putScript']>;
-  (endpoint: 'putTemplate', params: PutTemplateParams, options?: CallAPIOptions): ReturnType<Client['putTemplate']>;
-  (endpoint: 'reindex', params: ReindexParams, options?: CallAPIOptions): ReturnType<Client['reindex']>;
-  (endpoint: 'reindexRethrottle', params: ReindexRethrottleParams, options?: CallAPIOptions): ReturnType<Client['reindexRethrottle']>;
-  (endpoint: 'renderSearchTemplate', params: RenderSearchTemplateParams, options?: CallAPIOptions): ReturnType<Client['renderSearchTemplate']>;
+  <T>(endpoint: 'mget', params: MGetParams, options?: LegacyCallAPIOptions): Promise<MGetResponse<T>>;
+  <T>(endpoint: 'msearch', params: MSearchParams, options?: LegacyCallAPIOptions): Promise<MSearchResponse<T>>;
+  <T>(endpoint: 'msearchTemplate', params: MSearchTemplateParams, options?: LegacyCallAPIOptions): Promise<MSearchResponse<T>>;
+  (endpoint: 'mtermvectors', params: MTermVectorsParams, options?: LegacyCallAPIOptions): ReturnType<Client['mtermvectors']>;
+  (endpoint: 'ping', params: PingParams, options?: LegacyCallAPIOptions): ReturnType<Client['ping']>;
+  (endpoint: 'putScript', params: PutScriptParams, options?: LegacyCallAPIOptions): ReturnType<Client['putScript']>;
+  (endpoint: 'putTemplate', params: PutTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['putTemplate']>;
+  (endpoint: 'reindex', params: ReindexParams, options?: LegacyCallAPIOptions): ReturnType<Client['reindex']>;
+  (endpoint: 'reindexRethrottle', params: ReindexRethrottleParams, options?: LegacyCallAPIOptions): ReturnType<Client['reindexRethrottle']>;
+  (endpoint: 'renderSearchTemplate', params: RenderSearchTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['renderSearchTemplate']>;
   // Generic types cannot be properly looked up with ReturnType. Hard code these explicitly.
-  <T>(endpoint: 'scroll', params: ScrollParams, options?: CallAPIOptions): Promise<SearchResponse<T>>;
-  <T>(endpoint: 'search', params: SearchParams, options?: CallAPIOptions): Promise<SearchResponse<T>>;
-  (endpoint: 'searchShards', params: SearchShardsParams, options?: CallAPIOptions): ReturnType<Client['searchShards']>;
-  (endpoint: 'searchTemplate', params: SearchTemplateParams, options?: CallAPIOptions): ReturnType<Client['searchTemplate']>;
-  (endpoint: 'suggest', params: SuggestParams, options?: CallAPIOptions): ReturnType<Client['suggest']>;
-  (endpoint: 'termvectors', params: TermvectorsParams, options?: CallAPIOptions): ReturnType<Client['termvectors']>;
-  (endpoint: 'update', params: UpdateDocumentParams, options?: CallAPIOptions): ReturnType<Client['update']>;
-  (endpoint: 'updateByQuery', params: UpdateDocumentByQueryParams, options?: CallAPIOptions): ReturnType<Client['updateByQuery']>;
+  <T>(endpoint: 'scroll', params: ScrollParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+  <T>(endpoint: 'search', params: SearchParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+  (endpoint: 'searchShards', params: SearchShardsParams, options?: LegacyCallAPIOptions): ReturnType<Client['searchShards']>;
+  (endpoint: 'searchTemplate', params: SearchTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['searchTemplate']>;
+  (endpoint: 'suggest', params: SuggestParams, options?: LegacyCallAPIOptions): ReturnType<Client['suggest']>;
+  (endpoint: 'termvectors', params: TermvectorsParams, options?: LegacyCallAPIOptions): ReturnType<Client['termvectors']>;
+  (endpoint: 'update', params: UpdateDocumentParams, options?: LegacyCallAPIOptions): ReturnType<Client['update']>;
+  (endpoint: 'updateByQuery', params: UpdateDocumentByQueryParams, options?: LegacyCallAPIOptions): ReturnType<Client['updateByQuery']>;
 
   // cat namespace
-  (endpoint: 'cat.aliases', params: CatAliasesParams, options?: CallAPIOptions): ReturnType<Client['cat']['aliases']>;
-  (endpoint: 'cat.allocation', params: CatAllocationParams, options?: CallAPIOptions): ReturnType<Client['cat']['allocation']>;
-  (endpoint: 'cat.count', params: CatAllocationParams, options?: CallAPIOptions): ReturnType<Client['cat']['count']>;
-  (endpoint: 'cat.fielddata', params: CatFielddataParams, options?: CallAPIOptions): ReturnType<Client['cat']['fielddata']>;
-  (endpoint: 'cat.health', params: CatHealthParams, options?: CallAPIOptions): ReturnType<Client['cat']['health']>;
-  (endpoint: 'cat.help', params: CatHelpParams, options?: CallAPIOptions): ReturnType<Client['cat']['help']>;
-  (endpoint: 'cat.indices', params: CatIndicesParams, options?: CallAPIOptions): ReturnType<Client['cat']['indices']>;
-  (endpoint: 'cat.master', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['master']>;
-  (endpoint: 'cat.nodeattrs', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['nodeattrs']>;
-  (endpoint: 'cat.nodes', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['nodes']>;
-  (endpoint: 'cat.pendingTasks', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['pendingTasks']>;
-  (endpoint: 'cat.plugins', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['plugins']>;
-  (endpoint: 'cat.recovery', params: CatRecoveryParams, options?: CallAPIOptions): ReturnType<Client['cat']['recovery']>;
-  (endpoint: 'cat.repositories', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['repositories']>;
-  (endpoint: 'cat.segments', params: CatSegmentsParams, options?: CallAPIOptions): ReturnType<Client['cat']['segments']>;
-  (endpoint: 'cat.shards', params: CatShardsParams, options?: CallAPIOptions): ReturnType<Client['cat']['shards']>;
-  (endpoint: 'cat.snapshots', params: CatSnapshotsParams, options?: CallAPIOptions): ReturnType<Client['cat']['snapshots']>;
-  (endpoint: 'cat.tasks', params: CatTasksParams, options?: CallAPIOptions): ReturnType<Client['cat']['tasks']>;
-  (endpoint: 'cat.threadPool', params: CatThreadPoolParams, options?: CallAPIOptions): ReturnType<Client['cat']['threadPool']>;
+  (endpoint: 'cat.aliases', params: CatAliasesParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['aliases']>;
+  (endpoint: 'cat.allocation', params: CatAllocationParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['allocation']>;
+  (endpoint: 'cat.count', params: CatAllocationParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['count']>;
+  (endpoint: 'cat.fielddata', params: CatFielddataParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['fielddata']>;
+  (endpoint: 'cat.health', params: CatHealthParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['health']>;
+  (endpoint: 'cat.help', params: CatHelpParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['help']>;
+  (endpoint: 'cat.indices', params: CatIndicesParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['indices']>;
+  (endpoint: 'cat.master', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['master']>;
+  (endpoint: 'cat.nodeattrs', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['nodeattrs']>;
+  (endpoint: 'cat.nodes', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['nodes']>;
+  (endpoint: 'cat.pendingTasks', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['pendingTasks']>;
+  (endpoint: 'cat.plugins', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['plugins']>;
+  (endpoint: 'cat.recovery', params: CatRecoveryParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['recovery']>;
+  (endpoint: 'cat.repositories', params: CatCommonParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['repositories']>;
+  (endpoint: 'cat.segments', params: CatSegmentsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['segments']>;
+  (endpoint: 'cat.shards', params: CatShardsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['shards']>;
+  (endpoint: 'cat.snapshots', params: CatSnapshotsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['snapshots']>;
+  (endpoint: 'cat.tasks', params: CatTasksParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['tasks']>;
+  (endpoint: 'cat.threadPool', params: CatThreadPoolParams, options?: LegacyCallAPIOptions): ReturnType<Client['cat']['threadPool']>;
 
   // cluster namespace
-  (endpoint: 'cluster.allocationExplain', params: ClusterAllocationExplainParams, options?: CallAPIOptions): ReturnType<Client['cluster']['allocationExplain']>;
-  (endpoint: 'cluster.getSettings', params: ClusterGetSettingsParams, options?: CallAPIOptions): ReturnType<Client['cluster']['getSettings']>;
-  (endpoint: 'cluster.health', params: ClusterHealthParams, options?: CallAPIOptions): ReturnType<Client['cluster']['health']>;
-  (endpoint: 'cluster.pendingTasks', params: ClusterPendingTasksParams, options?: CallAPIOptions): ReturnType<Client['cluster']['pendingTasks']>;
-  (endpoint: 'cluster.putSettings', params: ClusterPutSettingsParams, options?: CallAPIOptions): ReturnType<Client['cluster']['putSettings']>;
-  (endpoint: 'cluster.reroute', params: ClusterRerouteParams, options?: CallAPIOptions): ReturnType<Client['cluster']['reroute']>;
-  (endpoint: 'cluster.state', params: ClusterStateParams, options?: CallAPIOptions): ReturnType<Client['cluster']['state']>;
-  (endpoint: 'cluster.stats', params: ClusterStatsParams, options?: CallAPIOptions): ReturnType<Client['cluster']['stats']>;
+  (endpoint: 'cluster.allocationExplain', params: ClusterAllocationExplainParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['allocationExplain']>;
+  (endpoint: 'cluster.getSettings', params: ClusterGetSettingsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['getSettings']>;
+  (endpoint: 'cluster.health', params: ClusterHealthParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['health']>;
+  (endpoint: 'cluster.pendingTasks', params: ClusterPendingTasksParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['pendingTasks']>;
+  (endpoint: 'cluster.putSettings', params: ClusterPutSettingsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['putSettings']>;
+  (endpoint: 'cluster.reroute', params: ClusterRerouteParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['reroute']>;
+  (endpoint: 'cluster.state', params: ClusterStateParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['state']>;
+  (endpoint: 'cluster.stats', params: ClusterStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['cluster']['stats']>;
 
   // indices namespace
-  (endpoint: 'indices.analyze', params: IndicesAnalyzeParams, options?: CallAPIOptions): ReturnType<Client['indices']['analyze']>;
-  (endpoint: 'indices.clearCache', params: IndicesClearCacheParams, options?: CallAPIOptions): ReturnType<Client['indices']['clearCache']>;
-  (endpoint: 'indices.close', params: IndicesCloseParams, options?: CallAPIOptions): ReturnType<Client['indices']['close']>;
-  (endpoint: 'indices.create', params: IndicesCreateParams, options?: CallAPIOptions): ReturnType<Client['indices']['create']>;
-  (endpoint: 'indices.delete', params: IndicesDeleteParams, options?: CallAPIOptions): ReturnType<Client['indices']['delete']>;
-  (endpoint: 'indices.deleteAlias', params: IndicesDeleteAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['deleteAlias']>;
-  (endpoint: 'indices.deleteTemplate', params: IndicesDeleteTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['deleteTemplate']>;
-  (endpoint: 'indices.exists', params: IndicesExistsParams, options?: CallAPIOptions): ReturnType<Client['indices']['exists']>;
-  (endpoint: 'indices.existsAlias', params: IndicesExistsAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['existsAlias']>;
-  (endpoint: 'indices.existsTemplate', params: IndicesExistsTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['existsTemplate']>;
-  (endpoint: 'indices.existsType', params: IndicesExistsTypeParams, options?: CallAPIOptions): ReturnType<Client['indices']['existsType']>;
-  (endpoint: 'indices.flush', params: IndicesFlushParams, options?: CallAPIOptions): ReturnType<Client['indices']['flush']>;
-  (endpoint: 'indices.flushSynced', params: IndicesFlushSyncedParams, options?: CallAPIOptions): ReturnType<Client['indices']['flushSynced']>;
-  (endpoint: 'indices.forcemerge', params: IndicesForcemergeParams, options?: CallAPIOptions): ReturnType<Client['indices']['forcemerge']>;
-  (endpoint: 'indices.get', params: IndicesGetParams, options?: CallAPIOptions): ReturnType<Client['indices']['get']>;
-  (endpoint: 'indices.getAlias', params: IndicesGetAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['getAlias']>;
-  (endpoint: 'indices.getFieldMapping', params: IndicesGetFieldMappingParams, options?: CallAPIOptions): ReturnType<Client['indices']['getFieldMapping']>;
-  (endpoint: 'indices.getMapping', params: IndicesGetMappingParams, options?: CallAPIOptions): ReturnType<Client['indices']['getMapping']>;
-  (endpoint: 'indices.getSettings', params: IndicesGetSettingsParams, options?: CallAPIOptions): ReturnType<Client['indices']['getSettings']>;
-  (endpoint: 'indices.getTemplate', params: IndicesGetTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['getTemplate']>;
-  (endpoint: 'indices.getUpgrade', params: IndicesGetUpgradeParams, options?: CallAPIOptions): ReturnType<Client['indices']['getUpgrade']>;
-  (endpoint: 'indices.open', params: IndicesOpenParams, options?: CallAPIOptions): ReturnType<Client['indices']['open']>;
-  (endpoint: 'indices.putAlias', params: IndicesPutAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['putAlias']>;
-  (endpoint: 'indices.putMapping', params: IndicesPutMappingParams, options?: CallAPIOptions): ReturnType<Client['indices']['putMapping']>;
-  (endpoint: 'indices.putSettings', params: IndicesPutSettingsParams, options?: CallAPIOptions): ReturnType<Client['indices']['putSettings']>;
-  (endpoint: 'indices.putTemplate', params: IndicesPutTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['putTemplate']>;
-  (endpoint: 'indices.recovery', params: IndicesRecoveryParams, options?: CallAPIOptions): ReturnType<Client['indices']['recovery']>;
-  (endpoint: 'indices.refresh', params: IndicesRefreshParams, options?: CallAPIOptions): ReturnType<Client['indices']['refresh']>;
-  (endpoint: 'indices.rollover', params: IndicesRolloverParams, options?: CallAPIOptions): ReturnType<Client['indices']['rollover']>;
-  (endpoint: 'indices.segments', params: IndicesSegmentsParams, options?: CallAPIOptions): ReturnType<Client['indices']['segments']>;
-  (endpoint: 'indices.shardStores', params: IndicesShardStoresParams, options?: CallAPIOptions): ReturnType<Client['indices']['shardStores']>;
-  (endpoint: 'indices.shrink', params: IndicesShrinkParams, options?: CallAPIOptions): ReturnType<Client['indices']['shrink']>;
-  (endpoint: 'indices.stats', params: IndicesStatsParams, options?: CallAPIOptions): ReturnType<Client['indices']['stats']>;
-  (endpoint: 'indices.updateAliases', params: IndicesUpdateAliasesParams, options?: CallAPIOptions): ReturnType<Client['indices']['updateAliases']>;
-  (endpoint: 'indices.upgrade', params: IndicesUpgradeParams, options?: CallAPIOptions): ReturnType<Client['indices']['upgrade']>;
-  (endpoint: 'indices.validateQuery', params: IndicesValidateQueryParams, options?: CallAPIOptions): ReturnType<Client['indices']['validateQuery']>;
+  (endpoint: 'indices.analyze', params: IndicesAnalyzeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['analyze']>;
+  (endpoint: 'indices.clearCache', params: IndicesClearCacheParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['clearCache']>;
+  (endpoint: 'indices.close', params: IndicesCloseParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['close']>;
+  (endpoint: 'indices.create', params: IndicesCreateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['create']>;
+  (endpoint: 'indices.delete', params: IndicesDeleteParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['delete']>;
+  (endpoint: 'indices.deleteAlias', params: IndicesDeleteAliasParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['deleteAlias']>;
+  (endpoint: 'indices.deleteTemplate', params: IndicesDeleteTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['deleteTemplate']>;
+  (endpoint: 'indices.exists', params: IndicesExistsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['exists']>;
+  (endpoint: 'indices.existsAlias', params: IndicesExistsAliasParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['existsAlias']>;
+  (endpoint: 'indices.existsTemplate', params: IndicesExistsTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['existsTemplate']>;
+  (endpoint: 'indices.existsType', params: IndicesExistsTypeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['existsType']>;
+  (endpoint: 'indices.flush', params: IndicesFlushParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['flush']>;
+  (endpoint: 'indices.flushSynced', params: IndicesFlushSyncedParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['flushSynced']>;
+  (endpoint: 'indices.forcemerge', params: IndicesForcemergeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['forcemerge']>;
+  (endpoint: 'indices.get', params: IndicesGetParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['get']>;
+  (endpoint: 'indices.getAlias', params: IndicesGetAliasParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getAlias']>;
+  (endpoint: 'indices.getFieldMapping', params: IndicesGetFieldMappingParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getFieldMapping']>;
+  (endpoint: 'indices.getMapping', params: IndicesGetMappingParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getMapping']>;
+  (endpoint: 'indices.getSettings', params: IndicesGetSettingsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getSettings']>;
+  (endpoint: 'indices.getTemplate', params: IndicesGetTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getTemplate']>;
+  (endpoint: 'indices.getUpgrade', params: IndicesGetUpgradeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['getUpgrade']>;
+  (endpoint: 'indices.open', params: IndicesOpenParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['open']>;
+  (endpoint: 'indices.putAlias', params: IndicesPutAliasParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['putAlias']>;
+  (endpoint: 'indices.putMapping', params: IndicesPutMappingParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['putMapping']>;
+  (endpoint: 'indices.putSettings', params: IndicesPutSettingsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['putSettings']>;
+  (endpoint: 'indices.putTemplate', params: IndicesPutTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['putTemplate']>;
+  (endpoint: 'indices.recovery', params: IndicesRecoveryParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['recovery']>;
+  (endpoint: 'indices.refresh', params: IndicesRefreshParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['refresh']>;
+  (endpoint: 'indices.rollover', params: IndicesRolloverParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['rollover']>;
+  (endpoint: 'indices.segments', params: IndicesSegmentsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['segments']>;
+  (endpoint: 'indices.shardStores', params: IndicesShardStoresParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['shardStores']>;
+  (endpoint: 'indices.shrink', params: IndicesShrinkParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['shrink']>;
+  (endpoint: 'indices.stats', params: IndicesStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['stats']>;
+  (endpoint: 'indices.updateAliases', params: IndicesUpdateAliasesParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['updateAliases']>;
+  (endpoint: 'indices.upgrade', params: IndicesUpgradeParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['upgrade']>;
+  (endpoint: 'indices.validateQuery', params: IndicesValidateQueryParams, options?: LegacyCallAPIOptions): ReturnType<Client['indices']['validateQuery']>;
 
   // ingest namepsace
-  (endpoint: 'ingest.deletePipeline', params: IngestDeletePipelineParams, options?: CallAPIOptions): ReturnType<Client['ingest']['deletePipeline']>;
-  (endpoint: 'ingest.getPipeline', params: IngestGetPipelineParams, options?: CallAPIOptions): ReturnType<Client['ingest']['getPipeline']>;
-  (endpoint: 'ingest.putPipeline', params: IngestPutPipelineParams, options?: CallAPIOptions): ReturnType<Client['ingest']['putPipeline']>;
-  (endpoint: 'ingest.simulate', params: IngestSimulateParams, options?: CallAPIOptions): ReturnType<Client['ingest']['simulate']>;
+  (endpoint: 'ingest.deletePipeline', params: IngestDeletePipelineParams, options?: LegacyCallAPIOptions): ReturnType<Client['ingest']['deletePipeline']>;
+  (endpoint: 'ingest.getPipeline', params: IngestGetPipelineParams, options?: LegacyCallAPIOptions): ReturnType<Client['ingest']['getPipeline']>;
+  (endpoint: 'ingest.putPipeline', params: IngestPutPipelineParams, options?: LegacyCallAPIOptions): ReturnType<Client['ingest']['putPipeline']>;
+  (endpoint: 'ingest.simulate', params: IngestSimulateParams, options?: LegacyCallAPIOptions): ReturnType<Client['ingest']['simulate']>;
 
   // nodes namespace
-  (endpoint: 'nodes.hotThreads', params: NodesHotThreadsParams, options?: CallAPIOptions): ReturnType<Client['nodes']['hotThreads']>;
-  (endpoint: 'nodes.info', params: NodesInfoParams, options?: CallAPIOptions): ReturnType<Client['nodes']['info']>;
-  (endpoint: 'nodes.stats', params: NodesStatsParams, options?: CallAPIOptions): ReturnType<Client['nodes']['stats']>;
+  (endpoint: 'nodes.hotThreads', params: NodesHotThreadsParams, options?: LegacyCallAPIOptions): ReturnType<Client['nodes']['hotThreads']>;
+  (endpoint: 'nodes.info', params: NodesInfoParams, options?: LegacyCallAPIOptions): ReturnType<Client['nodes']['info']>;
+  (endpoint: 'nodes.stats', params: NodesStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['nodes']['stats']>;
 
   // snapshot namespace
-  (endpoint: 'snapshot.create', params: SnapshotCreateParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['create']>;
-  (endpoint: 'snapshot.createRepository', params: SnapshotCreateRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['createRepository']>;
-  (endpoint: 'snapshot.delete', params: SnapshotDeleteParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['delete']>;
-  (endpoint: 'snapshot.deleteRepository', params: SnapshotDeleteRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['deleteRepository']>;
-  (endpoint: 'snapshot.get', params: SnapshotGetParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['get']>;
-  (endpoint: 'snapshot.getRepository', params: SnapshotGetRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['getRepository']>;
-  (endpoint: 'snapshot.restore', params: SnapshotRestoreParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['restore']>;
-  (endpoint: 'snapshot.status', params: SnapshotStatusParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['status']>;
-  (endpoint: 'snapshot.verifyRepository', params: SnapshotVerifyRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['verifyRepository']>;
+  (endpoint: 'snapshot.create', params: SnapshotCreateParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['create']>;
+  (endpoint: 'snapshot.createRepository', params: SnapshotCreateRepositoryParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['createRepository']>;
+  (endpoint: 'snapshot.delete', params: SnapshotDeleteParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['delete']>;
+  (endpoint: 'snapshot.deleteRepository', params: SnapshotDeleteRepositoryParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['deleteRepository']>;
+  (endpoint: 'snapshot.get', params: SnapshotGetParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['get']>;
+  (endpoint: 'snapshot.getRepository', params: SnapshotGetRepositoryParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['getRepository']>;
+  (endpoint: 'snapshot.restore', params: SnapshotRestoreParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['restore']>;
+  (endpoint: 'snapshot.status', params: SnapshotStatusParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['status']>;
+  (endpoint: 'snapshot.verifyRepository', params: SnapshotVerifyRepositoryParams, options?: LegacyCallAPIOptions): ReturnType<Client['snapshot']['verifyRepository']>;
 
   // tasks namespace
-  (endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallAPIOptions): ReturnType<Client['tasks']['cancel']>;
-  (endpoint: 'tasks.get', params: TasksGetParams, options?: CallAPIOptions): ReturnType<Client['tasks']['get']>;
-  (endpoint: 'tasks.list', params: TasksListParams, options?: CallAPIOptions): ReturnType<Client['tasks']['list']>;
+  (endpoint: 'tasks.cancel', params: TasksCancelParams, options?: LegacyCallAPIOptions): ReturnType<Client['tasks']['cancel']>;
+  (endpoint: 'tasks.get', params: TasksGetParams, options?: LegacyCallAPIOptions): ReturnType<Client['tasks']['get']>;
+  (endpoint: 'tasks.list', params: TasksListParams, options?: LegacyCallAPIOptions): ReturnType<Client['tasks']['list']>;
 
   // other APIs accessed via transport.request
-  (endpoint: 'transport.request', clientParams: AssistantAPIClientParams, options?: CallAPIOptions): Promise<
+  (endpoint: 'transport.request', clientParams: AssistantAPIClientParams, options?: LegacyCallAPIOptions): Promise<
     AssistanceAPIResponse
   >;
-  (endpoint: 'transport.request', clientParams: DeprecationAPIClientParams, options?: CallAPIOptions): Promise<
+  (endpoint: 'transport.request', clientParams: DeprecationAPIClientParams, options?: LegacyCallAPIOptions): Promise<
     DeprecationAPIResponse
   >;
 
   // Catch-all definition
-  <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<T>;
+  <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<T>;
   /* eslint-enable */
 }
 

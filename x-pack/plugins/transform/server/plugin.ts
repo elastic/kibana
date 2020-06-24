@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Plugin,
   IScopedClusterClient,
   Logger,
@@ -50,7 +50,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
   private readonly logger: Logger;
-  private transformESClient?: ICustomClusterClient;
+  private transformESClient?: ILegacyCustomClusterClient;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();

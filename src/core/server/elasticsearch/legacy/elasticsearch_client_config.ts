@@ -33,7 +33,7 @@ import { ElasticsearchConfig } from '../elasticsearch_config';
  *
  * @public
  */
-export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> &
+export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> &
   Pick<
     ElasticsearchConfig,
     | 'apiVersion'
@@ -53,7 +53,7 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
   };
 
 /** @internal */
-interface ElasticsearchClientConfigOverrides {
+interface LegacyElasticsearchClientConfigOverrides {
   /**
    * If set to `true`, username and password from the config won't be used
    * to access Elasticsearch API even if these are specified.
@@ -83,9 +83,9 @@ type ExtendedConfigOptions = ConfigOptions &
 
 /** @internal */
 export function parseElasticsearchClientConfig(
-  config: ElasticsearchClientConfig,
+  config: LegacyElasticsearchClientConfig,
   log: Logger,
-  { ignoreCertAndKey = false, auth = true }: ElasticsearchClientConfigOverrides = {}
+  { ignoreCertAndKey = false, auth = true }: LegacyElasticsearchClientConfigOverrides = {}
 ) {
   const esClientConfig: ExtendedConfigOptions = {
     keepAlive: true,

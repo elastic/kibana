@@ -21,8 +21,8 @@ import { retryWhen, concatMap } from 'rxjs/operators';
 import { defer, throwError, iif, timer } from 'rxjs';
 import * as legacyElasticsearch from 'elasticsearch';
 
-import { CallAPIOptions } from '.';
-import { APICaller } from './api_types';
+import { LegacyCallAPIOptions } from '.';
+import { LegacyAPICaller } from './api_types';
 import { Logger } from '../../logging';
 
 const esErrors = legacyElasticsearch.errors;
@@ -39,12 +39,16 @@ const esErrors = legacyElasticsearch.errors;
  * @param delay
  */
 export function migrationsRetryCallCluster(
-  apiCaller: APICaller,
+  apiCaller: LegacyAPICaller,
   log: Logger,
   delay: number = 2500
 ) {
   const previousErrors: string[] = [];
-  return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
+  return (
+    endpoint: string,
+    clientParams: Record<string, any> = {},
+    options?: LegacyCallAPIOptions
+  ) => {
     return defer(() => apiCaller(endpoint, clientParams, options))
       .pipe(
         retryWhen((error$) =>
@@ -86,8 +90,12 @@ export function migrationsRetryCallCluster(
  *
  * @param apiCaller
  */
-export function retryCallCluster(apiCaller: APICaller) {
-  return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
+export function retryCallCluster(apiCaller: LegacyAPICaller) {
+  return (
+    endpoint: string,
+    clientParams: Record<string, any> = {},
+    options?: LegacyCallAPIOptions
+  ) => {
     return defer(() => apiCaller(endpoint, clientParams, options))
       .pipe(
         retryWhen((errors) =>

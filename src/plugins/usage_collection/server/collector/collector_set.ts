@@ -18,7 +18,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, APICaller } from 'kibana/server';
+import { Logger, LegacyAPICaller } from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
@@ -112,7 +112,7 @@ export class CollectorSet {
   };
 
   public bulkFetch = async (
-    callCluster: APICaller,
+    callCluster: LegacyAPICaller,
     collectors: Array<Collector<any, any>> = this.collectors
   ) => {
     const responses = [];
@@ -140,7 +140,7 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: APICaller) => {
+  public bulkFetchUsage = async (callCluster: LegacyAPICaller) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
     return await this.bulkFetch(callCluster, usageCollectors.collectors);
   };

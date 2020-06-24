@@ -30,9 +30,9 @@ import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy';
 import {
-  APICaller,
+  LegacyAPICaller,
   ElasticsearchServiceStart,
-  IClusterClient,
+  ILegacyClusterClient,
   InternalElasticsearchServiceSetup,
 } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
@@ -434,7 +434,7 @@ export class SavedObjectsService
       await migrator.runMigrations();
     }
 
-    const createRepository = (callCluster: APICaller, includedHiddenTypes: string[] = []) => {
+    const createRepository = (callCluster: LegacyAPICaller, includedHiddenTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
@@ -484,7 +484,7 @@ export class SavedObjectsService
   private createMigrator(
     kibanaConfig: KibanaConfigType,
     savedObjectsConfig: SavedObjectsMigrationConfigType,
-    esClient: IClusterClient,
+    esClient: ILegacyClusterClient,
     migrationsRetryDelay?: number
   ): KibanaMigrator {
     return new KibanaMigrator({

@@ -15,7 +15,7 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-  IClusterClient,
+  ILegacyClusterClient,
   IScopedClusterClient,
   ScopeableRequest,
 } from 'src/core/server';
@@ -107,7 +107,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       return await client.callAsInternalUser(...args);
     }
 
-    const client: IClusterClient = {
+    const client: ILegacyClusterClient = {
       callAsInternalUser,
       asScoped(request?: ScopeableRequest): IScopedClusterClient {
         return {
@@ -144,7 +144,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     };
   }
 
-  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: number) {
+  private createLicensePoller(clusterClient: ILegacyClusterClient, pollingFrequency: number) {
     this.logger.debug(`Polling Elasticsearch License API with frequency ${pollingFrequency}ms.`);
 
     const intervalRefresh$ = timer(0, pollingFrequency);
@@ -173,7 +173,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     };
   }
 
-  private fetchLicense = async (clusterClient: IClusterClient): Promise<ILicense> => {
+  private fetchLicense = async (clusterClient: ILegacyClusterClient): Promise<ILicense> => {
     try {
       const response = await clusterClient.callAsInternalUser('transport.request', {
         method: 'GET',

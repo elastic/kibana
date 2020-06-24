@@ -9,7 +9,7 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { LicenseType } from '../../licensing/common/types';
 import {
-  IClusterClient,
+  ILegacyClusterClient,
   IScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
@@ -25,7 +25,9 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export interface Services {
   callCluster: IScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
-  getScopedCallCluster(clusterClient: IClusterClient): IScopedClusterClient['callAsCurrentUser'];
+  getScopedCallCluster(
+    clusterClient: ILegacyClusterClient
+  ): IScopedClusterClient['callAsCurrentUser'];
 }
 
 declare module 'src/core/server' {

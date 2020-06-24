@@ -24,11 +24,11 @@ import { securityAuditLoggerMock } from '../audit/index.mock';
 import {
   AuthenticationHandler,
   AuthToolkit,
-  IClusterClient,
+  ILegacyClusterClient,
   CoreSetup,
   KibanaRequest,
   LoggerFactory,
-  ScopedClusterClient,
+  LegacyScopedClusterClient,
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigSchema, ConfigType, createConfig } from '../config';
@@ -51,11 +51,11 @@ describe('setupAuthentication()', () => {
     config: ConfigType;
     loggers: LoggerFactory;
     http: jest.Mocked<CoreSetup['http']>;
-    clusterClient: jest.Mocked<IClusterClient>;
+    clusterClient: jest.Mocked<ILegacyClusterClient>;
     license: jest.Mocked<SecurityLicense>;
     getFeatureUsageService: () => jest.Mocked<SecurityFeatureUsageServiceStart>;
   };
-  let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<ScopedClusterClient>>;
+  let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<LegacyScopedClusterClient>>;
   beforeEach(() => {
     mockSetupAuthenticationParams = {
       auditLogger: securityAuditLoggerMock.create(),
@@ -79,7 +79,7 @@ describe('setupAuthentication()', () => {
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSetupAuthenticationParams.clusterClient.asScoped.mockReturnValue(
-      (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
+      (mockScopedClusterClient as unknown) as jest.Mocked<LegacyScopedClusterClient>
     );
   });
 

@@ -13,7 +13,7 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
@@ -43,7 +43,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
   private readonly logger: Logger;
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
-  private snapshotRestoreESClient?: ICustomClusterClient;
+  private snapshotRestoreESClient?: ILegacyCustomClusterClient;
 
   constructor(private context: PluginInitializerContext) {
     const { logger } = this.context;

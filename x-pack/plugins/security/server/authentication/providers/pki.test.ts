@@ -17,8 +17,8 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
 import {
-  ElasticsearchErrorHelpers,
-  IClusterClient,
+  LegacyElasticsearchErrorHelpers,
+  ILegacyClusterClient,
   KibanaRequest,
   ScopeableRequest,
 } from '../../../../../../src/core/server';
@@ -64,7 +64,7 @@ function getMockSocket({
 }
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<IClusterClient>,
+  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
@@ -197,7 +197,7 @@ describe('PKIAuthenticationProvider', () => {
         }),
       });
 
-      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
+      const failureReason = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
       mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.failed(failureReason));
@@ -219,7 +219,7 @@ describe('PKIAuthenticationProvider', () => {
         }),
       });
 
-      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
+      const failureReason = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
@@ -395,7 +395,9 @@ describe('PKIAuthenticationProvider', () => {
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser
         // In response to call with an expired token.
-        .mockRejectedValueOnce(ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()))
+        .mockRejectedValueOnce(
+          LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        )
         // In response to a call with a new token.
         .mockResolvedValueOnce(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
@@ -436,7 +438,7 @@ describe('PKIAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValueOnce(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -454,7 +456,7 @@ describe('PKIAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 

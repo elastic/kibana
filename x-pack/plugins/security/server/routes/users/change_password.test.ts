@@ -7,7 +7,7 @@
 import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import {
-  IClusterClient,
+  ILegacyClusterClient,
   IRouter,
   IScopedClusterClient,
   kibanaResponseFactory,
@@ -26,7 +26,7 @@ import { routeDefinitionParamsMock } from '../index.mock';
 describe('Change password', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;

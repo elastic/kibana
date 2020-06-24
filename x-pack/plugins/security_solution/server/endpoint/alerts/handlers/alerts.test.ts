@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IClusterClient, IRouter, IScopedClusterClient } from 'kibana/server';
+import { ILegacyClusterClient, IRouter, IScopedClusterClient } from 'kibana/server';
 import {
   elasticsearchServiceMock,
   httpServiceMock,
@@ -17,7 +17,7 @@ import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
   let endpointAppContextService: EndpointAppContextService;
 

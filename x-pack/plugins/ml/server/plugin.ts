@@ -13,7 +13,7 @@ import {
   KibanaRequest,
   Logger,
   PluginInitializerContext,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   CapabilitiesStart,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
@@ -58,7 +58,7 @@ declare module 'kibana/server' {
 }
 
 export interface MlPluginSetup extends SharedServices {
-  mlClient: ICustomClusterClient;
+  mlClient: ILegacyCustomClusterClient;
 }
 export type MlPluginStart = void;
 

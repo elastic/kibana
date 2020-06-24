@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  IClusterClient,
+  ILegacyClusterClient,
   IRouter,
   IScopedClusterClient,
   KibanaResponseFactory,
@@ -37,7 +37,7 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,7 +49,7 @@ describe('test endpoint route', () => {
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient() as jest.Mocked<
-      IClusterClient
+      ILegacyClusterClient
     >;
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();

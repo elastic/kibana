@@ -27,11 +27,11 @@ enum ErrorCode {
 }
 
 /** @public */
-export interface ElasticsearchError extends Boom {
+export interface LegacyElasticsearchError extends Boom {
   [code]?: string;
 }
 
-function isElasticsearchError(error: any): error is ElasticsearchError {
+function isElasticsearchError(error: any): error is LegacyElasticsearchError {
   return Boolean(error && error[code]);
 }
 
@@ -40,7 +40,7 @@ function decorate(
   errorCode: ErrorCode,
   statusCode: number,
   message?: string
-): ElasticsearchError {
+): LegacyElasticsearchError {
   if (isElasticsearchError(error)) {
     return error;
   }
@@ -50,7 +50,7 @@ function decorate(
     message,
     // keep status and messages if Boom error object already has them
     override: false,
-  }) as ElasticsearchError;
+  }) as LegacyElasticsearchError;
 
   boom[code] = errorCode;
 
@@ -74,8 +74,8 @@ function decorate(
  *   }
  * ```
  */
-export class ElasticsearchErrorHelpers {
-  public static isNotAuthorizedError(error: any): error is ElasticsearchError {
+export class LegacyElasticsearchErrorHelpers {
+  public static isNotAuthorizedError(error: any): error is LegacyElasticsearchError {
     return isElasticsearchError(error) && error[code] === ErrorCode.NOT_AUTHORIZED;
   }
 

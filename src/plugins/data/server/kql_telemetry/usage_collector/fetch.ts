@@ -18,13 +18,13 @@
  */
 
 import { get } from 'lodash';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
 
 export function fetchProvider(index: string) {
-  return async (callCluster: APICaller) => {
+  return async (callCluster: LegacyAPICaller) => {
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,

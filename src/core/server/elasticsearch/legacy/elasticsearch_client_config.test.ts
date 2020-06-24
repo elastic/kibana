@@ -20,7 +20,7 @@
 import { duration } from 'moment';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 import {
-  ElasticsearchClientConfig,
+  LegacyElasticsearchClientConfig,
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
 const logger = loggingServiceMock.create();
@@ -64,7 +64,7 @@ Object {
 });
 
 test('parses fully specified config', () => {
-  const elasticsearchConfig: ElasticsearchClientConfig = {
+  const elasticsearchConfig: LegacyElasticsearchClientConfig = {
     apiVersion: 'v7.0.0',
     customHeaders: { xsrf: 'something' },
     logQueries: true,

@@ -30,7 +30,7 @@ import { get } from 'lodash';
 import { Logger } from '../../logging';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 import { httpServerMock } from '../../http/http_server.mocks';
-import { ClusterClient } from './cluster_client';
+import { LegacyClusterClient } from './cluster_client';
 
 const logger = loggingServiceMock.create();
 afterEach(() => jest.clearAllMocks());
@@ -42,7 +42,7 @@ test('#constructor creates client with parsed config', () => {
   const mockEsConfig = { apiVersion: 'es-version' } as any;
   const mockLogger = logger.get();
 
-  const clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+  const clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
   expect(clusterClient).toBeDefined();
 
   expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
@@ -58,7 +58,7 @@ describe('#callAsInternalUser', () => {
     ping: jest.Mock;
     security: { authenticate: jest.Mock };
   };
-  let clusterClient: ClusterClient;
+  let clusterClient: LegacyClusterClient;
 
   beforeEach(() => {
     mockEsClientInstance = {
@@ -68,7 +68,7 @@ describe('#callAsInternalUser', () => {
     };
     MockClient.mockImplementation(() => mockEsClientInstance);
 
-    clusterClient = new ClusterClient({ apiVersion: 'es-version' } as any, logger.get());
+    clusterClient = new LegacyClusterClient({ apiVersion: 'es-version' } as any, logger.get());
   });
 
   test('fails if cluster client is closed', async () => {
@@ -220,7 +220,7 @@ describe('#asScoped', () => {
   let mockEsClientInstance: { ping: jest.Mock; close: jest.Mock };
   let mockScopedEsClientInstance: { ping: jest.Mock; close: jest.Mock };
 
-  let clusterClient: ClusterClient;
+  let clusterClient: LegacyClusterClient;
   let mockLogger: Logger;
   let mockEsConfig: ElasticsearchConfig;
 
@@ -237,7 +237,7 @@ describe('#asScoped', () => {
       requestHeadersWhitelist: ['one', 'two'],
     } as any;
 
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
     jest.clearAllMocks();
   });
 
@@ -272,7 +272,7 @@ describe('#asScoped', () => {
 
   test('properly configures `ignoreCertAndKey` for various configurations', () => {
     // Config without SSL.
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
@@ -285,7 +285,7 @@ describe('#asScoped', () => {
 
     // Config ssl.alwaysPresentCertificate === false
     mockEsConfig = { ...mockEsConfig, ssl: { alwaysPresentCertificate: false } } as any;
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
@@ -298,7 +298,7 @@ describe('#asScoped', () => {
 
     // Config ssl.alwaysPresentCertificate === true
     mockEsConfig = { ...mockEsConfig, ssl: { alwaysPresentCertificate: true } } as any;
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
@@ -341,7 +341,7 @@ describe('#asScoped', () => {
   });
 
   test('does not fail when scope to not defined request', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
     clusterClient.asScoped();
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
@@ -352,7 +352,7 @@ describe('#asScoped', () => {
   });
 
   test('does not fail when scope to a request without headers', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
     clusterClient.asScoped({} as any);
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
@@ -363,7 +363,10 @@ describe('#asScoped', () => {
   });
 
   test('calls getAuthHeaders and filters results for a real request', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger, () => ({ one: '1', three: '3' }));
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, () => ({
+      one: '1',
+      three: '3',
+    }));
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { two: '2' } }));
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
@@ -374,7 +377,7 @@ describe('#asScoped', () => {
   });
 
   test('getAuthHeaders results rewrite extends a request headers', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger, () => ({ one: 'foo' }));
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, () => ({ one: 'foo' }));
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1', two: '2' } }));
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
@@ -386,14 +389,14 @@ describe('#asScoped', () => {
 
   test("doesn't call getAuthHeaders for a fake request", async () => {
     const getAuthHeaders = jest.fn();
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
     clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
 
     expect(getAuthHeaders).not.toHaveBeenCalled();
   });
 
   test('filters a fake request headers', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger);
     clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
 
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
@@ -409,7 +412,7 @@ describe('#close', () => {
   let mockEsClientInstance: { close: jest.Mock };
   let mockScopedEsClientInstance: { close: jest.Mock };
 
-  let clusterClient: ClusterClient;
+  let clusterClient: LegacyClusterClient;
 
   beforeEach(() => {
     mockEsClientInstance = { close: jest.fn() };
@@ -418,7 +421,7 @@ describe('#close', () => {
       () => mockScopedEsClientInstance
     );
 
-    clusterClient = new ClusterClient(
+    clusterClient = new LegacyClusterClient(
       { apiVersion: 'es-version', requestHeadersWhitelist: [] } as any,
       logger.get()
     );

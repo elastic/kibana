@@ -19,49 +19,53 @@
 
 import Boom from 'boom';
 
-import { ElasticsearchErrorHelpers } from './errors';
+import { LegacyElasticsearchErrorHelpers } from './errors';
 
 describe('ElasticsearchErrorHelpers', () => {
   describe('NotAuthorized error', () => {
     describe('decorateNotAuthorizedError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(ElasticsearchErrorHelpers.decorateNotAuthorizedError(error)).toBe(error);
+        expect(LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(error)).toBe(error);
       });
 
       it('makes the error identifiable as a NotAuthorized error', () => {
         const error = new Error();
-        expect(ElasticsearchErrorHelpers.isNotAuthorizedError(error)).toBe(false);
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(error);
-        expect(ElasticsearchErrorHelpers.isNotAuthorizedError(error)).toBe(true);
+        expect(LegacyElasticsearchErrorHelpers.isNotAuthorizedError(error)).toBe(false);
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(error);
+        expect(LegacyElasticsearchErrorHelpers.isNotAuthorizedError(error)).toBe(true);
       });
 
       it('adds boom properties', () => {
-        const error = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
+        const error = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
         expect(typeof error.output).toBe('object');
         expect(error.output.statusCode).toBe(401);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(error);
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(error);
         expect(error.output.statusCode).toBe(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of error', () => {
-          const error = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error('foobar'));
+          const error = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(
+            new Error('foobar')
+          );
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = ElasticsearchErrorHelpers.decorateNotAuthorizedError(
+          const error = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(
             new Error('foobar'),
             'biz'
           );
           expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
         });
         it('sets statusCode to 401', () => {
-          const error = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error('foo'));
+          const error = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(
+            new Error('foo')
+          );
           expect(error.output).toHaveProperty('statusCode', 401);
         });
       });

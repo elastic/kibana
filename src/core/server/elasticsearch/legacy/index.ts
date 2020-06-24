@@ -16,9 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { ClusterClient, IClusterClient, ICustomClusterClient } from './cluster_client';
-export { IScopedClusterClient, ScopedClusterClient } from './scoped_cluster_client';
-export { ElasticsearchClientConfig } from './elasticsearch_client_config';
+export {
+  LegacyClusterClient,
+  ILegacyClusterClient,
+  ILegacyCustomClusterClient,
+} from './cluster_client';
+export { ILegacyScopedClusterClient, LegacyScopedClusterClient } from './scoped_cluster_client';
+export { LegacyElasticsearchClientConfig } from './elasticsearch_client_config';
 export { retryCallCluster, migrationsRetryCallCluster } from './retry_call_cluster';
-export { ElasticsearchError, ElasticsearchErrorHelpers } from './errors';
+export { LegacyElasticsearchError, LegacyElasticsearchErrorHelpers } from './errors';
 export * from './api_types';

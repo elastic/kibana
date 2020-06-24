@@ -30,7 +30,7 @@ import {
   RuleId,
   ListAndOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
-import { CallAPIOptions } from '../../../../../../src/core/server';
+import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
 import { RuleType } from '../../../common/detection_engine/types';
 
@@ -69,7 +69,7 @@ export interface RuleTypeParams {
 export type CallWithRequest<T extends Record<string, any>, V> = (
   endpoint: string,
   params: T,
-  options?: CallAPIOptions
+  options?: LegacyCallAPIOptions
 ) => Promise<V>;
 
 export type RefreshTypes = false | 'wait_for';

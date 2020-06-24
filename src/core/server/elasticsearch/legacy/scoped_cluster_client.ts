@@ -19,7 +19,7 @@
 
 import { intersection, isObject } from 'lodash';
 import { Headers } from '../../http/router';
-import { APICaller, CallAPIOptions } from './api_types';
+import { LegacyAPICaller, LegacyCallAPIOptions } from './api_types';
 
 /**
  * Serves the same purpose as "normal" `ClusterClient` but exposes additional
@@ -27,12 +27,12 @@ import { APICaller, CallAPIOptions } from './api_types';
  * user (as `callAsInternalUser` does) to request Elasticsearch API, but rather
  * passes HTTP headers extracted from the current user request to the API.
  *
- * See {@link ScopedClusterClient}.
+ * See {@link LegacyScopedClusterClient}.
  *
  * @public
  */
-export type IScopedClusterClient = Pick<
-  ScopedClusterClient,
+export type ILegacyScopedClusterClient = Pick<
+  LegacyScopedClusterClient,
   'callAsCurrentUser' | 'callAsInternalUser'
 >;
 
@@ -40,10 +40,10 @@ export type IScopedClusterClient = Pick<
  * {@inheritDoc IScopedClusterClient}
  * @public
  */
-export class ScopedClusterClient implements IScopedClusterClient {
+export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
   constructor(
-    private readonly internalAPICaller: APICaller,
-    private readonly scopedAPICaller: APICaller,
+    private readonly internalAPICaller: LegacyAPICaller,
+    private readonly scopedAPICaller: LegacyAPICaller,
     private readonly headers?: Headers
   ) {
     this.callAsCurrentUser = this.callAsCurrentUser.bind(this);
@@ -53,7 +53,7 @@ export class ScopedClusterClient implements IScopedClusterClient {
   /**
    * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * Kibana internal user.
-   * See {@link APICaller}.
+   * See {@link LegacyAPICaller}.
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
@@ -62,7 +62,7 @@ export class ScopedClusterClient implements IScopedClusterClient {
   public callAsInternalUser(
     endpoint: string,
     clientParams: Record<string, any> = {},
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ) {
     return this.internalAPICaller(endpoint, clientParams, options);
   }
@@ -70,7 +70,7 @@ export class ScopedClusterClient implements IScopedClusterClient {
   /**
    * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * user initiated request to the Kibana server (via HTTP request headers).
-   * See {@link APICaller}.
+   * See {@link LegacyAPICaller}.
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
@@ -79,7 +79,7 @@ export class ScopedClusterClient implements IScopedClusterClient {
   public callAsCurrentUser(
     endpoint: string,
     clientParams: Record<string, any> = {},
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ) {
     const defaultHeaders = this.headers;
     if (defaultHeaders !== undefined) {

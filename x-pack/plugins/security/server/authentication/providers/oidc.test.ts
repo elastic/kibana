@@ -11,8 +11,8 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
 import {
-  ElasticsearchErrorHelpers,
-  IClusterClient,
+  LegacyElasticsearchErrorHelpers,
+  ILegacyClusterClient,
   KibanaRequest,
   ScopeableRequest,
 } from '../../../../../../src/core/server';
@@ -21,7 +21,7 @@ import { DeauthenticationResult } from '../deauthentication_result';
 import { OIDCAuthenticationProvider, OIDCLogin, ProviderLoginAttempt } from './oidc';
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<IClusterClient>,
+  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
@@ -468,7 +468,7 @@ describe('OIDCAuthenticationProvider', () => {
         if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-            ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+            LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
           );
           return mockScopedClusterClient;
         }
@@ -516,7 +516,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -556,7 +556,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -604,7 +604,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -633,7 +633,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 

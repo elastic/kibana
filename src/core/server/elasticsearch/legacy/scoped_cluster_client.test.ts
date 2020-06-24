@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { ScopedClusterClient } from './scoped_cluster_client';
+import { LegacyScopedClusterClient } from './scoped_cluster_client';
 
 let internalAPICaller: jest.Mock;
 let scopedAPICaller: jest.Mock;
-let clusterClient: ScopedClusterClient;
+let clusterClient: LegacyScopedClusterClient;
 beforeEach(() => {
   internalAPICaller = jest.fn();
   scopedAPICaller = jest.fn();
-  clusterClient = new ScopedClusterClient(internalAPICaller, scopedAPICaller, { one: '1' });
+  clusterClient = new LegacyScopedClusterClient(internalAPICaller, scopedAPICaller, { one: '1' });
 });
 
 afterEach(() => jest.clearAllMocks());
@@ -184,7 +184,10 @@ describe('#callAsCurrentUser', () => {
     const mockResponse = { data: 'response' };
     scopedAPICaller.mockResolvedValue(mockResponse);
 
-    const clusterClientWithoutHeaders = new ScopedClusterClient(internalAPICaller, scopedAPICaller);
+    const clusterClientWithoutHeaders = new LegacyScopedClusterClient(
+      internalAPICaller,
+      scopedAPICaller
+    );
 
     await expect(clusterClientWithoutHeaders.callAsCurrentUser('ping')).resolves.toBe(mockResponse);
     expect(scopedAPICaller).toHaveBeenCalledTimes(1);

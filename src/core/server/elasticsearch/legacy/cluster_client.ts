@@ -19,17 +19,17 @@
 import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 
-import { ElasticsearchErrorHelpers } from './errors';
+import { LegacyElasticsearchErrorHelpers } from './errors';
 import { GetAuthHeaders, isRealRequest } from '../../http';
 import { filterHeaders, ensureRawRequest } from '../../http/router';
 import { Logger } from '../../logging';
 import { ScopeableRequest } from '../types';
 import {
-  ElasticsearchClientConfig,
+  LegacyElasticsearchClientConfig,
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
-import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
-import { CallAPIOptions, APICaller } from './api_types';
+import { LegacyScopedClusterClient, ILegacyScopedClusterClient } from './scoped_cluster_client';
+import { LegacyCallAPIOptions, LegacyAPICaller } from './api_types';
 
 /**
  * Support Legacy platform request for the period of migration.
@@ -51,7 +51,7 @@ const callAPI = async (
   client: Client,
   endpoint: string,
   clientParams: Record<string, any> = {},
-  options: CallAPIOptions = { wrap401Errors: true }
+  options: LegacyCallAPIOptions = { wrap401Errors: true }
 ) => {
   const clientPath = endpoint.split('.');
   const api: any = get(client, clientPath);
@@ -76,7 +76,7 @@ const callAPI = async (
       throw err;
     }
 
-    throw ElasticsearchErrorHelpers.decorateNotAuthorizedError(err);
+    throw LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(err);
   }
 };
 
@@ -85,28 +85,31 @@ const callAPI = async (
  * It allows to call API on behalf of the internal Kibana user and
  * the actual user that is derived from the request headers (via `asScoped(...)`).
  *
- * See {@link ClusterClient}.
+ * See {@link LegacyClusterClient}.
  *
  * @public
  */
-export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 /**
  * Represents an Elasticsearch cluster API client created by a plugin.
  * It allows to call API on behalf of the internal Kibana user and
  * the actual user that is derived from the request headers (via `asScoped(...)`).
  *
- * See {@link ClusterClient}.
+ * See {@link LegacyClusterClient}.
  *
  * @public
  */
-export type ICustomClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+export type ILegacyCustomClusterClient = Pick<
+  LegacyClusterClient,
+  'callAsInternalUser' | 'close' | 'asScoped'
+>;
 
 /**
  * {@inheritDoc IClusterClient}
  * @public
  */
-export class ClusterClient implements IClusterClient {
+export class LegacyClusterClient implements ILegacyClusterClient {
   /**
    * Raw Elasticsearch JS client that acts on behalf of the Kibana internal user.
    */
@@ -124,7 +127,7 @@ export class ClusterClient implements IClusterClient {
   private isClosed = false;
 
   constructor(
-    private readonly config: ElasticsearchClientConfig,
+    private readonly config: LegacyElasticsearchClientConfig,
     private readonly log: Logger,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
@@ -134,20 +137,24 @@ export class ClusterClient implements IClusterClient {
   /**
    * Calls specified endpoint with provided clientParams on behalf of the
    * Kibana internal user.
-   * See {@link APICaller}.
+   * See {@link LegacyAPICaller}.
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options - Options that affect the way we call the API and process the result.
    */
-  public callAsInternalUser: APICaller = async (
+  public callAsInternalUser: LegacyAPICaller = async (
     endpoint: string,
     clientParams: Record<string, any> = {},
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ) => {
     this.assertIsNotClosed();
 
-    return await (callAPI.bind(null, this.client) as APICaller)(endpoint, clientParams, options);
+    return await (callAPI.bind(null, this.client) as LegacyAPICaller)(
+      endpoint,
+      clientParams,
+      options
+    );
   };
 
   /**
@@ -168,7 +175,7 @@ export class ClusterClient implements IClusterClient {
   }
 
   /**
-   * Creates an instance of {@link IScopedClusterClient} based on the configuration the
+   * Creates an instance of {@link ILegacyScopedClusterClient} based on the configuration the
    * current cluster client that exposes additional `callAsCurrentUser` method
    * scoped to the provided req. Consumers shouldn't worry about closing
    * scoped client instances, these will be automatically closed as soon as the
@@ -177,7 +184,7 @@ export class ClusterClient implements IClusterClient {
    * @param request - Request the `IScopedClusterClient` instance will be scoped to.
    * Supports request optionality, Legacy.Request & FakeRequest for BWC with LegacyPlatform
    */
-  public asScoped(request?: ScopeableRequest): IScopedClusterClient {
+  public asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient {
     // It'd have been quite expensive to create and configure client for every incoming
     // request since it involves parsing of the config, reading of the SSL certificate and
     // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same
@@ -193,7 +200,7 @@ export class ClusterClient implements IClusterClient {
       );
     }
 
-    return new ScopedClusterClient(
+    return new LegacyScopedClusterClient(
       this.callAsInternalUser,
       this.callAsCurrentUser,
       filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist)
@@ -203,20 +210,20 @@ export class ClusterClient implements IClusterClient {
   /**
    * Calls specified endpoint with provided clientParams on behalf of the
    * user initiated request to the Kibana server (via HTTP request headers).
-   * See {@link APICaller}.
+   * See {@link LegacyAPICaller}.
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options - Options that affect the way we call the API and process the result.
    */
-  private callAsCurrentUser: APICaller = async (
+  private callAsCurrentUser: LegacyAPICaller = async (
     endpoint: string,
     clientParams: Record<string, any> = {},
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ) => {
     this.assertIsNotClosed();
 
-    return await (callAPI.bind(null, this.scopedClient!) as APICaller)(
+    return await (callAPI.bind(null, this.scopedClient!) as LegacyAPICaller)(
       endpoint,
       clientParams,
       options
