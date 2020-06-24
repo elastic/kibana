@@ -6,7 +6,9 @@
 
 export * from './common';
 export * from './lists';
+export * from './lists.mock';
 export * from './manifest_schema';
 export * from './request';
 export * from './response';
 export * from './saved_objects';
+export * from './saved_objects.mock';

@@ -5,18 +5,20 @@
  */
 
 import { InternalArtifactSchema, InternalManifestSchema } from './saved_objects';
+import { getTranslatedExceptionListMock } from './lists.mock';
+import { buildArtifact } from '../../lib/artifacts/lists';
+import { ArtifactConstants } from './common';
 
-// TODO: os type
-export const getInternalArtifactMock = (os?: string): InternalArtifactSchema => ({
-  identifier: '',
-  sha256: '',
-  encoding: '',
-  created: '',
-  body: '',
-  size: '',
-});
+export const getInternalArtifactMock = async (os?: string): Promise<InternalArtifactSchema> => {
+  const osParam = os === undefined ? 'linux' : os;
+  return buildArtifact(getTranslatedExceptionListMock(os), osParam, '1.0.0');
+};
 
-export const getInternalArtifactsMock = (): InternalArtifactSchema[] => [{}, {}];
+export const getInternalArtifactsMock = async (): Promise<InternalArtifactSchema[]> => {
+  return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map(async (os) => {
+    await buildArtifact(getTranslatedExceptionListMock(os), os, '1.0.0');
+  });
+};
 
 export const getInternalManifestMock = (): InternalManifestSchema => ({
   created: Date.now(),

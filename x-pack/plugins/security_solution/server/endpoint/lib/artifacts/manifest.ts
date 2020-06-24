@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ManifestEntry } from './manifest_entry';
+import { validate } from '../../../../common/validate';
 import {
   InternalArtifactSchema,
   InternalManifestSchema,
   ManifestSchema,
-  ManifestSchemaVersion,
+  manifestSchema,
+  manifestSchemaVersion,
 } from '../../schemas/artifacts';
+import { ManifestEntry } from './manifest_entry';
 
 export interface ManifestDiff {
   type: string;
@@ -28,7 +30,12 @@ export class Manifest {
   constructor(created: Date, schemaVersion: string) {
     this.created = created;
     this.entries = {};
-    this.schemaVersion = schemaVersion;
+
+    const [validated, errors] = validate(schemaVersion, manifestSchemaVersion);
+    if (errors != null) {
+      throw new Error(`Invalid manifest version: ${schemaVersion}`);
+    }
+    this.schemaVersion = validated;
   }
 
   public static fromArtifacts(
@@ -71,13 +78,6 @@ export class Manifest {
     return this.entries[artifactId].getArtifact();
   }
 
-  public copy(): Manifest {
-    const manifest = new Manifest(this.created, this.schemaVersion);
-    manifest.entries = { ...this.entries };
-    manifest.version = this.version;
-    return manifest;
-  }
-
   public diff(manifest: Manifest): ManifestDiff[] {
     const diffs: ManifestDiff[] = [];
 
@@ -97,9 +97,9 @@ export class Manifest {
   }
 
   public toEndpointFormat(): ManifestSchema {
-    const manifestObj: object = {
-      manifestVersion: 'todo',
-      schemaVersion: 'todo',
+    const manifestObj = {
+      manifestVersion: this.version,
+      schemaVersion: this.schemaVersion,
       artifacts: {},
     };
 
@@ -107,7 +107,12 @@ export class Manifest {
       manifestObj.artifacts[entry.getIdentifier()] = entry.getRecord();
     }
 
-    return manifestObj as ManifestSchema;
+    const [validated, errors] = validate(manifestObj, manifestSchema);
+    if (errors != null) {
+      throw new Error(errors);
+    }
+
+    return validated;
   }
 
   public toSavedObject(): InternalManifestSchema {

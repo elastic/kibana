@@ -11,6 +11,7 @@ import {
   ManifestConstants,
   Manifest,
   buildArtifact,
+  getFullEndpointExceptionList,
 } from '../../../lib/artifacts';
 import { InternalArtifactSchema, InternalManifestSchema } from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
@@ -60,7 +61,12 @@ export class ManifestManager {
     const artifacts: InternalArtifactSchema[] = [];
 
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
-      const artifact = buildArtifact(this.exceptionListClient, os, schemaVersion);
+      const exceptionList = await getFullEndpointExceptionList(
+        this.exceptionListClient,
+        os,
+        schemaVersion
+      );
+      const artifact = await buildArtifact(exceptionList, os, schemaVersion);
 
       artifacts.push(artifact);
     }

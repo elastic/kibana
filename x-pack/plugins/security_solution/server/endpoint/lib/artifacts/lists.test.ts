@@ -8,7 +8,7 @@ import { ExceptionListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { GetFullEndpointExceptionList } from './lists';
+import { getFullEndpointExceptionList } from './lists';
 
 describe('buildEventTypeSignal', () => {
   let mockExceptionClient: ExceptionListClient;
@@ -44,7 +44,7 @@ describe('buildEventTypeSignal', () => {
 
     const first = getFoundExceptionListItemSchemaMock();
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-    const resp = await GetFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
     expect(resp).toEqual(expectedEndpointExceptions);
   });
 
@@ -64,7 +64,7 @@ describe('buildEventTypeSignal', () => {
       .mockReturnValueOnce(first)
       .mockReturnValueOnce(second)
       .mockReturnValueOnce(third);
-    const resp = await GetFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
     expect(resp.exceptions_list.length).toEqual(6);
   });
 });

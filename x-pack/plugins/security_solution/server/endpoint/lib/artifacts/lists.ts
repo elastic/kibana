@@ -23,30 +23,30 @@ import {
   TranslatedEntryNested,
   FinalTranslatedExceptionList,
 } from '../../schemas';
+import { ArtifactConstants } from './common';
 
-// export async function buildArtifact(
-//   exceptionListClient: ExceptionListClient,
-//   os: string,
-//   schemaVersion: string
-// ): InternalArtifactSchema {
-//   const exceptions = await GetFullEndpointExceptionList(exceptionListClient, os, schemaVersion);
-//   const compressedExceptions: Buffer = await CompressExceptionList(exceptions);
+export async function buildArtifact(
+  exceptions: FinalTranslatedExceptionList,
+  os: string,
+  schemaVersion: string
+): InternalArtifactSchema {
+  const compressedExceptions: Buffer = await compressExceptionList(exceptions);
 
-//   const sha256 = createHash('sha256')
-//     .update(compressedExceptions.toString('utf8'), 'utf8')
-//     .digest('hex');
+  const sha256 = createHash('sha256')
+    .update(compressedExceptions.toString('utf8'), 'utf8')
+    .digest('hex');
 
-//   return {
-//     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
-//     sha256,
-//     encoding: 'xz',
-//     created: Date.now(),
-//     body: compressedExceptions.toString('binary'),
-//     size: Buffer.from(JSON.stringify(exceptions)).byteLength,
-//   };
-// }
+  return {
+    identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
+    sha256,
+    encoding: 'xz',
+    created: Date.now(),
+    body: compressedExceptions.toString('binary'),
+    size: Buffer.from(JSON.stringify(exceptions)).byteLength,
+  };
+}
 
-export async function GetFullEndpointExceptionList(
+export async function getFullEndpointExceptionList(
   eClient: ExceptionListClient,
   os: string, // TODO: make type
   schemaVersion: string
@@ -127,7 +127,7 @@ function translateEntry(schemaVersion: string, entry: Entry | EntryNested): Tran
     translatedEntry = {
       field: e.field,
       operator: e.operator,
-      type: 'exact_cased', // todo
+      type: e.field.endsWith('.text') ? 'exact_caseless' : 'exact_cased',
       value: e.value,
     } as TranslatedEntryMatch;
   } else if (entry.type === 'match_any') {
@@ -135,11 +135,12 @@ function translateEntry(schemaVersion: string, entry: Entry | EntryNested): Tran
     translatedEntry = {
       field: e.field,
       operator: e.operator,
-      type: 'exact_cased_any', // todo
+      type: e.field.endsWith('.text') ? 'exact_caseless_any' : 'exact_cased_any',
       value: e.value,
     } as TranslatedEntryMatchAny;
   } else {
-    throw new Error();
+    // TODO: log and continue?
+    throw new Error(`Invalid type encountered: ${entry.type}`);
   }
   return translatedEntry;
 }
@@ -147,7 +148,7 @@ function translateEntry(schemaVersion: string, entry: Entry | EntryNested): Tran
 /**
  * Compresses the exception list
  */
-function CompressExceptionList(exceptionList: TranslatedExceptionList): Promise<Buffer> {
+function compressExceptionList(exceptionList: TranslatedExceptionList): Promise<Buffer> {
   return lzma.compress(JSON.stringify(exceptionList), (res: Buffer) => {
     return res;
   });
