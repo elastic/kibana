@@ -4,38 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
-import color from 'color';
+import { uniq } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-// @ts-ignore no types
-import { euiPaletteColorBlindBehindText } from '@elastic/eui/lib/services';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import {
   Chart,
   Datum,
-  Settings,
+  LayerValue,
+  PartialTheme,
   Partition,
   PartitionConfig,
+  PartitionFillLabel,
   PartitionLayer,
   PartitionLayout,
-  PartialTheme,
-  PartitionFillLabel,
   RecursivePartial,
-  LayerValue,
+  Settings,
 } from '@elastic/charts';
-import { FormatFactory, LensFilterEvent } from '../types';
+import { FormatFactory, LensFilterEvent, SeriesLayer } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
-import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
+import { getFilterContext, getSliceValueWithFallback } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
 
 const EMPTY_SLICE = Symbol('empty_slice');
-
-const sortedColors = euiPaletteColorBlindBehindText();
 
 export function PieComponent(
   props: PieExpressionProps & {
@@ -59,6 +55,7 @@ export function PieComponent(
     nestedLegend,
     percentDecimals,
     hideLabels,
+    palette,
   } = props.args;
 
   if (!hideLabels) {
@@ -95,6 +92,12 @@ export function PieComponent(
     fillLabel.valueFormatter = () => '';
   }
 
+  const totalSeriesCount = uniq(
+    firstTable.rows.map((row) => {
+      columnGroups.map(({ col: { id: columnId } }) => row[columnId]).join(',');
+    })
+  ).length;
+
   const layers: PartitionLayer[] = columnGroups.map(({ col }, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
@@ -117,25 +120,30 @@ export function PieComponent(
           : fillLabel,
       shape: {
         fillColor: (d) => {
+          const seriesLayers: SeriesLayer[] = [];
+
           // Color is determined by round-robin on the index of the innermost slice
           // This has to be done recursively until we get to the slice index
-          let parentIndex = 0;
           let tempParent: typeof d | typeof d['parent'] = d;
           while (tempParent.parent && tempParent.depth > 0) {
-            parentIndex = tempParent.sortIndex;
+            seriesLayers.unshift({
+              name: String(tempParent.parent.children[tempParent.sortIndex][0]),
+              maxDepth: columnGroups.length,
+              rankAtDepth: tempParent.sortIndex,
+              totalSeries: totalSeriesCount,
+              totalSeriesAtDepth: tempParent.parent.children.length,
+            });
             tempParent = tempParent.parent;
           }
 
-          // Look up round-robin color from default palette
-          const outputColor = sortedColors[parentIndex % sortedColors.length];
+          const outputColor = palette.getColor(seriesLayers);
 
-          if (shape === 'treemap') {
+          if (outputColor && shape === 'treemap') {
             // Only highlight the innermost color of the treemap, as it accurately represents area
             return layerIndex < columnGroups.length - 1 ? 'rgba(0,0,0,0)' : outputColor;
           }
 
-          const lighten = (d.depth - 1) / (columnGroups.length * 2);
-          return color(outputColor, 'hsl').lighten(lighten).hex();
+          return outputColor || 'rgba(0,0,0,0)';
         },
       },
     };

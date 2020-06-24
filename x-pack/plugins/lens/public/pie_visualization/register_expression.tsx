@@ -77,6 +77,10 @@ export const pie: ExpressionFunctionDefinition<
       types: ['number'],
       help: '',
     },
+    palette: {
+      types: ['lens_palette'],
+      help: '',
+    },
   },
   inputTypes: ['lens_multitable'],
   fn(data: LensMultiTable, args: PieExpressionArgs) {

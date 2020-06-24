@@ -208,6 +208,8 @@ export function SuggestionPanel({
     currentVisualizationId,
     datasourceMap,
     visualizationMap,
+    frame.globalPalette.colorFunction.id,
+    frame.globalPalette.state,
   ]);
 
   const AutoRefreshExpressionRenderer = useMemo(() => {

@@ -20,6 +20,7 @@ import {
   EditorFrameSetup,
   EditorFrameInstance,
   EditorFrameStart,
+  ColorFunctionDefinition,
 } from '../types';
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
@@ -27,11 +28,14 @@ import { formatColumn } from './format_column';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { PaletteService } from './palettes/service';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
   embeddable?: EmbeddableSetup;
   expressions: ExpressionsSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface EditorFrameStartPlugins {
@@ -58,6 +62,7 @@ export class EditorFrameService {
 
   private readonly datasources: Array<Datasource | Promise<Datasource>> = [];
   private readonly visualizations: Array<Visualization | Promise<Visualization>> = [];
+  private palettes: Record<string, ColorFunctionDefinition> = {};
 
   public setup(
     core: CoreSetup<EditorFrameStartPlugins>,
@@ -83,7 +88,11 @@ export class EditorFrameService {
       plugins.embeddable.registerEmbeddableFactory('lens', new EmbeddableFactory(getStartServices));
     }
 
+    const paletteService = new PaletteService();
+    this.palettes = paletteService.setup(core, plugins).palettes;
+
     return {
+      palettes: this.palettes,
       registerDatasource: (datasource) => {
         this.datasources.push(datasource as Datasource<unknown, unknown>);
       },
@@ -121,6 +130,7 @@ export class EditorFrameService {
                 core={core}
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
+                palettes={this.palettes}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}

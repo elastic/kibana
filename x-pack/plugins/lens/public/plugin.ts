@@ -27,6 +27,7 @@ import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -34,6 +35,7 @@ export interface LensPluginSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -64,12 +66,20 @@ export class LensPlugin {
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
-    { kibanaLegacy, expressions, data, embeddable, visualizations }: LensPluginSetupDependencies
+    {
+      kibanaLegacy,
+      expressions,
+      data,
+      embeddable,
+      visualizations,
+      charts,
+    }: LensPluginSetupDependencies
   ) {
     const editorFrameSetupInterface = this.editorFrameService.setup(core, {
       data,
       embeddable,
       expressions,
+      charts,
     });
     const dependencies = {
       expressions,

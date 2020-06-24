@@ -21,7 +21,6 @@ import { ChartsPlugin } from './plugin';
 
 export const plugin = () => new ChartsPlugin();
 
-export type ChartsPluginSetup = ReturnType<ChartsPlugin['setup']>;
-export type ChartsPluginStart = ReturnType<ChartsPlugin['start']>;
+export { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
 export * from './static';

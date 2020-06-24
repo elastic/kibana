@@ -5,13 +5,22 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiPopover,
+} from '@elastic/eui';
 import { State, SeriesType, visualizationTypes } from './types';
-import { VisualizationLayerWidgetProps } from '../types';
+import { VisualizationLayerWidgetProps, VisualizationToolbarProps } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { PalettePicker } from '../editor_frame_service/palettes/palette_picker';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -66,5 +75,34 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
         buttonSize="compressed"
       />
     </EuiFormRow>
+  );
+}
+
+export function XyToolbar(props: VisualizationToolbarProps<State>) {
+  const [open, setOpen] = useState(false);
+  return (
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiButtonEmpty
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={() => {
+                setOpen(!open);
+              }}
+            >
+              <EuiIcon type="gear" />
+            </EuiButtonEmpty>
+          }
+          isOpen={open}
+          closePopover={() => {
+            setOpen(false);
+          }}
+        >
+          <PalettePicker frame={props.frame} />
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

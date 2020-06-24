@@ -16,6 +16,7 @@ import chartBarHorizontalStackedSVG from '../assets/chart_bar_horizontal_stacked
 import chartLineSVG from '../assets/chart_line.svg';
 
 import { VisualizationType } from '../index';
+import { LensPalette } from '../editor_frame_service/palettes/palettes';
 
 export interface LegendConfig {
   isVisible: boolean;
@@ -210,6 +211,7 @@ export interface XYArgs {
   yTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
+  palette: LensPalette & { type: 'lens_palette' };
 }
 
 // Persisted parts of the state

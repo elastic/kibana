@@ -13,7 +13,7 @@ import { toExpression, toPreviewExpression } from './to_expression';
 import { LayerState, PieVisualizationState } from './types';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
-import { SettingsWidget } from './settings_widget';
+import { PieToolbar, SettingsWidget } from './settings_widget';
 
 function newLayerState(layerId: string): LayerState {
   return {
@@ -208,6 +208,15 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
     render(
       <I18nProvider>
         <SettingsWidget {...props} />
+      </I18nProvider>,
+      domElement
+    );
+  },
+
+  renderToolbar(domElement, props) {
+    render(
+      <I18nProvider>
+        <PieToolbar {...props} />
       </I18nProvider>,
       domElement
     );

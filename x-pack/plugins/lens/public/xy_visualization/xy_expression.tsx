@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { uniq } from 'lodash';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
 import {
@@ -33,6 +34,7 @@ import {
   ILensInterpreterRenderHandlers,
   LensFilterEvent,
   LensBrushEvent,
+  SeriesLayer,
 } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
@@ -98,6 +100,10 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['lens_xy_layer'] as any,
       help: 'Layers of visual series',
       multi: true,
+    },
+    palette: {
+      types: ['lens_palette'],
+      help: '',
     },
   },
   fn(data: LensMultiTable, args: XYArgs) {
@@ -190,7 +196,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers } = args;
+  const { legend, layers, palette } = args;
 
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
     return !(
@@ -243,6 +249,7 @@ export function XYChart({
           layer.xAccessor &&
           data.tables[layer.layerId].rows.some((row) => row[layer.xAccessor!] !== firstRowValue)
         ) {
+          return false;
           return false;
         }
       }
@@ -411,6 +418,14 @@ export function XYChart({
               )
           );
 
+          const splits = uniq(
+            table.rows.map((row) => {
+              return splitAccessor && row[splitAccessor];
+            })
+          );
+
+          const totalSeriesCount = (splits.length || 1) * accessors.length;
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
@@ -422,6 +437,20 @@ export function XYChart({
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
+            color: ({ yAccessor, splitAccessors, seriesKeys }) => {
+              const seriesLayers: SeriesLayer[] = [
+                {
+                  name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
+                  totalSeries: totalSeriesCount,
+                  totalSeriesAtDepth: totalSeriesCount,
+                  rankAtDepth:
+                    (splitAccessor ? splits.indexOf(seriesKeys[0]) * accessors.length : 0) +
+                    accessors.indexOf(String(yAccessor)),
+                  maxDepth: 1,
+                },
+              ];
+              return palette.getColor(seriesLayers);
+            },
             name(d) {
               const splitHint = table.columns.find((col) => col.id === splitAccessor)?.formatHint;
 

@@ -13,6 +13,7 @@ import {
   FramePublicAPI,
   Visualization,
   DatasourceMetaData,
+  ColorFunctionDefinition,
 } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -34,6 +35,7 @@ export interface EditorFrameProps {
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ReactExpressionRendererType;
+  palettes: Record<string, ColorFunctionDefinition>;
   onError: (e: { message: string }) => void;
   core: CoreSetup | CoreStart;
   plugins: EditorFrameStartPlugins;
@@ -112,6 +114,24 @@ export function EditorFrame(props: EditorFrameProps) {
     dateRange: props.dateRange,
     query: props.query,
     filters: props.filters,
+
+    globalPalette: {
+      state: state.globalPalette.state,
+      setState: (updater) => {
+        dispatch({
+          type: 'UPDATE_PALETTE_STATE',
+          updater,
+        });
+      },
+      availableColorFunctions: props.palettes,
+      colorFunction: props.palettes[state.globalPalette.activePaletteId],
+      setColorFunction: (id) => {
+        dispatch({
+          type: 'UPDATE_PALETTE',
+          id,
+        });
+      },
+    },
 
     addNewLayer() {
       const newLayerId = generateId();

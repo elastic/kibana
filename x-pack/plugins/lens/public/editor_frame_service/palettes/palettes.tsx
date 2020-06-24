@@ -7,6 +7,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { Ast } from '@kbn/interpreter/common';
 import color from 'color';
 import {
   euiPaletteColorBlindBehindText,
@@ -14,22 +15,26 @@ import {
   euiPaletteGray,
   colorPalette as buildColorPalette,
 } from '@elastic/eui';
-import { createColorPalette } from '../../../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, createColorPalette } from '../../../../../../src/plugins/charts/public';
 import { ColorFunctionDefinition, SeriesLayer } from '../../types';
+import { PaletteSetupPlugins } from './service';
+import { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions';
 
-function buildRoundRobinCategorical(colors: string[] | ((n: number) => string[])) {
+function buildRoundRobinCategorical(id: string, colors: string[] | ((n: number) => string[])) {
+  function getColor(series: SeriesLayer[]) {
+    const actualColors = Array.isArray(colors) ? colors : colors(series[0].totalSeriesAtDepth);
+    const outputColor = actualColors[series[0].rankAtDepth % actualColors.length];
+
+    const lighten = (series.length - 1) / (series[0].maxDepth * 2);
+    return color(outputColor, 'hsl').lighten(lighten).hex();
+  }
   return {
-    getColor(series: SeriesLayer[]) {
-      const actualColors = Array.isArray(colors) ? colors : colors(series[0].totalSeriesAtDepth);
-      const outputColor = actualColors[series[0].rankAtDepth % actualColors.length];
-
-      const lighten = (series.length - 1) / (series[0].maxDepth * 2);
-      return color(outputColor, 'hsl').lighten(lighten).hex();
-    },
+    id,
+    getColor,
+    ...buildStatelessExpressionIntegration(id, getColor),
     renderPreview(element: Element) {
       const actualColors = Array.isArray(colors) ? colors : colors(10);
       render(
-        element,
         <div className="lensPaletteSwatch">
           <div className="lensPaletteSwatch__foreground">
             {actualColors.map((currentColor) => (
@@ -40,25 +45,28 @@ function buildRoundRobinCategorical(colors: string[] | ((n: number) => string[])
               />
             ))}
           </div>
-        </div>
+        </div>,
+        element
       );
     },
   };
 }
 
-function buildGradient(gradientColors: [string, string]) {
-  return {
-    getColor(series: SeriesLayer[]) {
-      const colors = buildColorPalette(gradientColors, series[0].totalSeriesAtDepth);
-      const outputColor = colors[series[0].rankAtDepth % colors.length];
+function buildGradient(id: string, gradientColors: [string, string]) {
+  function getColor(series: SeriesLayer[]) {
+    const colors = buildColorPalette(gradientColors, series[0].totalSeriesAtDepth);
+    const outputColor = colors[series[0].rankAtDepth % colors.length];
 
-      // TODO make sure this is not leaking into the next root level hue range
-      const lighten = (series.length - 1) / (series[0].maxDepth * 2);
-      return color(outputColor, 'hsl').lighten(lighten).hex();
-    },
+    // TODO make sure this is not leaking into the next root level hue range
+    const lighten = (series.length - 1) / (series[0].maxDepth * 2);
+    return color(outputColor, 'hsl').lighten(lighten).hex();
+  }
+  return {
+    id,
+    getColor,
+    ...buildStatelessExpressionIntegration(id, getColor),
     renderPreview(element: Element) {
       render(
-        element,
         <div className="lensPaletteSwatch">
           <div className="lensPaletteSwatch__foreground">
             <div
@@ -67,71 +75,146 @@ function buildGradient(gradientColors: [string, string]) {
               style={{ background: `linear-gradient(90deg, ${gradientColors.join(', ')})` }}
             />
           </div>
-        </div>
+        </div>,
+        element
       );
     },
   };
 }
 
-export const palettes: Record<string, ColorFunctionDefinition> = {
+function buildSyncedKibanaPalette(colors: ChartsPluginSetup['colors']) {
+  function getColor(series: SeriesLayer[]) {
+    colors.mappedColors.mapKeys([series[0].name]);
+    const outputColor = colors.mappedColors.get(series[0].name);
+
+    const lighten = (series.length - 1) / (series[0].maxDepth * 2);
+    return color(outputColor, 'hsl').lighten(lighten).hex();
+  }
+  return {
+    id: 'kibana_palette',
+    getColor,
+    ...buildStatelessExpressionIntegration('kibana_palette', getColor),
+    renderPreview(element: Element) {
+      const actualColors = createColorPalette(10);
+      render(
+        <div className="lensPaletteSwatch">
+          <div className="lensPaletteSwatch__foreground">
+            {actualColors.map((currentColor) => (
+              <div
+                key={currentColor}
+                className="lensPaletteSwatch__box"
+                style={{ backgroundColor: currentColor }}
+              />
+            ))}
+          </div>
+        </div>,
+        element
+      );
+    },
+  };
+}
+
+export interface LensPalette {
+  getColor: ColorFunctionDefinition['getColor'];
+}
+
+function buildStatelessExpressionIntegration(
+  id: string,
+  getColor: ColorFunctionDefinition['getColor']
+): {
+  toExpression: () => Ast;
+  expressionFunctionDefinition: ExpressionFunctionDefinition<
+    string,
+    null,
+    {},
+    LensPalette & { type: 'lens_palette' }
+  >;
+} {
+  return {
+    toExpression: () => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: `lens_palette_${id}`,
+          arguments: {},
+        },
+      ],
+    }),
+    expressionFunctionDefinition: {
+      name: `lens_palette_${id}`,
+      type: 'lens_palette',
+      help: i18n.translate('xpack.lens.functions.palette.help', {
+        defaultMessage: 'Create a color palette to be used in a lens visualization',
+      }),
+      args: {},
+      inputTypes: ['null'],
+      fn() {
+        return {
+          type: 'lens_palette',
+          getColor,
+        };
+      },
+    },
+  };
+}
+
+// These definitions will be rolled up into the implementation of the lens_palette expression function definition in the service
+type SerializableColorFunctionDefinition = ColorFunctionDefinition & {
+  expressionFunctionDefinition: ExpressionFunctionDefinition<string, unknown, unknown, unknown>;
+};
+
+export const buildPalettes: (
+  dependencies: PaletteSetupPlugins
+) => Record<string, SerializableColorFunctionDefinition> = ({ charts }) => ({
   eui: {
-    id: 'eui',
     title: i18n.translate('xpack.lens.palettes.euiPaletteLabel', { defaultMessage: 'Color Blind' }),
-    ...buildRoundRobinCategorical(euiPaletteColorBlindBehindText()),
+    ...buildRoundRobinCategorical('eui', euiPaletteColorBlindBehindText()),
   },
   eui_pastel: {
-    id: 'eui_pastel',
     title: i18n.translate('xpack.lens.palettes.pastelLabel', { defaultMessage: 'Pastel' }),
     ...buildRoundRobinCategorical(
+      'eui_pastel',
       (euiPaletteColorBlindBehindText() as string[]).map((original) =>
         color(original).lighten(0.2).hex()
       )
     ),
   },
   kibana_palette: {
-    id: 'kibana_palette',
     title: i18n.translate('xpack.lens.palettes.kibanaPaletteLabel', {
       defaultMessage: 'Kibana Default',
     }),
-    // TODO use charts.colors.mappedColors.mapKeys and charts.colors.mappedColors.get to align with dashboard colors
-    ...buildRoundRobinCategorical(createColorPalette),
+    ...buildSyncedKibanaPalette(charts.colors),
   },
   eui_gray: {
-    id: 'eui_gray',
     title: i18n.translate('xpack.lens.palettes.grayGradientLabel', { defaultMessage: 'Gray' }),
-    ...buildRoundRobinCategorical(euiPaletteGray),
+    ...buildRoundRobinCategorical('eui_gray', euiPaletteGray),
   },
   eui_cool: {
-    id: 'eui_cool',
     title: i18n.translate('xpack.lens.palettes.coolBlueGradientLabel', {
       defaultMessage: 'Cool Blue',
     }),
-    ...buildRoundRobinCategorical(euiPaletteCool),
+    ...buildRoundRobinCategorical('eui_cool', euiPaletteCool),
   },
   elastic_teal: {
-    id: 'elastic_teal',
     title: i18n.translate('xpack.lens.palettes.tealGradientLabel', { defaultMessage: 'Teal' }),
-    ...buildGradient(['#C5FAF4', '#0F6259']),
+    ...buildGradient('elastic_teal', ['#C5FAF4', '#0F6259']),
   },
   elastic_blue: {
-    id: 'elastic_blue',
     title: i18n.translate('xpack.lens.palettes.blueGradientLabel', { defaultMessage: 'Blue' }),
-    ...buildGradient(['#7ECAE3', '#003A4D']),
+    ...buildGradient('elastic_blue', ['#7ECAE3', '#003A4D']),
   },
   elastic_pink: {
-    id: 'elastic_pink',
     title: i18n.translate('xpack.lens.palettes.pinkGradientLabel', { defaultMessage: 'Pink' }),
-    ...buildGradient(['#FEA8D5', '#531E3A']),
+    ...buildGradient('elastic_pink', ['#FEA8D5', '#531E3A']),
   },
   elastic_purple: {
-    id: 'elastic_purple',
     title: i18n.translate('xpack.lens.palettes.purpleGradientLabel', { defaultMessage: 'Purple' }),
-    ...buildGradient(['#CCC7DF', '#130351']),
+    ...buildGradient('elastic_purple', ['#CCC7DF', '#130351']),
   },
   paul_tor: {
-    id: 'paul_tor',
     title: 'Paul Tor',
-    ...buildRoundRobinCategorical([
+    ...buildRoundRobinCategorical('paul_tor', [
       '#882E72',
       '#B178A6',
       '#D6C1DE',
@@ -148,4 +231,4 @@ export const palettes: Record<string, ColorFunctionDefinition> = {
       '#DC050C',
     ]),
   },
-};
+});

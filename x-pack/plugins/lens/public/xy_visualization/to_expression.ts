@@ -99,7 +99,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  frame?: FramePublicAPI,
+  frame: FramePublicAPI,
   { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
@@ -118,6 +118,7 @@ export const buildExpression = (
         arguments: {
           xTitle: [xTitle],
           yTitle: [yTitle],
+          palette: [frame.globalPalette.colorFunction.toExpression(frame.globalPalette.state)],
           legend: [
             {
               type: 'expression',

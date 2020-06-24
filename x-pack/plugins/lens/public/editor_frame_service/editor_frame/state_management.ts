@@ -13,6 +13,10 @@ export interface PreviewState {
     state: unknown;
   };
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
+  globalPalette: {
+    activePaletteId: string;
+    state?: unknown;
+  };
 }
 
 export interface EditorFrameState extends PreviewState {
@@ -38,6 +42,14 @@ export type Action =
       // caused this update.
       subType: string;
       updater: (prevState: EditorFrameState) => EditorFrameState;
+    }
+  | {
+      type: 'UPDATE_PALETTE_STATE';
+      updater: (prevState: unknown) => unknown;
+    }
+  | {
+      type: 'UPDATE_PALETTE';
+      id: string;
     }
   | {
       type: 'UPDATE_DATASOURCE_STATE';
@@ -128,6 +140,9 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
       state: null,
       activeId: props.initialVisualizationId,
     },
+    globalPalette: props.doc?.state.globalPalette || {
+      activePaletteId: 'eui',
+    },
   };
 };
 
@@ -139,6 +154,21 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return { ...state, title: action.title };
     case 'UPDATE_STATE':
       return action.updater(state);
+    case 'UPDATE_PALETTE':
+      return {
+        ...state,
+        globalPalette: {
+          activePaletteId: action.id,
+        },
+      };
+    case 'UPDATE_PALETTE_STATE':
+      return {
+        ...state,
+        globalPalette: {
+          ...state.globalPalette,
+          state: action.updater(state.globalPalette.state),
+        },
+      };
     case 'UPDATE_LAYER':
       return {
         ...state,
@@ -229,6 +259,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         stagedPreview: state.stagedPreview || {
           datasourceStates: state.datasourceStates,
           visualization: state.visualization,
+          globalPalette: state.globalPalette,
         },
       };
     case 'ROLLBACK_SUGGESTION':

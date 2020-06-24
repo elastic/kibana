@@ -59,6 +59,7 @@ export interface EditorFrameSetup {
   registerVisualization: <T, P>(
     visualization: Visualization<T, P> | Promise<Visualization<T, P>>
   ) => void;
+  palettes: Record<string, ColorFunctionDefinition>;
 }
 
 export interface EditorFrameStart {
@@ -399,14 +400,14 @@ export interface ColorFunctionDefinition<T = unknown> {
   id: string;
   title: string;
 
+  toExpression: (state?: T) => Ast;
   getColor: (series: SeriesLayer[], state?: T) => string | null;
 
-  state?: T;
   renderEditor?: (
     domElement: Element,
-    props: { state?: T; setState: (newState: T) => void }
+    props: { state?: T; setState: (updater: (oldState: T) => T) => void }
   ) => void;
-  renderPreview?: (domElement: Element, props: { state?: T }) => void;
+  renderPreview: (domElement: Element, props: { state?: T }) => void;
 }
 
 export interface FramePublicAPI {
@@ -420,7 +421,8 @@ export interface FramePublicAPI {
     colorFunction: ColorFunctionDefinition;
     state: unknown;
     setColorFunction: (id: string) => void;
-    setState: (newState: unknown) => void;
+    setState: (updater: (state: unknown) => unknown) => void;
+    availableColorFunctions: Record<string, ColorFunctionDefinition>;
   };
 
   // Adds a new layer. This has a side effect of updating the datasource state

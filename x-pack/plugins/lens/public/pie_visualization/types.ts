@@ -6,6 +6,7 @@
 
 import { KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
+import { LensPalette } from '../editor_frame_service/palettes/palettes';
 
 export interface SharedLayerState {
   groups: string[];
@@ -29,6 +30,7 @@ export interface PieVisualizationState {
 export type PieExpressionArgs = SharedLayerState & {
   shape: 'pie' | 'donut' | 'treemap';
   hideLabels: boolean;
+  palette: LensPalette & { type: 'lens_palette' };
 };
 
 export interface PieExpressionProps {

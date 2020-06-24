@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiForm,
@@ -15,11 +15,17 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiIcon,
 } from '@elastic/eui';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState, SharedLayerState } from './types';
-import { VisualizationLayerWidgetProps } from '../types';
+import { VisualizationLayerWidgetProps, VisualizationToolbarProps } from '../types';
 import './settings_widget.scss';
+import { PalettePicker } from '../editor_frame_service/palettes/palette_picker';
 
 const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
   {
@@ -226,5 +232,34 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
         </div>
       </EuiFormRow>
     </EuiForm>
+  );
+}
+
+export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
+  const [open, setOpen] = useState(false);
+  return (
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiButtonEmpty
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={() => {
+                setOpen(!open);
+              }}
+            >
+              <EuiIcon type="gear" />
+            </EuiButtonEmpty>
+          }
+          isOpen={open}
+          closePopover={() => {
+            setOpen(false);
+          }}
+        >
+          <PalettePicker frame={props.frame} />
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
