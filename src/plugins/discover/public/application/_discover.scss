@@ -103,13 +103,11 @@ discover-app {
   left: -10000px;
   top: $euiSizeXS;
   width: 1px;
-  height: 1px;
   overflow: hidden;
 
-  &:focus {
+  &:focus, &:hover {
     left: initial;
     right: $euiSize;
     width: auto;
-    height: auto;
   }
 }
