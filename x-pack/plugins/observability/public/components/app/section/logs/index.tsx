@@ -6,7 +6,6 @@
 
 import React, { useContext, Fragment } from 'react';
 import d3 from 'd3';
-
 import {
   Chart,
   Settings,

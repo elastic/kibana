@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { AreaSeries, Chart, DARK_THEME, LIGHT_THEME, ScaleType, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiStat } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { formatStatValue } from '../../../../utils/format_stat_value';
 import { SectionContainer } from '../';
 import { MetricsFetchDataResponse, Series } from '../../../../typings/fetch_data_response';
+import { formatStatValue } from '../../../../utils/format_stat_value';
 
 interface Props {
   data?: MetricsFetchDataResponse;

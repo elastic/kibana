@@ -13,6 +13,7 @@ import {
   niceTimeFormatter,
   Settings,
 } from '@elastic/charts';
+import d3 from 'd3';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useContext } from 'react';
@@ -34,9 +35,12 @@ export const APMSection = ({ data }: Props) => {
 
   const transactionSeries = data.series.transactions;
 
-  const startAPM = transactionSeries?.coordinates[0].x || 0;
-  const endAPM = transactionSeries?.coordinates[transactionSeries?.coordinates.length - 1].x || 0;
-  const formatterAPM = niceTimeFormatter([startAPM, endAPM]);
+  const xCoordinates = transactionSeries.coordinates.map((coordinate) => coordinate.x);
+
+  const min = d3.min(xCoordinates);
+  const max = d3.max(xCoordinates);
+
+  const formatter = niceTimeFormatter([min, max]);
 
   const getSerieColor = (color?: string) => {
     if (color) {
@@ -64,6 +68,7 @@ export const APMSection = ({ data }: Props) => {
           theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
           showLegend={true}
           legendPosition="bottom"
+          xDomain={{ min, max }}
         />
         {transactionSeries?.coordinates && (
           <>
@@ -86,7 +91,7 @@ export const APMSection = ({ data }: Props) => {
             />
           </>
         )}
-        <Axis id="bottom-axis" position="bottom" tickFormat={formatterAPM} showGridLines />
+        <Axis id="bottom-axis" position="bottom" tickFormat={formatter} showGridLines />
       </Chart>
     </SectionContainer>
   );
