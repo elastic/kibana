@@ -17,7 +17,7 @@
  * under the License.
  */
 export { ClusterClient, IClusterClient, ICustomClusterClient } from './cluster_client';
-export { IScopedClusterClient, ScopedClusterClient, Headers } from './scoped_cluster_client';
+export { IScopedClusterClient, ScopedClusterClient } from './scoped_cluster_client';
 export { ElasticsearchClientConfig } from './elasticsearch_client_config';
 export { retryCallCluster, migrationsRetryCallCluster } from './retry_call_cluster';
 export { ElasticsearchError, ElasticsearchErrorHelpers } from './errors';

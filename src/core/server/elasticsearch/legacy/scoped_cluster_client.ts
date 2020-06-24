@@ -21,9 +21,6 @@ import { intersection, isObject } from 'lodash';
 import { Headers } from '../../http/router';
 import { APICaller, CallAPIOptions } from './api_types';
 
-/** @public */
-export { Headers };
-
 /**
  * Serves the same purpose as "normal" `ClusterClient` but exposes additional
  * `callAsCurrentUser` method that doesn't use credentials of the Kibana internal
