@@ -5,8 +5,12 @@
  */
 
 import { SignalSourceHit, SignalSearchResponse, BulkResponse, BulkItem } from '../types';
-import { SavedObject, SavedObjectsFindResponse } from '../../../../../../../../src/core/server';
-import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
+import {
+  Logger,
+  SavedObject,
+  SavedObjectsFindResponse,
+} from '../../../../../../../../src/core/server';
+import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams } from '../../types';
 import { IRuleStatusAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -360,7 +364,7 @@ export const exampleFindRuleStatusResponse: (
   saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
-export const mockLogger: ReturnType<typeof loggingServiceMock.createLogger> = loggingServiceMock.createLogger();
+export const mockLogger: Logger = loggingSystemMock.createLogger();
 
 export const sampleBulkErrorItem = (
   {
