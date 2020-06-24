@@ -17,7 +17,11 @@
  * under the License.
  */
 
-export {
-  ProcessedImportResponse,
-  processImportResponse,
-} from '../../../../plugins/saved_objects_management/public/lib'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { normalize } from 'path';
+
+export function normalizePath(path: string) {
+  // resolve ../ within the path
+  const normalizedPath = normalize(path);
+  // strip any leading slashes and dots and replace with single leading slash
+  return normalizedPath.replace(/(\.?\.?\/?)*/, '/');
+}
