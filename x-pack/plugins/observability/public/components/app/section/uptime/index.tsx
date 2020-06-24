@@ -37,9 +37,9 @@ export const UptimeSection = ({ data }: Props) => {
     return null;
   }
 
-  const xCoordinates = Object.values(data.series)
-    .map((serie) => serie.coordinates.map((coordinate) => coordinate.x))
-    .flatMap((_) => _);
+  const xCoordinates = Object.values(data.series).flatMap((serie) =>
+    serie.coordinates.map((coordinate) => coordinate.x)
+  );
 
   const min = d3.min(xCoordinates);
   const max = d3.max(xCoordinates);

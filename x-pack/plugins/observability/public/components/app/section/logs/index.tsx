@@ -38,9 +38,9 @@ export const LogsSection = ({ data }: Props) => {
     return null;
   }
 
-  const xCoordinates = Object.values(data.series)
-    .map((serie) => serie.coordinates.map((coordinate) => coordinate.x))
-    .flatMap((_) => _);
+  const xCoordinates = Object.values(data.series).flatMap((serie) =>
+    serie.coordinates.map((coordinate) => coordinate.x)
+  );
 
   const min = d3.min(xCoordinates);
   const max = d3.max(xCoordinates);
@@ -100,7 +100,7 @@ export const LogsSection = ({ data }: Props) => {
                 id="y-axis"
                 showGridLines
                 position={Position.Left}
-                tickFormat={(d: any) => numeral(d).format('0a')}
+                tickFormat={(d: number) => numeral(d).format('0a')}
               />
             </Fragment>
           );
