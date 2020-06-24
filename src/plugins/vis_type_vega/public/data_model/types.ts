@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { AggParamsMapping, Filter } from 'src/plugins/data/public';
+import { SearchResponse, SearchParams } from 'elasticsearch';
+import { Filter } from 'src/plugins/data/public';
 import { DslQuery } from 'src/plugins/data/common';
 import { EsQueryParser } from './es_query_parser';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 
 interface Body {
-  aggs?: AggParamsMapping;
+  aggs?: SearchParams['body']['aggs'];
   query?: Query;
   timeout?: string;
 }
