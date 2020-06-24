@@ -17,7 +17,16 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
+// import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
+/*
+import {
+  SavedObjectsClientCommon,
+  SavedObjectsClientCommonFindArgs,
+  SavedObjectCommon,
+} from '../../common/index_patterns';
+*/
+
+import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -39,7 +48,7 @@ import {
   GetFieldsOptions,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS, SavedObject } from '../../../common';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -51,7 +60,7 @@ export interface IndexPatternSavedObjectAttrs {
 
 interface IndexPatternsServiceDeps {
   uiSettings: UiSettingsCommon;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IIndexPatternsApiClient;
   fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
@@ -61,8 +70,8 @@ interface IndexPatternsServiceDeps {
 
 export class IndexPatternsService {
   private config: UiSettingsCommon;
-  private savedObjectsClient: SavedObjectsClientContract;
-  private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
+  private savedObjectsClient: SavedObjectsClientCommon;
+  private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IIndexPatternsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
@@ -107,13 +116,11 @@ export class IndexPatternsService {
   }
 
   private async refreshSavedObjectsCache() {
-    this.savedObjectsCache = (
-      await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
-        type: 'index-pattern',
-        fields: ['title'],
-        perPage: 10000,
-      })
-    ).savedObjects;
+    this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000,
+    });
   }
 
   getIds = async (refresh: boolean = false) => {

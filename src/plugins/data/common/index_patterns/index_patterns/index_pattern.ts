@@ -19,7 +19,7 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -45,7 +45,7 @@ interface IUiSettingsValues {
 
 interface IndexPatternDeps {
   getConfig: UiSettingsCommon['get'];
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IIndexPatternsApiClient;
   patternCache: PatternCache;
   fieldFormats: FieldFormatsStartCommon;
@@ -70,7 +70,7 @@ export class IndexPattern implements IIndexPattern {
   public metaFields: string[];
 
   private version: string | undefined;
-  private savedObjectsClient: SavedObjectsClientContract;
+  private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
   private getConfig: UiSettingsCommon['get'];
   private sourceFilters?: [];
@@ -270,13 +270,13 @@ export class IndexPattern implements IIndexPattern {
     }
 
     const savedObject = await this.savedObjectsClient.get(type, this.id);
-    this.version = savedObject._version;
+    this.version = savedObject.version;
 
     const response = {
       _id: savedObject.id,
       _type: savedObject.type,
       _source: _.cloneDeep(savedObject.attributes),
-      found: savedObject._version ? true : false,
+      found: savedObject.version ? true : false,
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
@@ -353,7 +353,7 @@ export class IndexPattern implements IIndexPattern {
       const res = await this.savedObjectsClient.update(type, this.id, this.prepBody(), {
         version: this.version,
       });
-      this.version = res._version;
+      this.version = res.version;
     } catch (e) {
       // no need for an error message here
     }

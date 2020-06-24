@@ -18,7 +18,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, KibanaRequest } from 'kibana/server';
-import { SavedObjectsClient } from 'kibana/public';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -26,6 +25,7 @@ import { IndexPatternsService as IndexPatternsCommonService } from '../../common
 import { FieldFormatsStart } from '../field_formats';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
+import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
 
 export interface IndexPatternsServiceStart {
   IndexPatternsServiceFactory: any;
@@ -50,7 +50,7 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
 
         return new IndexPatternsCommonService({
           uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
-          savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClient, // todo
+          savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
           apiClient: new IndexPatternsApiServer(),
           fieldFormats: formats,
           onError: () => {}, // todo

@@ -17,37 +17,24 @@
  * under the License.
  */
 
-import { omit, map } from 'lodash';
-import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
-// eslint-disable-next-line
-import { SavedObject } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
 } from '../../common/index_patterns';
 
-type SOClient = Pick<SavedObjectsClient, 'find' | 'get' | 'update' | 'create' | 'delete'>;
-
-const simpleSavedObjectToSavedObject = <T>(
-  simpleSavedObject: SimpleSavedObject
-): SavedObject<T> => ({
-  version: simpleSavedObject._version,
-  ...omit(simpleSavedObject, '_version'),
-});
-
-export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
-  private savedObjectClient: SOClient;
-  constructor(savedObjectClient: SOClient) {
+export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
+  private savedObjectClient: SavedObjectsClientContract;
+  constructor(savedObjectClient: SavedObjectsClientContract) {
     this.savedObjectClient = savedObjectClient;
   }
   async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
-    const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
-    return map<SimpleSavedObject<T>, SavedObject<T>>(response, simpleSavedObjectToSavedObject);
+    const result = await this.savedObjectClient.find<T>(options);
+    return result.saved_objects;
   }
 
   async get(type: string, id: string) {
-    const response = await this.savedObjectClient.get(type, id);
-    return simpleSavedObjectToSavedObject(response);
+    return await this.savedObjectClient.get(type, id);
   }
   async update(
     type: string,
@@ -55,12 +42,10 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     attributes: Record<string, any>,
     options: Record<string, any>
   ) {
-    const response = await this.savedObjectClient.update(type, id, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+    return (await this.savedObjectClient.update(type, id, attributes, options)) as SavedObject;
   }
   async create(type: string, attributes: Record<string, any>, options: Record<string, any>) {
-    const response = await this.savedObjectClient.create(type, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+    return await this.savedObjectClient.create(type, attributes, options);
   }
   delete(type: string, id: string) {
     return this.savedObjectClient.delete(type, id);

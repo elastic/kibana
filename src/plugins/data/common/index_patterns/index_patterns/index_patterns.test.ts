@@ -21,7 +21,7 @@
 import { IndexPatternsService } from './index_patterns';
 import { SavedObjectsClientContract, SavedObjectsFindResponsePublic } from 'kibana/public';
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { UiSettingsCommon, IIndexPatternsApiClient } from '../types';
+import { UiSettingsCommon, IIndexPatternsApiClient, SavedObjectsClientCommon } from '../types';
 
 const fieldFormats = fieldFormatsMock;
 
@@ -55,7 +55,7 @@ describe('IndexPatterns', () => {
         get: () => Promise.resolve(false),
         getAll: () => {},
       } as any) as UiSettingsCommon,
-      savedObjectsClient,
+      savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
       apiClient: {} as IIndexPatternsApiClient,
       fieldFormats,
       onNotification: () => {},

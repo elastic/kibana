@@ -81,6 +81,7 @@ import {
   ACTION_VALUE_CLICK,
   ValueClickActionContext,
 } from './actions/value_click_action';
+import { SavedObjectsClientPublicToCommon } from './index_patterns';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -171,7 +172,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
-      savedObjectsClient: savedObjects.client,
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
       apiClient: new IndexPatternsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields) => {

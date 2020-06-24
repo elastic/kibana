@@ -18,6 +18,8 @@
  */
 
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
+// eslint-disable-next-line
+import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
 
 export interface IIndexPattern {
@@ -61,30 +63,28 @@ export interface UiSettingsCommon {
 }
 
 export interface SavedObjectsClientCommonFindArgs {
-  type: string;
-  fields: string[];
-  perPage: number;
+  type: string | string[];
+  fields?: string[];
+  perPage?: number;
+  search?: string;
+  searchFields?: string[];
 }
 
-export interface SavedObjectCommon {
-  id: string;
-  attributes: Record<string, any>;
-}
 export interface SavedObjectsClientCommon {
-  find: (options: SavedObjectsClientCommonFindArgs) => Promise<SavedObjectCommon[]>;
-  get: (type: string, id: string) => Promise<SavedObjectCommon>;
-  // todo stricter on options
+  find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
+  get: (type: string, id: string) => Promise<SavedObject>;
   update: (
     type: string,
     id: string,
     attributes: Record<string, any>,
     options: Record<string, any>
-  ) => Promise<SavedObjectCommon>;
+    //  ) => Promise<Pick<SavedObject, 'attributes' | 'references'>>;
+  ) => Promise<SavedObject>;
   create: (
     type: string,
     attributes: Record<string, any>,
     options: Record<string, any>
-  ) => Promise<SavedObjectCommon>;
+  ) => Promise<SavedObject>;
   delete: (type: string, id: string) => Promise<{}>;
 }
 
@@ -100,3 +100,5 @@ export interface IIndexPatternsApiClient {
   getFieldsForTimePattern: (options: GetFieldsOptions) => Promise<any>;
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
 }
+
+export { SavedObject };
