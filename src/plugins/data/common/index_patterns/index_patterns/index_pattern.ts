@@ -41,13 +41,8 @@ import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
-import {
-  IndexPatternSpec,
-  TypeMeta,
-  FieldSpec,
-  SerializedFieldFormat,
-  SourceFilter,
-} from '../types';
+import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
+import { SerializedFieldFormat } from '../../../../expressions/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';

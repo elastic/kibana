@@ -77,7 +77,6 @@ export interface TypeMeta {
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
-export { SerializedFieldFormat };
 
 // This should become FieldSpec once types are cleaned up
 export interface FieldSpecExportFmt {
