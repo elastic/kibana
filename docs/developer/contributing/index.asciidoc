@@ -15,6 +15,7 @@ Read <<development-getting-started>> to get your environment up and running, the
 * <<signing-contributor-agreement>>
 * <<kibana-localization>>
 * <<kibana-release-notes-process>>
+* <<kibana-linting>>
 
 [float]
 [[signing-contributor-agreement]]
@@ -50,6 +51,7 @@ The text that appears in the Release Notes is pulled directly from your PR title
 To use a single paragraph of text, enter `Release note:` or a `## Release note` header in the PR description, followed by your text. For example, refer to this [PR](https://github.com/elastic/kibana/pull/65796) that uses the `## Release note` header.
 
 When you create the Release Notes text, use the following best practices:
+
 * Use present tense. 
 * Use sentence case.
 * When you create a feature PR, start with `Adds`.
@@ -90,3 +92,5 @@ include::development-pull-request.asciidoc[]
 include::kibana-issue-reporting.asciidoc[]
 
 include::pr-review.asciidoc[]
+
+include::linting.asciidoc[]

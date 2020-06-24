@@ -56,7 +56,7 @@ Each of these will run Elasticsearch with a basic license. Additional options ar
 
 You can save some system resources, and the effort of generating sample data, if you have a remote Elasticsearch cluster to connect to. (Elasticians: you do! Check with your team about where to find credentials)
 
-You'll need to create a kibana.dev.yml and add the following to it:
+You'll need to create a kibana.dev.yml (<<customize-kibana-yml>>) and add the following to it:
 
 [source,bash]
 ----
@@ -115,4 +115,4 @@ PUT _cluster/settings
 }
 ----
 
-Follow the cross-cluster search instructions for setting up index patterns to search across clusters.
+Follow the cross-cluster search instructions for setting up index patterns to search across clusters (<<management-cross-cluster-search>>).

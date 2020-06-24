@@ -10,7 +10,7 @@ Any JavaScript (or TypeScript) file that imports SASS (.scss) files will
 automatically build with the
 https://elastic.github.io/eui/#/guidelines/sass[EUI] & {kib} invisibles
 (SASS variables, mixins, functions) from the
-https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/styles/_styling_constants.scss[`styling_constants.scss`
+{kib-repo}tree/{branch}/src/legacy/ui/public/styles/_styling_constants.scss[`styling_constants.scss`
 file]. However, any Legacy (file path includes `/legacy`) files will
 not.
 

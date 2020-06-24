@@ -18,8 +18,7 @@ don’t use jQuery at all.
 ensure that user provided input isn’t influencing the template and is
 only used as data for rendering the template.
 ** Check for possible prototype pollution.
-* Prototype Pollution - more info
-https://docs.google.com/document/d/19V-d9sb6IF-fbzF4iyiPpAropQNydCnoJApzSX5FdcI/edit?usp=sharing[here]
+* Prototype Pollution
 ** Check for instances of `anObject[a][b] = c` where a, b, and c are
 user defined. This includes code paths where the following logical code
 steps could be performed in separate files by completely different
@@ -50,4 +49,7 @@ escaping is performed.
 * Reverse tabnabbing -
 https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/HTML5_Security_Cheat_Sheet.md#tabnabbing
 ** When there are user controllable links or hard-coded links to
-third-party domains th
+third-party domains that specify target="_blank" or target="_window", the a tag should have the rel="noreferrer noopener" attribute specified.
+Allowing users to input markdown is a common culprit, a custom link renderer should be used
+* SSRF - https://www.owasp.org/index.php/Server_Side_Request_Forgery
+All network requests made from the {kib} server should use an explicit configuration or white-list specified in the kibana.yml

@@ -57,6 +57,7 @@ link:#setting-up-your-development-environment[Setting Up Your
 Development Environment] above.
 
 [float]
+[[customize-kibana-yml]]
 ==== Customizing `config/kibana.dev.yml`
 
 The `config/kibana.yml` file stores user configuration directives.

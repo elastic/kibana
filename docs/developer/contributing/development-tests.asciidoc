@@ -31,7 +31,7 @@ root)
 |===
 
 For X-Pack tests located in `x-pack/` see
-link:x-pack/README.md#testing[X-Pack Testing]
+link:{kib-repo}tree/{branch}/x-pack/README.md#testing[X-Pack Testing]
 
 Test runner arguments: - Where applicable, the optional arguments
 `-t=regexp` or `--grep=regexp` will only run tests or test suites
@@ -77,7 +77,7 @@ your computer name).
 Check out <<development-functional-tests>> to learn more about how you can run
 and develop functional tests for {kib} core and plugins.
 
-You can also look into the {kib-repo}tree/master/scripts/README.md[Scripts README.md]
+You can also look into the {kib-repo}tree/{branch}/scripts/README.md[Scripts README.md]
 to learn more about using the node scripts we provide for building
 {kib}, running integration tests, and starting up {kib} and
 Elasticsearch while you develop.

@@ -2,6 +2,7 @@
 == Best practices
 
 Consider these best practices, whether developing code directly to the {kib} repo or building your own plugins.
+They are intended to support our https://github.com/elastic/engineering/blob/master/kibana_dev_principles.md[{kib} development principals].
 
 [float]
 === Performance
@@ -12,7 +13,7 @@ Are you planning with scalability in mind?
 * Consider data with high cardinality fields
 * Consider large data sets, that span a long time range
 * Do you make lots of requests to the server?
-** If so, have you considered using the streaming {kib-repo}tree/master/src/plugins/bfetch[bfetch service]?
+** If so, have you considered using the streaming {kib-repo}tree/{branch}/src/plugins/bfetch[bfetch service]?
 
 [float]
 === Accessibility
@@ -70,7 +71,7 @@ services you should consider:
 
 * {kib-repo}tree/{branch}/src/plugins/data/README.md[Data
 services]
-** https://github.com/elastic/kibana/blob/master/src/plugins/data/public/search/README.md[Search
+** {kib-repo}tree/{branch}/src/plugins/data/public/search/README.md[Search
 strategies]
 *** Use the `esSearchStrategy` to make raw queries to ES that will
 support async searching and partial results, as well as injecting the
