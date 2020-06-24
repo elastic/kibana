@@ -14,7 +14,7 @@ import { Manifest } from './manifest';
 describe('manifest', () => {
   describe('Manifest object sanity checks', () => {
     const artifacts: InternalArtifactSchema[] = [];
-    let now: Date;
+    const now = new Date();
     let manifest1: Manifest;
     let manifest2: Manifest;
 
@@ -87,7 +87,7 @@ describe('manifest', () => {
 
     test('Manifest transforms correctly to expected saved object format', async () => {
       expect(manifest1.toSavedObject()).toStrictEqual({
-        created: now,
+        created: now.getTime(),
         ids: [
           'endpoint-allowlist-linux-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
           'endpoint-allowlist-macos-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',

@@ -28,6 +28,7 @@ import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockAgentService } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
+import { getManifestManagerMock } from '../../services/artifacts';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
 const expectedEndpointExceptions = {
@@ -74,7 +75,7 @@ describe('test alerts route', () => {
 
     endpointAppContextService.start({
       agentService: createMockAgentService(),
-      manifestManager: undefined,
+      manifestManager: getManifestManagerMock(),
     });
 
     registerDownloadExceptionListRoute(

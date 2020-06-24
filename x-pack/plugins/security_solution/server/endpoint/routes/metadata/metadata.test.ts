@@ -31,6 +31,7 @@ import { createMockAgentService, createRouteHandlerContext } from '../../mocks';
 import { AgentService } from '../../../../../ingest_manager/server';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { getManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
@@ -60,6 +61,7 @@ describe('test endpoint route', () => {
     endpointAppContextService = new EndpointAppContextService();
     endpointAppContextService.start({
       agentService: mockAgentService,
+      manifestManager: getManifestManagerMock(),
     });
 
     registerEndpointRoutes(routerMock, {

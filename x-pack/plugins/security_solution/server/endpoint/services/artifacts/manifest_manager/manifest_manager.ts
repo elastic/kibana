@@ -46,7 +46,7 @@ export class ManifestManager {
   }
 
   private async dispatch(manifest: Manifest) {
-    const manifestClient = await this.getManifestClient(manifest.getSchemaVersion());
+    const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
 
     // TODO: dispatch and only update if successful
 
@@ -79,7 +79,7 @@ export class ManifestManager {
   }
 
   private async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
-    const manifestClient = await this.getManifestClient(schemaVersion);
+    const manifestClient = this.getManifestClient(schemaVersion);
 
     let manifestSo: InternalManifestSchema;
     try {
@@ -119,7 +119,7 @@ export class ManifestManager {
     if (oldManifest === null) {
       if (createInitial) {
         // TODO: implement this when ready to integrate with Paul's code
-        oldManifest = new Manifest(Date.now(), ManifestConstants.SCHEMA_VERSION); // create empty manifest
+        oldManifest = new Manifest(new Date(), ManifestConstants.SCHEMA_VERSION); // create empty manifest
       } else {
         this.logger.debug('Manifest does not exist yet. Waiting...');
         return;

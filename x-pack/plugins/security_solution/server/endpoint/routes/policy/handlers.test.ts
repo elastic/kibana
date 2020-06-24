@@ -19,6 +19,7 @@ import {
 } from '../../../../../../../src/core/server/mocks';
 import { AgentService } from '../../../../../ingest_manager/server/services';
 import { SearchResponse } from 'elasticsearch';
+import { getManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
@@ -38,6 +39,7 @@ describe('test policy response handler', () => {
     mockAgentService = createMockAgentService();
     endpointAppContextService.start({
       agentService: mockAgentService,
+      manifestManager: getManifestManagerMock(),
     });
   });
 

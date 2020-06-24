@@ -5,10 +5,10 @@
  */
 
 import { ArtifactClient } from './artifact_client';
-import { getInternalArtifactSchemaMock } from '../../schemas';
+import { getInternalArtifactMock } from '../../schemas';
 
 export class ArtifactClientMock extends ArtifactClient {
-  public getArtifact = jest.fn().mockResolvedValue(getInternalArtifactSchemaMock());
-  public createArtifact = jest.fn().mockResolvedValue(getInternalArtifactSchemaMock());
-  public deleteArtifact = jest.fn().mockResolvedValue(getInternalArtifactSchemaMock());
+  public getArtifact = jest.fn().mockResolvedValue(getInternalArtifactMock());
+  public createArtifact = jest.fn().mockResolvedValue(getInternalArtifactMock());
+  public deleteArtifact = jest.fn().mockResolvedValue(getInternalArtifactMock());
 }
