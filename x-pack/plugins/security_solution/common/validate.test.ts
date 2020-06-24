@@ -9,9 +9,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { left, right } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
-import { validate } from './validate';
+import { validate, validateEither } from './validate';
 
 describe('validate', () => {
   test('it should do a validation correctly', () => {
@@ -30,5 +31,23 @@ describe('validate', () => {
 
     expect(validated).toEqual(null);
     expect(errors).toEqual('Invalid value "some other value" supplied to "a"');
+  });
+});
+
+describe('validateEither', () => {
+  it('returns the decoded payload as right if valid', () => {
+    const schema = t.exact(t.type({ a: t.number }));
+    const payload = { a: 1 };
+    const result = validateEither(payload, schema);
+
+    expect(result).toEqual(right(payload));
+  });
+
+  it('returns an error string if invalid', () => {
+    const schema = t.exact(t.type({ a: t.number }));
+    const payload = { a: 'some other value' };
+    const result = validateEither(payload, schema);
+
+    expect(result).toEqual(left('Invalid value "some other value" supplied to "a"'));
   });
 });
