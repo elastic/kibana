@@ -7,7 +7,7 @@
 import { Actions } from '.';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 
-import { httpServerMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { authorizationMock } from './index.mock';
 import { Feature } from '../../../features/server';
 
@@ -45,7 +45,7 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: { statusCode: 401, message: 'super informative message' },
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
@@ -106,7 +106,7 @@ describe('usingPrivileges', () => {
         },
       });
 
-      expect(loggingServiceMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Disabling all uiCapabilities because we received a 401: super informative message",
@@ -119,7 +119,7 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: { statusCode: 403, message: 'even more super informative message' },
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
@@ -179,7 +179,7 @@ describe('usingPrivileges', () => {
           bar: false,
         },
       });
-      expect(loggingServiceMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Disabling all uiCapabilities because we received a 403: even more super informative message",
@@ -192,7 +192,7 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: new Error('something else entirely'),
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
@@ -215,7 +215,7 @@ describe('usingPrivileges', () => {
           catalogue: {},
         })
       ).rejects.toThrowErrorMatchingSnapshot();
-      expect(loggingServiceMock.collect(mockLoggers)).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers)).toMatchInlineSnapshot(`
         Object {
           "debug": Array [],
           "error": Array [],
@@ -264,7 +264,7 @@ describe('usingPrivileges', () => {
           privileges: null,
         }),
       ],
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       mockAuthz
     );
 
@@ -350,7 +350,7 @@ describe('usingPrivileges', () => {
           privileges: null,
         }),
       ],
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       mockAuthz
     );
 
@@ -415,7 +415,7 @@ describe('all', () => {
           privileges: null,
         }),
       ],
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       mockAuthz
     );
 

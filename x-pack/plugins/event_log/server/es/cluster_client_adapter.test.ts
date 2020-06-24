@@ -5,7 +5,7 @@
  */
 
 import { ClusterClient, Logger } from '../../../../../src/core/server';
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import moment from 'moment';
 import { findOptionsSchema } from '../event_log_client';
@@ -17,7 +17,7 @@ let clusterClient: EsClusterClient;
 let clusterClientAdapter: IClusterClientAdapter;
 
 beforeEach(() => {
-  logger = loggingServiceMock.createLogger();
+  logger = loggingSystemMock.createLogger();
   clusterClient = elasticsearchServiceMock.createClusterClient();
   clusterClientAdapter = new ClusterClientAdapter({
     logger,

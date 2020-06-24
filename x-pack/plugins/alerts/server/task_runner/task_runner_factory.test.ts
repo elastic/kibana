@@ -8,7 +8,7 @@ import sinon from 'sinon';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
@@ -57,7 +57,7 @@ describe('Task Runner Factory', () => {
     getServices: jest.fn().mockReturnValue(services),
     actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
     eventLogger: eventLoggerMock.create(),

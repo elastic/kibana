@@ -166,6 +166,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
+    logging: {
+      configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
+    },
     metrics: {
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
