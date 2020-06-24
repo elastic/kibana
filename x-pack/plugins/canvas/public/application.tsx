@@ -15,14 +15,14 @@ import { BehaviorSubject } from 'rxjs';
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { App } from './components/app';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { getDocumentationLinks } from './lib/documentation_links';
-// @ts-ignore untyped component
+// @ts-expect-error untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
@@ -32,12 +32,12 @@ import { init as initStatsReporter } from './lib/ui_metric';
 import { CapabilitiesStrings } from '../i18n';
 
 import { startServices, services } from './services';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { createHistory, destroyHistory } from './lib/history_provider';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { stopRouter } from './lib/router_provider';
 import { initFunctions } from './functions';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
 
 import './style/index.scss';

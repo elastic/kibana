@@ -14,7 +14,11 @@ import { getFieldFormats, getUiSettings } from './dependency_cache';
 import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 const unitsDesc = dateMath.unitsDesc;
-const largeMax = unitsDesc.indexOf('w'); // Multiple units of week or longer converted to days for ES intervals.
+
+// Index of the list of time interval units at which larger units (i.e. weeks, months, years) need
+// need to be converted to multiples of the largest unit supported in ES aggregation intervals (i.e. days).
+// Note that similarly the largest interval supported for ML bucket spans is 'd'.
+const timeUnitsMaxSupportedIndex = unitsDesc.indexOf('w');
 
 const calcAuto = timeBucketsCalcAutoIntervalProvider();
 
@@ -383,9 +387,11 @@ export function calcEsInterval(duration) {
     const val = duration.as(unit);
     // find a unit that rounds neatly
     if (val >= 1 && Math.floor(val) === val) {
-      // if the unit is "large", like years, but isn't set to 1, ES will throw an error.
+      // Apart from for date histograms, ES only supports time units up to 'd',
+      // meaning we can't for example use 'w' for job bucket spans.
+      // See https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#time-units
       // So keep going until we get out of the "large" units.
-      if (i <= largeMax && val !== 1) {
+      if (i <= timeUnitsMaxSupportedIndex) {
         continue;
       }
 

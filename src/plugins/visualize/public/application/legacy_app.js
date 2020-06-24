@@ -244,9 +244,17 @@ export function initVisualizeApp(app, deps) {
         },
       })
       .otherwise({
-        template: '<span></span>',
-        controller: function () {
-          deps.kibanaLegacy.navigateToDefaultApp();
+        resolveRedirectTo: function ($rootScope) {
+          const path = window.location.hash.substr(1);
+          deps.restorePreviousUrl();
+          $rootScope.$applyAsync(() => {
+            const { navigated } = deps.kibanaLegacy.navigateToLegacyKibanaUrl(path);
+            if (!navigated) {
+              deps.kibanaLegacy.navigateToDefaultApp();
+            }
+          });
+          // prevent angular from completing the navigation
+          return new Promise(() => {});
         },
       });
   });

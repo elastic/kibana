@@ -16,7 +16,7 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
 import {
@@ -66,7 +66,7 @@ describe('test endpoint route', () => {
     mockAgentService = startContract.agentService;
 
     registerEndpointRoutes(routerMock, {
-      logFactory: loggingServiceMock.create(),
+      logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
     });
