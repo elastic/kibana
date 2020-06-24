@@ -21,10 +21,17 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
-import { RestoreSettings } from '../../../../../common/types';
-import { documentationLinksService } from '../../../services/documentation';
-import { useServices } from '../../../app_context';
-import { StepProps } from './';
+
+import { isDataStreamBackingIndex } from '../../../../../../common/lib';
+import { RestoreSettings } from '../../../../../../common/types';
+
+import { documentationLinksService } from '../../../../services/documentation';
+
+import { useServices } from '../../../../app_context';
+
+import { DataStreamBadge } from './data_stream_badge';
+
+import { StepProps } from '../index';
 
 export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = ({
   snapshotDetails,
@@ -52,6 +59,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     snapshotIndices.map(
       (index): EuiSelectableOption => ({
         label: index,
+        append: isDataStreamBackingIndex(index) ? <DataStreamBadge /> : undefined,
         checked:
           isAllIndices ||
           // If indices is a string, we default to custom input mode, so we mark individual indices
@@ -302,7 +310,24 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     </EuiSelectable>
                   ) : (
                     <EuiComboBox
-                      options={snapshotIndices.map((index) => ({ label: index }))}
+                      options={snapshotIndices.map((index) => ({ label: index, value: index }))}
+                      renderOption={({ value }) => {
+                        return isDataStreamBackingIndex(value!) ? (
+                          <EuiFlexGroup
+                            responsive={false}
+                            justifyContent="spaceBetween"
+                            alignItems="center"
+                            gutterSize="none"
+                          >
+                            <EuiFlexItem>{value!}</EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <DataStreamBadge />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        ) : (
+                          value!
+                        );
+                      }}
                       placeholder={i18n.translate(
                         'xpack.snapshotRestore.restoreForm.stepLogistics.indicesPatternPlaceholder',
                         {

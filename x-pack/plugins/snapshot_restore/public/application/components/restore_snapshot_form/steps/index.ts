@@ -14,6 +14,6 @@ export interface StepProps {
   updateCurrentStep: (step: number) => void;
 }
 
-export { RestoreSnapshotStepLogistics } from './step_logistics';
+export { RestoreSnapshotStepLogistics } from './step_logistics/step_logistics';
 export { RestoreSnapshotStepSettings } from './step_settings';
 export { RestoreSnapshotStepReview } from './step_review';
