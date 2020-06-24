@@ -42,7 +42,7 @@ export class ManifestManager {
   }
 
   private async dispatch(manifest: Manifest) {
-    const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
+    const manifestClient = await this.getManifestClient(manifest.getSchemaVersion());
 
     // TODO: dispatch and only update if successful
 
@@ -75,7 +75,7 @@ export class ManifestManager {
   }
 
   private async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
-    const manifestClient = this.getManifestClient(schemaVersion);
+    const manifestClient = await this.getManifestClient(schemaVersion);
 
     let manifestSo: InternalManifestSchema;
     try {
