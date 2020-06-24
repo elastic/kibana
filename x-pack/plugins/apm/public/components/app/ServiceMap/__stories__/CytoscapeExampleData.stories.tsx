@@ -23,6 +23,7 @@ import { Cytoscape } from '../Cytoscape';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';
 import exampleResponseOpbeansBeats from './example_response_opbeans_beats.json';
 import exampleResponseTodo from './example_response_todo.json';
+import exampleResponseOneDomainManyIPs from './example_response_one_domain_many_ips.json';
 import { generateServiceMapElements } from './generate_service_map_elements';
 
 const STORYBOOK_PATH = 'app/ServiceMap/Cytoscape/Example data';
@@ -99,89 +100,91 @@ storiesOf(STORYBOOK_PATH, module)
     }
   );
 
-storiesOf(STORYBOOK_PATH, module).add(
-  'Map from JSON',
-  () => {
-    const [json, setJson] = useState<string>(
-      getSessionJson() || JSON.stringify(exampleResponseTodo, null, 2)
-    );
-    const [error, setError] = useState<string | undefined>();
+storiesOf(STORYBOOK_PATH, module)
+  .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+  .add(
+    'Map from JSON',
+    () => {
+      const [json, setJson] = useState<string>(
+        getSessionJson() || JSON.stringify(exampleResponseTodo, null, 2)
+      );
+      const [error, setError] = useState<string | undefined>();
 
-    const [elements, setElements] = useState<any[]>([]);
-    useEffect(() => {
-      try {
-        setElements(JSON.parse(json).elements);
-      } catch (e) {
-        setError(e.message);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+      const [elements, setElements] = useState<any[]>([]);
+      useEffect(() => {
+        try {
+          setElements(JSON.parse(json).elements);
+        } catch (e) {
+          setError(e.message);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
 
-    return (
-      <div>
-        <Cytoscape elements={elements} height={600} width={1340} />
-        <EuiForm isInvalid={error !== undefined} error={error}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiCodeEditor
-                mode="json"
-                theme="github"
-                width="100%"
-                value={json}
-                setOptions={{ fontSize: '12px' }}
-                onChange={(value) => {
-                  setJson(value);
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup direction="column">
-                <EuiFilePicker
-                  display={'large'}
-                  fullWidth={true}
-                  style={{ height: '100%' }}
-                  initialPromptText="Upload a JSON file"
-                  onChange={(event) => {
-                    const item = event?.item(0);
-
-                    if (item) {
-                      const f = new FileReader();
-                      f.onload = (onloadEvent) => {
-                        const result = onloadEvent?.target?.result;
-                        if (typeof result === 'string') {
-                          setJson(result);
-                        }
-                      };
-                      f.readAsText(item);
-                    }
+      return (
+        <div>
+          <Cytoscape elements={elements} height={600} width={1340} />
+          <EuiForm isInvalid={error !== undefined} error={error}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiCodeEditor
+                  mode="json"
+                  theme="github"
+                  width="100%"
+                  value={json}
+                  setOptions={{ fontSize: '12px' }}
+                  onChange={(value) => {
+                    setJson(value);
                   }}
                 />
-                <EuiSpacer />
-                <EuiButton
-                  onClick={() => {
-                    try {
-                      setElements(JSON.parse(json).elements);
-                      setSessionJson(json);
-                      setError(undefined);
-                    } catch (e) {
-                      setError(e.message);
-                    }
-                  }}
-                >
-                  Render JSON
-                </EuiButton>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiForm>
-      </div>
-    );
-  },
-  {
-    info: {
-      propTables: false,
-      source: false,
-      text: `
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column">
+                  <EuiFilePicker
+                    display={'large'}
+                    fullWidth={true}
+                    style={{ height: '100%' }}
+                    initialPromptText="Upload a JSON file"
+                    onChange={(event) => {
+                      const item = event?.item(0);
+
+                      if (item) {
+                        const f = new FileReader();
+                        f.onload = (onloadEvent) => {
+                          const result = onloadEvent?.target?.result;
+                          if (typeof result === 'string') {
+                            setJson(result);
+                          }
+                        };
+                        f.readAsText(item);
+                      }
+                    }}
+                  />
+                  <EuiSpacer />
+                  <EuiButton
+                    onClick={() => {
+                      try {
+                        setElements(JSON.parse(json).elements);
+                        setSessionJson(json);
+                        setError(undefined);
+                      } catch (e) {
+                        setError(e.message);
+                      }
+                    }}
+                  >
+                    Render JSON
+                  </EuiButton>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiForm>
+        </div>
+      );
+    },
+    {
+      info: {
+        propTables: false,
+        source: false,
+        text: `
       Enter JSON map data into the text box or upload a file and click "Render JSON" to see the results. You can enable a download button on the service map by putting
 
       \`\`\`
@@ -189,60 +192,86 @@ storiesOf(STORYBOOK_PATH, module).add(
       \`\`\`
 
       into the JavaScript console and reloading the page.`,
+      },
+    }
+  );
+
+storiesOf(STORYBOOK_PATH, module)
+  .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+  .add(
+    'Todo app',
+    () => {
+      return (
+        <div>
+          <Cytoscape
+            elements={exampleResponseTodo.elements}
+            height={600}
+            width={1340}
+          />
+        </div>
+      );
     },
-  }
-);
+    {
+      info: { propTables: false, source: false },
+    }
+  );
 
-storiesOf(STORYBOOK_PATH, module).add(
-  'Todo app',
-  () => {
-    return (
-      <div>
-        <Cytoscape
-          elements={exampleResponseTodo.elements}
-          height={600}
-          width={1340}
-        />
-      </div>
-    );
-  },
-  {
-    info: { propTables: false, source: false },
-  }
-);
+storiesOf(STORYBOOK_PATH, module)
+  .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+  .add(
+    'Opbeans + beats',
+    () => {
+      return (
+        <div>
+          <Cytoscape
+            elements={exampleResponseOpbeansBeats.elements}
+            height={600}
+            width={1340}
+          />
+        </div>
+      );
+    },
+    {
+      info: { propTables: false, source: false },
+    }
+  );
 
-storiesOf(STORYBOOK_PATH, module).add(
-  'Opbeans + beats',
-  () => {
-    return (
-      <div>
-        <Cytoscape
-          elements={exampleResponseOpbeansBeats.elements}
-          height={600}
-          width={1340}
-        />
-      </div>
-    );
-  },
-  {
-    info: { propTables: false, source: false },
-  }
-);
+storiesOf(STORYBOOK_PATH, module)
+  .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+  .add(
+    'Hipster store',
+    () => {
+      return (
+        <div>
+          <Cytoscape
+            elements={exampleResponseHipsterStore.elements}
+            height={600}
+            width={1340}
+          />
+        </div>
+      );
+    },
+    {
+      info: { propTables: false, source: false },
+    }
+  );
 
-storiesOf(STORYBOOK_PATH, module).add(
-  'Hipster store',
-  () => {
-    return (
-      <div>
-        <Cytoscape
-          elements={exampleResponseHipsterStore.elements}
-          height={600}
-          width={1340}
-        />
-      </div>
-    );
-  },
-  {
-    info: { propTables: false, source: false },
-  }
-);
+storiesOf(STORYBOOK_PATH, module)
+  .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+  .add(
+    'Node resolves one domain name to many IPs',
+    () => {
+      return (
+        <div>
+          <Cytoscape
+            elements={exampleResponseOneDomainManyIPs.elements}
+            height={600}
+            width={1340}
+          />
+        </div>
+      );
+    },
+    {
+      info: { propTables: false, source: false },
+    }
+  );
