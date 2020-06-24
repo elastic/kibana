@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useMount } from 'react-use';
 
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
@@ -16,15 +16,19 @@ import { AnomalyRecord } from '../../use_log_entry_rate_results';
 import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
 import { useLogEntryRateExamples } from '../../use_log_entry_rate_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
+import { bucketSpan } from '../../../../../../common/log_analysis/job_parameters';
 
 const EXAMPLE_COUNT = 5;
 
+const examplesTitle = i18n.translate('xpack.infra.logs.analysis.anomaliesTableExamplesTitle', {
+  defaultMessage: 'Example logs',
+});
+
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   anomaly: AnomalyRecord;
-  setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   jobId: string;
-}> = ({ anomaly, timeRange, setTimeRange, jobId }) => {
+}> = ({ anomaly }) => {
   const {
     sourceConfiguration: { sourceId },
   } = useLogEntryRateModuleContext();
@@ -36,10 +40,10 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     logEntryRateExamples,
   } = useLogEntryRateExamples({
     dataset: anomaly.partitionId,
-    endTime: timeRange.endTime,
+    endTime: anomaly.startTime + bucketSpan / 2,
     exampleCount: EXAMPLE_COUNT,
     sourceId,
-    startTime: timeRange.startTime,
+    startTime: anomaly.startTime - bucketSpan / 2,
   });
 
   useMount(() => {
@@ -48,44 +52,48 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
 
   return (
     <>
-      <div>Example logs</div>
-      <LogEntryExampleMessages
-        examples={logEntryRateExamples}
-        isLoading={isLoadingLogEntryRateExamples}
-        hasFailedLoading={hasFailedLoadingLogEntryRateExamples}
-        exampleCount={EXAMPLE_COUNT}
-        onReload={getLogEntryRateExamples}
-      />
-      <div>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiStat
-              title={numeral(anomaly.typicalLogEntryRate).format('0.00a')}
-              titleSize="m"
-              description={i18n.translate(
-                'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateDescription',
-                {
-                  defaultMessage: 'Typical',
-                }
-              )}
-              reverse
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiStat
-              title={numeral(anomaly.actualLogEntryRate).format('0.00a')}
-              titleSize="m"
-              description={i18n.translate(
-                'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateDescription',
-                {
-                  defaultMessage: 'Actual',
-                }
-              )}
-              reverse
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>{examplesTitle}</h3>
+          </EuiTitle>
+          <LogEntryExampleMessages
+            examples={logEntryRateExamples}
+            isLoading={isLoadingLogEntryRateExamples}
+            hasFailedLoading={hasFailedLoadingLogEntryRateExamples}
+            exampleCount={EXAMPLE_COUNT}
+            onReload={getLogEntryRateExamples}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                title={numeral(anomaly.typicalLogEntryRate).format('0.00a')}
+                titleSize="m"
+                description={i18n.translate(
+                  'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateDescription',
+                  {
+                    defaultMessage: 'Typical',
+                  }
+                )}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                title={numeral(anomaly.actualLogEntryRate).format('0.00a')}
+                titleSize="m"
+                description={i18n.translate(
+                  'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateDescription',
+                  {
+                    defaultMessage: 'Actual',
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
