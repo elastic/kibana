@@ -7,12 +7,3 @@
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
-// Has to come after visualize because of some
-// bad cascading in the Editor layout
-@import '../../../../plugins/maps_legacy/public/index';
-
-// Management styles
-@import './management/index';
-
-// Local application mount wrapper styles
-@import 'local_application_service/index';

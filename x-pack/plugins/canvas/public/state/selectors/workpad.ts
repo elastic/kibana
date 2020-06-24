@@ -5,9 +5,9 @@
  */
 
 import { get, omit } from 'lodash';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 import { State, CanvasWorkpad, CanvasPage, CanvasElement, ResolvedArgType } from '../../../types';
