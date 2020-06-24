@@ -41,7 +41,7 @@ import { useSourceViaHttp } from '../../../containers/source/use_source_via_http
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 import { ExpressionRow } from './expression_row';
-import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
+import { AlertContextMeta, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { validateMetricThreshold } from './validation';
 
@@ -81,7 +81,7 @@ export const Expressions: React.FC<Props> = (props) => {
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
+  const [timeUnit, setTimeUnit] = useState<Unit>('m');
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
   ]);
@@ -182,7 +182,7 @@ export const Expressions: React.FC<Props> = (props) => {
           ...c,
           timeUnit: tu,
         })) || [];
-      setTimeUnit(tu as TimeUnit);
+      setTimeUnit(tu as Unit);
       setAlertParams('criteria', criteria);
     },
     /* eslint-disable-next-line react-hooks/exhaustive-deps */

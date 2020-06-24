@@ -16,7 +16,6 @@ export interface AlertContextMeta {
   series?: MetricsExplorerSeries;
 }
 
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
 export type MetricExpression = Omit<MetricExpressionParams, 'metric'> & {
   metric?: string;
 };

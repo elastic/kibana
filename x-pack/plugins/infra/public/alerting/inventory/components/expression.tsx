@@ -16,22 +16,11 @@ import {
   EuiFormRow,
   EuiButtonEmpty,
   EuiFieldSearch,
-  EuiSelect,
-  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertPreview } from '../../common';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
-import {
-  previewOptions,
-  firedTimeLabel,
-  firedTimesLabel,
-  getInventoryAlertPreview as getAlertPreview,
-} from '../../../alerting/common';
-import { AlertPreviewSuccessResponsePayload } from '../../../../common/alerting/metrics/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getIntervalInSeconds } from '../../../../server/utils/get_interval_in_seconds';
 import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -109,31 +98,6 @@ export const Expressions: React.FC<Props> = (props) => {
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
-
-  const [previewLookbackInterval, setPreviewLookbackInterval] = useState<string>('h');
-  const [isPreviewLoading, setIsPreviewLoading] = useState<boolean>(false);
-  const [previewError, setPreviewError] = useState<boolean>(false);
-  const [previewResult, setPreviewResult] = useState<AlertPreviewSuccessResponsePayload | null>(
-    null
-  );
-
-  const previewIntervalError = useMemo(() => {
-    const intervalInSeconds = getIntervalInSeconds(alertInterval);
-    const lookbackInSeconds = getIntervalInSeconds(`1${previewLookbackInterval}`);
-    if (intervalInSeconds >= lookbackInSeconds) {
-      return true;
-    }
-    return false;
-  }, [previewLookbackInterval, alertInterval]);
-
-  const isPreviewDisabled = useMemo(() => {
-    if (previewIntervalError) return true;
-    const validationResult = validateMetricThreshold({ criteria: alertParams.criteria } as any);
-    const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
-      Object.values(result).some((arr) => Array.isArray(arr) && arr.length)
-    );
-    return hasValidationErrors;
-  }, [alertParams.criteria, previewIntervalError]);
 
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
@@ -254,33 +218,6 @@ export const Expressions: React.FC<Props> = (props) => {
       );
     }
   }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
-
-  const onSelectPreviewLookbackInterval = useCallback((e) => {
-    setPreviewLookbackInterval(e.target.value);
-    setPreviewResult(null);
-  }, []);
-
-  const onClickPreview = useCallback(async () => {
-    setIsPreviewLoading(true);
-    setPreviewResult(null);
-    setPreviewError(false);
-    try {
-      const result = await getAlertPreview({
-        fetch: alertsContext.http.fetch,
-        params: {
-          ...pick(alertParams, 'criteria', 'nodeType'),
-          sourceId: alertParams.sourceId,
-          lookback: previewLookbackInterval as Unit,
-          alertInterval,
-        },
-      });
-      setPreviewResult(result);
-    } catch (e) {
-      setPreviewError(true);
-    } finally {
-      setIsPreviewLoading(false);
-    }
-  }, [alertParams, alertInterval, alertsContext, previewLookbackInterval]);
 
   useEffect(() => {
     const md = alertsContext.metadata;
