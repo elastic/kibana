@@ -30,11 +30,12 @@ export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement,
 interface Props {
   link: ChromeNavLink;
   legacyMode: boolean;
-  appId: string | undefined;
+  appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
   onClick?: Function;
   navigateToApp: CoreStart['application']['navigateToApp'];
+  externalLink?: boolean;
 }
 
 // TODO #64541
@@ -49,6 +50,7 @@ export function createEuiListItem({
   onClick = () => {},
   navigateToApp,
   dataTestSubj,
+  externalLink = false,
 }: Props) {
   const { legacy, active, id, title, disabled, euiIconType, icon, tooltip, href } = link;
 
@@ -62,6 +64,7 @@ export function createEuiListItem({
       }
 
       if (
+        !externalLink && // ignore external links
         !legacyMode && // ignore when in legacy mode
         !legacy && // ignore links to legacy apps
         event.button === 0 && // ignore everything but left clicks
