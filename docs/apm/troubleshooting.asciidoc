@@ -70,13 +70,14 @@ Transaction names are defined in each APM Agent; when an Agent supports a framew
 it includes logic for naming the transactions that the framework creates.
 In some cases though, like when using an Agent's API to create custom transactions,
 it is up to the user to define a pattern for transaction naming.
-When transactions are named incorrectly, every unique URL will be associated with a unique transaction group—
-causing an explosion in the number of transaction groups per service, and leading to inaccuracies in the APM app.
+When transactions are named incorrectly, each unique URL can be associated with a unique transaction group—causing
+an explosion in the number of transaction groups per service, and leading to inaccuracies in the APM app.
 
-To fix an explosion of transaction names, ensure you are **not** naming based on parameters that can change.
+To fix a large number of unique transaction names,
+you need to change how you are using the Agent API to name your transactions.
+To do this, ensure you are **not** naming based on parameters that can change.
 For example, user ids, product ids, order numbers, query parameters, etc.,
 should be stripped away, and commonality should be found between your unique URLs.
-This can be done by changing how you are using the Agent API to name your transactions.
 
 Let's look at an example from the RUM Agent documentation. Here are a few URLs you might find on Elastic.co:
 
@@ -94,12 +95,14 @@ https://www.elastic.co/guide/en/infrastructure/guide/current/index.html
 ----
 
 These URLs, like most, include unique names.
-If we named transactions based on each unique name, we'd end up with a very large number of different transaction names.
-Instead, we should strip away the unique information and name each transaction based on common information—
-in this case, `/blog` for our blog posts and `/guide` for our documentation pages.
+If we named transactions based on each unique URL, we'd end up with the problem described above—a
+very large number of different transaction names.
+Instead, we should strip away the unique information and group our transactions based on common information.
+In this case, that means naming all blog transactions, `/blog`, and all documentation transactions, `/guide`.
 
 If you feel like you'd be losing valuable information by following this naming convention, don't fret!
-You can add URL details to your transactions using metadata.html#labels-fields[labels] (indexed) or metadata.html#custom-fields[custom context' (non-indexed).
+You can always add additional metadata to your transactions using {apm-overview-ref-v}/metadata.html#labels-fields[labels] (indexed) or
+{apm-overview-ref-v}/metadata.html#custom-fields[custom context] (non-indexed).
 
 After ensuring you've correctly named your transactions,
 you might still see an error in the APM app related to too many transaction names.
@@ -108,66 +111,15 @@ If this is the case, you can increase the default number of transaction groups d
 
 **More information**
 
-For additional information on how to correctly set `transaction.name` in the RUM Agent, see custom-transaction-name.html[].
+While this can happen with any APM Agent, it typically occurs with the RUM Agent.
+For more information on how to correctly set `transaction.name` in the RUM Agent,
+see {apm-rum-ref}/custom-transaction-name.html[custom initial page load transaction names].
 
 The RUM Agent can also set the `transaction.name` when observing for transaction events.
-See agent-api.html#observe[`apm.observe()`] for more information.
+See {apm-rum-ref}/agent-api.html#observe[`apm.observe()`] for more information.
 
-// STILL NEED TO CLEANUP
-// *********************
-
-// While it's possible for this to happen with any APM Agent, it typically occurs in the RUM Agent.
-
-// Node.js
-// `transaction.name`
-// transaction-api.html#transaction-name
-
-// RUM:
-// `pageLoadTransactionName` can be used to configure page load transaction names: configuration.html#page-load-transaction-name[]
-
-// To determine if you have too many unique transaction names for a service, run the following terms aggregation:
-
-// [source,console]
-// ----
-// GET apm-*-transaction*/_search?terminate_after=10000 <1>
-// {
-//   "size": 0,
-//   "aggs": {
-//     "services": {
-//       "terms": {
-//         "field": "service.name",
-//         "size": 10
-//       },
-//       "aggs": {
-//         "distinct_names": {
-//           "cardinality": {
-//             "field": "transaction.name"
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
-// ----
-// // CONSOLE
-// <1> This aggregation assumes you're using the default index pattern
-
-// Look for any returned `distinct_names.value` greater than the default of `100`.
-
-// [source,json]
-// ----
-// //...
-// {
-//   "key" : "service-name-here",
-//   "doc_count" : 3957,
-//   "distinct_names" : {
-//     "value" : 1454 <1>
-//   }
-// },
-// //...
-// ----
-// <1> This service has a high number of distinct transaction names
-
+If your problem is occurring in a different Agent, the tips above still apply.
+See the relevant {apm-agents-ref}[Agent API documentation] to adjust how you're naming your transactions.
 
 [float]
 [[troubleshooting-unknown-route]]
