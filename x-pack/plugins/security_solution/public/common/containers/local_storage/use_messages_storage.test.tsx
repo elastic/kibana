@@ -54,4 +54,32 @@ describe('useLocalStorage', () => {
       expect(getMessages('case')).toEqual(['id-1', 'id-2']);
     });
   });
+
+  it('should remove a message', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
+        useMessagesStorage()
+      );
+      await waitForNextUpdate();
+      const { getMessages, addMessage, removeMessage } = result.current;
+      addMessage('case', 'id-1');
+      addMessage('case', 'id-2');
+      removeMessage('case', 'id-2');
+      expect(getMessages('case')).toEqual(['id-1']);
+    });
+  });
+
+  it('should clear all messages', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
+        useMessagesStorage()
+      );
+      await waitForNextUpdate();
+      const { getMessages, addMessage, clearAllMessages } = result.current;
+      addMessage('case', 'id-1');
+      addMessage('case', 'id-2');
+      clearAllMessages('case');
+      expect(getMessages('case')).toEqual([]);
+    });
+  });
 });

@@ -10,9 +10,7 @@ import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../../common/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
-import * as i18n from './translations';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { getKibanaConfigError, getLicenseError } from './helpers';
 import { connectorsMock } from '../../containers/configure/mock';
 
 jest.mock('react-router-dom', () => {

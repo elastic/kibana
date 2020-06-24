@@ -10,15 +10,15 @@ import { useKibana } from '../../lib/kibana';
 export interface UseMessagesStorage {
   getMessages: (plugin: string) => string[];
   addMessage: (plugin: string, id: string) => void;
+  removeMessage: (plugin: string, id: string) => void;
+  clearAllMessages: (plugin: string) => void;
 }
 
 export const useMessagesStorage = (): UseMessagesStorage => {
   const { storage } = useKibana().services;
 
   const getMessages = useCallback(
-    (plugin: string): string[] => {
-      return storage.get(`${plugin}-messages`) ?? [];
-    },
+    (plugin: string): string[] => storage.get(`${plugin}-messages`) ?? [],
     [storage]
   );
 
@@ -30,8 +30,23 @@ export const useMessagesStorage = (): UseMessagesStorage => {
     [storage]
   );
 
+  const removeMessage = useCallback(
+    (plugin: string, id: string) => {
+      const pluginStorage = storage.get(`${plugin}-messages`) ?? [];
+      storage.set(`${plugin}-messages`, [...pluginStorage.filter((val: string) => val !== id)]);
+    },
+    [storage]
+  );
+
+  const clearAllMessages = useCallback(
+    (plugin: string): string[] => storage.remove(`${plugin}-messages`),
+    [storage]
+  );
+
   return {
     getMessages,
     addMessage,
+    clearAllMessages,
+    removeMessage,
   };
 };
