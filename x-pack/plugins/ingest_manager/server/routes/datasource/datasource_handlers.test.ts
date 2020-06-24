@@ -11,8 +11,9 @@ import { DATASOURCE_API_ROUTES } from '../../../common/constants';
 import { xpackMocks } from '../../../../../mocks';
 import { appContextService } from '../../services';
 import { createAppContextStartContractMock } from '../../mocks';
-import { DatasourceServiceInterface } from '../..';
+import { DatasourceServiceInterface, ExternalCallback } from '../..';
 import { CreateDatasourceRequestSchema } from '../../types/rest_spec';
+import { datasourceService } from '../../services';
 
 jest.mock('../../services/datasource', (): {
   datasourceService: jest.Mock<DatasourceServiceInterface>;
@@ -58,29 +59,24 @@ describe('When calling datasource', () => {
 
   beforeAll(() => {
     routerMock = httpServiceMock.createRouter();
-    appContextService.start(createAppContextStartContractMock());
     registerRoutes(routerMock);
   });
 
   beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
     context = xpackMocks.createRequestHandlerContext();
     response = httpServerMock.createResponseFactory();
   });
 
-  afterAll(() => {
+  afterEach(() => {
+    jest.clearAllMocks();
     appContextService.stop();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('create api handler', () => {
-    const getCreateKibanaRequest: KibanaRequest<
-      undefined,
-      undefined,
-      typeof CreateDatasourceRequestSchema.body
-    > = (newData?: typeof CreateDatasourceRequestSchema.body) => {
+    const getCreateKibanaRequest = (
+      newData?: typeof CreateDatasourceRequestSchema.body
+    ): KibanaRequest<undefined, undefined, typeof CreateDatasourceRequestSchema.body> => {
       return httpServerMock.createKibanaRequest<
         undefined,
         undefined,
@@ -109,10 +105,219 @@ describe('When calling datasource', () => {
     });
 
     describe('and external callbacks are registered', () => {
+      // Callback one adds an input that includes a `config` property
+      const callbackOne: ExternalCallback[1] = jest.fn(async (ds) => {
+        const newDs = {
+          ...ds,
+          inputs: [
+            {
+              type: 'endpoint',
+              enabled: true,
+              streams: [],
+              config: {
+                one: {
+                  value: 'inserted by callbackOne',
+                },
+              },
+            },
+          ],
+        };
+        return newDs;
+      });
+
+      // Callback two adds an additional `input[0].config` property
+      const callbackTwo: ExternalCallback[1] = jest.fn(async (ds) => {
+        const newDs = {
+          ...ds,
+          inputs: [
+            {
+              ...ds.inputs[0],
+              config: {
+                ...ds.inputs[0].config,
+                two: {
+                  value: 'inserted by callbackTwo',
+                },
+              },
+            },
+          ],
+        };
+        return newDs;
+      });
+
+      beforeEach(() => {
+        appContextService.addExternalCallback('datasourceCreate', callbackOne);
+        appContextService.addExternalCallback('datasourceCreate', callbackTwo);
+      });
+
       it('should call external callbacks', async () => {
         const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
+        expect(callbackOne).toHaveBeenCalled();
+        expect(callbackTwo).toHaveBeenCalled();
+      });
+
+      it('should feed datasource returned by last callback', async () => {
+        const request = getCreateKibanaRequest();
+        await routeHandler(context, request, response);
+        expect(response.ok).toHaveBeenCalled();
+        expect(callbackOne).toHaveBeenCalledWith({
+          config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+          description: '',
+          enabled: true,
+          inputs: [],
+          name: 'endpoint-1',
+          namespace: 'default',
+          output_id: '',
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.5.0',
+          },
+        });
+        expect(callbackTwo).toHaveBeenCalledWith({
+          config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+          description: '',
+          enabled: true,
+          inputs: [
+            {
+              type: 'endpoint',
+              enabled: true,
+              streams: [],
+              config: {
+                one: {
+                  value: 'inserted by callbackOne',
+                },
+              },
+            },
+          ],
+          name: 'endpoint-1',
+          namespace: 'default',
+          output_id: '',
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.5.0',
+          },
+        });
+      });
+
+      it('should create with data from callback', async () => {
+        const request = getCreateKibanaRequest();
+        await routeHandler(context, request, response);
+        expect(response.ok).toHaveBeenCalled();
+        expect(datasourceService.create.mock.calls[0][1]).toEqual({
+          config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+          description: '',
+          enabled: true,
+          inputs: [
+            {
+              config: {
+                one: {
+                  value: 'inserted by callbackOne',
+                },
+                two: {
+                  value: 'inserted by callbackTwo',
+                },
+              },
+              enabled: true,
+              streams: [],
+              type: 'endpoint',
+            },
+          ],
+          name: 'endpoint-1',
+          namespace: 'default',
+          output_id: '',
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.5.0',
+          },
+        });
+      });
+
+      describe('and a callback throws an exception', () => {
+        const callbackThree: ExternalCallback[1] = jest.fn(async (ds) => {
+          throw new Error('callbackThree threw error on purpose');
+        });
+
+        const callbackFour: ExternalCallback[1] = jest.fn(async (ds) => {
+          return {
+            ...ds,
+            inputs: [
+              {
+                ...ds.inputs[0],
+                config: {
+                  ...ds.inputs[0].config,
+                  four: {
+                    value: 'inserted by callbackFour',
+                  },
+                },
+              },
+            ],
+          };
+        });
+
+        beforeEach(() => {
+          appContextService.addExternalCallback('datasourceCreate', callbackThree);
+          appContextService.addExternalCallback('datasourceCreate', callbackFour);
+        });
+
+        it('should skip over callback exceptions and still execute other callbacks', async () => {
+          const request = getCreateKibanaRequest();
+          await routeHandler(context, request, response);
+          expect(response.ok).toHaveBeenCalled();
+          expect(callbackThree).toHaveBeenCalled();
+          expect(callbackFour).toHaveBeenCalled();
+        });
+
+        it('should log errors', async () => {
+          const errorLogger = appContextService.getLogger().error;
+          const request = getCreateKibanaRequest();
+          await routeHandler(context, request, response);
+          expect(response.ok).toHaveBeenCalled();
+          expect(errorLogger.mock.calls).toEqual([
+            ['An external registered [datasourceCreate] callback failed when executed'],
+            [new Error('callbackThree threw error on purpose')],
+          ]);
+        });
+
+        it('should create datasource with last successful returned datasource', async () => {
+          const request = getCreateKibanaRequest();
+          await routeHandler(context, request, response);
+          expect(response.ok).toHaveBeenCalled();
+          expect(datasourceService.create.mock.calls[0][1]).toEqual({
+            config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+            description: '',
+            enabled: true,
+            inputs: [
+              {
+                config: {
+                  one: {
+                    value: 'inserted by callbackOne',
+                  },
+                  two: {
+                    value: 'inserted by callbackTwo',
+                  },
+                  four: {
+                    value: 'inserted by callbackFour',
+                  },
+                },
+                enabled: true,
+                streams: [],
+                type: 'endpoint',
+              },
+            ],
+            name: 'endpoint-1',
+            namespace: 'default',
+            output_id: '',
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.5.0',
+            },
+          });
+        });
       });
     });
   });

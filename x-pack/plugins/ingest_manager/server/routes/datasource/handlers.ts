@@ -124,6 +124,7 @@ export const createDatasourceHandler: RequestHandler<
       body,
     });
   } catch (e) {
+    logger.error(e);
     return response.customError({
       statusCode: 500,
       body: { message: e.message },

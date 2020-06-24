@@ -19,7 +19,7 @@ export const createAppContextStartContractMock = (): IngestManagerAppContext => 
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     security: securityMock.createSetup(),
-    logger: loggingServiceMock.create(),
+    logger: loggingServiceMock.create().get(),
   };
 };
 
