@@ -9,7 +9,7 @@ import nodeCrypto, { Crypto } from '@elastic/node-crypto';
 import { EncryptedSavedObjectsMigrationService } from './encrypted_saved_objects_migration_service';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError } from './encryption_error';
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 let service: EncryptedSavedObjectsMigrationService;
 
@@ -25,7 +25,7 @@ const mockNodeCrypto: jest.Mocked<Crypto> = {
 beforeEach(() => {
   service = new EncryptedSavedObjectsMigrationService(
     mockNodeCrypto,
-    loggingServiceMock.create().get()
+    loggingSystemMock.create().get()
   );
 
   // Call actual `@elastic/node-crypto` by default, but allow to override implementation in tests.
@@ -49,7 +49,7 @@ describe('#encryptAttributes', () => {
 
     service = new EncryptedSavedObjectsMigrationService(
       mockNodeCrypto,
-      loggingServiceMock.create().get()
+      loggingSystemMock.create().get()
     );
   });
 
@@ -575,7 +575,7 @@ describe('#decryptAttributes', () => {
     it('fails if encrypted with another encryption key', () => {
       service = new EncryptedSavedObjectsMigrationService(
         nodeCrypto({ encryptionKey: 'encryption-key-abc*' }),
-        loggingServiceMock.create().get()
+        loggingSystemMock.create().get()
       );
 
       const type = new EncryptedSavedObjectAttributesDefinition({

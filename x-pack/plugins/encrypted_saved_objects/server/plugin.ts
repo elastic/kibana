@@ -13,11 +13,11 @@ import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
   EncryptionError,
+  EncryptedSavedObjectsMigrationService,
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { setupSavedObjects, ClientInstanciator } from './saved_objects';
-import { EncryptedSavedObjectsMigrationService } from './crypto/encrypted_saved_objects_migration_service';
-import { getCreateMigration, CreateESOMigrationFn } from './create_migration';
+import { getCreateMigration, CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -26,7 +26,7 @@ export interface PluginsSetup {
 export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   usingEphemeralEncryptionKey: boolean;
-  createMigration: CreateESOMigrationFn;
+  createMigration: CreateEncryptedSavedObjectsMigrationFn;
 }
 
 export interface EncryptedSavedObjectsPluginStart {

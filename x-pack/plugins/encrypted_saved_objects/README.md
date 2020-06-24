@@ -99,7 +99,7 @@ const savedObjectWithDecryptedContent =  await esoClient.getDecryptedAsInternalU
 one would pass to `SavedObjectsClient.get`. These argument allows to specify `namespace` property that, for example, is
 required if Saved Object was created within a non-default space.
 
-### defining migrations
+### Defining migrations
 EncryptedSavedObjects rely on standard SavedObject migrations, but due to the additional complexity introduced by the need to decrypt and reencrypt the migrated document, there are some caveats to how we support this.
 The good news is, most of this complexity is abstracted away by the plugin and all you need to do is leverage our api.
 
@@ -118,7 +118,7 @@ For example:
 
 ```typescript
 const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-  function shouldbeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
     return doc.consumer === 'alerting' || doc.consumer === undefined;
   },
   (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
@@ -135,16 +135,16 @@ const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
   },
   // type hasn't changed as the field we're updating is not an encrypted one
   {
-      type: 'alert',
-      attributesToEncrypt: new Set(['apiKey']),
-      attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
-    }
+    type: 'alert',
+    attributesToEncrypt: new Set(['apiKey']),
+    attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+  }
 );
 ```
 
 In the above example you can see thwe following:
-1. In `shouldbeMigrated` we limit the migrated alerts to those whose `consumer` field equals `alerting` or is undefined.
-2. In the migration function we then migrate the value of `consumer` to the value we want (`alerts` or `unknown`, dependsing on the current value). In this function we can assume that only documents with a `consumer` of `alerting` or `undefined` will be passed in, but it's still safest not to, and so we use the current `consumer` as the default when needed.
+1. In `shouldBeMigrated` we limit the migrated alerts to those whose `consumer` field equals `alerting` or is undefined.
+2. In the migration function we then migrate the value of `consumer` to the value we want (`alerts` or `unknown`, depending on the current value). In this function we can assume that only documents with a `consumer` of `alerting` or `undefined` will be passed in, but it's still safest not to, and so we use the current `consumer` as the default when needed.
 3. We provide the type, which remains unchanged across this migration and so we can omit the fourth argument.
 
 As we said above, an EncryptedSavedObject migration is a normal SavedObjects migration, and so we can plug it into the underlying SavedObject just like any other kind of migration:

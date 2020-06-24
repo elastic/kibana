@@ -8,11 +8,13 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
-} from 'kibana/server';
-import { pick } from 'lodash';
-import { EncryptedSavedObjectAttributesDefinition } from './crypto/encrypted_saved_object_type_definition';
-import { EncryptedSavedObjectTypeRegistration, SavedObjectDescriptor } from './crypto';
-import { EncryptedSavedObjectsMigrationService } from './crypto/encrypted_saved_objects_migration_service';
+} from 'src/core/server';
+import {
+  EncryptedSavedObjectTypeRegistration,
+  SavedObjectDescriptor,
+  EncryptedSavedObjectsMigrationService,
+  EncryptedSavedObjectAttributesDefinition,
+} from './crypto';
 
 type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (
   doc: SavedObjectUnsanitizedDoc<InputAttributes> | SavedObjectUnsanitizedDoc<InputAttributes>,
@@ -25,7 +27,7 @@ type IsMigrationNeededPredicate<InputAttributes, MigratedAttributes> = (
     | SavedObjectUnsanitizedDoc<MigratedAttributes>
 ) => encryptedDoc is SavedObjectUnsanitizedDoc<InputAttributes>;
 
-export type CreateESOMigrationFn = <
+export type CreateEncryptedSavedObjectsMigrationFn = <
   InputAttributes = unknown,
   MigratedAttributes = InputAttributes
 >(
@@ -37,7 +39,7 @@ export type CreateESOMigrationFn = <
 
 export const getCreateMigration = (
   migrationService: EncryptedSavedObjectsMigrationService
-): CreateESOMigrationFn => (
+): CreateEncryptedSavedObjectsMigrationFn => (
   isMigrationNeededPredicate,
   migration,
   inputType,
@@ -51,37 +53,32 @@ export const getCreateMigration = (
   const inputTypeDefinition = new EncryptedSavedObjectAttributesDefinition(inputType);
   const migratedTypeDefinition = new EncryptedSavedObjectAttributesDefinition(migratedType);
   return (encryptedDoc, context) => {
-    if (isMigrationNeededPredicate(encryptedDoc)) {
-      const descriptor = pick<SavedObjectDescriptor, SavedObjectUnsanitizedDoc>(
-        encryptedDoc,
-        'id',
-        'type',
-        'namespace'
-      );
-
-      // decrypt the attributes using the input type definition
-      // then migrate the document
-      // then encrypt the attributes using the migration type definition
-      return mapAttributes(
-        migration(
-          mapAttributes(encryptedDoc, (inputAttributes) =>
-            migrationService.decryptAttributes<any>(
-              descriptor,
-              inputTypeDefinition,
-              inputAttributes
-            )
-          ),
-          context
-        ),
-        (migratedAttributes) =>
-          migrationService.encryptAttributes<any>(
-            descriptor,
-            migratedTypeDefinition,
-            migratedAttributes
-          )
-      );
+    if (!isMigrationNeededPredicate(encryptedDoc)) {
+      return encryptedDoc;
     }
-    return encryptedDoc;
+    const descriptor = {
+      id: encryptedDoc.id,
+      type: encryptedDoc.type,
+      namespace: encryptedDoc.namespace,
+    };
+
+    // decrypt the attributes using the input type definition
+    // then migrate the document
+    // then encrypt the attributes using the migration type definition
+    return mapAttributes(
+      migration(
+        mapAttributes(encryptedDoc, (inputAttributes) =>
+          migrationService.decryptAttributes<any>(descriptor, inputTypeDefinition, inputAttributes)
+        ),
+        context
+      ),
+      (migratedAttributes) =>
+        migrationService.encryptAttributes<any>(
+          descriptor,
+          migratedTypeDefinition,
+          migratedAttributes
+        )
+    );
   };
 };
 
