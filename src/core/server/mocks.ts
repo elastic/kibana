@@ -128,7 +128,6 @@ function createCoreSetupMock({
     http: httpMock,
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
-    metrics: metricsServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
     logging: loggingServiceMock.createSetupContract(),
@@ -145,6 +144,7 @@ function createCoreStartMock() {
     capabilities: capabilitiesServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
     http: httpServiceMock.createStartContract(),
+    metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
@@ -158,7 +158,6 @@ function createInternalCoreSetupMock() {
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createInternalSetupContract(),
-    metrics: metricsServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
     uuid: uuidServiceMock.createSetupContract(),
@@ -175,6 +174,7 @@ function createInternalCoreStartMock() {
     capabilities: capabilitiesServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
     http: httpServiceMock.createInternalStartContract(),
+    metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
