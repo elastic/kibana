@@ -84,3 +84,16 @@ export const urlSearchParams: (
 
   return searchParams;
 });
+
+/**
+ * Returns package information for Endpoint
+ * @param state
+ */
+export const endpointPackageInfo = (state: Immutable<PolicyListState>) => state.endpointPackageInfo;
+
+/**
+ * Returns the version number for the endpoint package.
+ */
+export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
+  info ? info.version : undefined
+);
