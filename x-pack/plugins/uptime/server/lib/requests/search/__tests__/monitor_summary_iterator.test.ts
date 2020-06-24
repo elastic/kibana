@@ -17,68 +17,112 @@ import { MonitorSummary } from '../../../../../common/runtime_types';
 describe('iteration', () => {
   let iterator: MonitorSummaryIterator | null = null;
   let fetched: MonitorSummary[];
+  let fullSummaryDataset: MonitorSummary[];
 
-  const setup = async (numGroups: number) => {
+  const setup = async (numSummaries: number) => {
     fetched = [];
-    const expectedMonitorGroups = makeMonitorGroups(numGroups);
-    const chunkFetcher = mockChunkFetcher(expectedMonitorGroups);
+    fullSummaryDataset = makeMonitorSummaries(numSummaries);
+    const chunkFetcher = mockChunkFetcher(fullSummaryDataset);
     iterator = new MonitorSummaryIterator(simpleQueryContext(), [], -1, chunkFetcher);
+  };
 
+  const fetchAllViaNext = async () => {
     while (true) {
-      const got = await iterator.next();
+      const got = await iterator!.next();
       if (got) {
         fetched.push(got);
       } else {
         break;
       }
     }
-  };
+  }
+
+  const fetchAllViaNextPage = async (pageSize: number) => {
+    while (true) {
+      const got = await iterator!.nextPage(pageSize);
+      if (got) {
+        got.monitorSummaries.forEach(s => fetched.push(s))
+      } else {
+        break;
+      }
+    }
+  }
+
 
   describe('matching', () => {
     [
-      { name: 'zero results', numGroups: 0 },
-      { name: 'one result', numGroups: 1 },
-      { name: 'less than chunk', numGroups: CHUNK_SIZE - 1 },
-      { name: 'multiple full chunks', numGroups: CHUNK_SIZE * 3 },
-      { name: 'multiple full chunks + partial', numGroups: CHUNK_SIZE * 3 + 3 },
-    ].forEach(({ name, numGroups }) => {
+      { name: 'zero results', numSummaries: 0 },
+      { name: 'one result', numSummaries: 1 },
+      { name: 'less than chunk', numSummaries: CHUNK_SIZE - 1 },
+      { name: 'multiple full chunks', numSummaries: CHUNK_SIZE * 3 },
+      { name: 'multiple full chunks + partial', numSummaries: CHUNK_SIZE * 3 + 3 },
+    ].forEach(({ name, numSummaries }) => {
       describe(`scenario given ${name}`, () => {
         beforeEach(async () => {
-          await setup(numGroups);
+          await setup(numSummaries);
         });
 
-        it('should receive the expected number of results', () => {
-          expect(fetched.length).toEqual(numGroups);
+        describe('fetching via next', () => {
+          beforeEach(async () => {
+            await fetchAllViaNext();
+          })
+
+          it('should receive the expected number of results', async () => {
+            expect(fetched.length).toEqual(numSummaries);
+          });
+
+          it('should have no remaining pages', async () => {
+            expect(await iterator!.paginationAfterCurrent()).toBeNull();
+          });
         });
 
-        it('should have no remaining pages', async () => {
-          expect(await iterator!.paginationAfterCurrent()).toBeNull();
+        describe('nextPage()', () => {
+          const pageSize = 3;
+
+          it('should fetch no more than the page size results', async () => {
+            const page = await iterator!.nextPage(pageSize);
+            const expectedLength = numSummaries < pageSize ? numSummaries : pageSize;
+            expect(page.monitorSummaries).toHaveLength(expectedLength);
+          });
+
+          it('should return all the results if called until none remain', async () => {
+            const receivedResults: MonitorSummary[] = [];
+            //while (await iterator!.peek()) {
+            while (true) {
+              const page = await iterator!.nextPage(pageSize);
+              if (page.monitorSummaries.length === 0) {
+                break
+              }
+              page.monitorSummaries.forEach(s => receivedResults.push(s));
+            }
+            expect(receivedResults.length).toEqual(fullSummaryDataset.length)
+          });
         });
       });
     });
   });
 });
 
-const makeMonitorGroups = (count: number): MonitorSummary[] => {
-  const groups: MonitorSummary[] = [];
+const makeMonitorSummaries = (count: number): MonitorSummary[] => {
+  const summaries: MonitorSummary[] = [];
   for (let i = 0; i < count; i++) {
     const id = `monitor-${i}`;
 
-    groups.push({
+    summaries.push({
       monitor_id: id,
       state: {
-        timestamp: '123',
+        timestamp: (123+i).toString(),
         url: {},
         summaryPings: [],
         summary: { up: 1, down: 0 },
       },
     });
   }
-  return groups;
+  return summaries;
 };
 
-const mockChunkFetcher = (groups: MonitorSummary[]): ChunkFetcher => {
-  const buffer = groups.slice(0); // Clone it since we'll modify it
+const mockChunkFetcher = (summaries: MonitorSummary[]): ChunkFetcher => {
+  const buffer = summaries.slice(0); // Clone it since we'll modify it
   return async (
     queryContext: QueryContext,
     searchAfter: any,

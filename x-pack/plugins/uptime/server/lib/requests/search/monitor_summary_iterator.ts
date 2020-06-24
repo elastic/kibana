@@ -38,7 +38,7 @@ export interface ChunkResult {
 export class MonitorSummaryIterator {
   queryContext: QueryContext;
   // Cache representing pre-fetched query results.
-  // The first item is the CheckGroup this represents.
+  // The first item is the MonitorSummary this represents.
   buffer: MonitorSummary[];
   bufferPos: number;
   searchAfter: any;
