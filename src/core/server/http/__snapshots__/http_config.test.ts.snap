@@ -83,6 +83,8 @@ Object {
 
 exports[`throws if basepath appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
 
+exports[`throws if basepath is an empty string 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
 exports[`throws if basepath is missing prepended slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
 
 exports[`throws if basepath is not specified, but rewriteBasePath is set 1`] = `"cannot use [rewriteBasePath] when [basePath] is not specified"`;
