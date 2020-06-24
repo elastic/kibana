@@ -34,7 +34,7 @@ interface Props {
 }
 
 interface State {
-  currentStepIndex: string;
+  currentStepIndex: number;
   layerSteps: Array<{ id: string; label: string }> | null;
   layerWizard: LayerWizard | null;
   isNextStepBtnEnabled: boolean;
@@ -78,7 +78,7 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   _onNext = () => {
-    if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
+    if (this.state.layerSteps!.length - 1 === this.state.currentStepIndex) {
       // last step
       this.props.promotePreviewLayers();
     } else {
@@ -93,7 +93,7 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   _getCurrentStep() {
-    return this.state.layerSteps ? this.state.layerSteps[this.state.currentStepIndex] : null;
+    return this.state.layerSteps ? this.state.layerSteps![this.state.currentStepIndex] : null;
   }
 
   _enableNextBtn = () => {
@@ -121,8 +121,11 @@ export class AddLayerPanel extends Component<Props, State> {
     let isDisabled = !this.state.isNextStepBtnEnabled;
     let isLoading = this.state.isNextStepBtnLoading;
     if (currentStep.id === ADD_LAYER_STEP_ID) {
-      isDisabled = isDisabled || !this.props.hasPreviewLayers;
-      isLoading = isLoading || this.props.isLoadingPreviewLayers;
+      isDisabled = !this.props.hasPreviewLayers;
+      isLoading = this.props.isLoadingPreviewLayers;
+    } else {
+      isDisabled = !this.state.isNextStepBtnEnabled;
+      isLoading = this.state.isNextStepBtnLoading;
     }
 
     return (
@@ -154,7 +157,7 @@ export class AddLayerPanel extends Component<Props, State> {
 
         <FlyoutBody
           layerWizard={this.state.layerWizard}
-          onClear={() => this._clearLayerWizard()}
+          onClear={this._clearLayerWizard}
           onWizardSelect={this._onWizardSelect}
           previewLayers={this._previewLayers}
           currentStepId={currentStep ? currentStep.id : null}
@@ -162,6 +165,7 @@ export class AddLayerPanel extends Component<Props, State> {
           disableNextBtn={this._disableNextBtn}
           startStepLoading={this._startStepLoading}
           stopStepLoading={this._stopStepLoading}
+          advanceToNextStep={this._onNext}
         />
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">

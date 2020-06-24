@@ -5,7 +5,6 @@
  */
 
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
@@ -18,8 +17,10 @@ import { GeojsonFileSource } from './geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 // @ts-ignore
 import { createDefaultLayerDescriptor } from '../es_search_source';
+import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
 
-export const INDEX_STEP_ID = 'INDEX_STEP_ID';
+export const INDEX_SETUP_STEP_ID = 'INDEX_SETUP_STEP_ID';
+export const INDEXING_STEP_ID = 'INDEXING_STEP_ID';
 
 enum INDEXING_STAGE {
   READY = 'READY',
@@ -48,9 +49,8 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   }
 
   componentDidUpdate() {
-    // trigger indexing when wizard step advances to next step
     if (
-      this.props.currentStepId !== INDEX_STEP_ID &&
+      this.props.currentStepId === INDEXING_STEP_ID &&
       this.state.indexingStage === INDEXING_STAGE.READY
     ) {
       this.setState({ indexingStage: INDEXING_STAGE.TRIGGERED });
@@ -81,7 +81,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       return;
     }
 
-    this.props.stopStepLoading();
+    this.props.advanceToNextStep();
 
     const { indexDataResp, indexPatternResp } = indexResponses;
 
@@ -119,7 +119,6 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
             : SCALING_TYPES.LIMIT,
       };
       this.setState({ indexingStage: INDEXING_STAGE.SUCCESS });
-      this.props.enableNextBtn();
       this.props.previewLayers([
         createDefaultLayerDescriptor(esSearchSourceConfig, this.props.mapColors),
       ]);

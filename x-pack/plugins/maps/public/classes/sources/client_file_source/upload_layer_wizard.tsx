@@ -7,26 +7,36 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { ClientFileCreateSourceEditor, INDEX_STEP_ID } from './create_client_file_source_editor';
+import {
+  ClientFileCreateSourceEditor,
+  INDEX_SETUP_STEP_ID,
+  INDEXING_STEP_ID,
+} from './create_client_file_source_editor';
 
 export const uploadLayerWizardConfig: LayerWizard = {
   categories: [],
-  description: i18n.translate('xpack.maps.source.geojsonFileDescription', {
+  description: i18n.translate('xpack.maps.fileUploadWizard.description', {
     defaultMessage: 'Index GeoJSON data in Elasticsearch',
   }),
   icon: 'importAction',
   prerequisiteSteps: [
     {
-      id: INDEX_STEP_ID,
-      label: i18n.translate('xpack.maps.fileUploadWizard.importFile', {
+      id: INDEX_SETUP_STEP_ID,
+      label: i18n.translate('xpack.maps.fileUploadWizard.importFileSetupLabel', {
         defaultMessage: 'Import file',
+      }),
+    },
+    {
+      id: INDEXING_STEP_ID,
+      label: i18n.translate('xpack.maps.fileUploadWizard.indexingLabel', {
+        defaultMessage: 'Importing file',
       }),
     },
   ],
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
     return <ClientFileCreateSourceEditor {...renderWizardArguments} />;
   },
-  title: i18n.translate('xpack.maps.source.geojsonFileTitle', {
+  title: i18n.translate('xpack.maps.fileUploadWizard.title', {
     defaultMessage: 'Upload GeoJSON',
   }),
 };

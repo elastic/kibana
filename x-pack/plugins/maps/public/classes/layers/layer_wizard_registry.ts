@@ -18,6 +18,10 @@ export type RenderWizardArguments = {
   disableNextBtn: () => void;
   startStepLoading: () => void;
   stopStepLoading: () => void;
+  // Typically, next step will be triggered via user clicking next button.
+  // However, this method is made available to trigger next step manually
+  // for async task completion that triggers the next step.
+  advanceToNextStep: () => void;
 };
 
 export type LayerWizard = {
@@ -25,7 +29,7 @@ export type LayerWizard = {
   checkVisibility?: () => Promise<boolean>;
   description: string;
   icon: string;
-  prerequisiteSteps?: Array<{ id: stirng; label: string }>;
+  prerequisiteSteps?: Array<{ id: string; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
 };

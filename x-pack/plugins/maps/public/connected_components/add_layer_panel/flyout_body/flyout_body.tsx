@@ -31,6 +31,7 @@ export const FlyoutBody = (props: Props) => {
       disableNextBtn: props.disableNextBtn,
       startStepLoading: props.startStepLoading,
       stopStepLoading: props.stopStepLoading,
+      advanceToNextStep: props.advanceToNextStep,
     };
 
     const backButton = props.isIndexingTriggered ? null : (
