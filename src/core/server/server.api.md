@@ -388,6 +388,11 @@ export interface APICaller {
     <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<T>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "appendersSchema" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type AppenderConfigType = TypeOf<typeof appendersSchema>;
+
 // @public
 export function assertNever(x: never): never;
 
@@ -574,6 +579,72 @@ export const config: {
             ignoreVersionMismatch: import("@kbn/config-schema/target/types/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
+    logging: {
+        appenders: import("@kbn/config-schema").Type<Readonly<{} & {
+            layout: Readonly<{} & {
+                kind: "json";
+            }> | Readonly<{
+                pattern?: string | undefined;
+                highlight?: boolean | undefined;
+            } & {
+                kind: "pattern";
+            }>;
+            kind: "console";
+        }> | Readonly<{} & {
+            path: string;
+            layout: Readonly<{} & {
+                kind: "json";
+            }> | Readonly<{
+                pattern?: string | undefined;
+                highlight?: boolean | undefined;
+            } & {
+                kind: "pattern";
+            }>;
+            kind: "file";
+        }> | Readonly<{
+            legacyLoggingConfig?: any;
+        } & {
+            kind: "legacy-appender";
+        }>>;
+        loggers: import("@kbn/config-schema").ObjectType<{
+            appenders: import("@kbn/config-schema").Type<string[]>;
+            context: import("@kbn/config-schema").Type<string>;
+            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
+        }>;
+        loggerContext: import("@kbn/config-schema").ObjectType<{
+            appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
+                layout: Readonly<{} & {
+                    kind: "json";
+                }> | Readonly<{
+                    pattern?: string | undefined;
+                    highlight?: boolean | undefined;
+                } & {
+                    kind: "pattern";
+                }>;
+                kind: "console";
+            }> | Readonly<{} & {
+                path: string;
+                layout: Readonly<{} & {
+                    kind: "json";
+                }> | Readonly<{
+                    pattern?: string | undefined;
+                    highlight?: boolean | undefined;
+                } & {
+                    kind: "pattern";
+                }>;
+                kind: "file";
+            }> | Readonly<{
+                legacyLoggingConfig?: any;
+            } & {
+                kind: "legacy-appender";
+            }>>>;
+            loggers: import("@kbn/config-schema").Type<Readonly<{} & {
+                context: string;
+                appenders: string[];
+                level: import("./logging/log_level").LogLevelId;
+            }>[]>;
+        }>;
+    };
 };
 
 // @public
@@ -638,6 +709,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     http: HttpServiceSetup & {
         resources: HttpResources;
     };
+    // (undocumented)
+    logging: LoggingServiceSetup;
     // (undocumented)
     metrics: MetricsServiceSetup;
     // (undocumented)
@@ -1270,9 +1343,27 @@ export interface Logger {
     warn(errorOrMessage: string | Error, meta?: LogMeta): void;
 }
 
+// Warning: (ae-forgotten-export) The symbol "loggerSchema" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type LoggerConfigType = TypeOf<typeof loggerSchema>;
+
+// @public (undocumented)
+export interface LoggerContextConfigInput {
+    // (undocumented)
+    appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
+    // (undocumented)
+    loggers?: LoggerConfigType[];
+}
+
 // @public
 export interface LoggerFactory {
     get(...contextParts: string[]): Logger;
+}
+
+// @public
+export interface LoggingServiceSetup {
+    configure(config$: Observable<LoggerContextConfigInput>): void;
 }
 
 // @internal

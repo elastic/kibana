@@ -93,4 +93,9 @@ export const siblingPipelineAggHelper = {
       ? customMetric.type.getFormat(customMetric)
       : new (FieldFormat.from(identity))();
   },
+
+  getSerializedFormat(agg: IMetricAggConfig) {
+    const customMetric = agg.getParam('customMetric');
+    return customMetric ? customMetric.type.getSerializedFormat(customMetric) : {};
+  },
 };

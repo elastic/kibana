@@ -6,9 +6,9 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
-// @ts-ignore .png file
+// @ts-expect-error .png file
 import { elasticLogo } from '../../lib/elastic_logo';
 
 export enum ImageMode {
