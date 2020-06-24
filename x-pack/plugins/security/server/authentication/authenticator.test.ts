@@ -14,7 +14,7 @@ import { duration, Duration } from 'moment';
 import { SessionStorage } from '../../../../../src/core/server';
 
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
   elasticsearchServiceMock,
@@ -48,10 +48,10 @@ function getMockOptions({
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
-    loggers: loggingServiceMock.create(),
+    loggers: loggingSystemMock.create(),
     config: createConfig(
       ConfigSchema.validate({ session, authc: { selector, providers, http } }),
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       { isTLSEnabled: false }
     ),
     sessionStorageFactory: sessionStorageMock.createFactory<ProviderSession>(),
@@ -110,6 +110,33 @@ describe('Authenticator', () => {
         () =>
           new Authenticator(getMockOptions({ providers: { basic: { __http__: { order: 0 } } } }))
       ).toThrowError('Provider name "__http__" is reserved.');
+    });
+
+    it('properly sets `loggedOut` URL.', () => {
+      const basicAuthenticationProviderMock = jest.requireMock('./providers/basic')
+        .BasicAuthenticationProvider;
+
+      basicAuthenticationProviderMock.mockClear();
+      new Authenticator(getMockOptions());
+      expect(basicAuthenticationProviderMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          urls: {
+            loggedOut: '/mock-server-basepath/security/logged_out',
+          },
+        }),
+        expect.anything()
+      );
+
+      basicAuthenticationProviderMock.mockClear();
+      new Authenticator(getMockOptions({ selector: { enabled: true } }));
+      expect(basicAuthenticationProviderMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          urls: {
+            loggedOut: `/mock-server-basepath/login?msg=LOGGED_OUT`,
+          },
+        }),
+        expect.anything()
+      );
     });
 
     describe('HTTP authentication provider', () => {

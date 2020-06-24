@@ -1,6 +1,7 @@
 {
   "include": [
     "typings/**/*",
+    "plugins/lists/**/*",
     "plugins/security_solution/**/*",
     "plugins/apm/typings/numeral.d.ts",
     "plugins/canvas/types/webpack.d.ts",
