@@ -17,21 +17,14 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
-import { registerRoutes } from './routes';
+import { IRouter } from 'kibana/server';
+import { registerGetRandomNumberRoute } from './random_number_generator';
+import { registerGetRandomNumberBetweenRoute } from './random_number_between_generator';
+import { registerGetMessageByIdRoute, registerPostMessageRoute } from './message_routes';
 
-export class RoutingExamplePlugin implements Plugin<{}, {}> {
-  public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-
-    registerRoutes(router);
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
-
-  public stop() {}
+export function registerRoutes(router: IRouter) {
+  registerGetRandomNumberRoute(router);
+  registerGetRandomNumberBetweenRoute(router);
+  registerGetMessageByIdRoute(router);
+  registerPostMessageRoute(router);
 }

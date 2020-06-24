@@ -16,6 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { registerGetRandomNumberRoute } from './random_number_generator';
-export { registerGetRandomNumberBetweenRoute } from './random_number_between_generator';
-export { registerGetMessageByIdRoute, registerPostMessageRoute } from './message_routes';
+export { registerRoutes } from './register_routes';
