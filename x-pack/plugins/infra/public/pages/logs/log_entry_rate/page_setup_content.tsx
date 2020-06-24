@@ -31,7 +31,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent = () => {
         <LogAnalysisSetupPageHeader>
           <FormattedMessage
             id="xpack.infra.logs.logEntryRate.setupTitle"
-            defaultMessage="FIXME: Placeholder title"
+            defaultMessage="Setup log anomaly analysis"
           />
         </LogAnalysisSetupPageHeader>
         <LogAnalysisSetupPageContent>
@@ -39,7 +39,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent = () => {
             <p>
               <FormattedMessage
                 id="xpack.infra.logs.logEntryRate.setupDescription"
-                defaultMessage="FIXME: Placeholder description"
+                defaultMessage="To show log anomalies, machine learning jobs need to be set up"
               />
             </p>
           </EuiText>
@@ -47,7 +47,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent = () => {
           <EuiButton fill onClick={openFlyout}>
             <FormattedMessage
               id="xpack.infra.logs.logEntryRate.setupCta"
-              defaultMessage="FIXME: Placeholder CTA"
+              defaultMessage="ML Setup"
             />
           </EuiButton>
         </LogAnalysisSetupPageContent>

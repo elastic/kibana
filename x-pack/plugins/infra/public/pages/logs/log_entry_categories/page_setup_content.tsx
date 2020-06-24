@@ -31,7 +31,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
         <LogAnalysisSetupPageHeader>
           <FormattedMessage
             id="xpack.infra.logs.logEntryCategories.setupTitle"
-            defaultMessage="FIXME: Placeholder title"
+            defaultMessage="Setup log category analysis"
           />
         </LogAnalysisSetupPageHeader>
         <LogAnalysisSetupPageContent>
@@ -39,7 +39,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
             <p>
               <FormattedMessage
                 id="xpack.infra.logs.logEntryCategories.setupDescription"
-                defaultMessage="FIXME: Placeholder description"
+                defaultMessage="To show log categories, machine learning jobs need to be set up."
               />
             </p>
           </EuiText>
@@ -47,7 +47,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
           <EuiButton fill onClick={openFlyout}>
             <FormattedMessage
               id="xpack.infra.logs.logEntryCategories.setupCta"
-              defaultMessage="FIXME: Placeholder CTA"
+              defaultMessage="ML setup"
             />
           </EuiButton>
         </LogAnalysisSetupPageContent>
