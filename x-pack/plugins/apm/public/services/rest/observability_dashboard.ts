@@ -6,18 +6,25 @@
 
 import { i18n } from '@kbn/i18n';
 import { sum } from 'lodash';
+import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FetchData } from '../../../../observability/public/data_handler';
+import { FetchDataParams } from '../../../../observability/public/data_handler';
 import { ApmFetchDataResponse } from '../../../../observability/public/typings/fetch_data_response';
 import { callApmApi } from './createCallApmApi';
 
-export const fetchData: FetchData<ApmFetchDataResponse> = async ({
-  startTime,
-  endTime,
-  bucketSize,
-}) => {
+interface Options {
+  isDarkMode: boolean;
+}
+
+export const fetchLandingPageData = async (
+  { startTime, endTime, bucketSize }: FetchDataParams,
+  { isDarkMode }: Options
+): Promise<ApmFetchDataResponse> => {
+  const theme = isDarkMode ? darkTheme : lightTheme;
+
   const data = await callApmApi({
-    pathname: '/api/apm/observability-dashboard',
+    pathname: '/api/apm/observability_dashboard',
     params: { query: { start: startTime, end: endTime, bucketSize } },
   });
 
@@ -42,6 +49,7 @@ export const fetchData: FetchData<ApmFetchDataResponse> = async ({
           { defaultMessage: 'Transactions' }
         ),
         value: sum(transactionCoordinates.map((coordinates) => coordinates.y)),
+        color: theme.euiColorVis1,
       },
     },
     series: {
@@ -50,7 +58,7 @@ export const fetchData: FetchData<ApmFetchDataResponse> = async ({
           'xpack.apm.observabilityDashboard.chart.transactions',
           { defaultMessage: 'Transactions' }
         ),
-        color: 'euiColorVis1',
+        color: theme.euiColorVis1,
         coordinates: transactionCoordinates,
       },
     },
@@ -59,6 +67,6 @@ export const fetchData: FetchData<ApmFetchDataResponse> = async ({
 
 export async function hasData() {
   return await callApmApi({
-    pathname: '/api/apm/observability-dashboard/hasData',
+    pathname: '/api/apm/observability_dashboard/has_data',
   });
 }

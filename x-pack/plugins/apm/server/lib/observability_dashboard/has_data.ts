@@ -13,7 +13,6 @@ export async function hasData({ setup }: { setup: Setup }) {
         indices['apm_oss.transactionIndices'],
         indices['apm_oss.errorIndices'],
         indices['apm_oss.metricsIndices'],
-        indices['apm_oss.spanIndices'],
       ],
       terminateAfter: 1,
       size: 0,

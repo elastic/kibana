@@ -12,7 +12,7 @@ import { getServiceCount } from '../lib/observability_dashboard/get_service_coun
 import { getTransactionCoordinates } from '../lib/observability_dashboard/get_transaction_coordinates';
 
 export const observabilityDashboardHasDataRoute = createRoute(() => ({
-  path: '/api/apm/observability-dashboard/hasData',
+  path: '/api/apm/observability_dashboard/has_data',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return await hasData({ setup });
@@ -20,19 +20,22 @@ export const observabilityDashboardHasDataRoute = createRoute(() => ({
 }));
 
 export const observabilityDashboardDataRoute = createRoute(() => ({
-  path: '/api/apm/observability-dashboard',
+  path: '/api/apm/observability_dashboard',
   params: {
     query: t.intersection([rangeRt, t.type({ bucketSize: t.string })]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { bucketSize } = context.params.query;
-    const serviceCount = await getServiceCount({ setup });
-    const transactionCoordinates = await getTransactionCoordinates({
+    const serviceCountPromise = getServiceCount({ setup });
+    const transactionCoordinatesPromise = getTransactionCoordinates({
       setup,
       bucketSize,
     });
-
+    const [serviceCount, transactionCoordinates] = await Promise.all([
+      serviceCountPromise,
+      transactionCoordinatesPromise,
+    ]);
     return { serviceCount, transactionCoordinates };
   },
 }));

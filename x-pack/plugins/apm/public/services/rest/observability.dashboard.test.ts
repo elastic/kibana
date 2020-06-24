@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchData, hasData } from './observability_dashboard';
+import { fetchLandingPageData, hasData } from './observability_dashboard';
 import * as createCallApmApi from './createCallApmApi';
 
 describe('Observability dashboard data', () => {
@@ -25,7 +25,7 @@ describe('Observability dashboard data', () => {
     });
   });
 
-  describe('fetchData', () => {
+  describe('fetchLandingPageData', () => {
     it('returns APM data with series and stats', async () => {
       callApmApiMock.mockImplementation(() =>
         Promise.resolve({
@@ -37,11 +37,14 @@ describe('Observability dashboard data', () => {
           ],
         })
       );
-      const response = await fetchData({
-        startTime: '1',
-        endTime: '2',
-        bucketSize: '3',
-      });
+      const response = await fetchLandingPageData(
+        {
+          startTime: '1',
+          endTime: '2',
+          bucketSize: '3',
+        },
+        { isDarkMode: false }
+      );
       expect(response).toEqual({
         title: 'APM',
         appLink: '/app/apm',
@@ -53,6 +56,7 @@ describe('Observability dashboard data', () => {
           transactions: {
             label: 'Transactions',
             value: 6,
+            color: '#6092c0',
           },
         },
         series: {
@@ -63,7 +67,7 @@ describe('Observability dashboard data', () => {
               { x: 2, y: 2 },
               { x: 3, y: 3 },
             ],
-            color: 'euiColorVis1',
+            color: '#6092c0',
           },
         },
       });
@@ -75,11 +79,14 @@ describe('Observability dashboard data', () => {
           transactionCoordinates: [],
         })
       );
-      const response = await fetchData({
-        startTime: '1',
-        endTime: '2',
-        bucketSize: '3',
-      });
+      const response = await fetchLandingPageData(
+        {
+          startTime: '1',
+          endTime: '2',
+          bucketSize: '3',
+        },
+        { isDarkMode: false }
+      );
       expect(response).toEqual({
         title: 'APM',
         appLink: '/app/apm',
@@ -91,13 +98,14 @@ describe('Observability dashboard data', () => {
           transactions: {
             label: 'Transactions',
             value: 0,
+            color: '#6092c0',
           },
         },
         series: {
           transactions: {
             label: 'Transactions',
             coordinates: [],
-            color: 'euiColorVis1',
+            color: '#6092c0',
           },
         },
       });

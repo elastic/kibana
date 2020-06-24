@@ -38,7 +38,10 @@ import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { createStaticIndexPattern } from './services/rest/index_pattern';
-import { fetchData, hasData } from './services/rest/observability_dashboard';
+import {
+  fetchLandingPageData,
+  hasData,
+} from './services/rest/observability_dashboard';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -75,9 +78,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
 
     if (plugins.observability) {
+      const isDarkMode = core.uiSettings.get('theme:darkMode');
       plugins.observability.dashboard.register({
         appName: 'apm',
-        fetchData,
+        fetchData: async (params) => {
+          return fetchLandingPageData(params, { isDarkMode });
+        },
         hasData,
       });
     }
