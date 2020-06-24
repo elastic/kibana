@@ -64,6 +64,11 @@ export const setupEnvironment = () => {
   };
 };
 
+window.Worker = function Worker() {
+  this.postMessage = () => {};
+  this.terminate = () => {};
+};
+
 export const WithAppDependencies = (Comp: any) => (props: any) => (
   <AppContextProvider value={appDependencies as any}>
     <Comp {...props} />

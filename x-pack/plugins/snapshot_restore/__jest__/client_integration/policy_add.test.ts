@@ -37,7 +37,10 @@ describe('<PolicyAdd />', () => {
   describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [repository] });
-      httpRequestsMockHelpers.setLoadIndicesResponse({ indices: ['my_index'] });
+      httpRequestsMockHelpers.setLoadIndicesResponse({
+        indices: ['my_index'],
+        dataStreams: ['my_data_stream'],
+      });
 
       testBed = await setup();
       await nextTick();
@@ -110,6 +113,20 @@ describe('<PolicyAdd />', () => {
           find('deselectIndicesLink').simulate('click');
 
           expect(form.getErrorsMessages()).toEqual(['You must select at least one index.']);
+        });
+        test('should not require any data streams to be included', async () => {
+          const { find, form, component } = testBed;
+
+          await act(async () => {
+            form.toggleEuiSwitch('allDataStreamsToggle', false);
+            await nextTick();
+            component.update();
+          });
+
+          // Deselect all indices from list
+          find('deselectDataStreamLink').simulate('click');
+
+          expect(form.getErrorsMessages()).toEqual([]);
         });
       });
 
