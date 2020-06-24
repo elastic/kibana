@@ -508,6 +508,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         />
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="flex-shrink: 0;"
                         >
                           <div
                             class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
@@ -1192,6 +1193,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           />
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
+                            style="flex-shrink: 0;"
                           >
                             <div
                               class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"

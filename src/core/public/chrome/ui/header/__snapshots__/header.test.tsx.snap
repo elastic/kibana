@@ -9120,6 +9120,7 @@ exports[`Header renders 3`] = `
                             />
                             <div
                               class="euiFlexItem euiFlexItem--flexGrowZero"
+                              style="flex-shrink: 0;"
                             >
                               <div
                                 class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
@@ -9391,6 +9392,7 @@ exports[`Header renders 3`] = `
                               />
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
+                                style="flex-shrink: 0;"
                               >
                                 <div
                                   class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
