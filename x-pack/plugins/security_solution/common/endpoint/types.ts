@@ -352,7 +352,7 @@ export interface AlertEvent {
 
 /**
  * The status of the Endpoint Agent as reported by the Agent or the
- * Security solution app using events from fleet.
+ * Security Solution app using events from Fleet.
  */
 export enum EndpointStatus {
   /**
