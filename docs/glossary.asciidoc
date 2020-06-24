@@ -85,7 +85,7 @@ The data source for a map, Canvas element, and visualizations.
 // end::data-source-def[]
 
 [glossary-diversity-field]] diversity field ::
-// tag::data-source-def[]
+// tag::diversity-field-def[]
 A field for which only a certain number of documents will be accepted in your
 graph to avoid bias. For example, if you select "nationality" as a
 diversity field, a limited number of documents will be accepted per nationality
