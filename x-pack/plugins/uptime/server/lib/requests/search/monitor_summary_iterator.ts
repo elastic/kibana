@@ -70,6 +70,7 @@ export class MonitorSummaryIterator {
   }
 
   async nextPage(size: number): Promise<MonitorSummariesPage> {
+    console.log("NEXT PAGE");
     const monitorSummaries: MonitorSummary[] = [];
     let paginationBefore: CursorPagination | null = null;
     while (monitorSummaries.length < size) {
@@ -94,6 +95,7 @@ export class MonitorSummaryIterator {
       monitorSummaries.reverse();
     }
 
+    console.log("END NEXT PAGE");
     return {
       monitorSummaries,
       nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
@@ -152,6 +154,7 @@ export class MonitorSummaryIterator {
     const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
     // If we've hit the end of the stream searchAfter will be empty
 
+    console.log("BUFFER MORE", results.monitorSummaries.length)
     results.monitorSummaries.forEach((ms: MonitorSummary) => this.buffer.push(ms));
     if (results.searchAfter) {
       this.searchAfter = results.searchAfter;

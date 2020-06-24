@@ -51,10 +51,10 @@ describe('iteration', () => {
 
   describe('matching', () => {
     [
-      { name: 'zero results', numSummaries: 0 },
-      { name: 'one result', numSummaries: 1 },
-      { name: 'less than chunk', numSummaries: CHUNK_SIZE - 1 },
-      { name: 'multiple full chunks', numSummaries: CHUNK_SIZE * 3 },
+      //{ name: 'zero results', numSummaries: 0 },
+      //{ name: 'one result', numSummaries: 1 },
+      //{ name: 'less than chunk', numSummaries: CHUNK_SIZE - 1 },
+      //{ name: 'multiple full chunks', numSummaries: CHUNK_SIZE * 3 },
       { name: 'multiple full chunks + partial', numSummaries: CHUNK_SIZE * 3 + 3 },
     ].forEach(({ name, numSummaries }) => {
       describe(`scenario given ${name}`, () => {
@@ -64,6 +64,7 @@ describe('iteration', () => {
 
         describe('fetching via next', () => {
           beforeEach(async () => {
+            console.log("THIS SHOULD NOT HAPPEN");
             await fetchAllViaNext();
           })
 
@@ -86,6 +87,7 @@ describe('iteration', () => {
           });
 
           it('should return all the results if called until none remain', async () => {
+            console.log("THIS IS THE TEST");
             const receivedResults: MonitorSummary[] = [];
             //while (await iterator!.peek()) {
             while (true) {
@@ -96,6 +98,7 @@ describe('iteration', () => {
               page.monitorSummaries.forEach(s => receivedResults.push(s));
             }
             expect(receivedResults.length).toEqual(fullSummaryDataset.length)
+            console.log("THIS IS THE END OF THE TEST")
           });
         });
       });
@@ -122,12 +125,14 @@ const makeMonitorSummaries = (count: number): MonitorSummary[] => {
 };
 
 const mockChunkFetcher = (summaries: MonitorSummary[]): ChunkFetcher => {
+  console.log("NEW CHUNK FETCHER")
   const buffer = summaries.slice(0); // Clone it since we'll modify it
   return async (
     queryContext: QueryContext,
     searchAfter: any,
     size: number
   ): Promise<ChunkResult> => {
+    //console.log("CHUNK FETCH", size, buffer.length, new Error().stack)
     const resultMonitorSummaries = buffer.splice(0, size);
     const resultSearchAfter =
       buffer.length === 0
