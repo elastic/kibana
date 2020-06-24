@@ -7,7 +7,7 @@
 import { EuiLoadingContent } from '@elastic/eui';
 import React from 'react';
 
-export const CategoryExampleMessagesLoadingIndicator: React.FunctionComponent<{
+export const LogEntryExampleMessagesLoadingIndicator: React.FunctionComponent<{
   exampleCount: number;
 }> = ({ exampleCount }) => (
   <>

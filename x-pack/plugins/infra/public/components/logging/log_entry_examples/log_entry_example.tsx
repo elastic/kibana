@@ -6,20 +6,20 @@
 
 import React, { useMemo } from 'react';
 
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
+import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
 import {
   LogEntryColumn,
   LogEntryFieldColumn,
   LogEntryMessageColumn,
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
-} from '../../../../../components/logging/log_text_stream';
-import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
+} from '../log_text_stream';
+import { LogColumnConfiguration } from '../../../utils/source_configuration';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
 
-export const CategoryExampleMessage: React.FunctionComponent<{
+export const LogEntryExampleMessage: React.FunctionComponent<{
   dataset: string;
   message: string;
   timestamp: number;
@@ -65,9 +65,9 @@ export const CategoryExampleMessage: React.FunctionComponent<{
 };
 
 const noHighlights: never[] = [];
-const timestampColumnId = 'category-example-timestamp-column' as const;
-const messageColumnId = 'category-examples-message-column' as const;
-const datasetColumnId = 'category-examples-dataset-column' as const;
+const timestampColumnId = 'log-entry-example-timestamp-column' as const;
+const messageColumnId = 'log-entry-examples-message-column' as const;
+const datasetColumnId = 'log-entry-examples-dataset-column' as const;
 
 const columnWidths = {
   [timestampColumnId]: {

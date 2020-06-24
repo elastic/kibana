@@ -10,7 +10,7 @@ import {
   formatAnomalyScore,
   getSeverityCategoryForScore,
   ML_SEVERITY_COLORS,
-} from '../../../../../../common/log_analysis';
+} from '../../../../common/log_analysis';
 
 export const AnomalySeverityIndicator: React.FunctionComponent<{
   anomalyScore: number;

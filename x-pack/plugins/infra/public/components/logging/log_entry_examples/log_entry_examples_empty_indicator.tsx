@@ -7,20 +7,20 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-export const CategoryExampleMessagesEmptyIndicator: React.FunctionComponent<{
+export const LogEntryExampleMessagesEmptyIndicator: React.FunctionComponent<{
   onReload: () => void;
 }> = ({ onReload }) => (
   <EuiFlexGroup alignItems="center" justifyContent="center">
     <EuiFlexItem grow={false} className="eui-textNoWrap">
       <FormattedMessage
-        id="xpack.infra.logs.logEntryCategories.exampleEmptyDescription"
+        id="xpack.infra.logs.logEntryExamples.exampleEmptyDescription"
         defaultMessage="No examples found within the selected time range. Increase the log entry retention period to improve message sample availability."
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiButton onClick={onReload} size="s">
         <FormattedMessage
-          id="xpack.infra.logs.logEntryCategories.exampleEmptyReloadButtonLabel"
+          id="xpack.infra.logs.logEntryExamples.exampleEmptyReloadButtonLabel"
           defaultMessage="Reload"
         />
       </EuiButton>
