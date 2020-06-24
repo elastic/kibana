@@ -14,8 +14,7 @@ import { getJobsListBreadcrumbs } from '../breadcrumbs';
 import { setDependencyCache, clearCache } from '../../util/dependency_cache';
 
 const renderApp = (element: HTMLElement, coreStart: CoreStart) => {
-  const I18nContext = coreStart.i18n.Context;
-  ReactDOM.render(React.createElement(JobsListPage, { I18nContext }), element);
+  ReactDOM.render(React.createElement(JobsListPage, { coreStart }), element);
   return () => {
     unmountComponentAtNode(element);
     clearCache();

@@ -21,13 +21,8 @@ import Fs from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
-import { importApi } from './server/routes/api/import';
-import { exportApi } from './server/routes/api/export';
 import { getUiSettingDefaults } from './server/ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
-import { injectVars } from './inject_vars';
-
-import { kbnBaseUrl } from '../../../plugins/kibana_legacy/server';
 
 const mkdirAsync = promisify(Fs.mkdir);
 
@@ -45,35 +40,7 @@ export default function (kibana) {
     },
 
     uiExports: {
-      app: {
-        id: 'kibana',
-        title: 'Kibana',
-        listed: false,
-        main: 'plugins/kibana/kibana',
-      },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      links: [],
-
-      injectDefaultVars(server, options) {
-        const mapConfig = server.config().get('map');
-        const tilemap = mapConfig.tilemap;
-
-        return {
-          kbnIndex: options.index,
-          kbnBaseUrl,
-
-          // required on all pages due to hacks that use these values
-          mapConfig,
-          tilemapsConfig: {
-            deprecated: {
-              // If url is set, old settings must be used for backward compatibility
-              isOverridden: typeof tilemap.url === 'string' && tilemap.url !== '',
-              config: tilemap,
-            },
-          },
-        };
-      },
-
       uiSettingDefaults: getUiSettingDefaults(),
     },
 
@@ -91,11 +58,7 @@ export default function (kibana) {
 
     init: async function (server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
-      // routes
-      importApi(server);
-      exportApi(server);
       registerCspCollector(usageCollection, server);
-      server.injectUiAppVars('kibana', () => injectVars(server));
     },
   });
 }
