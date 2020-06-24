@@ -143,6 +143,7 @@ export default function ({ getService }) {
                     },
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
                     namespaces: ['default'],
+                    score: 0,
                     references: [
                       {
                         id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -178,6 +179,7 @@ export default function ({ getService }) {
                     },
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
                     namespaces: ['default'],
+                    score: 0,
                     references: [
                       {
                         id: '91200a00-9efd-11e7-acb3-3dab96693fab',
