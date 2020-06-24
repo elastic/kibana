@@ -221,7 +221,7 @@ describe('resolver graph with too much lineage', () => {
   });
 
   describe('should select from state properly', () => {
-    it('has the correct ancestor cursor', () => {
+    it('should indicate there are too many ancestors', () => {
       const action: DataAction = {
         type: 'serverReturnedResolverData',
         payload: {
@@ -232,9 +232,9 @@ describe('resolver graph with too much lineage', () => {
       };
       store.dispatch(action);
       const { ancestors } = limitsReached(store.getState());
-      expect(ancestors).toEqual(ancestorCursor);
+      expect(ancestors).toEqual(true);
     });
-    it('has the correct children cursor', () => {
+    it('should indicate there are too many children', () => {
       const action: DataAction = {
         type: 'serverReturnedResolverData',
         payload: {
@@ -245,7 +245,7 @@ describe('resolver graph with too much lineage', () => {
       };
       store.dispatch(action);
       const { children } = limitsReached(store.getState());
-      expect(children).toEqual(childrenCursor);
+      expect(children).toEqual(true);
     });
   });
 });
