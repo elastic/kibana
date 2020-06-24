@@ -101,4 +101,4 @@ export interface IIndexPatternsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
 }
 
-export { SavedObject };
+export type { SavedObject };
