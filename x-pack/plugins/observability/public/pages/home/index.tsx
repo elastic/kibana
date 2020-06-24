@@ -60,7 +60,7 @@ export const Home = () => {
           <EuiTitle size="s">
             <h2>
               {i18n.translate('xpack.observability.home.sectionTitle', {
-                defaultMessage: 'Observability built on the Elastic Stack',
+                defaultMessage: 'Unified visibility across your entire ecosystem',
               })}
             </h2>
           </EuiTitle>
@@ -68,7 +68,7 @@ export const Home = () => {
           <EuiText size="s" color="subdued">
             {i18n.translate('xpack.observability.home.sectionsubtitle', {
               defaultMessage:
-                'Bring your logs, metrics, and APM traces together at scale in a single stack so you can monitor and react to events happening anywhere in your environment.',
+                'Monitor, analyze, and react to events happening anywhere in your environment by bringing logs, metrics, and traces together at scale in a single stack.',
             })}
           </EuiText>
         </EuiFlexItem>
@@ -107,6 +107,8 @@ export const Home = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+
+        <EuiSpacer size="xxl" />
 
         {/* Get started button */}
         <EuiFlexItem>
