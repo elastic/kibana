@@ -32,11 +32,13 @@ import { importSavedObjectsFromStream } from './import_saved_objects';
 
 import { collectSavedObjects } from './collect_saved_objects';
 import { validateReferences } from './validate_references';
+import { checkConflicts } from './check_conflicts';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
 
 jest.mock('./collect_saved_objects');
 jest.mock('./validate_references');
+jest.mock('./check_conflicts');
 jest.mock('./check_origin_conflicts');
 jest.mock('./create_saved_objects');
 
@@ -49,6 +51,12 @@ describe('#importSavedObjectsFromStream', () => {
     // mock empty output of each of these mocked modules so the import doesn't throw an error
     getMockFn(collectSavedObjects).mockResolvedValue({ errors: [], collectedObjects: [] });
     getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects: [] });
+    getMockFn(checkConflicts).mockResolvedValue({
+      errors: [],
+      filteredObjects: [],
+      importIdMap: new Map(),
+      importIds: new Set(),
+    });
     getMockFn(checkOriginConflicts).mockResolvedValue({
       errors: [],
       filteredObjects: [],
@@ -110,13 +118,38 @@ describe('#importSavedObjectsFromStream', () => {
       );
     });
 
-    test('checks origin conflicts', async () => {
+    test('checks conflicts', async () => {
       const options = setupOptions();
       const filteredObjects = [createObject()];
       getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
 
       await importSavedObjectsFromStream(options);
-      const checkOriginConflictsOptions = { savedObjectsClient, typeRegistry, namespace };
+      const checkConflictsOptions = {
+        savedObjectsClient,
+        namespace,
+        ignoreRegularConflicts: overwrite,
+      };
+      expect(checkConflicts).toHaveBeenCalledWith(filteredObjects, checkConflictsOptions);
+    });
+
+    test('checks origin conflicts', async () => {
+      const options = setupOptions();
+      const filteredObjects = [createObject()];
+      const importIds = new Set<string>();
+      getMockFn(checkConflicts).mockResolvedValue({
+        errors: [],
+        filteredObjects,
+        importIdMap: new Map(),
+        importIds,
+      });
+
+      await importSavedObjectsFromStream(options);
+      const checkOriginConflictsOptions = {
+        savedObjectsClient,
+        typeRegistry,
+        namespace,
+        importIds,
+      };
       expect(checkOriginConflicts).toHaveBeenCalledWith(
         filteredObjects,
         checkOriginConflictsOptions
@@ -126,14 +159,20 @@ describe('#importSavedObjectsFromStream', () => {
     test('creates saved objects', async () => {
       const options = setupOptions();
       const filteredObjects = [createObject()];
-      const importIdMap = new Map();
+      getMockFn(checkConflicts).mockResolvedValue({
+        errors: [],
+        filteredObjects,
+        importIdMap: new Map().set(`id1`, { id: `newId1` }),
+        importIds: new Set(),
+      });
       getMockFn(checkOriginConflicts).mockResolvedValue({
         errors: [],
         filteredObjects,
-        importIdMap,
+        importIdMap: new Map().set(`id2`, { id: `newId2` }),
       });
 
       await importSavedObjectsFromStream(options);
+      const importIdMap = new Map().set(`id1`, { id: `newId1` }).set(`id2`, { id: `newId2` });
       const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
       expect(createSavedObjects).toHaveBeenCalledWith(filteredObjects, createSavedObjectsOptions);
     });
@@ -174,18 +213,24 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('accumulates multiple errors', async () => {
       const options = setupOptions();
-      const errors = [createError(), createError(), createError(), createError()];
+      const errors = [createError(), createError(), createError(), createError(), createError()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [errors[0]],
         collectedObjects: [],
       });
       getMockFn(validateReferences).mockResolvedValue({ errors: [errors[1]], filteredObjects: [] });
-      getMockFn(checkOriginConflicts).mockResolvedValue({
+      getMockFn(checkConflicts).mockResolvedValue({
         errors: [errors[2]],
         filteredObjects: [],
         importIdMap: new Map(),
+        importIds: new Set(),
       });
-      getMockFn(createSavedObjects).mockResolvedValue({ errors: [errors[3]], createdObjects: [] });
+      getMockFn(checkOriginConflicts).mockResolvedValue({
+        errors: [errors[3]],
+        filteredObjects: [],
+        importIdMap: new Map(),
+      });
+      getMockFn(createSavedObjects).mockResolvedValue({ errors: [errors[4]], createdObjects: [] });
 
       const result = await importSavedObjectsFromStream(options);
       expect(result).toEqual({ success: false, successCount: 0, errors });

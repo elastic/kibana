@@ -29,6 +29,7 @@ import { validateRetries } from './validate_retries';
 import { createSavedObjects } from './create_saved_objects';
 import { getImportIdMapForRetries } from './check_origin_conflicts';
 import { SavedObject } from '../types';
+import { checkConflicts } from './check_conflicts';
 
 /**
  * Resolve and return saved object import errors.
@@ -49,6 +50,7 @@ export async function resolveSavedObjectsImportErrors({
 
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportError[] = [];
+  let importIdMap: Map<string, { id: string; omitOriginId?: boolean }> = new Map();
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
   const filter = createObjectsFilter(retries);
 
@@ -88,15 +90,28 @@ export async function resolveSavedObjectsImportErrors({
   }
 
   // Validate references
-  const { filteredObjects, errors: referenceErrors } = await validateReferences(
+  const validateReferencesResult = await validateReferences(
     objectsToResolve,
     savedObjectsClient,
     namespace
   );
-  errorAccumulator = [...errorAccumulator, ...referenceErrors];
+  errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
+
+  // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
+  const checkConflictsOptions = { savedObjectsClient, namespace, ignoreRegularConflicts: true };
+  const checkConflictsResult = await checkConflicts(
+    validateReferencesResult.filteredObjects,
+    checkConflictsOptions
+  );
+  errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
+  importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
-  const importIdMap = getImportIdMapForRetries(filteredObjects, { typeRegistry, retries });
+  const importIdMapForRetries = getImportIdMapForRetries(checkConflictsResult.filteredObjects, {
+    typeRegistry,
+    retries,
+  });
+  importIdMap = new Map([...importIdMap, ...importIdMapForRetries]);
 
   // Bulk create in two batches, overwrites and non-overwrites
   let successResults: Array<{ type: string; id: string; destinationId?: string }> = [];
@@ -114,7 +129,10 @@ export async function resolveSavedObjectsImportErrors({
       })),
     ];
   };
-  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(filteredObjects, retries);
+  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
+    checkConflictsResult.filteredObjects,
+    retries
+  );
   await bulkCreateObjects(objectsToOverwrite, true);
   await bulkCreateObjects(objectsToNotOverwrite);
 

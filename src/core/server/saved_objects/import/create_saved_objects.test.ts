@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { mockUuidv4 } from './__mocks__';
 import { savedObjectsClientMock } from '../../mocks';
 import { createSavedObjects } from './create_saved_objects';
 import { SavedObjectReference } from 'kibana/public';
@@ -160,187 +159,86 @@ describe('#createSavedObjects', () => {
     expect(createSavedObjectsResult).toEqual({ createdObjects: [], errors: [] });
   });
 
-  describe('import without retries', () => {
-    const objs = [obj1, obj2, obj3, obj4, obj6, obj7, obj8, obj10, obj11, obj12, obj13];
+  const objs = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12, obj13];
 
-    const setupMockResults = (options: CreateSavedObjectsOptions) => {
-      bulkCreate.mockResolvedValue({
-        saved_objects: [
-          getResultMock.success(obj1, options),
-          getResultMock.conflict(obj2.type, obj2.id),
-          getResultMock.conflict(obj3.type, importId3),
-          getResultMock.conflict(obj4.type, importId4),
-          // skip obj5, we aren't testing an unresolvable conflict here
-          getResultMock.success(obj6, options),
-          getResultMock.conflict(obj7.type, obj7.id),
-          getResultMock.conflict(obj8.type, importId8),
-          // skip obj9, we aren't testing an unresolvable conflict here
-          getResultMock.success(obj10, options),
-          getResultMock.conflict(obj11.type, obj11.id),
-          getResultMock.success(obj12, options),
-          getResultMock.conflict(obj13.type, obj13.id),
-        ],
-      });
-    };
-
-    const testBulkCreateObjects = async (namespace?: string) => {
-      const options = setupOptions({ namespace });
-      setupMockResults(options);
-
-      await createSavedObjects(objs, options);
-      expect(bulkCreate).toHaveBeenCalledTimes(1);
-      // these three objects are transformed before being created, because they are included in the `importIdMap`
-      const x3 = { ...obj3, id: importId3, originId: undefined }; // this import object already has an originId, but the entry has omitOriginId=true
-      const x4 = { ...obj4, id: importId4 }; // this import object already has an originId
-      const x8 = { ...obj8, id: importId8, originId: obj8.id }; // this import object doesn't have an originId, so it is set before create
-      const argObjs = [obj1, obj2, x3, x4, obj6, obj7, x8, obj10, obj11, obj12, obj13];
-      expectBulkCreateArgs.objects(1, argObjs);
-    };
-    const testBulkCreateOptions = async (namespace?: string) => {
-      const overwrite = (Symbol() as unknown) as boolean;
-      const options = setupOptions({ namespace, overwrite });
-      setupMockResults(options);
-
-      await createSavedObjects(objs, options);
-      expect(bulkCreate).toHaveBeenCalledTimes(1);
-      expectBulkCreateArgs.options(1, options);
-    };
-    const testReturnValue = async (namespace?: string) => {
-      const options = setupOptions({ namespace });
-      setupMockResults(options);
-
-      const results = await createSavedObjects(objs, options);
-      const resultSavedObjects = (await bulkCreate.mock.results[0].value).saved_objects;
-      const [r1, r2, r3, r4, r6, r7, r8, r10, r11, r12, r13] = resultSavedObjects;
-      // these three results are transformed before being returned, because the bulkCreate attempt used different IDs for them
-      const [x3, x4, x8] = [r3, r4, r8].map((x: SavedObject) => ({ ...x, destinationId: x.id }));
-      const transformedResults = [r1, r2, x3, x4, r6, r7, x8, r10, r11, r12, r13];
-      const expectedResults = getExpectedResults(transformedResults, objs);
-      expect(results).toEqual(expectedResults);
-    };
-
-    describe('with an undefined namespace', () => {
-      test('calls bulkCreate once with input objects', async () => {
-        await testBulkCreateObjects();
-      });
-      test('calls bulkCreate once with input options', async () => {
-        await testBulkCreateOptions();
-      });
-      test('returns bulkCreate results that are remapped to IDs of imported objects', async () => {
-        await testReturnValue();
-      });
+  const setupMockResults = (options: CreateSavedObjectsOptions) => {
+    bulkCreate.mockResolvedValue({
+      saved_objects: [
+        getResultMock.success(obj1, options),
+        getResultMock.conflict(obj2.type, obj2.id),
+        getResultMock.conflict(obj3.type, importId3),
+        getResultMock.conflict(obj4.type, importId4),
+        getResultMock.unresolvableConflict(obj5.type, obj5.id),
+        getResultMock.success(obj6, options),
+        getResultMock.conflict(obj7.type, obj7.id),
+        getResultMock.conflict(obj8.type, importId8),
+        getResultMock.unresolvableConflict(obj9.type, obj9.id),
+        getResultMock.success(obj10, options),
+        getResultMock.conflict(obj11.type, obj11.id),
+        getResultMock.success(obj12, options),
+        getResultMock.conflict(obj13.type, obj13.id),
+      ],
     });
+  };
 
-    describe('with a defined namespace', () => {
-      const namespace = 'some-namespace';
-      test('calls bulkCreate once with input objects', async () => {
-        await testBulkCreateObjects(namespace);
-      });
-      test('calls bulkCreate once with input options', async () => {
-        await testBulkCreateOptions(namespace);
-      });
-      test('returns bulkCreate results that are remapped to IDs of imported objects', async () => {
-        await testReturnValue(namespace);
-      });
+  const testBulkCreateObjects = async (namespace?: string) => {
+    const options = setupOptions({ namespace });
+    setupMockResults(options);
+
+    await createSavedObjects(objs, options);
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    // these three objects are transformed before being created, because they are included in the `importIdMap`
+    const x3 = { ...obj3, id: importId3, originId: undefined }; // this import object already has an originId, but the entry has omitOriginId=true
+    const x4 = { ...obj4, id: importId4 }; // this import object already has an originId
+    const x8 = { ...obj8, id: importId8, originId: obj8.id }; // this import object doesn't have an originId, so it is set before create
+    const argObjs = [obj1, obj2, x3, x4, obj5, obj6, obj7, x8, obj9, obj10, obj11, obj12, obj13];
+    expectBulkCreateArgs.objects(1, argObjs);
+  };
+  const testBulkCreateOptions = async (namespace?: string) => {
+    const overwrite = (Symbol() as unknown) as boolean;
+    const options = setupOptions({ namespace, overwrite });
+    setupMockResults(options);
+
+    await createSavedObjects(objs, options);
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    expectBulkCreateArgs.options(1, options);
+  };
+  const testReturnValue = async (namespace?: string) => {
+    const options = setupOptions({ namespace });
+    setupMockResults(options);
+
+    const results = await createSavedObjects(objs, options);
+    const resultSavedObjects = (await bulkCreate.mock.results[0].value).saved_objects;
+    const [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13] = resultSavedObjects;
+    // these three results are transformed before being returned, because the bulkCreate attempt used different IDs for them
+    const [x3, x4, x8] = [r3, r4, r8].map((x: SavedObject) => ({ ...x, destinationId: x.id }));
+    const transformedResults = [r1, r2, x3, x4, r5, r6, r7, x8, r9, r10, r11, r12, r13];
+    const expectedResults = getExpectedResults(transformedResults, objs);
+    expect(results).toEqual(expectedResults);
+  };
+
+  describe('with an undefined namespace', () => {
+    test('calls bulkCreate once with input objects', async () => {
+      await testBulkCreateObjects();
+    });
+    test('calls bulkCreate once with input options', async () => {
+      await testBulkCreateOptions();
+    });
+    test('returns bulkCreate results that are remapped to IDs of imported objects', async () => {
+      await testReturnValue();
     });
   });
 
-  describe('import with retries', () => {
-    const objs = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12, obj13];
-
-    const setupMockResults = (options: CreateSavedObjectsOptions) => {
-      bulkCreate.mockResolvedValueOnce({
-        saved_objects: [
-          getResultMock.success(obj1, options),
-          getResultMock.conflict(obj2.type, obj2.id),
-          getResultMock.conflict(obj3.type, importId3),
-          getResultMock.conflict(obj4.type, importId4),
-          getResultMock.unresolvableConflict(obj5.type, obj5.id), // unresolvable conflict will cause a retry
-          getResultMock.success(obj6, options),
-          getResultMock.conflict(obj7.type, obj7.id),
-          getResultMock.conflict(obj8.type, importId8),
-          getResultMock.unresolvableConflict(obj9.type, obj9.id), // unresolvable conflict will cause a retry
-          getResultMock.success(obj10, options),
-          getResultMock.conflict(obj11.type, obj11.id),
-          getResultMock.success(obj12, options),
-          getResultMock.conflict(obj13.type, obj13.id),
-        ],
-      });
-      mockUuidv4.mockReturnValueOnce(`new-id-for-${obj5.id}`);
-      mockUuidv4.mockReturnValueOnce(`new-id-for-${obj9.id}`);
-      bulkCreate.mockResolvedValue({
-        saved_objects: [
-          getResultMock.success({ ...obj5, id: `new-id-for-${obj5.id}` }, options), // retry is a success
-          getResultMock.success({ ...obj9, id: `new-id-for-${obj9.id}` }, options), // retry is a success
-        ],
-      });
-    };
-
-    const testBulkCreateObjects = async (namespace?: string) => {
-      const options = setupOptions({ namespace });
-      setupMockResults(options);
-
-      await createSavedObjects(objs, options);
-      expect(bulkCreate).toHaveBeenCalledTimes(2);
-      // these three objects are transformed before being created, because they are included in the `importIdMap`
-      const x3 = { ...obj3, id: importId3, originId: undefined }; // this import object already has an originId, but the entry has omitOriginId=true
-      const x4 = { ...obj4, id: importId4 }; // this import object already has an originId
-      const x8 = { ...obj8, id: importId8, originId: obj8.id }; // this import object doesn't have an originId, so it is set before create
-      const argObjs = [obj1, obj2, x3, x4, obj5, obj6, obj7, x8, obj9, obj10, obj11, obj12, obj13];
-      expectBulkCreateArgs.objects(1, argObjs); // we expect to first try bulkCreate with all thirteen test cases
-      expectBulkCreateArgs.objects(2, [obj5, obj9], true); // we only expect to retry bulkCreate with the unresolvable conflicts
-    };
-    const testBulkCreateOptions = async (namespace?: string) => {
-      const overwrite = (Symbol() as unknown) as boolean;
-      const options = setupOptions({ namespace, overwrite });
-      setupMockResults(options);
-
-      await createSavedObjects(objs, options);
-      expect(bulkCreate).toHaveBeenCalledTimes(2);
-      expectBulkCreateArgs.options(1, options);
-      expectBulkCreateArgs.options(2, options);
-    };
-    const testReturnValue = async (namespace?: string) => {
-      const options = setupOptions({ namespace });
-      setupMockResults(options);
-
-      const createSavedObjectsResult = await createSavedObjects(objs, options);
-      const resultSavedObjects = (await bulkCreate.mock.results[0].value).saved_objects;
-      const [r1, r2, r3, r4, , r6, r7, r8, , r10, r11, r12, r13] = resultSavedObjects;
-      const [r5, r9] = (await bulkCreate.mock.results[1].value).saved_objects; // these two import objects were retried, so the retry results are returned
-      // these five results are transformed before being returned, because the bulkCreate attempt used different IDs for them
-      const [x3, x4, x5, x8, x9] = [r3, r4, r5, r8, r9].map((x: SavedObject) => ({
-        ...x,
-        destinationId: x.id,
-      }));
-      const transformedResults = [r1, r2, x3, x4, x5, r6, r7, x8, x9, r10, r11, r12, r13];
-      const expectedResults = getExpectedResults(transformedResults, objs);
-      expect(createSavedObjectsResult).toEqual(expectedResults);
-    };
-
-    describe('with an undefined namespace', () => {
-      test('calls bulkCreate once with input objects, and a second time for unresolvable conflicts', async () => {
-        await testBulkCreateObjects();
-      });
-      test('calls bulkCreate once with input options, and a second time with input options', async () => {
-        await testBulkCreateOptions();
-      });
-      test('returns bulkCreate results that are merged and remapped to IDs of imported objects', async () => {
-        await testReturnValue();
-      });
+  describe('with a defined namespace', () => {
+    const namespace = 'some-namespace';
+    test('calls bulkCreate once with input objects', async () => {
+      await testBulkCreateObjects(namespace);
     });
-
-    describe('with a defined namespace', () => {
-      const namespace = 'some-namespace';
-      test('calls bulkCreate once with input objects, and a second time for unresolvable conflicts', async () => {
-        await testBulkCreateObjects(namespace);
-      });
-      test('calls bulkCreate once with input options, and a second time with input options', async () => {
-        await testBulkCreateOptions(namespace);
-      });
-      test('returns bulkCreate results that are merged and remapped to IDs of imported objects', async () => {
-        await testReturnValue(namespace);
-      });
+    test('calls bulkCreate once with input options', async () => {
+      await testBulkCreateOptions(namespace);
+    });
+    test('returns bulkCreate results that are remapped to IDs of imported objects', async () => {
+      await testReturnValue(namespace);
     });
   });
 });

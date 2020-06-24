@@ -21,7 +21,6 @@ export interface ImportTestCase extends TestCase {
   expectedNewId?: string;
   successParam?: string;
   failure?: 400 | 409; // only used for permitted response case
-  fail403Param?: string;
   fail409Param?: string;
 }
 
@@ -75,13 +74,12 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   const expectResponseBody = (
     testCases: ImportTestCase | ImportTestCase[],
     statusCode: 200 | 403,
-    fail403Param?: string,
     spaceId = SPACES.DEFAULT.spaceId
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
       const types = testCaseArray.map((x) => x.type);
-      await expectResponses.forbidden(fail403Param!)(types)(response);
+      await expectResponses.forbidden('bulk_create')(types)(response);
     } else {
       // permitted
       const { success, successCount, successResults, errors } = response.body;
@@ -170,7 +168,6 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       spaceId?: string;
       singleRequest?: boolean;
       responseBodyOverride?: ExpectResponseBody;
-      fail403Param?: string;
     }
   ): ImportTestDefinition[] => {
     const cases = Array.isArray(testCases) ? testCases : [testCases];
@@ -184,7 +181,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         responseStatusCode,
         responseBody:
           options?.responseBodyOverride ||
-          expectResponseBody(x, responseStatusCode, options?.fail403Param, options?.spaceId),
+          expectResponseBody(x, responseStatusCode, options?.spaceId),
         overwrite,
       }));
     }
@@ -196,7 +193,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         responseStatusCode,
         responseBody:
           options?.responseBodyOverride ||
-          expectResponseBody(cases, responseStatusCode, options?.fail403Param, options?.spaceId),
+          expectResponseBody(cases, responseStatusCode, options?.spaceId),
         overwrite,
       },
     ];

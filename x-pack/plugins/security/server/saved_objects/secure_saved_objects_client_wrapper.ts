@@ -82,10 +82,9 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: SavedObjectsCheckConflictsObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'create', options.namespace, {
-      objects,
-      options,
-    });
+    const types = this.getUniqueObjectTypes(objects);
+    const args = { objects, options };
+    await this.ensureAuthorized(types, 'bulk_create', options.namespace, args, 'checkConflicts');
 
     const response = await this.baseClient.checkConflicts(objects, options);
     return response;

@@ -70,42 +70,20 @@ export default function ({ getService }: FtrProviderContext) {
       overwrite
     );
     // use singleRequest to reduce execution time and/or test combined cases
-    const unauthorizedCommon = [
-      createTestDefinitions(group1Importable, true, overwrite, { fail403Param: 'bulk_create' }),
-      createTestDefinitions(group1NonImportable, false, overwrite, { singleRequest: true }),
-      createTestDefinitions(group1All, true, overwrite, {
-        singleRequest: true,
-        responseBodyOverride: expectForbidden('bulk_create')([
-          'dashboard',
-          'globaltype',
-          'isolatedtype',
-        ]),
-      }),
-    ];
     return {
-      unauthorizedRead: [
-        ...unauthorizedCommon,
-        // multi-namespace types result in a preflight search request before a create attempt;
-        // because of this, importing those types will result in a 403 "find" error (as opposed to a 403 "bulk_create" error)
-        createTestDefinitions(group2, true, overwrite, {
+      unauthorized: [
+        createTestDefinitions(group1Importable, true, overwrite),
+        createTestDefinitions(group1NonImportable, false, overwrite, { singleRequest: true }),
+        createTestDefinitions(group1All, true, overwrite, {
           singleRequest: true,
-          fail403Param: 'find',
+          responseBodyOverride: expectForbidden('bulk_create')([
+            'dashboard',
+            'globaltype',
+            'isolatedtype',
+          ]),
         }),
-        createTestDefinitions(group3, true, overwrite, {
-          singleRequest: true,
-          fail403Param: 'find',
-        }),
-      ].flat(),
-      unauthorizedWrite: [
-        ...unauthorizedCommon,
-        createTestDefinitions(group2, true, overwrite, {
-          singleRequest: true,
-          fail403Param: 'bulk_create',
-        }),
-        createTestDefinitions(group3, true, overwrite, {
-          singleRequest: true,
-          fail403Param: 'bulk_create',
-        }),
+        createTestDefinitions(group2, true, overwrite, { singleRequest: true }),
+        createTestDefinitions(group3, true, overwrite, { singleRequest: true }),
       ].flat(),
       authorized: [
         createTestDefinitions(group1All, false, overwrite, { singleRequest: true }),
@@ -118,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('_import', () => {
     getTestScenarios([false, true]).security.forEach(({ users, modifier: overwrite }) => {
       const suffix = overwrite ? ' with overwrite enabled' : '';
-      const { unauthorizedRead, unauthorizedWrite, authorized } = createTests(overwrite!);
+      const { unauthorized, authorized } = createTests(overwrite!);
       const _addTests = (user: TestUser, tests: ImportTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, tests });
       };
@@ -126,15 +104,14 @@ export default function ({ getService }: FtrProviderContext) {
       [
         users.noAccess,
         users.legacyAll,
+        users.dualRead,
+        users.readGlobally,
         users.allAtDefaultSpace,
         users.readAtDefaultSpace,
         users.allAtSpace1,
         users.readAtSpace1,
       ].forEach((user) => {
-        _addTests(user, unauthorizedRead);
-      });
-      [users.dualRead, users.readGlobally].forEach((user) => {
-        _addTests(user, unauthorizedWrite);
+        _addTests(user, unauthorized);
       });
       [users.dualAll, users.allGlobally, users.superuser].forEach((user) => {
         _addTests(user, authorized);

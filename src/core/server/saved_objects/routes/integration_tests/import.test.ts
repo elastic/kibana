@@ -54,6 +54,7 @@ describe('POST /internal/saved_objects/_import', () => {
 
     savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
+    savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
 
     const router = httpSetup.createRouter('/internal/saved_objects/');
     registerImportRoute(router, config);
@@ -184,16 +185,18 @@ describe('POST /internal/saved_objects/_import', () => {
   it('imports an index pattern and dashboard but has a conflict on the index pattern', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
 
-    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-      saved_objects: [
+    savedObjectsClient.checkConflicts.mockResolvedValue({
+      errors: [
         {
           type: 'index-pattern',
           id: 'my-pattern',
-          attributes: {},
-          references: [],
           error: SavedObjectsErrorHelpers.createConflictError('index-pattern', 'my-pattern').output
             .payload,
         },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
         {
           type: 'dashboard',
           id: 'my-dashboard',

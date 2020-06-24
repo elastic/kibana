@@ -35,6 +35,7 @@ import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
 import { validateRetries } from './validate_retries';
 import { collectSavedObjects } from './collect_saved_objects';
 import { validateReferences } from './validate_references';
+import { checkConflicts } from './check_conflicts';
 import { getImportIdMapForRetries } from './check_origin_conflicts';
 import { splitOverwrites } from './split_overwrites';
 import { createSavedObjects } from './create_saved_objects';
@@ -44,6 +45,7 @@ jest.mock('./validate_retries');
 jest.mock('./create_objects_filter');
 jest.mock('./collect_saved_objects');
 jest.mock('./validate_references');
+jest.mock('./check_conflicts');
 jest.mock('./check_origin_conflicts');
 jest.mock('./split_overwrites');
 jest.mock('./create_saved_objects');
@@ -58,6 +60,12 @@ describe('#importSavedObjectsFromStream', () => {
     getMockFn(createObjectsFilter).mockReturnValue(() => false);
     getMockFn(collectSavedObjects).mockResolvedValue({ errors: [], collectedObjects: [] });
     getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects: [] });
+    getMockFn(checkConflicts).mockResolvedValue({
+      errors: [],
+      filteredObjects: [],
+      importIdMap: new Map(),
+      importIds: new Set(),
+    });
     getMockFn(getImportIdMapForRetries).mockReturnValue(new Map());
     getMockFn(splitOverwrites).mockReturnValue({
       objectsToOverwrite: [],
@@ -170,11 +178,30 @@ describe('#importSavedObjectsFromStream', () => {
       );
     });
 
+    test('checks conflicts', async () => {
+      const options = setupOptions();
+      const filteredObjects = [createObject()];
+      getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
+
+      await resolveSavedObjectsImportErrors(options);
+      const checkConflictsOptions = {
+        savedObjectsClient,
+        namespace,
+        ignoreRegularConflicts: true,
+      };
+      expect(checkConflicts).toHaveBeenCalledWith(filteredObjects, checkConflictsOptions);
+    });
+
     test('gets import ID map for retries', async () => {
       const retries = [createRetry()];
       const options = setupOptions(retries);
       const filteredObjects = [createObject()];
-      getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
+      getMockFn(checkConflicts).mockResolvedValue({
+        errors: [],
+        filteredObjects,
+        importIdMap: new Map(),
+        importIds: new Set<string>(),
+      });
 
       await resolveSavedObjectsImportErrors(options);
       const opts = { typeRegistry, retries };
@@ -185,9 +212,11 @@ describe('#importSavedObjectsFromStream', () => {
       const retries = [createRetry()];
       const options = setupOptions(retries);
       const filteredObjects = [createObject()];
-      getMockFn(validateReferences).mockResolvedValue({
+      getMockFn(checkConflicts).mockResolvedValue({
         errors: [],
         filteredObjects,
+        importIdMap: new Map(),
+        importIds: new Set<string>(),
       });
 
       await resolveSavedObjectsImportErrors(options);
@@ -196,8 +225,14 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('creates saved objects', async () => {
       const options = setupOptions();
-      const importIdMap = new Map();
-      getMockFn(getImportIdMapForRetries).mockReturnValue(importIdMap);
+      getMockFn(checkConflicts).mockResolvedValue({
+        errors: [],
+        filteredObjects: [],
+        importIdMap: new Map().set(`id1`, { id: `newId1` }),
+        importIds: new Set(),
+      });
+      getMockFn(getImportIdMapForRetries).mockReturnValue(new Map().set(`id2`, { id: `newId2` }));
+      const importIdMap = new Map().set(`id1`, { id: `newId1` }).set(`id2`, { id: `newId2` });
       const objectsToOverwrite = [createObject()];
       const objectsToNotOverwrite = [createObject()];
       getMockFn(splitOverwrites).mockReturnValue({ objectsToOverwrite, objectsToNotOverwrite });

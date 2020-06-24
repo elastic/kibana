@@ -61,7 +61,7 @@ const expectGeneralError = async (fn: Function, args: Record<string, any>) => {
  * Requires that function args are passed in as key/value pairs
  * The argument properties must be in the correct order to be spread properly
  */
-const expectForbiddenError = async (fn: Function, args: Record<string, any>) => {
+const expectForbiddenError = async (fn: Function, args: Record<string, any>, action?: string) => {
   clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
     getMockCheckPrivilegesFailure
   );
@@ -84,7 +84,7 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>) => 
   expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
   expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
     USERNAME,
-    ACTION,
+    action ?? ACTION,
     types,
     spaceIds,
     missing,
@@ -93,7 +93,7 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>) => 
   expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
 };
 
-const expectSuccess = async (fn: Function, args: Record<string, any>) => {
+const expectSuccess = async (fn: Function, args: Record<string, any>, action?: string) => {
   const result = await fn.bind(client)(...Object.values(args));
   const getCalls = (clientOpts.actions.savedObject.get as jest.MockedFunction<
     SavedObjectActions['get']
@@ -106,7 +106,7 @@ const expectSuccess = async (fn: Function, args: Record<string, any>) => {
   expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
   expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
     USERNAME,
-    ACTION,
+    action ?? ACTION,
     types,
     spaceIds,
     args
@@ -475,8 +475,8 @@ describe('#bulkUpdate', () => {
 });
 
 describe('#checkConflicts', () => {
-  const obj1 = Object.freeze({ type: 'foo', otherThing: 'sup' });
-  const obj2 = Object.freeze({ type: 'bar', otherThing: 'everyone' });
+  const obj1 = Object.freeze({ type: 'foo', id: 'foo-id' });
+  const obj2 = Object.freeze({ type: 'bar', id: 'bar-id' });
   const options = Object.freeze({ namespace: 'some-ns' });
 
   test(`throws decorated GeneralError when checkPrivileges.globally rejects promise`, async () => {
@@ -486,7 +486,7 @@ describe('#checkConflicts', () => {
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const objects = [obj1, obj2];
-    await expectForbiddenError(client.checkConflicts, { objects, options });
+    await expectForbiddenError(client.checkConflicts, { objects, options }, 'checkConflicts');
   });
 
   test(`returns result of baseClient.create when authorized`, async () => {
@@ -494,7 +494,11 @@ describe('#checkConflicts', () => {
     clientOpts.baseClient.checkConflicts.mockResolvedValue(apiCallReturnValue as any);
 
     const objects = [obj1, obj2];
-    const result = await expectSuccess(client.checkConflicts, { objects, options });
+    const result = await expectSuccess(
+      client.checkConflicts,
+      { objects, options },
+      'checkConflicts'
+    );
     expect(result).toBe(apiCallReturnValue);
   });
 

@@ -64,13 +64,19 @@ describe('#checkOriginConflicts', () => {
     saved_objects: objects,
   });
 
-  const setupOptions = (namespace?: string): CheckOriginConflictsOptions => {
+  const setupOptions = (
+    options: {
+      namespace?: string;
+      importIds?: Set<string>;
+    } = {}
+  ): CheckOriginConflictsOptions => {
+    const { namespace, importIds = new Set<string>() } = options;
     savedObjectsClient = savedObjectsClientMock.create();
     find = savedObjectsClient.find;
     find.mockResolvedValue(getResultMock()); // mock zero hits response by default
     typeRegistry = typeRegistryMock.create();
     typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
-    return { savedObjectsClient, typeRegistry, namespace };
+    return { savedObjectsClient, typeRegistry, namespace, importIds };
   };
 
   const mockFindResult = (...objects: SavedObjectType[]) => {
@@ -111,7 +117,7 @@ describe('#checkOriginConflicts', () => {
       expectFindArgs(2, multiNsObjWithOriginId, '');
 
       find.mockClear();
-      const options2 = setupOptions('some-namespace');
+      const options2 = setupOptions({ namespace: 'some-namespace' });
       await checkOriginConflicts(objects, options2);
       expect(find).toHaveBeenCalledTimes(2);
       expectFindArgs(1, multiNsObj, 'some-namespace:');
@@ -121,7 +127,7 @@ describe('#checkOriginConflicts', () => {
     test('searches within the current `namespace`', async () => {
       const objects = [multiNsObj];
       const namespace = 'some-namespace';
-      const options = setupOptions(namespace);
+      const options = setupOptions({ namespace });
 
       await checkOriginConflicts(objects, options);
       expect(find).toHaveBeenCalledTimes(1);
@@ -191,64 +197,27 @@ describe('#checkOriginConflicts', () => {
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
-      test('returns object when an exact match is detected (1 hit)', async () => {
-        // obj1 and obj2 exist in this space
-        // try to import obj2 and obj2
-        const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
-        const obj2 = createObject(MULTI_NS_TYPE, 'id-2', 'originId-foo');
-        const options = setupOptions();
-        mockFindResult(obj1); // find for obj1: the result is an exact match
-        mockFindResult(obj2); // find for obj2: the result is an exact match
-
-        const checkOriginConflictsResult = await checkOriginConflicts([obj1, obj2], options);
-        const expectedResult = {
-          filteredObjects: [obj1, obj2],
-          importIdMap: new Map(),
-          errors: [],
-        };
-        expect(checkOriginConflictsResult).toEqual(expectedResult);
-      });
-
-      test('returns object when an exact match is detected (2+ hits)', async () => {
-        // obj1, obj2, objA, and objB exist in this space
-        // try to import obj1 and obj2
-        const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
-        const objA = createObject(MULTI_NS_TYPE, 'id-3', obj1.id);
-        const obj2 = createObject(MULTI_NS_TYPE, 'id-2', 'originId-foo');
-        const objB = createObject(MULTI_NS_TYPE, 'id-4', obj2.originId);
-        const options = setupOptions();
-        mockFindResult(obj1, objA); // find for obj1: the first result is an exact match, so the second result is ignored
-        mockFindResult(objB, obj2); // find for obj2: the second result is an exact match, so the first result is ignored
-
-        const checkOriginConflictsResult = await checkOriginConflicts([obj1, obj2], options);
-        const expectedResult = {
-          filteredObjects: [obj1, obj2],
-          importIdMap: new Map(),
-          errors: [],
-        };
-        expect(checkOriginConflictsResult).toEqual(expectedResult);
-      });
-
       test('returns object when an inexact match is detected (1 hit) with a destination that is exactly matched by another object', async () => {
         // obj1 and obj3 exist in this space
-        // try to import obj1, obj2, obj3, and obj4
-        // note: this test is only concerned with obj2 and obj4, but obj1 and obj3 must be included to exercise this code path
+        // try to import obj1, obj2, obj3, and obj4; simulating a scenario where obj1 and obj3 were filtered out during `checkConflicts`, so we only call `checkOriginConflicts` with the remainder
         const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
         const obj2 = createObject(MULTI_NS_TYPE, 'id-2', obj1.id);
         const obj3 = createObject(MULTI_NS_TYPE, 'id-3', 'originId-foo');
         const obj4 = createObject(MULTI_NS_TYPE, 'id-4', obj3.originId);
-        const options = setupOptions();
-        mockFindResult(obj1); // find for obj1: the result is an exact match
+        const options = setupOptions({
+          importIds: new Set([
+            `${obj1.type}:${obj1.id}`,
+            `${obj2.type}:${obj2.id}`,
+            `${obj3.type}:${obj3.id}`,
+            `${obj4.type}:${obj4.id}`,
+          ]),
+        });
         mockFindResult(obj1); // find for obj2: the result is an inexact match with one destination that is exactly matched by obj1 so it is ignored -- accordingly, obj2 has no match
-        mockFindResult(obj3); // find for obj3: the result is an exact match
         mockFindResult(obj3); // find for obj4: the result is an inexact match with one destination that is exactly matched by obj3 so it is ignored -- accordingly, obj4 has no match
 
-        const checkOriginConflictsResult = await checkOriginConflicts(
-          [obj1, obj2, obj3, obj4],
-          options
-        );
+        const checkOriginConflictsResult = await checkOriginConflicts([obj2, obj4], options);
         const expectedResult = {
-          filteredObjects: [obj1, obj2, obj3, obj4],
+          filteredObjects: [obj2, obj4],
           importIdMap: new Map(),
           errors: [],
         };
@@ -257,18 +226,18 @@ describe('#checkOriginConflicts', () => {
 
       test('returns object when an inexact match is detected (2+ hits) with destinations that are all exactly matched by another object', async () => {
         // obj1 and obj2 exist in this space
-        // try to import obj1, obj2, and obj3
+        // try to import obj1, obj2, and obj3; simulating a scenario where obj1 and obj2 were filtered out during `checkConflicts`, so we only call `checkOriginConflicts` with the remainder
         const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
         const obj2 = createObject(MULTI_NS_TYPE, 'id-2', obj1.id);
         const obj3 = createObject(MULTI_NS_TYPE, 'id-3', obj1.id);
-        const options = setupOptions();
-        mockFindResult(obj1, obj2); // find for obj1: the first result is an exact match, so the second result is ignored
-        mockFindResult(obj1, obj2); // find for obj2: the second result is an exact match, so the first result is ignored
+        const options = setupOptions({
+          importIds: new Set([`${obj1.type}:${obj1.id}`, `${obj2.type}:${obj2.id}`]),
+        });
         mockFindResult(obj1, obj2); // find for obj3: the result is an inexact match with two destinations that are exactly matched by obj1 and obj2 so they are ignored -- accordingly, obj3 has no match
 
-        const checkOriginConflictsResult = await checkOriginConflicts([obj1, obj2, obj3], options);
+        const checkOriginConflictsResult = await checkOriginConflicts([obj3], options);
         const expectedResult = {
-          filteredObjects: [obj1, obj2, obj3],
+          filteredObjects: [obj3],
           importIdMap: new Map(),
           errors: [],
         };
@@ -302,26 +271,27 @@ describe('#checkOriginConflicts', () => {
 
       test('returns object with a `importIdMap` entry when an inexact match is detected (2+ hits), with n-1 destinations that are exactly matched by another object', async () => {
         // obj1, obj3, objA, and objB exist in this space
-        // try to import obj1, obj2, obj3, and obj4
-        // note: this test is only concerned with obj2 and obj4, but obj1 and obj3 must be included to exercise this code path
+        // try to import obj1, obj2, obj3, and obj4; simulating a scenario where obj1 and obj3 were filtered out during `checkConflicts`, so we only call `checkOriginConflicts` with the remainder
         const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
         const obj2 = createObject(MULTI_NS_TYPE, 'id-2', obj1.id);
         const objA = createObject(MULTI_NS_TYPE, 'id-A', obj1.id);
         const obj3 = createObject(MULTI_NS_TYPE, 'id-3', 'originId-foo');
         const obj4 = createObject(MULTI_NS_TYPE, 'id-4', obj3.originId);
         const objB = createObject(MULTI_NS_TYPE, 'id-B', obj3.originId);
-        const options = setupOptions();
-        mockFindResult(obj1, objA); // find for obj1: the first result is an exact match, so the second result is ignored
+        const options = setupOptions({
+          importIds: new Set([
+            `${obj1.type}:${obj1.id}`,
+            `${obj2.type}:${obj2.id}`,
+            `${obj3.type}:${obj3.id}`,
+            `${obj4.type}:${obj4.id}`,
+          ]),
+        });
         mockFindResult(obj1, objA); // find for obj2: the result is an inexact match with two destinations, but the first destination is exactly matched by obj1 so it is ignored -- accordingly, obj2 has an inexact match with one destination (objA)
-        mockFindResult(objB, obj3); // find for obj3: the second result is an exact match, so the first result is ignored
         mockFindResult(objB, obj3); // find for obj4: the result is an inexact match with two destinations, but the second destination is exactly matched by obj3 so it is ignored -- accordingly, obj4 has an inexact match with one destination (objB)
 
-        const checkOriginConflictsResult = await checkOriginConflicts(
-          [obj1, obj2, obj3, obj4],
-          options
-        );
+        const checkOriginConflictsResult = await checkOriginConflicts([obj2, obj4], options);
         const expectedResult = {
-          filteredObjects: [obj1, obj2, obj3, obj4],
+          filteredObjects: [obj2, obj4],
           importIdMap: new Map([
             [`${obj2.type}:${obj2.id}`, { id: objA.id }],
             [`${obj4.type}:${obj4.id}`, { id: objB.id }],
@@ -429,8 +399,8 @@ describe('#checkOriginConflicts', () => {
     });
 
     test('returns mixed results', async () => {
-      // obj3, objA, obB, and objC exist in this space
-      // try to import obj1, obj2, obj3, obj4, obj5, obj6, and obj7
+      // obj3, objA, objB, objC, objD, and objE exist in this space
+      // try to import obj1, obj2, obj3, obj4, obj5, obj6, and obj7; simulating a scenario where obj3 was filtered out during `checkConflicts`, so we only call `checkOriginConflicts` with the remainder
       // note: this test is non-exhaustive for different permutations of import objects and results, but prior tests exercise these more thoroughly
       const obj1 = createObject(OTHER_TYPE, 'id-1');
       const obj2 = createObject(MULTI_NS_TYPE, 'id-2');
@@ -445,20 +415,21 @@ describe('#checkOriginConflicts', () => {
       const objC = createObject(MULTI_NS_TYPE, 'id-C', obj6.id);
       const objD = createObject(MULTI_NS_TYPE, 'id-D', obj7.id);
       const objE = createObject(MULTI_NS_TYPE, 'id-E', obj7.id);
-      const options = setupOptions();
+      const objects = [obj1, obj2, obj4, obj5, obj6, obj7, obj8];
+      const importIds = new Set([...objects, obj3].map(({ type, id }) => `${type}:${id}`));
+      const options = setupOptions({ importIds });
+
       // obj1 is a non-multi-namespace type, so it is skipped while searching
       mockFindResult(); // find for obj2: the result is no match
-      mockFindResult(obj3); // find for obj3: the result is an exact match
       mockFindResult(obj3); // find for obj4: the result is an inexact match with one destination that is exactly matched by obj3 so it is ignored -- accordingly, obj4 has no match
       mockFindResult(objA); // find for obj5: the result is an inexact match with one destination
       mockFindResult(objB, objC); // find for obj6: the result is an inexact match with two destinations
       mockFindResult(objD, objE); // find for obj7: the result is an inexact match with two destinations
       mockFindResult(objD, objE); // find for obj8: the result is an inexact match with two destinations
 
-      const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8];
       const checkOriginConflictsResult = await checkOriginConflicts(objects, options);
       const expectedResult = {
-        filteredObjects: [obj1, obj2, obj3, obj4, obj5, obj7, obj8],
+        filteredObjects: [obj1, obj2, obj4, obj5, obj7, obj8],
         importIdMap: new Map([
           [`${obj5.type}:${obj5.id}`, { id: objA.id }],
           [`${obj7.type}:${obj7.id}`, { id: 'uuidv4', omitOriginId: true }],

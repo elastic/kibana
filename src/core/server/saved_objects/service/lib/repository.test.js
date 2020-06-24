@@ -1512,7 +1512,9 @@ describe('SavedObjectsRepository', () => {
 
     describe('returns', () => {
       it(`expected results`, async () => {
-        const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7];
+        const unknownTypeObj = { type: 'unknownType', id: 'three' };
+        const hiddenTypeObj = { type: HIDDEN_TYPE, id: 'three' };
+        const objects = [unknownTypeObj, hiddenTypeObj, obj1, obj2, obj3, obj4, obj5, obj6, obj7];
         const response = {
           status: 200,
           docs: [
@@ -1531,6 +1533,8 @@ describe('SavedObjectsRepository', () => {
         expectClusterCalls('mget');
         expect(result).toEqual({
           errors: [
+            { ...unknownTypeObj, error: createUnsupportedTypeError(unknownTypeObj.type) },
+            { ...hiddenTypeObj, error: createUnsupportedTypeError(hiddenTypeObj.type) },
             { ...obj1, error: createConflictError(obj1.type, obj1.id) },
             // obj2 was not found so it does not result in a conflict error
             { ...obj3, error: createConflictError(obj3.type, obj3.id) },

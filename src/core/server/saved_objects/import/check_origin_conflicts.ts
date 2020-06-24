@@ -30,6 +30,7 @@ interface CheckOriginConflictsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
+  importIds: Set<string>;
 }
 
 interface GetImportIdMapForRetriesOptions {
@@ -74,17 +75,16 @@ const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
 /**
  * Make a search request for an import object to check if any objects of this type that match this object's `originId` or `id` exist in the
  * specified namespace:
- *  - A `Right` result indicates that no conflict destinations were found in this namespace ("no match"), *OR* an exact match for this
- *    object's ID exists in this namespace ("exact match").
+ *  - A `Right` result indicates that no conflict destinations were found in this namespace ("no match").
  *  - A `Left` result indicates that one or more conflict destinations exist in this namespace, none of which exactly match this object's ID
- *    ("inexact match").
+ *    ("inexact match"). We can make this assumption because any "exact match" results would have been obtained and filtered out by the
+ *    `checkConflicts` submodule, which is called before this.
  */
 const checkOriginConflict = async (
   object: SavedObject<{ title?: string }>,
-  importIds: Set<string>,
   options: CheckOriginConflictsOptions
 ): Promise<Either<{ title?: string }>> => {
-  const { savedObjectsClient, typeRegistry, namespace } = options;
+  const { savedObjectsClient, typeRegistry, namespace, importIds } = options;
   const { type, originId } = object;
 
   if (!typeRegistry.isMultiNamespace(type)) {
@@ -104,7 +104,7 @@ const checkOriginConflict = async (
   };
   const findResult = await savedObjectsClient.find<{ title?: string }>(findOptions);
   const { total, saved_objects: savedObjects } = findResult;
-  if (total === 0 || savedObjects.some(({ id }) => id === object.id)) {
+  if (total === 0) {
     return { tag: 'right', value: object };
   }
   // This is an "inexact match" so far; filter the conflict destination(s) to exclude any that exactly match other objects we are importing.
@@ -140,9 +140,8 @@ export async function checkOriginConflicts(
   options: CheckOriginConflictsOptions
 ) {
   // Check each object for possible destination conflicts.
-  const importIds = new Set<string>(objects.map(({ type, id }) => `${type}:${id}`));
   const checkOriginConflictResults = await Promise.all(
-    objects.map((object) => checkOriginConflict(object, importIds, options))
+    objects.map((object) => checkOriginConflict(object, options))
   );
 
   // Get a map of all inexact matches that share the same destination(s).

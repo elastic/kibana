@@ -451,28 +451,60 @@ export class SavedObjectsRepository {
     }
 
     const { namespace } = options;
-    const bulkGetDocs = objects.map(({ type, id }) => ({
+
+    let bulkGetRequestIndexCounter = 0;
+    const expectedBulkGetResults: Either[] = objects.map((object) => {
+      const { type, id } = object;
+
+      if (!this._allowedTypes.includes(type)) {
+        return {
+          tag: 'Left' as 'Left',
+          error: {
+            id,
+            type,
+            error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload,
+          },
+        };
+      }
+
+      return {
+        tag: 'Right' as 'Right',
+        value: {
+          type,
+          id,
+          esRequestIndex: bulkGetRequestIndexCounter++,
+        },
+      };
+    });
+
+    const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
       _id: this._serializer.generateRawId(namespace, type, id),
       _index: this.getIndexForType(type),
       _source: ['type', 'namespaces'],
     }));
-    const bulkGetResponse = await this._callCluster('mget', {
-      body: { docs: bulkGetDocs },
-      ignore: [404],
-    });
+    const bulkGetResponse = bulkGetDocs.length
+      ? await this._callCluster('mget', {
+          body: { docs: bulkGetDocs },
+          ignore: [404],
+        })
+      : undefined;
 
     const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
-    const indexFound = bulkGetResponse.status !== 404;
-    objects.forEach(({ type, id }, index) => {
-      const actualResult = indexFound ? bulkGetResponse.docs[index] : undefined;
-      const docFound = actualResult?.found === true;
-      if (docFound) {
+    expectedBulkGetResults.forEach((expectedResult) => {
+      if (isLeft(expectedResult)) {
+        errors.push(expectedResult.error as any);
+        return;
+      }
+
+      const { type, id, esRequestIndex } = expectedResult.value;
+      const doc = bulkGetResponse.docs[esRequestIndex];
+      if (doc.found) {
         errors.push({
           id,
           type,
           error: {
             ...SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
-            ...(!this.rawDocExistsInNamespace(actualResult, namespace) && {
+            ...(!this.rawDocExistsInNamespace(doc, namespace) && {
               metadata: { isNotOverwritable: true },
             }),
           },

@@ -26,6 +26,7 @@ import {
 import { validateReferences } from './validate_references';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
+import { checkConflicts } from './check_conflicts';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -42,6 +43,7 @@ export async function importSavedObjectsFromStream({
   namespace,
 }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
+  let importIdMap: Map<string, { id: string; omitOriginId?: boolean }> = new Map();
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
   // Get the objects to import
@@ -59,28 +61,49 @@ export async function importSavedObjectsFromStream({
   );
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
 
-  // Check multi-namespace object types for regular conflicts and ambiguous conflicts
-  const checkOriginConflictsOptions = { savedObjectsClient, typeRegistry, namespace };
-  const { filteredObjects, errors: conflictErrors, importIdMap } = await checkOriginConflicts(
+  // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
+  const checkConflictsOptions = {
+    savedObjectsClient,
+    namespace,
+    ignoreRegularConflicts: overwrite,
+  };
+  const checkConflictsResult = await checkConflicts(
     validateReferencesResult.filteredObjects,
+    checkConflictsOptions
+  );
+  errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
+  importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
+
+  // Check multi-namespace object types for origin conflicts in this namespace
+  const checkOriginConflictsOptions = {
+    savedObjectsClient,
+    typeRegistry,
+    namespace,
+    importIds: checkConflictsResult.importIds,
+  };
+  const checkOriginConflictsResult = await checkOriginConflicts(
+    checkConflictsResult.filteredObjects,
     checkOriginConflictsOptions
   );
-  errorAccumulator = [...errorAccumulator, ...conflictErrors];
+  errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
+  importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
 
   // Create objects in bulk
   const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
-  const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
-    filteredObjects,
+  const createSavedObjectsResult = await createSavedObjects(
+    checkOriginConflictsResult.filteredObjects,
     createSavedObjectsOptions
   );
-  errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
+  errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
 
-  const successResults = createdObjects.map(({ type, id, destinationId }) => {
-    return { type, id, ...(destinationId && { destinationId }) };
-  });
+  const successResults = createSavedObjectsResult.createdObjects.map(
+    ({ type, id, destinationId }) => {
+      return { type, id, ...(destinationId && { destinationId }) };
+    }
+  );
 
   return {
-    successCount: createdObjects.length,
+    successCount: createSavedObjectsResult.createdObjects.length,
     success: errorAccumulator.length === 0,
     ...(successResults.length && { successResults }),
     ...(errorAccumulator.length && { errors: errorAccumulator }),
