@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'endpoint',
     'policy',
     'endpointPageUtils',
-    'header',
+    'ingestManagerCreateDatasource',
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
@@ -197,13 +197,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       beforeEach(async () => {
         // Create a policy and navigate to Ingest app
         policyInfo = await policyTestResources.createPolicy();
-        const agentId = policyInfo.agentConfig.id;
-        const datasourceId = policyInfo.datasource.id;
-
-        await pageObjects.common.navigateToApp('ingestManager', {
-          hash: `/configs/${agentId}/edit-datasource/${datasourceId}`,
-        });
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.ingestManagerCreateDatasource.navigateToAgentConfigEditDatasource(
+          policyInfo.agentConfig.id,
+          policyInfo.datasource.id
+        );
       });
       afterEach(async () => {
         if (policyInfo) {

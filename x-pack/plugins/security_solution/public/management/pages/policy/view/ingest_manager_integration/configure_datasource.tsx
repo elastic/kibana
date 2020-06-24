@@ -38,6 +38,7 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
                   data-test-subj="editLinkToPolicyDetails"
                   appId="securitySolution:management"
                   appPath={policyUrl}
+                  // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
                   href={`${services.application.getUrlForApp(
                     'securitySolution:management'
                   )}${policyUrl}`}
