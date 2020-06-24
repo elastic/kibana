@@ -130,6 +130,38 @@ describe('buildEventTypeSignal', () => {
     expect(resp).toEqual(expectedEndpointExceptions);
   });
 
+  test('it should ignore unsupported entries', async () => {
+    // Lists and exists are not supported by the Endpoint
+    const testEntries: EntriesArray = [
+      { field: 'server.domain', operator: 'included', type: 'match', value: 'DOMAIN' },
+      {
+        field: 'server.domain',
+        operator: 'included',
+        type: 'list',
+        value: ['lists', 'not', 'supported'],
+      },
+      { field: 'server.ip', operator: 'included', type: 'exists' },
+    ];
+
+    const expectedEndpointExceptions = {
+      exceptions_list: [
+        {
+          field: 'server.domain',
+          operator: 'included',
+          type: 'exact_cased',
+          value: 'DOMAIN',
+        },
+      ],
+    };
+
+    const first = getFoundExceptionListItemSchemaMock();
+    first.data[0].entries = testEntries;
+    mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
+    expect(resp).toEqual(expectedEndpointExceptions);
+  });
+
   test('it should convert the exception lists response to the proper endpoint format while paging', async () => {
     // The first call returns one exception
     const first = getFoundExceptionListItemSchemaMock();
@@ -148,5 +180,14 @@ describe('buildEventTypeSignal', () => {
       .mockReturnValueOnce(third);
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
     expect(resp.exceptions_list.length).toEqual(6);
+  });
+
+  test('it should handle no exceptions', async () => {
+    const exceptionsResponse = getFoundExceptionListItemSchemaMock();
+    exceptionsResponse.data = [];
+    exceptionsResponse.total = 0;
+    mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionsResponse);
+    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', '1.0.0');
+    expect(resp.exceptions_list.length).toEqual(0);
   });
 });
