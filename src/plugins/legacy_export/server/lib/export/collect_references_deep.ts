@@ -29,7 +29,7 @@ interface ObjectsToCollect {
 export async function collectReferencesDeep(
   savedObjectClient: SavedObjectsClientContract,
   objects: ObjectsToCollect[]
-) {
+): Promise<SavedObject[]> {
   let result: SavedObject[] = [];
   const queue = [...objects];
   while (queue.length !== 0) {
