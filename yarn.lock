@@ -5347,6 +5347,13 @@
   resolved "https://registry.yarnpkg.com/@types/lru-cache/-/lru-cache-5.1.0.tgz#57f228f2b80c046b4a1bd5cac031f81f207f4f03"
   integrity sha512-RaE0B+14ToE4l6UqdarKPnXwVDuigfFv+5j9Dze/Nqr23yyuqdNvzcZi3xB+3Agvi5R4EOgAksfv3lXX4vBt9w==
 
+"@types/lzma-native@4.0.0", "@types/lzma-native@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@types/lzma-native/-/lzma-native-4.0.0.tgz#86440e70b1431f2bc1a470eb0ea8bcfc5788fe14"
+  integrity sha512-9mBLyFWJe8/whIRjGwca5pbXv7ANzPj7KNgsgCU/l5z8xcyIe6LNae+iKdT5rjnXcXGOwyW/PKYt0N6+7N5QlA==
+  dependencies:
+    "@types/node" "*"
+
 "@types/mapbox-gl@^1.9.1":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@types/mapbox-gl/-/mapbox-gl-1.9.1.tgz#78b62f8a1ead78bc525a4c1db84bb71fa0fcc579"
