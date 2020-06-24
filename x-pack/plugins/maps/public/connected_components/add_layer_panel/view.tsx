@@ -38,15 +38,15 @@ interface State {
   layerSteps: Array<{ id: string; label: string }> | null;
   layerWizard: LayerWizard | null;
   isNextStepBtnEnabled: boolean;
-  isNextStepBtnLoading: boolean;
+  isStepLoading: boolean;
 }
 
-const INITIAL_STATE = {
+const INITIAL_STATE: State = {
   currentStepIndex: 0,
   layerSteps: null,
   layerWizard: null,
   isNextStepBtnEnabled: false,
-  isNextStepBtnLoading: false,
+  isStepLoading: false,
 };
 
 export class AddLayerPanel extends Component<Props, State> {
@@ -78,9 +78,11 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   _onNext = () => {
-    // @ts-expect-error
-    // Property 'length' does not exist on type 'never'.
-    if (this.state.layerSteps!.length - 1 === this.state.currentStepIndex) {
+    if (!this.state.layerSteps) {
+      return;
+    }
+
+    if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
       // last step
       this.props.promotePreviewLayers();
     } else {
@@ -88,14 +90,14 @@ export class AddLayerPanel extends Component<Props, State> {
         return {
           currentStepIndex: prevState.currentStepIndex + 1,
           isNextStepBtnEnabled: false,
-          isNextStepBtnLoading: false,
+          isStepLoading: false,
         };
       });
     }
   };
 
   _getCurrentStep() {
-    return this.state.layerSteps ? this.state.layerSteps![this.state.currentStepIndex] : null;
+    return this.state.layerSteps ? this.state.layerSteps[this.state.currentStepIndex] : null;
   }
 
   _enableNextBtn = () => {
@@ -107,11 +109,11 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   _startStepLoading = () => {
-    this.setState({ isNextStepBtnLoading: true });
+    this.setState({ isStepLoading: true });
   };
 
   _stopStepLoading = () => {
-    this.setState({ isNextStepBtnLoading: false });
+    this.setState({ isStepLoading: false });
   };
 
   _renderNextButton() {
@@ -121,20 +123,15 @@ export class AddLayerPanel extends Component<Props, State> {
     }
 
     let isDisabled = !this.state.isNextStepBtnEnabled;
-    let isLoading = this.state.isNextStepBtnLoading;
-    // @ts-expect-error
-    // Property 'id' does not exist on type 'never'.
+    let isLoading = this.state.isStepLoading;
     if (currentStep.id === ADD_LAYER_STEP_ID) {
       isDisabled = !this.props.hasPreviewLayers;
       isLoading = this.props.isLoadingPreviewLayers;
     } else {
       isDisabled = !this.state.isNextStepBtnEnabled;
-      isLoading = this.state.isNextStepBtnLoading;
+      isLoading = this.state.isStepLoading;
     }
 
-    // @ts-expect-error
-    // Property 'label' does not exist on type 'never'.
-    const btnLabel = currentStep.label;
     return (
       <EuiFlexItem grow={false}>
         <EuiButton
@@ -146,7 +143,7 @@ export class AddLayerPanel extends Component<Props, State> {
           onClick={this._onNext}
           fill
         >
-          {btnLabel}
+          {currentStep.label}
         </EuiButton>
       </EuiFlexItem>
     );
@@ -158,7 +155,7 @@ export class AddLayerPanel extends Component<Props, State> {
       <>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>{currentStep ? currentStep!.label : ADD_LAYER_STEP_LABEL}</h2>
+            <h2>{currentStep ? currentStep.label : ADD_LAYER_STEP_LABEL}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
@@ -167,7 +164,8 @@ export class AddLayerPanel extends Component<Props, State> {
           onClear={this._clearLayerWizard}
           onWizardSelect={this._onWizardSelect}
           previewLayers={this._previewLayers}
-          currentStepId={currentStep ? currentStep!.id : null}
+          showBackButton={!this.state.isStepLoading}
+          currentStepId={currentStep ? currentStep.id : null}
           enableNextBtn={this._enableNextBtn}
           disableNextBtn={this._disableNextBtn}
           startStepLoading={this._startStepLoading}

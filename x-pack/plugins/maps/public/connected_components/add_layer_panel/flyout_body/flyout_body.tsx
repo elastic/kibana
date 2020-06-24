@@ -15,6 +15,7 @@ type Props = RenderWizardArguments & {
   layerWizard: LayerWizard | null;
   onClear: () => void;
   onWizardSelect: (layerWizard: LayerWizard) => void;
+  showBackButton: boolean;
 };
 
 export const FlyoutBody = (props: Props) => {
@@ -34,7 +35,7 @@ export const FlyoutBody = (props: Props) => {
       advanceToNextStep: props.advanceToNextStep,
     };
 
-    const backButton = props.isIndexingTriggered ? null : (
+    const backButton = props.showBackButton ? (
       <Fragment>
         <EuiButtonEmpty size="xs" flush="left" onClick={props.onClear} iconType="arrowLeft">
           <FormattedMessage
@@ -44,7 +45,7 @@ export const FlyoutBody = (props: Props) => {
         </EuiButtonEmpty>
         <EuiSpacer size="s" />
       </Fragment>
-    );
+    ) : null;
 
     return (
       <Fragment>
