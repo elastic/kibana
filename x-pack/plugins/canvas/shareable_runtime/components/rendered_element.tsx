@@ -7,7 +7,6 @@
 import React, { FC, PureComponent } from 'react';
 // @ts-expect-error untyped library
 import Style from 'style-it';
-// @ts-expect-error untyped local
 import { Positionable } from '../../public/components/positionable/positionable';
 // @ts-expect-error untyped local
 import { elementToShape } from '../../public/components/workpad_page/utils';
