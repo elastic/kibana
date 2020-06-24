@@ -6,8 +6,9 @@
 import React from 'react';
 
 import { Forms } from '../../../../shared_imports';
+import { documentationService } from '../../../services/documentation';
+import { StepMappings } from '../../shared';
 import { WizardContent } from '../template_form';
-import { StepMappings } from './step_mappings';
 
 export const StepMappingsContainer = () => {
   const { defaultValue, updateContent, getData } = Forms.useContent<WizardContent>('mappings');
@@ -17,6 +18,7 @@ export const StepMappingsContainer = () => {
       defaultValue={defaultValue}
       onChange={updateContent}
       indexSettings={getData().settings}
+      esDocsBase={documentationService.getEsDocsBase()}
     />
   );
 };

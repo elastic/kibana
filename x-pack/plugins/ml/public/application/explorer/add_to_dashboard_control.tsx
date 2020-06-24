@@ -57,7 +57,7 @@ interface AddToDashboardControlProps {
 }
 
 /**
- * Component for attaching anomaly swimlane embeddable to dashboards.
+ * Component for attaching anomaly swim lane embeddable to dashboards.
  */
 export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
   onClose,
@@ -225,7 +225,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="xpack.ml.explorer.dashboardsTitle"
-              defaultMessage="Add swimlanes to dashboards"
+              defaultMessage="Add swim lanes to dashboards"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -234,7 +234,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.explorer.addToDashboard.selectSwimlanesLabel"
-                defaultMessage="Select swimlane view:"
+                defaultMessage="Select swim lane view:"
               />
             }
           >
