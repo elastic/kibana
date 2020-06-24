@@ -62,11 +62,19 @@ export function GetMessageRouteExample({ getMessageById }: Props) {
 
         <p>This examples uses a simple GET route that takes an id as a param in the route path.</p>
         <EuiFormRow label="Message Id">
-          <EuiFieldText value={id} onChange={(e) => setId(e.target.value)} />
+          <EuiFieldText
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            data-test-subj="routingExampleGetMessageId"
+          />
         </EuiFormRow>
 
         <EuiFormRow hasEmptyLabelSpace={true}>
-          <EuiButton disabled={isFetching || id === ''} onClick={() => doFetch()}>
+          <EuiButton
+            data-test-subj="routingExampleFetchMessage"
+            disabled={isFetching || id === ''}
+            onClick={() => doFetch()}
+          >
             {isFetching ? <EuiLoadingSpinner /> : 'Get message'}
           </EuiButton>
         </EuiFormRow>
@@ -78,7 +86,7 @@ export function GetMessageRouteExample({ getMessageById }: Props) {
         ) : null}
         {message !== '' ? (
           <p>
-            Message is: <pre>{message}</pre>
+            Message is: <pre data-test-subj="routingExampleGetMessage">{message}</pre>
           </p>
         ) : null}
       </EuiText>

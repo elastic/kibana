@@ -53,7 +53,11 @@ export function RandomNumberRouteExample({ fetchRandomNumber }: Props) {
           This examples uses a simple GET route that takes no parameters or body in the request and
           returns a single number.
         </p>
-        <EuiButton disabled={isFetching} onClick={() => doFetch()}>
+        <EuiButton
+          data-test-subj="routingExampleFetchRandomNumber"
+          disabled={isFetching}
+          onClick={() => doFetch()}
+        >
           {isFetching ? <EuiLoadingSpinner /> : 'Generate a random number'}
         </EuiButton>
 
@@ -62,7 +66,11 @@ export function RandomNumberRouteExample({ fetchRandomNumber }: Props) {
             {error}
           </EuiCallOut>
         ) : null}
-        {randomNumber > -1 ? <h2>{`Random number is ${randomNumber}`}</h2> : null}
+        {randomNumber > -1 ? (
+          <h2>
+            Random number is <div data-test-subj="routingExampleRandomNumber">{randomNumber}</div>
+          </h2>
+        ) : null}
       </EuiText>
     </React.Fragment>
   );

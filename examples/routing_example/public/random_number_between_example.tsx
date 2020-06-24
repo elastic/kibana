@@ -63,6 +63,7 @@ export function RandomNumberBetweenRouteExample({ fetchRandomNumberBetween }: Pr
         </p>
         <EuiFormRow label="Generate a random number between 0 and">
           <EuiFieldText
+            data-test-subj="routingExampleMaxRandomNumberBetween"
             value={maxInput}
             onChange={(e) => setMaxInput(e.target.value)}
             isInvalid={isNaN(Number(maxInput))}
@@ -70,7 +71,11 @@ export function RandomNumberBetweenRouteExample({ fetchRandomNumberBetween }: Pr
         </EuiFormRow>
 
         <EuiFormRow hasEmptyLabelSpace={true}>
-          <EuiButton disabled={isFetching || isNaN(Number(maxInput))} onClick={() => doFetch()}>
+          <EuiButton
+            data-test-subj="routingExampleFetchRandomNumberBetween"
+            disabled={isFetching || isNaN(Number(maxInput))}
+            onClick={() => doFetch()}
+          >
             {isFetching ? <EuiLoadingSpinner /> : 'Generate random number'}
           </EuiButton>
         </EuiFormRow>
@@ -80,7 +85,12 @@ export function RandomNumberBetweenRouteExample({ fetchRandomNumberBetween }: Pr
             {error.message}
           </EuiCallOut>
         ) : null}
-        {randomNumber > -1 ? <h2>{`Random number is ${randomNumber}`}</h2> : null}
+        {randomNumber > -1 ? (
+          <h2>
+            Random number is
+            <div data-test-subj="routingExampleRandomNumberBetween">{randomNumber}</div>
+          </h2>
+        ) : null}
       </EuiText>
     </React.Fragment>
   );

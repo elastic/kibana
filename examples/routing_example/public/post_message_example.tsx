@@ -67,14 +67,26 @@ export function PostMessageRouteExample({ postMessage, addSuccessToast }: Props)
           the route path.
         </p>
         <EuiFormRow label="Message Id">
-          <EuiFieldText value={id} onChange={(e) => setId(e.target.value)} />
+          <EuiFieldText
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            data-test-subj="routingExampleSetMessageId"
+          />
         </EuiFormRow>
         <EuiFormRow label="Message">
-          <EuiTextArea value={message} onChange={(e) => setMessage(e.target.value)} />
+          <EuiTextArea
+            data-test-subj="routingExampleSetMessage"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
         </EuiFormRow>
 
         <EuiFormRow hasEmptyLabelSpace={true}>
-          <EuiButton disabled={isPosting || id === '' || message === ''} onClick={() => doFetch()}>
+          <EuiButton
+            data-test-subj="routingExamplePostMessage"
+            disabled={isPosting || id === '' || message === ''}
+            onClick={() => doFetch()}
+          >
             {isPosting ? <EuiLoadingSpinner /> : 'Post message'}
           </EuiButton>
         </EuiFormRow>
