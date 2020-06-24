@@ -5,7 +5,7 @@
  */
 
 import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { palettes } from '../../../common/lib/palettes';
+import { paulTor14 } from '../../../common/lib/palettes';
 import { palette } from './palette';
 
 describe('palette', () => {
@@ -25,7 +25,7 @@ describe('palette', () => {
 
       it('defaults to pault_tor_14 colors', () => {
         const result = fn(null);
-        expect(result.colors).toEqual(palettes.paul_tor_14.colors);
+        expect(result.colors).toEqual(paulTor14.colors);
       });
     });
 
@@ -47,17 +47,17 @@ describe('palette', () => {
     describe('reverse', () => {
       it('reverses order of the colors', () => {
         const result = fn(null, { reverse: true });
-        expect(result.colors).toEqual(palettes.paul_tor_14.colors.reverse());
+        expect(result.colors).toEqual(paulTor14.colors.reverse());
       });
 
       it('keeps the original order of the colors', () => {
         const result = fn(null, { reverse: false });
-        expect(result.colors).toEqual(palettes.paul_tor_14.colors);
+        expect(result.colors).toEqual(paulTor14.colors);
       });
 
       it(`defaults to 'false`, () => {
         const result = fn(null);
-        expect(result.colors).toEqual(palettes.paul_tor_14.colors);
+        expect(result.colors).toEqual(paulTor14.colors);
       });
     });
   });
