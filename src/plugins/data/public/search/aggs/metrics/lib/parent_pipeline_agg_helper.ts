@@ -84,4 +84,16 @@ export const parentPipelineAggHelper = {
     }
     return subAgg ? subAgg.type.getFormat(subAgg) : new (FieldFormat.from(identity))();
   },
+
+  getSerializedFormat(agg: IMetricAggConfig) {
+    let subAgg;
+    const customMetric = agg.getParam('customMetric');
+
+    if (customMetric) {
+      subAgg = customMetric;
+    } else {
+      subAgg = agg.aggConfigs.byId(agg.getParam('metricAgg'));
+    }
+    return subAgg ? subAgg.type.getSerializedFormat(subAgg) : {};
+  },
 };
