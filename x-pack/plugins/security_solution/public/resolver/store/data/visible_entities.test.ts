@@ -5,12 +5,12 @@
  */
 
 import { Store, createStore } from 'redux';
-import { ResolverAction } from './actions';
-import { resolverReducer } from './reducer';
-import { ResolverState } from '../types';
-import { LegacyEndpointEvent, ResolverEvent } from '../../../common/endpoint/types';
-import { visibleProcessNodePositionsAndEdgeLineSegments } from './selectors';
-import { mockProcessEvent } from '../models/process_event_test_helpers';
+import { ResolverAction } from '../actions';
+import { resolverReducer } from '../reducer';
+import { ResolverState } from '../../types';
+import { LegacyEndpointEvent, ResolverEvent } from '../../../../common/endpoint/types';
+import { visibleProcessNodePositionsAndEdgeLineSegments } from '../selectors';
+import { mockProcessEvent } from '../../models/process_event_test_helpers';
 
 describe('resolver visible entities', () => {
   let processA: LegacyEndpointEvent;
@@ -20,8 +20,6 @@ describe('resolver visible entities', () => {
   let processE: LegacyEndpointEvent;
   let processF: LegacyEndpointEvent;
   let processG: LegacyEndpointEvent;
-  let processH: LegacyEndpointEvent;
-  let processI: LegacyEndpointEvent;
   let store: Store<ResolverState, ResolverAction>;
 
   beforeEach(() => {
@@ -50,7 +48,7 @@ describe('resolver visible entities', () => {
         unique_ppid: 0,
       },
     });
-    processD = mockProcessEvent({
+    processC = mockProcessEvent({
       endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -58,7 +56,7 @@ describe('resolver visible entities', () => {
         unique_ppid: 1,
       },
     });
-    processE = mockProcessEvent({
+    processD = mockProcessEvent({
       endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -66,7 +64,7 @@ describe('resolver visible entities', () => {
         unique_ppid: 2,
       },
     });
-    processF = mockProcessEvent({
+    processE = mockProcessEvent({
       endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -74,7 +72,7 @@ describe('resolver visible entities', () => {
         unique_ppid: 3,
       },
     });
-    processG = mockProcessEvent({
+    processF = mockProcessEvent({
       endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -82,7 +80,7 @@ describe('resolver visible entities', () => {
         unique_ppid: 4,
       },
     });
-    processH = mockProcessEvent({
+    processF = mockProcessEvent({
       endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -90,7 +88,7 @@ describe('resolver visible entities', () => {
         unique_ppid: 5,
       },
     });
-    processI = mockProcessEvent({
+    processG = mockProcessEvent({
       endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'termination_event',
@@ -102,44 +100,60 @@ describe('resolver visible entities', () => {
   });
   describe('when rendering a large tree with a small viewport', () => {
     beforeEach(() => {
-      const payload: ResolverEvent[] = [];
-      const action: ResolverAction = { type: 'serverReturnedResolverData', payload };
+      const events: ResolverEvent[] = [processA, processB];
+      const action: ResolverAction = {
+        type: 'serverReturnedResolverData',
+        events,
+        stats: new Map(),
+      };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
       store.dispatch(cameraAction);
     });
     it('the visibleProcessNodePositions list should only include 2 nodes', () => {
-      const { visibleProcessNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
+      const { processNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
         store.getState()
-      );
-      expect(visibleProcessNodePositions.length).toEqual(2);
+      )(Date.now());
+      expect(processNodePositions.length).toEqual(2);
     });
-    it('the visibleEdgeLineSegments list should only include 2 lines', () => {
-      const { visibleEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
+    it('the visibleEdgeLineSegments list should only include 1 lines', () => {
+      const { connectingEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
         store.getState()
-      );
-      expect(visibleEdgeLineSegments.length).toEqual(2);
+      )(Date.now());
+      expect(connectingEdgeLineSegments.length).toEqual(1);
     });
   });
   describe('when rendering a large tree with a large viewport', () => {
     beforeEach(() => {
-      const payload: ResolverEvent[] = [];
-      const action: ResolverAction = { type: 'serverReturnedResolverData', payload };
+      const events: ResolverEvent[] = [
+        processA,
+        processB,
+        processC,
+        processD,
+        processE,
+        processF,
+        processG,
+      ];
+      const action: ResolverAction = {
+        type: 'serverReturnedResolverData',
+        events,
+        stats: new Map(),
+      };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [1000, 1000] };
       store.dispatch(action);
       store.dispatch(cameraAction);
     });
     it('the visibleProcessNodePositions list should include all lines', () => {
-      const { visibleProcessNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
+      const { processNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
         store.getState()
-      );
-      expect(visibleProcessNodePositions.length).toEqual(8);
+      )(Date.now());
+      expect(processNodePositions.length).toEqual(5);
     });
     it('the visibleEdgeLineSegments list include all lines', () => {
-      const { visibleEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
+      const { connectingEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
         store.getState()
-      );
-      expect(visibleEdgeLineSegments.length).toEqual(7);
+      )(Date.now());
+      expect(connectingEdgeLineSegments.length).toEqual(3);
     });
   });
 });

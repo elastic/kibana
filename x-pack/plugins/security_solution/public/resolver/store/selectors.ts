@@ -175,22 +175,15 @@ const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
   dataSelectors.visibleProcessNodePositionsAndEdgeLineSegments
 );
 
-const currentBoundingBox = createSelector(
-  (state: ResolverState) => state,
-  function (state) {
-    return boundingBox(state)(Date.now());
-  }
-);
-
 export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
   indexedProcessNodesAndEdgeLineSegments,
-  currentBoundingBox,
+  boundingBox,
   function (
     /* eslint-disable no-shadow */
     indexedProcessNodesAndEdgeLineSegments,
-    currentBoundingBox
+    boundingBox
     /* eslint-enable no-shadow */
   ) {
-    return indexedProcessNodesAndEdgeLineSegments(currentBoundingBox);
+    return (time: number) => indexedProcessNodesAndEdgeLineSegments(boundingBox(time));
   }
 );

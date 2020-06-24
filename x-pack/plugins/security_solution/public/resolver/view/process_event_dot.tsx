@@ -376,6 +376,7 @@ const ProcessEventDotComponents = React.memo(
         | null;
     } = React.createRef();
     const { colorMap, nodeAssets } = useResolverTheme();
+    const processType = nodeType(isProcessTerminated, isProcessOrigin);
     const {
       backingFill,
       cubeSymbol,
@@ -383,7 +384,7 @@ const ProcessEventDotComponents = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = nodeAssets[nodeType(isProcessTerminated, isProcessOrigin)];
+    } = nodeAssets[processType];
     const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
     const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -726,7 +727,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
   unknownEvent: 'runningProcessCube',
 };
 
-function nodeType(isProcessTerminated: boolean, isProcessOrigin: boolean): string {
+function nodeType(isProcessTerminated: boolean, isProcessOrigin: boolean): keyof NodeStyleMap {
   if (isProcessTerminated) {
     return processTypeToCube.processTerminated;
   } else if (isProcessOrigin) {

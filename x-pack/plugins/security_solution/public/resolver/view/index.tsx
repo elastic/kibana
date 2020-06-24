@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -16,9 +16,10 @@ import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions, useResolverTheme } from './assets';
+import { entityId } from '../../../common/endpoint/models/event';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
-import * as eventModel from '../../../common/endpoint/models/event';
+import { SideEffectContext } from './side_effect_context';
 
 interface StyledResolver {
   backgroundColor: string;
@@ -74,9 +75,11 @@ export const Resolver = React.memo(function Resolver({
   className?: string;
   selectedEvent?: ResolverEvent;
 }) {
+  const { timestamp } = useContext(SideEffectContext);
+
   const { processNodePositions, connectingEdgeLineSegments } = useSelector(
     selectors.visibleProcessNodePositionsAndEdgeLineSegments
-  );
+  )(timestamp());
 
   const dispatch: (action: ResolverAction) => unknown = useDispatch();
   const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
@@ -128,11 +131,13 @@ export const Resolver = React.memo(function Resolver({
               {
                 entity: {
                   points: [startPosition, endPosition],
+                  metadata,
                 },
               },
               index
             ) => (
               <EdgeLine
+                edgeLineMetadata={metadata}
                 key={index}
                 startPosition={startPosition}
                 endPosition={endPosition}
@@ -142,9 +147,7 @@ export const Resolver = React.memo(function Resolver({
           )}
           {processNodePositions.map(({ entity, position }, index) => {
             const adjacentNodeMap = processToAdjacencyMap.get(entity);
-            const {
-              process: { entity_id },
-            } = entity;
+            const processEntityId = entityId(entity);
             if (!adjacentNodeMap) {
               // This should never happen
               throw new Error('Issue calculating adjacency node map.');
@@ -156,7 +159,7 @@ export const Resolver = React.memo(function Resolver({
                 projectionMatrix={projectionMatrix}
                 event={entity}
                 adjacentNodeMap={adjacentNodeMap}
-                isProcessTerminated={terminatedProcesses.has(entity_id)}
+                isProcessTerminated={terminatedProcesses.has(processEntityId)}
                 isProcessOrigin={false}
               />
             );

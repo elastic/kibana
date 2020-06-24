@@ -162,6 +162,14 @@ export interface IndexedProcessNode extends BBox {
 }
 
 /**
+ * A type containing all things to actually be rendered to the DOM.
+ */
+export interface VisibleEntites {
+  processNodePositions: IndexedProcessNode[];
+  connectingEdgeLineSegments: IndexedEdgeLineSegment[];
+}
+
+/**
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {

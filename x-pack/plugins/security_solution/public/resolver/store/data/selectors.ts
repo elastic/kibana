@@ -5,8 +5,7 @@
  */
 
 import rbush from 'rbush';
-import { createSelector, defaultMemoize } from 'reselect';
-import { isEqual } from 'lodash/fp';
+import { createSelector } from 'reselect';
 import {
   DataState,
   IndexedProcessTree,
@@ -22,6 +21,7 @@ import {
   IndexedEdgeLineSegment,
   IndexedProcessNode,
   AABB,
+  VisibleEntites,
 } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as event from '../../../../common/endpoint/models/event';
@@ -39,6 +39,7 @@ import {
   levelOrder,
 } from '../../models/indexed_process_tree';
 import { getFriendlyElapsedTime } from '../../lib/date';
+import { isEqual } from '../../lib/aabb';
 
 const unit = 140;
 const distanceBetweenNodesInUnits = 2;
@@ -70,7 +71,7 @@ export function hasError(state: DataState) {
  * We can multiply both of these matrices to get the final transformation below.
  */
 /* prettier-ignore */
-export const isometricTransformMatrix: Matrix3 = [
+const isometricTransformMatrix: Matrix3 = [
   Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
   Math.sqrt(6) / 6,   Math.sqrt(6) / 6,     -(Math.sqrt(6) / 3),
   0,                  0,                    1,
@@ -147,7 +148,7 @@ export const terminatedProcesses = createSelector(
  *                   H
  *
  */
-export function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
+function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
   const widths = new Map<ResolverEvent, number>();
 
   if (size(indexedProcessTree) === 0) {
@@ -178,7 +179,7 @@ export function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree):
   return widths;
 }
 
-export function processEdgeLineSegments(
+function processEdgeLineSegments(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths,
   positions: ProcessPositions
@@ -358,7 +359,7 @@ function* levelOrderWithWidths(
   }
 }
 
-export function processPositions(
+function processPositions(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths
 ): ProcessPositions {
@@ -607,27 +608,39 @@ const indexedProcessNodePositionsAndEdgeLineSegments = createSelector(
 export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
   indexedProcessNodePositionsAndEdgeLineSegments,
   function visibleProcessNodePositionsAndEdgeLineSegments(tree) {
-    return defaultMemoize((boundingBox: AABB) => {
-      const {
-        minimum: [minX, minY],
-        maximum: [maxX, maxY],
-      } = boundingBox;
-      const entities = tree.search({
-        minX,
-        minY,
-        maxX,
-        maxY,
-      });
-      const visibleProcessNodePositions = entities.filter(
-        (entity): entity is IndexedProcessNode => entity.type === 'processNode'
-      );
-      const connectingEdgeLineSegments = entities.filter(
-        (entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine'
-      );
-      return {
-        processNodePositions: visibleProcessNodePositions,
-        connectingEdgeLineSegments,
-      };
-    }, isEqual);
+    // memoize the results of this call to avoid unnecessarily rerunning
+    let lastBoundingBox: AABB | null = null;
+    let currentlyVisible: VisibleEntites = {
+      processNodePositions: [],
+      connectingEdgeLineSegments: [],
+    };
+    return (boundingBox: AABB) => {
+      if (lastBoundingBox !== null && isEqual(lastBoundingBox, boundingBox)) {
+        return currentlyVisible;
+      } else {
+        const {
+          minimum: [minX, minY],
+          maximum: [maxX, maxY],
+        } = boundingBox;
+        const entities = tree.search({
+          minX,
+          minY,
+          maxX,
+          maxY,
+        });
+        const visibleProcessNodePositions = entities.filter(
+          (entity): entity is IndexedProcessNode => entity.type === 'processNode'
+        );
+        const connectingEdgeLineSegments = entities.filter(
+          (entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine'
+        );
+        currentlyVisible = {
+          processNodePositions: visibleProcessNodePositions,
+          connectingEdgeLineSegments,
+        };
+        lastBoundingBox = boundingBox;
+        return currentlyVisible;
+      }
+    };
   }
 );
