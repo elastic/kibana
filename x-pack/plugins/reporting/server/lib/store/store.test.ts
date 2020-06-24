@@ -107,10 +107,37 @@ describe('ReportingStore', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: error]`);
     });
 
+    /* Creating the index will fail, if there were multiple jobs staged in
+     * parallel and creation completed from another Kibana instance.  Only the
+     * first request in line can successfully create it.
+     * In spite of that race condition, adding the new job in Elasticsearch is
+     * fine.
+     */
+    it('ignores index creation error if the index already exists and continues adding the report', async () => {
+      // setup
+      callClusterStub.withArgs('indices.exists').resolves(false);
+      callClusterStub.withArgs('indices.create').rejects(new Error('error'));
+
+      const store = new ReportingStore(mockCore, mockLogger);
+      const reportType = 'unknowntype';
+      const reportPayload = {};
+      const reportOptions = {
+        timeout: 10000,
+        created_by: 'created_by_string',
+        browser_type: 'browser_type_string',
+        max_attempts: 1,
+      };
+      await expect(
+        store.addReport(reportType, reportPayload, reportOptions)
+      ).rejects.toMatchInlineSnapshot(`[Error: error]`);
+    });
+
     it('skips creating the index if already exists', async () => {
       // setup
-      callClusterStub.withArgs('indices.exists').resolves(true);
-      callClusterStub.withArgs('indices.create').rejects(new Error('error')); // will not be triggered
+      callClusterStub.withArgs('indices.exists').resolves(false);
+      callClusterStub
+        .withArgs('indices.create')
+        .rejects(new Error('resource_already_exists_exception')); // will be triggered but ignored
 
       const store = new ReportingStore(mockCore, mockLogger);
       const reportType = 'unknowntype';

@@ -87,21 +87,12 @@ export class ReportingStore {
             body,
           })
           .then(() => true)
-          .catch((err) => {
-            /* FIXME creating the index will fail if there were multiple jobs staged in parallel.
-             * Each staged job checks `client.indices.exists` and could each get `false` as a response.
-             * Only the first job in line can successfully create it though.
-             * The problem might only happen in automated tests, where the indices are deleted after each test run.
-             * This catch block is in place to not fail a job if the job runner hits this race condition.
-             * Unfortunately we don't have a logger in scope to log a warning.
-             */
-            const isIndexExistsError =
-              err &&
-              err.body &&
-              err.body.error &&
-              err.body.error.type === 'resource_already_exists_exception';
+          .catch((err: Error) => {
+            const isIndexExistsError = err.message.match(/resource_already_exists_exception/);
             if (isIndexExistsError) {
-              return true;
+              // Do not fail a job if the job runner hits the race condition.
+              this.logger.warn(`Automatic index creation failed: index already exists: ${err}`);
+              return;
             }
 
             throw err;
