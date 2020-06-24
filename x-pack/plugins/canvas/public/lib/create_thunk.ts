@@ -5,7 +5,7 @@
  */
 
 import { Dispatch, Action } from 'redux';
-// @ts-ignore untyped dependency
+// @ts-expect-error untyped dependency
 import { createThunk as createThunkFn } from 'redux-thunks/cjs';
 import { State } from '../../types';
 

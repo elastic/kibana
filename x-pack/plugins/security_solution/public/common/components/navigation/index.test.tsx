@@ -15,14 +15,40 @@ import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
+const mockGetUrlForApp = jest.fn();
+jest.mock('../../lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        chrome: undefined,
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: mockGetUrlForApp,
+        },
+      },
+    }),
+  };
+});
+jest.mock('../link_to');
 
 describe('SIEM Navigation', () => {
   const mockProps: SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState = {
     pageName: 'hosts',
-    pathName: '/hosts',
+    pathName: '/',
     detailName: undefined,
     search: '',
     tabName: HostsTableType.authentications,
@@ -65,63 +91,71 @@ describe('SIEM Navigation', () => {
       {
         detailName: undefined,
         navTabs: {
+          alerts: {
+            disabled: false,
+            href: '/app/security/alerts',
+            id: 'alerts',
+            name: 'Alerts',
+            urlKey: 'alerts',
+          },
           case: {
             disabled: false,
-            href: '#/link-to/case',
+            href: '/app/security/cases',
             id: 'case',
             name: 'Cases',
             urlKey: 'case',
           },
           management: {
             disabled: false,
-            href: '#/management',
+            href: '/app/security/management',
             id: 'management',
             name: 'Management',
             urlKey: 'management',
           },
-          detections: {
-            disabled: false,
-            href: '#/link-to/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
-          },
           hosts: {
             disabled: false,
-            href: '#/link-to/hosts',
+            href: '/app/security/hosts',
             id: 'hosts',
             name: 'Hosts',
             urlKey: 'host',
           },
           network: {
             disabled: false,
-            href: '#/link-to/network',
+            href: '/app/security/network',
             id: 'network',
             name: 'Network',
             urlKey: 'network',
           },
           overview: {
             disabled: false,
-            href: '#/link-to/overview',
+            href: '/app/security/overview',
             id: 'overview',
             name: 'Overview',
             urlKey: 'overview',
           },
           timelines: {
             disabled: false,
-            href: '#/link-to/timelines',
+            href: '/app/security/timelines',
             id: 'timelines',
             name: 'Timelines',
             urlKey: 'timeline',
           },
+          endpointAlerts: {
+            disabled: false,
+            href: '/app/security/endpoint-alerts',
+            id: 'endpointAlerts',
+            name: 'Endpoint Alerts',
+            urlKey: 'management',
+          },
         },
         pageName: 'hosts',
-        pathName: '/hosts',
+        pathName: '/',
         search: '',
         state: undefined,
         tabName: 'authentications',
         query: { query: '', language: 'kuery' },
         filters: [],
+        flowTarget: undefined,
         savedQuery: undefined,
         timeline: {
           id: '',
@@ -150,74 +184,83 @@ describe('SIEM Navigation', () => {
           },
         },
       },
-      undefined
+      undefined,
+      mockGetUrlForApp
     );
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
     wrapper.setProps({
       pageName: 'network',
-      pathName: '/network',
-      tabName: undefined,
+      pathName: '/',
+      tabName: 'authentications',
     });
     wrapper.update();
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(
-      1,
+      2,
       {
         detailName: undefined,
         filters: [],
+        flowTarget: undefined,
         navTabs: {
+          alerts: {
+            disabled: false,
+            href: '/app/security/alerts',
+            id: 'alerts',
+            name: 'Alerts',
+            urlKey: 'alerts',
+          },
           case: {
             disabled: false,
-            href: '#/link-to/case',
+            href: '/app/security/cases',
             id: 'case',
             name: 'Cases',
             urlKey: 'case',
           },
-          detections: {
+          endpointAlerts: {
             disabled: false,
-            href: '#/link-to/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
+            href: '/app/security/endpoint-alerts',
+            id: 'endpointAlerts',
+            name: 'Endpoint Alerts',
+            urlKey: 'management',
           },
           hosts: {
             disabled: false,
-            href: '#/link-to/hosts',
+            href: '/app/security/hosts',
             id: 'hosts',
             name: 'Hosts',
             urlKey: 'host',
           },
           management: {
             disabled: false,
-            href: '#/management',
+            href: '/app/security/management',
             id: 'management',
             name: 'Management',
             urlKey: 'management',
           },
           network: {
             disabled: false,
-            href: '#/link-to/network',
+            href: '/app/security/network',
             id: 'network',
             name: 'Network',
             urlKey: 'network',
           },
           overview: {
             disabled: false,
-            href: '#/link-to/overview',
+            href: '/app/security/overview',
             id: 'overview',
             name: 'Overview',
             urlKey: 'overview',
           },
           timelines: {
             disabled: false,
-            href: '#/link-to/timelines',
+            href: '/app/security/timelines',
             id: 'timelines',
             name: 'Timelines',
             urlKey: 'timeline',
           },
         },
-        pageName: 'hosts',
-        pathName: '/hosts',
+        pageName: 'network',
+        pathName: '/',
         query: { language: 'kuery', query: '' },
         savedQuery: undefined,
         search: '',
@@ -247,7 +290,8 @@ describe('SIEM Navigation', () => {
           },
         },
       },
-      undefined
+      undefined,
+      mockGetUrlForApp
     );
   });
 });

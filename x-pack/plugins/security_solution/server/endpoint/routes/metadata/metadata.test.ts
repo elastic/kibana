@@ -16,7 +16,7 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
 import {
@@ -63,7 +63,7 @@ describe('test endpoint route', () => {
     });
 
     registerEndpointRoutes(routerMock, {
-      logFactory: loggingServiceMock.create(),
+      logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
     });
@@ -237,7 +237,7 @@ describe('test endpoint route', () => {
       expect(routeConfig.options).toEqual({ authRequired: true });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
-      expect(result).toHaveProperty('metadata.endpoint');
+      expect(result).toHaveProperty('metadata.Endpoint');
       expect(result.host_status).toEqual(HostStatus.ONLINE);
     });
 

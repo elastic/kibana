@@ -5,16 +5,11 @@
  */
 
 import { initializeESFieldsRoute } from './es_fields';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import {
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
   elasticsearchServiceMock,
 } from 'src/core/server/mocks';
 
@@ -31,10 +26,10 @@ describe('Retrieve ES Fields', () => {
 
   beforeEach(() => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
     initializeESFieldsRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.get.mock.calls[0][1];

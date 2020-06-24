@@ -20,6 +20,8 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     const isProductionMode = appContextService.getIsProductionMode();
     const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
     const isTLSCheckDisabled = appContextService.getConfig()?.fleet?.tlsCheckDisabled ?? false;
+    const isUsingEphemeralEncryptionKey = appContextService.getEncryptedSavedObjectsSetup()
+      .usingEphemeralEncryptionKey;
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     if (!isAdminUserSetup) {
@@ -30,6 +32,10 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     }
     if (!isTLSCheckDisabled && !isCloud && isProductionMode && !isTLSEnabled) {
       missingRequirements.push('tls_required');
+    }
+
+    if (isUsingEphemeralEncryptionKey) {
+      missingRequirements.push('encrypted_saved_object_encryption_key_required');
     }
 
     const body: GetFleetStatusResponse = {
