@@ -11,7 +11,7 @@ import React, { memo, useCallback } from 'react';
 import { ErrorMessage } from './types';
 import * as i18n from './translations';
 
-interface CallOutProps {
+export interface CallOutProps {
   id: string;
   type: NonNullable<ErrorMessage['errorType']>;
   title: string;

@@ -9,7 +9,7 @@ import { useKibana } from '../../lib/kibana';
 import { createUseKibanaMock } from '../../mock/kibana_react';
 import { useMessagesStorage, UseMessagesStorage } from './use_messages_storage';
 
-jest.mock('../lib/kibana');
+jest.mock('../../lib/kibana');
 const useKibanaMock = useKibana as jest.Mock;
 
 describe('useLocalStorage', () => {

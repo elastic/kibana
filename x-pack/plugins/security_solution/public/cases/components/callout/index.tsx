@@ -14,7 +14,7 @@ import { createCalloutId } from './helpers';
 
 export * from './helpers';
 
-interface CaseCallOutProps {
+export interface CaseCallOutProps {
   title: string;
   messages?: ErrorMessage[];
 }

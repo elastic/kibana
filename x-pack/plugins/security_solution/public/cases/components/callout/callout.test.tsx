@@ -7,13 +7,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CallOut } from './callout';
-import { ErrorMessage } from './types';
+import { CallOut, CallOutProps } from './callout';
 
 describe('Callout', () => {
-  const defaultProps = {
+  const defaultProps: CallOutProps = {
     id: 'md5-hex',
-    type: 'primary' as NonNullable<ErrorMessage['errorType']>,
+    type: 'primary',
     title: 'a tittle',
     messages: [
       {
@@ -25,6 +24,10 @@ describe('Callout', () => {
     showCallOut: true,
     handleDismissCallout: jest.fn(),
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('It renders the callout', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
@@ -60,11 +63,12 @@ describe('Callout', () => {
     );
   });
 
-  it('dismiss the button correctly', () => {
+  it('dismiss the callout correctly', () => {
     const wrapper = mount(<CallOut {...defaultProps} messages={[]} />);
     expect(wrapper.find(`[data-test-subj="callout-dismiss-md5-hex"]`).exists()).toBeTruthy();
     wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).simulate('click');
     wrapper.update();
-    expect(defaultProps.handleDismissCallout).toHaveBeenCalledWith('md5-hex');
+
+    expect(defaultProps.handleDismissCallout).toHaveBeenCalledWith('md5-hex', 'primary');
   });
 });
