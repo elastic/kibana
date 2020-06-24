@@ -8,13 +8,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import {
-  TransformEndpointRequest,
   DeleteTransformEndpointResult,
   DeleteTransformStatus,
+  TransformEndpointRequest,
 } from '../../../common';
-import { getErrorMessage, extractErrorMessage } from '../../shared_imports';
+import { extractErrorMessage, getErrorMessage } from '../../shared_imports';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
+import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$, TransformListRow } from '../common';
 import { ToastNotificationText } from '../components';
 import { useApi } from './use_api';
 import { indexService } from '../services/es_index_service';
@@ -27,13 +27,13 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
+
   const toggleDeleteIndex = useCallback(() => setDeleteDestIndex(!deleteDestIndex), [
     deleteDestIndex,
   ]);
   const toggleDeleteIndexPattern = useCallback(() => setDeleteIndexPattern(!deleteIndexPattern), [
     deleteIndexPattern,
   ]);
-
   const checkIndexPatternExists = useCallback(
     async (indexName: string) => {
       try {
@@ -79,6 +79,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   useEffect(() => {
     checkUserIndexPermission();
 
+    // if user only deleting one transform
     if (items.length === 1) {
       const config = items[0].config;
       const destinationIndex = Array.isArray(config.dest.index)
@@ -110,7 +111,8 @@ export const useDeleteTransforms = () => {
   return async (
     transforms: TransformListRow[],
     shouldDeleteDestIndex: boolean,
-    shouldDeleteDestIndexPattern: boolean
+    shouldDeleteDestIndexPattern: boolean,
+    shouldForceDelete = false
   ) => {
     const transformsInfo: TransformEndpointRequest[] = transforms.map((tf) => ({
       id: tf.config.id,
@@ -121,7 +123,8 @@ export const useDeleteTransforms = () => {
       const results: DeleteTransformEndpointResult = await api.deleteTransforms(
         transformsInfo,
         shouldDeleteDestIndex,
-        shouldDeleteDestIndexPattern
+        shouldDeleteDestIndexPattern,
+        shouldForceDelete
       );
       const isBulk = Object.keys(results).length > 1;
       const successCount: Record<SuccessCountField, number> = {

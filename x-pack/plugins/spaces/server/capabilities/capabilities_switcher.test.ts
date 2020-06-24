@@ -8,7 +8,7 @@ import { Feature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import { Capabilities, CoreSetup } from 'src/core/server';
-import { coreMock, httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { PluginsStart } from '../plugin';
@@ -109,7 +109,7 @@ const setup = (space: Space) => {
   const spacesService = spacesServiceMock.createSetupContract();
   spacesService.getActiveSpace.mockResolvedValue(space);
 
-  const logger = loggingServiceMock.createLogger();
+  const logger = loggingSystemMock.createLogger();
 
   const switcher = setupCapabilitiesSwitcher(
     (coreSetup as unknown) as CoreSetup<PluginsStart>,
