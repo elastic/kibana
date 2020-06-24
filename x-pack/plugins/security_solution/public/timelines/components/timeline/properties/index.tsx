@@ -182,6 +182,7 @@ export const Properties = React.memo<Props>(
           showUsersView={title.length > 0}
           status={status}
           timelineId={timelineId}
+          timelineType={timelineType}
           title={title}
           updateDescription={updateDescription}
           updateNote={updateNote}

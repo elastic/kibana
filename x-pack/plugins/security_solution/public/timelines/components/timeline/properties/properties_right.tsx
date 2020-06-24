@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { NewTimeline, Description, NotesButton, NewCase, ExistingCase } from './helpers';
 
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -27,7 +27,7 @@ import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
 
 import * as i18n from './translations';
-// import { NewTemplateTimeline } from './new_template_timeline';
+import { NewTemplateTimeline } from './new_template_timeline';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
   margin-right: 5px;
@@ -83,6 +83,7 @@ interface PropertiesRightComponentProps {
   showUsersView: boolean;
   status: TimelineStatus;
   timelineId: string;
+  timelineType: TimelineType;
   title: string;
   updateDescription: UpdateDescription;
   updateNote: UpdateNote;
@@ -110,6 +111,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   status,
   timelineId,
   title,
+  timelineType,
   updateDescription,
   updateNote,
   usersViewing,
@@ -145,33 +147,37 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                 </EuiFlexItem>
               )}
 
-              {/* <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false}>
                 <NewTemplateTimeline
                   closeGearMenu={onClosePopover}
                   timelineId={timelineId}
                   title={i18n.NEW_TEMPLATE_TIMELINE}
                 />
-              </EuiFlexItem> */}
+              </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
                 <OpenTimelineModalButton onClick={onOpenTimelineModal} />
               </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <NewCase
-                  onClosePopover={onClosePopover}
-                  timelineId={timelineId}
-                  timelineTitle={title}
-                  timelineStatus={status}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ExistingCase
-                  onClosePopover={onClosePopover}
-                  onOpenCaseModal={onOpenCaseModal}
-                  timelineStatus={status}
-                />
-              </EuiFlexItem>
+              {timelineType === TimelineType.default && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <NewCase
+                      onClosePopover={onClosePopover}
+                      timelineId={timelineId}
+                      timelineTitle={title}
+                      timelineStatus={status}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ExistingCase
+                      onClosePopover={onClosePopover}
+                      onOpenCaseModal={onOpenCaseModal}
+                      timelineStatus={status}
+                    />
+                  </EuiFlexItem>
+                </>
+              )}
 
               <EuiFlexItem grow={false}>
                 <InspectButton

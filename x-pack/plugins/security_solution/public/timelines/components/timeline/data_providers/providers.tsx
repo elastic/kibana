@@ -5,7 +5,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
@@ -86,7 +86,9 @@ const Parens = styled.span`
 `;
 
 const AndOrBadgeContainer = styled.div`
-  width: 44px;
+  width: 121px;
+  display: flex;
+  justify-content: flex-end;
 `;
 
 const LastAndOrBadgeInGroup = styled.div`
@@ -111,11 +113,11 @@ const TimelineEuiFormHelpText = styled(EuiFormHelpText)`
 TimelineEuiFormHelpText.displayName = 'TimelineEuiFormHelpText';
 
 const ParensContainer = styled(EuiFlexItem)`
-  align-self: flex-start;
+  align-self: center;
 `;
 
 const AddDataProviderContainer = styled.div`
-  padding: 10px 15px;
+  padding-right: 9px;
 `;
 
 const getDataProviderValue = (dataProvider: DataProvidersAnd) =>
@@ -151,158 +153,170 @@ export const Providers = React.memo<Props>(
       [dataProviders]
     );
     return (
-      <div>
-        <AddDataProviderContainer>
-          <AddDataProviderPopover timelineId={timelineId} Button={AddDataProviderPopoverButton} />
-        </AddDataProviderContainer>
+      <>
         {dataProviderGroups.map((group, groupIndex) => (
-          <EuiFlexGroup alignItems="center" gutterSize="none" key={`droppable-${groupIndex}`}>
-            <OrFlexItem grow={false}>
-              <AndOrBadgeContainer>
-                {groupIndex !== 0 && <AndOrBadge type="or" />}
-              </AndOrBadgeContainer>
-            </OrFlexItem>
-            <ParensContainer grow={false}>
-              <Parens>{'('}</Parens>
-            </ParensContainer>
-            <EuiFlexItem grow={false}>
-              <Droppable
-                droppableId={getTimelineProviderDroppableId({ groupIndex, timelineId })}
-                direction="horizontal"
-              >
-                {(droppableProvided) => (
-                  <DroppableContainer
-                    className={
-                      groupIndex === dataProviderGroups.length - 1
-                        ? EMPTY_PROVIDERS_GROUP_CLASS_NAME
-                        : ''
-                    }
-                    ref={droppableProvided.innerRef}
-                    style={listStyle}
-                    {...droppableProvided.droppableProps}
-                  >
-                    {group.map((dataProvider, index) => (
-                      <Draggable
-                        disableInteractiveElementBlocking={true}
-                        draggableId={getTimelineProviderDraggableId({
-                          dataProviderId: dataProvider.id,
-                          groupIndex,
-                          timelineId,
-                        })}
-                        index={index}
-                        key={dataProvider.id}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={getItemStyle(provided.draggableProps.style)}
-                            data-test-subj="providerContainer"
-                          >
-                            <EuiFlexGroup alignItems="center" gutterSize="none">
-                              <EuiFlexItem grow={false}>
-                                <ProviderItemBadge
-                                  andProviderId={index > 0 ? dataProvider.id : undefined}
-                                  browserFields={browserFields}
-                                  deleteProvider={() =>
-                                    index > 0
-                                      ? onDataProviderRemoved(group[0].id, dataProvider.id)
-                                      : onDataProviderRemoved(dataProvider.id)
-                                  }
-                                  field={
-                                    index > 0
-                                      ? dataProvider.queryMatch.displayField ??
-                                        dataProvider.queryMatch.field
-                                      : group[0].queryMatch.displayField ??
-                                        group[0].queryMatch.field
-                                  }
-                                  kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
-                                  isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
-                                  isExcluded={index > 0 ? dataProvider.excluded : group[0].excluded}
-                                  isInvalid={isInvalid(index > 0 ? dataProvider : group[0])}
-                                  onDataProviderEdited={onDataProviderEdited}
-                                  operator={
-                                    index > 0
-                                      ? dataProvider.queryMatch.operator ?? IS_OPERATOR
-                                      : group[0].queryMatch.operator ?? IS_OPERATOR
-                                  }
-                                  register={dataProvider}
-                                  providerId={index > 0 ? group[0].id : dataProvider.id}
-                                  timelineId={timelineId}
-                                  timelineType={timelineType}
-                                  toggleEnabledProvider={() =>
-                                    index > 0
-                                      ? onToggleDataProviderEnabled({
-                                          providerId: group[0].id,
-                                          enabled: !dataProvider.enabled,
-                                          andProviderId: dataProvider.id,
-                                        })
-                                      : onToggleDataProviderEnabled({
-                                          providerId: dataProvider.id,
-                                          enabled: !dataProvider.enabled,
-                                        })
-                                  }
-                                  toggleExcludedProvider={() =>
-                                    index > 0
-                                      ? onToggleDataProviderExcluded({
-                                          providerId: group[0].id,
-                                          excluded: !dataProvider.excluded,
-                                          andProviderId: dataProvider.id,
-                                        })
-                                      : onToggleDataProviderExcluded({
-                                          providerId: dataProvider.id,
-                                          excluded: !dataProvider.excluded,
-                                        })
-                                  }
-                                  toggleTypeProvider={() =>
-                                    index > 0
-                                      ? onToggleDataProviderType({
-                                          providerId: group[0].id,
-                                          type:
-                                            dataProvider.type === DataProviderType.template
-                                              ? DataProviderType.default
-                                              : DataProviderType.template,
-                                          andProviderId: dataProvider.id,
-                                        })
-                                      : onToggleDataProviderType({
-                                          providerId: dataProvider.id,
-                                          type:
-                                            dataProvider.type === DataProviderType.template
-                                              ? DataProviderType.default
-                                              : DataProviderType.template,
-                                        })
-                                  }
-                                  val={getDataProviderValue(dataProvider)}
-                                  type={dataProvider.type}
-                                />
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                {!snapshot.isDragging &&
-                                  (index < group.length - 1 ? (
-                                    <AndOrBadge type="and" />
-                                  ) : (
-                                    <LastAndOrBadgeInGroup>
-                                      <AndOrBadge type="and" />
-                                    </LastAndOrBadgeInGroup>
-                                  ))}
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {droppableProvided.placeholder}
-                  </DroppableContainer>
+          <>
+            {groupIndex !== 0 && <EuiSpacer size="xs" />}
+
+            <EuiFlexGroup alignItems="center" gutterSize="none" key={`droppable-${groupIndex}`}>
+              <OrFlexItem grow={false}>
+                {groupIndex === 0 ? (
+                  <AddDataProviderContainer>
+                    <AddDataProviderPopover
+                      timelineId={timelineId}
+                      Button={AddDataProviderPopoverButton}
+                    />
+                  </AddDataProviderContainer>
+                ) : (
+                  <AndOrBadgeContainer>
+                    <AndOrBadge type="or" />
+                  </AndOrBadgeContainer>
                 )}
-              </Droppable>
-            </EuiFlexItem>
-            <ParensContainer grow={false}>
-              <Parens>{')'}</Parens>
-            </ParensContainer>
-          </EuiFlexGroup>
+              </OrFlexItem>
+              <ParensContainer grow={false}>
+                <Parens>{'('}</Parens>
+              </ParensContainer>
+              <EuiFlexItem grow={false}>
+                <Droppable
+                  droppableId={getTimelineProviderDroppableId({ groupIndex, timelineId })}
+                  direction="horizontal"
+                >
+                  {(droppableProvided) => (
+                    <DroppableContainer
+                      className={
+                        groupIndex === dataProviderGroups.length - 1
+                          ? EMPTY_PROVIDERS_GROUP_CLASS_NAME
+                          : ''
+                      }
+                      ref={droppableProvided.innerRef}
+                      style={listStyle}
+                      {...droppableProvided.droppableProps}
+                    >
+                      {group.map((dataProvider, index) => (
+                        <Draggable
+                          disableInteractiveElementBlocking={true}
+                          draggableId={getTimelineProviderDraggableId({
+                            dataProviderId: dataProvider.id,
+                            groupIndex,
+                            timelineId,
+                          })}
+                          index={index}
+                          key={dataProvider.id}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={getItemStyle(provided.draggableProps.style)}
+                              data-test-subj="providerContainer"
+                            >
+                              <EuiFlexGroup alignItems="center" gutterSize="none">
+                                <EuiFlexItem grow={false}>
+                                  <ProviderItemBadge
+                                    andProviderId={index > 0 ? dataProvider.id : undefined}
+                                    browserFields={browserFields}
+                                    deleteProvider={() =>
+                                      index > 0
+                                        ? onDataProviderRemoved(group[0].id, dataProvider.id)
+                                        : onDataProviderRemoved(dataProvider.id)
+                                    }
+                                    field={
+                                      index > 0
+                                        ? dataProvider.queryMatch.displayField ??
+                                          dataProvider.queryMatch.field
+                                        : group[0].queryMatch.displayField ??
+                                          group[0].queryMatch.field
+                                    }
+                                    kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
+                                    isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
+                                    isExcluded={
+                                      index > 0 ? dataProvider.excluded : group[0].excluded
+                                    }
+                                    isInvalid={isInvalid(index > 0 ? dataProvider : group[0])}
+                                    onDataProviderEdited={onDataProviderEdited}
+                                    operator={
+                                      index > 0
+                                        ? dataProvider.queryMatch.operator ?? IS_OPERATOR
+                                        : group[0].queryMatch.operator ?? IS_OPERATOR
+                                    }
+                                    register={dataProvider}
+                                    providerId={index > 0 ? group[0].id : dataProvider.id}
+                                    timelineId={timelineId}
+                                    timelineType={timelineType}
+                                    toggleEnabledProvider={() =>
+                                      index > 0
+                                        ? onToggleDataProviderEnabled({
+                                            providerId: group[0].id,
+                                            enabled: !dataProvider.enabled,
+                                            andProviderId: dataProvider.id,
+                                          })
+                                        : onToggleDataProviderEnabled({
+                                            providerId: dataProvider.id,
+                                            enabled: !dataProvider.enabled,
+                                          })
+                                    }
+                                    toggleExcludedProvider={() =>
+                                      index > 0
+                                        ? onToggleDataProviderExcluded({
+                                            providerId: group[0].id,
+                                            excluded: !dataProvider.excluded,
+                                            andProviderId: dataProvider.id,
+                                          })
+                                        : onToggleDataProviderExcluded({
+                                            providerId: dataProvider.id,
+                                            excluded: !dataProvider.excluded,
+                                          })
+                                    }
+                                    toggleTypeProvider={() =>
+                                      index > 0
+                                        ? onToggleDataProviderType({
+                                            providerId: group[0].id,
+                                            type:
+                                              dataProvider.type === DataProviderType.template
+                                                ? DataProviderType.default
+                                                : DataProviderType.template,
+                                            andProviderId: dataProvider.id,
+                                          })
+                                        : onToggleDataProviderType({
+                                            providerId: dataProvider.id,
+                                            type:
+                                              dataProvider.type === DataProviderType.template
+                                                ? DataProviderType.default
+                                                : DataProviderType.template,
+                                          })
+                                    }
+                                    val={getDataProviderValue(dataProvider)}
+                                    type={dataProvider.type}
+                                  />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  {!snapshot.isDragging &&
+                                    (index < group.length - 1 ? (
+                                      <AndOrBadge type="and" />
+                                    ) : (
+                                      <LastAndOrBadgeInGroup>
+                                        <AndOrBadge type="and" />
+                                      </LastAndOrBadgeInGroup>
+                                    ))}
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {droppableProvided.placeholder}
+                    </DroppableContainer>
+                  )}
+                </Droppable>
+              </EuiFlexItem>
+              <ParensContainer grow={false}>
+                <Parens>{')'}</Parens>
+              </ParensContainer>
+            </EuiFlexGroup>
+          </>
         ))}
-      </div>
+      </>
     );
   }
 );
