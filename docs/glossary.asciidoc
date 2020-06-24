@@ -138,7 +138,7 @@ An open-standard file format for storing geospatial vector data.
 [[glossary-heat map]] heat map ::
 // tag::GeoJSON-def[]
 A geographic visualization in which point data is clustered to show locations with higher densities.
-// end::GeoJSON-def[]
+// end::heat-map-def[]
 
 
 [float]
