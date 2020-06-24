@@ -106,17 +106,18 @@ export const AnomaliesTable: React.FunctionComponent<{
   const expandedDatasetRowContents = useMemo(
     () =>
       [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedDatasetRows, id) => {
+        const anomaly = results.anomalies.find((_anomaly) => _anomaly.id === id);
+
         return {
           ...aggregatedDatasetRows,
-          [id]: (
+          [id]: anomaly ? (
             <AnomaliesTableExpandedRow
-              id={id}
-              results={results}
+              anomaly={anomaly}
               setTimeRange={setTimeRange}
               timeRange={timeRange}
               jobId={jobId}
             />
-          ),
+          ) : null,
         };
       }, {}),
     [expandedIds, results, setTimeRange, timeRange, jobId]

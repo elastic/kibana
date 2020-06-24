@@ -12,28 +12,19 @@ import { useMount } from 'react-use';
 
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
-import { LogEntryRateResults } from '../../use_log_entry_rate_results';
-import {
-  getAnnotationsForPartition,
-  getLogEntryRateSeriesForPartition,
-  getTotalNumberOfLogEntriesForPartition,
-} from '../helpers/data_formatters';
+import { AnomalyRecord } from '../../use_log_entry_rate_results';
 import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
 import { useLogEntryRateExamples } from '../../use_log_entry_rate_examples';
+import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
+
+const EXAMPLE_COUNT = 5;
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
-  id: string;
-  results: LogEntryRateResults;
+  anomaly: AnomalyRecord;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   jobId: string;
-}> = ({ id, results, timeRange, setTimeRange, jobId }) => {
-  const anomaly = useMemo(() => {
-    return results.anomalies.find((_anomaly) => _anomaly.id === id);
-  }, [results, id]);
-
-  // if (!anomaly) return null;
-
+}> = ({ anomaly, timeRange, setTimeRange, jobId }) => {
   const {
     sourceConfiguration: { sourceId },
   } = useLogEntryRateModuleContext();
@@ -46,7 +37,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   } = useLogEntryRateExamples({
     dataset: anomaly.partitionId,
     endTime: timeRange.endTime,
-    exampleCount: 4,
+    exampleCount: EXAMPLE_COUNT,
     sourceId,
     startTime: timeRange.startTime,
   });
@@ -58,6 +49,13 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   return (
     <>
       <div>Example logs</div>
+      <LogEntryExampleMessages
+        examples={logEntryRateExamples}
+        isLoading={isLoadingLogEntryRateExamples}
+        hasFailedLoading={hasFailedLoadingLogEntryRateExamples}
+        exampleCount={EXAMPLE_COUNT}
+        onReload={getLogEntryRateExamples}
+      />
       <div>
         <EuiFlexGroup>
           <EuiFlexItem>

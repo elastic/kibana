@@ -24,7 +24,7 @@ type PartitionRecord = Record<
   { buckets: PartitionBucket[]; topAnomalyScore: number; totalNumberOfLogEntries: number }
 >;
 
-type AnomalyRecord = LogEntryRateAnomaly & {
+export type AnomalyRecord = LogEntryRateAnomaly & {
   partitionId: string;
 };
 
