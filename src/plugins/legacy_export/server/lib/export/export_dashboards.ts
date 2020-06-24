@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { collectReferencesDeep } from './collect_references_deep';
 
-export async function exportDashboards(req) {
-  const ids = _.flatten([req.query.dashboard]);
-  const config = req.server.config();
-
-  const savedObjectsClient = req.getSavedObjectsClient();
+export async function exportDashboards(
+  ids: string[],
+  savedObjectsClient: SavedObjectsClientContract,
+  kibanaVersion: string
+) {
   const objectsToExport = ids.map((id) => ({ id, type: 'dashboard' }));
 
   const objects = await collectReferencesDeep(savedObjectsClient, objectsToExport);
   return {
-    version: config.get('pkg.version'),
+    version: kibanaVersion,
     objects,
   };
 }
