@@ -58,39 +58,54 @@ export const getIndexFields = memoizeOne(
           ),
           title,
         }
-      : { fields: [], title }
+      : { fields: [], title },
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
 export const getBrowserFields = memoizeOne(
-  (fields: IndexField[]): BrowserFields =>
+  (_title: string, fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
       ? fields.reduce<BrowserFields>(
           (accumulator: BrowserFields, field: IndexField) =>
             set([field.category, 'fields', field.name], field, accumulator),
           {}
         )
-      : {}
+      : {},
+  // Update the value only if _title has changed
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
 export const indicesExistOrDataTemporarilyUnavailable = (
   indicesExist: boolean | null | undefined
 ) => indicesExist || isUndefined(indicesExist);
 
+const EMPTY_BROWSER_FIELDS = {};
+
+interface UseWithSourceState {
+  browserFields: BrowserFields;
+  errorMessage: string | null;
+  indexPattern: IIndexPattern;
+  indicesExist: boolean | undefined | null;
+}
+
 export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [loading, updateLoading] = useState(false);
-  const [indicesExist, setIndicesExist] = useState<boolean | undefined | null>(undefined);
-  const [browserFields, setBrowserFields] = useState<BrowserFields>({});
-  const [errorMessage, updateErrorMessage] = useState<string | null>(null);
   const defaultIndex = useMemo<string[]>(() => {
     if (indexToAdd != null && !isEmpty(indexToAdd)) {
       return [...configIndex, ...indexToAdd];
     }
     return configIndex;
   }, [configIndex, indexToAdd]);
-  const [indexPattern, setIndexPattern] = useState<IIndexPattern>(
-    getIndexFields(defaultIndex.join(), [])
-  );
+
+  const [loading, updateLoading] = useState(false);
+  const [{ browserFields, errorMessage, indicesExist, indexPattern }, setState] = useState<
+    UseWithSourceState
+  >({
+    indicesExist: undefined,
+    browserFields: EMPTY_BROWSER_FIELDS,
+    errorMessage: null,
+    indexPattern: getIndexFields(defaultIndex.join(), []),
+  });
 
   const apolloClient = useApolloClient();
 
@@ -117,16 +132,22 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
           .then(
             (result) => {
               updateLoading(false);
-              updateErrorMessage(null);
-              setIndicesExist(get('data.source.status.indicesExist', result));
-              setBrowserFields(getBrowserFields(get('data.source.status.indexFields', result)));
-              setIndexPattern(
-                getIndexFields(defaultIndex.join(), get('data.source.status.indexFields', result))
-              );
+              setState({
+                indicesExist: get('data.source.status.indicesExist', result),
+                browserFields: getBrowserFields(
+                  defaultIndex.join(),
+                  get('data.source.status.indexFields', result)
+                ),
+                indexPattern: getIndexFields(
+                  defaultIndex.join(),
+                  get('data.source.status.indexFields', result)
+                ),
+                errorMessage: null,
+              });
             },
             (error) => {
               updateLoading(false);
-              updateErrorMessage(error.message);
+              setState((prevState) => ({ ...prevState, errorMessage: error.message }));
             }
           );
       }
