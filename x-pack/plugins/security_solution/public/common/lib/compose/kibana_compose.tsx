@@ -12,7 +12,7 @@ import { ApolloLink } from 'apollo-link';
 import introspectionQueryResultData from '../../../graphql/introspection.json';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
-import { StartServices } from '../../../types';
+import { CoreStart } from '../../../../../../../src/core/public';
 
 export function composeLibs(core: CoreStart): AppFrontendLibs {
   const cache = new InMemoryCache({

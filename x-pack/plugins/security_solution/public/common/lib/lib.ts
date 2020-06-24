@@ -7,11 +7,11 @@
 import { IScope } from 'angular';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
-import { StartServices } from '../../types';
+import { CoreStart } from '../../../../../../src/core/public';
 
 export interface AppFrontendLibs {
   apolloClient: AppApolloClient;
-  kibana: StartServices;
+  kibana: CoreStart;
 }
 
 export type AppTimezoneProvider = () => string;

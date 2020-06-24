@@ -16,7 +16,7 @@ import {
 } from '../../../../common/types/timeline';
 
 import * as i18n from './translations';
-import { TimelineTabsStyle, TemplateTimelineFilter } from './types';
+import { TemplateTimelineFilter } from './types';
 import { disableTemplate } from '../../../../common/constants';
 
 export const useTimelineStatus = ({
@@ -32,20 +32,27 @@ export const useTimelineStatus = ({
   templateTimelineType: TemplateTimelineTypeLiteralWithNull;
   templateTimelineFilter: JSX.Element[] | null;
 } => {
-  const isTemplateFilterEnabled = timelineType === TimelineType.template;
+  const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(
+    disableTemplate ? null : TemplateTimelineType.elastic
+  );
+  const isTemplateFilterEnabled = useMemo(() => timelineType === TimelineType.template, [
+    timelineType,
+  ]);
 
-  const [templateTimelineType, setTemplateTimelineType] = useState<
-    TemplateTimelineTypeLiteralWithNull
-  >(
-    disableTemplate || timelineType !== TimelineType.template ? null : TemplateTimelineType.elastic
+  const templateTimelineType = useMemo(
+    () => (disableTemplate || !isTemplateFilterEnabled ? null : selectedTab),
+    [selectedTab, isTemplateFilterEnabled]
   );
 
-  const timelineStatus =
-    templateTimelineType == null
-      ? null
-      : templateTimelineType === TemplateTimelineType.elastic
-      ? TimelineStatus.immutable
-      : TimelineStatus.active;
+  const timelineStatus = useMemo(
+    () =>
+      templateTimelineType == null
+        ? null
+        : templateTimelineType === TemplateTimelineType.elastic
+        ? TimelineStatus.immutable
+        : TimelineStatus.active,
+    [templateTimelineType]
+  );
 
   const filters = useMemo(
     () => [
@@ -69,17 +76,13 @@ export const useTimelineStatus = ({
 
   const onFilterClicked = useCallback(
     (tabId) => {
-      if (templateTimelineType === tabId) {
-        setTemplateTimelineType(null);
+      if (selectedTab === tabId) {
+        setSelectedTab(null);
       } else {
-        if (timelineStatus !== TimelineStatus.immutable && tabId !== TemplateTimelineType.elastic) {
-          setTemplateTimelineType(TemplateTimelineType.custom);
-        } else {
-          setTemplateTimelineType(tabId);
-        }
+        setSelectedTab(tabId);
       }
     },
-    [setTemplateTimelineType, templateTimelineType, timelineStatus]
+    [setSelectedTab, selectedTab]
   );
 
   const templateTimelineFilter = useMemo(() => {
