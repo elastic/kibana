@@ -61,7 +61,7 @@ A filtering rule that excludes one or more members from a set.
 [[c_glos]]
 == C
 
-[[glossary-certainty-map]] certainty ::
+[[glossary-certainty]] certainty ::
 // tag::certainty-def[]
 Specifies how many documents must contain a pair of terms before it is considered
 to be a useful connection in a graph.
