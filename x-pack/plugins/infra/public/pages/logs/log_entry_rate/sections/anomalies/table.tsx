@@ -18,6 +18,7 @@ import {
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
+import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 
 interface TableItem {
   id: string;
@@ -189,6 +190,7 @@ export const AnomaliesTable: React.FunctionComponent<{
         sortable: true,
         truncateText: true,
         dataType: 'number' as const,
+        render: (anomalyScore: number) => <AnomalySeverityIndicator anomalyScore={anomalyScore} />,
       },
       {
         field: 'anomalyMessage',
