@@ -302,12 +302,13 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
   ({ noteIds, toggleShowNotes, timelineType }) => {
     const isTemplate = timelineType === TimelineType.template;
 
-    return isTemplate ? null : (
+    return (
       <EuiButtonIcon
         aria-label={i18n.NOTES}
         data-test-subj="timeline-notes-button-small"
         iconType="editorComment"
         onClick={() => toggleShowNotes()}
+        isDisabled={isTemplate}
       />
     );
   }

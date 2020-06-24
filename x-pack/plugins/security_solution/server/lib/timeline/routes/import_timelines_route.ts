@@ -59,7 +59,7 @@ export const importTimelinesRoute = (
         body: buildRouteValidation(ImportTimelinesPayloadSchemaRt),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
         body: {
           maxBytes: config.maxTimelineImportPayloadBytes,
           output: 'stream',
@@ -138,7 +138,6 @@ export const importTimelinesRoute = (
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
-                    // console.log('parsedTimeline', JSON.stringify(parsedTimeline));
                     let newTimeline = null;
                     try {
                       const compareTimelinesStatus = new CompareTimelinesStatus({

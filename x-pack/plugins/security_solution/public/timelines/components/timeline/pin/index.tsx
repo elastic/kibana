@@ -27,13 +27,14 @@ interface Props {
 export const Pin = React.memo<Props>(
   ({ allowUnpinning, iconSize = 'm', onClick = noop, pinned, timelineType }) => {
     const isTemplate = timelineType === TimelineType.template;
-    return isTemplate ? null : (
+    return (
       <EuiButtonIcon
         aria-label={pinned ? i18n.PINNED : i18n.UNPINNED}
         data-test-subj="pin"
         iconSize={iconSize}
         iconType={getPinIcon(pinned)}
         onClick={onClick}
+        isDisabled={isTemplate}
       />
     );
   }

@@ -21,7 +21,7 @@ import { AddNote } from './add_note';
 import { columns } from './columns';
 import { AssociateNote, GetNewNoteId, NotesCount, search, UpdateNote } from './helpers';
 import { NOTES_PANEL_WIDTH, NOTES_PANEL_HEIGHT } from '../timeline/properties/notes_size';
-import { TimelineStatusLiteral } from '../../../../common/types/timeline';
+import { TimelineStatusLiteral, TimelineStatus } from '../../../../common/types/timeline';
 
 interface Props {
   associateNote: AssociateNote;
@@ -57,6 +57,7 @@ InMemoryTable.displayName = 'InMemoryTable';
 export const Notes = React.memo<Props>(
   ({ associateNote, getNotesByIds, getNewNoteId, noteIds, status, updateNote }) => {
     const [newNote, setNewNote] = useState('');
+    const isImmutable = status === TimelineStatus.immutable;
 
     return (
       <NotesPanel>
@@ -65,14 +66,15 @@ export const Notes = React.memo<Props>(
         </EuiModalHeader>
 
         <EuiModalBody>
-          <AddNote
-            associateNote={associateNote}
-            getNewNoteId={getNewNoteId}
-            newNote={newNote}
-            status={status}
-            updateNewNote={setNewNote}
-            updateNote={updateNote}
-          />
+          {!isImmutable && (
+            <AddNote
+              associateNote={associateNote}
+              getNewNoteId={getNewNoteId}
+              newNote={newNote}
+              updateNewNote={setNewNote}
+              updateNote={updateNote}
+            />
+          )}
           <EuiSpacer size="s" />
           <InMemoryTable
             data-test-subj="notes-table"

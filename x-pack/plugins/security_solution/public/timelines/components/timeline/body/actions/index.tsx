@@ -140,6 +140,7 @@ export const Actions = React.memo<Props>(
                   content={getPinTooltip({
                     isPinned: eventIsPinned,
                     eventHasNotes: eventHasNotes(noteIds),
+                    timelineType: timeline.timelineType,
                   })}
                 >
                   <Pin
@@ -166,7 +167,7 @@ export const Actions = React.memo<Props>(
                   status={timeline.status}
                   timelineType={timeline.timelineType}
                   toggleShowNotes={toggleShowNotes}
-                  toolTip={i18n.NOTES_TOOLTIP}
+                  toolTip={timeline.timelineType ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP}
                   updateNote={updateNote}
                 />
               </EventsTdContent>

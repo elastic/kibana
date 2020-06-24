@@ -19,7 +19,6 @@ import {
 import * as i18n from '../translations';
 
 import { NewNote } from './new_note';
-import { TimelineStatus, TimelineStatusLiteral } from '../../../../../common/types/timeline';
 
 const AddNotesContainer = styled(EuiFlexGroup)`
   margin-bottom: 5px;
@@ -48,58 +47,46 @@ export const AddNote = React.memo<{
   getNewNoteId: GetNewNoteId;
   newNote: string;
   onCancelAddNote?: () => void;
-  status: TimelineStatusLiteral;
   updateNewNote: UpdateInternalNewNote;
   updateNote: UpdateNote;
-}>(
-  ({
-    associateNote,
-    getNewNoteId,
-    newNote,
-    onCancelAddNote,
-    status,
-    updateNewNote,
-    updateNote,
-  }) => {
-    const handleClick = useCallback(
-      () =>
-        updateAndAssociateNode({
-          associateNote,
-          getNewNoteId,
-          newNote,
-          updateNewNote,
-          updateNote,
-        }),
-      [associateNote, getNewNoteId, newNote, updateNewNote, updateNote]
-    );
-    const hasNewNote = newNote.trim().length > 0;
-    const isImmutable = status === TimelineStatus.immutable;
-    return (
-      <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
-        <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
-        <EuiFlexItem grow={true}>
-          <MarkdownHint show={hasNewNote} />
-        </EuiFlexItem>
-        <ButtonsContainer gutterSize="none">
-          {onCancelAddNote != null ? (
-            <EuiFlexItem grow={false}>
-              <CancelButton onCancelAddNote={onCancelAddNote} />
-            </EuiFlexItem>
-          ) : null}
+}>(({ associateNote, getNewNoteId, newNote, onCancelAddNote, updateNewNote, updateNote }) => {
+  const handleClick = useCallback(
+    () =>
+      updateAndAssociateNode({
+        associateNote,
+        getNewNoteId,
+        newNote,
+        updateNewNote,
+        updateNote,
+      }),
+    [associateNote, getNewNoteId, newNote, updateNewNote, updateNote]
+  );
+  const hasNewNote = newNote.trim().length > 0;
+  return (
+    <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
+      <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
+      <EuiFlexItem grow={true}>
+        <MarkdownHint show={hasNewNote} />
+      </EuiFlexItem>
+      <ButtonsContainer gutterSize="none">
+        {onCancelAddNote != null ? (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="add-note"
-              isDisabled={!hasNewNote || isImmutable}
-              fill={true}
-              onClick={handleClick}
-            >
-              {i18n.ADD_NOTE}
-            </EuiButton>
+            <CancelButton onCancelAddNote={onCancelAddNote} />
           </EuiFlexItem>
-        </ButtonsContainer>
-      </AddNotesContainer>
-    );
-  }
-);
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="add-note"
+            isDisabled={!hasNewNote}
+            fill={true}
+            onClick={handleClick}
+          >
+            {i18n.ADD_NOTE}
+          </EuiButton>
+        </EuiFlexItem>
+      </ButtonsContainer>
+    </AddNotesContainer>
+  );
+});
 
 AddNote.displayName = 'AddNote';
