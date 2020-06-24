@@ -5,7 +5,7 @@
  */
 
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import { IRouter, KibanaRequest, RequestHandler, RouteConfig } from 'kibana/server';
+import { IRouter, KibanaRequest, Logger, RequestHandler, RouteConfig } from 'kibana/server';
 import { registerRoutes } from './index';
 import { DATASOURCE_API_ROUTES } from '../../../common/constants';
 import { xpackMocks } from '../../../../../mocks';
@@ -15,8 +15,10 @@ import { DatasourceServiceInterface, ExternalCallback } from '../..';
 import { CreateDatasourceRequestSchema } from '../../types/rest_spec';
 import { datasourceService } from '../../services';
 
+const datasourceServiceMock = datasourceService as jest.Mocked<DatasourceServiceInterface>;
+
 jest.mock('../../services/datasource', (): {
-  datasourceService: jest.Mock<DatasourceServiceInterface>;
+  datasourceService: jest.Mocked<DatasourceServiceInterface>;
 } => {
   return {
     datasourceService: {
@@ -27,7 +29,7 @@ jest.mock('../../services/datasource', (): {
         Promise.resolve({
           ...newData,
           id: '1',
-          revision: '1',
+          revision: 1,
           updated_at: new Date().toISOString(),
           updated_by: 'elastic',
           created_at: new Date().toISOString(),
@@ -206,7 +208,7 @@ describe('When calling datasource', () => {
         const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
-        expect(datasourceService.create.mock.calls[0][1]).toEqual({
+        expect(datasourceServiceMock.create.mock.calls[0][1]).toEqual({
           config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,
@@ -272,7 +274,7 @@ describe('When calling datasource', () => {
         });
 
         it('should log errors', async () => {
-          const errorLogger = appContextService.getLogger().error;
+          const errorLogger = (appContextService.getLogger() as jest.Mocked<Logger>).error;
           const request = getCreateKibanaRequest();
           await routeHandler(context, request, response);
           expect(response.ok).toHaveBeenCalled();
@@ -286,7 +288,7 @@ describe('When calling datasource', () => {
           const request = getCreateKibanaRequest();
           await routeHandler(context, request, response);
           expect(response.ok).toHaveBeenCalled();
-          expect(datasourceService.create.mock.calls[0][1]).toEqual({
+          expect(datasourceServiceMock.create.mock.calls[0][1]).toEqual({
             config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
             description: '',
             enabled: true,

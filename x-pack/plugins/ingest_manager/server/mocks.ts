@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  loggingServiceMock,
-  savedObjectsServiceMock,
-  savedObjectsClientMock,
-} from 'src/core/server/mocks';
+import { loggingServiceMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 import { IngestManagerAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
@@ -20,10 +16,12 @@ export const createAppContextStartContractMock = (): IngestManagerAppContext => 
     savedObjects: savedObjectsServiceMock.createStartContract(),
     security: securityMock.createSetup(),
     logger: loggingServiceMock.create().get(),
+    isProductionMode: true,
+    kibanaVersion: '8.0.0',
   };
 };
 
-export const createDatasourceServiceMock = (): jest.Mocked<DatasourceServiceInterface> => {
+export const createDatasourceServiceMock = () => {
   return {
     assignPackageStream: jest.fn(),
     buildDatasourceFromPackage: jest.fn(),
@@ -34,5 +32,5 @@ export const createDatasourceServiceMock = (): jest.Mocked<DatasourceServiceInte
     getByIDs: jest.fn(),
     list: jest.fn(),
     update: jest.fn(),
-  };
+  } as jest.Mocked<DatasourceServiceInterface>;
 };
