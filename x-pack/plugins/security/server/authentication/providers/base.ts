@@ -26,6 +26,9 @@ export interface AuthenticationProviderOptions {
   client: ILegacyClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
+  urls: {
+    loggedOut: string;
+  };
 }
 
 /**

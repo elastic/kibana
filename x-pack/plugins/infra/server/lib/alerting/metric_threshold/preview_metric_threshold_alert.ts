@@ -5,6 +5,7 @@
  */
 
 import { first, zip } from 'lodash';
+import { Unit } from '@elastic/datemath';
 import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
@@ -25,7 +26,7 @@ interface PreviewMetricThresholdAlertParams {
     filterQuery: string | undefined;
   };
   config: InfraSource['configuration'];
-  lookback: 'h' | 'd' | 'w' | 'M';
+  lookback: Unit;
   alertInterval: string;
   end?: number;
   overrideLookbackIntervalInSeconds?: number;

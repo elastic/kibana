@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import React, { useMemo, useState } from 'react';
-import { AlertFlyout } from '../../../../../components/alerting/inventory/alert_flyout';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';
 import { createUptimeLink } from '../../lib/create_uptime_link';
