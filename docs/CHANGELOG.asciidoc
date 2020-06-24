@@ -59,6 +59,17 @@ Metrics::
 APM::
 * Services maps fail to load when there are no machine learning jobs for APM.
 As a workaround, enable a machine learning job on at least one service in APM. {kib-issue}69238[#69238]
+Reporting::
+* Config setting `xpack.reporting.enabled` has a bug and Kibana will fail to
+start up if the config key exists in `kibana.yml`. There is no workaround until
+a patch fix is released. {kib-pull}69645[#69645]
+* Config setting `xpack.reporting.encryptionKey` has an unintentional breaking
+change that validates the encryption key string to be a minimum of 32
+characters. If upgrading from 7.7.x or below, Kibana will fail to start up in
+7.8.0 if the `kibana.yml` has `xpack.reporting.encryptionKey` containing fewer
+than 32 characters. Since changing the encryption key means being no longer
+able to access older reports, there is no workaround until a patch fix is
+released. {kib-pull}69827[#69827]
 SIEM::
 * After upgrading from 7.7.x to 7.8.0, rules that have been overwritten in any
 of the 7.7.x releases fail to run without warning (see issue for workaround)
