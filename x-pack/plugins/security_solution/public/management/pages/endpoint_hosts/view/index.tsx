@@ -153,7 +153,7 @@ export const HostList = () => {
       return {
         key: item.config_id,
         label: item.name,
-        checked: selectedPolicyId === item.id ? 'on' : undefined,
+        checked: selectedPolicyId === item.config_id ? 'on' : undefined,
       };
     });
   }, [policyItems, selectedPolicyId]);
@@ -343,7 +343,7 @@ export const HostList = () => {
         <EndpointsEmptyState
           loading={loading}
           onActionClick={handleDeployEndpointsClick}
-          actionDisabled={isFetchingPackageInfo && selectedPolicyId === undefined}
+          actionDisabled={isFetchingPackageInfo || selectedPolicyId === undefined}
           handleSelectableOnChange={handleSelectableOnChange}
           selectionOptions={selectionOptions}
         />
