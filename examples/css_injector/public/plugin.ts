@@ -22,11 +22,7 @@ import { Plugin } from 'src/core/public';
 import './index.scss';
 
 export class CssInjectorPlugin implements Plugin {
-  constructor() {}
-
   public setup() {}
 
   public start() {}
-
-  public stop() {}
 }
