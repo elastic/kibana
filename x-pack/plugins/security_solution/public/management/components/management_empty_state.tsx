@@ -132,10 +132,10 @@ const EndpointsEmptyState = React.memo<{
               height={100}
               listProps={{ bordered: true, singleSelection: true }}
               onChange={handleSelectableOnChange}
-              data-test-sub="onboardingPolicySelect"
+              data-test-subj="onboardingPolicySelect"
             >
-              {(list) =>
-                loading ? (
+              {(list) => {
+                return loading ? (
                   <EuiSelectableMessage>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.endpointList.loadingPolicies"
@@ -149,8 +149,8 @@ const EndpointsEmptyState = React.memo<{
                     id="xpack.securitySolution.endpoint.endpointList.noPolicies"
                     defaultMessage="There are no policies."
                   />
-                )
-              }
+                );
+              }}
             </EuiSelectable>
           </>
         ),

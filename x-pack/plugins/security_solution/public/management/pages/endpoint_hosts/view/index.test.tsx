@@ -34,7 +34,7 @@ describe('when on the hosts page', () => {
     render = () => mockedContext.render(<HostList />);
   });
 
-  it('should show the empty state', async () => {
+  it('should show the empty state when there are no hosts or polices', async () => {
     const renderResult = render();
     // Initially, there are no endpoints or policies, so we prompt to add policies first.
     const table = await renderResult.findByTestId('emptyPolicyTable');
@@ -73,6 +73,18 @@ describe('when on the hosts page', () => {
       const renderResult = render();
       const emptyEndpointsTable = await renderResult.findByTestId('emptyEndpointsTable');
       expect(emptyEndpointsTable).not.toBeNull();
+    });
+
+    it('should display the onboarding steps', async () => {
+      const renderResult = render();
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+
+    it('should show policy selection', async () => {
+      const renderResult = render();
+      const onboardingPolicySelect = await renderResult.findAllByTestId('onboardingPolicySelect');
+      expect(onboardingPolicySelect).not.toBeNull();
     });
   });
 
