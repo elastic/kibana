@@ -20,8 +20,6 @@ export const transformElasticToListItem = ({
   response,
   type,
 }: TransformElasticToListItemOptions): ListItemArraySchema => {
-  // We disable the consistent return and array-callback-return since we want to use typescript for exhaustive type checks
-  // eslint-disable-next-line consistent-return, array-callback-return
   return response.hits.hits.map((hit) => {
     const {
       _id,
