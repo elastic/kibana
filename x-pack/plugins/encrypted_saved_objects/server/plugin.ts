@@ -13,7 +13,6 @@ import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
   EncryptionError,
-  EncryptedSavedObjectsMigrationService,
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { setupSavedObjects, ClientInstanciator } from './saved_objects';
@@ -56,14 +55,11 @@ export class Plugin {
 
     const crypto = nodeCrypto({ encryptionKey });
 
+    const auditLogger = new EncryptedSavedObjectsAuditLogger(
+      deps.security?.audit.getLogger('encryptedSavedObjects')
+    );
     const service = Object.freeze(
-      new EncryptedSavedObjectsService(
-        crypto,
-        this.logger,
-        new EncryptedSavedObjectsAuditLogger(
-          deps.security?.audit.getLogger('encryptedSavedObjects')
-        )
-      )
+      new EncryptedSavedObjectsService(crypto, this.logger, auditLogger)
     );
 
     this.savedObjectsSetup = setupSavedObjects({
@@ -78,7 +74,16 @@ export class Plugin {
         service.registerType(typeRegistration),
       usingEphemeralEncryptionKey,
       createMigration: getCreateMigration(
-        new EncryptedSavedObjectsMigrationService(crypto, this.logger)
+        service,
+        (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
+          const serviceForMigration = new EncryptedSavedObjectsService(
+            crypto,
+            this.logger,
+            auditLogger
+          );
+          serviceForMigration.registerType(typeRegistration);
+          return serviceForMigration;
+        }
       ),
     };
   }

@@ -9,12 +9,7 @@ import {
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
 } from 'src/core/server';
-import {
-  EncryptedSavedObjectTypeRegistration,
-  SavedObjectDescriptor,
-  EncryptedSavedObjectsMigrationService,
-  EncryptedSavedObjectAttributesDefinition,
-} from './crypto';
+import { EncryptedSavedObjectTypeRegistration, EncryptedSavedObjectsService } from './crypto';
 
 type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (
   doc: SavedObjectUnsanitizedDoc<InputAttributes> | SavedObjectUnsanitizedDoc<InputAttributes>,
@@ -33,31 +28,42 @@ export type CreateEncryptedSavedObjectsMigrationFn = <
 >(
   isMigrationNeededPredicate: IsMigrationNeededPredicate<InputAttributes, MigratedAttributes>,
   migration: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>,
-  inputType: EncryptedSavedObjectTypeRegistration,
+  inputType?: EncryptedSavedObjectTypeRegistration,
   migratedType?: EncryptedSavedObjectTypeRegistration
 ) => SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes>;
 
 export const getCreateMigration = (
-  migrationService: EncryptedSavedObjectsMigrationService
+  encryptedSavedObjectsService: Readonly<EncryptedSavedObjectsService>,
+  instantiateServiceWithLegacyType: (
+    typeRegistration: EncryptedSavedObjectTypeRegistration
+  ) => EncryptedSavedObjectsService
 ): CreateEncryptedSavedObjectsMigrationFn => (
   isMigrationNeededPredicate,
   migration,
   inputType,
-  migratedType = inputType
+  migratedType
 ) => {
-  if (inputType.type !== migratedType.type) {
+  if (inputType && migratedType && inputType.type !== migratedType.type) {
     throw new Error(
       `An Invalid Encrypted Saved Objects migration is trying to migrate across types ("${inputType.type}" => "${migratedType.type}"), which isn't permitted`
     );
   }
-  const inputTypeDefinition = new EncryptedSavedObjectAttributesDefinition(inputType);
-  const migratedTypeDefinition = new EncryptedSavedObjectAttributesDefinition(migratedType);
+
+  const inputService = inputType
+    ? instantiateServiceWithLegacyType(inputType)
+    : encryptedSavedObjectsService;
+
+  const migratedService = migratedType
+    ? instantiateServiceWithLegacyType(migratedType)
+    : encryptedSavedObjectsService;
+
   return (encryptedDoc, context) => {
     if (!isMigrationNeededPredicate(encryptedDoc)) {
       return encryptedDoc;
     }
+
     const descriptor = {
-      id: encryptedDoc.id,
+      id: encryptedDoc.id!,
       type: encryptedDoc.type,
       namespace: encryptedDoc.namespace,
     };
@@ -68,16 +74,12 @@ export const getCreateMigration = (
     return mapAttributes(
       migration(
         mapAttributes(encryptedDoc, (inputAttributes) =>
-          migrationService.decryptAttributes<any>(descriptor, inputTypeDefinition, inputAttributes)
+          inputService.decryptAttributesSync<any>(descriptor, inputAttributes)
         ),
         context
       ),
       (migratedAttributes) =>
-        migrationService.encryptAttributes<any>(
-          descriptor,
-          migratedTypeDefinition,
-          migratedAttributes
-        )
+        migratedService.encryptAttributesSync<any>(descriptor, migratedAttributes)
     );
   };
 };

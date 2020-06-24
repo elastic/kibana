@@ -11,5 +11,4 @@ export {
   SavedObjectDescriptor,
 } from './encrypted_saved_objects_service';
 export { EncryptionError } from './encryption_error';
-export { EncryptedSavedObjectsMigrationService } from './encrypted_saved_objects_migration_service';
 export { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';

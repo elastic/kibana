@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Crypto } from '@elastic/node-crypto';
+import { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import typeDetect from 'type-detect';
 import { Logger } from 'src/core/server';
+import stringify from 'json-stable-stringify';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
-import { getAAD } from './get_aad';
 
 /**
  * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users
@@ -200,35 +200,23 @@ export class EncryptedSavedObjectsService {
     return { attributes: clonedAttributes as T, error: decryptionError };
   }
 
-  /**
-   * Takes saved object attributes for the specified type and encrypts all of them that are supposed
-   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
-   * attributes were encrypted original attributes dictionary is returned.
-   * @param descriptor Descriptor of the saved object to encrypt attributes for.
-   * @param attributes Dictionary of __ALL__ saved object attributes.
-   * @param [params] Additional parameters.
-   * @throws Will throw if encryption fails for whatever reason.
-   */
-  public async encryptAttributes<T extends Record<string, unknown>>(
+  private *attributesToEncryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
     params?: CommonParameters
-  ): Promise<T> {
+  ): Generator<[unknown, string], T, string> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;
     }
 
-    const encryptionAAD = getAAD(typeDefinition, descriptor, attributes, this.logger);
+    const encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
     const encryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue != null) {
         try {
-          encryptedAttributes[attributeName] = await this.crypto.encrypt(
-            attributeValue,
-            encryptionAAD
-          );
+          encryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
         } catch (err) {
           this.logger.error(
             `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
@@ -271,6 +259,64 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
+   * Takes saved object attributes for the specified type and encrypts all of them that are supposed
+   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
+   * attributes were encrypted original attributes dictionary is returned.
+   * @param descriptor Descriptor of the saved object to encrypt attributes for.
+   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [params] Additional parameters.
+   * @throws Will throw if encryption fails for whatever reason.
+   */
+  public async encryptAttributes<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    params?: CommonParameters
+  ): Promise<T> {
+    const iterator = this.attributesToEncryptIterator<T>(descriptor, attributes, params);
+
+    let iteratorResult = iterator.next();
+    while (!iteratorResult.done) {
+      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      try {
+        iteratorResult = iterator.next(await this.crypto.encrypt(attributeValue, encryptionAAD));
+      } catch (err) {
+        iterator.throw!(err);
+      }
+    }
+
+    return iteratorResult.value;
+  }
+
+  /**
+   * Takes saved object attributes for the specified type and encrypts all of them that are supposed
+   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
+   * attributes were encrypted original attributes dictionary is returned.
+   * @param descriptor Descriptor of the saved object to encrypt attributes for.
+   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [params] Additional parameters.
+   * @throws Will throw if encryption fails for whatever reason.
+   */
+  public encryptAttributesSync<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    params?: CommonParameters
+  ): T {
+    const iterator = this.attributesToEncryptIterator<T>(descriptor, attributes, params);
+
+    let iteratorResult = iterator.next();
+    while (!iteratorResult.done) {
+      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      try {
+        iteratorResult = iterator.next(this.crypto.encryptSync(attributeValue, encryptionAAD));
+      } catch (err) {
+        iterator.throw!(err);
+      }
+    }
+
+    return iteratorResult.value;
+  }
+
+  /**
    * Takes saved object attributes for the specified type and decrypts all of them that are supposed
    * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
    * attributes were decrypted original attributes dictionary is returned.
@@ -285,13 +331,75 @@ export class EncryptedSavedObjectsService {
     attributes: T,
     params?: CommonParameters
   ): Promise<T> {
+    const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params);
+
+    let iteratorResult = iterator.next();
+    while (!iteratorResult.done) {
+      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      try {
+        iteratorResult = iterator.next(
+          (await this.crypto.decrypt(attributeValue, encryptionAAD)) as string
+        );
+      } catch (err) {
+        iterator.throw!(err);
+      }
+    }
+
+    return iteratorResult.value;
+  }
+
+  /**
+   * Takes saved object attributes for the specified type and decrypts all of them that are supposed
+   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
+   * attributes were decrypted original attributes dictionary is returned.
+   * @param descriptor Descriptor of the saved object to decrypt attributes for.
+   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [params] Additional parameters.
+   * @throws Will throw if decryption fails for whatever reason.
+   * @throws Will throw if any of the attributes to decrypt is not a string.
+   */
+  public decryptAttributesSync<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    params?: CommonParameters
+  ): T {
+    const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params);
+
+    let iteratorResult = iterator.next();
+    while (!iteratorResult.done) {
+      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      try {
+        iteratorResult = iterator.next(this.crypto.decryptSync(attributeValue, encryptionAAD));
+      } catch (err) {
+        iterator.throw!(err);
+      }
+    }
+
+    return iteratorResult.value;
+  }
+
+  /**
+   * Takes saved object attributes for the specified type and decrypts all of them that are supposed
+   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
+   * attributes were decrypted original attributes dictionary is returned.
+   * @param descriptor Descriptor of the saved object to decrypt attributes for.
+   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [params] Additional parameters.
+   * @throws Will throw if decryption fails for whatever reason.
+   * @throws Will throw if any of the attributes to decrypt is not a string.
+   */
+  private *attributesToDecryptIterator<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    params?: CommonParameters
+  ): Generator<[string, string], T, EncryptOutput> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;
     }
 
-    const encryptionAAD = getAAD(typeDefinition, descriptor, attributes, this.logger);
-    const decryptedAttributes: Record<string, string> = {};
+    const encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+    const decryptedAttributes: Record<string, EncryptOutput> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue == null) {
@@ -308,10 +416,7 @@ export class EncryptedSavedObjectsService {
       }
 
       try {
-        decryptedAttributes[attributeName] = (await this.crypto.decrypt(
-          attributeValue,
-          encryptionAAD
-        )) as string;
+        decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
       } catch (err) {
         this.logger.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
         this.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
@@ -348,5 +453,36 @@ export class EncryptedSavedObjectsService {
       ...attributes,
       ...decryptedAttributes,
     };
+  }
+
+  /**
+   * Generates string representation of the Additional Authenticated Data based on the specified saved
+   * object type and attributes.
+   * @param typeDefinition Encrypted saved object type definition.
+   * @param descriptor Descriptor of the saved object to get AAD for.
+   * @param attributes All attributes of the saved object instance of the specified type.
+   */
+  private getAAD(
+    typeDefinition: EncryptedSavedObjectAttributesDefinition,
+    descriptor: SavedObjectDescriptor,
+    attributes: Record<string, unknown>
+  ) {
+    // Collect all attributes (both keys and values) that should contribute to AAD.
+    const attributesAAD: Record<string, unknown> = {};
+    for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
+      if (!typeDefinition.shouldBeExcludedFromAAD(attributeKey)) {
+        attributesAAD[attributeKey] = attributeValue;
+      }
+    }
+
+    if (Object.keys(attributesAAD).length === 0) {
+      this.logger.debug(
+        `The AAD for saved object "${descriptorToArray(
+          descriptor
+        )}" does not include any attributes.`
+      );
+    }
+
+    return stringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 }
