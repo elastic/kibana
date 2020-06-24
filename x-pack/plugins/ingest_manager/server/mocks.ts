@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingServiceMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 import { IngestManagerAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
@@ -15,7 +15,7 @@ export const createAppContextStartContractMock = (): IngestManagerAppContext => 
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     security: securityMock.createSetup(),
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
     isProductionMode: true,
     kibanaVersion: '8.0.0',
   };

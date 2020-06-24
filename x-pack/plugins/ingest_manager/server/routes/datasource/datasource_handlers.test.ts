@@ -107,8 +107,11 @@ describe('When calling datasource', () => {
     });
 
     describe('and external callbacks are registered', () => {
+      const callbackCallingOrder: string[] = [];
+
       // Callback one adds an input that includes a `config` property
       const callbackOne: ExternalCallback[1] = jest.fn(async (ds) => {
+        callbackCallingOrder.push('one');
         const newDs = {
           ...ds,
           inputs: [
@@ -129,6 +132,7 @@ describe('When calling datasource', () => {
 
       // Callback two adds an additional `input[0].config` property
       const callbackTwo: ExternalCallback[1] = jest.fn(async (ds) => {
+        callbackCallingOrder.push('two');
         const newDs = {
           ...ds,
           inputs: [
@@ -151,12 +155,13 @@ describe('When calling datasource', () => {
         appContextService.addExternalCallback('datasourceCreate', callbackTwo);
       });
 
-      it('should call external callbacks', async () => {
+      afterEach(() => (callbackCallingOrder.length = 0));
+
+      it('should call external callbacks in expected order', async () => {
         const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
-        expect(callbackOne).toHaveBeenCalled();
-        expect(callbackTwo).toHaveBeenCalled();
+        expect(callbackCallingOrder).toEqual(['one', 'two']);
       });
 
       it('should feed datasource returned by last callback', async () => {
