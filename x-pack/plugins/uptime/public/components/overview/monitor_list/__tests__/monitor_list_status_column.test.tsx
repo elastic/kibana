@@ -8,7 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { getLocationStatus, MonitorListStatusColumn } from '../monitor_list_status_column';
-import { Ping } from '../../../../../common/runtime_types';
+import { Ping, makePing } from '../../../../../common/runtime_types';
 import { STATUS } from '../../../../../common/constants';
 
 describe('MonitorListStatusColumn', () => {

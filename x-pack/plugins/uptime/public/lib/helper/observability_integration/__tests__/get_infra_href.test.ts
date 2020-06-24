@@ -10,23 +10,20 @@ import { MonitorSummary, makePing, Ping } from '../../../../../common/runtime_ty
 describe('getInfraHref', () => {
   let summary: MonitorSummary;
   beforeEach(() => {
-    const ping = makePing({
-      docId: 'myDocId',
-      type: 'test',
-      id: 'myId',
-      ip: '151.101.202.217',
-      status: 'up',
-      duration: 123,
-      timestamp: '123',
-    });
-    ping.container = {
-      id: 'test-container-id',
+    const ping: Ping = {
+      ...makePing({
+        docId: 'myDocId',
+        type: 'test',
+        id: 'myId',
+        ip: '151.101.202.217',
+        status: 'up',
+        duration: 123,
+        timestamp: '123',
+      }),
+      container: { id: 'test-container-id' },
+      kubernetes: { pod: { uid: 'test-pod-uid' } },
     };
-    ping.kubernetes = {
-      pod: {
-        uid: 'test-pod-id',
-      },
-    };
+
     summary = {
       monitor_id: 'foo',
       state: {
@@ -88,12 +85,12 @@ describe('getInfraHref', () => {
   it('getInfraKubernetesHref creates a link for valid parameters', () => {
     const result = getInfraKubernetesHref(summary, 'foo');
     expect(result).not.toBeUndefined();
-    expect(result).toMatchInlineSnapshot(`"foo/app/metrics/link-to/pod-detail/test-pod-id"`);
+    expect(result).toMatchInlineSnapshot(`"foo/app/metrics/link-to/pod-detail/test-pod-uid"`);
   });
 
   it('getInfraKubernetesHref does not specify a base path when none is available', () => {
     expect(getInfraKubernetesHref(summary, '')).toMatchInlineSnapshot(
-      `"/app/metrics/link-to/pod-detail/test-pod-id"`
+      `"/app/metrics/link-to/pod-detail/test-pod-uid"`
     );
   });
 
@@ -170,7 +167,7 @@ describe('getInfraHref', () => {
       timestamp: '123',
     });
     const pingTwo = makePing({
-      docId: 'myDocId',
+      docId: 'myDocId2',
       type: 'test',
       id: 'myId',
       ip: '151.101.202.217',

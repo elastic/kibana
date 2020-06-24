@@ -161,6 +161,8 @@ export const PingType = t.intersection([
 
 export type Ping = t.TypeOf<typeof PingType>;
 
+// Convenience function for tests etc that makes an empty ping
+// object with the minimum of fields.
 export const makePing = (f: {
   docId: string;
   type: string;
