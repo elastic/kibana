@@ -6,7 +6,7 @@
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, CreateOptions, ConstructorOptions } from './alerts_client';
-import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';

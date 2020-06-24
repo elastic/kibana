@@ -9,7 +9,11 @@ import { AlertsClientFactory, AlertsClientFactoryOpts } from './alerts_client_fa
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { KibanaRequest } from '../../../../src/core/server';
-import { savedObjectsClientMock, savedObjectsServiceMock } from '../../../../src/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsServiceMock,
+  loggingSystemMock,
+} from '../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { AuthenticatedUser } from '../../../plugins/security/common/model';
 import { securityMock } from '../../security/server/mocks';
