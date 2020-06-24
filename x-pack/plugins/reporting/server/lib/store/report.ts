@@ -35,7 +35,7 @@ export class Report {
 
   public _index: string;
   public _id?: string; // set by ES
-  public _primary_term: unknown; // set by ES
+  public _primary_term?: unknown; // set by ES
   public _seq_no: unknown; // set by ES
 
   /*

@@ -22,13 +22,7 @@ describe('ReportingStore', () => {
   let mockCore: ReportingCore;
 
   const callClusterStub = sinon.stub();
-  const mockElasticsearch = {
-    legacy: {
-      client: {
-        callAsInternalUser: callClusterStub,
-      },
-    },
-  };
+  const mockElasticsearch = { legacy: { client: { callAsInternalUser: callClusterStub } } };
 
   beforeEach(async () => {
     const mockConfigGet = sinon.stub();
