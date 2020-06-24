@@ -1,0 +1,191 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render field editor 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    gutterSize="xs"
+    key="0"
+  >
+    <EuiFlexItem>
+      <EuiFieldText
+        aria-label="Fieldname"
+        onChange={[Function]}
+        value="foo"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSuperSelect
+        compressed={false}
+        fullWidth={false}
+        hasDividers={false}
+        isInvalid={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "inputDisplay": <span>
+                <FieldIcon
+                  type="string"
+                />
+                <span>
+                  String
+                </span>
+              </span>,
+              "value": "String",
+            },
+            Object {
+              "inputDisplay": <span>
+                <FieldIcon
+                  type="number"
+                />
+                <span>
+                  Number
+                </span>
+              </span>,
+              "value": "Number",
+            },
+          ]
+        }
+        valueOfSelected="String"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiButtonIcon
+        aria-label="Remove field"
+        color="danger"
+        iconType="trash"
+        onClick={[Function]}
+        title="Remove field"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="xs"
+    key="1"
+  >
+    <EuiFlexItem>
+      <EuiFieldText
+        aria-label="Fieldname"
+        onChange={[Function]}
+        value="food"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSuperSelect
+        compressed={false}
+        fullWidth={false}
+        hasDividers={false}
+        isInvalid={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "inputDisplay": <span>
+                <FieldIcon
+                  type="string"
+                />
+                <span>
+                  String
+                </span>
+              </span>,
+              "value": "String",
+            },
+            Object {
+              "inputDisplay": <span>
+                <FieldIcon
+                  type="number"
+                />
+                <span>
+                  Number
+                </span>
+              </span>,
+              "value": "Number",
+            },
+          ]
+        }
+        valueOfSelected="String"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiButtonIcon
+        aria-label="Remove field"
+        color="danger"
+        iconType="trash"
+        onClick={[Function]}
+        title="Remove field"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="xs"
+    key="2"
+  >
+    <EuiFlexItem>
+      <EuiFieldText
+        aria-label="Fieldname"
+        onChange={[Function]}
+        value="fooz"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSuperSelect
+        compressed={false}
+        fullWidth={false}
+        hasDividers={false}
+        isInvalid={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "inputDisplay": <span>
+                <FieldIcon
+                  type="string"
+                />
+                <span>
+                  String
+                </span>
+              </span>,
+              "value": "String",
+            },
+            Object {
+              "inputDisplay": <span>
+                <FieldIcon
+                  type="number"
+                />
+                <span>
+                  Number
+                </span>
+              </span>,
+              "value": "Number",
+            },
+          ]
+        }
+        valueOfSelected="Number"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiButtonIcon
+        aria-label="Remove field"
+        color="danger"
+        iconType="trash"
+        onClick={[Function]}
+        title="Remove field"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
+  <EuiButton
+    fill={true}
+    isDisabled={false}
+    onClick={[Function]}
+    size="s"
+  >
+    Add field
+  </EuiButton>
+</Fragment>
+`;
