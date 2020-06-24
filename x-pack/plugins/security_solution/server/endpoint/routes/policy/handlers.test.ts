@@ -14,7 +14,7 @@ import {
 import {
   elasticsearchServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
 import { AgentService } from '../../../../../ingest_manager/server/services';
@@ -46,7 +46,7 @@ describe('test policy response handler', () => {
   it('should return the latest policy response for a host', async () => {
     const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
     const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-      logFactory: loggingServiceMock.create(),
+      logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
     });
@@ -69,7 +69,7 @@ describe('test policy response handler', () => {
 
   it('should return not found when there is no response policy for host', async () => {
     const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-      logFactory: loggingServiceMock.create(),
+      logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
     });

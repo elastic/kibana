@@ -6,7 +6,7 @@
 jest.mock('../es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
 import { BehaviorSubject } from 'rxjs';
 import { Logger } from 'src/core/server';
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 import {
   IndexGroup,
@@ -60,7 +60,7 @@ describe('reindexService', () => {
       runWhileIndexGroupLocked: jest.fn(async (group: string, f: any) => f({ attributes: {} })),
     };
     callCluster = jest.fn();
-    log = loggingServiceMock.create().get();
+    log = loggingSystemMock.create().get();
     licensingPluginSetup = licensingMock.createSetup();
     licensingPluginSetup.license$ = new BehaviorSubject(
       licensingMock.createLicense({
