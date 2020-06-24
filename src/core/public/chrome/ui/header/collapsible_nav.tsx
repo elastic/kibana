@@ -38,7 +38,7 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, createRecentNavLink, isModifiedEvent } from './nav_link';
+import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -151,7 +151,7 @@ export function CollapsibleNav({
                 iconType: 'home',
                 href: homeHref,
                 onClick: (event) => {
-                  if (isModifiedEvent(event)) {
+                  if (isModifiedOrPrevented(event)) {
                     return;
                   }
 
@@ -193,7 +193,7 @@ export function CollapsibleNav({
                 ...hydratedLink,
                 'data-test-subj': 'collapsibleNavAppLink--recent',
                 onClick: (event) => {
-                  if (isModifiedEvent(event)) {
+                  if (isModifiedOrPrevented(event)) {
                     return;
                   }
 
