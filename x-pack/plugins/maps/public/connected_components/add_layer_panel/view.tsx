@@ -78,6 +78,8 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   _onNext = () => {
+    // @ts-expect-error
+    // Property 'length' does not exist on type 'never'.
     if (this.state.layerSteps!.length - 1 === this.state.currentStepIndex) {
       // last step
       this.props.promotePreviewLayers();
@@ -120,6 +122,8 @@ export class AddLayerPanel extends Component<Props, State> {
 
     let isDisabled = !this.state.isNextStepBtnEnabled;
     let isLoading = this.state.isNextStepBtnLoading;
+    // @ts-expect-error
+    // Property 'id' does not exist on type 'never'.
     if (currentStep.id === ADD_LAYER_STEP_ID) {
       isDisabled = !this.props.hasPreviewLayers;
       isLoading = this.props.isLoadingPreviewLayers;
@@ -128,6 +132,9 @@ export class AddLayerPanel extends Component<Props, State> {
       isLoading = this.state.isNextStepBtnLoading;
     }
 
+    // @ts-expect-error
+    // Property 'label' does not exist on type 'never'.
+    const btnLabel = currentStep.label;
     return (
       <EuiFlexItem grow={false}>
         <EuiButton
@@ -139,7 +146,7 @@ export class AddLayerPanel extends Component<Props, State> {
           onClick={this._onNext}
           fill
         >
-          {currentStep.label}
+          {btnLabel}
         </EuiButton>
       </EuiFlexItem>
     );
@@ -151,7 +158,7 @@ export class AddLayerPanel extends Component<Props, State> {
       <>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>{currentStep ? currentStep.label : ADD_LAYER_STEP_ID}</h2>
+            <h2>{currentStep ? currentStep!.label : ADD_LAYER_STEP_LABEL}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
@@ -160,7 +167,7 @@ export class AddLayerPanel extends Component<Props, State> {
           onClear={this._clearLayerWizard}
           onWizardSelect={this._onWizardSelect}
           previewLayers={this._previewLayers}
-          currentStepId={currentStep ? currentStep.id : null}
+          currentStepId={currentStep ? currentStep!.id : null}
           enableNextBtn={this._enableNextBtn}
           disableNextBtn={this._disableNextBtn}
           startStepLoading={this._startStepLoading}
