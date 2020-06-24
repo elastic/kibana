@@ -30,11 +30,11 @@ export const pickSavedTimeline = (
 
   if (savedTimeline.timelineType === TimelineType.template) {
     if (savedTimeline.templateTimelineId == null) {
-      // create template timeline
+      // create timeline template
       savedTimeline.templateTimelineId = uuid.v4();
       savedTimeline.templateTimelineVersion = 1;
     } else {
-      // update template timeline
+      // update timeline template
       if (savedTimeline.templateTimelineVersion != null) {
         savedTimeline.templateTimelineVersion = savedTimeline.templateTimelineVersion + 1;
       }

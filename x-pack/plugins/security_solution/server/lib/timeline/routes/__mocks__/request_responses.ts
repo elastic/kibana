@@ -111,7 +111,7 @@ export const createDraftTimelineWithTimelineId = {
 export const createTemplateTimelineWithTimelineId = {
   ...createTemplateTimelineWithoutTimelineId,
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
-  templateTimelineId: 'existing template timeline id',
+  templateTimelineId: 'existing timeline template id',
 };
 
 export const updateTimelineWithTimelineId = {

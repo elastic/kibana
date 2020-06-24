@@ -119,7 +119,7 @@ export const NEW_TIMELINE = i18n.translate(
 export const NEW_TEMPLATE_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.newTemplateTimelineButtonLabel',
   {
-    defaultMessage: 'Create template timeline',
+    defaultMessage: 'Create timeline template',
   }
 );
 

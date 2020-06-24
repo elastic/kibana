@@ -31,7 +31,7 @@ const AddDataProviderPopoverComponent: React.FC<{
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const timelineById = useSelector(timelineSelectors.timelineByIdSelector);
   const { dataProviders, timelineType } = timelineById[timelineId] ?? {};
-  const { indexPattern, browserFields } = useWithSource('default');
+  const { browserFields } = useWithSource('default');
 
   const handleOpenPopover = useCallback(() => setIsAddFilterPopoverOpen(true), [
     setIsAddFilterPopoverOpen,

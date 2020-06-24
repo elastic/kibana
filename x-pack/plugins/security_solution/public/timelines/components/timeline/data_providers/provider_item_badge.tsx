@@ -26,6 +26,7 @@ interface ProviderItemBadgeProps {
   kqlQuery: string;
   isEnabled: boolean;
   isExcluded: boolean;
+  isInvalid: boolean;
   onDataProviderEdited?: OnDataProviderEdited;
   operator: QueryOperator;
   providerId: string;
@@ -48,6 +49,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     kqlQuery,
     isEnabled,
     isExcluded,
+    isInvalid,
     onDataProviderEdited,
     operator,
     providerId,
@@ -122,6 +124,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
         kqlQuery={kqlQuery}
         isEnabled={isEnabled}
         isExcluded={isExcluded}
+        isInvalid={isInvalid}
         providerId={providerId}
         togglePopover={togglePopover}
         val={val}

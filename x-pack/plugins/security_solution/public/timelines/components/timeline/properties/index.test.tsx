@@ -93,6 +93,7 @@ const defaultProps = {
   noteIds: [],
   status: TimelineStatus.active,
   timelineId: 'abc',
+  timelineType: TimelineType.default,
   toggleLock: jest.fn(),
   updateDescription: jest.fn(),
   updateIsFavorite: jest.fn(),

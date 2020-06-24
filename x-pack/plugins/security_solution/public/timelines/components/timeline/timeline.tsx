@@ -198,7 +198,7 @@ export const TimelineComponent: React.FC<Props> = ({
   return (
     <TimelineContainer data-test-subj="timeline">
       {timelineType === TimelineType.template && (
-        <TemplateTimelineBadge>{'Template Timeline'}</TemplateTimelineBadge>
+        <TemplateTimelineBadge>{'Timeline Template'}</TemplateTimelineBadge>
       )}
       <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
         <FlyoutHeaderWithCloseButton

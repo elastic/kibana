@@ -196,7 +196,7 @@ describe('Properties Right', () => {
         expect(wrapper.find('[data-test-subj="settings-gear"]').exists()).toBeTruthy();
       });
 
-      // test('it renders create template timeline btn', () => {
+      // test('it renders create timeline template btn', () => {
       //   expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(true);
       // });
 

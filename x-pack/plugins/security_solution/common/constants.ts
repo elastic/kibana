@@ -158,6 +158,6 @@ export const showAllOthersBucket: string[] = [
 
 /**
  * CreateTemplateTimelineBtn
- * Remove the comment here to enable template timeline
+ * Remove the comment here to enable timeline template
  */
 export const disableTemplate = true;

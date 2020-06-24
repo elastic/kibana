@@ -104,9 +104,9 @@ export const MODIFIED_BY = i18n.translate(
 );
 
 export const TIMELINE_TEMPLATE = i18n.translate(
-  'xpack.securitySolution.open.timeline.timelineTemplateTableHeader',
+  'xpack.securitySolution.open.timeline.templateTableHeader',
   {
-    defaultMessage: 'Timeline Template',
+    defaultMessage: 'Template',
   }
 );
 
@@ -139,6 +139,13 @@ export const OPEN_AS_DUPLICATE = i18n.translate(
   'xpack.securitySolution.open.timeline.openAsDuplicateTooltip',
   {
     defaultMessage: 'Duplicate timeline',
+  }
+);
+
+export const OPEN_AS_DUPLICATE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.open.timeline.openAsDuplicateTemplateTooltip',
+  {
+    defaultMessage: 'Duplicate template',
   }
 );
 
@@ -178,10 +185,24 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const SEARCH_TEMPLATE_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.open.timeline.searchTemplatePlaceholder',
+  {
+    defaultMessage: 'e.g. template name, or description',
+  }
+);
+
 export const TIMELINE_NAME = i18n.translate(
   'xpack.securitySolution.open.timeline.timelineNameTableHeader',
   {
     defaultMessage: 'Timeline name',
+  }
+);
+
+export const TIMELINE_TEMPLATE_NAME = i18n.translate(
+  'xpack.securitySolution.open.timeline.timelineTemplateNameTableHeader',
+  {
+    defaultMessage: 'Template name',
   }
 );
 

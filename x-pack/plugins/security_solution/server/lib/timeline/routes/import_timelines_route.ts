@@ -149,7 +149,7 @@ export const importTimelinesRoute = (
                         (timeline == null && !isHandlingTemplateTimeline) ||
                         (timeline == null && templateTimeline == null && isHandlingTemplateTimeline)
                       ) {
-                        // create timeline / template timeline
+                        // create timeline / timeline template
                         newTimeline = await createTimelines(
                           frameworkRequest,
                           {
@@ -178,7 +178,7 @@ export const importTimelinesRoute = (
                         templateTimeline != null &&
                         isHandlingTemplateTimeline
                       ) {
-                        // update template timeline
+                        // update timeline template
                         const errorObj = checkIsFailureCases(
                           isHandlingTemplateTimeline,
                           version,

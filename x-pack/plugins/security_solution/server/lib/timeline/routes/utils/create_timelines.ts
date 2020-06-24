@@ -15,7 +15,7 @@ import { NoteResult, ResponseTimeline } from '../../../../graphql/types';
 export const CREATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE timeline with POST is not allowed, please use PATCH instead';
 export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
-  'UPDATE template timeline with POST is not allowed, please use PATCH instead';
+  'UPDATE timeline template with POST is not allowed, please use PATCH instead';
 
 export const saveTimelines = (
   frameworkRequest: FrameworkRequest,

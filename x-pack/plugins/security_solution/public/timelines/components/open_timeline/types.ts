@@ -120,6 +120,7 @@ export type ActionTimelineToShow =
   | 'createTimelineFromTemplate'
   | 'createTemplateFromTimeline'
   | 'duplicate'
+  | 'duplicateTemplate'
   | 'delete'
   | 'export'
   | 'selectable';
@@ -171,7 +172,7 @@ export interface OpenTimelineProps {
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
   sortField: string;
-  /** timeline / template timeline */
+  /** timeline / timeline template */
   tabs?: JSX.Element;
   /** The title of the Open Timeline component  */
   title: string;

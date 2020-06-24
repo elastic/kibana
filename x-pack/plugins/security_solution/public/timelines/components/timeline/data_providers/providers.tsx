@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
@@ -117,6 +118,14 @@ const AddDataProviderContainer = styled.div`
   padding: 10px 15px;
 `;
 
+const getDataProviderValue = (dataProvider: DataProvidersAnd) =>
+  dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value;
+
+const isInvalid = (dataProvider: DataProvidersAnd): boolean =>
+  !!(
+    dataProvider.queryMatch.operator === IS_OPERATOR && isEmpty(getDataProviderValue(dataProvider))
+  );
+
 /**
  * Renders an interactive card representation of the data providers. It also
  * affords uniform UI controls for the following actions:
@@ -211,6 +220,7 @@ export const Providers = React.memo<Props>(
                                   kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
                                   isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
                                   isExcluded={index > 0 ? dataProvider.excluded : group[0].excluded}
+                                  isInvalid={isInvalid(index > 0 ? dataProvider : group[0])}
                                   onDataProviderEdited={onDataProviderEdited}
                                   operator={
                                     index > 0
@@ -263,10 +273,7 @@ export const Providers = React.memo<Props>(
                                               : DataProviderType.template,
                                         })
                                   }
-                                  val={
-                                    dataProvider.queryMatch.displayValue ??
-                                    dataProvider.queryMatch.value
-                                  }
+                                  val={getDataProviderValue(dataProvider)}
                                   type={dataProvider.type}
                                 />
                               </EuiFlexItem>

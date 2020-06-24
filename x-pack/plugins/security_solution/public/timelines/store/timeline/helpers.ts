@@ -1015,13 +1015,58 @@ export const updateTimelineProviderKqlQuery = ({
 };
 
 interface UpdateTimelineProviderTypeParams {
+  andProviderId?: string;
   id: string;
   providerId: string;
   type: DataProviderType;
   timelineById: TimelineById;
 }
 
+const updateTypeAndProvider = (
+  andProviderId: string,
+  type: DataProviderType,
+  providerId: string,
+  timeline: TimelineModel
+) =>
+  timeline.dataProviders.map((provider) =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          and: provider.and.map((andProvider) =>
+            andProvider.id === andProviderId
+              ? {
+                  ...andProvider,
+                  type,
+                  name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
+                  queryMatch: {
+                    ...provider.queryMatch,
+                    value:
+                      type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
+                  },
+                }
+              : andProvider
+          ),
+        }
+      : provider
+  );
+
+const updateTypeProvider = (type: DataProviderType, providerId: string, timeline: TimelineModel) =>
+  timeline.dataProviders.map((provider) =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          type,
+          name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
+          queryMatch: {
+            ...provider.queryMatch,
+            value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
+          },
+        }
+      : provider
+  );
+
 export const updateTimelineProviderType = ({
+  andProviderId,
   id,
   providerId,
   type,
@@ -1030,7 +1075,7 @@ export const updateTimelineProviderType = ({
   const timeline = timelineById[id];
 
   if (timeline.timelineType !== TimelineType.template && type === DataProviderType.template) {
-    // Not template timeline cannot have template type providers
+    // Not timeline template cannot have template type providers
     return timelineById;
   }
 
@@ -1038,19 +1083,9 @@ export const updateTimelineProviderType = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders: timeline.dataProviders.map((provider) =>
-        provider.id === providerId
-          ? {
-              ...provider,
-              type,
-              name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
-              queryMatch: {
-                ...provider.queryMatch,
-                value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
-              },
-            }
-          : provider
-      ),
+      dataProviders: andProviderId
+        ? updateTypeAndProvider(andProviderId, type, providerId, timeline)
+        : updateTypeProvider(type, providerId, timeline),
     },
   };
 };

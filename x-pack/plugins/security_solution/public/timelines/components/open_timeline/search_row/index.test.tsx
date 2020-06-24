@@ -10,6 +10,8 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
+
 import { SearchRow } from '.';
 
 import * as i18n from '../translations';
@@ -25,6 +27,7 @@ describe('SearchRow', () => {
           onQueryChange={jest.fn()}
           onToggleOnlyFavorites={jest.fn()}
           query=""
+          timelineType={TimelineType.default}
           totalSearchResultsCount={0}
         />
       </ThemeProvider>
@@ -45,6 +48,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
             query=""
+            timelineType={TimelineType.default}
             totalSearchResultsCount={0}
           />
         </ThemeProvider>
@@ -65,6 +69,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
             query=""
+            timelineType={TimelineType.default}
             totalSearchResultsCount={0}
           />
         </ThemeProvider>
@@ -83,6 +88,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
             query=""
+            timelineType={TimelineType.default}
             totalSearchResultsCount={0}
           />
         </ThemeProvider>
@@ -104,6 +110,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
             query=""
+            timelineType={TimelineType.default}
             totalSearchResultsCount={0}
           />
         </ThemeProvider>
@@ -129,6 +136,7 @@ describe('SearchRow', () => {
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={jest.fn()}
             query=""
+            timelineType={TimelineType.default}
             totalSearchResultsCount={32}
           />
         </ThemeProvider>

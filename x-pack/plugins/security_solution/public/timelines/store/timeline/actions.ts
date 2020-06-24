@@ -151,6 +151,7 @@ export const updateDataProviderKqlQuery = actionCreator<{
 }>('PROVIDER_EDIT_KQL_QUERY');
 
 export const updateDataProviderType = actionCreator<{
+  andProviderId?: string;
   id: string;
   type: DataProviderType;
   providerId: string;

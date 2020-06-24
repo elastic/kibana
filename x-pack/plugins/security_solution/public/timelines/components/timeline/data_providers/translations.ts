@@ -79,7 +79,7 @@ export const FILTER_FOR_FIELD_PRESENT = i18n.translate(
 export const CONVERT_TO_FIELD = i18n.translate(
   'xpack.securitySolution.dataProviders.convertToFieldLabel',
   {
-    defaultMessage: 'Covert to field',
+    defaultMessage: 'Convert to field',
   }
 );
 

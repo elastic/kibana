@@ -421,13 +421,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       }),
     })
   )
-  .case(updateDataProviderType, (state, { id, type, providerId }) => ({
+  .case(updateDataProviderType, (state, { id, type, providerId, andProviderId }) => ({
     ...state,
     timelineById: updateTimelineProviderType({
       id,
       type,
       providerId,
       timelineById: state.timelineById,
+      andProviderId,
     }),
   }))
   .case(updateDataProviderKqlQuery, (state, { id, kqlQuery, providerId }) => ({

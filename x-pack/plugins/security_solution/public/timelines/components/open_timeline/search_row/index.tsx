@@ -12,9 +12,10 @@ import {
   // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';
 
@@ -34,51 +35,60 @@ SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
 
 type Props = Pick<
   OpenTimelineProps,
-  'onlyFavorites' | 'onQueryChange' | 'onToggleOnlyFavorites' | 'query' | 'totalSearchResultsCount'
+  | 'onlyFavorites'
+  | 'onQueryChange'
+  | 'onToggleOnlyFavorites'
+  | 'query'
+  | 'totalSearchResultsCount'
+  | 'timelineType'
 > & { tabs?: JSX.Element };
-
-const searchBox = {
-  placeholder: i18n.SEARCH_PLACEHOLDER,
-  incremental: false,
-};
 
 /**
  * Renders the row containing the search input and Only Favorites filter
  */
-export const SearchRow = React.memo<Props>(
-  ({
-    onlyFavorites,
-    onQueryChange,
-    onToggleOnlyFavorites,
-    query,
-    totalSearchResultsCount,
-    tabs,
-  }) => {
-    return (
-      <SearchRowContainer>
-        <SearchRowFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiSearchBar data-test-subj="search-bar" box={searchBox} onChange={onQueryChange} />
-          </EuiFlexItem>
+const SearchRowComponent: React.FC<Props> = ({
+  onlyFavorites,
+  onQueryChange,
+  onToggleOnlyFavorites,
+  tabs,
+  timelineType,
+}) => {
+  const searchBox = useMemo(
+    () => ({
+      placeholder:
+        timelineType === TimelineType.default
+          ? i18n.SEARCH_PLACEHOLDER
+          : i18n.SEARCH_TEMPLATE_PLACEHOLDER,
+      incremental: false,
+    }),
+    [timelineType]
+  );
+  return (
+    <SearchRowContainer>
+      <SearchRowFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiSearchBar data-test-subj="search-bar" box={searchBox} onChange={onQueryChange} />
+        </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiFilterGroup fullWidth={true}>
-              <>
-                <EuiFilterButton
-                  data-test-subj="only-favorites-toggle"
-                  hasActiveFilters={onlyFavorites}
-                  onClick={onToggleOnlyFavorites}
-                >
-                  {i18n.ONLY_FAVORITES}
-                </EuiFilterButton>
-                {tabs}
-              </>
-            </EuiFilterGroup>
-          </EuiFlexItem>
-        </SearchRowFlexGroup>
-      </SearchRowContainer>
-    );
-  }
-);
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup fullWidth={true}>
+            <>
+              <EuiFilterButton
+                data-test-subj="only-favorites-toggle"
+                hasActiveFilters={onlyFavorites}
+                onClick={onToggleOnlyFavorites}
+              >
+                {i18n.ONLY_FAVORITES}
+              </EuiFilterButton>
+              {tabs}
+            </>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </SearchRowFlexGroup>
+    </SearchRowContainer>
+  );
+};
+
+export const SearchRow = React.memo(SearchRowComponent);
 
 SearchRow.displayName = 'SearchRow';

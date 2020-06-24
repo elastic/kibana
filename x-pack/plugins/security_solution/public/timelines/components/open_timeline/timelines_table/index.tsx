@@ -8,7 +8,7 @@ import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
+import { TimelineTypeLiteral } from '../../../../../common/types/timeline';
 
 import * as i18n from '../translations';
 import {
@@ -26,7 +26,7 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import { getTemplateColumns } from './template_columns';
+// import { getTemplateColumns } from './template_columns';
 
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -69,14 +69,15 @@ export const getTimelinesTableColumns = ({
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineTypeLiteral;
 }) => [
   ...getCommonColumns({
     itemIdToExpandedNotesRowMap,
     onOpenTimeline,
     onToggleShowNotes,
+    timelineType,
   }),
-  ...getTemplateColumns(timelineType),
+  // ...getTemplateColumns(timelineType),
   ...getExtendedColumns(showExtendedColumns),
   ...getIconHeaderColumns(),
   ...getActionsColumns({
@@ -109,7 +110,7 @@ export interface TimelinesTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
   totalSearchResultsCount: number;
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineTypeLiteral;
 }
 
 /**

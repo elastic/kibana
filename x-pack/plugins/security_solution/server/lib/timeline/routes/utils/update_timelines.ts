@@ -15,12 +15,12 @@ import {
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'CREATE timeline with PATCH is not allowed, please use POST instead';
 export const UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
-  'CREATE template timeline with PATCH is not allowed, please use POST instead';
+  'CREATE timeline template with PATCH is not allowed, please use POST instead';
 export const NO_MATCH_VERSION_ERROR_MESSAGE =
   'TimelineVersion conflict: The given version doesn not match with existing timeline';
 export const NO_MATCH_ID_ERROR_MESSAGE =
-  "Timeline id doesn't match with existing template timeline";
-export const TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE = 'Template timelineVersion conflict';
+  "Timeline id doesn't match with existing timeline template";
+export const TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE = 'Timeline templateVersion conflict';
 export const UPDATE_ACTIVE_TIMELINE_STATUS_ERROR_MESSAGE =
   "Changing 'active' Timeline status is not allowed";
 
@@ -38,7 +38,7 @@ export const checkIsFailureCases = (
       statusCode: 405,
     };
   } else if (isHandlingTemplateTimeline && existTemplateTimeline == null) {
-    // Throw error to create template timeline in patch
+    // Throw error to create timeline template in patch
     return {
       body: UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
       statusCode: 405,
@@ -49,7 +49,7 @@ export const checkIsFailureCases = (
     existTemplateTimeline != null &&
     existTimeline.savedObjectId !== existTemplateTimeline.savedObjectId
   ) {
-    // Throw error you can not have a no matching between your timeline and your template timeline during an update
+    // Throw error you can not have a no matching between your timeline and your timeline template during an update
     return {
       body: NO_MATCH_ID_ERROR_MESSAGE,
       statusCode: 409,
@@ -78,7 +78,7 @@ export const checkIsFailureCases = (
     existTemplateTimeline.templateTimelineVersion != null &&
     existTemplateTimeline.templateTimelineVersion !== templateTimelineVersion
   ) {
-    // Throw error you can not update a template timeline version with an old version
+    // Throw error you can not update a timeline template version with an old version
     return {
       body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
       statusCode: 409,

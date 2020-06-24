@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
@@ -32,6 +32,10 @@ const ProviderBadgeStyled = (styled(EuiBadge)`
       font-weight: 400;
       font-style: italic;
     }
+    &.globalFilterItem-isError {
+      box-shadow: 0 1px 1px -1px rgba(152, 162, 179, 0.2), 0 3px 2px -2px rgba(152, 162, 179, 0.2),
+        inset 0 0 0 1px #bd271e;
+    }
   }
   .euiBadge.euiBadge--iconLeft &.euiBadge.euiBadge--iconRight .euiBadge__content {
     flex-direction: row;
@@ -43,7 +47,7 @@ const ProviderBadgeStyled = (styled(EuiBadge)`
     margin-right: 0;
     margin-left: 4px;
   }
-  ${({ type }) =>
+  ${({ type }: { type: DataProviderType }) =>
     type === DataProviderType.template &&
     `
     &.globalFilterItem {
@@ -73,6 +77,7 @@ interface ProviderBadgeProps {
   kqlQuery: string;
   isEnabled: boolean;
   isExcluded: boolean;
+  isInvalid: boolean;
   providerId: string;
   togglePopover: () => void;
   val: string | number;
@@ -92,6 +97,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
     field,
     isEnabled,
     isExcluded,
+    isInvalid,
     operator,
     providerId,
     togglePopover,
@@ -114,8 +120,9 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
         classNames('globalFilterItem', {
           'globalFilterItem-isDisabled': !isEnabled,
           'globalFilterItem-isExcluded': isExcluded,
+          'globalFilterItem-isError': isInvalid,
         }),
-      [isEnabled, isExcluded]
+      [isEnabled, isExcluded, isInvalid]
     );
 
     const formattedValue = useMemo(() => (isString(val) && val === '' ? getEmptyString() : val), [
@@ -155,7 +162,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
           )}
         </>
       );
-    }, [field, formattedValue, operator, prefix, type]);
+    }, [field, formattedValue, operator, prefix]);
 
     return (
       <ProviderContainer>
@@ -178,7 +185,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             {content}
           </ProviderBadgeStyled>
           {type === DataProviderType.template && (
-            <TemplateTimelineBadge>{'Template timeline'}</TemplateTimelineBadge>
+            <TemplateTimelineBadge>{'Template field'}</TemplateTimelineBadge>
           )}
         </div>
       </ProviderContainer>

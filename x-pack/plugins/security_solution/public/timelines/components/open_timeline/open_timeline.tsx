@@ -72,11 +72,14 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       tableRef,
     });
 
-    const nTimelines = useMemo(
-      () => (
+    const nTimelines = useMemo(() => {
+      const singleTerm = timelineType === TimelineType.template ? 'template' : 'timeline';
+      const pluralTerm = timelineType === TimelineType.template ? 'templates' : 'timelines';
+
+      return (
         <FormattedMessage
-          id="xpack.securitySolution.open.timeline.showingNTimelinesLabel"
-          defaultMessage="{totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
+          id="xpack.securitySolution.open.timeline.showingNTemplatesLabel"
+          defaultMessage={`{totalSearchResultsCount} {totalSearchResultsCount, plural, one {${singleTerm}} other {${pluralTerm}}} {with}`}
           values={{
             totalSearchResultsCount,
             with: (
@@ -86,9 +89,8 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             ),
           }}
         />
-      ),
-      [totalSearchResultsCount, query]
-    );
+      );
+    }, [timelineType, totalSearchResultsCount, query]);
 
     const actionItemId = useMemo(
       () =>
@@ -119,7 +121,15 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
       const timelineResultsType = searchResults[0]?.timelineType;
-      const timelineActions = ['duplicate', 'export', 'selectable'];
+      const timelineActions = ['export', 'selectable'];
+
+      if (timelineResultsType === TimelineType.template) {
+        timelineActions.unshift('duplicateTemplate');
+      }
+
+      if (timelineResultsType !== TimelineType.template) {
+        timelineActions.unshift('duplicate');
+      }
 
       if (onDeleteSelected != null && deleteTimelines != null) {
         timelineActions.unshift('delete');
@@ -170,6 +180,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
             query={query}
+            timelineType={timelineType}
             totalSearchResultsCount={totalSearchResultsCount}
           />
 

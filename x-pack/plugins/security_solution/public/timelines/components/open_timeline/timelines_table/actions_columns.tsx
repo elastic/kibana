@@ -52,7 +52,7 @@ export const getActionsColumns = ({
 
   const createTemplateFromTimeline = {
     name: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
-    icon: 'string',
+    icon: 'visText',
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
@@ -79,6 +79,21 @@ export const getActionsColumns = ({
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.OPEN_AS_DUPLICATE,
     'data-test-subj': 'open-duplicate',
+  };
+
+  const openAsDuplicateTemplateColumn = {
+    name: i18n.OPEN_AS_DUPLICATE_TEMPLATE,
+    icon: 'copy',
+    onClick: ({ savedObjectId }: OpenTimelineResult) => {
+      onOpenTimeline({
+        duplicate: true,
+        timelineId: savedObjectId ?? '',
+      });
+    },
+    type: 'icon',
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.OPEN_AS_DUPLICATE_TEMPLATE,
+    'data-test-subj': 'open-duplicate-template',
   };
 
   const exportTimelineAction = {
@@ -114,6 +129,7 @@ export const getActionsColumns = ({
           ? createTemplateFromTimeline
           : null,
         actionTimelineToShow.includes('duplicate') ? openAsDuplicateColumn : null,
+        actionTimelineToShow.includes('duplicateTemplate') ? openAsDuplicateTemplateColumn : null,
         actionTimelineToShow.includes('export') ? exportTimelineAction : null,
         actionTimelineToShow.includes('delete') && deleteTimelines != null
           ? deleteTimelineColumn

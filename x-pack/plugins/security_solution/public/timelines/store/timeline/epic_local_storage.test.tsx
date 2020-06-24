@@ -17,6 +17,7 @@ import {
   mockIndexPattern,
 } from '../../../common/mock';
 
+import { TimelineType } from '../../../../common/types/timeline';
 import { createStore, State } from '../../../common/store';
 import {
   removeColumn,
@@ -86,10 +87,12 @@ describe('epicLocalStorage', () => {
       onDataProviderRemoved: jest.fn(),
       onToggleDataProviderEnabled: jest.fn(),
       onToggleDataProviderExcluded: jest.fn(),
+      onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
       start: startDate,
       sort,
+      timelineType: TimelineType.default,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };

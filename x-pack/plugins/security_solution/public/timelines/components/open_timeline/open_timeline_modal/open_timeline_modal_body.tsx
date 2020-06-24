@@ -51,17 +51,19 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
   }) => {
     const actionsToShow = useMemo(() => {
       const timelineResultsType = searchResults[0]?.timelineType;
-      const actions: ActionTimelineToShow[] = ['duplicate'];
+      const actions: ActionTimelineToShow[] = [];
 
       if (onDeleteSelected != null && deleteTimelines != null) {
         actions.unshift('delete');
       }
 
       if (timelineResultsType === TimelineType.template) {
+        actions.push('duplicateTemplate');
         actions.unshift('createTimelineFromTemplate');
       }
 
       if (timelineResultsType !== TimelineType.template) {
+        actions.push('duplicate');
         actions.unshift('createTemplateFromTimeline');
       }
 
@@ -86,6 +88,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
                 onToggleOnlyFavorites={onToggleOnlyFavorites}
                 query={query}
                 tabs={tabs}
+                timelineType={timelineType}
                 totalSearchResultsCount={totalSearchResultsCount}
               />
             </>

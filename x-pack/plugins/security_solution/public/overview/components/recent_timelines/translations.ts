@@ -54,6 +54,13 @@ export const OPEN_AS_DUPLICATE = i18n.translate(
   }
 );
 
+export const OPEN_AS_DUPLICATE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.recentTimelines.openAsDuplicateTemplateTooltip',
+  {
+    defaultMessage: 'Open as a duplicate template',
+  }
+);
+
 export const PINNED_EVENTS = i18n.translate(
   'xpack.securitySolution.recentTimelines.pinnedEventsTooltip',
   {

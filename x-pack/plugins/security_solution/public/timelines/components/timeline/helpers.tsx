@@ -13,7 +13,6 @@ import {
   DataProvider,
   DataProviderType,
   DataProvidersAnd,
-  IS_OPERATOR,
   EXISTS_OPERATOR,
 } from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';

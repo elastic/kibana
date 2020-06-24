@@ -108,11 +108,12 @@ const StatefulTimelineComponent = React.memo<Props>(
     );
 
     const onToggleDataProviderType: OnToggleDataProviderType = useCallback(
-      ({ providerId, type }) =>
+      ({ providerId, type, andProviderId }) =>
         updateDataProviderType!({
           id,
           type,
           providerId,
+          andProviderId,
         }),
       [id, updateDataProviderType]
     );
