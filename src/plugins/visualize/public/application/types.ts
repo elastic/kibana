@@ -27,7 +27,13 @@ import {
   VisualizeEmbeddableContract,
   VisSavedObject,
 } from 'src/plugins/visualizations/public';
-import { CoreStart, PluginInitializerContext, ChromeStart, ToastsStart } from 'kibana/public';
+import {
+  CoreStart,
+  PluginInitializerContext,
+  ChromeStart,
+  ToastsStart,
+  ScopedHistory,
+} from 'kibana/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import {
   Storage,
@@ -35,8 +41,8 @@ import {
   ReduxLikeStateContainer,
 } from 'src/plugins/kibana_utils/public';
 import { SharePluginStart } from 'src/plugins/share/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
 
 export type PureVisState = SavedVisState;
 
@@ -84,22 +90,24 @@ export interface EditorRenderProps {
 }
 
 export interface VisualizeServices extends CoreStart {
+  embeddable: EmbeddableStart;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
-  dashboard: DashboardStart;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
-  savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
   share?: SharePluginStart;
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
+  savedObjectsPublic: SavedObjectsStart;
+  savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
   setActiveUrl: (newUrl: string) => void;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
-  savedObjectsPublic: SavedObjectsStart;
+  restorePreviousUrl: () => void;
+  scopedHistory: ScopedHistory;
 }
 
 export interface SavedVisInstance {

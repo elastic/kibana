@@ -132,6 +132,12 @@ export class VisualizePlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
+        /**
+         * current implementation uses 2 history objects:
+         * 1. the hash history (used for the react hash router)
+         * 2. and the scoped history (used for url tracking)
+         * this should be replaced to use only scoped history after moving legacy apps to browser routing
+         */
         const history = createHashHistory();
 
         const services: VisualizeServices = {
@@ -152,13 +158,11 @@ export class VisualizePlugin
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
           embeddable: pluginsStart.embeddable,
-          I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
           savedObjectsPublic: pluginsStart.savedObjects,
-          scopedHistory: () => this.currentHistory!,
-          savedObjects: pluginsStart.savedObjects,
+          scopedHistory: params.history,
           restorePreviousUrl,
         };
 

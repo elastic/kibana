@@ -59,7 +59,7 @@ export const getTopNavConfig = (
   {
     application,
     chrome,
-    dashboard,
+    embeddable,
     history,
     share,
     setActiveUrl,
@@ -72,7 +72,7 @@ export const getTopNavConfig = (
    * Called when the user clicks "Save" button.
    */
   async function doSave(saveOptions: SavedObjectSaveOpts) {
-    const firstSave = !Boolean(savedVis.id);
+    const newlyCreated = !Boolean(savedVis.id) || savedVis.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
       title: savedVis.title,
@@ -103,11 +103,9 @@ export const getTopNavConfig = (
           history.replace(appPath);
           setActiveUrl(appPath);
 
-          if (originatingApp === 'dashboards') {
-            const savedVisId = firstSave || savedVis.copyOnSave ? id : '';
-            dashboard.addEmbeddableToDashboard({
-              embeddableId: savedVisId,
-              embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
+          if (newlyCreated && embeddable) {
+            embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
+              state: { id, type: VISUALIZE_EMBEDDABLE_TYPE },
             });
           } else {
             application.navigateToApp(originatingApp);
