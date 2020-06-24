@@ -3,8 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiSwitch,
+  EuiLink,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,59 +22,14 @@ import {
   getFormRow,
   Field,
   Forms,
-  FieldConfig,
-  FIELD_TYPES,
-  fieldValidators,
+  JsonEditorField,
 } from '../../../../shared_imports';
+
+import { logisticsFormSchema } from './step_logistics_schema';
+import { useComponentTemplatesContext } from '../../../../component_templates_context';
 
 const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
-
-const { emptyField } = fieldValidators;
-
-const fieldsMeta = {
-  name: {
-    title: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.nameTitle', {
-      defaultMessage: 'Name',
-    }),
-    description: i18n.translate(
-      'xpack.idxMgmt.componentTemplateForm.stepLogistics.nameDescription',
-      {
-        defaultMessage: 'A unique identifier for this component template.',
-      }
-    ),
-    testSubject: 'nameField',
-  },
-  version: {
-    title: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.versionTitle', {
-      defaultMessage: 'Version',
-    }),
-    description: i18n.translate(
-      'xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription',
-      {
-        defaultMessage: 'A number that identifies the template to external management systems.',
-      }
-    ),
-    testSubject: 'versionField',
-  },
-};
-
-const nameConfig: FieldConfig = {
-  defaultValue: undefined,
-  label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.nameFieldLabel', {
-    defaultMessage: 'Name',
-  }),
-  type: FIELD_TYPES.TEXT,
-  validations: [
-    {
-      validator: emptyField(
-        i18n.translate('xpack.idxMgmt.componentTemplateForm.validation.nameRequiredError', {
-          defaultMessage: 'A component template name is required.',
-        })
-      ),
-    },
-  ],
-};
 
 interface Props {
   defaultValue: { [key: string]: any };
@@ -77,9 +40,20 @@ interface Props {
 export const StepLogistics: React.FunctionComponent<Props> = React.memo(
   ({ defaultValue, isEditing, onChange }) => {
     const { form } = useForm({
+      schema: logisticsFormSchema,
       defaultValue,
       options: { stripEmptyFields: false },
     });
+
+    const { documentation } = useComponentTemplatesContext();
+
+    const [isVersionVisible, setIsVersionVisible] = useState<boolean>(
+      Boolean(defaultValue.version)
+    );
+
+    const [isMetaVisible, setIsMetaVisible] = useState<boolean>(
+      Boolean(Object.keys(defaultValue._meta).length)
+    );
 
     useEffect(() => {
       const validate = async () => {
@@ -91,8 +65,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         getData: form.getFormData,
       });
     }, [form.isValid, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const { name, version } = fieldsMeta;
 
     return (
       <Form form={form} data-test-subj="stepLogistics">
@@ -112,39 +84,130 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={'#'} // TODO
+              href={documentation.componentTemplates}
               target="_blank"
               iconType="help"
             >
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateForm.stepLogistics.docsButtonLabel"
-                defaultMessage="Index Templates docs"
+                defaultMessage="Component Templates docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        {/* Name */}
-        <FormRow title={name.title} description={name.description}>
+        {/* Name with optional version field */}
+        <FormRow
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameTitle"
+              defaultMessage="Name"
+            />
+          }
+          description={
+            <>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameDescription"
+                defaultMessage="A unique identifier for this component template."
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionToggleDescription"
+                    defaultMessage="Add version number"
+                  />
+                }
+                checked={isVersionVisible}
+                onChange={(e) => setIsVersionVisible(e.target.checked)}
+                data-test-subj="versionToggle"
+              />
+            </>
+          }
+        >
           <UseField
             path="name"
-            config={nameConfig}
-            component={Field}
             componentProps={{
-              ['data-test-subj']: name.testSubject,
+              ['data-test-subj']: 'nameField',
               euiFieldProps: { disabled: isEditing },
             }}
           />
+
+          {isVersionVisible && (
+            <UseField
+              path="version"
+              componentProps={{
+                ['data-test-subj']: 'versionField',
+              }}
+            />
+          )}
         </FormRow>
-        {/* Version */}
-        {/* <FormRow title={version.title} description={version.description}>
-          <UseField
-            path="version"
-            componentProps={{
-              ['data-test-subj']: version.testSubject,
-            }}
-          />
-        </FormRow> */}
+
+        {/* _meta field */}
+        <FormRow
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaTitle"
+              defaultMessage="Metadata"
+            />
+          }
+          description={
+            <>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDescription"
+                defaultMessage="A user-defined map that can contain any data. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink
+                      href={documentation.componentTemplatesMetadata}
+                      target="_blank"
+                      external
+                    >
+                      {i18n.translate('xpack.ingestPipelines.form.metaDocumentionLink', {
+                        defaultMessage: 'Learn more',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metadataDescription"
+                    defaultMessage="Add metadata"
+                  />
+                }
+                checked={isMetaVisible}
+                onChange={(e) => setIsMetaVisible(e.target.checked)}
+                data-test-subj="metaToggle"
+              />
+            </>
+          }
+        >
+          {isMetaVisible ? (
+            <UseField
+              path="_meta"
+              component={JsonEditorField}
+              componentProps={{
+                euiCodeEditorProps: {
+                  ['data-test-subj']: 'metaEditor',
+                  height: '300px',
+                  'aria-label': i18n.translate(
+                    'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaAriaLabel',
+                    {
+                      defaultMessage: 'Metadata JSON editor',
+                    }
+                  ),
+                },
+              }}
+            />
+          ) : (
+            // <FormRow/> requires children or a field
+            // For now, we return an empty <div> if the editor is not visible
+            <div />
+          )}
+        </FormRow>
       </Form>
     );
   }

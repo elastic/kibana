@@ -24,6 +24,7 @@ export {
 export {
   serializers,
   fieldValidators,
+  fieldFormatters,
 } from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 
 export {
@@ -39,7 +40,10 @@ export {
 export {
   getFormRow,
   Field,
+  JsonEditorField,
 } from '../../../../../../../src/plugins/es_ui_shared/static/forms/components';
+
+export { isJSON } from '../../../../../../../src/plugins/es_ui_shared/static/validators/string';
 
 export { TabMappings, TabSettings, TabAliases } from '../shared';
 

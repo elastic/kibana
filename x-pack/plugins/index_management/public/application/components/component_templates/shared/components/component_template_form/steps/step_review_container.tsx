@@ -5,13 +5,12 @@
  */
 import React from 'react';
 
-import { TemplateDeserialized } from '../../../../../common';
-import { Forms } from '../../../../shared_imports';
-import { WizardContent, WizardSection } from '../template_form';
+import { Forms, ComponentTemplateDeserialized } from '../../../../shared_imports';
+import { WizardContent, WizardSection } from '../component_template_form';
 import { StepReview } from './step_review';
 
 interface Props {
-  getTemplateData: (wizardContent: WizardContent) => TemplateDeserialized;
+  getTemplateData: (wizardContent: WizardContent) => ComponentTemplateDeserialized;
 }
 
 export const StepReviewContainer = React.memo(({ getTemplateData }: Props) => {
