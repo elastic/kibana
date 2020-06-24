@@ -10715,7 +10715,6 @@
     "xpack.ml.newJob.wizard.validateJob.queryIsInvalidEsQuery": "数据馈送查询必须是有效的 Elasticsearch 查询。",
     "xpack.ml.overview.analyticsList.createFirstJobMessage": "创建您的首个数据帧分析作业",
     "xpack.ml.overview.analyticsList.createJobButtonText": "创建作业",
-    "xpack.ml.overview.analyticsList.emptyPromptText": "数据帧分析允许您对数据执行不同的分析，并使用结果标注数据。该作业会将标注的数据以及源数据的副本置于新的索引中。",
     "xpack.ml.overview.analyticsList.errorPromptTitle": "获取数据帧分析列表时发生错误。",
     "xpack.ml.overview.analyticsList.id": "ID",
     "xpack.ml.overview.analyticsList.manageJobsButtonText": "管理作业",
