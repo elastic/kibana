@@ -35,6 +35,7 @@ import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
 import { AuditTrailSetup, AuditTrailStart } from './audit_trail';
+import { InternalLoggingServiceSetup } from './logging';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -50,6 +51,7 @@ export interface InternalCoreSetup {
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
   auditTrail: AuditTrailSetup;
+  logging: InternalLoggingServiceSetup;
 }
 
 /**

@@ -33,7 +33,7 @@ import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
-import { Logger, LoggerFactory } from './logging';
+import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
@@ -75,21 +75,24 @@ export class Server {
   private readonly metrics: MetricsService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
+  private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
   private readonly auditTrail: AuditTrailService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
+  private readonly logger: LoggerFactory;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
     public readonly env: Env,
-    private readonly logger: LoggerFactory
+    private readonly loggingSystem: ILoggingSystem
   ) {
+    this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
-    this.configService = new ConfigService(rawConfigProvider, env, logger);
+    this.configService = new ConfigService(rawConfigProvider, env, this.logger);
 
-    const core = { coreId, configService: this.configService, env, logger };
+    const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
@@ -105,6 +108,7 @@ export class Server {
     this.coreApp = new CoreApp(core);
     this.httpResources = new HttpResourcesService(core);
     this.auditTrail = new AuditTrailService(core);
+    this.logging = new LoggingService(core);
   }
 
   public async setup() {
@@ -168,6 +172,10 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
+    const loggingSetup = this.logging.setup({
+      loggingSystem: this.loggingSystem,
+    });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -181,6 +189,7 @@ export class Server {
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
       auditTrail: auditTrailSetup,
+      logging: loggingSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -252,6 +261,7 @@ export class Server {
     await this.rendering.stop();
     await this.metrics.stop();
     await this.status.stop();
+    await this.logging.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
