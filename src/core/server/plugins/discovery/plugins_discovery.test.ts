@@ -19,7 +19,7 @@
 
 import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugins_discovery.test.mocks';
 import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 
 import { resolve } from 'path';
 import { first, map, toArray } from 'rxjs/operators';
@@ -37,7 +37,7 @@ const TEST_PLUGIN_SEARCH_PATHS = {
 };
 const TEST_EXTRA_PLUGIN_PATH = resolve(process.cwd(), 'my-extra-plugin');
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 
 beforeEach(() => {
   mockReaddir.mockImplementation((path, cb) => {
@@ -221,7 +221,7 @@ test('logs a warning about --plugin-path when used in development', async () => 
     logger,
   });
 
-  expect(loggingServiceMock.collect(logger).warn).toEqual([
+  expect(loggingSystemMock.collect(logger).warn).toEqual([
     [
       `Explicit plugin paths [${TEST_EXTRA_PLUGIN_PATH}] should only be used in development. Relative imports may not work properly in production.`,
     ],
@@ -263,5 +263,5 @@ test('does not log a warning about --plugin-path when used in production', async
     logger,
   });
 
-  expect(loggingServiceMock.collect(logger).warn).toEqual([]);
+  expect(loggingSystemMock.collect(logger).warn).toEqual([]);
 });
