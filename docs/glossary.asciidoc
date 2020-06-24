@@ -90,7 +90,7 @@ A field for which only a certain number of documents will be accepted in your
 graph to avoid bias. For example, if you select "nationality" as a
 diversity field, a limited number of documents will be accepted per nationality
 in your sample.
-// end::data-source-def[]
+// end::diversity-field-def[]
 
 [glossary-drilldown]] drilldown ::
 // tag::drilldown-def[]
