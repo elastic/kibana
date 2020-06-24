@@ -23,7 +23,7 @@ import * as legacyElasticsearch from 'elasticsearch';
 
 import { CallAPIOptions } from '.';
 import { APICaller } from './api_types';
-import { Logger } from '../logging';
+import { Logger } from '../../logging';
 
 const esErrors = legacyElasticsearch.errors;
 

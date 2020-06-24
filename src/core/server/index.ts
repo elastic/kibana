@@ -103,7 +103,7 @@ export {
   FakeRequest,
   ScopeableRequest,
 } from './elasticsearch';
-export * from './elasticsearch/api_types';
+export * from './elasticsearch/legacy/api_types';
 export {
   AuthenticationHandler,
   AuthHeaders,

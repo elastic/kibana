@@ -36,7 +36,7 @@ import {
   InternalElasticsearchServiceSetup,
 } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
-import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
+import { migrationsRetryCallCluster } from '../elasticsearch/legacy';
 import {
   SavedObjectsConfigType,
   SavedObjectsMigrationConfigType,

@@ -18,7 +18,7 @@
  */
 
 import { intersection, isObject } from 'lodash';
-import { Headers } from '../http/router';
+import { Headers } from '../../http/router';
 import { APICaller, CallAPIOptions } from './api_types';
 
 /** @public */

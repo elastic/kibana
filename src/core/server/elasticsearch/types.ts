@@ -19,8 +19,7 @@
 
 import { Observable } from 'rxjs';
 import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchClientConfig } from './elasticsearch_client_config';
-import { IClusterClient, ICustomClusterClient } from './cluster_client';
+import { ElasticsearchClientConfig, IClusterClient, ICustomClusterClient } from './legacy';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus } from '../status';
 

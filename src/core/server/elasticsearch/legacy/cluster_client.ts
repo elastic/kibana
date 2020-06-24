@@ -20,9 +20,9 @@ import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 
 import { ElasticsearchErrorHelpers } from './errors';
-import { GetAuthHeaders, isRealRequest, LegacyRequest } from '../http';
-import { filterHeaders, Headers, KibanaRequest, ensureRawRequest } from '../http/router';
-import { Logger } from '../logging';
+import { GetAuthHeaders, isRealRequest, LegacyRequest } from '../../http';
+import { filterHeaders, Headers, KibanaRequest, ensureRawRequest } from '../../http/router';
+import { Logger } from '../../logging';
 import {
   ElasticsearchClientConfig,
   parseElasticsearchClientConfig,

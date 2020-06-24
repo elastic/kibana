@@ -19,8 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { Client } from 'elasticsearch';
-import { IClusterClient, ICustomClusterClient } from './cluster_client';
-import { IScopedClusterClient } from './scoped_cluster_client';
+import { IClusterClient, ICustomClusterClient, IScopedClusterClient } from './legacy';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './types';

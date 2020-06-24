@@ -18,7 +18,7 @@
  */
 
 import { duration } from 'moment';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingServiceMock } from '../../logging/logging_service.mock';
 import {
   ElasticsearchClientConfig,
   parseElasticsearchClientConfig,

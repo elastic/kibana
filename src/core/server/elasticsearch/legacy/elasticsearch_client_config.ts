@@ -22,9 +22,9 @@ import { cloneDeep } from 'lodash';
 import { Duration } from 'moment';
 import { checkServerIdentity } from 'tls';
 import url from 'url';
-import { pick } from '../../utils';
-import { Logger } from '../logging';
-import { ElasticsearchConfig } from './elasticsearch_config';
+import { pick } from '../../../utils';
+import { Logger } from '../../logging';
+import { ElasticsearchConfig } from '../elasticsearch_config';
 
 /**
  * @privateRemarks Config that consumers can pass to the Elasticsearch JS client is complex and includes

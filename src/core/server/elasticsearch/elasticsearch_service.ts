@@ -38,12 +38,12 @@ import {
   ScopeableRequest,
   IClusterClient,
   ICustomClusterClient,
-} from './cluster_client';
-import { ElasticsearchClientConfig } from './elasticsearch_client_config';
+  ElasticsearchClientConfig,
+  CallAPIOptions,
+} from './legacy';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
 import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './types';
-import { CallAPIOptions } from './api_types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 

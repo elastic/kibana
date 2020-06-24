@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { ElasticsearchService } from './elasticsearch_service';
-export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
-export { NodesVersionCompatibility } from './version_check/ensure_es_version';
 export {
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-  InternalElasticsearchServiceSetup,
-} from './types';
-export * from './legacy';
+  ClusterClient,
+  FakeRequest,
+  IClusterClient,
+  ICustomClusterClient,
+  ScopeableRequest,
+} from './cluster_client';
+export { IScopedClusterClient, ScopedClusterClient, Headers } from './scoped_cluster_client';
+export { ElasticsearchClientConfig } from './elasticsearch_client_config';
+export { retryCallCluster, migrationsRetryCallCluster } from './retry_call_cluster';
+export { ElasticsearchError, ElasticsearchErrorHelpers } from './errors';
+export * from './api_types';

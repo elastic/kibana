@@ -19,7 +19,7 @@
 
 import { omit } from 'lodash';
 import uuid from 'uuid';
-import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
+import { retryCallCluster } from '../../../elasticsearch/legacy';
 import { APICaller } from '../../../elasticsearch/';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';

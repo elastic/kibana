@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ElasticsearchConfig } from './elasticsearch_config';
+import { ElasticsearchConfig } from '../elasticsearch_config';
 
 import {
   MockClient,
@@ -27,9 +27,9 @@ import {
 
 import { errors } from 'elasticsearch';
 import { get } from 'lodash';
-import { Logger } from '../logging';
-import { loggingServiceMock } from '../logging/logging_service.mock';
-import { httpServerMock } from '../http/http_server.mocks';
+import { Logger } from '../../logging';
+import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { httpServerMock } from '../../http/http_server.mocks';
 import { ClusterClient } from './cluster_client';
 
 const logger = loggingServiceMock.create();

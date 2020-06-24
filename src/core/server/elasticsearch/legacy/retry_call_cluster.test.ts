@@ -19,7 +19,7 @@
 import * as legacyElasticsearch from 'elasticsearch';
 
 import { retryCallCluster, migrationsRetryCallCluster } from './retry_call_cluster';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingServiceMock } from '../../logging/logging_service.mock';
 
 describe('retryCallCluster', () => {
   it('retries ES API calls that rejects with NoConnections', () => {
