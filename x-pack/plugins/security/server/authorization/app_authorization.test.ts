@@ -8,7 +8,7 @@ import { PluginSetupContract as FeaturesSetupContract } from '../../../features/
 import { initAppAuthorization } from './app_authorization';
 
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   coreMock,
   httpServerMock,
   httpServiceMock,
@@ -27,7 +27,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       authorizationMock.create(),
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -49,7 +49,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -74,7 +74,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -100,7 +100,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -140,7 +140,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
