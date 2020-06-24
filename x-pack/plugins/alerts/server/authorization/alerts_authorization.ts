@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { pluck, mapValues } from 'lodash';
+import { pluck, mapValues, remove } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { ALERTS_FEATURE_ID } from '../../common';
 import { AlertTypeRegistry } from '../types';
@@ -269,13 +269,17 @@ export class AlertsAuthorization {
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
-  const invalid = value.match(/[>=<\*:]+/g);
+  const invalid = value.match(/([>=<\*:()]+|\s+)/g);
   if (invalid) {
-    throw new Error(
-      `expected ${field} not to include invalid character${
-        invalid.length > 1 ? `s` : ``
-      }: ${invalid?.join(`, `)}`
-    );
+    const whitespace = remove(invalid, (chars) => chars.trim().length === 0);
+    const errors = [];
+    if (whitespace.length) {
+      errors.push(`whitespace`);
+    }
+    if (invalid.length) {
+      errors.push(`invalid character${invalid.length > 1 ? `s` : ``}: ${invalid?.join(`, `)}`);
+    }
+    throw new Error(`expected ${field} not to include ${errors.join(' and ')}`);
   }
   return true;
 }

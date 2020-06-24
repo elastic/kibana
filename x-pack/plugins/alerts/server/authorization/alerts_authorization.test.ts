@@ -816,12 +816,20 @@ describe('ensureFieldIsSafeForQuery', () => {
       `expected id not to include invalid character: <=`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', '<"" or >=""')).toThrowError(
-      `expected id not to include invalid characters: <, >=`
+    expect(() => ensureFieldIsSafeForQuery('id', '>=""')).toThrowError(
+      `expected id not to include invalid character: >=`
     );
 
     expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrowError(
-      `expected id not to include invalid character: :`
+      `expected id not to include whitespace and invalid character: :`
+    );
+
+    expect(() => ensureFieldIsSafeForQuery('id', ') or alertid:123')).toThrowError(
+      `expected id not to include whitespace and invalid characters: ), :`
+    );
+
+    expect(() => ensureFieldIsSafeForQuery('id', 'some space')).toThrowError(
+      `expected id not to include whitespace`
     );
   });
 
