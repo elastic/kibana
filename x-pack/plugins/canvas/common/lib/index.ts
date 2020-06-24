@@ -26,7 +26,6 @@ export * from './hex_to_rgb';
 export * from './httpurl';
 // @ts-expect-error missing local definition
 export * from './missing_asset';
-// @ts-expect-error missing local definition
 export * from './palettes';
 export * from './pivot_object_array';
 // @ts-expect-error missing local definition
