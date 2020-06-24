@@ -140,6 +140,13 @@ describe('SIEM Navigation', () => {
             name: 'Timelines',
             urlKey: 'timeline',
           },
+          endpointAlerts: {
+            disabled: false,
+            href: '/app/security/endpoint-alerts',
+            id: 'endpointAlerts',
+            name: 'Endpoint Alerts',
+            urlKey: 'management',
+          },
         },
         pageName: 'hosts',
         pathName: '/',
@@ -185,7 +192,7 @@ describe('SIEM Navigation', () => {
     wrapper.setProps({
       pageName: 'network',
       pathName: '/',
-      tabName: undefined,
+      tabName: 'authentications',
     });
     wrapper.update();
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(
@@ -209,7 +216,13 @@ describe('SIEM Navigation', () => {
             name: 'Cases',
             urlKey: 'case',
           },
-
+          endpointAlerts: {
+            disabled: false,
+            href: '/app/security/endpoint-alerts',
+            id: 'endpointAlerts',
+            name: 'Endpoint Alerts',
+            urlKey: 'management',
+          },
           hosts: {
             disabled: false,
             href: '/app/security/hosts',
@@ -252,7 +265,7 @@ describe('SIEM Navigation', () => {
         savedQuery: undefined,
         search: '',
         state: undefined,
-        tabName: undefined,
+        tabName: 'authentications',
         timeline: { id: '', isOpen: false },
         timerange: {
           global: {

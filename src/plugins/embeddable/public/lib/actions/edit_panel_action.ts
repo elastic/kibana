@@ -24,12 +24,18 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { EMBEDDABLE_ORIGINATING_APP_PARAM, IEmbeddable } from '../..';
+import { IEmbeddable, EmbeddableOriginatingAppState, EmbeddableStateTransfer } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
 interface ActionContext {
   embeddable: IEmbeddable;
+}
+
+interface NavigationContext {
+  app: string;
+  path: string;
+  state?: EmbeddableOriginatingAppState;
 }
 
 export class EditPanelAction implements Action<ActionContext> {
@@ -40,7 +46,8 @@ export class EditPanelAction implements Action<ActionContext> {
 
   constructor(
     private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
-    private readonly application: ApplicationStart
+    private readonly application: ApplicationStart,
+    private readonly stateTransfer?: EmbeddableStateTransfer
   ) {
     if (this.application?.currentAppId$) {
       this.application.currentAppId$
@@ -79,9 +86,15 @@ export class EditPanelAction implements Action<ActionContext> {
 
   public async execute(context: ActionContext) {
     const appTarget = this.getAppTarget(context);
-
     if (appTarget) {
-      await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
+      if (this.stateTransfer && appTarget.state) {
+        await this.stateTransfer.navigateToWithOriginatingApp(appTarget.app, {
+          path: appTarget.path,
+          state: appTarget.state,
+        });
+      } else {
+        await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
+      }
       return;
     }
 
@@ -92,22 +105,17 @@ export class EditPanelAction implements Action<ActionContext> {
     }
   }
 
-  public getAppTarget({ embeddable }: ActionContext): { app: string; path: string } | undefined {
+  public getAppTarget({ embeddable }: ActionContext): NavigationContext | undefined {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
-    let path = embeddable ? embeddable.getOutput().editPath : undefined;
+    const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
-      if (this.currentAppId) {
-        path += `?${EMBEDDABLE_ORIGINATING_APP_PARAM}=${this.currentAppId}`;
-      }
-      return { app, path };
+      const state = this.currentAppId ? { originatingApp: this.currentAppId } : undefined;
+      return { app, path, state };
     }
   }
 
   public async getHref({ embeddable }: ActionContext): Promise<string> {
-    let editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
-    if (editUrl && this.currentAppId) {
-      editUrl += `?${EMBEDDABLE_ORIGINATING_APP_PARAM}=${this.currentAppId}`;
-    }
+    const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     return editUrl ? editUrl : '';
   }
 }
