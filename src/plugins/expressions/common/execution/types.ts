@@ -70,6 +70,11 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultIn
     type: string,
     id: string
   ) => Promise<SavedObject<T>>;
+
+  /**
+   * A list of names of arguments which were defaulted in the course of execution.
+   */
+  defaultedArgs: string[];
 }
 
 /**
