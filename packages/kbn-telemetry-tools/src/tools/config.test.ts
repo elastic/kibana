@@ -27,13 +27,13 @@ describe('parseTelemetryRC', () => {
   });
 
   it('returns parsed rc file', async () => {
-    const fixtureDir = path.join(__dirname, '__fixture__');
-    const config = await parseTelemetryRC(fixtureDir);
+    const configRoot = path.join(process.cwd(), 'src', 'fixtures', 'telemetry_collectors');
+    const config = await parseTelemetryRC(configRoot);
     expect(config).toStrictEqual([
       {
-        root: fixtureDir,
-        output: fixtureDir,
-        exclude: [path.resolve(fixtureDir, './unmapped_collector.ts')],
+        root: configRoot,
+        output: configRoot,
+        exclude: [path.resolve(configRoot, './unmapped_collector.ts')],
       },
     ]);
   });
