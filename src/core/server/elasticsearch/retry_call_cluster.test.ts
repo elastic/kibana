@@ -19,7 +19,7 @@
 import * as legacyElasticsearch from 'elasticsearch';
 
 import { retryCallCluster, migrationsRetryCallCluster } from './retry_call_cluster';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 describe('retryCallCluster', () => {
   it('retries ES API calls that rejects with NoConnections', () => {
@@ -69,10 +69,10 @@ describe('migrationsRetryCallCluster', () => {
     'Gone',
   ];
 
-  const mockLogger = loggingServiceMock.create();
+  const mockLogger = loggingSystemMock.create();
 
   beforeEach(() => {
-    loggingServiceMock.clear(mockLogger);
+    loggingSystemMock.clear(mockLogger);
   });
 
   errors.forEach((errorName) => {
@@ -133,7 +133,7 @@ describe('migrationsRetryCallCluster', () => {
     callEsApi.mockResolvedValueOnce('done');
     const retried = migrationsRetryCallCluster(callEsApi, mockLogger.get('mock log'), 1);
     await retried('endpoint');
-    expect(loggingServiceMock.collect(mockLogger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(mockLogger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
           "Unable to connect to Elasticsearch. Error: No Living connections",
