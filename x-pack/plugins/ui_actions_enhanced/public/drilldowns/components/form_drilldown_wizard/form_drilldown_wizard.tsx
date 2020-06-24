@@ -64,7 +64,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         data-test-subj={'getMoreActionsLink'}
       >
         <FormattedMessage
-          id="xpack.drilldowns.components.FormDrilldownWizard.getMoreActionsLinkLabel"
+          id="xpack.uiActionsEnhanced.drildown.components.FormDrilldownWizard.getMoreActionsLinkLabel"
           defaultMessage="Get more actions"
         />
       </EuiLink>
