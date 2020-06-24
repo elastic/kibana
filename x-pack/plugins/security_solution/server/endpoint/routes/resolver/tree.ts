@@ -6,7 +6,7 @@
 
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { eventsIndexPattern } from '../../../../common/endpoint/constants';
+import { eventsIndexPattern, alertsIndexPattern } from '../../../../common/endpoint/constants';
 import { validateTree } from '../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 import { Tree } from './utils/tree';
@@ -34,7 +34,7 @@ export function handleTree(
     try {
       const client = context.core.elasticsearch.legacy.client;
 
-      const fetcher = new Fetcher(client, id, eventsIndexPattern, endpointID);
+      const fetcher = new Fetcher(client, id, eventsIndexPattern, alertsIndexPattern, endpointID);
 
       const [childrenNodes, ancestry, relatedEvents, relatedAlerts] = await Promise.all([
         fetcher.children(children, generations, afterChild),
