@@ -7,9 +7,9 @@
 import { getSearchEsListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
 import { Type } from '../../../common/schemas';
 
-import { deriveTypeFromItem } from './derive_type_from_es_type';
+import { findSourceType } from './find_source_type';
 
-describe('derive_type_from_es_type', () => {
+describe('find_source_type', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -20,7 +20,7 @@ describe('derive_type_from_es_type', () => {
 
   test('it returns the item ip if it exists', () => {
     const item = getSearchEsListItemMock();
-    const derivedType = deriveTypeFromItem({ item });
+    const derivedType = findSourceType(item);
     const expected: Type = 'ip';
     expect(derivedType).toEqual(expected);
   });
@@ -29,18 +29,15 @@ describe('derive_type_from_es_type', () => {
     const item = getSearchEsListItemMock();
     item.ip = undefined;
     item.keyword = 'some keyword';
-    const derivedType = deriveTypeFromItem({ item });
+    const derivedType = findSourceType(item);
     const expected: Type = 'keyword';
     expect(derivedType).toEqual(expected);
   });
 
-  test('it throws an error with status code if neither one exists', () => {
+  test('it returns a null if all the attached types are undefined', () => {
     const item = getSearchEsListItemMock();
     item.ip = undefined;
     item.keyword = undefined;
-    const expected = `Was expecting a valid type from the Elastic Search List Item such as ip or keyword but did not found one here ${JSON.stringify(
-      item
-    )}`;
-    expect(() => deriveTypeFromItem({ item })).toThrowError(expected);
+    expect(findSourceType(item)).toEqual(null);
   });
 });

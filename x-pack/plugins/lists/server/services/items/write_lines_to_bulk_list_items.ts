@@ -77,6 +77,7 @@ export const writeBufferToItems = async ({
   user,
   meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
+  // TODO: Do we want to remove duplicates here because of the multi-column CSV capabilities we want to introduce?
   const items = await getListItemByValues({
     callCluster,
     listId,
