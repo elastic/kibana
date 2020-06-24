@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
@@ -69,13 +69,13 @@ describe('rules_notification_alert_type', () => {
   };
   let payload: jest.Mocked<RuleExecutorOptions>;
   let alert: ReturnType<typeof signalRulesAlertType>;
-  let logger: ReturnType<typeof loggingServiceMock.createLogger>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
   let ruleStatusService: Record<string, jest.Mock>;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
-    logger = loggingServiceMock.createLogger();
+    logger = loggingSystemMock.createLogger();
     ruleStatusService = {
       success: jest.fn(),
       find: jest.fn(),

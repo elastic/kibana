@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
 import { esQuery } from '../../../../../../src/plugins/data/public';
+import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -175,7 +176,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
           }}
         </WithSource>
 
-        <SpyRoute />
+        <SpyRoute pageName={SecurityPageName.network} />
       </>
     );
   }

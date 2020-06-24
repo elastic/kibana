@@ -40,10 +40,14 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 
 const mockUseSignalIndex: jest.Mock = useSignalIndex as jest.Mock<ReturnSignalIndex>;
 jest.mock('../../../alerts/containers/detection_engine/alerts/use_signal_index');
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: jest.fn(),
-}));
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: jest.fn(),
+  };
+});
 jest.mock('../flyout/header_with_close_button');
 describe('StatefulTimeline', () => {
   let props = {} as StatefulTimelineProps;
@@ -70,6 +74,7 @@ describe('StatefulTimeline', () => {
       filters: [],
       id: 'foo',
       isLive: false,
+      isTimelineExists: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search',

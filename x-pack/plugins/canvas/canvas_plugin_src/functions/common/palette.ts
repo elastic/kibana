@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { palettes } from '../../../common/lib/palettes';
 import { getFunctionHelp } from '../../../i18n';
 

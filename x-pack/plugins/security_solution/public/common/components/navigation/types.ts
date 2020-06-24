@@ -9,6 +9,7 @@ import { HostsTableType } from '../../../hosts/store/model';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS, UrlStateType } from '../url_state/constants';
+import { SecurityPageName } from '../../../app/types';
 
 export interface SiemNavigationProps {
   display?: 'default' | 'condensed';
@@ -37,4 +38,22 @@ export interface NavTab {
   disabled: boolean;
   urlKey: UrlStateType;
   isDetailPage?: boolean;
+  pageId?: SecurityPageName;
 }
+
+export type SiemNavTabKey =
+  | SecurityPageName.overview
+  | SecurityPageName.hosts
+  | SecurityPageName.network
+  | SecurityPageName.alerts
+  | SecurityPageName.timelines
+  | SecurityPageName.case
+  | SecurityPageName.management
+  | SecurityPageName.endpointAlerts;
+
+export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
+
+export type GetUrlForApp = (
+  appId: string,
+  options?: { path?: string; absolute?: boolean }
+) => string;

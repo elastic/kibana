@@ -5,12 +5,14 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import { AlertIndex } from './view';
 
-export const endpointAlertsRoutes = () => [
-  <Route path="/:pageName(endpoint-alerts)">
-    <AlertIndex />
-  </Route>,
-];
+export const EndpointAlertsRoutes: React.FC = () => (
+  <Switch>
+    <Route path="/">
+      <AlertIndex />
+    </Route>
+  </Switch>
+);

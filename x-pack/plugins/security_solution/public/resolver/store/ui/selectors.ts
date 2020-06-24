@@ -28,3 +28,19 @@ export const selectedDescendantId = createSelector(
     return selectedDescendantId;
   }
 );
+
+/**
+ * id of the currently "selected" tree node
+ */
+export const selectedDescendantProcessId = createSelector(
+  (uiState: ResolverUIState) => uiState,
+  /* eslint-disable no-shadow */
+  ({ processEntityIdOfSelectedDescendant }: ResolverUIState) => {
+    return processEntityIdOfSelectedDescendant;
+  }
+);
+
+// Select the current panel to be displayed
+export const currentPanelView = (uiState: ResolverUIState) => {
+  return uiState.panelToDisplay;
+};

@@ -71,13 +71,13 @@ describe('Spy Routes', () => {
               path: pathname,
               url: pathname,
               params: {
-                pageName: undefined,
                 detailName: '',
                 tabName: HostsTableType.hosts,
                 search: '',
                 flowTarget: undefined,
               },
             }}
+            pageName={undefined}
           />
         </ManageRoutesSpy>
       );
@@ -103,13 +103,13 @@ describe('Spy Routes', () => {
               path: pathname,
               url: pathname,
               params: {
-                pageName: 'hosts',
                 detailName: undefined,
                 tabName: HostsTableType.hosts,
                 search: '?IdoNotWantToSeeYou="true"',
                 flowTarget: undefined,
               },
             }}
+            pageName="hosts"
           />
         </ManageRoutesSpy>
       );
@@ -124,9 +124,9 @@ describe('Spy Routes', () => {
       expect(dispatchMock.mock.calls[1]).toEqual([
         {
           route: {
+            pageName: 'hosts',
             detailName: undefined,
             history: mockHistory,
-            pageName: 'hosts',
             pathName: pathname,
             tabName: HostsTableType.hosts,
           },
@@ -154,13 +154,13 @@ describe('Spy Routes', () => {
             path: pathname,
             url: pathname,
             params: {
-              pageName: 'hosts',
               detailName: undefined,
               tabName: HostsTableType.hosts,
               search: '?IdoNotWantToSeeYou="true"',
               flowTarget: undefined,
             },
           }}
+          pageName="hosts"
         />
       );
 
