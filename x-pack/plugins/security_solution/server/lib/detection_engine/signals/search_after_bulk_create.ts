@@ -116,6 +116,7 @@ export const searchAfterAndBulkCreate = async ({
     interval,
   });
   const useSortIds = totalToFromTuples.length <= 1;
+  logger.debug(`totalToFromTuples: ${totalToFromTuples.length}`);
   while (totalToFromTuples.length > 0) {
     const tuple = totalToFromTuples.pop();
     if (tuple == null || tuple.to == null || tuple.from == null) {
@@ -228,10 +229,11 @@ export const searchAfterAndBulkCreate = async ({
       } catch (exc) {
         logger.error(`[-] search_after and bulk threw an error ${exc}`);
         toReturn.success = false;
-        break;
+        return toReturn;
       }
     }
   }
   logger.debug(`[+] completed bulk index of ${toReturn.createdSignalsCount}`);
+  toReturn.success = true;
   return toReturn;
 };
