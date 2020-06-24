@@ -40,6 +40,7 @@ import { isHorizontalChart } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
+import { fittingFunctions, getFitOptions } from './fitting_functions';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -91,6 +92,13 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['lens_xy_legendConfig'],
       help: i18n.translate('xpack.lens.xyChart.legend.help', {
         defaultMessage: 'Configure the chart legend.',
+      }),
+    },
+    fittingFunction: {
+      types: ['string'],
+      options: [...fittingFunctions],
+      help: i18n.translate('xpack.lens.xyChart.fittingFuncction.help', {
+        defaultMessage: 'Define how missing values are treated',
       }),
     },
     layers: {
@@ -190,7 +198,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers } = args;
+  const { legend, layers, fittingFunction } = args;
 
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
     return !(
@@ -453,14 +461,18 @@ export function XYChart({
 
           switch (seriesType) {
             case 'line':
-              return <LineSeries key={index} {...seriesProps} />;
+              return (
+                <LineSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+              );
             case 'bar':
             case 'bar_stacked':
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
               return <BarSeries key={index} {...seriesProps} />;
             default:
-              return <AreaSeries key={index} {...seriesProps} />;
+              return (
+                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+              );
           }
         }
       )}

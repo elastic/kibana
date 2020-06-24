@@ -5,13 +5,24 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperSelect,
+  EuiFormRow,
+  EuiIcon,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import { State, SeriesType, visualizationTypes } from './types';
-import { VisualizationLayerWidgetProps } from '../types';
+import { VisualizationLayerWidgetProps, VisualizationToolbarProps } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { FittingFunction, fittingFunctionDescriptions } from './fitting_functions';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -66,5 +77,71 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
         buttonSize="compressed"
       />
     </EuiFormRow>
+  );
+}
+
+export function XyToolbar(props: VisualizationToolbarProps<State>) {
+  const [open, setOpen] = useState(false);
+  const hasNonBarSeries = props.state.layers.some(
+    (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
+  );
+  return (
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiButtonEmpty
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={() => {
+                setOpen(!open);
+              }}
+            >
+              <EuiIcon type="gear" />
+            </EuiButtonEmpty>
+          }
+          isOpen={open}
+          closePopover={() => {
+            setOpen(false);
+          }}
+          anchorPosition="downRight"
+        >
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
+              defaultMessage: 'Fitting function',
+            })}
+            helpText={
+              !hasNonBarSeries &&
+              i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
+                defaultMessage: 'This setting only applies to line and area charts.',
+              })
+            }
+          >
+            <EuiSuperSelect
+              disabled={!hasNonBarSeries}
+              options={Object.entries(fittingFunctionDescriptions).map(([id, description]) => {
+                return {
+                  value: id,
+                  inputDisplay: (
+                    <>
+                      <strong>{id}</strong>
+                      <EuiText size="s" color="subdued">
+                        <p className="euiTextColor--subdued">{description}</p>
+                      </EuiText>
+                    </>
+                  ),
+                };
+              })}
+              valueOfSelected={props.state?.fittingFunction || 'None'}
+              onChange={(value) =>
+                props.setState({ ...props.state, fittingFunction: value as FittingFunction })
+              }
+              itemLayoutAlign="top"
+              hasDividers
+            />
+          </EuiFormRow>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

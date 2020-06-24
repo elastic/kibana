@@ -331,6 +331,7 @@ describe('xy_suggestions', () => {
   test('makes a visible seriesType suggestion for unchanged table without split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      fittingFunction: 'None',
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -368,6 +369,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -408,6 +410,7 @@ describe('xy_suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      fittingFunction: 'None',
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -440,6 +443,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price'],
@@ -474,6 +478,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -512,6 +517,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price'],
@@ -551,6 +557,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price', 'quantity'],
