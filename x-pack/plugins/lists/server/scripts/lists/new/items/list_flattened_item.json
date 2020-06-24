@@ -1,5 +1,5 @@
 {
-  "id": "hand_inserted_item_id",
+  "id": "hand_inserted_flattened_item_id",
   "list_id": "list-flattened",
   "value": "{ \"a\": \"foo\"  }"
 }

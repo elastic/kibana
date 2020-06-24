@@ -19,7 +19,7 @@ import {
 import { getList } from '../lists';
 import {
   encodeCursor,
-  getQueryFilter,
+  getQueryFilterWithListId,
   getSearchAfterWithTieBreaker,
   getSortWithTieBreaker,
   scrollToStartPage,
@@ -53,11 +53,11 @@ export const findListItem = async ({
   listItemIndex,
   sortOrder,
 }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
-  const query = getQueryFilter({ filter });
   const list = await getList({ callCluster, id: listId, listIndex });
   if (list == null) {
     return null;
   } else {
+    const query = getQueryFilterWithListId({ filter, listId });
     const sortField =
       sortFieldWithPossibleValue === 'value' ? list.type : sortFieldWithPossibleValue;
     const scroll = await scrollToStartPage({

@@ -1,5 +1,5 @@
 {
-  "id": "hand_inserted_item_id",
+  "id": "hand_inserted_double_range_item_id",
   "list_id": "list-double-range",
   "format": "${lte}-${gte}",
   "value": "10-100"
