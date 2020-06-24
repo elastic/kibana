@@ -29,7 +29,7 @@ jest.mock('elasticsearch', () => {
 
 export const MockScopedClusterClient = jest.fn();
 jest.mock('./scoped_cluster_client', () => ({
-  ScopedClusterClient: MockScopedClusterClient,
+  LegacyScopedClusterClient: MockScopedClusterClient,
 }));
 
 export const mockParseElasticsearchClientConfig = jest.fn();
