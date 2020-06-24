@@ -25,13 +25,16 @@ export abstract class ResolverQuery<T> implements MSearchQuery {
    *  we need `endpointID` for legacy data is because we don't have a cross endpoint unique identifier for process
    *  events. Instead we use `unique_pid/ppid` and `endpointID` to uniquely identify a process event.
    */
-  constructor(private readonly indexPattern: string, private readonly endpointID?: string) {}
+  constructor(
+    private readonly indexPattern: string | string[],
+    private readonly endpointID?: string
+  ) {}
 
   private static createIdsArray(ids: string | string[]): string[] {
     return Array.isArray(ids) ? ids : [ids];
   }
 
-  private buildQuery(ids: string | string[]): { query: JsonObject; index: string } {
+  private buildQuery(ids: string | string[]): { query: JsonObject; index: string | string[] } {
     const idsArray = ResolverQuery.createIdsArray(ids);
     if (this.endpointID) {
       return { query: this.legacyQuery(this.endpointID, idsArray), index: legacyEventIndexPattern };

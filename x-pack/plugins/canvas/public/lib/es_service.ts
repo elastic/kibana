@@ -7,7 +7,6 @@
 import { IndexPatternAttributes } from 'src/plugins/data/public';
 
 import { API_ROUTE } from '../../common/lib/constants';
-// @ts-ignore untyped local
 import { fetch } from '../../common/lib/fetch';
 import { ErrorStrings } from '../../i18n';
 import { notifyService } from '../services';
