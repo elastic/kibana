@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPopover,
-  keyCodes,
+  keys,
   EuiIcon,
   EuiSpacer,
   EuiButtonEmpty,
@@ -67,7 +67,7 @@ const VisLegendItemComponent = ({
    * This will close the details panel of this legend entry when pressing Escape.
    */
   const onLegendEntryKeydown = (event: KeyboardEvent) => {
-    if (event.keyCode === keyCodes.ESCAPE) {
+    if (event.key === keys.ESCAPE) {
       event.preventDefault();
       event.stopPropagation();
       onSelect(null)();

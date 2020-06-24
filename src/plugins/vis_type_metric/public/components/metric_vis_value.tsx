@@ -20,7 +20,7 @@
 import React, { Component, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
-import { EuiKeyboardAccessible, keyCodes } from '@elastic/eui';
+import { EuiKeyboardAccessible, keys } from '@elastic/eui';
 
 import { MetricVisMetric } from '../types';
 
@@ -39,7 +39,7 @@ export class MetricVisValue extends Component<MetricVisValueProps> {
   };
 
   onKeyPress = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.keyCode === keyCodes.ENTER) {
+    if (event.key === keys.ENTER) {
       this.onClick();
     }
   };

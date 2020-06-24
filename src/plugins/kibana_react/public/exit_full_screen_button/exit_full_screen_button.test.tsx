@@ -20,7 +20,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { ExitFullScreenButton } from './exit_full_screen_button';
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 import { mount } from 'enzyme';
 
 test('is rendered', () => {
@@ -45,7 +45,7 @@ describe('onExitFullScreenMode', () => {
 
     mount(<ExitFullScreenButton onExitFullScreenMode={onExitHandler} />);
 
-    const escapeKeyEvent = new KeyboardEvent('keydown', { keyCode: keyCodes.ESCAPE } as any);
+    const escapeKeyEvent = new KeyboardEvent('keydown', { key: keys.ESCAPE } as any);
     document.dispatchEvent(escapeKeyEvent);
 
     sinon.assert.calledOnce(onExitHandler);

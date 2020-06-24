@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import moment from 'moment';
 import {
-  keyCodes,
+  keys,
   EuiSpacer,
   EuiIcon,
   EuiTitle,
@@ -125,17 +125,17 @@ export function ConsoleHistory({ close }: Props) {
           <ul
             ref={listRef}
             onKeyDown={(ev: React.KeyboardEvent) => {
-              if (ev.keyCode === keyCodes.ENTER) {
+              if (ev.key === keys.ENTER) {
                 restoreRequestFromHistory(selectedReq.current);
                 return;
               }
 
               let currentIdx = selectedIndex;
 
-              if (ev.keyCode === keyCodes.UP) {
+              if (ev.key === keys.ARROW_UP) {
                 ev.preventDefault();
                 --currentIdx;
-              } else if (ev.keyCode === keyCodes.DOWN) {
+              } else if (ev.key === keys.ARROW_DOWN) {
                 ev.preventDefault();
                 ++currentIdx;
               }
