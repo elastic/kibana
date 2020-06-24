@@ -15,5 +15,5 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-const connected = connect(mapStateToProps, null)(FlyoutBody);
+const connected = connect(mapStateToProps, {})(FlyoutBody);
 export { connected as FlyoutBody };
