@@ -17,13 +17,10 @@ import { NewDatasource, Datasource, ListWithKuery, DatasourceSOAttributes } from
 import { agentConfigService } from './agent_config';
 import { getPackageInfo, getInstallation } from './epm/packages';
 import { outputService } from './output';
+import { getAssetsDataForPackageKey } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
-
-function getDataset(st: string) {
-  return st.split('.')[1];
-}
 
 class DatasourceService {
   public async create(
@@ -274,32 +271,44 @@ async function _assignPackageStreamToStream(
   if (!stream.enabled) {
     return { ...stream, agent_stream: undefined };
   }
-  const dataset = getDataset(stream.dataset);
-  const datasource = pkgInfo.datasources?.[0];
-  if (!datasource) {
-    throw new Error('Stream template not found, no datasource');
+  const dataset = stream.dataset;
+  const packageDatasets = pkgInfo.datasets;
+  if (!packageDatasets) {
+    throw new Error('Stream template not found, no datasets');
   }
 
-  const inputFromPkg = datasource.inputs.find((pkgInput) => pkgInput.type === input.type);
-  if (!inputFromPkg) {
-    throw new Error(`Stream template not found, unable to found input ${input.type}`);
+  const packageDataset = packageDatasets.find((pkgDataset) => pkgDataset.name === dataset);
+  if (!packageDataset) {
+    throw new Error(`Stream template not found, unable to find dataset ${dataset}`);
   }
 
-  const streamFromPkg = inputFromPkg.streams.find(
-    (pkgStream) => pkgStream.dataset === stream.dataset
+  const streamFromPkg = (packageDataset.streams || []).find(
+    (pkgStream) => pkgStream.input === input.type
   );
   if (!streamFromPkg) {
-    throw new Error(`Stream template not found, unable to found stream ${stream.dataset}`);
+    throw new Error(`Stream template not found, unable to find stream for input ${input.type}`);
   }
 
-  if (!streamFromPkg.template) {
-    throw new Error(`Stream template not found for dataset ${dataset}`);
+  if (!streamFromPkg.template_path) {
+    throw new Error(`Stream template path not found for dataset ${dataset}`);
+  }
+
+  const [pkgStream] = await getAssetsDataForPackageKey(
+    { pkgName: pkgInfo.name, pkgVersion: pkgInfo.version },
+    (path: string) => path.endsWith('streamFromPkg.template_path'),
+    dataset
+  );
+
+  if (!pkgStream || !pkgStream.buffer) {
+    throw new Error(
+      `Unable to load stream template ${streamFromPkg.template_path} for dataset ${dataset}`
+    );
   }
 
   const yaml = createStream(
     // Populate template variables from input vars and stream vars
     Object.assign({}, input.vars, stream.vars),
-    streamFromPkg.template
+    pkgStream.buffer.toString()
   );
 
   stream.agent_stream = yaml;
