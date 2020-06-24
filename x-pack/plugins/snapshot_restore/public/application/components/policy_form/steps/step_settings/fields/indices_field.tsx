@@ -26,7 +26,7 @@ import {
 import { Index, SlmPolicyPayload, SnapshotConfig } from '../../../../../../../common/types';
 import { useServices } from '../../../../../app_context';
 import { PolicyValidation } from '../../../../../services/validation';
-import { DataStreamBadge } from './data_stream_badge';
+import { DataStreamBadge } from '../../../../data_stream_badge';
 
 interface Props {
   isManagedPolicy: boolean;

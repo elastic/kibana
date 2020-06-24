@@ -5,3 +5,4 @@
  */
 
 export { CollapsibleIndicesList } from './collapsible_indices_list';
+export { CollapsibleDataStreamsList } from './collapsible_data_streams_list';
