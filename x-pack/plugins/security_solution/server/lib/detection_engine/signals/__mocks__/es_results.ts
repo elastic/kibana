@@ -10,7 +10,7 @@ import {
   SavedObject,
   SavedObjectsFindResponse,
 } from '../../../../../../../../src/core/server';
-import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams } from '../../types';
 import { IRuleStatusAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -391,10 +391,10 @@ export const exampleFindRuleStatusResponse: (
   total: 1,
   per_page: 6,
   page: 1,
-  saved_objects: mockStatuses,
+  saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
-export const mockLogger: Logger = loggingServiceMock.createLogger();
+export const mockLogger: Logger = loggingSystemMock.createLogger();
 
 export const sampleBulkErrorItem = (
   {

@@ -13,7 +13,7 @@ import {
   CustomConfigureDatasourceContent,
   CustomConfigureDatasourceProps,
 } from '../../../../../../../ingest_manager/public';
-import { getManagementUrl } from '../../../..';
+import { getPolicyDetailPath } from '../../../../common/routing';
 
 /**
  * Exports Endpoint-specific datasource configuration instructions
@@ -24,14 +24,12 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
     const { services } = useKibana();
     let policyUrl = '';
     if (from === 'edit' && datasourceId) {
-      policyUrl = getManagementUrl({
-        name: 'policyDetails',
-        policyId: datasourceId,
-      });
+      policyUrl = getPolicyDetailPath(datasourceId);
     }
 
     return (
       <EuiEmptyPrompt
+        data-test-subj={`endpointDatasourceConfig_${from === 'edit' ? 'edit' : 'create'}`}
         body={
           <EuiText>
             <p>
