@@ -233,3 +233,15 @@ export enum LAYER_WIZARD_CATEGORY {
   REFERENCE = 'REFERENCE',
   SOLUTIONS = 'SOLUTIONS',
 }
+
+export enum VECTOR_SHAPE_TYPE {
+  POINT = 'POINT',
+  LINE = 'LINE',
+  POLYGON = 'POLYGON',
+}
+
+// https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#data-expressions
+export enum MB_LOOKUP_FUNCTION {
+  GET = 'get',
+  FEATURE_STATE = 'feature-state',
+}
