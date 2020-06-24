@@ -204,9 +204,10 @@ Note:
 1. Locate the source index by fetching aliases (including `.kibana` for versions prior to v7.10.0) `GET '/_alias/.kibana_current,.kibana_7.10.0,.kibana'`. The source index is the index the `.kibana_current` alias points to, or if it doesn’t exist, the index the `.kibana` alias points to.
 2. If `.kibana_current` and `.kibana_7.10.0` both exists and are pointing to the same index this version's migration has already been completed.
    1. Because the same version can have plugins enabled at any point in time, perform the mappings update in step (6).
-   2. If the target index contains any documents with an outdated migrationVersion number, log an error explaining that a re-migration is required and mark the saved object type these documents belong to as unavailable. See section (4.2.1.4).
    3. Skip to step (9) to start serving traffic.
-3. If `.kibana_current` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001` fail the migration.
+3. Fail the migration if:
+   1. `.kibana_current` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001`
+   2. The source index contains documents that belong to an unknown Saved Object type (from a disabled plugin). Log an error explaining that the plugin that created these documents needs to be enabled again or that these objects should be deleted. See section (4.2.1.4).
 4. Mark the source index as read-only and wait for all in-flight operations to drain (requires new functionality in Elasticsearch). This prevents any further writes from outdated nodes. Assuming this API is similar to the existing `/<index>/_close` API, we expect to receive `"acknowledged" : true` and `"shards_acknowledged" : true`. If all shards don’t acknowledge within the timeout, retry the operation until it succeeds.
 5. Clone the source index into a new target index which has writes enabled. All nodes on the same version will use the same fixed index name e.g. `.kibana_7.10.0_001`. The `001` postfix can be changed with the configuration option i.e. `migrations.target_index_postfix: '002'`
    1. `POST /.kibana_n/_clone/.kibana_7.10.0_001?wait_for_active_shards=all {"settings": {"index.blocks.write": true}}`. Ignore errors if the clone already exists.
@@ -220,14 +221,14 @@ Note:
       3. That belong to a type whose mappings were changed by comparing the `migrationMappingPropertyHashes`. (Metadata, unlike the mappings isn't commutative, so there is a small chance that the metadata hashes do not accurately reflect the latest mappings, however, this will just result in an less efficient query).
 7. Transform documents by reading batches from the source index then transforming and updating them with optimistic concurrency control.
    1. Ignore any version conflict errors.
-   2. If a document transform fails mark the saved object type as unavailable but continue trying to transform other documents of the same type.
+   2. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents. If any failures occured, log the complete list of documents that failed to transform. Fail the migration.
 8. Mark the migration as complete by doing a single atomic operation (new Elasticsearch functionality) that:
    1. Checks that `.kibana-current` alias is still pointing to the source index
    2. Points the `.kibana-7.10.0`  and `.kibana_current` aliases to the target index.
    3. If this fails with a "required alias [.kibana_current] does not exist" error fetch `.kibana_current` again:
-      1. If `.kibana_current` is not pointing to our target index fail the migration.
+      1. If `.kibana_current` is _not_ pointing to our target index fail the migration.
       2. If `.kibana_current` is pointing to our target index the migration has succeeded and we can proceed to step (9).
-9. Start serving traffic.
+9.  Start serving traffic.
 
 Together with the limitations, this algorithm ensures that migrations are
 idempotent. If two nodes are started simultaneously, both of them will start
@@ -250,9 +251,7 @@ When a newer Kibana starts an upgrade, it blocks all writes to the outdated inde
    3. Closes any keep-alive sockets by sending a `connection: close` header. 
    4. Shutdown all plugins and Core services.
 2. (recommended) Take a snapshot of all Kibana's Saved Objects indices. This simplifies doing a rollback to a simple snapshot restore, but is not required in order to do a rollback if a migration fails.
-3. Start the upgraded Kibana nodes. All running Kibana nodes should be on the
-   same version, have the same plugins enabled and use the same
-   configuration.
+3. Start the upgraded Kibana nodes. All running Kibana nodes should be on the same version, have the same plugins enabled and use the same configuration.
 
 To rollback to a previous version of Kibana with a snapshot
 1. Shutdown all Kibana nodes.
@@ -274,19 +273,22 @@ It is possible for a plugin to create documents in one version of Kibana, but th
  - A major version introduces breaking mapping changes that cannot be applied to the data in these documents.
  - Two majors later migrations will no longer be able to migrate this old schema and could fail unexpectadly when the plugin is suddenly enabled.
 
-There are several approaches we could take to dealing with this orphan data
+As a concrete example of the above, consider a user taking the following steps:
+1. Installs Kibana 7.6.0 with spaces=enabled. The spaces plugin creates a default space saved object.
+2. User upgrades to 7.10.0 but uses the OSS download which has spaces=disabled. Although the 7.10.0 spaces plugin includes a migration for space documents, the OSS release cannot migrate the documents or update it's mappings.
+3. User realizes they made a mistake and use Kibana 7.10.0 with x-pack and the spaces plugin enabled. At this point we have a completed migration for 7.10.0 but there's outdated spaces documents with migrationVersion=7.6.0 instead of 7.10.0.
+
+There are several approaches we could take to dealing with these orphan documents:
 
 1. Start up but refuse to query on types with outdated documents until a user manually triggers a re-migration
    
-   This is the approach implemented by the migration algorithm in (4.2.1.2)
-   
    Advantages:
-    - The impact is limited to the single plugin which if it was disabled before can’t have a critical impact
-    - We can use the same mechanism to treat documents which fail to transform (bug in migration transform function, or invalid document)
+    - The impact is limited to a single plugin
     
    Disadvantages:
     - It might be less obvious that a plugin is in a degraded state unless you read the logs (not possible on Cloud) or view the `/status` endpoint.
     - If a user doesn't care that the plugin is degraded, orphan documents are carried forward indefinitely.
+    - Since Kibana has started receiving traffic, users can no longer downgrade without losing data. They have to re-migrate, but if that fails they're stuck.
 
     To perform a re-migration:
       - Remove the `.kibana_7.10.0` alias
@@ -299,7 +301,7 @@ There are several approaches we could take to dealing with this orphan data
     - Admin’s are forced to deal with the problem as soon as they disable a plugin
 
     Disadvantages:
-    - Cannot temporarily disable a plugin to aid in debugging or to reduce the load a Kibana plugin places on as ES cluster.
+    - Cannot temporarily disable a plugin to aid in debugging or to reduce the load a Kibana plugin places on an ES cluster.
 
 3. Refuse to start a migration until the plugin is enabled or it's data deleted
 
@@ -310,6 +312,9 @@ There are several approaches we could take to dealing with this orphan data
     Disadvantages:
     - Since users have to take down outdated nodes before they can start the upgrade, they have to enter the downtime window before they know about this problem. This prolongs the downtime window and in many cases might cause an operations team to have to reschedule their downtime window to give them time to investigate the documents that need to be deleted. Logging an error on every startup could warn users ahead of time to mitigate this.
     - We don’t expose Kibana logs on Cloud so this will have to be escalated to support and could take 48hrs to resolve (users can safely rollback, but without visibility into the logs they might not know this). Exposing Kibana logs is on the cloud team’s roadmap.
+    - It might not be obvious just from the saved object type, which plugin created these objects.
+
+We prefer option (3) since it provides flexibility for disabling plugins in the same version while also protecting users' data in all cases during an upgrade migration.
 
 # 5. Alternatives
 ## 5.1 Rolling upgrades
