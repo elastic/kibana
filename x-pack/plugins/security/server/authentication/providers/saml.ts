@@ -283,7 +283,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         ? await this.performIdPInitiatedSingleLogout(request)
         : state
         ? await this.performUserInitiatedSingleLogout(state.accessToken!, state.refreshToken!)
-        : // Once Elasticsearch can consume logout response we'll be sending it here.
+        : // Once Elasticsearch can consume logout response we'll be sending it here. See https://github.com/elastic/elasticsearch/issues/40901
           null;
 
       // Having non-null `redirect` field within logout response means that IdP

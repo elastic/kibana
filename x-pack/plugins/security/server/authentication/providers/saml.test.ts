@@ -247,7 +247,7 @@ describe('SAMLAuthenticationProvider', () => {
           { requestId: 'some-request-id', redirectURL: '', realm: 'test-realm' }
         )
       ).resolves.toEqual(
-        AuthenticationResult.redirectTo('/base-path/', {
+        AuthenticationResult.redirectTo('/mock-server-basepath/', {
           state: {
             accessToken: 'user-initiated-login-token',
             refreshToken: 'user-initiated-login-refresh-token',

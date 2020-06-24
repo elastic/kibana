@@ -112,7 +112,7 @@ describe('Authenticator', () => {
       ).toThrowError('Provider name "__http__" is reserved.');
     });
 
-    it('properly set `loggedOut` URL.', () => {
+    it('properly sets `loggedOut` URL.', () => {
       const basicAuthenticationProviderMock = jest.requireMock('./providers/basic')
         .BasicAuthenticationProvider;
 
