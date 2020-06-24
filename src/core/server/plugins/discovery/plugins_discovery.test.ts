@@ -19,7 +19,7 @@
 
 import { mockPackage } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 
 import { first, map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
@@ -76,14 +76,14 @@ const manifestPath = (...pluginPath: string[]) =>
   resolve(KIBANA_ROOT, 'src', 'plugins', ...pluginPath, 'kibana.json');
 
 describe('plugins discovery system', () => {
-  let logger: ReturnType<typeof loggingServiceMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.create>;
   let env: Env;
   let configService: ConfigService;
   let pluginConfig: PluginsConfigType;
   let coreContext: CoreContext;
 
   beforeEach(async () => {
-    logger = loggingServiceMock.create();
+    logger = loggingSystemMock.create();
 
     mockPackage.raw = packageMock;
 
@@ -407,7 +407,7 @@ describe('plugins discovery system', () => {
       logger,
     });
 
-    expect(loggingServiceMock.collect(logger).warn).toEqual([
+    expect(loggingSystemMock.collect(logger).warn).toEqual([
       [
         `Explicit plugin paths [${extraPluginTestPath}] should only be used in development. Relative imports may not work properly in production.`,
       ],
@@ -430,6 +430,6 @@ describe('plugins discovery system', () => {
       logger,
     });
 
-    expect(loggingServiceMock.collect(logger).warn).toEqual([]);
+    expect(loggingSystemMock.collect(logger).warn).toEqual([]);
   });
 });
