@@ -154,7 +154,7 @@ export class TimeseriesVisualization extends Component {
     const styles = reactCSS({
       default: {
         tvbVis: {
-          backgroundColor: get(model, 'background_color'),
+          borderColor: get(model, 'background_color'),
         },
       },
     });

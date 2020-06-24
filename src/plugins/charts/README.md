@@ -18,7 +18,7 @@ Color mappings in `value`/`text` form
 
 ### `getHeatmapColors`
 
-Funciton to retrive heatmap related colors based on `value` and `colorSchemaName`
+Function to retrieve heatmap related colors based on `value` and `colorSchemaName`
 
 ### `truncatedColorSchemas`
 

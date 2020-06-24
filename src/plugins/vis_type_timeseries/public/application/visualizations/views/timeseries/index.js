@@ -273,7 +273,6 @@ TimeSeries.defaultProps = {
 };
 
 TimeSeries.propTypes = {
-  darkMode: PropTypes.bool,
   backgroundColor: PropTypes.string,
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,
