@@ -593,54 +593,9 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 };
 
-const previewOptions = [
-  {
-    value: 'h',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastHourLabel', {
-      defaultMessage: 'Last hour',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.hourLabel', {
-      defaultMessage: 'hour',
-    }),
-  },
-  {
-    value: 'd',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastDayLabel', {
-      defaultMessage: 'Last day',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.dayLabel', {
-      defaultMessage: 'day',
-    }),
-  },
-  {
-    value: 'w',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastWeekLabel', {
-      defaultMessage: 'Last week',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.weekLabel', {
-      defaultMessage: 'week',
-    }),
-  },
-  {
-    value: 'M',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastMonthLabel', {
-      defaultMessage: 'Last month',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.monthLabel', {
-      defaultMessage: 'month',
-    }),
-  },
-];
 const previewDOMOptions: Array<{ text: string; value: string }> = previewOptions.map((o) =>
   omit(o, 'shortText')
 );
-
-const firedTimeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTime', {
-  defaultMessage: 'time',
-});
-const firedTimesLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTimes', {
-  defaultMessage: 'times',
-});
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
