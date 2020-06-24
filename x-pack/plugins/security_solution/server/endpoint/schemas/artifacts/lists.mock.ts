@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FinalTranslatedExceptionList } from '../../lib/artifacts/lists';
+import { WrappedTranslatedExceptionList } from './lists';
 
-export const getTranslatedExceptionListMock = (): FinalTranslatedExceptionList => {
+export const getTranslatedExceptionListMock = (): WrappedTranslatedExceptionList => {
   return {
     exceptions_list: [
       {

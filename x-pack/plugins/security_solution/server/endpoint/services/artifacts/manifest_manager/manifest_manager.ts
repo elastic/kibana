@@ -12,6 +12,7 @@ import {
   Manifest,
   buildArtifact,
   getFullEndpointExceptionList,
+  ExceptionsCache,
 } from '../../../lib/artifacts';
 import { InternalArtifactSchema, InternalManifestSchema } from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
@@ -22,6 +23,7 @@ export interface ManifestManagerContext {
   artifactClient: ArtifactClient;
   exceptionListClient: ExceptionListClient;
   logger: Logger;
+  cache: ExceptionsCache;
 }
 
 export class ManifestManager {
@@ -29,15 +31,17 @@ export class ManifestManager {
   private exceptionListClient: ExceptionListClient;
   private savedObjectsClient: SavedObjectsClient;
   private logger: Logger;
+  private cache: ExceptionsCache;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
     this.savedObjectsClient = context.savedObjectsClient;
     this.logger = context.logger;
+    this.cache = context.cache;
   }
 
-  private async getManifestClient(schemaVersion: string): ManifestClient {
+  private async getManifestClient(schemaVersion: string): Promise<ManifestClient> {
     return new ManifestClient(this.savedObjectsClient, schemaVersion);
   }
 
@@ -140,6 +144,7 @@ export class ManifestManager {
         const artifact = newManifest.getArtifact(diff.id);
         try {
           await this.artifactClient.createArtifact(artifact);
+          this.cache.set(`${artifact.identifier}-${artifact.sha256}`, artifact.body);
         } catch (err) {
           if (err.status === 409) {
             // This artifact already existed...

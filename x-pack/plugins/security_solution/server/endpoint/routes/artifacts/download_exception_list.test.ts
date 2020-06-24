@@ -22,7 +22,7 @@ import {
   loggingServiceMock,
 } from 'src/core/server/mocks';
 import { ExceptionsCache } from '../../lib/artifacts/cache';
-import { CompressExceptionList } from '../../lib/artifacts/lists';
+import { compressExceptionList } from '../../lib/artifacts/lists';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -69,7 +69,8 @@ describe('test alerts route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
-    cache = new ExceptionsCache(10000); // TODO
+    cache = new ExceptionsCache();
+    loggingServiceMock.createSetupContract();
 
     endpointAppContextService.start({
       agentService: createMockAgentService(),
@@ -94,7 +95,7 @@ describe('test alerts route', () => {
       params: { sha256: '123456' },
     });
 
-    const mockCompressedArtifact = await CompressExceptionList(expectedEndpointExceptions);
+    const mockCompressedArtifact = await compressExceptionList(expectedEndpointExceptions);
 
     const mockArtifact = {
       id: '2468',
@@ -183,7 +184,7 @@ describe('test alerts route', () => {
     });
 
     // Add to the download cache
-    const mockCompressedArtifact = await CompressExceptionList(expectedEndpointExceptions);
+    const mockCompressedArtifact = await compressExceptionList(expectedEndpointExceptions);
     const cacheKey = `${mockArtifactName}-${mockSha}`;
     cache.set(cacheKey, mockCompressedArtifact.toString('binary'));
 

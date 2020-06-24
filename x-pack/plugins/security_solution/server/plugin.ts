@@ -88,7 +88,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
-    this.exceptionsCache = new ExceptionsCache(10000); // TODO ttl
+    this.exceptionsCache = new ExceptionsCache(this.logger);
 
     this.logger.debug('plugin initialized');
   }
@@ -231,7 +231,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.exceptionsPackagerTask = setupPackagerTask({
         endpointAppContext: endpointContext,
         taskManager: plugins.taskManager,
-        cache: this.exceptionsCache,
       });
     }
 
@@ -253,6 +252,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         artifactClient,
         exceptionListClient,
         logger: this.logger,
+        cache: this.exceptionsCache,
       });
     }
 

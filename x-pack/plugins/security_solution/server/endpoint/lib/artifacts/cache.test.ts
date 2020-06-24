@@ -10,7 +10,8 @@ describe('ExceptionsCache tests', () => {
   let cache: ExceptionsCache;
 
   beforeEach(() => {
-    cache = new ExceptionsCache(100);
+    jest.clearAllMocks();
+    cache = new ExceptionsCache();
   });
 
   test('it should cache', async () => {
@@ -33,7 +34,7 @@ describe('ExceptionsCache tests', () => {
     // Clean will remove all entries from the cache that have not been called by `get` since the last time it was cleaned
     cache.clean();
 
-    // Need to call clean again to simulate a ttl period has gone by without `test` being requested
+    // Need to call clean again to simulate a ttl period has gone by without `test` being
     cache.clean();
     const cacheRespCleaned = cache.get('test');
     expect(cacheRespCleaned).toEqual(undefined);

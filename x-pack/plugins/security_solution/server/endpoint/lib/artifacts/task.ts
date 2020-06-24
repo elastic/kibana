@@ -10,7 +10,6 @@ import {
   TaskManagerStartContract,
 } from '../../../../../../plugins/task_manager/server';
 import { EndpointAppContext } from '../../types';
-import { ExceptionsCache } from './cache';
 
 const PackagerTaskConstants = {
   TIMEOUT: '1m',
@@ -29,7 +28,6 @@ interface PackagerTaskRunner {
 interface PackagerTaskContext {
   endpointAppContext: EndpointAppContext;
   taskManager: TaskManagerSetupContract;
-  cache: ExceptionsCache;
 }
 
 interface PackagerTaskRunnerContext {
