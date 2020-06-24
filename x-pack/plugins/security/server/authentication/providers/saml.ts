@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { KibanaRequest } from '../../../../../../src/core/server';
+import { isInternalURL } from '../../../common/is_internal_url';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
@@ -60,7 +61,7 @@ export enum SAMLLogin {
  */
 type ProviderLoginAttempt =
   | { type: SAMLLogin.LoginInitiatedByUser; redirectURLPath?: string; redirectURLFragment?: string }
-  | { type: SAMLLogin.LoginWithSAMLResponse; samlResponse: string };
+  | { type: SAMLLogin.LoginWithSAMLResponse; samlResponse: string; relayState?: string };
 
 /**
  * Checks whether request query includes SAML request from IdP.
@@ -100,9 +101,19 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private readonly maxRedirectURLSize: ByteSizeValue;
 
+  /**
+   * Indicates if we should treat non-empty `RelayState` as a deep link in Kibana we should redirect
+   * user to after successful IdP initiated login. `RelayState` is ignored for SP initiated login.
+   */
+  private readonly useRelayStateDeepLink: boolean;
+
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
-    samlOptions?: Readonly<{ realm?: string; maxRedirectURLSize?: ByteSizeValue }>
+    samlOptions?: Readonly<{
+      realm?: string;
+      maxRedirectURLSize?: ByteSizeValue;
+      useRelayStateDeepLink?: boolean;
+    }>
   ) {
     super(options);
 
@@ -112,6 +123,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     this.realm = samlOptions.realm;
     this.maxRedirectURLSize = samlOptions.maxRedirectURLSize;
+    this.useRelayStateDeepLink = samlOptions.useRelayStateDeepLink ?? false;
   }
 
   /**
@@ -146,14 +158,14 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return this.captureRedirectURL(request, redirectURLPath, attempt.redirectURLFragment);
     }
 
-    const { samlResponse } = attempt;
+    const { samlResponse, relayState } = attempt;
     const authenticationResult = state
       ? await this.authenticateViaState(request, state)
       : AuthenticationResult.notHandled();
 
     // Let's check if user is redirected to Kibana from IdP with valid SAMLResponse.
     if (authenticationResult.notHandled()) {
-      return await this.loginWithSAMLResponse(request, samlResponse, state);
+      return await this.loginWithSAMLResponse(request, samlResponse, relayState, state);
     }
 
     // If user has been authenticated via session or failed to do so because of expired access token,
@@ -167,6 +179,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return await this.loginWithNewSAMLResponse(
         request,
         samlResponse,
+        relayState,
         (authenticationResult.state || state) as ProviderState
       );
     }
@@ -288,11 +301,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * initiated login.
    * @param request Request instance.
    * @param samlResponse SAMLResponse payload string.
+   * @param relayState RelayState payload string.
    * @param [state] Optional state object associated with the provider.
    */
   private async loginWithSAMLResponse(
     request: KibanaRequest,
     samlResponse: string,
+    relayState?: string,
     state?: ProviderState | null
   ) {
     this.logger.debug('Trying to log in with SAML response payload.');
@@ -340,9 +355,29 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         },
       });
 
+      // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
+      // depending on the configuration we may need to redirect user to this URL.
+      let redirectURLFromRelayState;
+      if (isIdPInitiatedLogin && relayState) {
+        if (!this.useRelayStateDeepLink) {
+          this.options.logger.debug(
+            `"RelayState" is provided, but deep links support is not enabled for "${this.type}/${this.options.name}" provider.`
+          );
+        } else if (!isInternalURL(relayState, this.options.basePath.serverBasePath)) {
+          this.options.logger.debug(
+            `"RelayState" is provided, but it is not a valid Kibana internal URL.`
+          );
+        } else {
+          this.options.logger.debug(
+            `User will be redirected to the Kibana internal URL specified in "RelayState".`
+          );
+          redirectURLFromRelayState = relayState;
+        }
+      }
+
       this.logger.debug('Login has been performed with SAML response.');
       return AuthenticationResult.redirectTo(
-        stateRedirectURL || `${this.options.basePath.get(request)}/`,
+        redirectURLFromRelayState || stateRedirectURL || `${this.options.basePath.get(request)}/`,
         { state: { username, accessToken, refreshToken, realm } }
       );
     } catch (err) {
@@ -367,17 +402,23 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * we'll forward user to a page with the respective warning.
    * @param request Request instance.
    * @param samlResponse SAMLResponse payload string.
+   * @param relayState RelayState payload string.
    * @param existingState State existing user session is based on.
    */
   private async loginWithNewSAMLResponse(
     request: KibanaRequest,
     samlResponse: string,
+    relayState: string | undefined,
     existingState: ProviderState
   ) {
     this.logger.debug('Trying to log in with SAML response payload and existing valid session.');
 
     // First let's try to authenticate via SAML Response payload.
-    const payloadAuthenticationResult = await this.loginWithSAMLResponse(request, samlResponse);
+    const payloadAuthenticationResult = await this.loginWithSAMLResponse(
+      request,
+      samlResponse,
+      relayState
+    );
     if (payloadAuthenticationResult.failed() || payloadAuthenticationResult.notHandled()) {
       return payloadAuthenticationResult;
     }
