@@ -34,19 +34,18 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
-import {
-  getIndexPatternFieldListCreator,
-  CreateIndexPatternFieldList,
-  Field,
-  FieldSpec,
-} from '../fields';
+import { getIndexPatternFieldListCreator, CreateIndexPatternFieldList, Field } from '../fields';
 import {
   OnNotification,
   OnError,
   UiSettingsCommon,
   IIndexPatternsApiClient,
   GetFieldsOptions,
+  FieldSpec,
+  IndexPatternSpec,
 } from '../types';
+// import { getIndexPatternFieldListCreator, CreateIndexPatternFieldList, Field } from '../fields';
+// import { IndexPatternSpec, FieldSpec } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 
@@ -202,7 +201,27 @@ export class IndexPatternsService {
     return indexPatternCache.set(id, indexPattern);
   };
 
-  make = async (id?: string): Promise<IndexPattern> => {
+  async specToIndexPattern(spec: IndexPatternSpec) {
+    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    const uiSettingsValues = await this.config.getAll(); // could map to values
+
+    const indexPattern = new IndexPattern(spec.id, {
+      getConfig: (cfg: any) => this.config.get(cfg),
+      savedObjectsClient: this.savedObjectsClient,
+      apiClient: this.apiClient,
+      patternCache: indexPatternCache,
+      fieldFormats: this.fieldFormats,
+      onNotification: this.onNotification,
+      onError: this.onError,
+      uiSettingsValues: { ...uiSettingsValues, shortDotsEnable, metaFields },
+    });
+
+    indexPattern.initFromSpec(spec);
+    return indexPattern;
+  }
+
+  async make(id?: string): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
     const uiSettingsValues = await this.config.getAll(); // could map to values
@@ -219,7 +238,7 @@ export class IndexPatternsService {
     });
 
     return indexPattern.init();
-  };
+  }
 }
 
 export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;

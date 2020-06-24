@@ -392,6 +392,10 @@ export interface IFieldType {
     sortable?: boolean;
     // (undocumented)
     subType?: IFieldSubType;
+    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    toSpec?: () => FieldSpec;
     // (undocumented)
     type: string;
     // (undocumented)

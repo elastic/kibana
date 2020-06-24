@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export * from './types';
 export * from './_pattern_cache';
 export * from './flatten_hit';
 export * from './format_hit';
