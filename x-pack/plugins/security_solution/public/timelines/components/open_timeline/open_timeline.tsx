@@ -157,7 +157,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-          <EuiCallOut size="s" title="Now you can add timeline templates and link it to rules." />
+          <EuiCallOut size="s" title={i18n.TEMPLATE_CALL_OUT_MESSAGE} />
           {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"

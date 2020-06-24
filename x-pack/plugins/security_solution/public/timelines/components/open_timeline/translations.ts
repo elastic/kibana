@@ -294,3 +294,10 @@ export const IMPORT_FAILED_DETAILED = (id: string, statusCode: number, message: 
       defaultMessage: 'Timeline ID: {id}\n Status Code: {statusCode}\n Message: {message}',
     }
   );
+
+export const TEMPLATE_CALL_OUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.timelines.components.templateCallOutMessageTitle',
+  {
+    defaultMessage: 'Now you can add timeline templates and link it to rules.',
+  }
+);
