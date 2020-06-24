@@ -16,7 +16,6 @@ export * from './helpers';
 
 interface CaseCallOutProps {
   title: string;
-  message?: string;
   messages?: ErrorMessage[];
 }
 
@@ -31,7 +30,7 @@ interface CalloutVisibility {
   [index: string]: boolean;
 }
 
-const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) => {
+const CaseCallOutComponent = ({ title, messages = [] }: CaseCallOutProps) => {
   const { getMessages, addMessage } = useMessagesStorage();
   const dismissedCallouts = getMessages('case').reduce<CalloutVisibility>(
     (acc, id) => ({
@@ -52,21 +51,7 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
     [setCalloutVisibility, addMessage]
   );
 
-  let callOutMessages = messages ?? [];
-
-  if (message) {
-    callOutMessages = [
-      ...callOutMessages,
-      {
-        id: 'generic-message-error',
-        title: '',
-        description: <p data-test-subj="callout-message-primary">{message}</p>,
-        errorType: 'primary',
-      },
-    ];
-  }
-
-  const groupedByTypeErrorMessages = callOutMessages.reduce<GroupByTypeMessages>(
+  const groupedByTypeErrorMessages = messages.reduce<GroupByTypeMessages>(
     (acc: GroupByTypeMessages, currentMessage: ErrorMessage) => {
       const type = currentMessage.errorType == null ? 'primary' : currentMessage.errorType;
       return {
