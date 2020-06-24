@@ -41,7 +41,13 @@ import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
-import { IndexPatternSpec, TypeMeta, FieldSpec, FieldFormatSpec, SourceFilter } from '../types';
+import {
+  IndexPatternSpec,
+  TypeMeta,
+  FieldSpec,
+  SerializedFieldFormat,
+  SourceFilter,
+} from '../types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -198,7 +204,7 @@ export class IndexPattern implements IIndexPattern {
 
   public initFromSpec(spec: IndexPatternSpec) {
     // create fieldFormatMap from field list
-    const fieldFormatMap: Record<string, FieldFormatSpec> = {};
+    const fieldFormatMap: Record<string, SerializedFieldFormat> = {};
     if (_.isArray(spec.fields)) {
       spec.fields.forEach((field: FieldSpec) => {
         if (field.format) {

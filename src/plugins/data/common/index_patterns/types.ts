@@ -19,7 +19,7 @@
 
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 import { IFieldType } from './fields';
-import { IFieldFormatMetaParams } from '../field_formats/types';
+import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES } from '..';
 
 export interface IIndexPattern {
@@ -54,11 +54,6 @@ export interface IndexPatternAttributes {
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
 export type OnError = (error: Error, toastInputFields: ErrorToastOptions) => void;
 
-export interface FieldFormatSpec {
-  id: string;
-  params: IFieldFormatMetaParams;
-}
-
 export type AggregationRestrictions = Record<
   string,
   {
@@ -82,6 +77,7 @@ export interface TypeMeta {
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
+export { SerializedFieldFormat };
 
 // This should become FieldSpec once types are cleaned up
 export interface FieldSpecExportFmt {
@@ -97,13 +93,13 @@ export interface FieldSpecExportFmt {
   aggregatable: boolean;
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
-  format?: FieldFormatSpec;
+  format?: SerializedFieldFormat;
   indexed?: boolean;
 }
 
 export interface FieldSpec {
   [key: string]: any;
-  format?: FieldFormatSpec;
+  format?: SerializedFieldFormat;
 }
 
 export interface IndexPatternSpec {
