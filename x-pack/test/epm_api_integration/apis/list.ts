@@ -8,19 +8,33 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('list', () => {
-    it('lists all packages from the registry', async () => {
-      const supertest = getService('supertest');
-      const fetchPackageList = async () => {
-        const response = await supertest
-          .get('/api/ingest_manager/epm/packages')
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        return response.body;
-      };
+  const log = getService('log');
+  const supertest = getService('supertest');
+  const dockerServers = getService('dockerServers');
 
-      const listResponse = await fetchPackageList();
-      expect(listResponse.response.length).to.be(15);
+  const server = dockerServers.get('registry');
+  // use function () {} and not () => {} here
+  // because `this` has to point to the Mocha context
+  // see https://mochajs.org/#arrow-functions
+
+  describe('list', async function () {
+    it('lists all packages from the registry', async function () {
+      if (server.enabled) {
+        const fetchPackageList = async () => {
+          const response = await supertest
+            .get('/api/ingest_manager/epm/packages')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+          return response.body;
+        };
+        const listResponse = await fetchPackageList();
+        expect(listResponse.response.length).to.be(15);
+      } else {
+        log.warning(
+          'disabling tests because DockerServers service is not enabled, set INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT to run them'
+        );
+        this.skip(); // this == Mocha context!
+      }
     });
   });
 }
