@@ -24,7 +24,7 @@
       }
     }
   },
-  "maps-telemetry": {
+  "maps": {
     "properties": {
       "settings": {
         "properties": {
