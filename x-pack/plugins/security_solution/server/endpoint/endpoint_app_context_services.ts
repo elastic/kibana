@@ -23,6 +23,7 @@ export class EndpointAppContextService {
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
+    this.manifestManager = dependencies.manifestManager;
     dependencies.registerIngestCallback('datasourceCreate', handleDatasourceCreate);
   }
 
