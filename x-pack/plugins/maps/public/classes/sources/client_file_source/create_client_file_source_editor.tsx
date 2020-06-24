@@ -125,6 +125,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     }
   };
 
+  // Called on file upload screen when UI state changes
   _onIndexReady = (indexReady: boolean) => {
     if (!this._isMounted) {
       return;
@@ -137,6 +138,11 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     }
   };
 
+  // Called on file upload screen when upload file is changed or removed
+  _onFileRemove = () => {
+    this.props.previewLayers([]);
+  };
+
   render() {
     const FileUpload = getFileUploadComponent();
     return (
@@ -144,6 +150,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
         appName={'Maps'}
         isIndexingTriggered={this.state.indexingStage === INDEXING_STAGE.TRIGGERED}
         onFileUpload={this._onFileUpload}
+        onFileRemove={this._onFileRemove}
         onIndexReady={this._onIndexReady}
         transformDetails={'geo'}
         onIndexingComplete={this._onIndexingComplete}
