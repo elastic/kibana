@@ -17,6 +17,7 @@ import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../lib/vector2';
 import { sideEffectSimulator } from './side_effect_simulator';
 import { mockProcessEvent } from '../models/process_event_test_helpers';
+import { mock as mockResolverTree } from '../models/resolver_tree';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
@@ -27,7 +28,7 @@ describe('useCamera on an unpainted element', () => {
   let simulator: SideEffectSimulator;
 
   beforeEach(async () => {
-    ({ store } = storeFactory());
+    store = storeFactory();
 
     const Test = function Test() {
       const camera = useCamera();
@@ -159,7 +160,7 @@ describe('useCamera on an unpainted element', () => {
       let process: ResolverEvent;
       beforeEach(() => {
         const events: ResolverEvent[] = [];
-        const numberOfEvents: number = Math.floor(Math.random() * 10 + 1);
+        const numberOfEvents: number = 10;
 
         for (let index = 0; index < numberOfEvents; index++) {
           const uniquePpid = index === 0 ? undefined : index - 1;
@@ -174,23 +175,27 @@ describe('useCamera on an unpainted element', () => {
             })
           );
         }
-        const serverResponseAction: ResolverAction = {
-          type: 'serverReturnedResolverData',
-          payload: {
-            events,
-            stats: new Map(),
-            lineageLimits: { children: null, ancestors: null },
-          },
-        };
-        act(() => {
-          store.dispatch(serverResponseAction);
-        });
+        const tree = mockResolverTree({ events });
+        if (tree !== null) {
+          const serverResponseAction: ResolverAction = {
+            type: 'serverReturnedResolverData',
+            payload: { result: tree, databaseDocumentID: '' },
+          };
+          act(() => {
+            store.dispatch(serverResponseAction);
+          });
+        } else {
+          throw new Error('failed to create tree');
+        }
         const processes: ResolverEvent[] = [
           ...selectors
             .processNodePositionsAndEdgeLineSegments(store.getState())
             .processNodePositions.keys(),
         ];
         process = processes[processes.length - 1];
+        if (!process) {
+          throw new Error('missing the process to bring into view');
+        }
         simulator.controls.time = 0;
         const cameraAction: ResolverAction = {
           type: 'userBroughtProcessIntoView',

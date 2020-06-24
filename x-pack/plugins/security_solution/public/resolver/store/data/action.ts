@@ -4,23 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ResolverEvent,
-  ResolverNodeStats,
-  ResolverRelatedEvents,
-} from '../../../../common/endpoint/types';
+import { ResolverRelatedEvents, ResolverTree } from '../../../../common/endpoint/types';
+import { ResolverExternalProperties } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
   readonly payload: {
-    readonly events: Readonly<ResolverEvent[]>;
-    readonly stats: Readonly<Map<string, ResolverNodeStats>>;
-    readonly lineageLimits: { readonly children: string | null; readonly ancestors: string | null };
+    /**
+     * The result of fetching data
+     */
+    result: ResolverTree;
+    /**
+     * The database document ID that was used to fetch the resolver tree
+     */
+    databaseDocumentID: string;
   };
+}
+
+interface AppRequestedResolverData {
+  readonly type: 'appRequestedResolverData';
+  /**
+   * entity ID used to make the request.
+   */
+  readonly payload: string;
 }
 
 interface ServerFailedToReturnResolverData {
   readonly type: 'serverFailedToReturnResolverData';
+  /**
+   * entity ID used to make the failed request
+   */
+  readonly payload: string;
+}
+
+interface AppAbortedResolverDataRequest {
+  readonly type: 'appAbortedResolverDataRequest';
+  /**
+   * entity ID used to make the aborted request
+   */
+  readonly payload: string;
 }
 
 /**
@@ -39,8 +61,21 @@ interface ServerReturnedRelatedEventData {
   readonly payload: ResolverRelatedEvents;
 }
 
+/**
+ * Used by `useStateSyncingActions` hook.
+ * This is dispatched when external sources provide new parameters for Resolver.
+ * When the component receives a new 'databaseDocumentID' prop, this is fired.
+ */
+interface AppReceivedNewExternalProperties {
+  type: 'appReceivedNewExternalProperties';
+  payload: ResolverExternalProperties;
+}
+
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
   | ServerFailedToReturnRelatedEventData
-  | ServerReturnedRelatedEventData;
+  | ServerReturnedRelatedEventData
+  | AppReceivedNewExternalProperties
+  | AppRequestedResolverData
+  | AppAbortedResolverDataRequest;

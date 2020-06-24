@@ -14,7 +14,7 @@ import { resolverMiddlewareFactory } from './middleware';
 
 export const storeFactory = (
   context?: KibanaReactContextValue<StartServices>
-): { store: Store<ResolverState, ResolverAction> } => {
+): Store<ResolverState, ResolverAction> => {
   const actionsBlacklist: Array<ResolverAction['type']> = ['userMovedPointer'];
   const composeEnhancers = composeWithDevTools({
     name: 'Resolver',
@@ -22,8 +22,5 @@ export const storeFactory = (
   });
   const middlewareEnhancer = applyMiddleware(resolverMiddlewareFactory(context));
 
-  const store = createStore(resolverReducer, composeEnhancers(middlewareEnhancer));
-  return {
-    store,
-  };
+  return createStore(resolverReducer, composeEnhancers(middlewareEnhancer));
 };
