@@ -14,7 +14,7 @@ import { duration, Duration } from 'moment';
 import { SessionStorage } from '../../../../../src/core/server';
 
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
   elasticsearchServiceMock,
@@ -48,11 +48,11 @@ function getMockOptions({
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
-    loggers: loggingServiceMock.create(),
+    loggers: loggingSystemMock.create(),
     getServerBaseURL: jest.fn(),
     config: createConfig(
       ConfigSchema.validate({ session, authc: { selector, providers, http } }),
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       { isTLSEnabled: false }
     ),
     sessionStorageFactory: sessionStorageMock.createFactory<ProviderSession>(),
