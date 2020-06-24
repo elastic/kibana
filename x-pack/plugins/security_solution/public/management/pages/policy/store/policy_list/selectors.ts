@@ -94,6 +94,7 @@ export const endpointPackageInfo = (state: Immutable<PolicyListState>) => state.
 /**
  * Returns the version number for the endpoint package.
  */
-export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
-  info ? info.version : undefined
+export const endpointPackageVersion = createSelector(
+  endpointPackageInfo,
+  (info) => info?.version ?? undefined
 );

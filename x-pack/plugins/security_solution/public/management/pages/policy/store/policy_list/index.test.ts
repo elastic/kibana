@@ -28,7 +28,6 @@ import {
   MiddlewareActionSpyHelper,
 } from '../../../../../common/store/test_utils';
 import { getPoliciesPath } from '../../../../common/routing';
-import { http } from '../../../../../../../ml/public/application/services/http_service';
 
 describe('policy list store concerns', () => {
   const policyListPathUrl = getPoliciesPath();
