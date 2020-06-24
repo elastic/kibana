@@ -312,7 +312,7 @@ Points, lines, and polygons used to represent a map.
 // end::vector-def[]
 
 [[glossary-visualzation]] visualization ::
-// tag::visualzation-def[]
+// tag::visualization-def[]
 A graphical representation of query results (e.g., a histogram, line graph, pie chart, or heat map).
 // end::visualization-def[]
 
