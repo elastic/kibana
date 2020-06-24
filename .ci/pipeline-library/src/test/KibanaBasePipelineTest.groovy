@@ -19,9 +19,9 @@ class KibanaBasePipelineTest extends BasePipelineTest {
     env.BUILD_DISPLAY_NAME = "#${env.BUILD_ID}"
 
     env.JENKINS_URL = 'http://jenkins.localhost:8080'
-    env.BUILD_URL = "${env.JENKINS_URL}/job/elastic+kibana+${env.BRANCH_NAME}/${env.BUILD_ID}/"
+    env.BUILD_URL = "${env.JENKINS_URL}/job/elastic+kibana+${env.BRANCH_NAME}/${env.BUILD_ID}/".toString()
 
-    env.JOB_BASE_NAME = "elastic / kibana # ${env.BRANCH_NAME}"
+    env.JOB_BASE_NAME = "elastic / kibana # ${env.BRANCH_NAME}".toString()
     env.JOB_NAME = env.JOB_BASE_NAME
 
     env.WORKSPACE = 'WS'
@@ -30,6 +30,9 @@ class KibanaBasePipelineTest extends BasePipelineTest {
       buildUtils: [
         getBuildStatus: { 'SUCCESS' },
         printStacktrace: { ex -> print ex },
+      ],
+      githubPr: [
+        isPr: { false },
       ],
       jenkinsApi: [ getFailedSteps: { [] } ],
       testUtils: [ getFailures: { [] } ],

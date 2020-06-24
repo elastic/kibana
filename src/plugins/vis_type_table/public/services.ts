@@ -19,7 +19,12 @@
 
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('table data.fieldFormats');
+
+export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
+  'table kibanaLegacy'
+);

@@ -26,10 +26,10 @@ import {
   TestUtils,
 } from '../../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
-const logger = loggingServiceMock.create().get();
+const logger = loggingSystemMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient: SavedObjectsClientContract;
   let servers: TestUtils;
