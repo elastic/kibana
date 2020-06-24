@@ -6,7 +6,6 @@
 
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { isEmpty } from 'lodash/fp';
 
 import { TimelineStatus } from '../../../../common/types/timeline';
 
@@ -66,9 +65,7 @@ export const useEditTimelineBatchActions = ({
 
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => {
-      const isItemsSelected = !isEmpty(selectedItems);
-      const hasImmutableItems =
-        !isItemsSelected || selectedItems?.some((item) => item.status === TimelineStatus.immutable);
+      const disabled = selectedItems?.some((item) => item.status === TimelineStatus.immutable);
       return (
         <>
           <EditTimelineActions
@@ -87,7 +84,7 @@ export const useEditTimelineBatchActions = ({
           <EuiContextMenuPanel
             items={[
               <EuiContextMenuItem
-                disabled={hasImmutableItems}
+                disabled={disabled}
                 icon="exportAction"
                 key="ExportItemKey"
                 onClick={handleEnableExportTimelineDownloader}
@@ -95,7 +92,7 @@ export const useEditTimelineBatchActions = ({
                 {i18n.EXPORT_SELECTED}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
-                disabled={!isItemsSelected || hasImmutableItems}
+                disabled={disabled}
                 icon="trash"
                 key="DeleteItemKey"
                 onClick={handleOnOpenDeleteTimelineModal}
@@ -107,6 +104,7 @@ export const useEditTimelineBatchActions = ({
         </>
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       deleteTimelines,
       isEnableDownloader,
