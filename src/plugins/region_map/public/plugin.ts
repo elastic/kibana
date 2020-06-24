@@ -31,10 +31,11 @@ import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
 import { getBaseMapsVis, IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
-import { setFormatService, setNotifications } from './kibana_services';
+import { setFormatService, setNotifications, setKibanaLegacy } from './kibana_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { RegionMapsConfigType } from './index';
 import { ConfigSchema } from '../../maps_legacy/config';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 /** @private */
 interface RegionMapVisualizationDependencies {
@@ -55,6 +56,7 @@ export interface RegionMapPluginSetupDependencies {
 export interface RegionMapPluginStartDependencies {
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 /** @internal */
@@ -107,8 +109,9 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
   }
 
   // @ts-ignore
-  public start(core: CoreStart, { data }: RegionMapPluginStartDependencies) {
+  public start(core: CoreStart, { data, kibanaLegacy }: RegionMapPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setNotifications(core.notifications);
+    setKibanaLegacy(kibanaLegacy);
   }
 }

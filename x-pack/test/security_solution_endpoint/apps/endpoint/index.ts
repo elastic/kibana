@@ -7,12 +7,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('endpoint', function () {
-    const ingestManager = getService('ingestManager');
     this.tags('ciGroup7');
+    const ingestManager = getService('ingestManager');
     before(async () => {
       await ingestManager.setup();
     });
-
     loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_list'));
     loadTestFile(require.resolve('./policy_details'));
