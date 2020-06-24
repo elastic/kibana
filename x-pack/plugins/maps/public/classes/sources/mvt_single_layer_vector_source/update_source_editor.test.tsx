@@ -24,7 +24,7 @@ const descriptor: TiledSingleLayerVectorSourceDescriptor = {
   tooltipProperties: [],
 };
 
-test('should render update source editor', async () => {
+test('should render update source editor (fields _should_ be included)', async () => {
   const source = new MVTSingleLayerVectorSource(descriptor);
 
   const component = shallow(

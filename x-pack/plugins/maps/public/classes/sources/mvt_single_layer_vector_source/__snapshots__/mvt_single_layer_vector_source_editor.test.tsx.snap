@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render source creation editor 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Url"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <MVTSingleLayerSourceSettings
+    fields={Array []}
+    handleChange={[Function]}
+    includeFields={false}
+    layerName=""
+    maxSourceZoom={24}
+    minSourceZoom={0}
+  />
+</Fragment>
+`;
