@@ -8,16 +8,27 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
-import { getJobId } from '../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
-import { NoLogAnalysisResultsIndexError } from './errors';
 import {
   logRateModelPlotResponseRT,
   createLogEntryRateQuery,
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
+import { startTracingSpan } from '../../../common/performance_tracing';
+import { decodeOrThrow } from '../../../common/runtime_types';
+import { getJobId, jobCustomSettingsRT } from '../../../common/log_analysis';
+import {
+  createLogEntryRateExamplesQuery,
+  logEntryRateExamplesResponseRT,
+} from './queries/log_entry_rate_examples';
+import {
+  InsufficientLogAnalysisMlJobConfigurationError,
+  NoLogAnalysisMlJobError,
+  NoLogAnalysisResultsIndexError,
+} from './errors';
+import { createMlJobsQuery, mlJobsResponseRT } from './queries/ml_jobs';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -175,13 +186,13 @@ export class LogEntryRateAnalysis {
     const {
       examples,
       timing: { spans: fetchLogEntryRateExamplesSpans },
-    } = await this.fetchLogEntryCategoryExamples(
+    } = await this.fetchLogEntryRateExamples(
       requestContext,
       indices,
       timestampField,
       startTime,
       endTime,
-      category._source.terms,
+      dataset,
       exampleCount
     );
 
@@ -227,7 +238,7 @@ export class LogEntryRateAnalysis {
 
     return {
       examples: hits.map((hit) => ({
-        dataset: hit._source.event?.dataset ?? '',
+        dataset,
         message: hit._source.message ?? '',
         timestamp: hit.sort[0],
       })),
@@ -247,7 +258,7 @@ export class LogEntryRateAnalysis {
       await this.libs.framework.callWithRequest(
         requestContext,
         'transport.request',
-        createMlJobsQuery([logEntryCategoriesCountJobId])
+        createMlJobsQuery([jobId])
       )
     );
 

@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { useMount } from 'react-use';
 
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
@@ -18,6 +19,7 @@ import {
   getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
 import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
+import { useLogEntryRateExamples } from '../../use_log_entry_rate_examples';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   id: string;
@@ -30,11 +32,28 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     return results.anomalies.find((_anomaly) => _anomaly.id === id);
   }, [results, id]);
 
+  // if (!anomaly) return null;
+
   const {
     sourceConfiguration: { sourceId },
   } = useLogEntryRateModuleContext();
 
-  if (!anomaly) return null;
+  const {
+    getLogEntryRateExamples,
+    hasFailedLoadingLogEntryRateExamples,
+    isLoadingLogEntryRateExamples,
+    logEntryRateExamples,
+  } = useLogEntryRateExamples({
+    dataset: anomaly.partitionId,
+    endTime: timeRange.endTime,
+    exampleCount: 4,
+    sourceId,
+    startTime: timeRange.startTime,
+  });
+
+  useMount(() => {
+    getLogEntryRateExamples();
+  });
 
   return (
     <>

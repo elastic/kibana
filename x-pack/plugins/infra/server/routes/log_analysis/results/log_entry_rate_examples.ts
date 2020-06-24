@@ -10,10 +10,15 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH } from '../../../../common/http_api/log_analysis';
 import { throwErrors } from '../../../../common/runtime_types';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import { NoLogAnalysisResultsIndexError } from '../../../lib/log_analysis';
+
+import {
+  getLogEntryRateExamplesRequestPayloadRT,
+  getLogEntryRateExamplesSuccessReponsePayloadRT,
+  LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
+} from '../../../../common/http_api/log_analysis';
 
 const anyObject = schema.object({}, { unknowns: 'allow' });
 
