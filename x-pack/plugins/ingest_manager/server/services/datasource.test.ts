@@ -38,7 +38,7 @@ describe('Datasource service', () => {
         ({
           datasets: [
             {
-              name: 'dataset1',
+              name: 'package.dataset1',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
@@ -55,7 +55,7 @@ describe('Datasource service', () => {
             streams: [
               {
                 id: 'dataset01',
-                dataset: 'dataset1',
+                dataset: { name: 'package.dataset1' },
                 enabled: true,
                 vars: {
                   paths: {
@@ -75,7 +75,7 @@ describe('Datasource service', () => {
           streams: [
             {
               id: 'dataset01',
-              dataset: 'dataset1',
+              dataset: { name: 'package.dataset1' },
               enabled: true,
               vars: {
                 paths: {
@@ -98,7 +98,7 @@ describe('Datasource service', () => {
         ({
           datasets: [
             {
-              name: 'dataset1',
+              name: 'package.dataset1',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
@@ -120,7 +120,7 @@ describe('Datasource service', () => {
             streams: [
               {
                 id: 'dataset01',
-                dataset: 'dataset1',
+                dataset: { name: 'package.dataset1' },
                 enabled: true,
               },
             ],
@@ -140,7 +140,7 @@ describe('Datasource service', () => {
           streams: [
             {
               id: 'dataset01',
-              dataset: 'dataset1',
+              dataset: { name: 'package.dataset1' },
               enabled: true,
               agent_stream: {
                 metricset: ['dataset1'],

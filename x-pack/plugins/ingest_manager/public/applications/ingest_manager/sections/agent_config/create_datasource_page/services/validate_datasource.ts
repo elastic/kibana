@@ -124,7 +124,7 @@ export const validateDatasource = (
         if (stream.vars) {
           const streamVarsByName = (
             (
-              registryStreamsByDataset[stream.dataset].find(
+              registryStreamsByDataset[stream.dataset.name].find(
                 (registryStream) => registryStream.input === input.type
               ) || {}
             ).vars || []

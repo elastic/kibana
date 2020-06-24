@@ -18,6 +18,8 @@ export {
   AgentAction,
   AgentActionSOAttributes,
   Datasource,
+  DatasourceInput,
+  DatasourceInputStream,
   NewDatasource,
   DatasourceSOAttributes,
   FullAgentConfigInput,

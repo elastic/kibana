@@ -20,7 +20,9 @@ export type DatasourceConfigRecord = Record<string, DatasourceConfigRecordEntry>
 export interface NewDatasourceInputStream {
   id: string;
   enabled: boolean;
-  dataset: string;
+  dataset: {
+    name: string;
+  };
   processors?: string[];
   config?: DatasourceConfigRecord;
   vars?: DatasourceConfigRecord;
@@ -32,6 +34,9 @@ export interface DatasourceInputStream extends NewDatasourceInputStream {
 
 export interface NewDatasourceInput {
   type: string;
+  dataset?: {
+    type: string;
+  };
   enabled: boolean;
   processors?: string[];
   config?: DatasourceConfigRecord;

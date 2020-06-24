@@ -39,7 +39,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
       {
         id: 'test-logs-foo',
         enabled: true,
-        dataset: 'foo',
+        dataset: { name: 'foo' },
         vars: {
           fooVar: { value: 'foo-value' },
           fooVar2: { value: [1, 2] },
@@ -52,7 +52,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
       {
         id: 'test-logs-bar',
         enabled: true,
-        dataset: 'bar',
+        dataset: { name: 'bar' },
         vars: {
           barVar: { value: 'bar-value' },
           barVar2: { value: [1, 2] },

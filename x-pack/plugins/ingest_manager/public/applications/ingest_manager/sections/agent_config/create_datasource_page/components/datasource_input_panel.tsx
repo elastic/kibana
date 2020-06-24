@@ -177,7 +177,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
         <EuiFlexGroup direction="column">
           {packageInputStreams.map((packageInputStream) => {
             const datasourceInputStream = datasourceInput.streams.find(
-              (stream) => stream.dataset === packageInputStream.dataset.name
+              (stream) => stream.dataset.name === packageInputStream.dataset.name
             );
             return datasourceInputStream ? (
               <EuiFlexItem key={packageInputStream.dataset.name}>
@@ -186,7 +186,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                   datasourceInputStream={datasourceInputStream}
                   updateDatasourceInputStream={(updatedStream: Partial<DatasourceInputStream>) => {
                     const indexOfUpdatedStream = datasourceInput.streams.findIndex(
-                      (stream) => stream.dataset === packageInputStream.dataset.name
+                      (stream) => stream.dataset.name === packageInputStream.dataset.name
                     );
                     const newStreams = [...datasourceInput.streams];
                     newStreams[indexOfUpdatedStream] = {

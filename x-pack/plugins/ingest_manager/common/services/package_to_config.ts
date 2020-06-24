@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { pluck, uniq } from 'lodash';
 import {
   PackageInfo,
   RegistryConfigTemplate,
@@ -16,11 +17,11 @@ import {
   NewDatasource,
 } from '../types';
 
-const findStreamsForInputType = (
+const getStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo
-): Array<RegistryStream & { dataset: { name: string } }> => {
-  const streams: Array<RegistryStream & { dataset: { name: string } }> = [];
+): Array<RegistryStream & { dataset: { type: string; name: string } }> => {
+  const streams: Array<RegistryStream & { dataset: { type: string; name: string } }> = [];
 
   (packageInfo.datasets || []).forEach((dataset) => {
     (dataset.streams || []).forEach((stream) => {
@@ -28,6 +29,7 @@ const findStreamsForInputType = (
         streams.push({
           ...stream,
           dataset: {
+            type: dataset.type,
             name: dataset.name,
           },
         });
@@ -36,6 +38,11 @@ const findStreamsForInputType = (
   });
 
   return streams;
+};
+
+const getDatasetTypeForInputType = (inputType: string, packageInfo: PackageInfo): string => {
+  const datasetTypes = uniq(pluck(getStreamsForInputType(inputType, packageInfo), 'dataset.type'));
+  return datasetTypes[0];
 };
 
 /*
@@ -70,14 +77,14 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
       };
 
       // Map each package input stream into datasource input stream
-      const streams: DatasourceInputStream[] = findStreamsForInputType(
+      const streams: DatasourceInputStream[] = getStreamsForInputType(
         packageInput.type,
         packageInfo
       ).map((packageStream) => {
         const stream: DatasourceInputStream = {
           id: `${packageInput.type}-${packageStream.dataset.name}`,
           enabled: packageStream.enabled === false ? false : true,
-          dataset: packageStream.dataset.name,
+          dataset: { name: packageStream.dataset.name },
         };
         if (packageStream.vars && packageStream.vars.length) {
           stream.vars = packageStream.vars.reduce(varsReducer, {});
@@ -90,6 +97,12 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
         enabled: streams.length ? !!streams.find((stream) => stream.enabled) : true,
         streams,
       };
+
+      const datasetType = getDatasetTypeForInputType(packageInput.type, packageInfo);
+
+      if (datasetType) {
+        input.dataset = { type: datasetType };
+      }
 
       if (packageInput.vars && packageInput.vars.length) {
         input.vars = packageInput.vars.reduce(varsReducer, {});

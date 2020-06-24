@@ -24,7 +24,10 @@ export const storedDatasourcesToAgentInputs = (
         id: datasource.id || datasource.name,
         name: datasource.name,
         type: input.type,
-        dataset: { namespace: datasource.namespace || 'default' },
+        dataset: {
+          namespace: datasource.namespace || 'default',
+          ...(input.dataset?.type ? { type: input.dataset.type } : {}),
+        },
         use_output: DEFAULT_OUTPUT.name,
         ...Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
           acc[key] = value;
@@ -35,7 +38,7 @@ export const storedDatasourcesToAgentInputs = (
           .map((stream) => {
             const fullStream: FullAgentConfigInputStream = {
               id: stream.id,
-              dataset: { name: stream.dataset },
+              dataset: stream.dataset,
               ...stream.agent_stream,
               ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
                 acc[key] = value;

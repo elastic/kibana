@@ -275,13 +275,15 @@ async function _assignPackageStreamToStream(
   if (!stream.enabled) {
     return { ...stream, agent_stream: undefined };
   }
-  const datasetPath = getDataset(stream.dataset);
+  const datasetPath = getDataset(stream.dataset.name);
   const packageDatasets = pkgInfo.datasets;
   if (!packageDatasets) {
     throw new Error('Stream template not found, no datasets');
   }
 
-  const packageDataset = packageDatasets.find((pkgDataset) => pkgDataset.name === stream.dataset);
+  const packageDataset = packageDatasets.find(
+    (pkgDataset) => pkgDataset.name === stream.dataset.name
+  );
   if (!packageDataset) {
     throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);
   }
