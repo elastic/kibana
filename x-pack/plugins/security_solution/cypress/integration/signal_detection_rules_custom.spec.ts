@@ -62,7 +62,7 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
-import { DETECTIONS } from '../urls/navigation';
+import { ALERTS_URL } from '../urls/navigation';
 
 describe('Detection rules, custom', () => {
   before(() => {
@@ -74,7 +74,7 @@ describe('Detection rules, custom', () => {
   });
 
   it('Creates and activates a new custom rule', () => {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertDetectionRules();
@@ -169,7 +169,7 @@ describe('Detection rules, custom', () => {
 describe('Deletes custom rules', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertDetectionRules();

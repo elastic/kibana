@@ -59,7 +59,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       ),
     },
     {
-      field: 'timeStampField',
+      field: 'timeStampField.name',
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.timeStampFieldColumnTitle', {
         defaultMessage: 'Timestamp field',
       }),
