@@ -33,7 +33,9 @@ describe('positive_integer_greater_than_zero', () => {
     const decoded = PositiveInteger.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "PositiveInteger"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -42,7 +44,9 @@ describe('positive_integer_greater_than_zero', () => {
     const decoded = PositiveInteger.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "some string" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "some string" supplied to "PositiveInteger"',
+    ]);
     expect(message.schema).toEqual({});
   });
 });

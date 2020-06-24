@@ -508,8 +508,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // @deprecated (undocumented)
     context: ContextSetup;
     // (undocumented)
-    docLinks: DocLinksSetup;
-    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
@@ -600,13 +598,16 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
 }>;
 
 // @public (undocumented)
-export interface DocLinksSetup {
+export interface DocLinksStart {
     // (undocumented)
     readonly DOC_LINK_VERSION: string;
     // (undocumented)
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly dashboard: {
+            readonly drilldowns: string;
+        };
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -693,9 +694,6 @@ export interface DocLinksSetup {
         readonly management: Record<string, string>;
     };
 }
-
-// @public (undocumented)
-export type DocLinksStart = DocLinksSetup;
 
 // @public (undocumented)
 export interface EnvironmentMode {
@@ -1591,6 +1589,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:216:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:215:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

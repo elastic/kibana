@@ -5,6 +5,7 @@
  */
 
 import { debounce, pick } from 'lodash';
+import { Unit } from '@elastic/datemath';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiSpacer,
