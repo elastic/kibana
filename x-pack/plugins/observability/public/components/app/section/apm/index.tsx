@@ -10,15 +10,14 @@ import {
   Chart,
   DARK_THEME,
   LIGHT_THEME,
-  LineSeries,
   niceTimeFormatter,
-  Position,
   Settings,
 } from '@elastic/charts';
-import { EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
+import { formatStatValue } from '../../../../utils/format_stat_value';
 import { SectionContainer } from '../';
 import { ApmFetchDataResponse } from '../../../../typings/fetch_data_response';
 
@@ -47,9 +46,16 @@ export const APMSection = ({ data }: Props) => {
 
   return (
     <SectionContainer title={data.title} appLink={data.appLink}>
-      {/* {data.stats.map((stat) => (
-        <EuiStat key={stat.label} title={stat.value} description={stat.label} />
-      ))} */}
+      <EuiFlexGroup>
+        {Object.keys(data.stats).map((key) => {
+          const stat = data.stats[key as keyof ApmFetchDataResponse['stats']];
+          return (
+            <EuiFlexItem key={key} grow={false}>
+              <EuiStat title={formatStatValue(stat)} description={stat.label} />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
       <Chart size={{ height: 220 }}>
         <Settings
           onBrushEnd={({ x }) => {

@@ -19,8 +19,12 @@ import {
 } from '@elastic/charts';
 import { ThemeContext } from 'styled-components';
 import numeral from '@elastic/numeral';
-import { UptimeFetchDataResponse } from '../../../../typings/fetch_data_response';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiStat } from '@elastic/eui';
+import { formatStatValue } from '../../../../utils/format_stat_value';
 import { SectionContainer } from '../';
+import { UptimeFetchDataResponse } from '../../../../typings/fetch_data_response';
 
 interface Props {
   data?: UptimeFetchDataResponse;
@@ -50,7 +54,16 @@ export const UptimeSection = ({ data }: Props) => {
 
   return (
     <SectionContainer title={data.title} appLink={data.appLink}>
-      {/* <Stats stats={data.stats} formatter={(value: number) => numeral(value).format('0a')} /> */}
+      <EuiFlexGroup>
+        {Object.keys(data.stats).map((key) => {
+          const stat = data.stats[key as keyof UptimeFetchDataResponse['stats']];
+          return (
+            <EuiFlexItem key={key} grow={false}>
+              <EuiStat title={formatStatValue(stat)} description={stat.label} />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
       <Chart size={{ height: 220 }}>
         <Settings
           onBrushEnd={({ x }) => {

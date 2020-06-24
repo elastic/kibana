@@ -21,8 +21,12 @@ import {
 import { ThemeContext } from 'styled-components';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { LogsFetchDataResponse } from '../../../../typings/fetch_data_response';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiStat } from '@elastic/eui';
+import { formatStatValue } from '../../../../utils/format_stat_value';
 import { SectionContainer } from '../';
+import { LogsFetchDataResponse } from '../../../../typings/fetch_data_response';
 
 interface Props {
   data?: LogsFetchDataResponse;
@@ -54,7 +58,16 @@ export const LogsSection = ({ data }: Props) => {
 
   return (
     <SectionContainer title={data.title} appLink={data.appLink}>
-      {/* <Stats stats={data.stats} formatter={(value: number) => numeral(value).format('0a')} /> */}
+      <EuiFlexGroup>
+        {Object.keys(data.stats).map((key) => {
+          const stat = data.stats[key as keyof LogsFetchDataResponse['stats']];
+          return (
+            <EuiFlexItem key={key} grow={false}>
+              <EuiStat title={formatStatValue(stat)} description={stat.label} />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
       <Chart size={{ height: 220 }}>
         <Settings
           onBrushEnd={({ x }) => {

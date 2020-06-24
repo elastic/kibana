@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Percentage {
+export interface Percentage {
   label: string;
   pct: number;
   color?: string;
 }
-interface Bytes {
+export interface Bytes {
   label: string;
   bytes: number;
   color?: string;
 }
-interface Numeral {
+export interface Numeral {
   label: string;
   value: number;
   color?: string;
@@ -25,7 +25,7 @@ export interface Coordinates {
   y?: number;
 }
 
-interface Series {
+export interface Series {
   label: string;
   coordinates: Coordinates[];
   color?: string;
