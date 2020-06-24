@@ -82,6 +82,7 @@ async function creatHelloWorldContainerAndEmbeddable(
     getEmbeddableFactory: start.getEmbeddableFactory,
     panelComponent: testPanel,
   });
+
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
