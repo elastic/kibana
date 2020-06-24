@@ -144,8 +144,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
             cellTemplate({
               timefield: true,
               formatted: _displayField(row, indexPattern.timeFieldName),
-              filterable:
-                mapping(indexPattern.timeFieldName).filterable && _.isFunction($scope.filter),
+              filterable: mapping(indexPattern.timeFieldName).filterable && $scope.filter,
               column: indexPattern.timeFieldName,
             })
           );
@@ -156,7 +155,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
             $scope.flattenedRow[column] !== undefined &&
             mapping(column) &&
             mapping(column).filterable &&
-            _.isFunction($scope.filter);
+            $scope.filter;
 
           newHtmls.push(
             cellTemplate({
