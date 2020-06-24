@@ -26,6 +26,9 @@ export interface AuthenticationProviderOptions {
   client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
+  urls: {
+    loggedOut: string;
+  };
 }
 
 /**

@@ -29,11 +29,13 @@ import {
   getUISettings,
   getUsageCollector,
   getApplication,
+  getEmbeddable,
 } from '../services';
 
 export interface ShowNewVisModalParams {
   editorParams?: string[];
   onClose?: () => void;
+  originatingApp?: string;
   outsideVisualizeApp?: boolean;
 }
 
@@ -45,6 +47,7 @@ export interface ShowNewVisModalParams {
 export function showNewVisModal({
   editorParams = [],
   onClose,
+  originatingApp,
   outsideVisualizeApp,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
@@ -65,6 +68,8 @@ export function showNewVisModal({
       <NewVisModal
         isOpen={true}
         onClose={handleClose}
+        originatingApp={originatingApp}
+        stateTransfer={getEmbeddable().getStateTransfer()}
         outsideVisualizeApp={outsideVisualizeApp}
         editorParams={editorParams}
         visTypesRegistry={getTypes()}

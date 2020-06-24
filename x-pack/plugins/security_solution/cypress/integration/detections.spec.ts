@@ -28,13 +28,13 @@ import {
 import { esArchiverLoad } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
-import { DETECTIONS } from '../urls/navigation';
+import { ALERTS_URL } from '../urls/navigation';
 
 describe('Detections', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
-      loginAndWaitForPage(DETECTIONS);
+      loginAndWaitForPage(ALERTS_URL);
     });
 
     it('Closes and opens alerts', () => {
@@ -161,7 +161,7 @@ describe('Detections', () => {
   context('Opening alerts', () => {
     beforeEach(() => {
       esArchiverLoad('closed_alerts');
-      loginAndWaitForPage(DETECTIONS);
+      loginAndWaitForPage(ALERTS_URL);
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
@@ -207,7 +207,7 @@ describe('Detections', () => {
   context('Marking alerts as in-progress', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
-      loginAndWaitForPage(DETECTIONS);
+      loginAndWaitForPage(ALERTS_URL);
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {

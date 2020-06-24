@@ -20,13 +20,13 @@ import { CanvasElement } from '../../../types';
 
 import { ComponentStrings } from '../../../i18n';
 
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { Navbar } from '../navbar';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { WorkpadManager } from '../workpad_manager';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { PageManager } from '../page_manager';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
