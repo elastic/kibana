@@ -35,7 +35,7 @@ export const ErrorState: React.FC = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.appSearch.errorConnectingState.title"
-                  defaultMessage="Cannot connect to App Search"
+                  defaultMessage="Unable to connect"
                 />
               </h2>
             }
@@ -45,28 +45,45 @@ export const ErrorState: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.appSearch.errorConnectingState.description1"
-                    defaultMessage="We cannot connect to the App Search instance at the configured host URL: {enterpriseSearchUrl}"
+                    defaultMessage="We can’t establish a connection to App Search at the host URL: {enterpriseSearchUrl}"
                     values={{
                       enterpriseSearchUrl: <EuiCode>{enterpriseSearchUrl}</EuiCode>,
                     }}
                   />
                 </p>
-                <p>
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.appSearch.errorConnectingState.description2"
-                    defaultMessage="Please ensure your App Search host URL is configured correctly within {configFile}."
-                    values={{
-                      configFile: <EuiCode>config/kibana.yml</EuiCode>,
-                    }}
-                  />
-                </p>
+                <ol className="eui-textLeft">
+                  <li>
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.appSearch.errorConnectingState.description2"
+                      defaultMessage="Ensure the host URL is configured correctly in {configFile}."
+                      values={{
+                        configFile: <EuiCode>config/kibana.yml</EuiCode>,
+                      }}
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.appSearch.errorConnectingState.description3"
+                      defaultMessage="Confirm that the App Search server is responsive."
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.appSearch.errorConnectingState.description4"
+                      defaultMessage="Review the Setup guide or check your server log for {pluginLog} log messages."
+                      values={{
+                        pluginLog: <EuiCode>[enterpriseSearch][plugins]</EuiCode>,
+                      }}
+                    />
+                  </li>
+                </ol>
               </>
             }
             actions={
               <EuiButton iconType="help" fill to="/setup_guide">
                 <FormattedMessage
                   id="xpack.enterpriseSearch.appSearch.errorConnectingState.setupGuideCta"
-                  defaultMessage="Review the setup guide"
+                  defaultMessage="Review setup guide"
                 />
               </EuiButton>
             }

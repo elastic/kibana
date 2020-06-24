@@ -45,7 +45,7 @@ export const EmptyState: React.FC = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.appSearch.emptyState.title"
-                  defaultMessage="There’s nothing here yet"
+                  defaultMessage="Create your first engine"
                 />
               </h2>
             }
@@ -54,12 +54,7 @@ export const EmptyState: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.appSearch.emptyState.description1"
-                  defaultMessage="Looks like you don’t have any App Search engines."
-                />
-                <br />
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.appSearch.emptyState.description2"
-                  defaultMessage="Let’s create your first one now."
+                  defaultMessage="An App Search engine stores the documents for your search experience."
                 />
               </p>
             }
@@ -67,7 +62,7 @@ export const EmptyState: React.FC = () => {
               <EuiButton iconType="popout" fill {...buttonProps}>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta"
-                  defaultMessage="Create your first Engine"
+                  defaultMessage="Create an engine"
                 />
               </EuiButton>
             }
