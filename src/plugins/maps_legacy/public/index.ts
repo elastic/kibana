@@ -40,6 +40,8 @@ import {
 // @ts-ignore
 import { mapTooltipProvider } from './tooltip_provider';
 
+import './map/index.scss';
+
 export interface MapsLegacyConfigType {
   regionmap: any;
   emsTileLayerId: string;
