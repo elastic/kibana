@@ -11,7 +11,7 @@ import { AlertIndex } from './view';
 
 export const EndpointAlertsRoutes: React.FC = () => (
   <Switch>
-    <Route path="/:pageName(endpoint-alerts)">
+    <Route path="/">
       <AlertIndex />
     </Route>
   </Switch>
