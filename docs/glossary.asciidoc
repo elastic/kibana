@@ -285,7 +285,7 @@ A control that constrains the search results to a particular time period.
 [[glossary-time-series-data]] time series data ::
 // tag::time-series-data[]
 A control that constrains the search results to a particular time period.
-// end::time-series-data[]
+// end::time-series-data-def[]
 
 
 
