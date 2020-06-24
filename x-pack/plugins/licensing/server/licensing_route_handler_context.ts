@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { ILicense } from '../common/types';
+import { FeatureUsageServiceStart } from './services';
 
 /**
  * Create a route handler context for access to Kibana license information.
@@ -16,9 +17,13 @@ import { ILicense } from '../common/types';
  * @public
  */
 export function createRouteHandlerContext(
-  license$: Observable<ILicense>
+  license$: Observable<ILicense>,
+  featureUsage: FeatureUsageServiceStart
 ): IContextProvider<RequestHandler<any, any, any>, 'licensing'> {
   return async function licensingRouteHandlerContext() {
-    return { license: await license$.pipe(take(1)).toPromise() };
+    return {
+      license: await license$.pipe(take(1)).toPromise(),
+      featureUsage,
+    };
   };
 }
