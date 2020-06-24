@@ -20,6 +20,7 @@
 import { NotificationsStart } from 'kibana/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
@@ -27,4 +28,8 @@ export const [getFormatService, setFormatService] = createGetterSetter<
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
+);
+
+export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
+  'KibanaLegacy'
 );
