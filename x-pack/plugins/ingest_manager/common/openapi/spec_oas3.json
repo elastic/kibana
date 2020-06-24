@@ -4012,6 +4012,9 @@
           },
           "path": {
             "type": "string"
+          },
+          "removable": {
+            "type": "boolean"
           }
         },
         "required": [
