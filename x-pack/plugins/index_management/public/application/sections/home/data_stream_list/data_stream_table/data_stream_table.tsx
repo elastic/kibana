@@ -155,7 +155,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     <>
       {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
         <DeleteDataStreamConfirmationModal
-          callback={(data) => {
+          onClose={(data) => {
             if (data && data.hasDeletedDataStreams) {
               reload();
             } else {

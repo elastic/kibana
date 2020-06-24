@@ -24,9 +24,8 @@ export { IngestManagerConfigType } from '../common/types';
 
 // We need to provide an object instead of void so that dependent plugins know when Ingest Manager
 // is disabled.
-export interface IngestManagerSetup {
-  enabled: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IngestManagerSetup {}
 
 /**
  * Describes public IngestManager plugin contract returned at the `start` stage.
@@ -81,9 +80,7 @@ export class IngestManagerPlugin
       },
     });
 
-    return {
-      enabled: true,
-    };
+    return {};
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {

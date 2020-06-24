@@ -27,6 +27,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickIndicesAt: (index: number) => void;
     clickDeletActionAt: (index: number) => void;
     clickConfirmDelete: () => void;
+    clickDeletDataStreamButton: () => void;
   };
   findDeleteActionAt: (index: number) => ReactWrapper;
   findDeleteConfirmationModal: () => ReactWrapper;
@@ -128,6 +129,11 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     });
   };
 
+  const clickDeletDataStreamButton = () => {
+    const { find } = testBed;
+    find('deleteDataStreamButton').simulate('click');
+  };
+
   const findDetailPanel = () => {
     const { find } = testBed;
     return find('dataStreamDetailPanel');
@@ -148,6 +154,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       clickIndicesAt,
       clickDeletActionAt,
       clickConfirmDelete,
+      clickDeletDataStreamButton,
     },
     findDeleteActionAt,
     findDeleteConfirmationModal,

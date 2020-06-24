@@ -27,23 +27,25 @@ describe('Data Streams tab', () => {
     });
 
     test('displays an empty prompt', async () => {
+      testBed = await setup();
+
       await act(async () => {
-        testBed = await setup();
         testBed.actions.goToDataStreamsList();
       });
 
       const { exists, component } = testBed;
-      testBed.component.update();
+      component.update();
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyPrompt')).toBe(true);
     });
 
     test('when Ingest Manager is disabled, goes to index templates tab when "Get started" link is clicked', async () => {
+      testBed = await setup({
+        plugins: {},
+      });
+
       await act(async () => {
-        testBed = await setup({
-          plugins: {},
-        });
         testBed.actions.goToDataStreamsList();
       });
 
@@ -58,10 +60,11 @@ describe('Data Streams tab', () => {
     });
 
     test('when Ingest Manager is enabled, links to Ingest Manager', async () => {
+      testBed = await setup({
+        plugins: { ingestManager: { hi: 'ok' } },
+      });
+
       await act(async () => {
-        testBed = await setup({
-          plugins: { ingestManager: {} },
-        });
         testBed.actions.goToDataStreamsList();
       });
 
@@ -69,7 +72,7 @@ describe('Data Streams tab', () => {
       component.update();
 
       // Assert against the text because the href won't be available, due to dependency upon our core mock.
-      expect(findEmptyPromptIndexTemplateLink().props().children).toBe('Ingest Manager');
+      expect(findEmptyPromptIndexTemplateLink().text()).toBe('Ingest Manager');
     });
   });
 
@@ -101,13 +104,18 @@ describe('Data Streams tab', () => {
         },
       ]);
 
+      const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
+
       httpRequestsMockHelpers.setLoadDataStreamsResponse([
-        createDataStreamPayload('dataStream1'),
+        dataStreamForDetailPanel,
         createDataStreamPayload('dataStream2'),
       ]);
 
+      httpRequestsMockHelpers.setLoadDataStreamResponse(dataStreamForDetailPanel);
+
+      testBed = await setup();
+
       await act(async () => {
-        testBed = await setup();
         testBed.actions.goToDataStreamsList();
       });
 
@@ -136,13 +144,6 @@ describe('Data Streams tab', () => {
 
       expect(server.requests.length).toBe(totalRequests + 1);
       expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/data_streams`);
-    });
-
-    test('clicking the name opens the detail panel', async () => {
-      const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
-      await actions.clickNameAt(0);
-      expect(findDetailPanel().length).toBe(1);
-      expect(findDetailPanelTitle()).toBe('dataStream1');
     });
 
     test('clicking the indices count navigates to the backing indices', async () => {
@@ -177,6 +178,42 @@ describe('Data Streams tab', () => {
           actions: { clickDeletActionAt, clickConfirmDelete },
         } = testBed;
         clickDeletActionAt(0);
+
+        httpRequestsMockHelpers.setDeleteDataStreamResponse({
+          results: {
+            dataStreamsDeleted: ['dataStream1'],
+            errors: [],
+          },
+        });
+
+        await clickConfirmDelete();
+
+        const { method, url, requestBody } = server.requests[server.requests.length - 1];
+
+        expect(method).toBe('POST');
+        expect(url).toBe(`${API_BASE_PATH}/delete_data_streams`);
+        expect(JSON.parse(JSON.parse(requestBody).body)).toEqual({
+          dataStreams: ['dataStream1'],
+        });
+      });
+    });
+
+    describe('detail panel', () => {
+      test('opens when the data stream name in the table is clicked', async () => {
+        const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
+        await actions.clickNameAt(0);
+        expect(findDetailPanel().length).toBe(1);
+        expect(findDetailPanelTitle()).toBe('dataStream1');
+      });
+
+      test('deletes the data stream when delete button is clicked', async () => {
+        const {
+          actions: { clickNameAt, clickDeletDataStreamButton, clickConfirmDelete },
+        } = testBed;
+
+        await clickNameAt(0);
+
+        clickDeletDataStreamButton();
 
         httpRequestsMockHelpers.setDeleteDataStreamResponse({
           results: {

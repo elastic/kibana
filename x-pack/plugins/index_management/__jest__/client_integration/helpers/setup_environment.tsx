@@ -55,9 +55,9 @@ export const setupEnvironment = () => {
 export const WithAppDependencies = (Comp: any, overridingDependencies: any = {}) => (
   props: any
 ) => {
-  const dependencies = merge(appDependencies, overridingDependencies);
+  const mergedDependencies = merge({}, appDependencies, overridingDependencies);
   return (
-    <AppContextProvider value={appDependencies}>
+    <AppContextProvider value={mergedDependencies}>
       <Comp {...props} />
     </AppContextProvider>
   );

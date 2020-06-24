@@ -77,7 +77,8 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsDescription"
               defaultMessage="Data streams represent collections of time series indices."
-            />{' '}
+            />
+            {' ' /* We need this space to separate these two sentences. */}
             {ingestManager ? (
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
@@ -100,7 +101,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               />
             ) : (
               <FormattedMessage
-                id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
+                id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIndexTemplateMessage"
                 defaultMessage="Get started with data streams by creating a {link}."
                 values={{
                   link: (
@@ -111,7 +112,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                       })}
                     >
                       {i18n.translate(
-                        'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerLink',
+                        'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIndexTemplateLink',
                         {
                           defaultMessage: 'composable index template',
                         }
@@ -149,18 +150,31 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           reload={reload}
           history={history as ScopedHistory}
         />
-
-        {dataStreamName && (
-          <DataStreamDetailPanel
-            dataStreamName={decodePathFromReactRouter(dataStreamName)}
-            onClose={() => {
-              history.push(`/${Section.DataStreams}`);
-            }}
-          />
-        )}
       </>
     );
   }
 
-  return <div data-test-subj="dataStreamList">{content}</div>;
+  return (
+    <div data-test-subj="dataStreamList">
+      {content}
+
+      {/*
+        If the user has been deep-linked, they'll expect to see the detail panel because it reflects
+        the URL state, even if there are no data streams or if there was an error loading them.
+      */}
+      {dataStreamName && (
+        <DataStreamDetailPanel
+          dataStreamName={decodePathFromReactRouter(dataStreamName)}
+          onClose={(shouldReload?: boolean) => {
+            history.push(`/${Section.DataStreams}`);
+
+            // If the data stream was deleted, we need to refresh the list.
+            if (shouldReload) {
+              reload();
+            }
+          }}
+        />
+      )}
+    </div>
+  );
 };

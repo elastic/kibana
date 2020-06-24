@@ -12,12 +12,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { deleteDataStreams } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
 
-export const DeleteDataStreamConfirmationModal = ({
+interface Props {
+  dataStreams: string[];
+  onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
+}
+
+export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> = ({
   dataStreams,
-  callback,
+  onClose,
 }: {
   dataStreams: string[];
-  callback: (data?: { hasDeletedDataStreams: boolean }) => void;
+  onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
 }) => {
   const dataStreamsCount = dataStreams.length;
 
@@ -44,7 +49,7 @@ export const DeleteDataStreamConfirmationModal = ({
                 }
               );
 
-        callback({ hasDeletedDataStreams });
+        onClose({ hasDeletedDataStreams });
         notificationService.showSuccessToast(successMessage);
       }
 
@@ -87,7 +92,7 @@ export const DeleteDataStreamConfirmationModal = ({
             values={{ dataStreamsCount }}
           />
         }
-        onCancel={() => callback()}
+        onCancel={() => onClose()}
         onConfirm={handleDeleteDataStreams}
         cancelButtonText={
           <FormattedMessage
