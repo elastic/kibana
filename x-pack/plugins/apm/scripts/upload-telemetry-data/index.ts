@@ -30,7 +30,7 @@ import { downloadTelemetryTemplate } from './download-telemetry-template';
 import mapping from '../../mappings.json';
 import { generateSampleDocuments } from './generate-sample-documents';
 
-consoleStamp(console, '[HH:MM:ss.l]');
+consoleStamp(console, { pattern: '[HH:MM:ss.l]' });
 
 const githubToken = process.env.GITHUB_TOKEN;
 

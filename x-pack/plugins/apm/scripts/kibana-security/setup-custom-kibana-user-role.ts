@@ -147,13 +147,14 @@ async function init() {
 }
 
 async function isSecurityEnabled() {
-  interface XPackInfo {
-    features: { security?: { allow_rbac: boolean } };
+  try {
+    await callKibana({
+      url: `/api/security/v1/me`,
+    });
+    return true;
+  } catch (err) {
+    return false;
   }
-  const { features } = await callKibana<XPackInfo>({
-    url: `/api/xpack/v1/info`,
-  });
-  return features.security?.allow_rbac;
 }
 
 async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
