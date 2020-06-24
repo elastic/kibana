@@ -5,7 +5,6 @@
  */
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import uuid from 'uuid';
 import {
   addHistory,
   addNote,
@@ -137,13 +136,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         filters,
       }
     ) => {
-      const templateTimelineInfo =
-        timelineType === TimelineType.template
-          ? {
-              templateTimelineId: uuid.v4(),
-              templateTimelineVersion: 1,
-            }
-          : {};
       return {
         ...state,
         timelineById: addNewTimeline({
@@ -160,7 +152,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
           showRowRenderers,
           timelineById: state.timelineById,
           timelineType,
-          ...templateTimelineInfo,
         }),
       };
     }
