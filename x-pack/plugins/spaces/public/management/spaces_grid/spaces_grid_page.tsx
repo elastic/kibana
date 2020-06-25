@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
-import { FeatureConfig, FeaturesPluginStart } from '../../../../features/public';
+import { Feature, FeaturesPluginStart } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
@@ -46,7 +46,7 @@ interface Props {
 
 interface State {
   spaces: Space[];
-  features: FeatureConfig[];
+  features: Feature[];
   loading: boolean;
   showConfirmDeleteModal: boolean;
   selectedSpace: Space | null;
@@ -228,7 +228,7 @@ export class SpacesGridPage extends Component<Props, State> {
       this.setState({
         loading: false,
         spaces,
-        features: features.map((f) => f.toRaw()),
+        features,
       });
     } catch (error) {
       this.setState({

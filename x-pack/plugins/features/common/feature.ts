@@ -49,7 +49,9 @@ export interface FeatureConfig {
    * This does not restrict access to your feature based on license.
    * Its only purpose is to inform the space and roles UIs on which features to display.
    */
-  validLicenses?: Array<'basic' | 'standard' | 'gold' | 'platinum' | 'enterprise' | 'trial'>;
+  validLicenses?: ReadonlyArray<
+    'basic' | 'standard' | 'gold' | 'platinum' | 'enterprise' | 'trial'
+  >;
 
   /**
    * An optional EUI Icon to be used when displaying your feature.
