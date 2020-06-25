@@ -5,9 +5,9 @@
  */
 
 import { createBoundedQueue } from './bounded_queue';
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
-const loggingService = loggingServiceMock.create();
+const loggingService = loggingSystemMock.create();
 const logger = loggingService.get();
 
 describe('basic', () => {

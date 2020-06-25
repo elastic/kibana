@@ -26,7 +26,7 @@ export function toExpression(input: VisualizeInput): string {
       .reduce((_, part) => expressionParts.push(part), 0);
   }
 
-  // @ts-ignore LegendOpen missing on VisualizeInput type
+  // @ts-expect-error LegendOpen missing on VisualizeInput type
   if (input.vis?.legendOpen !== undefined && input.vis.legendOpen === false) {
     expressionParts.push(`hideLegend=true`);
   }
