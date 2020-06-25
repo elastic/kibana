@@ -17,67 +17,35 @@
  * under the License.
  */
 
-// Test helpers to simplify mocking logs and collecting all their outputs
-import { ILoggingService } from './logging_service';
-import { LoggerFactory } from './logger_factory';
-import { loggerMock, MockedLogger } from './logger.mock';
+import {
+  LoggingService,
+  LoggingServiceSetup,
+  InternalLoggingServiceSetup,
+} from './logging_service';
 
-const createLoggingServiceMock = () => {
-  const mockLog = loggerMock.create();
+const createInternalSetupMock = (): jest.Mocked<InternalLoggingServiceSetup> => ({
+  configure: jest.fn(),
+});
 
-  mockLog.get.mockImplementation((...context) => ({
-    ...mockLog,
-    context,
-  }));
+const createSetupMock = (): jest.Mocked<LoggingServiceSetup> => ({
+  configure: jest.fn(),
+});
 
-  const mocked: jest.Mocked<ILoggingService> = {
-    get: jest.fn(),
-    asLoggerFactory: jest.fn(),
-    upgrade: jest.fn(),
+type LoggingServiceContract = PublicMethodsOf<LoggingService>;
+const createMock = (): jest.Mocked<LoggingServiceContract> => {
+  const service: jest.Mocked<LoggingServiceContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.get.mockImplementation((...context) => ({
-    ...mockLog,
-    context,
-  }));
-  mocked.asLoggerFactory.mockImplementation(() => mocked);
-  mocked.stop.mockResolvedValue();
-  return mocked;
-};
 
-const collectLoggingServiceMock = (loggerFactory: LoggerFactory) => {
-  const mockLog = loggerFactory.get() as MockedLogger;
-  return {
-    debug: mockLog.debug.mock.calls,
-    error: mockLog.error.mock.calls,
-    fatal: mockLog.fatal.mock.calls,
-    info: mockLog.info.mock.calls,
-    log: mockLog.log.mock.calls,
-    trace: mockLog.trace.mock.calls,
-    warn: mockLog.warn.mock.calls,
-  };
-};
+  service.setup.mockReturnValue(createInternalSetupMock());
 
-const clearLoggingServiceMock = (loggerFactory: LoggerFactory) => {
-  const mockedLoggerFactory = (loggerFactory as unknown) as jest.Mocked<ILoggingService>;
-  mockedLoggerFactory.get.mockClear();
-  mockedLoggerFactory.asLoggerFactory.mockClear();
-  mockedLoggerFactory.upgrade.mockClear();
-  mockedLoggerFactory.stop.mockClear();
-
-  const mockLog = loggerFactory.get() as MockedLogger;
-  mockLog.debug.mockClear();
-  mockLog.info.mockClear();
-  mockLog.warn.mockClear();
-  mockLog.error.mockClear();
-  mockLog.trace.mockClear();
-  mockLog.fatal.mockClear();
-  mockLog.log.mockClear();
+  return service;
 };
 
 export const loggingServiceMock = {
-  create: createLoggingServiceMock,
-  collect: collectLoggingServiceMock,
-  clear: clearLoggingServiceMock,
-  createLogger: loggerMock.create,
+  create: createMock,
+  createSetupContract: createSetupMock,
+  createInternalSetupContract: createInternalSetupMock,
 };
