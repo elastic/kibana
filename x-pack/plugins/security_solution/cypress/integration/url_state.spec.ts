@@ -235,7 +235,7 @@ describe('url state', () => {
   });
 
   it('sets and reads the url state for timeline by id', () => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    loginAndWaitForPage(HOSTS_URL);
     openTimeline();
     executeTimelineKQL('host.name: *');
 
