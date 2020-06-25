@@ -100,7 +100,7 @@ describe('StatefulOpenTimeline', () => {
       );
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
+        .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
       expect(wrapper.find('[data-test-subj="search-row"]').first().prop('query')).toEqual('abcd');
     });
 
@@ -122,7 +122,7 @@ describe('StatefulOpenTimeline', () => {
 
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
+        .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
 
       expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
         'Showing: 11 timelines with'
@@ -147,7 +147,7 @@ describe('StatefulOpenTimeline', () => {
 
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
+        .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
 
       expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual(
         'with "abcd"'
