@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.clickConfirmChanges();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.savedObjects.clickImportDone();
-        const objects = await PageObjects.settings.getRowTitles();
+        const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object with index pattern conflict');
         expect(isSavedObjectImported).to.be(true);
       });
