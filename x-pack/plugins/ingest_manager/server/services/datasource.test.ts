@@ -27,7 +27,13 @@ paths:
 
 jest.mock('./epm/packages/assets', () => {
   return {
-    getAssetsDataForPackageKey: mockedGetAssetsData,
+    getAssetsData: mockedGetAssetsData,
+  };
+});
+
+jest.mock('./epm/registry', () => {
+  return {
+    fetchInfo: () => ({}),
   };
 });
 

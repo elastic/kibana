@@ -13,11 +13,18 @@ import {
   PackageInfo,
 } from '../../common';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
-import { NewDatasource, Datasource, ListWithKuery, DatasourceSOAttributes } from '../types';
+import {
+  NewDatasource,
+  Datasource,
+  ListWithKuery,
+  DatasourceSOAttributes,
+  RegistryPackage,
+} from '../types';
 import { agentConfigService } from './agent_config';
-import { getPackageInfo, getInstallation } from './epm/packages';
 import { outputService } from './output';
-import { getAssetsDataForPackageKey } from './epm/packages/assets';
+import * as Registry from './epm/registry';
+import { getPackageInfo, getInstallation } from './epm/packages';
+import { getAssetsData } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
@@ -252,15 +259,22 @@ class DatasourceService {
     pkgInfo: PackageInfo,
     inputs: DatasourceInput[]
   ): Promise<DatasourceInput[]> {
-    const inputsPromises = inputs.map((input) => _assignPackageStreamToInput(pkgInfo, input));
+    const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+    const inputsPromises = inputs.map((input) =>
+      _assignPackageStreamToInput(registryPkgInfo, pkgInfo, input)
+    );
 
     return Promise.all(inputsPromises);
   }
 }
 
-async function _assignPackageStreamToInput(pkgInfo: PackageInfo, input: DatasourceInput) {
+async function _assignPackageStreamToInput(
+  registryPkgInfo: RegistryPackage,
+  pkgInfo: PackageInfo,
+  input: DatasourceInput
+) {
   const streamsPromises = input.streams.map((stream) =>
-    _assignPackageStreamToStream(pkgInfo, input, stream)
+    _assignPackageStreamToStream(registryPkgInfo, pkgInfo, input, stream)
   );
 
   const streams = await Promise.all(streamsPromises);
@@ -268,6 +282,7 @@ async function _assignPackageStreamToInput(pkgInfo: PackageInfo, input: Datasour
 }
 
 async function _assignPackageStreamToStream(
+  registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   input: DatasourceInput,
   stream: DatasourceInputStream
@@ -299,8 +314,8 @@ async function _assignPackageStreamToStream(
     throw new Error(`Stream template path not found for dataset ${datasetPath}`);
   }
 
-  const [pkgStream] = await getAssetsDataForPackageKey(
-    { pkgName: pkgInfo.name, pkgVersion: pkgInfo.version },
+  const [pkgStream] = await getAssetsData(
+    registryPkgInfo,
     (path: string) => path.endsWith(streamFromPkg.template_path),
     datasetPath
   );
