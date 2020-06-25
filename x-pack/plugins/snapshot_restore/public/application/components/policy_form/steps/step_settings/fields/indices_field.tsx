@@ -21,7 +21,6 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
-  euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../../../common/types';
