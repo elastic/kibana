@@ -28,7 +28,7 @@ export const IntraAppStateProvider = memo<{
 }>(({ kibanaScopedHistory, children }) => {
   const internalAppToAppState = useMemo<IntraAppState>(() => {
     return {
-      forRoute: kibanaScopedHistory.location.hash.substr(1),
+      forRoute: kibanaScopedHistory.location.hash.substr(1).split('?')[0],
       routeState: kibanaScopedHistory.location.state as AnyIntraAppRouteState,
     };
   }, [kibanaScopedHistory.location.hash, kibanaScopedHistory.location.state]);
@@ -58,10 +58,7 @@ export function useIntraAppState<S = AnyIntraAppRouteState>():
     // ingest app. side affect is that the browser back button would not work
     // consistently either.
 
-    // Compare the routes only, strip any query params
-    const forBaseRoute = intraAppState.forRoute.split('?')[0];
-
-    if (location.pathname === forBaseRoute && !wasHandled.has(intraAppState)) {
+    if (location.pathname === intraAppState.forRoute && !wasHandled.has(intraAppState)) {
       wasHandled.add(intraAppState);
       return intraAppState.routeState as S;
     }

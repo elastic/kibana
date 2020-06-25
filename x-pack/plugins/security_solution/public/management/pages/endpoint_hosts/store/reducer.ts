@@ -155,6 +155,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           error: undefined,
           detailsError: undefined,
           policyResponseError: undefined,
+          policyItemsLoading: true,
         };
       }
     }
@@ -165,8 +166,6 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       error: undefined,
       detailsError: undefined,
       policyResponseError: undefined,
-      loading: true,
-      policyItemsLoading: true,
     };
   }
   return state;

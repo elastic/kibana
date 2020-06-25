@@ -14,9 +14,9 @@ import {
   EuiSteps,
   EuiTitle,
   EuiSelectable,
-  EuiProgress,
   EuiSelectableMessage,
   EuiSelectableProps,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -219,7 +219,11 @@ const ManagementEmptyState = React.memo<{
     return (
       <div data-test-subj={dataTestSubj}>
         {loading ? (
-          <EuiProgress size="xs" color="accent" className="essentialAnimation" />
+          <EuiFlexGroup alignItems="center" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" className="essentialAnimation" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : (
           <>
             <EuiSpacer size="xxl" />
