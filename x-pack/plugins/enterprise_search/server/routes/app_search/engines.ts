@@ -38,12 +38,6 @@ export function registerEnginesRoute({ router, config, log }: IRouteDependencies
           headers: { Authorization: request.headers.authorization as string },
         });
 
-        if (enginesResponse.url.endsWith('/login')) {
-          log.info('No corresponding App Search account found');
-          // Note: Can't use response.unauthorized, Kibana will auto-log out the user
-          return response.forbidden({ body: 'no-as-account' });
-        }
-
         const engines = await enginesResponse.json();
         const hasValidData =
           Array.isArray(engines?.results) && typeof engines?.meta?.page?.total_results === 'number';
