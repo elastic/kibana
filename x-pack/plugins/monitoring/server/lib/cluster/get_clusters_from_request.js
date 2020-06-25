@@ -98,17 +98,17 @@ export async function getClustersFromRequest(
       cluster.ml = { jobs: mlJobs };
     }
 
-    if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
-      const alertsClient = req.getAlertsClient ? req.getAlertsClient() : null;
-      cluster.alerts = await fetchStatus(
-        alertsClient,
-        ALERTS,
-        cluster.cluster_uuid,
-        start,
-        end,
-        req.logger
-      );
-    }
+    // if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
+    const alertsClient = req.getAlertsClient ? req.getAlertsClient() : null;
+    cluster.alerts = await fetchStatus(
+      alertsClient,
+      ALERTS,
+      cluster.cluster_uuid,
+      start,
+      end,
+      req.logger
+    );
+    // }
 
     cluster.logs = isInCodePath(codePaths, [CODE_PATH_LOGS])
       ? await getLogTypes(req, filebeatIndexPattern, {

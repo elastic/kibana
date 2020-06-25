@@ -128,17 +128,24 @@ export class BaseAlert {
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
   ): Promise<Alert> {
-    const existingAlert = await alertsClient.find({
+    const existingAlertData = await alertsClient.find({
       options: {
         search: this.type,
       },
     });
 
-    if (existingAlert.total === 1) {
-      // TEMP CODE
+    if (existingAlertData.total === 1) {
+      const existingAlert = existingAlertData.data[0] as Alert;
 
-      // return null;
-      await alertsClient.delete(existingAlert.data[0]);
+      // const defaultServerLogAction = existingAlert.actions.find(
+      //   (action) => action.actionTypeId === ALERT_ACTION_TYPE_LOG
+      // );
+      // if (defaultServerLogAction) {
+      //   console.log(defaultServerLogAction.params);
+      //   console.log(this.getDefaultActionParams(ALERT_ACTION_TYPE_LOG));
+      // }
+
+      return existingAlert;
     }
 
     const alertActions = [];
