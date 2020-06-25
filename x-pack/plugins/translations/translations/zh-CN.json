@@ -10468,6 +10468,8 @@
     "xpack.ml.newJob.recognize.useDedicatedIndexLabel": "使用专用索引",
     "xpack.ml.newJob.recognize.useFullDataLabel": "使用完整的 {indexPatternTitle} 数据",
     "xpack.ml.newJob.recognize.usingSavedSearchDescription": "使用已保存搜索意味着在数据馈送中使用的查询会与我们在 {moduleId} 模块中提供的默认查询不同。",
+    "xpack.ml.newJob.recognize.viewResultsAriaLabel": "查看结果",
+    "xpack.ml.newJob.recognize.viewResultsLinkText": "查看结果",
     "xpack.ml.newJob.recognize.visualizationsLabel": "可视化",
     "xpack.ml.newJob.simple.createWatchView.emailAddressPlaceholder": "电子邮件地址",
     "xpack.ml.newJob.simple.createWatchView.nowLabel": "立即 - {selectInterval}",
