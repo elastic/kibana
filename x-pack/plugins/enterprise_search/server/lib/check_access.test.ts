@@ -22,11 +22,9 @@ describe('checkAccess', () => {
       mode: {
         useRbacForRequest: () => true,
       },
-      checkPrivilegesWithRequest: () => ({
-        globally: () => ({
-          hasAllRequested: false,
-        }),
-      }),
+    },
+    authc: {
+      getCurrentUser: () => ({ username: 'someuser', roles: ['somerole'] }),
     },
   };
   const mockRequest = {
@@ -52,14 +50,8 @@ describe('checkAccess', () => {
     it('should always show the plugin', async () => {
       const security = {
         ...mockSecurity,
-        authz: {
-          mode: { useRbacForRequest: () => true },
-          checkPrivilegesWithRequest: () => ({
-            globally: () => ({
-              hasAllRequested: true,
-            }),
-          }),
-          actions: { ui: { get: () => {} } },
+        authc: {
+          getCurrentUser: () => ({ username: 'enterprise_search', roles: ['superuser'] }),
         },
       };
       expect(await checkAccess({ ...mockDependencies, security })).toEqual(true);
@@ -127,13 +119,7 @@ describe('checkAccess', () => {
     });
 
     it("falls back to assuming a non-superuser role if a user's roles cannot be accessed", async () => {
-      const security = {
-        ...mockSecurity,
-        authz: {
-          mode: { useRbacForRequest: () => true },
-          checkPrivilegesWithRequest: undefined,
-        },
-      };
+      const security = { ...mockSecurity, authc: undefined };
       expect(await checkAccess({ ...mockDependencies, security })).toEqual(false);
     });
   });
