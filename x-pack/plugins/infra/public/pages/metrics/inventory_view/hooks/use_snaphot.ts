@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -22,16 +21,6 @@ import {
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
 
-interface SnapshotData {
-  filterQuery: string | null | undefined;
-  metric: { type: SnapshotMetricType };
-  groupBy: SnapshotGroupBy;
-  nodeType: InventoryItemType;
-  sourceId: string;
-  currentTime: number;
-  accountId: string;
-  region: string;
-}
 export function useSnapshot(
   filterQuery: string | null | undefined,
   metric: { type: SnapshotMetricType },

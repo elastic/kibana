@@ -38,7 +38,6 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleTimeChange,
     handleRefresh,
     handleLoadMore,
-    defaultViewState,
     onViewStateChange,
   } = useMetricsExplorerState(source, derivedIndexPattern);
   const { currentView } = useSavedViewContext();
