@@ -11,7 +11,7 @@ import { FilterManager } from '../../../../../../../src/plugins/data/public/quer
 import { TimelineRowAction } from '../timeline/body/actions';
 import * as i18n from '../../../common/components/events_viewer/translations';
 import * as i18nF from '../timeline/footer/translations';
-import { Ecs, TimelineNonEcsData, TimelineItem } from '../../../graphql/types';
+import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
 
 interface ManageTimelineInit {
   documentType?: string;
@@ -26,9 +26,8 @@ interface ManageTimelineInit {
 }
 
 export interface TimelineRowActionArgs {
-  ecsData?: Ecs;
-  nonEcsData?: TimelineNonEcsData[];
-  timelineItem?: TimelineItem[];
+  ecsData: Ecs;
+  nonEcsData: TimelineNonEcsData[];
 }
 
 interface ManageTimeline {
@@ -41,11 +40,7 @@ interface ManageTimeline {
   loadingText: string;
   queryFields: string[];
   selectAll: boolean;
-  timelineRowActions: ({
-    ecsData,
-    nonEcsData,
-    timelineItem,
-  }: TimelineRowActionArgs) => TimelineRowAction[];
+  timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
   title: string;
   unit: (totalCount: number) => string;
 }
@@ -70,11 +65,7 @@ type ActionManageTimeline =
       id: string;
       payload: {
         queryFields?: string[];
-        timelineRowActions: ({
-          ecsData,
-          nonEcsData,
-          timelineItem,
-        }: TimelineRowActionArgs) => TimelineRowAction[];
+        timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
       };
     };
 
@@ -131,11 +122,7 @@ interface UseTimelineManager {
   setTimelineRowActions: (actionsArgs: {
     id: string;
     queryFields?: string[];
-    timelineRowActions: ({
-      ecsData,
-      nonEcsData,
-      timelineItem,
-    }: TimelineRowActionArgs) => TimelineRowAction[];
+    timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
   }) => void;
 }
 
@@ -161,11 +148,7 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     }: {
       id: string;
       queryFields?: string[];
-      timelineRowActions: ({
-        ecsData,
-        nonEcsData,
-        timelineItem,
-      }: TimelineRowActionArgs) => TimelineRowAction[];
+      timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
     }) => {
       dispatch({
         type: 'SET_TIMELINE_ACTIONS',
@@ -221,7 +204,6 @@ const init = {
   initializeTimeline: () => noop,
   setIsTimelineLoading: () => noop,
   setTimelineRowActions: () => noop,
-  setTimelineFilterManager: () => noop,
 };
 const ManageTimelineContext = createContext<UseTimelineManager>(init);
 

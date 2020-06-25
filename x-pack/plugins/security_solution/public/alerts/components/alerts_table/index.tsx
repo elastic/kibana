@@ -291,7 +291,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Send to Timeline / Update Alert Status Actions for each table row
   const additionalActions = useMemo(
-    () => ({ ecsData, nonEcsData, timelineItem }: TimelineRowActionArgs) =>
+    () => ({ ecsData, nonEcsData }: TimelineRowActionArgs) =>
       getAlertActions({
         apolloClient,
         canUserCRUD,
@@ -304,7 +304,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
         status: filterGroup,
-        timelineItem,
         updateTimelineIsLoading,
       }),
     [

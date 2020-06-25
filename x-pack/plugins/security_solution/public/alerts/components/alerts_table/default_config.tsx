@@ -196,7 +196,6 @@ export const getAlertActions = ({
   setEventsDeleted,
   setEventsLoading,
   status,
-  timelineItem,
   updateTimelineIsLoading,
 }: AlertActionArgs): TimelineRowAction[] => {
   const openAlertActionComponent: TimelineRowAction = {

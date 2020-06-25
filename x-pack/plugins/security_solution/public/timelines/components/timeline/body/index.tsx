@@ -30,6 +30,7 @@ import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 import { useManageTimeline } from '../../manage_timeline';
+import { TimelineRowAction } from './actions';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -97,7 +98,14 @@ export const Body = React.memo<BodyProps>(
     const containerElementRef = useRef<HTMLDivElement>(null);
     const { getManageTimelineById } = useManageTimeline();
     const timelineActions = useMemo(
-      () => getManageTimelineById(id).timelineRowActions({ timelineItem: data }),
+      () =>
+        data.reduce((acc: TimelineRowAction[], rowData) => {
+          const rowActions = getManageTimelineById(id).timelineRowActions({
+            ecsData: rowData.ecs,
+            nonEcsData: rowData.data,
+          });
+          return rowActions && rowActions.length > acc.length ? rowActions : acc;
+        }, []),
       [data, getManageTimelineById, id]
     );
 
