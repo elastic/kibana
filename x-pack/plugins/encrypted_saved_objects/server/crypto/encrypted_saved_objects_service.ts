@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Crypto } from '@elastic/node-crypto';
+import { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import typeDetect from 'type-detect';
+import stringify from 'json-stable-stringify';
 import { Logger } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
@@ -80,7 +81,7 @@ export class EncryptedSavedObjectsService {
   > = new Map();
 
   /**
-   * @param Crypto nodeCrypto instance.
+   * @param crypto nodeCrypto instance.
    * @param logger Ordinary logger instance.
    * @param audit Audit logger instance.
    */
@@ -200,20 +201,11 @@ export class EncryptedSavedObjectsService {
     return { attributes: clonedAttributes as T, error: decryptionError };
   }
 
-  /**
-   * Takes saved object attributes for the specified type and encrypts all of them that are supposed
-   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
-   * attributes were encrypted original attributes dictionary is returned.
-   * @param descriptor Descriptor of the saved object to encrypt attributes for.
-   * @param attributes Dictionary of __ALL__ saved object attributes.
-   * @param [params] Additional parameters.
-   * @throws Will throw if encryption fails for whatever reason.
-   */
-  public async encryptAttributes<T extends Record<string, unknown>>(
+  private *attributesToEncryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
     params?: CommonParameters
-  ): Promise<T> {
+  ): Iterator<[unknown, string], T, string> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;
@@ -225,10 +217,7 @@ export class EncryptedSavedObjectsService {
       const attributeValue = attributes[attributeName];
       if (attributeValue != null) {
         try {
-          encryptedAttributes[attributeName] = await this.crypto.encrypt(
-            attributeValue,
-            encryptionAAD
-          );
+          encryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
         } catch (err) {
           this.logger.error(
             `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
@@ -271,6 +260,64 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
+   * Takes saved object attributes for the specified type and encrypts all of them that are supposed
+   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
+   * attributes were encrypted original attributes dictionary is returned.
+   * @param descriptor Descriptor of the saved object to encrypt attributes for.
+   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [params] Additional parameters.
+   * @throws Will throw if encryption fails for whatever reason.
+   */
+  public async encryptAttributes<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    params?: CommonParameters
+  ): Promise<T> {
+    const iterator = this.attributesToEncryptIterator<T>(descriptor, attributes, params);
+
+    let iteratorResult = iterator.next();
+    while (!iteratorResult.done) {
+      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      try {
+        iteratorResult = iterator.next(await this.crypto.encrypt(attributeValue, encryptionAAD));
+      } catch (err) {
+        iterator.throw!(err);
+      }
+    }
+
+    return iteratorResult.value;
+  }
+
+  /**
+   * Takes saved object attributes for the specified type and encrypts all of them that are supposed
+   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
+   * attributes were encrypted original attributes dictionary is returned.
+   * @param descriptor Descriptor of the saved object to encrypt attributes for.
+   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [params] Additional parameters.
+   * @throws Will throw if encryption fails for whatever reason.
+   */
+  public encryptAttributesSync<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    params?: CommonParameters
+  ): T {
+    const iterator = this.attributesToEncryptIterator<T>(descriptor, attributes, params);
+
+    let iteratorResult = iterator.next();
+    while (!iteratorResult.done) {
+      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      try {
+        iteratorResult = iterator.next(this.crypto.encryptSync(attributeValue, encryptionAAD));
+      } catch (err) {
+        iterator.throw!(err);
+      }
+    }
+
+    return iteratorResult.value;
+  }
+
+  /**
    * Takes saved object attributes for the specified type and decrypts all of them that are supposed
    * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
    * attributes were decrypted original attributes dictionary is returned.
@@ -285,13 +332,65 @@ export class EncryptedSavedObjectsService {
     attributes: T,
     params?: CommonParameters
   ): Promise<T> {
+    const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params);
+
+    let iteratorResult = iterator.next();
+    while (!iteratorResult.done) {
+      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      try {
+        iteratorResult = iterator.next(
+          (await this.crypto.decrypt(attributeValue, encryptionAAD)) as string
+        );
+      } catch (err) {
+        iterator.throw!(err);
+      }
+    }
+
+    return iteratorResult.value;
+  }
+
+  /**
+   * Takes saved object attributes for the specified type and decrypts all of them that are supposed
+   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
+   * attributes were decrypted original attributes dictionary is returned.
+   * @param descriptor Descriptor of the saved object to decrypt attributes for.
+   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [params] Additional parameters.
+   * @throws Will throw if decryption fails for whatever reason.
+   * @throws Will throw if any of the attributes to decrypt is not a string.
+   */
+  public decryptAttributesSync<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    params?: CommonParameters
+  ): T {
+    const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params);
+
+    let iteratorResult = iterator.next();
+    while (!iteratorResult.done) {
+      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      try {
+        iteratorResult = iterator.next(this.crypto.decryptSync(attributeValue, encryptionAAD));
+      } catch (err) {
+        iterator.throw!(err);
+      }
+    }
+
+    return iteratorResult.value;
+  }
+
+  private *attributesToDecryptIterator<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    params?: CommonParameters
+  ): Iterator<[string, string], T, EncryptOutput> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;
     }
 
-    const encryptionAAD = getAAD(typeDefinition, descriptor, attributes, this.logger);
-    const decryptedAttributes: Record<string, string> = {};
+    const encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+    const decryptedAttributes: Record<string, EncryptOutput> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue == null) {
@@ -308,10 +407,7 @@ export class EncryptedSavedObjectsService {
       }
 
       try {
-        decryptedAttributes[attributeName] = (await this.crypto.decrypt(
-          attributeValue,
-          encryptionAAD
-        )) as string;
+        decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
       } catch (err) {
         this.logger.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
         this.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);

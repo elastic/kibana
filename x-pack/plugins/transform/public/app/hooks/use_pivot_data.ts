@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import { dictionaryToArray } from '../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../../common/utils/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../shared_imports';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import {

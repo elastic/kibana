@@ -16,8 +16,7 @@ import {
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { setupSavedObjects, ClientInstanciator } from './saved_objects';
-import { EncryptedSavedObjectsMigrationService } from './crypto/encrypted_saved_objects_migration_service';
-import { getCreateMigration, CreateESOMigrationFn } from './create_migration';
+import { getCreateMigration, CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -26,7 +25,7 @@ export interface PluginsSetup {
 export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   usingEphemeralEncryptionKey: boolean;
-  createMigration: CreateESOMigrationFn;
+  createMigration: CreateEncryptedSavedObjectsMigrationFn;
 }
 
 export interface EncryptedSavedObjectsPluginStart {
@@ -56,14 +55,11 @@ export class Plugin {
 
     const crypto = nodeCrypto({ encryptionKey });
 
+    const auditLogger = new EncryptedSavedObjectsAuditLogger(
+      deps.security?.audit.getLogger('encryptedSavedObjects')
+    );
     const service = Object.freeze(
-      new EncryptedSavedObjectsService(
-        crypto,
-        this.logger,
-        new EncryptedSavedObjectsAuditLogger(
-          deps.security?.audit.getLogger('encryptedSavedObjects')
-        )
-      )
+      new EncryptedSavedObjectsService(crypto, this.logger, auditLogger)
     );
 
     this.savedObjectsSetup = setupSavedObjects({
@@ -78,7 +74,16 @@ export class Plugin {
         service.registerType(typeRegistration),
       usingEphemeralEncryptionKey,
       createMigration: getCreateMigration(
-        new EncryptedSavedObjectsMigrationService(crypto, this.logger)
+        service,
+        (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
+          const serviceForMigration = new EncryptedSavedObjectsService(
+            crypto,
+            this.logger,
+            auditLogger
+          );
+          serviceForMigration.registerType(typeRegistration);
+          return serviceForMigration;
+        }
       ),
     };
   }
