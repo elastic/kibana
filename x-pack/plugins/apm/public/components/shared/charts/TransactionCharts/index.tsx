@@ -24,10 +24,10 @@ import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
-  asInteger,
   tpmUnit,
   TimeFormatter,
   getDurationFormatter,
+  asDecimal,
 } from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
@@ -86,7 +86,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   public getTPMFormatter = (t: number) => {
     const { urlParams } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return `${asInteger(t)} ${unit}`;
+    return `${asDecimal(t)} ${unit}`;
   };
 
   public getTPMTooltipFormatter = (p: Coordinate) => {
@@ -120,7 +120,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
           'xpack.apm.metrics.transactionChart.machineLearningTooltip',
           {
             defaultMessage:
-              'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores >= 75.',
+              'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores ≥ 75.',
           }
         )}
       />

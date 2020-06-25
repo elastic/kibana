@@ -657,6 +657,8 @@ export interface CoreStart {
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
+    http: HttpServiceStart;
+    // (undocumented)
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
@@ -905,6 +907,12 @@ export type Headers = {
     [header: string]: string | string[] | undefined;
 };
 
+// @public (undocumented)
+export interface HttpAuth {
+    get: GetAuthState;
+    isAuthenticated: IsAuthenticated;
+}
+
 // @public
 export interface HttpResources {
     register: <P, Q, B>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B>) => void;
@@ -948,17 +956,13 @@ export interface HttpServerInfo {
 
 // @public
 export interface HttpServiceSetup {
-    // (undocumented)
-    auth: {
-        get: GetAuthState;
-        isAuthenticated: IsAuthenticated;
-    };
+    // @deprecated
+    auth: HttpAuth;
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
     csp: ICspConfig;
     getServerInfo: () => HttpServerInfo;
-    isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
@@ -968,7 +972,9 @@ export interface HttpServiceSetup {
 
 // @public (undocumented)
 export interface HttpServiceStart {
-    isListening: (port: number) => boolean;
+    auth: HttpAuth;
+    basePath: IBasePath;
+    getServerInfo: () => HttpServerInfo;
 }
 
 // @public
@@ -1520,6 +1526,8 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
 // @public
 export interface PluginManifest {
     readonly configPath: ConfigPath;
+    // @deprecated
+    readonly extraPublicDirs?: string[];
     readonly id: PluginName;
     readonly kibanaVersion: string;
     readonly optionalPlugins: readonly PluginName[];
@@ -2037,9 +2045,14 @@ export interface SavedObjectsFindResponse<T = unknown> {
     // (undocumented)
     per_page: number;
     // (undocumented)
-    saved_objects: Array<SavedObject<T>>;
+    saved_objects: Array<SavedObjectsFindResult<T>>;
     // (undocumented)
     total: number;
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
+    score: number;
 }
 
 // @public
@@ -2549,8 +2562,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:166:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:167:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:232:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:238:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:238:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:240:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

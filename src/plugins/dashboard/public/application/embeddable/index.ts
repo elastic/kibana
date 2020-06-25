@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export { DashboardContainerFactory } from './dashboard_container_factory';
+export {
+  DashboardContainerFactoryDefinition,
+  DashboardContainerFactory,
+} from './dashboard_container_factory';
 export { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 export { createPanelState } from './panel';
 
@@ -29,3 +32,5 @@ export {
   DEFAULT_PANEL_WIDTH,
   DASHBOARD_CONTAINER_TYPE,
 } from './dashboard_constants';
+
+export { createDashboardContainerByValueRenderer } from './dashboard_container_by_value_renderer';

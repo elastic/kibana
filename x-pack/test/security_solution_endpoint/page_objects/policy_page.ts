@@ -20,6 +20,32 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
+     * Finds and returns the Policy Details Page Save button
+     */
+    async findFirstActionsButton() {
+      await this.ensureIsOnPolicyPage();
+      return (await testSubjects.findAll('policyActionsButton'))[0];
+    },
+
+    /**
+     * Finds and returns the Policy Details Page Save button
+     */
+    async launchAndFindDeleteModal() {
+      const actionsButton = await this.findFirstActionsButton();
+      await actionsButton.click();
+      const deleteAction = await testSubjects.find('policyDeleteButton');
+      await deleteAction.click();
+      return await testSubjects.find('policyListDeleteModal');
+    },
+
+    /**
+     * ensures that the Policy Page is the currently display view
+     */
+    async ensureIsOnPolicyPage() {
+      await testSubjects.existOrFail('policyListPage');
+    },
+
+    /**
      * Navigates to the Endpoint Policy Details page
      *
      * @param policyId
@@ -54,6 +80,26 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       await (await this.findSaveButton()).click();
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();
+    },
+
+    /**
+     * Finds and returns the Create New policy Policy button displayed on the List page
+     */
+    async findHeaderCreateNewButton() {
+      // The Create button is initially disabled because we need to first make a call to Ingest
+      // to retrieve the package version, so that the redirect works as expected. So, we wait
+      // for that to occur here a well.
+      await testSubjects.waitForEnabled('headerCreateNewPolicyButton');
+      return await testSubjects.find('headerCreateNewPolicyButton');
+    },
+
+    /**
+     * Used when looking a the Ingest create/edit datasource pages. Finds the endpoint
+     * custom configuaration component
+     * @param onEditPage
+     */
+    async findDatasourceEndpointCustomConfiguration(onEditPage: boolean = false) {
+      return await testSubjects.find(`endpointDatasourceConfig_${onEditPage ? 'edit' : 'create'}`);
     },
   };
 }
