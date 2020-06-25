@@ -54,7 +54,7 @@ import {
   AgentService,
   datasourceService,
 } from './services';
-import { getAgentStatusById } from './services/agents';
+import { getAgentStatusById, authenticateAgentWithAccessToken } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 
@@ -256,6 +256,7 @@ export class IngestManagerPlugin
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
         getAgentStatusById,
+        authenticateAgentWithAccessToken,
       },
       datasourceService,
       registerExternalCallback: (...args: ExternalCallback) => {
