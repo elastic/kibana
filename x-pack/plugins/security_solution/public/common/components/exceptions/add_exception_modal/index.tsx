@@ -47,7 +47,7 @@ export interface AddExceptionOnClick {
   ruleName: string;
   ruleExceptionLists: ExceptionListSchema[];
   exceptionListType: ExceptionListSchema['type'];
-  alertData: TimelineNonEcsData[] | null;
+  alertData: TimelineNonEcsData[] | null; // TODO: this can also be undefined
 }
 
 // TODO: What's the different between ECS data and Non ECS data
@@ -187,8 +187,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [formatComment()])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      // TODO: dont hardcode 'windows'
-      enriched = enrichExceptionItemsWithOS(enriched, ['windows']);
+      const osTags = alertData ? ['windows'] : ['windows', 'macos', 'linux']; // TODO: use alert data instead
+      enriched = enrichExceptionItemsWithOS(enriched, osTags);
     }
 
     // TODO: delete this. Namespace should be handled by the builder
@@ -196,7 +196,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       enriched,
       exceptionListType === 'endpoint' ? 'agnostic' : 'single'
     );
-  }, [comment, exceptionItemsToAdd, formatComment, exceptionListType]);
+  }, [comment, exceptionItemsToAdd, formatComment, exceptionListType, alertData]);
 
   const onAddExceptionConfirm = useCallback(() => {
     console.log(enrichExceptionItems());
