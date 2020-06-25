@@ -5,20 +5,23 @@
  */
 import React from 'react';
 
-import { Forms } from '../../../../shared_imports';
-import { documentationService } from '../../../services/documentation';
-import { StepMappings } from '../../shared';
-import { WizardContent } from '../template_form';
+import { Forms } from '../../../../../shared_imports';
+import { CommonWizardSteps } from './types';
+import { StepMappings } from './step_mappings';
 
-export const StepMappingsContainer = () => {
-  const { defaultValue, updateContent, getData } = Forms.useContent<WizardContent>('mappings');
+interface Props {
+  esDocsBase: string;
+}
+
+export const StepMappingsContainer: React.FunctionComponent<Props> = ({ esDocsBase }) => {
+  const { defaultValue, updateContent, getData } = Forms.useContent<CommonWizardSteps>('mappings');
 
   return (
     <StepMappings
       defaultValue={defaultValue}
       onChange={updateContent}
       indexSettings={getData().settings}
-      esDocsBase={documentationService.getEsDocsBase()}
+      esDocsBase={esDocsBase}
     />
   );
 };
