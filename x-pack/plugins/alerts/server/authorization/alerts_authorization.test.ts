@@ -68,8 +68,71 @@ function mockFeature(appName: string, typeName?: string) {
   });
 }
 
+function mockFeatureWithSubFeature(appName: string, typeName: string) {
+  return new Feature({
+    id: appName,
+    name: appName,
+    app: [],
+    privileges: {
+      all: {
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+      read: {
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+    subFeatures: [
+      {
+        name: appName,
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'doSomethingAlertRelated',
+                name: 'sub feature alert',
+                includeIn: 'all',
+                alerting: {
+                  all: [typeName],
+                },
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: ['doSomethingAlertRelated'],
+              },
+              {
+                id: 'doSomethingAlertRelated',
+                name: 'sub feature alert',
+                includeIn: 'read',
+                alerting: {
+                  read: [typeName],
+                },
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: ['doSomethingAlertRelated'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+}
+
 const myAppFeature = mockFeature('myApp', 'myType');
 const myOtherAppFeature = mockFeature('myOtherApp', 'myType');
+const myAppWithSubFeature = mockFeatureWithSubFeature('myAppWithSubFeature', 'myType');
 const myFeatureWithoutAlerting = mockFeature('myOtherApp');
 
 beforeEach(() => {
@@ -91,7 +154,12 @@ beforeEach(() => {
     async executor() {},
     producer: 'myApp',
   }));
-  features.getFeatures.mockReturnValue([myAppFeature, myOtherAppFeature, myFeatureWithoutAlerting]);
+  features.getFeatures.mockReturnValue([
+    myAppFeature,
+    myOtherAppFeature,
+    myAppWithSubFeature,
+    myFeatureWithoutAlerting,
+  ]);
 });
 
 describe('ensureAuthorized', () => {
@@ -460,7 +528,7 @@ describe('getFindAuthorizationFilter', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchInlineSnapshot(
-      `"((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp)) or (alert.attributes.alertTypeId:alertingAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp)))"`
+      `"((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:alertingAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))"`
     );
 
     expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -639,6 +707,7 @@ describe('filterByAlertTypeAuthorization', () => {
                   "alerts",
                   "myApp",
                   "myOtherApp",
+                  "myAppWithSubFeature",
                 ],
                 "defaultActionGroupId": "default",
                 "id": "myAppAlertType",
@@ -652,6 +721,7 @@ describe('filterByAlertTypeAuthorization', () => {
                   "alerts",
                   "myApp",
                   "myOtherApp",
+                  "myAppWithSubFeature",
                 ],
                 "defaultActionGroupId": "default",
                 "id": "alertingAlertType",

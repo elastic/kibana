@@ -11,6 +11,7 @@ import { ALERTS_FEATURE_ID } from '../../common';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
+import { FeatureKibanaPrivileges, SubFeaturePrivilegeConfig } from '../../../features/common';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 
@@ -189,12 +190,17 @@ export class AlertsAuthorization {
     const featuresIds = this.features
       .getFeatures()
       // ignore features which don't grant privileges to alerting
-      .filter(({ privileges }) => {
+      .filter(({ privileges, subFeatures }) => {
         return (
-          (privileges?.all.alerting?.all?.length ?? 0 > 0) ||
-          (privileges?.all.alerting?.read?.length ?? 0 > 0) ||
-          (privileges?.read.alerting?.all?.length ?? 0 > 0) ||
-          (privileges?.read.alerting?.read?.length ?? 0 > 0)
+          hasAnyAlertingPrivileges(privileges?.all) ||
+          hasAnyAlertingPrivileges(privileges?.read) ||
+          subFeatures.some((subFeature) =>
+            subFeature.privilegeGroups.some((privilegeGroup) =>
+              privilegeGroup.privileges.some((subPrivileges) =>
+                hasAnyAlertingPrivileges(subPrivileges)
+              )
+            )
+          )
         );
       })
       .map((feature) => feature.id);
@@ -293,4 +299,12 @@ export function ensureFieldIsSafeForQuery(field: string, value: string): boolean
     throw new Error(`expected ${field} not to include ${errors.join(' and ')}`);
   }
   return true;
+}
+
+function hasAnyAlertingPrivileges(
+  privileges?: FeatureKibanaPrivileges | SubFeaturePrivilegeConfig
+): boolean {
+  return (
+    ((privileges?.alerting?.all?.length ?? 0) || (privileges?.alerting?.read?.length ?? 0)) > 0
+  );
 }
