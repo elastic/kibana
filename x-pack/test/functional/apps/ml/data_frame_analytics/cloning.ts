@@ -160,6 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(await ml.dataFrameAnalyticsCreation.getHeaderText()).to.match(
             /Clone analytics job/
           );
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
         it('should have correct init form values for config step', async () => {

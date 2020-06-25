@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('selects the source data and loads the job wizard page', async () => {
           await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
         it('selects the job type', async () => {
@@ -81,6 +82,14 @@ export default function ({ getService }: FtrProviderContext) {
         it('inputs the training percent', async () => {
           await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputExists();
           await ml.dataFrameAnalyticsCreation.setTrainingPercent(testData.trainingPercent);
+        });
+
+        it('displays the source data preview', async () => {
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
+        });
+
+        it('displays the exclude fields selection', async () => {
+          await ml.dataFrameAnalyticsCreation.assertExcludeFieldsSelectionExists();
         });
 
         it('continues to the additional options step', async () => {

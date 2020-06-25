@@ -124,6 +124,14 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertJobDescriptionValue(jobDescription);
     },
 
+    async assertSourceDataPreviewExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreationDataGrid loaded', { timeout: 5000 });
+    },
+
+    async assertExcludeFieldsSelectionExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardExcludesSelect', { timeout: 5000 });
+    },
+
     // async assertExcludedFieldsSelection(expectedSelection: string[]) {
     //   const actualSelection = await comboBox.getComboBoxSelectedOptions(
     //     'mlAnalyticsCreateJobWizardExcludesSelect'
@@ -252,19 +260,35 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertTrainingPercentValue(trainingPercent);
     },
 
+    async assertConfigurationStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardConfigurationStep active');
+    },
+
+    async assertAdditionalOptionsStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep active');
+    },
+
+    async assertDetailsStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep active');
+    },
+
+    async assertCreateStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep active');
+    },
+
     async continueToAdditionalOptionsStep() {
-      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep');
+      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await this.assertAdditionalOptionsStepActive();
     },
 
     async continueToDetailsStep() {
-      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep');
+      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await this.assertDetailsStepActive();
     },
 
     async continueToCreateStep() {
-      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep');
+      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await this.assertCreateStepActive();
     },
 
     async assertModelMemoryInputExists() {
@@ -372,6 +396,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await this.assertDependentVariableSelection([job.analysis[jobType].dependent_variable]);
         await this.assertTrainingPercentValue(String(job.analysis[jobType].training_percent));
       }
+      await this.assertSourceDataPreviewExists();
+      await this.assertExcludeFieldsSelectionExists();
       // await this.assertExcludedFieldsSelection(job.analyzed_fields.excludes);
     },
 
