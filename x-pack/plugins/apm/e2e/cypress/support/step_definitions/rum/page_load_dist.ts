@@ -18,21 +18,14 @@ Given(`a user click page load breakdown filter`, () => {
 });
 
 When(`the user selected the breakdown`, () => {
-  cy.get('[data-cy=filter-breakdown-item_DE]').click();
+  cy.get('[data-cy=filter-breakdown-item_Browser]').click();
   // click outside popover to close it
   cy.get('[data-cy=pageLoadDist]').click();
 });
 
 Then(`breakdown series should appear in chart`, () => {
   cy.get('.euiLoadingChart').should('not.be.visible');
-  cy.get('div.echLegendItem__label[title=DE] ')
+  cy.get('div.echLegendItem__label[title=Chrome] ')
     .invoke('text')
-    .should('eq', 'DE');
-});
-
-Then(`breakdown series should appear in chart`, () => {
-  cy.get('.euiLoadingChart').should('not.be.visible');
-  cy.get('div.echLegendItem__label[title=DE] ')
-    .invoke('text')
-    .should('eq', 'DE');
+    .should('eq', 'Chrome');
 });
