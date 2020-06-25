@@ -67,7 +67,6 @@ export const allTimelinesQuery = gql`
         pinnedEventIds
         status
         title
-        status
         timelineType
         templateTimelineId
         templateTimelineVersion

@@ -36,6 +36,34 @@ export const JIRA_PROJECT_KEY_REQUIRED = i18n.translate(
   }
 );
 
+export const JIRA_EMAIL_LABEL = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.emailTextFieldLabel',
+  {
+    defaultMessage: 'Email or Username',
+  }
+);
+
+export const JIRA_EMAIL_REQUIRED = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.requiredEmailTextField',
+  {
+    defaultMessage: 'Email or Username is required',
+  }
+);
+
+export const JIRA_API_TOKEN_LABEL = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.apiTokenTextFieldLabel',
+  {
+    defaultMessage: 'API token or Password',
+  }
+);
+
+export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.requiredApiTokenTextField',
+  {
+    defaultMessage: 'API token or Password is required',
+  }
+);
+
 export const MAPPING_FIELD_SUMMARY = i18n.translate(
   'xpack.securitySolution.case.configureCases.mappingFieldSummary',
   {
