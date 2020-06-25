@@ -8,8 +8,6 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 // @ts-ignore
 import { SavedObjectsClientContract } from 'src/core/server';
 import { getMapsTelemetry } from '../maps_telemetry';
-// @ts-ignore
-import { TELEMETRY_TYPE } from '../../../../../../plugins/maps/common/constants';
 
 export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -21,7 +19,7 @@ export function registerMapsUsageCollector(
   }
 
   const mapsUsageCollector = usageCollection.makeUsageCollector({
-    type: TELEMETRY_TYPE,
+    type: 'maps',
     isReady: () => true,
     fetch: async () => await getMapsTelemetry(savedObjectsClient, config),
   });
