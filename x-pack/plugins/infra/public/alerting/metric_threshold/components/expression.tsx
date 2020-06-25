@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce, pick, omit } from 'lodash';
+import { debounce, pick } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
@@ -222,6 +222,13 @@ export const Expressions: React.FC<Props> = (props) => {
       );
     }
   }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
+
+  const preFillAlertGroupBy = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.currentOptions?.groupBy && !md.series) {
+      setAlertParams('groupBy', md.currentOptions.groupBy);
+    }
+  }, [alertsContext.metadata, setAlertParams]);
 
   useEffect(() => {
     if (alertParams.criteria && alertParams.criteria.length) {
