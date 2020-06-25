@@ -154,6 +154,7 @@ export function __kbnBootstrap__(): void;
 export interface App<HistoryLocationState = unknown> extends AppBase {
     appRoute?: string;
     chromeless?: boolean;
+    exactRoute?: boolean;
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
 }
 
@@ -466,6 +467,7 @@ export interface ChromeStart {
     getBadge$(): Observable<ChromeBadge | undefined>;
     getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+    getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
@@ -478,6 +480,7 @@ export interface ChromeStart {
     setBadge(badge?: ChromeBadge): void;
     setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+    setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
     setHelpSupportUrl(url: string): void;
     setIsVisible(isVisible: boolean): void;
@@ -507,8 +510,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     application: ApplicationSetup;
     // @deprecated (undocumented)
     context: ContextSetup;
-    // (undocumented)
-    docLinks: DocLinksSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
@@ -562,7 +563,9 @@ export class CoreSystem {
         fatalErrors: FatalErrorsSetup;
     } | undefined>;
     // (undocumented)
-    start(): Promise<void>;
+    start(): Promise<{
+        application: InternalApplicationStart;
+    } | undefined>;
     // (undocumented)
     stop(): void;
     }
@@ -598,13 +601,16 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
 }>;
 
 // @public (undocumented)
-export interface DocLinksSetup {
+export interface DocLinksStart {
     // (undocumented)
     readonly DOC_LINK_VERSION: string;
     // (undocumented)
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly dashboard: {
+            readonly drilldowns: string;
+        };
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -691,9 +697,6 @@ export interface DocLinksSetup {
         readonly management: Record<string, string>;
     };
 }
-
-// @public (undocumented)
-export type DocLinksStart = DocLinksSetup;
 
 // @public (undocumented)
 export interface EnvironmentMode {
@@ -1586,5 +1589,9 @@ export interface UserProvidedValues<T = any> {
     userValue?: T;
 }
 
+
+// Warnings were encountered during analysis:
+//
+// src/core/public/core_system.ts:215:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

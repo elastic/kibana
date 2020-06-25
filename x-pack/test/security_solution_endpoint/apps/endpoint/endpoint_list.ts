@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { deleteMetadataStream } from '../../../api_integration/apis/endpoint/data_stream_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
@@ -17,11 +18,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     before(async () => {
-      await esArchiver.load('endpoint/metadata/api_feature');
+      await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
       await pageObjects.endpoint.navigateToEndpointList();
     });
 
-    it('finds title', async () => {
+    it('finds page title', async () => {
       const title = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
       expect(title).to.equal('Endpoints');
     });
@@ -77,54 +78,61 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(tableData).to.eql(expectedData);
     });
 
-    it('no details flyout when endpoint page displayed', async () => {
+    it('does not show the details flyout initially', async () => {
       await testSubjects.missingOrFail('hostDetailsFlyout');
     });
 
-    it('display details flyout when the hostname is clicked on', async () => {
-      await (await testSubjects.find('hostnameCellLink')).click();
-      await testSubjects.existOrFail('hostDetailsUpperList');
-      await testSubjects.existOrFail('hostDetailsLowerList');
+    describe('when the hostname is clicked on,', () => {
+      it('display the details flyout', async () => {
+        await (await testSubjects.find('hostnameCellLink')).click();
+        await testSubjects.existOrFail('hostDetailsUpperList');
+        await testSubjects.existOrFail('hostDetailsLowerList');
+      });
+
+      it('updates the details flyout when a new hostname is selected from the list', async () => {
+        // display flyout for the first host in the list
+        await (await testSubjects.findAll('hostnameCellLink'))[0].click();
+        await testSubjects.existOrFail('hostDetailsFlyoutTitle');
+        const hostDetailTitle0 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+        // select the 2nd host in the host list
+        await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+        await pageObjects.endpoint.waitForVisibleTextToChange(
+          'hostDetailsFlyoutTitle',
+          hostDetailTitle0
+        );
+        const hostDetailTitle1 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+        expect(hostDetailTitle1).to.not.eql(hostDetailTitle0);
+      });
+
+      it('has the same flyout info when the same hostname is selected', async () => {
+        // display flyout for the first host in the list
+        await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+        await testSubjects.existOrFail('hostDetailsFlyoutTitle');
+        const hostDetailTitleInitial = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+        // select the same host in the host list
+        await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+        await sleep(500); // give page time to refresh and verify it did not change
+        const hostDetailTitleNew = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+        expect(hostDetailTitleNew).to.equal(hostDetailTitleInitial);
+      });
+
+      it('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
+        await (await testSubjects.find('hostDetailsLinkToIngest')).click();
+        await testSubjects.existOrFail('fleetAgentListTable');
+      });
     });
 
-    it('update details flyout when new hostname is clicked on', async () => {
-      // display flyout for the first host in the list
-      await (await testSubjects.findAll('hostnameCellLink'))[0].click();
-      await testSubjects.existOrFail('hostDetailsFlyoutTitle');
-      const hostDetailTitle0 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
-      // select the 2nd host in the host list
-      await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-      await pageObjects.endpoint.waitForVisibleTextToChange(
-        'hostDetailsFlyoutTitle',
-        hostDetailTitle0
-      );
-      const hostDetailTitle1 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
-      expect(hostDetailTitle1).to.not.eql(hostDetailTitle0);
-    });
-
-    it('details flyout remains the same when current hostname is clicked on', async () => {
-      // display flyout for the first host in the list
-      await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-      await testSubjects.existOrFail('hostDetailsFlyoutTitle');
-      const hostDetailTitleInitial = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
-      // select the same host in the host list
-      await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-      await sleep(500); // give page time to refresh and verify it did not change
-      const hostDetailTitleNew = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
-      expect(hostDetailTitleNew).to.equal(hostDetailTitleInitial);
-    });
-
-    describe('no data', () => {
+    describe('when there is no data,', () => {
       before(async () => {
         // clear out the data and reload the page
-        await esArchiver.unload('endpoint/metadata/api_feature');
+        await deleteMetadataStream(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         // reload the data so the other tests continue to pass
-        await esArchiver.load('endpoint/metadata/api_feature');
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
       });
-      it('displays no items found when empty', async () => {
+      it('displays No items found when empty', async () => {
         // get the endpoint list table data and verify message
         const [, [noItemsFoundMessage]] = await pageObjects.endpointPageUtils.tableData(
           'hostListTable'
@@ -166,7 +174,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'Windows 10',
           '',
           '0',
-          '00000000-0000-0000-0000-000000000000',
+          'Default',
           'Unknown',
           '10.101.149.262606:a000:ffc0:39:11ef:37b9:3371:578c',
           'rezzani-7.example.com',
@@ -175,7 +183,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
     after(async () => {
-      await esArchiver.unload('endpoint/metadata/api_feature');
+      await deleteMetadataStream(getService);
     });
   });
 };

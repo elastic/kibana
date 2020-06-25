@@ -8,7 +8,7 @@ import { IClusterClient, Logger } from 'kibana/server';
 import { RawKibanaPrivileges } from '../../common/model';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (
@@ -130,7 +130,7 @@ const registerPrivilegesWithClusterTest = (
         }
       }
     });
-    const mockLogger = loggingServiceMock.create().get() as jest.Mocked<Logger>;
+    const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
     let error;
     try {

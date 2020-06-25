@@ -33,7 +33,7 @@ import {
   DataFrameAnalyticsListRow,
   DataFrameAnalyticsStats,
 } from './common';
-import { getActions, AnalyticsViewAction } from './actions';
+import { getActions } from './actions';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -148,8 +148,7 @@ export const getColumns = (
   isMlEnabledInSpace: boolean = true,
   createAnalyticsForm?: CreateAnalyticsFormProps
 ) => {
-  const actions =
-    isManagementTable === true ? [AnalyticsViewAction] : getActions(createAnalyticsForm!);
+  const actions = getActions(createAnalyticsForm!, isManagementTable);
 
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);

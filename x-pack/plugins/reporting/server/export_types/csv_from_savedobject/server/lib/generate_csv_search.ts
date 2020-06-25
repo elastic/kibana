@@ -156,7 +156,7 @@ export async function generateCsvSearch(
   };
 
   const config = reporting.getConfig();
-  const elasticsearch = await reporting.getElasticsearchService();
+  const elasticsearch = reporting.getElasticsearchService();
   const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(req);
   const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
   const uiSettings = await getUiSettings(uiConfig);

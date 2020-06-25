@@ -10,15 +10,13 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '../../../../src/core/public';
-import { RegisterDataHandler, registerDataHandler } from './data_handler';
+import { registerDataHandler } from './data_handler';
 
 export interface ObservabilityPluginSetup {
-  dashboard: { register: RegisterDataHandler };
+  dashboard: { register: typeof registerDataHandler };
 }
 
-export type ObservabilityPluginStart = void;
-
-export class Plugin implements PluginClass<ObservabilityPluginSetup, ObservabilityPluginStart> {
+export class Plugin implements PluginClass<ObservabilityPluginSetup> {
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {

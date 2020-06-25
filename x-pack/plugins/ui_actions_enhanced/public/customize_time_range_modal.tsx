@@ -101,7 +101,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
-        <EuiModalBody>
+        <EuiModalBody data-test-subj="customizePanelBody">
           <EuiFormRow
             label={i18n.translate(
               'xpack.uiActionsEnhanced.customizePanelTimeRange.modal.optionsMenuForm.panelTitleFormRowLabel',
@@ -126,10 +126,11 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
                   };
                 }
               )}
+              data-test-subj="customizePanelTimeRangeDatePicker"
             />
           </EuiFormRow>
         </EuiModalBody>
-        <EuiModalFooter>
+        <EuiModalFooter data-test-subj="customizePanelFooter">
           <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="spaceBetween">
             <EuiFlexItem grow={true}>
               <div>

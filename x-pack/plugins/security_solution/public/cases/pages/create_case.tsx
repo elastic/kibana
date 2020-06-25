@@ -5,8 +5,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
+import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { WrapperPage } from '../../common/components/wrapper_page';
@@ -18,6 +19,7 @@ import { Create } from '../components/create';
 import * as i18n from './translations';
 
 export const CreateCasePage = React.memo(() => {
+  const history = useHistory();
   const userPermissions = useGetUserSavedObjectPermissions();
   const search = useGetUrlSearch(navTabs.case);
 
@@ -25,12 +27,14 @@ export const CreateCasePage = React.memo(() => {
     () => ({
       href: getCaseUrl(search),
       text: i18n.BACK_TO_ALL,
+      pageId: SecurityPageName.case,
     }),
     [search]
   );
 
   if (userPermissions != null && !userPermissions.crud) {
-    return <Redirect to={getCaseUrl(search)} />;
+    history.replace(getCaseUrl(search));
+    return null;
   }
 
   return (
@@ -39,7 +43,7 @@ export const CreateCasePage = React.memo(() => {
         <CaseHeaderPage backOptions={backOptions} title={i18n.CREATE_TITLE} />
         <Create />
       </WrapperPage>
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.case} />
     </>
   );
 });
