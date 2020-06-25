@@ -20,6 +20,7 @@
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectAttributes } from 'src/core/public';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
 import {
@@ -36,11 +37,12 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from '.';
-import { TypeMeta } from '.';
 import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
+import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
+import { SerializedFieldFormat } from '../../../../expressions/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -60,10 +62,9 @@ export class IndexPattern implements IIndexPattern {
 
   public id?: string;
   public title: string = '';
-  public type?: string;
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
-  public fields: IIndexPatternFieldList;
+  public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -74,7 +75,7 @@ export class IndexPattern implements IIndexPattern {
   private savedObjectsClient: SavedObjectsClientContract;
   private patternCache: PatternCache;
   private getConfig: any;
-  private sourceFilters?: [];
+  private sourceFilters?: SourceFilter[];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
@@ -196,6 +197,35 @@ export class IndexPattern implements IIndexPattern {
     this.initFields();
   }
 
+  public initFromSpec(spec: IndexPatternSpec) {
+    // create fieldFormatMap from field list
+    const fieldFormatMap: Record<string, SerializedFieldFormat> = {};
+    if (_.isArray(spec.fields)) {
+      spec.fields.forEach((field: FieldSpec) => {
+        if (field.format) {
+          fieldFormatMap[field.name as string] = { ...field.format };
+        }
+      });
+    }
+
+    this.version = spec.version;
+
+    this.title = spec.title || '';
+    this.timeFieldName = spec.timeFieldName;
+    this.sourceFilters = spec.sourceFilters;
+
+    // ignoring this because the same thing happens elsewhere but via _.assign
+    // @ts-ignore
+    this.fields = spec.fields || [];
+    this.typeMeta = spec.typeMeta;
+    this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
+      return this.deserializeFieldFormatMap(mapping);
+    });
+
+    this.initFields();
+    return this;
+  }
+
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
       throw new SavedObjectNotFound(type, this.id, 'management/kibana/indexPatterns');
@@ -206,15 +236,16 @@ export class IndexPattern implements IIndexPattern {
         return;
       }
 
-      response._source[name] = fieldMapping._deserialize(response._source[name]);
+      response[name] = fieldMapping._deserialize(response[name]);
     });
 
-    // give index pattern all of the values in _source
-    _.assign(this, response._source);
+    // give index pattern all of the values
+    _.assign(this, response);
 
     if (!this.title && this.id) {
       this.title = this.id;
     }
+    this.version = response.version;
 
     return this.indexFields(forceFieldRefresh);
   }
@@ -266,13 +297,11 @@ export class IndexPattern implements IIndexPattern {
     }
 
     const savedObject = await this.savedObjectsClient.get(type, this.id);
-    this.version = savedObject._version;
 
     const response = {
-      _id: savedObject.id,
-      _type: savedObject.type,
-      _source: _.cloneDeep(savedObject.attributes),
+      version: savedObject._version,
       found: savedObject._version ? true : false,
+      ...(_.cloneDeep(savedObject.attributes) as SavedObjectAttributes),
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
@@ -281,6 +310,19 @@ export class IndexPattern implements IIndexPattern {
     this.originalBody = this.prepBody();
 
     return this;
+  }
+
+  public toSpec(): IndexPatternSpec {
+    return {
+      id: this.id,
+      version: this.version,
+
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      sourceFilters: this.sourceFilters,
+      fields: this.fields.toSpec(),
+      typeMeta: this.typeMeta,
+    };
   }
 
   // Get the source filtering configuration for that index.
