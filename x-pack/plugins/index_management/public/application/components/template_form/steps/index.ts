@@ -5,7 +5,4 @@
  */
 
 export { StepLogisticsContainer } from './step_logistics_container';
-export { StepAliasesContainer } from './step_aliases_container';
-export { StepMappingsContainer } from './step_mappings_container';
-export { StepSettingsContainer } from './step_settings_container';
 export { StepReviewContainer } from './step_review_container';
