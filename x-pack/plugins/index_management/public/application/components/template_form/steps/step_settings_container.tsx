@@ -6,11 +6,18 @@
 import React from 'react';
 
 import { Forms } from '../../../../shared_imports';
+import { documentationService } from '../../../services/documentation';
+import { StepSettings } from '../../shared';
 import { WizardContent } from '../template_form';
-import { StepSettings } from './step_settings';
 
 export const StepSettingsContainer = React.memo(() => {
   const { defaultValue, updateContent } = Forms.useContent<WizardContent>('settings');
 
-  return <StepSettings defaultValue={defaultValue} onChange={updateContent} />;
+  return (
+    <StepSettings
+      defaultValue={defaultValue}
+      onChange={updateContent}
+      esDocsBase={documentationService.getEsDocsBase()}
+    />
+  );
 });
