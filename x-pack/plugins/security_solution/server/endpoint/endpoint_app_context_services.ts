@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
-import { handleDatasourceCreate } from './ingest_integration';
+import { getDatasourceCreateCallback } from './ingest_integration';
 
 export type EndpointAppContextServiceStartContract = Pick<
   IngestManagerStartContract,
@@ -24,7 +24,10 @@ export class EndpointAppContextService {
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
     this.manifestManager = dependencies.manifestManager;
-    dependencies.registerIngestCallback('datasourceCreate', handleDatasourceCreate);
+    dependencies.registerIngestCallback(
+      'datasourceCreate',
+      getDatasourceCreateCallback(this.manifestManager)
+    );
   }
 
   public stop() {}

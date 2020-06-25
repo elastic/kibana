@@ -251,6 +251,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         savedObjectsClient,
         artifactClient,
         exceptionListClient,
+        datasourceService: plugins.ingestManager.datasourceService,
         logger: this.logger,
         cache: this.exceptionsCache,
       });
@@ -261,6 +262,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       manifestManager,
       registerIngestCallback: plugins.ingestManager.registerExternalCallback,
     });
+
+    if (this.exceptionsPackagerTask) {
+      this.exceptionsPackagerTask
+        .getTaskRunner({
+          taskManager: plugins.taskManager,
+        })
+        .run();
+    } else {
+      this.logger.debug('Exceptions Packager not available.');
+    }
 
     return {};
   }

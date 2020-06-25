@@ -59,11 +59,14 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
     }
 
     try {
-      // TODO: change this to 'false' when we hook up the ingestManager callback
-      await manifestManager.refresh(true);
+      const manifestState = await manifestManager.refresh();
+      if (manifestState != null) {
+        if (await manifestManager.dispatch(manifestState)) {
+          await manifestManager.commit(manifestState);
+        }
+      }
     } catch (err) {
       logger.error(err);
-      logger.debug('Manifest not created yet, nothing to do.');
     }
   };
 
