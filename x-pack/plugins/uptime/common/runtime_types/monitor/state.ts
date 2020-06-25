@@ -7,16 +7,6 @@
 import * as t from 'io-ts';
 import { PingType } from '../ping/ping';
 
-export const CheckMonitorType = t.intersection([
-  t.partial({
-    name: t.string,
-    ip: t.union([t.array(t.union([t.string, t.null])), t.string, t.null]),
-  }),
-  t.type({
-    status: t.string,
-  }),
-]);
-
 export const StateType = t.intersection([
   t.type({
     timestamp: t.string,
@@ -32,6 +22,9 @@ export const StateType = t.intersection([
       status: t.string,
       up: t.number,
       down: t.number,
+    }),
+    monitor: t.partial({
+      name: t.string,
     }),
   }),
   t.partial({

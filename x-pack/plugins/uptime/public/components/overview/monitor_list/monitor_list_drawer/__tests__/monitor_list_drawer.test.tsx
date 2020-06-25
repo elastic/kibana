@@ -17,6 +17,7 @@ describe('MonitorListDrawer component', () => {
     summary = {
       monitor_id: 'foo',
       state: {
+        monitor: {},
         summaryPings: [
           makePing({
             docId: 'foo',

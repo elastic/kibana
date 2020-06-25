@@ -43,6 +43,7 @@ export class MonitorSummaryIterator {
   bufferPos: number;
   searchAfter: any;
   chunkFetcher: ChunkFetcher;
+  endOfResults: boolean; // true if we've hit the end of results from ES
 
   constructor(
     queryContext: QueryContext,
@@ -55,11 +56,12 @@ export class MonitorSummaryIterator {
     this.bufferPos = initialBufferPos;
     this.searchAfter = queryContext.pagination.cursorKey;
     this.chunkFetcher = chunkFetcher;
+    this.endOfResults = false;
   }
 
   // Fetch the next matching result.
   async next(): Promise<MonitorSummary | null> {
-    await this.bufferNext(CHUNK_SIZE);
+    await this.bufferNext();
 
     const found = this.buffer[this.bufferPos + 1];
     if (found) {
@@ -70,7 +72,6 @@ export class MonitorSummaryIterator {
   }
 
   async nextPage(size: number): Promise<MonitorSummariesPage> {
-    console.log("NEXT PAGE");
     const monitorSummaries: MonitorSummary[] = [];
     let paginationBefore: CursorPagination | null = null;
     while (monitorSummaries.length < size) {
@@ -95,7 +96,6 @@ export class MonitorSummaryIterator {
       monitorSummaries.reverse();
     }
 
-    console.log("END NEXT PAGE");
     return {
       monitorSummaries,
       nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
@@ -105,7 +105,7 @@ export class MonitorSummaryIterator {
 
   // Look ahead to see if there are additional results.
   async peek(): Promise<MonitorSummary | null> {
-    await this.bufferNext(CHUNK_SIZE);
+    await this.bufferNext();
     return this.buffer[this.bufferPos + 1] || null;
   }
 
@@ -117,15 +117,16 @@ export class MonitorSummaryIterator {
 
   // Attempts to buffer at most `size` number of additional results, stopping when at least one additional
   // result is buffered or there are no more matching items to be found.
-  async bufferNext(size: number = CHUNK_SIZE): Promise<void> {
-    // The next element is already buffered.
+  async bufferNext(): Promise<void> {
+    // Nothing to do if there are no more results or
+    // the next element is already buffered.
     if (this.buffer[this.bufferPos + 1]) {
       return;
     }
 
-    while (true) {
-      const result = await this.attemptBufferMore(size);
-      if (result.gotHit || !result.hasMore) {
+    while (!this.endOfResults) {
+      const result = await this.attemptBufferMore();
+      if (result.gotHit) {
         return;
       }
     }
@@ -137,9 +138,7 @@ export class MonitorSummaryIterator {
    * to free up space.
    * @param size the number of items to chunk
    */
-  async attemptBufferMore(
-    size: number = CHUNK_SIZE
-  ): Promise<{ hasMore: boolean; gotHit: boolean }> {
+  async attemptBufferMore(): Promise<{ hasMore: boolean; gotHit: boolean }> {
     // Trim the buffer to just the current element since we'll be fetching more
     const current = this.getCurrent();
 
@@ -151,18 +150,20 @@ export class MonitorSummaryIterator {
       this.bufferPos = 0;
     }
 
-    const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
+    const results = await this.chunkFetcher(this.queryContext, this.searchAfter, CHUNK_SIZE);
     // If we've hit the end of the stream searchAfter will be empty
-
-    console.log("BUFFER MORE", results.monitorSummaries.length)
     results.monitorSummaries.forEach((ms: MonitorSummary) => this.buffer.push(ms));
     if (results.searchAfter) {
       this.searchAfter = results.searchAfter;
     }
 
+    if (!results.searchAfter) {
+      this.endOfResults = true;
+    }
+
     return {
       gotHit: results.monitorSummaries.length > 0,
-      hasMore: !!results.searchAfter,
+      hasMore: this.endOfResults,
     };
   }
 

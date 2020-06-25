@@ -35,26 +35,14 @@ describe('iteration', () => {
         break;
       }
     }
-  }
-
-  const fetchAllViaNextPage = async (pageSize: number) => {
-    while (true) {
-      const got = await iterator!.nextPage(pageSize);
-      if (got) {
-        got.monitorSummaries.forEach(s => fetched.push(s))
-      } else {
-        break;
-      }
-    }
-  }
-
+  };
 
   describe('matching', () => {
     [
-      //{ name: 'zero results', numSummaries: 0 },
-      //{ name: 'one result', numSummaries: 1 },
-      //{ name: 'less than chunk', numSummaries: CHUNK_SIZE - 1 },
-      //{ name: 'multiple full chunks', numSummaries: CHUNK_SIZE * 3 },
+      { name: 'zero results', numSummaries: 0 },
+      { name: 'one result', numSummaries: 1 },
+      { name: 'less than chunk', numSummaries: CHUNK_SIZE - 1 },
+      { name: 'multiple full chunks', numSummaries: CHUNK_SIZE * 3 },
       { name: 'multiple full chunks + partial', numSummaries: CHUNK_SIZE * 3 + 3 },
     ].forEach(({ name, numSummaries }) => {
       describe(`scenario given ${name}`, () => {
@@ -64,9 +52,8 @@ describe('iteration', () => {
 
         describe('fetching via next', () => {
           beforeEach(async () => {
-            console.log("THIS SHOULD NOT HAPPEN");
             await fetchAllViaNext();
-          })
+          });
 
           it('should receive the expected number of results', async () => {
             expect(fetched.length).toEqual(numSummaries);
@@ -78,7 +65,7 @@ describe('iteration', () => {
         });
 
         describe('nextPage()', () => {
-          const pageSize = 3;
+          const pageSize = 900;
 
           it('should fetch no more than the page size results', async () => {
             const page = await iterator!.nextPage(pageSize);
@@ -87,18 +74,15 @@ describe('iteration', () => {
           });
 
           it('should return all the results if called until none remain', async () => {
-            console.log("THIS IS THE TEST");
             const receivedResults: MonitorSummary[] = [];
-            //while (await iterator!.peek()) {
             while (true) {
               const page = await iterator!.nextPage(pageSize);
               if (page.monitorSummaries.length === 0) {
-                break
+                break;
               }
-              page.monitorSummaries.forEach(s => receivedResults.push(s));
+              page.monitorSummaries.forEach((s) => receivedResults.push(s));
             }
-            expect(receivedResults.length).toEqual(fullSummaryDataset.length)
-            console.log("THIS IS THE END OF THE TEST")
+            expect(receivedResults.length).toEqual(fullSummaryDataset.length);
           });
         });
       });
@@ -114,7 +98,8 @@ const makeMonitorSummaries = (count: number): MonitorSummary[] => {
     summaries.push({
       monitor_id: id,
       state: {
-        timestamp: (123+i).toString(),
+        monitor: {},
+        timestamp: (123 + i).toString(),
         url: {},
         summaryPings: [],
         summary: { up: 1, down: 0 },
@@ -125,19 +110,19 @@ const makeMonitorSummaries = (count: number): MonitorSummary[] => {
 };
 
 const mockChunkFetcher = (summaries: MonitorSummary[]): ChunkFetcher => {
-  console.log("NEW CHUNK FETCHER")
   const buffer = summaries.slice(0); // Clone it since we'll modify it
   return async (
     queryContext: QueryContext,
     searchAfter: any,
     size: number
   ): Promise<ChunkResult> => {
-    //console.log("CHUNK FETCH", size, buffer.length, new Error().stack)
-    const resultMonitorSummaries = buffer.splice(0, size);
+    const offset = searchAfter?.monitor_id ? parseInt(searchAfter.monitor_id.split('-')[1], 10) : 0;
+    const resultMonitorSummaries = buffer.slice(offset, offset + size);
     const resultSearchAfter =
-      buffer.length === 0
+      offset > buffer.length - 1
         ? null
-        : { monitor_id: resultMonitorSummaries[resultMonitorSummaries.length - 1].monitor_id };
+        : { monitor_id: `monitor-${offset + resultMonitorSummaries.length}` };
+
     return {
       monitorSummaries: resultMonitorSummaries,
       searchAfter: resultSearchAfter,

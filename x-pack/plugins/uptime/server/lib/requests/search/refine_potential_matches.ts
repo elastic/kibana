@@ -38,6 +38,7 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
     const monitorSummaryState: MonitorSummaryState = {
       timestamp: '',
       summaryPings: [],
+      monitor: {},
       summary: {
         status: 'up',
         up: 0,
@@ -69,6 +70,7 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
         continue MonitorLoop;
       }
 
+      monitorSummaryState.monitor.name = latest._source.monitor.name;
       monitorSummaryState.summaryPings.push({
         docId: latest._id,
         timestamp: latest._source['@timestamp'],
@@ -124,7 +126,11 @@ export const query = async (
       },
       aggs: {
         monitor: {
-          terms: { field: 'monitor.id', size: potentialMatchMonitorIDs.length },
+          terms: {
+            field: 'monitor.id',
+            size: potentialMatchMonitorIDs.length,
+            order: { _key: 'desc' },
+          },
           aggs: {
             location: {
               terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },

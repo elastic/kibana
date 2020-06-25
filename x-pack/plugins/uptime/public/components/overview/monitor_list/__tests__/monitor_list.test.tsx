@@ -50,6 +50,7 @@ const testFooPings: Ping[] = [
 const testFooSummary: MonitorSummary = {
   monitor_id: 'foo',
   state: {
+    monitor: {},
     summaryPings: testFooPings,
     summary: {
       up: 1,
@@ -84,6 +85,7 @@ const testBarPings: Ping[] = [
 const testBarSummary: MonitorSummary = {
   monitor_id: 'bar',
   state: {
+    monitor: {},
     summaryPings: testBarPings,
     summary: {
       up: 2,
