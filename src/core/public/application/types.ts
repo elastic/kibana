@@ -234,6 +234,24 @@ export interface App<HistoryLocationState = unknown> extends AppBase {
    * base path from HTTP.
    */
   appRoute?: string;
+
+  /**
+   * If set to true, the application's route will only be checked against an exact match. Defaults to `false`.
+   *
+   * @example
+   * ```ts
+   * core.application.register({
+   *   id: 'my_app',
+   *   title: 'My App'
+   *   exactRoute: true,
+   *   mount: () => { ... },
+   * })
+   *
+   * // '[basePath]/app/my_app' will be matched
+   * // '[basePath]/app/my_app/some/path' will not be matched
+   * ```
+   */
+  exactRoute?: boolean;
 }
 
 /** @public */
@@ -569,6 +587,7 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
     appBasePath: string;
     mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
     legacy: boolean;
+    exactRoute: boolean;
     unmountBeforeMounting: T extends LegacyApp ? true : boolean;
   },
   T extends LegacyApp ? never : 'unmountBeforeMounting'

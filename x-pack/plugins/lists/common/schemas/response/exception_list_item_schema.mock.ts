@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ENTRIES } from '../../constants.mock';
 
 import { ExceptionListItemSchema } from './exception_list_item_schema';
 
@@ -12,20 +13,7 @@ export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
   created_at: '2020-04-23T00:19:13.289Z',
   created_by: 'user_name',
   description: 'This is a sample endpoint type exception',
-  entries: [
-    {
-      field: 'actingProcess.file.signer',
-      match: 'Elastic, N.V.',
-      match_any: undefined,
-      operator: 'included',
-    },
-    {
-      field: 'event.category',
-      match: undefined,
-      match_any: ['process', 'malware'],
-      operator: 'included',
-    },
-  ],
+  entries: ENTRIES,
   id: '1',
   item_id: 'endpoint_list_item',
   list_id: 'endpoint_list',

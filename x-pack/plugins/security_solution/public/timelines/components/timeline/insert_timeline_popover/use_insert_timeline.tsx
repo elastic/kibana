@@ -17,7 +17,7 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
   });
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null) => {
-      const builtLink = `${basePath}/app/security#/timelines?timeline=(id:'${id}',isOpen:!t)`;
+      const builtLink = `${basePath}/app/security/timelines?timeline=(id:'${id}',isOpen:!t)`;
       const currentValue = form.getFormData()[fieldName];
       const newValue: string = [
         currentValue.slice(0, cursorPosition.start),

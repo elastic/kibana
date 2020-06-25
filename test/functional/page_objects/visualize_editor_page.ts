@@ -230,6 +230,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click('dropPartialBucketsCheckbox');
     }
 
+    public async expectMarkdownTextArea() {
+      await testSubjects.existOrFail('markdownTextarea');
+    }
+
     public async setMarkdownTxt(markdownTxt: string) {
       const input = await testSubjects.find('markdownTextarea');
       await input.clearValue();

@@ -22,6 +22,7 @@ import {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStartDependencies,
+  EmbeddableStateTransfer,
   IEmbeddable,
   EmbeddablePanel,
 } from '.';
@@ -75,6 +76,15 @@ export const createEmbeddablePanelMock = ({
   );
 };
 
+export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTransfer> => {
+  return {
+    getIncomingOriginatingApp: jest.fn(),
+    getIncomingEmbeddablePackage: jest.fn(),
+    navigateToWithOriginatingApp: jest.fn(),
+    navigateToWithEmbeddablePackage: jest.fn(),
+  };
+};
+
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerEmbeddableFactory: jest.fn(),
@@ -88,6 +98,8 @@ const createStartContract = (): Start => {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     EmbeddablePanel: jest.fn(),
+    getEmbeddablePanel: jest.fn(),
+    getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
   };
   return startContract;
 };
