@@ -145,6 +145,26 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('~transformPivotPreview');
     }
 
+    public async assertTransformRowActions(isJobRunning = false, clickId?: string) {
+      await testSubjects.click('euiCollapsedItemActionsButton');
+
+      await testSubjects.existOrFail('transformActionClone');
+      await testSubjects.existOrFail('transformActionDelete');
+      await testSubjects.existOrFail('transformActionEdit');
+
+      if (isJobRunning) {
+        await testSubjects.missingOrFail('transformActionStart');
+        await testSubjects.existOrFail('transformActionStop');
+      } else {
+        await testSubjects.existOrFail('transformActionStart');
+        await testSubjects.missingOrFail('transformActionStop');
+      }
+
+      if (clickId !== undefined) {
+        await testSubjects.click(clickId);
+      }
+    }
+
     public async waitForTransformsExpandedRowPreviewTabToLoad() {
       await testSubjects.existOrFail('~transformPivotPreview', { timeout: 60 * 1000 });
       await testSubjects.existOrFail('transformPivotPreview loaded', { timeout: 30 * 1000 });
