@@ -7,14 +7,13 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
-import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { EntriesArray, ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
 import { hasListsFeature } from '../feature_flags';
 import { BulkResponse, BulkResponseErrorAggregation } from './types';
-import { Logger } from '../../../../../../../src/core/server';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
