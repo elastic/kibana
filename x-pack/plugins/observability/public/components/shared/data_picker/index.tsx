@@ -86,7 +86,7 @@ export const DatePicker = ({ rangeFrom, rangeTo }: Props) => {
 
   // TODO: maybe use Generics to specify what this component expects
   const {
-    refreshPaused = true,
+    refreshPaused = timePickerRefreshInterval.pause,
     refreshInterval = timePickerRefreshInterval.value,
   } = useQueryParams<QueryParams>();
 

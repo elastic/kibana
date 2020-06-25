@@ -7,6 +7,7 @@ import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui'
 import { isEmpty } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
+import moment from 'moment';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { APMSection } from '../../components/app/section/apm';
@@ -20,6 +21,7 @@ import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_sett
 import { RouteParams } from '../../routes';
 import { getParsedDate } from '../../utils/date';
 import { appsSection } from '../home/section';
+import { getBucketSize } from '../../utils/get_bucket_size';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -33,9 +35,14 @@ export const Overview = ({ routeParams }: Props) => {
 
   const { data = [] } = useFetcher(() => {
     const startTime = getParsedDate(rangeFrom);
-    const endTime = getParsedDate(rangeTo);
+    const endTime = getParsedDate(rangeTo, { roundUp: true });
     if (startTime && endTime) {
-      const params = { startTime, endTime, bucketSize: '3' };
+      const { intervalString } = getBucketSize({
+        start: moment.utc(startTime).valueOf(),
+        end: moment.utc(endTime).valueOf(),
+        minInterval: 'auto',
+      });
+      const params = { startTime, endTime, bucketSize: intervalString };
       const apmDataPromise = getDataHandler('apm')?.fetchData(params);
       const logsDataPromise = getDataHandler('infra_logs')?.fetchData(params);
       const metricsDataPromise = getDataHandler('infra_metrics')?.fetchData(params);
