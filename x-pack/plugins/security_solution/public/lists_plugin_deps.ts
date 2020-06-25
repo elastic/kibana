@@ -27,4 +27,5 @@ export {
   OperatorTypeEnum,
   entriesNested,
   entriesExists,
+  entriesList,
 } from '../../lists/common/schemas';
