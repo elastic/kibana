@@ -13,11 +13,12 @@ import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';
 import { createFilter } from '../add_filter_to_global_search_bar';
-import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '../top_n';
+import { StatefulTopN } from '../top_n';
 
 import { allowTopN } from './helpers';
 import * as i18n from './translations';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 
 interface Props {
   draggableId?: DraggableId;
@@ -34,7 +35,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   field,
   onFilterAdded,
   showTopN,
-  timelineId = ACTIVE_TIMELINE_REDUX_ID,
+  timelineId,
   toggleTopN,
   value,
 }) => {
@@ -44,11 +45,16 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
     kibana.services.data.query.filterManager,
   ]);
   const { getTimelineFilterManager } = useManageTimeline();
-  const filterManager = useMemo(() => getTimelineFilterManager(timelineId) ?? filterManagerBackup, [
-    timelineId,
-    getTimelineFilterManager,
-    filterManagerBackup,
-  ]);
+
+  const filterManager = useMemo(
+    () =>
+      timelineId === TimelineId.active ||
+      (draggableId != null && draggableId?.includes(TimelineId.active))
+        ? getTimelineFilterManager(TimelineId.active)
+        : filterManagerBackup,
+    [draggableId, timelineId, getTimelineFilterManager, filterManagerBackup]
+  );
+
   const filterForValue = useCallback(() => {
     const filter =
       value?.length === 0 ? createFilter(field, undefined) : createFilter(field, value);
