@@ -120,9 +120,9 @@ export const MonitorListComponent: React.FC<Props> = ({
     },
     {
       align: 'left' as const,
-      field: 'state.tls',
+      field: 'state.tls.server.x509',
       name: labels.TLS_COLUMN_LABEL,
-      render: (tls: any) => <CertStatusColumn cert={tls} />,
+      render: (x509: any) => <CertStatusColumn expiry={x509} />,
     },
     {
       align: 'center' as const,

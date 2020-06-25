@@ -8,7 +8,6 @@ import { QueryContext } from './query_context';
 import { fetchChunk } from './fetch_chunk';
 import { CursorDirection, MonitorSummary } from '../../../../common/runtime_types';
 import { CursorPagination } from './types';
-import { MonitorSummariesPage } from '.';
 
 // Hardcoded chunk size for how many monitors to fetch at a time when querying
 export const CHUNK_SIZE = 1000;
@@ -212,4 +211,10 @@ export class MonitorSummaryIterator {
   clone() {
     return new MonitorSummaryIterator(this.queryContext, this.buffer.slice(0), this.bufferPos);
   }
+}
+
+export interface MonitorSummariesPage {
+  monitorSummaries: MonitorSummary[];
+  nextPagePagination: CursorPagination | null;
+  prevPagePagination: CursorPagination | null;
 }

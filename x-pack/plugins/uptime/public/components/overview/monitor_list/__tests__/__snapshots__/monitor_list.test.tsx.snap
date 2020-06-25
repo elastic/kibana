@@ -856,7 +856,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </th>
             <th
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_state.tls_3"
+              data-test-subj="tableHeaderCell_state.tls.server.x509_3"
               role="columnheader"
               scope="col"
             >

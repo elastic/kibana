@@ -16,9 +16,49 @@ export const HttpResponseBodyType = t.partial({
 
 export type HttpResponseBody = t.TypeOf<typeof HttpResponseBodyType>;
 
-export const TlsType = t.partial({
+const ECSDistinguishedName = t.type({
+  common_name: t.string,
+  distinguished_name: t.string,
+});
+
+export const X509ExpiryType = t.type({
   not_after: t.string,
   not_before: t.string,
+});
+
+export type X509Expiry = t.TypeOf<typeof X509ExpiryType>;
+
+export const X509Type = t.intersection([
+  t.type({
+    issuer: ECSDistinguishedName,
+    subject: ECSDistinguishedName,
+    serial_number: t.string,
+    public_key_algorithm: t.string,
+    signature_algorithm: t.string,
+  }),
+  X509ExpiryType,
+  t.partial({
+    public_key_curve: t.string,
+    public_key_exponent: t.number,
+    public_key_size: t.number,
+  }),
+]);
+
+export type X509 = t.TypeOf<typeof X509Type>;
+
+export const TlsType = t.partial({
+  // deprecated in favor of server.x509.not_after/not_before
+  certificate_not_valid_after: t.string,
+  certificate_not_valid_before: t.string,
+  cipher: t.string,
+  established: t.boolean,
+  server: t.partial({
+    hash: t.type({
+      sha256: t.string,
+      sha1: t.string,
+    }),
+    x509: X509Type,
+  }),
 });
 
 export type Tls = t.TypeOf<typeof TlsType>;

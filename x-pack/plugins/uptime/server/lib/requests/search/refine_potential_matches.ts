@@ -5,7 +5,7 @@
  */
 
 import { QueryContext } from './query_context';
-import { MonitorSummaryState, MonitorSummary, Ping } from '../../../../common/runtime_types';
+import { MonitorSummary, Ping } from '../../../../common/runtime_types';
 
 /**
  * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.
@@ -31,8 +31,6 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
   const summaries: MonitorSummary[] = [];
 
   for (const monBucket of queryResult.aggregations.monitor.buckets) {
-    const monitorId: string = monBucket.key;
-
     // Did at least one location match?
     let matched = false;
 
@@ -41,7 +39,6 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
     for (const locBucket of monBucket.location.buckets) {
       const latest = locBucket.summaries.latest.hits.hits[0];
       const latestStillMatching = locBucket.latest_matching.top.hits.hits[0];
-      const status = latest._source.summary.down > 0 ? 'down' : 'up';
       // If the most recent document still matches the most recent document matching the current filters
       // we can include this in the result
       //
