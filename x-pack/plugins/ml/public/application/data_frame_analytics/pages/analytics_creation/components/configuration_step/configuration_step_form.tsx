@@ -69,7 +69,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const [dependentVariableOptions, setDependentVariableOptions] = useState<
     EuiComboBoxOptionOption[]
   >([]);
-  const [excludesTableItems, setExcludesTableItems] = useState<FieldSelectionItem[]>([]);
+  const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>(
     undefined
   );
@@ -79,7 +79,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const firstUpdate = useRef<boolean>(true);
   const {
     dependentVariable,
-    excludes,
+    includes,
     jobConfigQuery,
     jobConfigQueryString,
     jobType,
@@ -187,7 +187,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         setLoadingFieldOptions(false);
         setFieldOptionsFetchFail(false);
         setMaxDistinctValuesError(undefined);
-        setExcludesTableItems(fieldSelection ? fieldSelection : []);
+        setIncludesTableItems(fieldSelection ? fieldSelection : []);
         setFormState({
           ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
@@ -267,7 +267,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     return () => {
       debouncedGetExplainData.cancel();
     };
-  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(excludes), jobConfigQueryString]);
+  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
   return (
     <Fragment>
@@ -405,8 +405,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         <Fragment />
       </EuiFormRow>
       <MemoizedAnalysisFieldsTable
-        excludes={excludes}
-        tableItems={excludesTableItems}
+        includes={includes}
+        tableItems={includesTableItems}
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />

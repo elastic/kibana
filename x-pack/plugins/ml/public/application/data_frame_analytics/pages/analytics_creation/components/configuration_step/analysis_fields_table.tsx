@@ -14,6 +14,8 @@ import { FieldSelectionItem } from '../../../../common/analytics';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
 
+const ITEMS_PER_PAGE = 5;
+
 const columns = [
   {
     id: 'checkbox',
@@ -67,141 +69,141 @@ const columns = [
   },
 ];
 
-const checkboxDisabledCheck = (item: FieldSelectionItem) =>
-  (item.is_included === false && !item.reason?.includes('in excludes list')) ||
-  item.is_required === true;
+const checkboxDisabledCheck = (item: FieldSelectionItem) => item.is_required === true;
 
 export const MemoizedAnalysisFieldsTable: FC<{
-  excludes: string[];
+  includes: string[];
   loadingItems: boolean;
   setFormState: React.Dispatch<React.SetStateAction<any>>;
   tableItems: FieldSelectionItem[];
-}> = memo(
-  ({ excludes, loadingItems, setFormState, tableItems }) => {
-    const [sortableProperties, setSortableProperties] = useState();
-    const [currentSelection, setCurrentSelection] = useState<any[]>([]);
+}> = ({ includes, loadingItems, setFormState, tableItems }) => {
+  const [sortableProperties, setSortableProperties] = useState();
+  const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
 
-    useEffect(() => {
-      if (excludes.length > 0) {
-        setCurrentSelection(excludes);
-      }
-    }, [tableItems]);
+  useEffect(() => {
+    if (includes.length === 0 && tableItems.length > 0) {
+      const includedFields = [];
+      tableItems.forEach((field) => {
+        if (field.is_included === true) {
+          includedFields.push(field.name);
+        }
+      });
+      setFormState({ includes: includedFields });
+    } else if (includes.length > 0) {
+      setFormState({ includes });
+    }
+  }, [tableItems]);
 
-    // Only set form state on unmount to prevent re-renders due to props changing if exludes was updated on each selection
-    useEffect(() => {
-      return () => {
-        setFormState({ excludes: currentSelection });
-      };
-    }, [currentSelection]);
+  useEffect(() => {
+    let sortablePropertyItems = [];
+    const defaultSortProperty = 'name';
 
-    useEffect(() => {
-      let sortablePropertyItems = [];
-      const defaultSortProperty = 'name';
-
-      sortablePropertyItems = [
-        {
-          name: 'name',
-          getValue: (item: any) => item.name.toLowerCase(),
-          isAscending: true,
-        },
-        {
-          name: 'is_included',
-          getValue: (item: any) => item.is_included,
-          isAscending: true,
-        },
-        {
-          name: 'is_required',
-          getValue: (item: any) => item.is_required,
-          isAscending: true,
-        },
-      ];
-      const sortableProps = new SortableProperties(sortablePropertyItems, defaultSortProperty);
-
-      setSortableProperties(sortableProps);
-    }, []);
-
-    const filters = [
+    sortablePropertyItems = [
       {
-        type: 'field_value_selection',
-        field: 'is_included',
-        name: i18n.translate('xpack.ml.dataframe.analytics.create.excludedFilterLabel', {
-          defaultMessage: 'Is included',
-        }),
-        multiSelect: false,
-        options: [
-          {
-            value: true,
-            view: (
-              <EuiText grow={false}>
-                {i18n.translate('xpack.ml.dataframe.analytics.create.isIncludedOption', {
-                  defaultMessage: 'Yes',
-                })}
-              </EuiText>
-            ),
-          },
-          {
-            value: false,
-            view: (
-              <EuiText grow={false}>
-                {i18n.translate('xpack.ml.dataframe.analytics.create.isNotIncludedOption', {
-                  defaultMessage: 'No',
-                })}
-              </EuiText>
-            ),
-          },
-        ],
+        name: 'name',
+        getValue: (item: any) => item.name.toLowerCase(),
+        isAscending: true,
+      },
+      {
+        name: 'is_included',
+        getValue: (item: any) => item.is_included,
+        isAscending: true,
+      },
+      {
+        name: 'is_required',
+        getValue: (item: any) => item.is_required,
+        isAscending: true,
       },
     ];
+    const sortableProps = new SortableProperties(sortablePropertyItems, defaultSortProperty);
 
-    return (
-      <Fragment>
-        <EuiFormRow
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsLabel', {
-            defaultMessage: 'Excluded fields',
+    setSortableProperties(sortableProps);
+  }, []);
+
+  const filters = [
+    {
+      type: 'field_value_selection',
+      field: 'is_included',
+      name: i18n.translate('xpack.ml.dataframe.analytics.create.excludedFilterLabel', {
+        defaultMessage: 'Is included',
+      }),
+      multiSelect: false,
+      options: [
+        {
+          value: true,
+          view: (
+            <EuiText grow={false}>
+              {i18n.translate('xpack.ml.dataframe.analytics.create.isIncludedOption', {
+                defaultMessage: 'Yes',
+              })}
+            </EuiText>
+          ),
+        },
+        {
+          value: false,
+          view: (
+            <EuiText grow={false}>
+              {i18n.translate('xpack.ml.dataframe.analytics.create.isNotIncludedOption', {
+                defaultMessage: 'No',
+              })}
+            </EuiText>
+          ),
+        },
+      ],
+    },
+  ];
+
+  return (
+    <Fragment>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsLabel', {
+          defaultMessage: 'Included fields',
+        })}
+      >
+        <Fragment />
+      </EuiFormRow>
+      {tableItems.length > 0 && (
+        <EuiText size="xs">
+          {includes.length}
+          {i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsCount', {
+            defaultMessage: ' fields included in the analysis',
           })}
-          helpText={i18n.translate(
-            'xpack.ml.dataframe.analytics.create.excludedFieldsLabelHelpText',
-            {
-              defaultMessage: 'From included fields, select fields to exclude from analysis.',
-            }
-          )}
+        </EuiText>
+      )}
+      {tableItems.length === 0 && (
+        <EuiCallOut
+          title={i18n.translate('xpack.ml.dataframe.analytics.create.calloutTitle', {
+            defaultMessage: 'Analysis fields not available',
+          })}
         >
-          <Fragment />
-        </EuiFormRow>
-        {tableItems.length === 0 && (
-          <EuiCallOut
-            title={i18n.translate('xpack.ml.dataframe.analytics.create.calloutTitle', {
-              defaultMessage: 'Analysis fields not available',
-            })}
-          >
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.create.calloutMessage"
-              defaultMessage="Additional data required to load analysis fields."
-            />
-          </EuiCallOut>
-        )}
-        {tableItems.length > 0 && (
-          <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardExcludesSelect">
-            <CustomSelectionTable
-              data-test-subj="mlAnalyticsCreationAnalysisFieldsTable"
-              checkboxDisabledCheck={checkboxDisabledCheck}
-              columns={columns}
-              filters={filters}
-              items={tableItems}
-              itemsPerPage={5}
-              onTableChange={(selection: FieldSelectionItem[]) => {
-                setCurrentSelection(selection);
-              }}
-              selectedIds={currentSelection}
-              singleSelection={false}
-              sortableProperties={sortableProperties}
-              tableItemId={'name'}
-            />
-          </EuiPanel>
-        )}
-        <EuiSpacer />
-      </Fragment>
-    );
-  },
-  (prevProps, nextProps) => prevProps.tableItems.length === nextProps.tableItems.length
-);
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.calloutMessage"
+            defaultMessage="Additional data required to load analysis fields."
+          />
+        </EuiCallOut>
+      )}
+      {tableItems.length > 0 && (
+        <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardincludesSelect">
+          <CustomSelectionTable
+            currentPage={currentPageIndex}
+            data-test-subj="mlAnalyticsCreationAnalysisFieldsTable"
+            checkboxDisabledCheck={checkboxDisabledCheck}
+            columns={columns}
+            filters={filters}
+            items={tableItems}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onTableChange={(selection: FieldSelectionItem[]) => {
+              setFormState({ includes: selection });
+            }}
+            selectedIds={includes}
+            setCurrentPage={setCurrentPageIndex}
+            singleSelection={false}
+            sortableProperties={sortableProperties}
+            tableItemId={'name'}
+          />
+        </EuiPanel>
+      )}
+      <EuiSpacer />
+    </Fragment>
+  );
+};

@@ -57,10 +57,10 @@ export interface State {
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
     eta: undefined | number;
-    excludes: string[];
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
     gamma: undefined | number;
+    includes: string[];
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
@@ -122,10 +122,10 @@ export const getInitialState = (): State => ({
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
     eta: undefined,
-    excludes: [],
     featureBagFraction: undefined,
     featureInfluenceThreshold: undefined,
     gamma: undefined,
+    includes: [],
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
@@ -242,7 +242,7 @@ export const getJobConfigFromFormState = (
       index: formState.destinationIndex,
     },
     analyzed_fields: {
-      excludes: getExcludesFields(formState.excludes),
+      includes: formState.includes,
     },
     analysis: {
       outlier_detection: {},
@@ -333,7 +333,7 @@ export function getCloneFormStateFromJobConfig(
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
-    excludes: analyticsJobConfig.analyzed_fields.excludes,
+    includes: analyticsJobConfig.analyzed_fields.includes,
   };
 
   if (

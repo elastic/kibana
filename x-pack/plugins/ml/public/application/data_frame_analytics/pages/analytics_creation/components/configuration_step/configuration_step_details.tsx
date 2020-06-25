@@ -30,7 +30,7 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
   const { form, isJobCreated } = state;
-  const { dependentVariable, excludes, jobConfigQueryString, jobType, trainingPercent } = form;
+  const { dependentVariable, includes, jobConfigQueryString, jobType, trainingPercent } = form;
 
   const isJobTypeWithDepVar =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
@@ -61,10 +61,10 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
 
   const detailsThirdCol = [
     {
-      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.excludedFields', {
-        defaultMessage: 'Excluded fields',
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.includedFields', {
+        defaultMessage: 'Included fields',
       }),
-      description: excludes.length > 0 ? excludes.join(', ') : UNSET_CONFIG_ITEM,
+      description: includes.length > 0 ? includes.join(', ') : UNSET_CONFIG_ITEM,
     },
   ];
 
