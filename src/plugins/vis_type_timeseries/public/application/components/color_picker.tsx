@@ -43,7 +43,9 @@ export interface ColorPickerProps {
 }
 
 export function ColorPicker({ name, value, disableTrash = false, onChange }: ColorPickerProps) {
-  const initialColorValue = value ? value.replace(COMMAS_NUMS_ONLY_RE, '') : '';
+  const initialColorValue = value?.includes('rgba')
+    ? value.replace(COMMAS_NUMS_ONLY_RE, '')
+    : value;
   const [color, setColor] = useState(initialColorValue);
 
   const handleColorChange: EuiColorPickerProps['onChange'] = (text: string, { rgba, hex }) => {
