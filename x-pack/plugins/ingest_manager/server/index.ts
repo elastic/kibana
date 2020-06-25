@@ -11,6 +11,7 @@ export {
   IngestManagerSetupContract,
   IngestManagerSetupDeps,
   IngestManagerStartContract,
+  ExternalCallback,
 } from './plugin';
 
 export const config = {
@@ -41,6 +42,8 @@ export const config = {
 };
 
 export type IngestManagerConfigType = TypeOf<typeof config.schema>;
+
+export { DatasourceServiceInterface } from './services/datasource';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);

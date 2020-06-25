@@ -38,7 +38,7 @@ import {
   executeTimelineKQL,
 } from '../tasks/timeline';
 
-import { HOSTS_PAGE } from '../urls/navigation';
+import { HOSTS_URL } from '../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../urls/state';
 
 const ABSOLUTE_DATE = {
@@ -235,7 +235,7 @@ describe('url state', () => {
   });
 
   it.skip('sets and reads the url state for timeline by id', () => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    loginAndWaitForPage(HOSTS_URL);
     openTimeline();
     executeTimelineKQL('host.name: *');
 

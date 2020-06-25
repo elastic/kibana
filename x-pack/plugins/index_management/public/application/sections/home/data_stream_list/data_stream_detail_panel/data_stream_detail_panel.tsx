@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButton,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
@@ -15,14 +16,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 
 import { SectionLoading, SectionError, Error } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
+import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 
 interface Props {
   dataStreamName: string;
-  onClose: () => void;
+  onClose: (shouldReload?: boolean) => void;
 }
 
 /**
@@ -35,6 +40,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   onClose,
 }) => {
   const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
+
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   let content;
 
@@ -61,44 +68,97 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       />
     );
   } else if (dataStream) {
-    content = <Fragment>{JSON.stringify(dataStream)}</Fragment>;
+    const { timeStampField, generation } = dataStream;
+
+    content = (
+      <EuiDescriptionList textStyle="reverse">
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle"
+            defaultMessage="Timestamp field"
+          />
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>{timeStampField.name}</EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.idxMgmt.dataStreamDetailPanel.generationTitle"
+            defaultMessage="Generation"
+          />
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>{generation}</EuiDescriptionListDescription>
+      </EuiDescriptionList>
+    );
   }
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      data-test-subj="dataStreamDetailPanel"
-      aria-labelledby="dataStreamDetailPanelTitle"
-      size="m"
-      maxWidth={500}
-    >
-      <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2 id="dataStreamDetailPanelTitle" data-test-subj="title">
-            {dataStreamName}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+    <>
+      {isDeleting ? (
+        <DeleteDataStreamConfirmationModal
+          onClose={(data) => {
+            if (data && data.hasDeletedDataStreams) {
+              onClose(true);
+            } else {
+              setIsDeleting(false);
+            }
+          }}
+          dataStreams={[dataStreamName]}
+        />
+      ) : null}
 
-      <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
+      <EuiFlyout
+        onClose={onClose}
+        data-test-subj="dataStreamDetailPanel"
+        aria-labelledby="dataStreamDetailPanelTitle"
+        size="m"
+        maxWidth={500}
+      >
+        <EuiFlyoutHeader>
+          <EuiTitle size="m">
+            <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
+              {dataStreamName}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="cross"
-              flush="left"
-              onClick={onClose}
-              data-test-subj="closeDetailsButton"
-            >
-              <FormattedMessage
-                id="xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel"
-                defaultMessage="Close"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+        <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="cross"
+                flush="left"
+                onClick={() => onClose()}
+                data-test-subj="closeDetailsButton"
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel"
+                  defaultMessage="Close"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            {!isLoading && !error ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="danger"
+                  iconType="trash"
+                  onClick={() => setIsDeleting(true)}
+                  data-test-subj="deleteDataStreamButton"
+                >
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreamDetailPanel.deleteButtonLabel"
+                    defaultMessage="Delete data stream"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </>
   );
 };

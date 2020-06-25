@@ -5,15 +5,15 @@
  */
 
 import React, { FC, PureComponent } from 'react';
-// @ts-ignore Untyped library
+// @ts-expect-error untyped library
 import Style from 'style-it';
-// @ts-ignore Untyped local
 import { Positionable } from '../../public/components/positionable/positionable';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { elementToShape } from '../../public/components/workpad_page/utils';
 import { CanvasRenderedElement } from '../types';
 import { CanvasShareableContext, useCanvasShareableState } from '../context';
 import { RendererSpec } from '../../types';
+import { createHandlers } from '../../public/lib/create_handlers';
 
 import css from './rendered_element.module.scss';
 
@@ -62,17 +62,7 @@ export class RenderedElementComponent extends PureComponent<Props> {
     }
 
     try {
-      // TODO: These are stubbed, but may need implementation.
-      fn.render(this.ref.current, value.value, {
-        done: () => {},
-        onDestroy: () => {},
-        onResize: () => {},
-        getElementId: () => '',
-        setFilter: () => {},
-        getFilter: () => '',
-        onEmbeddableInputChange: () => {},
-        onEmbeddableDestroyed: () => {},
-      });
+      fn.render(this.ref.current, value.value, createHandlers());
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(as, e.message);
