@@ -153,6 +153,15 @@ export const graphableProcesses = composeSelectors(
 );
 
 /**
+ * Select the `ancestors` and `children` limits that were reached or exceeded
+ * during the request for the current tree.
+ */
+export const lineageLimitsReached = composeSelectors(
+  dataStateSelector,
+  dataSelectors.limitsReached
+);
+
+/**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.
  */
