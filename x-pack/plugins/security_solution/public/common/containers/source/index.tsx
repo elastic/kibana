@@ -98,9 +98,7 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
     return configIndex;
   }, [configIndex, indexToAdd]);
 
-  const [{ browserFields, errorMessage, indicesExist, indexPattern, loading }, setState] = useState<
-    UseWithSourceState
-  >({
+  const [state, setState] = useState<UseWithSourceState>({
     browserFields: EMPTY_BROWSER_FIELDS,
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
@@ -115,7 +113,7 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
     const abortCtrl = new AbortController();
 
     async function fetchSource() {
-      if (!isSubscribed || !apolloClient) return;
+      if (!apolloClient) return;
 
       setState((prevState) => ({ ...prevState, loading: true }));
 
@@ -133,9 +131,18 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
             },
           },
         });
+        if (!isSubscribed) {
+          return setState((prevState) => ({
+            ...prevState,
+            loading: false,
+          }));
+        }
+
         setState({
           loading: false,
-          indicesExist: get('data.source.status.indicesExist', result),
+          indicesExist: indicesExistOrDataTemporarilyUnavailable(
+            get('data.source.status.indicesExist', result)
+          ),
           browserFields: getBrowserFields(
             defaultIndex.join(),
             get('data.source.status.indexFields', result)
@@ -147,6 +154,13 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
           errorMessage: null,
         });
       } catch (error) {
+        if (!isSubscribed) {
+          return setState((prevState) => ({
+            ...prevState,
+            loading: false,
+          }));
+        }
+
         setState((prevState) => ({
           ...prevState,
           loading: false,
@@ -163,11 +177,5 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
     };
   }, [apolloClient, sourceId, defaultIndex]);
 
-  return {
-    indicesExist: indicesExistOrDataTemporarilyUnavailable(indicesExist),
-    browserFields,
-    indexPattern,
-    loading,
-    errorMessage,
-  };
+  return state;
 };

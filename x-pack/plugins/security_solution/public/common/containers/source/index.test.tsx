@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useWithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
@@ -17,6 +17,17 @@ jest.mock('../../utils/apollo_context', () => ({
 }));
 
 describe('Index Fields & Browser Fields', () => {
+  test('returns memoized value', async () => {
+    const { result, waitForNextUpdate, rerender } = renderHook(() => useWithSource());
+    await waitForNextUpdate();
+
+    const result1 = result.current;
+    act(() => rerender());
+    const result2 = result.current;
+
+    return expect(result1).toBe(result2);
+  });
+
   test('Index Fields', async () => {
     const { result, waitForNextUpdate } = renderHook(() => useWithSource());
 
