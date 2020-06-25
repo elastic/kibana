@@ -16,6 +16,7 @@ import {
   KibanaRequest,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UICapabilities } from 'ui/capabilities';
 import { SecurityPluginSetup } from '../../security/server';
 
 import { registerEnginesRoute } from './routes/app_search/engines';
@@ -51,11 +52,45 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public async setup(
-    { http, savedObjects, getStartServices }: CoreSetup,
+    { capabilities, http, savedObjects, getStartServices }: CoreSetup,
     { usageCollection, security }: PluginsSetup
   ) {
-    const router = http.createRouter();
     const config = await this.config.pipe(first()).toPromise();
+
+    /**
+     * Register user access to the Enterprise Search plugins
+     */
+    capabilities.registerProvider(() => ({
+      navLinks: {
+        app_search: true,
+      },
+      catalogue: {
+        app_search: true,
+      },
+    }));
+
+    capabilities.registerSwitcher(
+      async (request: KibanaRequest, uiCapabilities: UICapabilities) => {
+        const hasAppSearchAccess = true; // TODO
+
+        return {
+          ...uiCapabilities,
+          navLinks: {
+            ...uiCapabilities.navLinks,
+            app_search: hasAppSearchAccess,
+          },
+          catalogue: {
+            ...uiCapabilities.catalogue,
+            app_search: hasAppSearchAccess,
+          },
+        };
+      }
+    );
+
+    /**
+     * Register routes
+     */
+    const router = http.createRouter();
     const dependencies = { router, config, log: this.logger };
 
     registerEnginesRoute(dependencies);
