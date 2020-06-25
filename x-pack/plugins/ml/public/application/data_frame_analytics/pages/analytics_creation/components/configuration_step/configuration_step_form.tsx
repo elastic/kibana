@@ -87,7 +87,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const indexData = useIndexData(
     currentIndexPattern,
-    savedSearchQuery !== undefined ? savedSearchQuery : jobConfigQuery
+    savedSearchQuery !== undefined ? savedSearchQuery : jobConfigQuery,
+    toastNotifications
   );
 
   const indexPreviewProps = {

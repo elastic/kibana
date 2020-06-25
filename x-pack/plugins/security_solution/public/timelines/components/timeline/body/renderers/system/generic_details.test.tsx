@@ -13,6 +13,8 @@ import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { SystemGenericDetails, SystemGenericLine } from './generic_details';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
+jest.mock('../../../../../../common/components/link_to');
+
 describe('SystemGenericDetails', () => {
   const mount = useMountAppended();
 

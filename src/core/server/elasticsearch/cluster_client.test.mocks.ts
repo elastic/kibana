@@ -18,11 +18,14 @@
  */
 
 export const MockClient = jest.fn();
-jest.mock('elasticsearch', () => ({
-  // Jest types don't include `requireActual` right now.
-  ...jest.requireActual('elasticsearch'),
-  Client: MockClient,
-}));
+jest.mock('elasticsearch', () => {
+  const original = jest.requireActual('elasticsearch');
+
+  return {
+    ...original,
+    Client: MockClient,
+  };
+});
 
 export const MockScopedClusterClient = jest.fn();
 jest.mock('./scoped_cluster_client', () => ({

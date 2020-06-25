@@ -23,7 +23,7 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
 import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './elasticsearch';
-import { InternalHttpServiceSetup } from './http';
+import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
@@ -34,6 +34,7 @@ import { InternalMetricsServiceSetup } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
+import { InternalLoggingServiceSetup } from './logging';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -48,6 +49,7 @@ export interface InternalCoreSetup {
   uuid: UuidServiceSetup;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
+  logging: InternalLoggingServiceSetup;
 }
 
 /**
@@ -56,6 +58,7 @@ export interface InternalCoreSetup {
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
   elasticsearch: ElasticsearchServiceStart;
+  http: InternalHttpServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
 }
