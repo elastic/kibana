@@ -29,7 +29,7 @@ interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
 
 const dataHandlers: Partial<Record<ObservabilityApp, DataHandler>> = {};
 
-export function registerDataHandler<T extends ObservabilityApp = ObservabilityApp>({
+export function registerDataHandler<T extends ObservabilityApp>({
   appName,
   fetchData,
   hasData,
