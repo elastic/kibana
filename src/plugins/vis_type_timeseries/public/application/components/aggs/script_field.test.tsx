@@ -25,6 +25,7 @@ import { PercentileRankAgg } from './percentile_rank';
 import { StandardAgg } from './std_agg';
 import { StandardDeviationAgg } from './std_deviation';
 import { TopHitAgg } from './top_hit';
+import { FilterRatioAgg } from './filter_ratio';
 import { ScriptField } from './script_field';
 import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
@@ -99,6 +100,90 @@ describe('ScriptField', () => {
       const wrapper = mountWithIntl(
         <div>
           <StandardAgg
+            onAdd={jest.fn()}
+            onChange={jest.fn()}
+            onDelete={jest.fn()}
+            panel={panel}
+            fields={FIELDS}
+            model={metric}
+            series={series}
+            siblings={series.metrics}
+            dragHandleProps={{}}
+          />
+        </div>
+      );
+      expect(wrapper.find(ScriptField).html()).toBe(null);
+    });
+  });
+  describe('filter_ratio', () => {
+    it('should display ScriptField component when script field selected', () => {
+      const metric = {
+        type: 'filter_ratio',
+        denominator: '*',
+        numerator: '*',
+        metric_agg: 'avg',
+        field: SCRIPTED_FIELD_VALUE,
+        script: 'doc["system.cpu.user.pct"]',
+      };
+      const series = { ...SERIES, metrics: [metric] };
+      const panel = { ...PANEL, series };
+      const wrapper = mountWithIntl(
+        <div>
+          <FilterRatioAgg
+            onAdd={jest.fn()}
+            onChange={jest.fn()}
+            onDelete={jest.fn()}
+            panel={panel}
+            fields={FIELDS}
+            model={metric}
+            series={series}
+            siblings={series.metrics}
+            dragHandleProps={{}}
+          />
+        </div>
+      );
+      expect(wrapper.find(ScriptField).length).toBe(1);
+      expect(wrapper.find(ScriptField).html()).not.toBe(null);
+    });
+    it('should NOT display ScriptField component when count selected as agg', () => {
+      const metric = {
+        type: 'filter_ratio',
+        denominator: '*',
+        numerator: '*',
+        metric_agg: 'count',
+      };
+      const series = { ...SERIES, metrics: [metric] };
+      const panel = { ...PANEL, series };
+      const wrapper = mountWithIntl(
+        <div>
+          <FilterRatioAgg
+            onAdd={jest.fn()}
+            onChange={jest.fn()}
+            onDelete={jest.fn()}
+            panel={panel}
+            fields={FIELDS}
+            model={metric}
+            series={series}
+            siblings={series.metrics}
+            dragHandleProps={{}}
+          />
+        </div>
+      );
+      expect(wrapper.find(ScriptField).html()).toBe(null);
+    });
+    it('should NOT display ScriptField component when script field is NOT selected', () => {
+      const metric = {
+        type: 'filter_ratio',
+        denominator: '*',
+        numerator: '*',
+        metric_agg: 'avg',
+        field: 'system.cpu.user.pct',
+      };
+      const series = { ...SERIES, metrics: [metric] };
+      const panel = { ...PANEL, series };
+      const wrapper = mountWithIntl(
+        <div>
+          <FilterRatioAgg
             onAdd={jest.fn()}
             onChange={jest.fn()}
             onDelete={jest.fn()}
