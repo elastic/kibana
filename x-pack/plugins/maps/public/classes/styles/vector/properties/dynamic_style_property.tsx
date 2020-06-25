@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import _ from 'lodash';
 import React from 'react';
@@ -44,22 +45,22 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
 }
 
+type fieldFormatter = (value: string | undefined) => string;
+
 export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T> {
   static type = STYLE_TYPE.DYNAMIC;
 
   protected readonly _field: IField | null;
   protected readonly _layer: IVectorLayer;
-  protected readonly _getFieldFormatter: (
-    fieldName: string
-  ) => (value: string | undefined) => string;
+  protected readonly _getFieldFormatter: (fieldName: string) => null | fieldFormatter;
 
   constructor(
     options: T,
     styleName: VECTOR_STYLES,
     field: IField | null,
     vectorLayer: IVectorLayer,
-    getFieldFormatter: (fieldName: string) => (value: string | undefined) => string
+    getFieldFormatter: (fieldName: string) => null | fieldFormatter
   ) {
     super(options, styleName);
     this._field = field;
