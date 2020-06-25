@@ -154,6 +154,7 @@ export function __kbnBootstrap__(): void;
 export interface App<HistoryLocationState = unknown> extends AppBase {
     appRoute?: string;
     chromeless?: boolean;
+    exactRoute?: boolean;
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
 }
 
