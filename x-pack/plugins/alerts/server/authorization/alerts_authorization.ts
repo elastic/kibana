@@ -186,7 +186,18 @@ export class AlertsAuthorization {
     hasAllRequested: boolean;
     authorizedAlertTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
-    const featuresIds = this.features.getFeatures().map((feature) => feature.id);
+    const featuresIds = this.features
+      .getFeatures()
+      // ignore features which don't grant privileges to alerting
+      .filter(({ privileges }) => {
+        return (
+          (privileges?.all.alerting?.all?.length ?? 0 > 0) ||
+          (privileges?.all.alerting?.read?.length ?? 0 > 0) ||
+          (privileges?.read.alerting?.all?.length ?? 0 > 0) ||
+          (privileges?.read.alerting?.read?.length ?? 0 > 0)
+        );
+      })
+      .map((feature) => feature.id);
     if (!this.authorization) {
       return {
         hasAllRequested: true,

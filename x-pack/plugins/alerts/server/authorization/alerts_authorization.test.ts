@@ -30,16 +30,20 @@ function mockAuthorization() {
   return authorization;
 }
 
-function mockFeature(appName: string, typeName: string, requiredApps: string[] = []) {
+function mockFeature(appName: string, typeName?: string) {
   return new Feature({
     id: appName,
     name: appName,
-    app: requiredApps,
+    app: [],
     privileges: {
       all: {
-        alerting: {
-          all: [typeName],
-        },
+        ...(typeName
+          ? {
+              alerting: {
+                all: [typeName],
+              },
+            }
+          : {}),
         savedObject: {
           all: [],
           read: [],
@@ -47,9 +51,13 @@ function mockFeature(appName: string, typeName: string, requiredApps: string[] =
         ui: [],
       },
       read: {
-        alerting: {
-          read: [typeName],
-        },
+        ...(typeName
+          ? {
+              alerting: {
+                read: [typeName],
+              },
+            }
+          : {}),
         savedObject: {
           all: [],
           read: [],
@@ -60,8 +68,9 @@ function mockFeature(appName: string, typeName: string, requiredApps: string[] =
   });
 }
 
-const myAppFeature = mockFeature('myApp', 'myType', []);
-const myOtherAppFeature = mockFeature('myOtherApp', 'myType', []);
+const myAppFeature = mockFeature('myApp', 'myType');
+const myOtherAppFeature = mockFeature('myOtherApp', 'myType');
+const myFeatureWithoutAlerting = mockFeature('myOtherApp');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -82,7 +91,7 @@ beforeEach(() => {
     async executor() {},
     producer: 'myApp',
   }));
-  features.getFeatures.mockReturnValue([myAppFeature, myOtherAppFeature]);
+  features.getFeatures.mockReturnValue([myAppFeature, myOtherAppFeature, myFeatureWithoutAlerting]);
 });
 
 describe('ensureAuthorized', () => {
