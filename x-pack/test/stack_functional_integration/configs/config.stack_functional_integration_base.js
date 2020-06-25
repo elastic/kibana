@@ -74,12 +74,12 @@ export default async ({ readConfigFile }) => {
         hash: '/console',
       },
       home: {
-        pathname: '/app/kibana',
-        hash: '/home',
+        pathname: '/app/home',
+        hash: '/',
       },
       sampledata: {
-        pathname: '/app/kibana',
-        hash: '/home/tutorial_directory/sampleData',
+        pathname: '/app/home',
+        hash: '/tutorial_directory/sampleData',
       },
       monitoring: {
         pathname: '/app/monitoring',
