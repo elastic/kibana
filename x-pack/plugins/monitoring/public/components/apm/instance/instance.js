@@ -19,18 +19,22 @@ import { Status } from './status';
 
 export function ApmServerInstance({ summary, metrics, ...props }) {
   const seriesToShow = [
+    metrics.apm_requests,
     metrics.apm_responses_valid,
+
     metrics.apm_responses_errors,
+    metrics.apm_acm_request_count,
+
+    metrics.apm_acm_response,
+    metrics.apm_acm_response_errors,
 
     metrics.apm_output_events_rate_success,
     metrics.apm_output_events_rate_failure,
 
-    metrics.apm_requests,
     metrics.apm_transformations,
-
     metrics.apm_cpu,
-    metrics.apm_memory,
 
+    metrics.apm_memory,
     metrics.apm_os_load,
   ];
 
@@ -46,8 +50,10 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
-          <Status stats={summary} />
-          <EuiSpacer size="s" />
+          <EuiPanel>
+            <Status stats={summary} />
+          </EuiPanel>
+          <EuiSpacer size="m" />
           <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>

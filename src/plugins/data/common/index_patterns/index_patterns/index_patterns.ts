@@ -32,13 +32,14 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
+import { getIndexPatternFieldListCreator, CreateIndexPatternFieldList, Field } from '../fields';
 import {
-  getIndexPatternFieldListCreator,
-  CreateIndexPatternFieldList,
-  Field,
+  OnNotification,
+  OnError,
+  OnUnsupportedTimePattern,
+  IndexPatternSpec,
   FieldSpec,
-} from '../fields';
-import { OnNotification, OnError, OnUnsupportedTimePattern } from '../types';
+} from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 
 const indexPatternCache = createIndexPatternCache();
@@ -198,6 +199,22 @@ export class IndexPatternsService {
 
     return indexPatternCache.set(id, indexPattern);
   };
+
+  specToIndexPattern(spec: IndexPatternSpec) {
+    const indexPattern = new IndexPattern(spec.id, {
+      getConfig: (cfg: any) => this.config.get(cfg),
+      savedObjectsClient: this.savedObjectsClient,
+      apiClient: this.apiClient,
+      patternCache: indexPatternCache,
+      fieldFormats: this.fieldFormats,
+      onNotification: this.onNotification,
+      onError: this.onError,
+      onUnsupportedTimePattern: this.onUnsupportedTimePattern,
+    });
+
+    indexPattern.initFromSpec(spec);
+    return indexPattern;
+  }
 
   make = (id?: string): Promise<IndexPattern> => {
     const indexPattern = new IndexPattern(id, {

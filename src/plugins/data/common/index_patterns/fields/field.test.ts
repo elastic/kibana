@@ -20,7 +20,7 @@
 import { Field } from './field';
 import { IndexPattern } from '../index_patterns';
 import { FieldFormatsStartCommon } from '../..';
-import { KBN_FIELD_TYPES } from '../../../common';
+import { KBN_FIELD_TYPES, FieldSpec, FieldSpecExportFmt } from '../../../common';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {
@@ -59,8 +59,9 @@ describe('Field', function () {
       fieldFormatMap: { name: {}, _source: {}, _score: {}, _id: {} },
     } as unknown) as IndexPattern,
     format: { name: 'formatName' },
-    $$spec: {},
+    $$spec: ({} as unknown) as FieldSpec,
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
+    toSpec: () => (({} as unknown) as FieldSpecExportFmt),
   } as Field;
 
   it('the correct properties are writable', () => {
@@ -145,7 +146,7 @@ describe('Field', function () {
     }).toThrow();
 
     expect(() => {
-      field.$$spec = { a: 'b' };
+      field.$$spec = ({ a: 'b' } as unknown) as FieldSpec;
     }).toThrow();
   });
 
@@ -218,5 +219,22 @@ describe('Field', function () {
       onNotification: () => {},
     });
     expect(flatten(field)).toMatchSnapshot();
+  });
+
+  it('spec snapshot', () => {
+    const field = new Field(
+      {
+        fieldFormatMap: {
+          name: { toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }) },
+        },
+      } as IndexPattern,
+      fieldValues,
+      false,
+      {
+        fieldFormats: {} as FieldFormatsStartCommon,
+        onNotification: () => {},
+      }
+    );
+    expect(field.toSpec()).toMatchSnapshot();
   });
 });

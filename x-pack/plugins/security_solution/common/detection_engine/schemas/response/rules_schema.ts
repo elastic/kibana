@@ -56,7 +56,7 @@ import {
   meta,
   note,
 } from '../common/schemas';
-import { ListsDefaultArray } from '../types/lists_default_array';
+import { DefaultListArray } from '../types/lists_default_array';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -87,7 +87,7 @@ export const requiredRulesSchema = t.type({
   updated_at,
   created_by,
   version,
-  exceptions_list: ListsDefaultArray,
+  exceptions_list: DefaultListArray,
 });
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
