@@ -15,8 +15,6 @@ import React, { MouseEvent } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricFetcher } from './ServiceMetricFetcher';
-import { AnomalyDetection } from './anomaly_detection';
-import { ServiceNode } from '../../../../../common/service_map';
 import { popoverMinWidth } from '../cytoscapeOptions';
 
 interface ContentsProps {
@@ -70,12 +68,13 @@ export function Contents({
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
       </FlexColumnItem>
-      {isService && (
+      {/* //TODO [APM ML] add service health stats here:
+      isService && (
         <FlexColumnItem>
-          <AnomalyDetection serviceNodeData={selectedNodeData as ServiceNode} />
+          <ServiceHealth serviceNodeData={selectedNodeData} />
           <EuiHorizontalRule margin="xs" />
         </FlexColumnItem>
-      )}
+      )*/}
       <FlexColumnItem>
         {isService ? (
           <ServiceMetricFetcher serviceName={selectedNodeServiceName} />

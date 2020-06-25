@@ -22,8 +22,6 @@ import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
@@ -34,7 +32,6 @@ import { PROJECTION } from '../../../../common/projections/typings';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 function getRedirectLocation({
   urlParams,
@@ -86,18 +83,6 @@ export function TransactionOverview() {
     status: transactionListStatus,
   } = useTransactionList(urlParams);
 
-  const { http } = useApmPluginContext().core;
-
-  const { data: hasMLJob = false } = useFetcher(
-    () => {
-      if (serviceName && transactionType) {
-        return getHasMLJob({ serviceName, transactionType, http });
-      }
-    },
-    [http, serviceName, transactionType],
-    { showToastOnError: false }
-  );
-
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: [
@@ -140,7 +125,8 @@ export function TransactionOverview() {
             <EuiSpacer size="s" />
 
             <TransactionCharts
-              hasMLJob={hasMLJob}
+              // TODO [APM ML] set hasMLJob prop when ML integration is reintroduced:
+              hasMLJob={false}
               charts={transactionCharts}
               location={location}
               urlParams={urlParams}
