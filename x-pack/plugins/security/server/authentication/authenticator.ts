@@ -242,6 +242,11 @@ export class Authenticator {
         client: this.options.clusterClient,
         logger: this.options.loggers.get('tokens'),
       }),
+      urls: {
+        loggedOut: options.config.authc.selector.enabled
+          ? `${options.basePath.serverBasePath}/login?msg=LOGGED_OUT`
+          : `${options.basePath.serverBasePath}/security/logged_out`,
+      },
     };
 
     this.providers = new Map(

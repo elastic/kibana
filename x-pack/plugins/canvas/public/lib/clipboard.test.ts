@@ -15,7 +15,7 @@ const get = jest.fn();
 
 describe('clipboard', () => {
   beforeAll(() => {
-    // @ts-ignore
+    // @ts-expect-error
     Storage.mockImplementation(() => ({
       set,
       get,

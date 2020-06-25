@@ -65,7 +65,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ContextSetup](./kibana-plugin-core-public.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-core-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
-|  [DocLinksSetup](./kibana-plugin-core-public.doclinkssetup.md) |  |
+|  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
 |  [EnvironmentMode](./kibana-plugin-core-public.environmentmode.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
@@ -157,7 +157,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-core-public.chromehelpextensionmenugithublink.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-core-public.chromehelpextensionmenulink.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-core-public.chromenavlinkupdateablefields.md) |  |
-|  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [Freezable](./kibana-plugin-core-public.freezable.md) |  |
 |  [HandlerContextType](./kibana-plugin-core-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md) to represent the type of the context. |
