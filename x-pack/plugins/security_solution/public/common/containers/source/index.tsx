@@ -111,55 +111,56 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
   const apolloClient = useApolloClient();
 
   useEffect(() => {
+    let isSubscribed = true;
     const abortCtrl = new AbortController();
 
     async function fetchSource() {
+      if (!isSubscribed || !apolloClient) return;
+
       setState((prevState) => ({ ...prevState, loading: true }));
-      if (apolloClient) {
-        apolloClient
-          .query<SourceQuery.Query, SourceQuery.Variables>({
-            query: sourceQuery,
-            fetchPolicy: 'cache-first',
-            variables: {
-              sourceId,
-              defaultIndex,
+
+      try {
+        const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
+          query: sourceQuery,
+          fetchPolicy: 'cache-first',
+          variables: {
+            sourceId,
+            defaultIndex,
+          },
+          context: {
+            fetchOptions: {
+              signal: abortCtrl.signal,
             },
-            context: {
-              fetchOptions: {
-                signal: abortCtrl.signal,
-              },
-            },
-          })
-          .then(
-            (result) => {
-              setState({
-                loading: false,
-                indicesExist: get('data.source.status.indicesExist', result),
-                browserFields: getBrowserFields(
-                  defaultIndex.join(),
-                  get('data.source.status.indexFields', result)
-                ),
-                indexPattern: getIndexFields(
-                  defaultIndex.join(),
-                  get('data.source.status.indexFields', result)
-                ),
-                errorMessage: null,
-              });
-            },
-            (error) => {
-              setState((prevState) => ({
-                ...prevState,
-                loading: false,
-                errorMessage: error.message,
-              }));
-            }
-          );
+          },
+        });
+        setState({
+          loading: false,
+          indicesExist: get('data.source.status.indicesExist', result),
+          browserFields: getBrowserFields(
+            defaultIndex.join(),
+            get('data.source.status.indexFields', result)
+          ),
+          indexPattern: getIndexFields(
+            defaultIndex.join(),
+            get('data.source.status.indexFields', result)
+          ),
+          errorMessage: null,
+        });
+      } catch (error) {
+        setState((prevState) => ({
+          ...prevState,
+          loading: false,
+          errorMessage: error.message,
+        }));
       }
     }
 
     fetchSource();
 
-    return () => abortCtrl.abort();
+    return () => {
+      isSubscribed = false;
+      return abortCtrl.abort();
+    };
   }, [apolloClient, sourceId, defaultIndex]);
 
   return {
