@@ -223,24 +223,25 @@ describe('searchAfterAndBulkCreate', () => {
         ],
       })
       .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       gap: moment.duration(2, 'm'),
       previousStartedAt: moment().subtract(10, 'm').toDate(),
       listClient,
-      exceptionsList: [
-        {
-          field: 'source.ip',
-          values_operator: 'included',
-          values_type: 'list',
-          values: [
-            {
-              id: 'ci-badguys.txt',
-              name: 'ip',
-            },
-          ],
-        },
-      ],
+      exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,

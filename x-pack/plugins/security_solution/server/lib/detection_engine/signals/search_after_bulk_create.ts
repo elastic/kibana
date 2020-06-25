@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 
-import { ListAndOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertServices } from '../../../../../alerts/server';
 import { ListClient } from '../../../../../lists/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
