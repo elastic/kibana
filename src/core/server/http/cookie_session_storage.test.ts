@@ -29,14 +29,14 @@ import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { httpServerMock } from './http_server.mocks';
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
 
 let server: HttpService;
 
-let logger: ReturnType<typeof loggingServiceMock.create>;
+let logger: ReturnType<typeof loggingSystemMock.create>;
 let env: Env;
 let coreContext: CoreContext;
 const configService = configServiceMock.create();
@@ -67,7 +67,7 @@ configService.atPath.mockReturnValue(
 );
 
 beforeEach(() => {
-  logger = loggingServiceMock.create();
+  logger = loggingSystemMock.create();
   env = Env.createDefault(getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
@@ -324,7 +324,7 @@ describe('Cookie based SessionStorage', () => {
       expect(mockServer.auth.test).toBeCalledTimes(1);
       expect(mockServer.auth.test).toHaveBeenCalledWith('security-cookie', mockRequest);
 
-      expect(loggingServiceMock.collect(logger).warn).toEqual([
+      expect(loggingSystemMock.collect(logger).warn).toEqual([
         ['Found 2 auth sessions when we were only expecting 1.'],
       ]);
     });
@@ -381,7 +381,7 @@ describe('Cookie based SessionStorage', () => {
       const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
       expect(session).toBe(null);
 
-      expect(loggingServiceMock.collect(logger).debug).toEqual([['Error: Invalid cookie.']]);
+      expect(loggingSystemMock.collect(logger).debug).toEqual([['Error: Invalid cookie.']]);
     });
   });
 
