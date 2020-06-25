@@ -15,6 +15,7 @@ import {
   EuiPageContent,
   EuiSpacer,
   EuiScreenReaderOnly,
+  EuiPanel,
 } from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
@@ -154,7 +155,9 @@ export function ApmServerInstances({ apms, setupMode }) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageContent>
-          <Status stats={data.stats} />
+          <EuiPanel>
+            <Status stats={data.stats} />
+          </EuiPanel>
           <EuiSpacer size="m" />
           {setupModeCallout}
           <EuiMonitoringTable

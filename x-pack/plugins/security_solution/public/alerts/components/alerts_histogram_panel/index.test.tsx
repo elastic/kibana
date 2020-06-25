@@ -9,6 +9,15 @@ import { shallow } from 'enzyme';
 
 import { AlertsHistogramPanel } from './index';
 
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+  return {
+    ...originalModule,
+    createHref: jest.fn(),
+    useHistory: jest.fn(),
+  };
+});
+
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/navigation/use_get_url_search');
 

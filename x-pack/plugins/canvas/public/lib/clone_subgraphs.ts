@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { arrayToMap } from './aeroelastic/functional';
 import { getId } from './get_id';
 import { PositionedElement } from '../../types';

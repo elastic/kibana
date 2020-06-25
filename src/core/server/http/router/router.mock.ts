@@ -19,7 +19,7 @@
 
 import { IRouter } from './router';
 
-export type RouterMock = DeeplyMockedKeys<IRouter>;
+export type RouterMock = jest.Mocked<IRouter>;
 
 function create({ routerPath = '' }: { routerPath?: string } = {}): RouterMock {
   return {

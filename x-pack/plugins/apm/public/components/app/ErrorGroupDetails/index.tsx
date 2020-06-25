@@ -13,7 +13,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
@@ -37,7 +36,7 @@ const Titles = styled.div`
 const Label = styled.div`
   margin-bottom: ${px(units.quarter)};
   font-size: ${fontSizes.small};
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
 const Message = styled.div`
