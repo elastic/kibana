@@ -9,8 +9,6 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { componentTemplateSchema } from './schema_validation';
 
-const bodySchema = schema.object(componentTemplateSchema);
-
 const paramsSchema = schema.object({
   name: schema.string(),
 });
@@ -24,7 +22,7 @@ export const registerUpdateRoute = ({
     {
       path: addBasePath('/component_templates/{name}'),
       validate: {
-        body: bodySchema,
+        body: componentTemplateSchema,
         params: paramsSchema,
       },
     },

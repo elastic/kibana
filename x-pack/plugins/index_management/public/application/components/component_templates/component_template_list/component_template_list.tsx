@@ -38,6 +38,10 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     return history.push('component_templates');
   };
 
+  const goToEditComponentTemplate = (name: string) => {
+    return history.push(`edit_component_template/${encodeURIComponent(name)}`);
+  };
+
   // Track component loaded
   useEffect(() => {
     trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
@@ -64,6 +68,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
         componentTemplates={data}
         onReloadClick={sendRequest}
         onDeleteClick={setComponentTemplatesToDelete}
+        onEditClick={goToEditComponentTemplate}
         history={history as ScopedHistory}
       />
     );
@@ -97,6 +102,13 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
           onClose={goToList}
           componentTemplateName={componentTemplateName}
           actions={[
+            {
+              name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.editButtonLabel', {
+                defaultMessage: 'Edit',
+              }),
+              icon: 'pencil',
+              handleActionClick: () => goToEditComponentTemplate(componentTemplateName),
+            },
             {
               name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {
                 defaultMessage: 'Delete',

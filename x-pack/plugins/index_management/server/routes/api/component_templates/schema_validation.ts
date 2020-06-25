@@ -5,7 +5,8 @@
  */
 import { schema } from '@kbn/config-schema';
 
-export const componentTemplateSchema = {
+export const componentTemplateSchema = schema.object({
+  name: schema.string(),
   template: schema.object({
     settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),
@@ -16,4 +17,4 @@ export const componentTemplateSchema = {
   _kbnMeta: schema.object({
     usedBy: schema.arrayOf(schema.string()),
   }),
-};
+});

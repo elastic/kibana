@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ComponentTemplatesProvider } from './component_templates_context';
-
-export { ComponentTemplateList } from './component_template_list';
-
-export { ComponentTemplateDetailsFlyout } from './component_template_details';
-
-export { ComponentTemplateCreate } from './component_template_create';
-
 export { ComponentTemplateEdit } from './component_template_edit';

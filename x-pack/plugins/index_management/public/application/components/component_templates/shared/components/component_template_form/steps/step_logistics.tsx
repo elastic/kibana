@@ -67,6 +67,17 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
     }, [form.isValid, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    useEffect(() => {
+      const subscription = form.subscribe(({ data, validate, isValid }) => {
+        onChange({
+          isValid,
+          validate,
+          getData: data.format,
+        });
+      });
+      return subscription.unsubscribe;
+    }, [onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+
     return (
       <Form form={form} data-test-subj="stepLogistics">
         <EuiFlexGroup justifyContent="spaceBetween">

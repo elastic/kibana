@@ -25,6 +25,7 @@ export interface Props {
   componentTemplates: ComponentTemplateListItem[];
   onReloadClick: () => void;
   onDeleteClick: (componentTemplateName: string[]) => void;
+  onEditClick: (componentTemplateName: string) => void;
   history: ScopedHistory;
 }
 
@@ -32,6 +33,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   componentTemplates,
   onReloadClick,
   onDeleteClick,
+  onEditClick,
   history,
 }) => {
   const { trackMetric } = useComponentTemplatesContext();
@@ -214,6 +216,21 @@ export const ComponentTable: FunctionComponent<Props> = ({
           />
         ),
         actions: [
+          {
+            name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.actionEditText', {
+              defaultMessage: 'Edit',
+            }),
+            isPrimary: true,
+            description: i18n.translate(
+              'xpack.idxMgmt.componentTemplatesList.table.actionEditDecription',
+              {
+                defaultMessage: 'Edit this component template',
+              }
+            ),
+            icon: 'pencil',
+            type: 'icon',
+            onClick: ({ name }: ComponentTemplateListItem) => onEditClick(name),
+          },
           {
             'data-test-subj': 'deleteComponentTemplateButton',
             isPrimary: true,

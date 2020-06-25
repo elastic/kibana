@@ -16,7 +16,7 @@ import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
 
 import { useServices } from './app_context';
-import { ComponentTemplateCreate } from './components';
+import { ComponentTemplateCreate, ComponentTemplateEdit } from './components';
 
 export const App = ({ history }: { history: ScopedHistory }) => {
   const { uiMetricService } = useServices();
@@ -36,6 +36,7 @@ export const AppWithoutRouter = () => (
     <Route exact path="/create_component_template" component={ComponentTemplateCreate} />
     <Route exact path="/clone_template/:name*" component={TemplateClone} />
     <Route exact path="/edit_template/:name*" component={TemplateEdit} />
+    <Route exact path="/edit_component_template/:name*" component={ComponentTemplateEdit} />
     <Route path={`/:section(${homeSections.join('|')})`} component={IndexManagementHome} />
     <Redirect from={`/`} to={`/indices`} />
   </Switch>

@@ -64,10 +64,24 @@ export const getApi = (
     return result;
   }
 
+  async function updateComponentTemplate(componentTemplate: ComponentTemplateDeserialized) {
+    const { name } = componentTemplate;
+    const result = await sendRequest({
+      path: `${apiBasePath}/component_templates/${encodeURIComponent(name)}`,
+      method: 'put',
+      body: JSON.stringify(componentTemplate),
+    });
+
+    // trackMetric('count', UIM_TEMPLATE_UPDATE);
+
+    return result;
+  }
+
   return {
     useLoadComponentTemplates,
     deleteComponentTemplates,
     useLoadComponentTemplate,
     createComponentTemplate,
+    updateComponentTemplate,
   };
 };
