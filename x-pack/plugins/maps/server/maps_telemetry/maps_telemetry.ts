@@ -11,12 +11,47 @@ import {
   SavedObjectAttribute,
 } from 'kibana/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
-import { ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { SOURCE_TYPES, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
 import { getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
+
+interface IStats {
+  [key: string]: {
+    min: number;
+    max: number;
+    avg: number;
+  };
+}
+
+interface ILayerTypeCount {
+  [key: string]: number;
+}
+
+function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
+  const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map((lTypes) => Object.keys(lTypes))));
+
+  return uniqueLayerTypes.reduce((accu: IStats, type: string) => {
+    const typeCounts = layerCountsList.reduce(
+      (tCountsAccu: number[], tCounts: ILayerTypeCount): number[] => {
+        if (tCounts[type]) {
+          tCountsAccu.push(tCounts[type]);
+        }
+        return tCountsAccu;
+      },
+      []
+    );
+    const typeCountsSum = _.sum(typeCounts);
+    accu[type] = {
+      min: typeCounts.length ? _.min(typeCounts) : 0,
+      max: typeCounts.length ? _.max(typeCounts) : 0,
+      avg: typeCountsSum ? typeCountsSum / mapsCount : 0,
+    };
+    return accu;
+  }, {});
+}
 
 function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
   const fieldLists = indexPatterns.map((indexPattern) =>
@@ -71,6 +106,19 @@ export function buildMapsTelemetry({
   });
 
   const layersCount = layerLists.map((lList) => lList.length);
+  const layerTypesCount = layerLists.map((lList) => _.countBy(lList, 'type'));
+
+  // Count of EMS Vector layers used
+  const emsLayersCount = layerLists.map((lList) =>
+    _(lList)
+      .countBy((layer: LayerDescriptor) => {
+        const isEmsFile = _.get(layer, 'sourceDescriptor.type') === SOURCE_TYPES.EMS_FILE;
+        return isEmsFile && _.get(layer, 'sourceDescriptor.id');
+      })
+      .pick((val, key) => key !== 'false')
+      .value()
+  );
+
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
 
@@ -100,6 +148,14 @@ export function buildMapsTelemetry({
         min: layersCount.length ? _.min(layersCount) : 0,
         max: layersCount.length ? _.max(layersCount) : 0,
         avg: layersCountSum ? layersCountSum / mapsCount : 0,
+      },
+      // Count of layers by type
+      layerTypesCount: {
+        ...getUniqueLayerCounts(layerTypesCount, mapsCount),
+      },
+      // Count of layer by EMS region
+      emsVectorLayersCount: {
+        ...getUniqueLayerCounts(emsLayersCount, mapsCount),
       },
     },
   };
