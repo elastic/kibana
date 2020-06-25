@@ -18,14 +18,29 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
 export const configureClient = (
   config: ElasticsearchClientConfig,
-  { scoped = false }: { scoped?: boolean } = {}
+  { logger, scoped = false }: { logger: Logger; scoped?: boolean }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
   const client = new Client(clientOptions);
-  // TODO: logQueries & co.
+
+  client.on('response', (err, event) => {
+    if (err) {
+      logger.error(`${err.name}: ${err.message}`);
+    } else if (config.logQueries) {
+      const params = event.meta.request.params;
+      logger.debug(
+        `${event.statusCode}\n${params.method} ${params.path}\n${params.querystring?.trim() ?? ''}`,
+        {
+          tags: ['query'],
+        }
+      );
+    }
+  });
+
   return client;
 };

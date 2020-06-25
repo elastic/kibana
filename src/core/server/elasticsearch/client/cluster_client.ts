@@ -42,11 +42,11 @@ export class ClusterClient implements IClusterClient {
 
   constructor(
     private readonly config: ElasticsearchClientConfig,
-    private readonly log: Logger, // TODO: use when configuring the es client with logQueries
+    logger: Logger,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
-    this.internalWrapper = getClientFacade(configureClient(config));
-    this.scopedClient = configureClient(config, { scoped: true });
+    this.internalWrapper = getClientFacade(configureClient(config, { logger }));
+    this.scopedClient = configureClient(config, { logger, scoped: true });
   }
 
   asInternalUser() {

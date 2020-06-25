@@ -67,8 +67,8 @@ export function parseClientOptions(
     clientOptions.sniffInterval = getDurationAsMs(config.sniffInterval);
   }
 
-  // TODO: this can either be done here or by host in convertHost.
-  // Not sure which one we should choose.
+  // TODO: this can either be done globally here or by host in convertHost.
+  //       Not sure which option is the best.
   if (config.username && config.password) {
     clientOptions.auth = {
       username: config.username,
