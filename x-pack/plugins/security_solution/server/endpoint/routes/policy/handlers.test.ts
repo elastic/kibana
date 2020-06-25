@@ -21,7 +21,6 @@ import {
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
 import { SearchResponse } from 'elasticsearch';
-import { getManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';

@@ -60,7 +60,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
 
     try {
       const manifestState = await manifestManager.refresh();
-      if (manifestState != null) {
+      if (manifestState !== null) {
         if (await manifestManager.dispatch(manifestState)) {
           await manifestManager.commit(manifestState);
         }

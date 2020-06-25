@@ -21,37 +21,34 @@ export const getDatasourceCreateCallback = (
       return newDatasource;
     }
 
-    const manifestState = await manifestManager.refresh({ initialize: true });
-
     // We cast the type here so that any changes to the Endpoint specific data
     // follow the types/schema expected
     let updatedDatasource = newDatasource as NewPolicyData;
-    // updatedDatasource['artifact_manifest'] = manifestManager.
-    // console.log(JSON.stringify(updatedDatasource.inputs[0].config));
 
-    // Until we get the Default Policy Configuration in the Endpoint package,
-    // we will add it here manually at creation time.
-    // @ts-ignore
-    if (newDatasource.inputs.length === 0) {
-      updatedDatasource = {
-        ...newDatasource,
-        artifact_manifest: manifestState.manifest.toEndpointFormat(),
-        inputs: [
-          {
-            type: 'endpoint',
-            enabled: true,
-            streams: [],
-            config: {
-              policy: {
-                value: policyConfigFactory(),
+    const manifestState = await manifestManager.refresh({ initialize: true });
+    if (manifestState !== null) {
+      // Until we get the Default Policy Configuration in the Endpoint package,
+      // we will add it here manually at creation time.
+      // @ts-ignore
+      if (newDatasource.inputs.length === 0) {
+        updatedDatasource = {
+          ...newDatasource,
+          inputs: [
+            {
+              type: 'endpoint',
+              enabled: true,
+              streams: [],
+              config: {
+                artifact_manifest: manifestState.manifest.toEndpointFormat(),
+                policy: {
+                  value: policyConfigFactory(),
+                },
               },
             },
-          },
-        ],
-      };
+          ],
+        };
+      }
     }
-
-    // console.log(updatedDatasource);
 
     try {
       return updatedDatasource;

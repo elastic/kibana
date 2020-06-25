@@ -16,7 +16,7 @@ describe('buildEventTypeSignal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockExceptionClient = listMock.getExceptionList();
+    mockExceptionClient = listMock.getExceptionListClient();
   });
 
   test('it should convert the exception lists response to the proper endpoint format', async () => {

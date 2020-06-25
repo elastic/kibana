@@ -7,7 +7,7 @@
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 
 import { ManifestClient } from './manifest_client';
-import { getInternalManifestMock } from '../../schemas';
+import { getInternalManifestMock } from '../../schemas/artifacts/saved_objects.mock';
 
 export class ManifestClientMock extends ManifestClient {
   public createManifest = jest.fn().mockResolvedValue(getInternalManifestMock());

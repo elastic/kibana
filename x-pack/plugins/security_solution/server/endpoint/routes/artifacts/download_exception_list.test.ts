@@ -26,10 +26,7 @@ import { compressExceptionList } from '../../lib/artifacts/lists';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import {
-  createMockAgentService,
-  createMockEndpointAppContextServiceStartContract,
-} from '../../mocks';
+import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 

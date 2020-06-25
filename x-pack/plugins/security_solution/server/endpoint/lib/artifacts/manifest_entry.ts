@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalArtifactSchema, ManifestEntrySchema } from '../../schemas/artifacts';
+import { InternalArtifactSchema } from '../../schemas/artifacts';
+import { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
 
 export class ManifestEntry {
   private artifact: InternalArtifactSchema;

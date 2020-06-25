@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InternalArtifactSchema } from '../../schemas';
 import {
-  InternalArtifactSchema,
   getInternalArtifactMock,
   getInternalArtifactMockWithDiffs,
-} from '../../schemas';
+} from '../../schemas/artifacts/saved_objects.mock';
 import { Manifest } from './manifest';
 
 describe('manifest', () => {

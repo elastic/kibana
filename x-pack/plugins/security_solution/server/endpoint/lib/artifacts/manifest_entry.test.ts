@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalArtifactSchema, getInternalArtifactMock } from '../../schemas';
+import { InternalArtifactSchema } from '../../schemas';
+import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { ManifestEntry } from './manifest_entry';
 
 describe('manifest_entry', () => {

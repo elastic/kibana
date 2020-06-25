@@ -32,10 +32,6 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
   };
 };
 
-import { ExceptionListClient } from '../../../lists/server';
-
-import { ArtifactClient, ManifestManager } from './services';
-
 /**
  * Creates a mock AgentService
  */

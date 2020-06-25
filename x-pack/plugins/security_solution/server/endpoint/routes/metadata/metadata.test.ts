@@ -33,7 +33,6 @@ import {
 } from '../../mocks';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { getManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 

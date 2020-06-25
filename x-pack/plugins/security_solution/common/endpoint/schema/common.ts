@@ -6,14 +6,17 @@
 
 import * as t from 'io-ts';
 
-export const body = t.string;
+export const identifier = t.string;
 
-export const created = t.number; // TODO: Make this into an ISO Date string check
+export const manifestVersion = t.string;
 
-export const encoding = t.keyof({
-  xz: null,
-});
-
-export const schemaVersion = t.keyof({
+export const manifestSchemaVersion = t.keyof({
   '1.0.0': null,
 });
+export type ManifestSchemaVersion = t.TypeOf<typeof manifestSchemaVersion>;
+
+export const sha256 = t.string;
+
+export const size = t.number;
+
+export const url = t.string;

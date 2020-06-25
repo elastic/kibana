@@ -5,14 +5,12 @@
  */
 
 import { validate } from '../../../../common/validate';
+import { InternalArtifactSchema, InternalManifestSchema } from '../../schemas/artifacts';
 import {
-  InternalArtifactSchema,
-  InternalManifestSchema,
-  ManifestSchema,
-  ManifestSchemaVersion,
-  manifestSchema,
   manifestSchemaVersion,
-} from '../../schemas/artifacts';
+  ManifestSchemaVersion,
+} from '../../../../common/endpoint/schema/common';
+import { ManifestSchema, manifestSchema } from '../../../../common/endpoint/schema/manifest';
 import { ManifestEntry } from './manifest_entry';
 
 export interface ManifestDiff {

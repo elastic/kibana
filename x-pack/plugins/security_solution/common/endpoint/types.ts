@@ -5,6 +5,7 @@
  */
 
 import { Datasource, NewDatasource } from '../../../ingest_manager/common';
+import { ManifestSchema } from './schema/manifest';
 
 /**
  * Object that allows you to maintain stateful information in the location object across navigation events
@@ -658,6 +659,7 @@ export type NewPolicyData = NewDatasource & {
       enabled: boolean;
       streams: [];
       config: {
+        artifact_manifest: ManifestSchema;
         policy: {
           value: PolicyConfig;
         };

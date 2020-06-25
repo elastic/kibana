@@ -5,7 +5,8 @@
  */
 
 import * as t from 'io-ts';
-import { body, created, encoding, identifier, sha256, size } from './common';
+import { identifier, sha256, size } from '../../../../common/endpoint/schema/common';
+import { body, created, encoding } from './common';
 
 export const internalArtifactSchema = t.exact(
   t.type({

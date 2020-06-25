@@ -48,6 +48,7 @@ export class ManifestManager {
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
+    this.datasourceService = context.datasourceService;
     this.savedObjectsClient = context.savedObjectsClient;
     this.logger = context.logger;
     this.cache = context.cache;
@@ -103,8 +104,17 @@ export class ManifestManager {
     }
   }
 
-  public async refresh(opts: ManifestRefreshOpts): Promise<NewManifestState | null> {
+  public async refresh(opts?: ManifestRefreshOpts): Promise<NewManifestState | null> {
     let oldManifest: Manifest;
+
+    /*
+      const result = await this.datasourceService.list(
+        this.savedObjectsClient,
+        { kuery: 'ingest-datasourcese.package.name:endpoint' },
+      );
+      console.log(result);
+      console.log(JSON.stringify(result));
+      */
 
     // Get the last-dispatched manifest
     oldManifest = await this.getLastDispatchedManifest(ManifestConstants.SCHEMA_VERSION);
@@ -156,9 +166,18 @@ export class ManifestManager {
    *
    * @return {boolean} True if dispatched.
    */
-  public async dispatch(manifestState: NewManifestState): boolean {
+  public async dispatch(manifestState: NewManifestState | null): boolean {
+    if (manifestState === null) {
+      this.logger.debug('manifestState was null, aborting dispatch');
+      return false;
+    }
+
     if (manifestState.diffs.length > 0) {
       this.logger.info(`Dispatching new manifest with diffs: ${manifestState.diffs}`);
+      const result = await this.datasourceService.list(this.savedObjectsClient, {
+        kuery: 'ingest-datasources.package.name:endpoint',
+      });
+      this.logger.debug(result);
       //
       // Datasource:
       //
@@ -188,7 +207,12 @@ export class ManifestManager {
     return false;
   }
 
-  public async commit(manifestState: NewManifestState) {
+  public async commit(manifestState: NewManifestState | null) {
+    if (manifestState === null) {
+      this.logger.debug('manifestState was null, aborting commit');
+      return;
+    }
+
     const manifestClient = this.getManifestClient(manifestState.manifest.getSchemaVersion());
 
     // Commit the new manifest

@@ -7,7 +7,7 @@
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 
 import { ArtifactClient } from './artifact_client';
-import { getInternalArtifactMock } from '../../schemas';
+import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 
 export class ArtifactClientMock extends ArtifactClient {
   public getArtifact = jest.fn().mockResolvedValue(getInternalArtifactMock());
