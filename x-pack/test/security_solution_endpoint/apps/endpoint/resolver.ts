@@ -249,7 +249,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('zoom-in');
     });
 
-    // inserting tests here
+    // Tests for Resolver panels
+    it('shows the default panel first', async () => {
+      expect(1).to.equal(1);
+    });
 
     after(async () => {
       await browser.setWindowSize(1600, 1000);

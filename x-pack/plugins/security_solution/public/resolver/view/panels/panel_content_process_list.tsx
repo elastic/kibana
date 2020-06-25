@@ -157,7 +157,12 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
-      <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />
+      <EuiInMemoryTable<ProcessTableView>
+        items={processTableView}
+        columns={columns}
+        sorting
+        data-test-subject="default-panel"
+      />
     </>
   );
 });
