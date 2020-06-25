@@ -5,10 +5,11 @@
  */
 
 import React, { useCallback } from 'react';
+import { EuiButtonIcon, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { LogEntryColumnContent } from './log_entry_column';
 import { euiStyled } from '../../../../../observability/public';
-import { HorizontalBoxButtonWithPopoverMenu } from '../../horizontal_box_button_with_popover';
 
 interface LogEntryActionsColumnProps {
   isHovered: boolean;
@@ -58,32 +59,43 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
     onViewLogInContext?.();
   }, [onCloseMenu, onViewLogInContext]);
 
+  const button = (
+    <ButtonWrapper>
+      <EuiButtonIcon
+        aria-label={MENU_LABEL}
+        color="ghost"
+        iconType="boxesHorizontal"
+        onClick={onOpenMenu}
+      />
+    </ButtonWrapper>
+  );
+
   const items = [
-    {
-      key: 'log_details',
-      onClick: handleClickViewDetails,
-      label: LOG_DETAILS_LABEL,
-    },
+    <EuiContextMenuItem key="log_details" onClick={handleClickViewDetails}>
+      {LOG_DETAILS_LABEL}
+    </EuiContextMenuItem>,
   ];
 
   if (onViewLogInContext !== undefined) {
-    items.push({
-      key: 'view_in_context',
-      onClick: handleClickViewInContext,
-      label: LOG_VIEW_IN_CONTEXT_LABEL,
-    });
+    items.push(
+      <EuiContextMenuItem key="view_in_context" onClick={handleClickViewInContext}>
+        {LOG_VIEW_IN_CONTEXT_LABEL}
+      </EuiContextMenuItem>
+    );
   }
 
   return (
     <ActionsColumnContent>
       {isHovered || isMenuOpen ? (
         <AbsoluteWrapper>
-          <HorizontalBoxButtonWithPopoverMenu
-            onMenuOpen={onOpenMenu}
-            onMenuClose={onCloseMenu}
-            ariaLabel={MENU_LABEL}
-            menuItems={items}
-          />
+          <EuiPopover
+            closePopover={onCloseMenu}
+            isOpen={isMenuOpen}
+            button={button}
+            ownFocus={true}
+          >
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
         </AbsoluteWrapper>
       ) : null}
     </ActionsColumnContent>
@@ -93,6 +105,13 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
 const ActionsColumnContent = euiStyled(LogEntryColumnContent)`
   overflow: hidden;
   user-select: none;
+`;
+
+const ButtonWrapper = euiStyled.div`
+  background: ${(props) => props.theme.eui.euiColorPrimary};
+  border-radius: 50%;
+  padding: 4px;
+  transform: translateY(-6px);
 `;
 
 // this prevents the button from influencing the line height
