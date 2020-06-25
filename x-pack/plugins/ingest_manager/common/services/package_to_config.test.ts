@@ -82,17 +82,15 @@ describe('Ingest Manager - packageToConfig', () => {
       ).toEqual([
         {
           type: 'foo',
-          dataset: { type: 'logs' },
           enabled: true,
-          streams: [{ id: 'foo-foo', enabled: true, dataset: { name: 'foo' } }],
+          streams: [{ id: 'foo-foo', enabled: true, dataset: { name: 'foo', type: 'logs' } }],
         },
         {
           type: 'bar',
-          dataset: { type: 'logs' },
           enabled: true,
           streams: [
-            { id: 'bar-bar', enabled: true, dataset: { name: 'bar' } },
-            { id: 'bar-bar2', enabled: true, dataset: { name: 'bar2' } },
+            { id: 'bar-bar', enabled: true, dataset: { name: 'bar', type: 'logs' } },
+            { id: 'bar-bar2', enabled: true, dataset: { name: 'bar2', type: 'logs' } },
           ],
         },
       ]);
@@ -138,32 +136,30 @@ describe('Ingest Manager - packageToConfig', () => {
       ).toEqual([
         {
           type: 'foo',
-          dataset: { type: 'logs' },
           enabled: true,
           streams: [
             {
               id: 'foo-foo',
               enabled: true,
-              dataset: { name: 'foo' },
+              dataset: { name: 'foo', type: 'logs' },
               vars: { 'var-name': { value: 'foo-var-value' } },
             },
           ],
         },
         {
           type: 'bar',
-          dataset: { type: 'logs' },
           enabled: true,
           streams: [
             {
               id: 'bar-bar',
               enabled: true,
-              dataset: { name: 'bar' },
+              dataset: { name: 'bar', type: 'logs' },
               vars: { 'var-name': { type: 'text', value: 'bar-var-value' } },
             },
             {
               id: 'bar-bar2',
               enabled: true,
-              dataset: { name: 'bar2' },
+              dataset: { name: 'bar2', type: 'logs' },
               vars: { 'var-name': { type: 'yaml', value: 'bar2-var-value' } },
             },
           ],
@@ -251,7 +247,6 @@ describe('Ingest Manager - packageToConfig', () => {
       ).toEqual([
         {
           type: 'foo',
-          dataset: { type: 'logs' },
           enabled: true,
           vars: {
             'foo-input-var-name': { value: 'foo-input-var-value' },
@@ -262,7 +257,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'foo-foo',
               enabled: true,
-              dataset: { name: 'foo' },
+              dataset: { name: 'foo', type: 'logs' },
               vars: {
                 'var-name': { value: 'foo-var-value' },
               },
@@ -271,7 +266,6 @@ describe('Ingest Manager - packageToConfig', () => {
         },
         {
           type: 'bar',
-          dataset: { type: 'logs' },
           enabled: true,
           vars: {
             'bar-input-var-name': { value: ['value1', 'value2'] },
@@ -281,7 +275,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'bar-bar',
               enabled: true,
-              dataset: { name: 'bar' },
+              dataset: { name: 'bar', type: 'logs' },
               vars: {
                 'var-name': { value: 'bar-var-value' },
               },
@@ -289,7 +283,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'bar-bar2',
               enabled: true,
-              dataset: { name: 'bar2' },
+              dataset: { name: 'bar2', type: 'logs' },
               vars: {
                 'var-name': { value: 'bar2-var-value' },
               },
@@ -298,13 +292,12 @@ describe('Ingest Manager - packageToConfig', () => {
         },
         {
           type: 'with-disabled-streams',
-          dataset: { type: 'logs' },
           enabled: false,
           streams: [
             {
               id: 'with-disabled-streams-disabled',
               enabled: false,
-              dataset: { name: 'disabled' },
+              dataset: { name: 'disabled', type: 'logs' },
               vars: {
                 'var-name': { value: [] },
               },
@@ -312,7 +305,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'with-disabled-streams-disabled2',
               enabled: false,
-              dataset: { name: 'disabled2' },
+              dataset: { name: 'disabled2', type: 'logs' },
             },
           ],
         },

@@ -30,7 +30,6 @@ const DatasourceBaseSchema = {
   inputs: schema.arrayOf(
     schema.object({
       type: schema.string(),
-      dataset: schema.maybe(schema.object({ type: schema.string() })),
       enabled: schema.boolean(),
       processors: schema.maybe(schema.arrayOf(schema.string())),
       vars: schema.maybe(ConfigRecordSchema),
@@ -47,7 +46,7 @@ const DatasourceBaseSchema = {
         schema.object({
           id: schema.string(),
           enabled: schema.boolean(),
-          dataset: schema.object({ name: schema.string() }),
+          dataset: schema.object({ name: schema.string(), type: schema.string() }),
           processors: schema.maybe(schema.arrayOf(schema.string())),
           vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(

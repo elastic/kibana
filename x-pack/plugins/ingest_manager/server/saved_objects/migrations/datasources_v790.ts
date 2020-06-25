@@ -35,7 +35,7 @@ export const migrateDatasourcesToV790: SavedObjectMigrationFn<Pre790Datasource, 
   updatedDatasource.attributes.updated_at = updatedDatasource?.updated_at ?? defDate;
   updatedDatasource.attributes.inputs.forEach((input) => {
     input.streams.forEach((stream) => {
-      stream.dataset = { name: (stream.dataset as unknown) as string };
+      stream.dataset = { name: (stream.dataset as unknown) as string, type: '' };
     });
   });
 

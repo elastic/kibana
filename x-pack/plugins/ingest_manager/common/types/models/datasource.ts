@@ -22,6 +22,7 @@ export interface NewDatasourceInputStream {
   enabled: boolean;
   dataset: {
     name: string;
+    type: string;
   };
   processors?: string[];
   config?: DatasourceConfigRecord;
@@ -34,9 +35,6 @@ export interface DatasourceInputStream extends NewDatasourceInputStream {
 
 export interface NewDatasourceInput {
   type: string;
-  dataset?: {
-    type: string;
-  };
   enabled: boolean;
   processors?: string[];
   config?: DatasourceConfigRecord;

@@ -26,7 +26,6 @@ export const storedDatasourcesToAgentInputs = (
         type: input.type,
         dataset: {
           namespace: datasource.namespace || 'default',
-          ...(input.dataset?.type ? { type: input.dataset.type } : {}),
         },
         use_output: DEFAULT_OUTPUT.name,
         ...Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {

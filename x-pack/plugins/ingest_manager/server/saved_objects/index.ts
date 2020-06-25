@@ -203,11 +203,6 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
           type: 'nested',
           properties: {
             type: { type: 'keyword' },
-            dataset: {
-              properties: {
-                type: { type: 'keyword' },
-              },
-            },
             enabled: { type: 'boolean' },
             processors: { type: 'keyword' },
             config: { type: 'flattened' },
@@ -220,6 +215,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
                 dataset: {
                   properties: {
                     name: { type: 'keyword' },
+                    type: { type: 'keyword' },
                   },
                 },
                 processors: { type: 'keyword' },
