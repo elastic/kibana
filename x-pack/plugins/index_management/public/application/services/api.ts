@@ -31,14 +31,12 @@ import {
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
 } from '../../../common/constants';
-
+import { TemplateDeserialized, TemplateListItem, DataStream } from '../../../common';
+import { IndexMgmtMetricsType } from '../../types';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
-
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import { TemplateDeserialized, TemplateListItem } from '../../../common';
-import { IndexMgmtMetricsType } from '../../types';
 
 // Temporary hack to provide the uiMetricService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
@@ -47,6 +45,28 @@ export const setUiMetricService = (_uiMetricService: UiMetricService<IndexMgmtMe
   uiMetricService = _uiMetricService;
 };
 // End hack
+
+export function useLoadDataStreams() {
+  return useRequest<DataStream[]>({
+    path: `${API_BASE_PATH}/data_streams`,
+    method: 'get',
+  });
+}
+
+export function useLoadDataStream(name: string) {
+  return useRequest<DataStream>({
+    path: `${API_BASE_PATH}/data_streams/${encodeURIComponent(name)}`,
+    method: 'get',
+  });
+}
+
+export async function deleteDataStreams(dataStreams: string[]) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/delete_data_streams`,
+    method: 'post',
+    body: { dataStreams },
+  });
+}
 
 export async function loadIndices() {
   const response = await httpService.httpClient.get(`${API_BASE_PATH}/indices`);

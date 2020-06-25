@@ -7,7 +7,7 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiSideNav, EuiSideNavItemType, EuiFieldNumber } from '@elastic/eui';
+import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiFieldNumber } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
@@ -303,18 +303,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
         />
       );
 
-      interface ItemType {
-        name: string;
-        'data-test-subj': string;
-      }
-      const items: Array<EuiSideNavItemType<ItemType>> = wrapper.find(EuiSideNav).prop('items');
-      const options = (items[0].items as unknown) as ItemType[];
+      const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-      expect(options.find(({ name }) => name === 'Minimum')!['data-test-subj']).not.toContain(
+      expect(items.find(({ label }) => label === 'Minimum')!['data-test-subj']).not.toContain(
         'Incompatible'
       );
 
-      expect(options.find(({ name }) => name === 'Date histogram')!['data-test-subj']).toContain(
+      expect(items.find(({ label }) => label === 'Date histogram')!['data-test-subj']).toContain(
         'Incompatible'
       );
     });
@@ -467,7 +462,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(setState).not.toHaveBeenCalled();
     });
 
-    it('should update label on label input changes', () => {
+    it('should update label and custom label flag on label input changes', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
       act(() => {
@@ -485,7 +480,106 @@ describe('IndexPatternDimensionEditorPanel', () => {
               ...state.layers.first.columns,
               col1: expect.objectContaining({
                 label: 'New Label',
+                customLabel: true,
                 // Other parts of this don't matter for this test
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should not keep the label as long as it is the default label', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={{
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    label: 'Max of bytes',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    // Private
+                    operationType: 'max',
+                    sourceField: 'bytes',
+                    params: { format: { id: 'bytes' } },
+                  },
+                },
+              },
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
+      });
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                label: 'Minimum of bytes',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should keep the label on operation change if it is custom', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={{
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    label: 'Custom label',
+                    customLabel: true,
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    // Private
+                    operationType: 'max',
+                    sourceField: 'bytes',
+                    params: { format: { id: 'bytes' } },
+                  },
+                },
+              },
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
+      });
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                label: 'Custom label',
+                customLabel: true,
               }),
             },
           },
@@ -878,13 +972,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         />
       );
 
-      interface ItemType {
-        name: React.ReactNode;
-      }
-      const items: Array<EuiSideNavItemType<ItemType>> = wrapper.find(EuiSideNav).prop('items');
-      const options = (items[0].items as unknown) as ItemType[];
+      const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-      expect(options.map(({ name }: { name: React.ReactNode }) => name)).toEqual([
+      expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
         'Unique count',
         'Average',
         'Count',

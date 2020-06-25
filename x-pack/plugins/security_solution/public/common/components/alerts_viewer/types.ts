@@ -5,16 +5,19 @@
  */
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { NetworkComponentQueryProps } from '../../../network/pages/navigation/types';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
 
 type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;
-export interface AlertsComponentsQueryProps
+
+export interface AlertsComponentsProps
   extends Pick<
     CommonQueryProps,
     'deleteQuery' | 'endDate' | 'filterQuery' | 'skip' | 'setQuery' | 'startDate' | 'type'
   > {
+  timelineId: TimelineIdLiteral;
   pageFilters: Filter[];
   stackByOptions?: MatrixHistogramOption[];
   defaultFilters?: Filter[];

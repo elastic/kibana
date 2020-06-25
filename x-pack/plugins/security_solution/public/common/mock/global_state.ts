@@ -229,6 +229,7 @@ export const mockGlobalState: State = {
         status: TimelineStatus.active,
       },
     },
+    insertTimeline: null,
   },
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,

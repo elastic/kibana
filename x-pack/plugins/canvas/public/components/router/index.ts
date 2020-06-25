@@ -5,15 +5,14 @@
  */
 
 import { connect } from 'react-redux';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { setFullscreen } from '../../state/actions/transient';
 import {
   enableAutoplay,
   setRefreshInterval,
   setAutoplayInterval,
-  // @ts-ignore untyped local
 } from '../../state/actions/workpad';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { Router as Component } from './router';
 import { State } from '../../../types';
 

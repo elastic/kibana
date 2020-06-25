@@ -69,8 +69,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   const [loadingError, setLoadingError] = useState<Error>();
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [datasource, setDatasource] = useState<NewDatasource & { id: string }>({
-    id: '',
+  const [datasource, setDatasource] = useState<NewDatasource>({
     name: '',
     description: '',
     config_id: '',
@@ -94,6 +93,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
         }
         if (datasourceData?.item) {
           const {
+            id,
             revision,
             inputs,
             created_by,
@@ -242,7 +242,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   };
 
   return (
-    <CreateDatasourcePageLayout {...layoutProps}>
+    <CreateDatasourcePageLayout {...layoutProps} data-test-subj="editDataSource">
       {isLoadingData ? (
         <Loading />
       ) : loadingError || !agentConfig || !packageInfo ? (
@@ -302,6 +302,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                     from={'edit'}
                     packageInfo={packageInfo}
                     datasource={datasource}
+                    datasourceId={datasourceId}
                     updateDatasource={updateDatasource}
                     validationResults={validationResults!}
                     submitAttempted={formState === 'INVALID'}

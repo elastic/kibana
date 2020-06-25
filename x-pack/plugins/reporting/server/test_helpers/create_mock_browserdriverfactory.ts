@@ -6,8 +6,7 @@
 
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
-import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
-import { createDriverFactory } from '../browsers/chromium';
+import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
 import * as contexts from '../export_types/common/lib/screenshots/constants';
 import { LevelLogger } from '../lib';
 import { CaptureConfig, ElementsPositionAndAttribute } from '../types';
@@ -113,8 +112,12 @@ export const createMockBrowserDriverFactory = async (
     maxAttempts: 1,
   };
 
-  const binaryPath = '/usr/local/share/common/secure/';
-  const mockBrowserDriverFactory = await createDriverFactory(binaryPath, logger, captureConfig);
+  const binaryPath = '/usr/local/share/common/secure/super_awesome_binary';
+  const mockBrowserDriverFactory = await chromium.createDriverFactory(
+    binaryPath,
+    captureConfig,
+    logger
+  );
   const mockPage = {} as Page;
   const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, {
     inspect: true,

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import React, { useMemo, useState } from 'react';
-import { AlertFlyout } from '../../../../../components/alerting/inventory/alert_flyout';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';
 import { createUptimeLink } from '../../lib/create_uptime_link';
@@ -87,14 +87,13 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       return { label: '', value: '' };
     }, [nodeType, node.ip, node.id, options.fields]);
 
-    const nodeLogsMenuItemLinkProps = useLinkProps({
-      app: 'logs',
-      ...getNodeLogsUrl({
+    const nodeLogsMenuItemLinkProps = useLinkProps(
+      getNodeLogsUrl({
         nodeType,
         nodeId: node.id,
         time: currentTime,
-      }),
-    });
+      })
+    );
     const nodeDetailMenuItemLinkProps = useLinkProps({
       ...getNodeDetailUrl({
         nodeType,

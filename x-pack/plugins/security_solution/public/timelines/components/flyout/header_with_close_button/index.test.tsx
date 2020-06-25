@@ -10,13 +10,24 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { FlyoutHeaderWithCloseButton } from '.';
 
-jest.mock('../../../../common/lib/kibana', () => {
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
   return {
+    ...original,
+    useHistory: jest.fn(),
+  };
+});
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
+  return {
+    ...original,
     useKibana: jest.fn().mockReturnValue({
       services: {
         application: {
           capabilities: {
-            securitySolution: {
+            siem: {
               crud: true,
             },
           },
@@ -24,6 +35,7 @@ jest.mock('../../../../common/lib/kibana', () => {
       },
     }),
     useUiSetting$: jest.fn().mockReturnValue([]),
+    useGetUserSavedObjectPermissions: jest.fn(),
   };
 });
 

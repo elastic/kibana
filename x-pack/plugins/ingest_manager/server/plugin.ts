@@ -45,16 +45,18 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType } from '../common';
+import { IngestManagerConfigType, NewDatasource } from '../common';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
+  datasourceService,
 } from './services';
-import { getAgentStatusById } from './services/agents';
+import { getAgentStatusById, authenticateAgentWithAccessToken } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
+import { agentCheckinState } from './services/agents/checkin/state';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -67,7 +69,8 @@ export interface IngestManagerSetupDeps {
 export type IngestManagerStartDeps = object;
 
 export interface IngestManagerAppContext {
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
@@ -91,11 +94,30 @@ const allSavedObjectTypes = [
 ];
 
 /**
+ * Callbacks supported by the Ingest plugin
+ */
+export type ExternalCallback = [
+  'datasourceCreate',
+  (newDatasource: NewDatasource) => Promise<NewDatasource>
+];
+
+export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
+
+/**
  * Describes public IngestManager plugin contract returned at the `startup` stage.
  */
 export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   agentService: AgentService;
+  /**
+   * Services for Ingest's Datasources
+   */
+  datasourceService: typeof datasourceService;
+  /**
+   * Register callbacks for inclusion in ingest API processing
+   * @param args
+   */
+  registerExternalCallback: (...args: ExternalCallback) => void;
 }
 
 export class IngestManagerPlugin
@@ -115,6 +137,7 @@ export class IngestManagerPlugin
   private isProductionMode: boolean;
   private kibanaVersion: string;
   private httpSetup: HttpServiceSetup | undefined;
+  private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
@@ -129,6 +152,7 @@ export class IngestManagerPlugin
     if (deps.security) {
       this.security = deps.security;
     }
+    this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
 
     registerSavedObjects(core.savedObjects);
@@ -187,12 +211,22 @@ export class IngestManagerPlugin
       }
 
       if (config.fleet.enabled) {
-        registerAgentRoutes(router);
-        registerEnrollmentApiKeyRoutes(router);
-        registerInstallScriptRoutes({
-          router,
-          basePath: core.http.basePath,
-        });
+        const isESOUsingEphemeralEncryptionKey =
+          deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
+        if (isESOUsingEphemeralEncryptionKey) {
+          if (this.logger) {
+            this.logger.warn(
+              'Fleet APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+            );
+          }
+        } else {
+          registerAgentRoutes(router);
+          registerEnrollmentApiKeyRoutes(router);
+          registerInstallScriptRoutes({
+            router,
+            basePath: core.http.basePath,
+          });
+        }
       }
     }
   }
@@ -203,8 +237,9 @@ export class IngestManagerPlugin
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
   ) {
-    appContextService.start({
-      encryptedSavedObjects: plugins.encryptedSavedObjects,
+    await appContextService.start({
+      encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: this.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
@@ -215,10 +250,17 @@ export class IngestManagerPlugin
       logger: this.logger,
     });
     licenseService.start(this.licensing$);
+    agentCheckinState.start();
+
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
         getAgentStatusById,
+        authenticateAgentWithAccessToken,
+      },
+      datasourceService,
+      registerExternalCallback: (...args: ExternalCallback) => {
+        return appContextService.addExternalCallback(...args);
       },
     };
   }
@@ -226,5 +268,6 @@ export class IngestManagerPlugin
   public async stop() {
     appContextService.stop();
     licenseService.stop();
+    agentCheckinState.stop();
   }
 }

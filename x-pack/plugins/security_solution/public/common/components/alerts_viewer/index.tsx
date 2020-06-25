@@ -7,7 +7,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import numeral from '@elastic/numeral';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
-import { AlertsComponentsQueryProps } from './types';
+import { AlertsComponentsProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../lib/kibana';
@@ -17,6 +17,7 @@ import { MatrixHisrogramConfigs } from '../matrix_histogram/types';
 const ID = 'alertsOverTimeQuery';
 
 export const AlertsView = ({
+  timelineId,
   deleteQuery,
   endDate,
   filterQuery,
@@ -24,7 +25,7 @@ export const AlertsView = ({
   setQuery,
   startDate,
   type,
-}: AlertsComponentsQueryProps) => {
+}: AlertsComponentsProps) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const getSubtitle = useCallback(
     (totalCount: number) =>
@@ -61,7 +62,12 @@ export const AlertsView = ({
         type={type}
         {...alertsHistogramConfigs}
       />
-      <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
+      <AlertsTable
+        timelineId={timelineId}
+        endDate={endDate}
+        startDate={startDate}
+        pageFilters={pageFilters}
+      />
     </>
   );
 };

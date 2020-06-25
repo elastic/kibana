@@ -10,7 +10,12 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
-import { apolloClientObservable, mockGlobalState, SUB_PLUGINS_REDUCER } from '../../mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
+} from '../../mock';
 import { createUseUiSetting$Mock } from '../../mock/kibana_react';
 import { createStore, State } from '../../store';
 
@@ -75,11 +80,12 @@ const timepickerRanges = [
 describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
-    let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    const { storage } = createSecuritySolutionStorageMock();
+    let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
     beforeEach(() => {
       jest.clearAllMocks();
-      store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+      store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
       mockUseUiSetting$.mockImplementation((key, defaultValue) => {
         const useUiSetting$Mock = createUseUiSetting$Mock();
 
@@ -258,44 +264,6 @@ describe('SIEM Super Date Picker', () => {
         wrapper.update();
 
         expect(store.getState().inputs.global.policy.kind).toBe('manual');
-      });
-    });
-
-    describe('Pick Absolute Date', () => {
-      let wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <SuperDatePicker id="global" />
-        </ReduxStoreProvider>
-      );
-      beforeEach(() => {
-        wrapper = mount(
-          <ReduxStoreProvider store={store}>
-            <SuperDatePicker id="global" />
-          </ReduxStoreProvider>
-        );
-        wrapper.find('[data-test-subj="superDatePickerShowDatesButton"]').first().simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="superDatePickerstartDatePopoverButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        wrapper.find('[data-test-subj="superDatePickerAbsoluteTab"]').first().simulate('click');
-        wrapper.update();
-
-        wrapper.find('button.react-datepicker__navigation--previous').first().simulate('click');
-        wrapper.update();
-
-        wrapper.find('div.react-datepicker__day').at(1).simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('button[data-test-subj="superDatePickerApplyTimeButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
       });
     });
 

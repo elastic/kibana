@@ -7,18 +7,19 @@
 import { AlertServices } from '../../../../../alerts/server';
 import { ListClient } from '../../../../../lists/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, RefreshTypes, RuleAlertParams } from '../types';
+import { RuleTypeParams, RefreshTypes } from '../types';
 import { Logger } from '../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
 import { SignalSearchResponse } from './types';
 import { filterEventsAgainstList } from './filter_events_with_list';
+import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 
 interface SearchAfterAndBulkCreateParams {
   ruleParams: RuleTypeParams;
   services: AlertServices;
   listClient: ListClient | undefined; // TODO: undefined is for temporary development, remove before merged
-  exceptionsList: RuleAlertParams['exceptionsList'];
+  exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
   id: string;
   inputIndexPattern: string[];
@@ -103,6 +104,7 @@ export const searchAfterAndBulkCreate = async ({
     try {
       logger.debug(`sortIds: ${sortId}`);
       const {
+        // @ts-ignore https://github.com/microsoft/TypeScript/issues/35546
         searchResult,
         searchDuration,
       }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter({
@@ -140,7 +142,7 @@ export const searchAfterAndBulkCreate = async ({
 
       // filter out the search results that match with the values found in the list.
       // the resulting set are valid signals that are not on the allowlist.
-      const filteredEvents =
+      const filteredEvents: SignalSearchResponse =
         listClient != null
           ? await filterEventsAgainstList({
               listClient,

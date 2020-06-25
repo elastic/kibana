@@ -23,8 +23,9 @@ import { MlStartDependencies } from '../../plugin';
 import { HttpService } from '../../application/services/http_service';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { ExplorerService } from '../../application/services/explorer_service';
-import { mlResultsService } from '../../application/services/results_service';
+import { mlResultsServiceProvider } from '../../application/services/results_service';
 import { resolveAnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
+import { mlApiServicesProvider } from '../../application/services/ml_api_service';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
@@ -38,7 +39,7 @@ export class AnomalySwimlaneEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
-      defaultMessage: 'ML Anomaly Swimlane',
+      defaultMessage: 'ML Anomaly Swim Lane',
     });
   }
 
@@ -64,8 +65,7 @@ export class AnomalySwimlaneEmbeddableFactory
     const explorerService = new ExplorerService(
       pluginsStart.data.query.timefilter.timefilter,
       coreStart.uiSettings,
-      // TODO mlResultsService to use DI
-      mlResultsService
+      mlResultsServiceProvider(mlApiServicesProvider(httpService))
     );
 
     return [coreStart, pluginsStart, { anomalyDetectorService, explorerService }];

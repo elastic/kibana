@@ -9,7 +9,6 @@ jest.mock('../../../lib/app_state');
 
 import { workpadRefresh } from '../workpad_refresh';
 import { inFlightComplete } from '../../actions/resolved_args';
-// @ts-ignore untyped local
 import { setRefreshInterval } from '../../actions/workpad';
 import { setRefreshInterval as setAppStateRefreshInterval } from '../../../lib/app_state';
 

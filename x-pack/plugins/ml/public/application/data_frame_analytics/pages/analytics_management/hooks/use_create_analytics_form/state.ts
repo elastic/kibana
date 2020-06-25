@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 import {
-  FieldSelectionItem,
   isClassificationAnalysis,
   isRegressionAnalysis,
   DataFrameAnalyticsId,
@@ -52,8 +50,6 @@ export interface State {
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
-    dependentVariableFetchFail: boolean;
-    dependentVariableOptions: EuiComboBoxOptionOption[];
     description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
@@ -62,11 +58,8 @@ export interface State {
     destinationIndexPatternTitleExists: boolean;
     eta: undefined | number;
     excludes: string[];
-    excludesTableItems: FieldSelectionItem[];
-    excludesOptions: EuiComboBoxOptionOption[];
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
-    fieldOptionsFetchFail: boolean;
     gamma: undefined | number;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
@@ -77,9 +70,7 @@ export interface State {
     jobConfigQuery: any;
     jobConfigQueryString: string | undefined;
     lambda: number | undefined;
-    loadingDepVarOptions: boolean;
     loadingFieldOptions: boolean;
-    maxDistinctValuesError: string | undefined;
     maxTrees: undefined | number;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
@@ -92,7 +83,6 @@ export interface State {
     outlierFraction: undefined | number;
     predictionFieldName: undefined | string;
     previousJobType: null | AnalyticsJobType;
-    previousSourceIndex: EsIndexName | undefined;
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
     sourceIndex: EsIndexName;
@@ -110,8 +100,6 @@ export interface State {
   isAdvancedEditorValidJson: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
-  isModalButtonDisabled: boolean;
-  isModalVisible: boolean;
   isValid: boolean;
   jobConfig: DeepPartial<DataFrameAnalyticsConfig>;
   jobIds: DataFrameAnalyticsId[];
@@ -127,8 +115,6 @@ export const getInitialState = (): State => ({
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
     dependentVariable: '',
-    dependentVariableFetchFail: false,
-    dependentVariableOptions: [],
     description: '',
     destinationIndex: '',
     destinationIndexNameExists: false,
@@ -139,10 +125,7 @@ export const getInitialState = (): State => ({
     excludes: [],
     featureBagFraction: undefined,
     featureInfluenceThreshold: undefined,
-    fieldOptionsFetchFail: false,
     gamma: undefined,
-    excludesTableItems: [],
-    excludesOptions: [],
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
@@ -152,9 +135,7 @@ export const getInitialState = (): State => ({
     jobConfigQuery: { match_all: {} },
     jobConfigQueryString: undefined,
     lambda: undefined,
-    loadingDepVarOptions: false,
     loadingFieldOptions: false,
-    maxDistinctValuesError: undefined,
     maxTrees: undefined,
     method: undefined,
     modelMemoryLimit: undefined,
@@ -167,7 +148,6 @@ export const getInitialState = (): State => ({
     outlierFraction: undefined,
     predictionFieldName: undefined,
     previousJobType: null,
-    previousSourceIndex: undefined,
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     sourceIndex: '',
@@ -189,8 +169,6 @@ export const getInitialState = (): State => ({
   isAdvancedEditorValidJson: true,
   isJobCreated: false,
   isJobStarted: false,
-  isModalVisible: false,
-  isModalButtonDisabled: false,
   isValid: false,
   jobIds: [],
   requestMessages: [],
@@ -317,6 +295,9 @@ export const getJobConfigFromFormState = (
         n_neighbors: formState.nNeighbors,
       },
       formState.outlierFraction && { outlier_fraction: formState.outlierFraction },
+      formState.featureInfluenceThreshold && {
+        feature_influence_threshold: formState.featureInfluenceThreshold,
+      },
       formState.standardizationEnabled && {
         standardization_enabled: formState.standardizationEnabled,
       }
@@ -327,6 +308,14 @@ export const getJobConfigFromFormState = (
 
   return jobConfig;
 };
+
+function toCamelCase(property: string): string {
+  const camelCased = property.replace(/_([a-z])/g, function (g) {
+    return g[1].toUpperCase();
+  });
+
+  return camelCased;
+}
 
 /**
  * Extracts form state for a job clone from the analytics job configuration.
@@ -353,13 +342,12 @@ export function getCloneFormStateFromJobConfig(
   ) {
     const analysisConfig = analyticsJobConfig.analysis[jobType];
 
-    resultState.dependentVariable = analysisConfig.dependent_variable;
-    resultState.numTopFeatureImportanceValues = analysisConfig.num_top_feature_importance_values;
-    resultState.trainingPercent = analysisConfig.training_percent;
-
-    if (isClassificationAnalysis(analyticsJobConfig.analysis)) {
-      // @ts-ignore
-      resultState.numTopClasses = analysisConfig.num_top_classes;
+    for (const key in analysisConfig) {
+      if (analysisConfig.hasOwnProperty(key)) {
+        const camelCased = toCamelCase(key);
+        // @ts-ignore
+        resultState[camelCased] = analysisConfig[key];
+      }
     }
   }
 

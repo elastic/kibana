@@ -6,27 +6,20 @@
 
 import { EuiButtonIcon, EuiPopover, EuiSelectableOption, EuiToolTip } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import { timelineActions } from '../../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineType } from '../../../../../common/types/timeline';
+import { State } from '../../../../common/store';
+import { setInsertTimeline } from '../../../store/timeline/actions';
 
 interface InsertTimelinePopoverProps {
   isDisabled: boolean;
   hideUntitled?: boolean;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
-}
-
-interface RouterState {
-  insertTimeline: {
-    timelineId: string;
-    timelineSavedObjectId: string;
-    timelineTitle: string;
-  };
 }
 
 type Props = InsertTimelinePopoverProps;
@@ -38,22 +31,18 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { state } = useLocation();
-  const [routerState, setRouterState] = useState<RouterState | null>(state ?? null);
 
+  const insertTimeline = useSelector((state: State) => {
+    return timelineSelectors.selectInsertTimeline(state);
+  });
   useEffect(() => {
-    if (routerState && routerState.insertTimeline) {
-      dispatch(
-        timelineActions.showTimeline({ id: routerState.insertTimeline.timelineId, show: false })
-      );
-      onTimelineChange(
-        routerState.insertTimeline.timelineTitle,
-        routerState.insertTimeline.timelineSavedObjectId
-      );
-      setRouterState(null);
+    if (insertTimeline != null) {
+      dispatch(timelineActions.showTimeline({ id: insertTimeline.timelineId, show: false }));
+      onTimelineChange(insertTimeline.timelineTitle, insertTimeline.timelineSavedObjectId);
+      dispatch(setInsertTimeline(null));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routerState]);
+  }, [insertTimeline, dispatch]);
 
   const handleClosePopover = useCallback(() => {
     setIsPopoverOpen(false);

@@ -29,6 +29,16 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+  return {
+    ...originalModule,
+    useHistory: jest.fn(),
+  };
+});
+
+jest.mock('../../../common/components/link_to');
+
 describe('AllCases', () => {
   const dispatchResetIsDeleted = jest.fn();
   const dispatchResetIsUpdated = jest.fn();
@@ -98,7 +108,7 @@ describe('AllCases', () => {
       </TestProviders>
     );
     expect(wrapper.find(`a[data-test-subj="case-details-link"]`).first().prop('href')).toEqual(
-      `#/link-to/case/${useGetCasesMockState.data.cases[0].id}?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))`
+      `/${useGetCasesMockState.data.cases[0].id}`
     );
     expect(wrapper.find(`a[data-test-subj="case-details-link"]`).first().text()).toEqual(
       useGetCasesMockState.data.cases[0].title
@@ -151,8 +161,22 @@ describe('AllCases', () => {
       expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
       expect(column.find('span').text()).toEqual(emptyTag);
     };
-    getCasesColumns([], 'open').map((i, key) => i.name != null && checkIt(`${i.name}`, key));
+    getCasesColumns([], 'open', false).map((i, key) => i.name != null && checkIt(`${i.name}`, key));
   });
+
+  it('should not render case link or actions on modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} />
+      </TestProviders>
+    );
+    const checkIt = (columnName: string) => {
+      expect(columnName).not.toEqual(i18n.ACTIONS);
+    };
+    getCasesColumns([], 'open', true).map((i, key) => i.name != null && checkIt(`${i.name}`));
+    expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
+  });
+
   it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(
       <TestProviders>

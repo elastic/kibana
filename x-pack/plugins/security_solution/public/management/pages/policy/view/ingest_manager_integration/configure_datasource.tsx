@@ -12,43 +12,36 @@ import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app
 import {
   CustomConfigureDatasourceContent,
   CustomConfigureDatasourceProps,
-  NewDatasource,
 } from '../../../../../../../ingest_manager/public';
-import { getManagementUrl } from '../../../..';
-
-type DatasourceWithId = NewDatasource & { id: string };
+import { getPolicyDetailPath } from '../../../../common/routing';
 
 /**
  * Exports Endpoint-specific datasource configuration instructions
  * for use in the Ingest app create / edit datasource config
  */
 export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent>(
-  ({
-    from,
-    datasource,
-  }: {
-    from: string;
-    datasource: CustomConfigureDatasourceProps['datasource'];
-  }) => {
+  ({ from, datasourceId }: CustomConfigureDatasourceProps) => {
     const { services } = useKibana();
     let policyUrl = '';
-    if (from === 'edit') {
-      policyUrl = getManagementUrl({
-        name: 'policyDetails',
-        policyId: (datasource as DatasourceWithId).id,
-      });
+    if (from === 'edit' && datasourceId) {
+      policyUrl = getPolicyDetailPath(datasourceId);
     }
 
     return (
       <EuiEmptyPrompt
+        data-test-subj={`endpointDatasourceConfig_${from === 'edit' ? 'edit' : 'create'}`}
         body={
           <EuiText>
             <p>
               {from === 'edit' ? (
                 <LinkToApp
-                  appId="siem"
+                  data-test-subj="editLinkToPolicyDetails"
+                  appId="securitySolution:management"
                   appPath={policyUrl}
-                  href={`${services.application.getUrlForApp('siem')}${policyUrl}`}
+                  // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
+                  href={`${services.application.getUrlForApp(
+                    'securitySolution:management'
+                  )}${policyUrl}`}
                 >
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.ingestManager.editDatasource.stepConfigure"

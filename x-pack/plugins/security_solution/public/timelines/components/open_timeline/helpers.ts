@@ -221,7 +221,7 @@ export const queryTimelineById = <TCache>({
         variables: { id: timelineId },
       })
       // eslint-disable-next-line
-      .then(result => {
+      .then((result) => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
         );

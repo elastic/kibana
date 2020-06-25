@@ -5,7 +5,7 @@
  */
 import { SearchResponse } from 'elasticsearch';
 import { ResolverQuery } from './base';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 
 /**

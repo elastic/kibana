@@ -14,7 +14,6 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { ListsDefaultArraySchema } from '../../../../common/detection_engine/schemas/types/lists_default_array';
 import {
   FalsePositives,
   From,
@@ -62,18 +61,24 @@ import {
   ThreatOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
-  ListAndOrUndefined,
   PerPageOrUndefined,
   PageOrUndefined,
   SortFieldOrUndefined,
   QueryFilterOrUndefined,
   FieldsOrUndefined,
   SortOrderOrUndefined,
+  JobStatus,
+  LastSuccessAt,
+  StatusDate,
+  LastSuccessMessage,
+  LastFailureAt,
+  LastFailureMessage,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { RuleAlertParams, RuleTypeParams, PartialFilter } from '../types';
+import { RuleTypeParams, PartialFilter } from '../types';
+import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
@@ -82,12 +87,12 @@ export interface RuleAlertType extends Alert {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusAttributes extends Record<string, any> {
   alertId: string; // created alert id.
-  statusDate: string;
-  lastFailureAt: string | null | undefined;
-  lastFailureMessage: string | null | undefined;
-  lastSuccessAt: string | null | undefined;
-  lastSuccessMessage: string | null | undefined;
-  status: RuleStatusString | null | undefined;
+  statusDate: StatusDate;
+  lastFailureAt: LastFailureAt | null | undefined;
+  lastFailureMessage: LastFailureMessage | null | undefined;
+  lastSuccessAt: LastSuccessAt | null | undefined;
+  lastSuccessMessage: LastSuccessMessage | null | undefined;
+  status: JobStatus | null | undefined;
   lastLookBackDate: string | null | undefined;
   gap: string | null | undefined;
   bulkCreateTimeDurations: string[] | null | undefined;
@@ -121,8 +126,6 @@ export interface IRuleStatusFindType {
   saved_objects: IRuleStatusSavedObject[];
 }
 
-export type RuleStatusString = 'succeeded' | 'failed' | 'going to run';
-
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
@@ -132,12 +135,6 @@ export interface HapiReadableStream extends Readable {
 export interface Clients {
   alertsClient: AlertsClient;
 }
-
-// TODO: Try and remove this patch
-export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'ruleId' | 'throttle'>> & {
-  rule: SanitizedAlert | null;
-  savedObjectsClient: SavedObjectsClientContract;
-} & Clients;
 
 export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
   return partialAlert.every((rule) => isAlertType(rule));
@@ -196,7 +193,7 @@ export interface CreateRulesOptions {
   references: References;
   note: NoteOrUndefined;
   version: Version;
-  exceptionsList: ListsDefaultArraySchema;
+  exceptionsList: ListArray;
   actions: RuleAlertAction[];
 }
 
@@ -232,7 +229,7 @@ export interface UpdateRulesOptions {
   references: References;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListsDefaultArraySchema;
+  exceptionsList: ListArray;
   actions: RuleAlertAction[];
 }
 
@@ -266,7 +263,7 @@ export interface PatchRulesOptions {
   references: ReferencesOrUndefined;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListAndOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
   rule: SanitizedAlert | null;
 }

@@ -378,14 +378,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async isChromeVisible() {
       const globalNavShown = await globalNav.exists();
-      const topNavShown = await testSubjects.exists('top-nav');
-      return globalNavShown && topNavShown;
+      return globalNavShown;
     }
 
     async isChromeHidden() {
       const globalNavShown = await globalNav.exists();
-      const topNavShown = await testSubjects.exists('top-nav');
-      return !globalNavShown && !topNavShown;
+      return !globalNavShown;
     }
 
     async waitForTopNavToBeVisible() {
@@ -409,7 +407,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async closeToastIfExists() {
       const toastShown = await find.existsByCssSelector('.euiToast');
       if (toastShown) {
-        await this.closeToast();
+        await find.clickByCssSelector('.euiToast__closeButton');
       }
     }
 

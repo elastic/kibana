@@ -16,6 +16,7 @@ import {
   GetAgentStatusResponse,
   GetDatasourcesResponse,
   GetOneDatasourceResponse,
+  GetPackagesResponse,
   UpdateDatasourceResponse,
 } from '../../../../../ingest_manager/common';
 
@@ -25,6 +26,8 @@ import {
 export interface PolicyListState {
   /** Array of policy items  */
   policyItems: PolicyData[];
+  /** Information about the latest endpoint package */
+  endpointPackageInfo?: GetPackagesResponse['response'][0];
   /** API error if loading data failed */
   apiError?: ServerApiError;
   /** total number of policies */
@@ -37,6 +40,12 @@ export interface PolicyListState {
   isLoading: boolean;
   /** current location information */
   location?: Immutable<AppLocation>;
+  /** policy is being deleted */
+  isDeleting: boolean;
+  /** Deletion status */
+  deleteStatus?: boolean;
+  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  agentStatusSummary?: GetAgentStatusResponse['results'];
 }
 
 /**

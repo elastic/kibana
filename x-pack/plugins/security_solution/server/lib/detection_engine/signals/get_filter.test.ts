@@ -7,6 +7,7 @@
 import { getQueryFilter, getFilter } from './get_filter';
 import { PartialFilter } from '../types';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 describe('get_filter', () => {
   let servicesMock: AlertServicesMock;
@@ -381,18 +382,7 @@ describe('get_filter', () => {
         'kuery',
         [],
         ['auditbeat-*'],
-        [
-          {
-            field: 'event.module',
-            values_operator: 'excluded',
-            values_type: 'match',
-            values: [
-              {
-                name: 'suricata',
-              },
-            ],
-          },
-        ]
+        [getExceptionListItemSchemaMock()]
       );
       expect(esQuery).toEqual({
         bool: {
@@ -414,11 +404,39 @@ describe('get_filter', () => {
                   },
                   {
                     bool: {
-                      minimum_should_match: 1,
-                      should: [
+                      filter: [
                         {
-                          match: {
-                            'event.module': 'suricata',
+                          nested: {
+                            path: 'some.parentField',
+                            query: {
+                              bool: {
+                                minimum_should_match: 1,
+                                should: [
+                                  {
+                                    match: {
+                                      'some.parentField.nested.field': 'some value',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            score_mode: 'none',
+                          },
+                        },
+                        {
+                          bool: {
+                            must_not: {
+                              bool: {
+                                minimum_should_match: 1,
+                                should: [
+                                  {
+                                    match: {
+                                      'some.not.nested.field': 'some value',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
                           },
                         },
                       ],
@@ -449,8 +467,8 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work when lists has value null', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], null);
+    test('it should work when lists has value undefined', () => {
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
       expect(esQuery).toEqual({
         bool: {
           filter: [
@@ -463,16 +481,57 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work when lists has value undefined', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], undefined);
+    test('it should work with a nested object queries', () => {
+      const esQuery = getQueryFilter(
+        'category:{ name:Frank and trusted:true }',
+        'kuery',
+        [],
+        ['auditbeat-*'],
+        []
+      );
       expect(esQuery).toEqual({
         bool: {
-          filter: [
-            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
-          ],
           must: [],
-          must_not: [],
+          filter: [
+            {
+              nested: {
+                path: 'category',
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                'category.name': 'Frank',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                'category.trusted': true,
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+                score_mode: 'none',
+              },
+            },
+          ],
           should: [],
+          must_not: [],
         },
       });
     });
@@ -488,7 +547,7 @@ describe('get_filter', () => {
         savedId: undefined,
         services: servicesMock,
         index: ['auditbeat-*'],
-        lists: undefined,
+        lists: [],
       });
       expect(filter).toEqual({
         bool: {
@@ -523,7 +582,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
-          lists: undefined,
+          lists: [],
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -538,7 +597,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
-          lists: undefined,
+          lists: [],
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -553,7 +612,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: undefined,
-          lists: undefined,
+          lists: [],
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -567,7 +626,7 @@ describe('get_filter', () => {
         savedId: 'some-id',
         services: servicesMock,
         index: ['auditbeat-*'],
-        lists: undefined,
+        lists: [],
       });
       expect(filter).toEqual({
         bool: {
@@ -591,7 +650,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
-          lists: undefined,
+          lists: [],
         })
       ).rejects.toThrow('savedId parameter should be defined');
     });
@@ -606,7 +665,7 @@ describe('get_filter', () => {
           savedId: 'some-id',
           services: servicesMock,
           index: undefined,
-          lists: undefined,
+          lists: [],
         })
       ).rejects.toThrow('savedId parameter should be defined');
     });
@@ -621,7 +680,7 @@ describe('get_filter', () => {
           savedId: 'some-id',
           services: servicesMock,
           index: undefined,
-          lists: undefined,
+          lists: [],
         })
       ).rejects.toThrow('Unsupported Rule of type "machine_learning" supplied to getFilter');
     });
@@ -771,18 +830,7 @@ describe('get_filter', () => {
         savedId: undefined,
         services: servicesMock,
         index: ['auditbeat-*'],
-        lists: [
-          {
-            field: 'event.module',
-            values_operator: 'excluded',
-            values_type: 'match',
-            values: [
-              {
-                name: 'suricata',
-              },
-            ],
-          },
-        ],
+        lists: [getExceptionListItemSchemaMock()],
       });
       expect(filter).toEqual({
         bool: {
@@ -804,11 +852,39 @@ describe('get_filter', () => {
                   },
                   {
                     bool: {
-                      minimum_should_match: 1,
-                      should: [
+                      filter: [
                         {
-                          match: {
-                            'event.module': 'suricata',
+                          nested: {
+                            path: 'some.parentField',
+                            query: {
+                              bool: {
+                                minimum_should_match: 1,
+                                should: [
+                                  {
+                                    match: {
+                                      'some.parentField.nested.field': 'some value',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            score_mode: 'none',
+                          },
+                        },
+                        {
+                          bool: {
+                            must_not: {
+                              bool: {
+                                minimum_should_match: 1,
+                                should: [
+                                  {
+                                    match: {
+                                      'some.not.nested.field': 'some value',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
                           },
                         },
                       ],

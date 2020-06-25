@@ -10,34 +10,33 @@ import { capitalize } from 'lodash';
 import moment from 'moment';
 
 import * as i18n from './translations';
-import {
-  FormattedEntry,
-  OperatorType,
-  OperatorOption,
-  ExceptionEntry,
-  NestedExceptionEntry,
-  DescriptionListItem,
-  Comment,
-  ExceptionListItemSchema,
-} from './types';
+import { FormattedEntry, OperatorOption, DescriptionListItem, Comment } from './types';
 import { EXCEPTION_OPERATORS, isOperator } from './operators';
+import {
+  Entry,
+  EntriesArray,
+  ExceptionListItemSchema,
+  OperatorTypeEnum,
+  entriesNested,
+  entriesExists,
+  entriesList,
+} from '../../../lists_plugin_deps';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
  *
  * @param entry a single ExceptionItem entry
  */
-export const getOperatorType = (entry: ExceptionEntry): OperatorType => {
+export const getOperatorType = (entry: Entry): OperatorTypeEnum => {
   switch (entry.type) {
-    case 'nested':
     case 'match':
-      return OperatorType.PHRASE;
+      return OperatorTypeEnum.MATCH;
     case 'match_any':
-      return OperatorType.PHRASES;
+      return OperatorTypeEnum.MATCH_ANY;
     case 'list':
-      return OperatorType.LIST;
+      return OperatorTypeEnum.LIST;
     default:
-      return OperatorType.EXISTS;
+      return OperatorTypeEnum.EXISTS;
   }
 };
 
@@ -47,22 +46,17 @@ export const getOperatorType = (entry: ExceptionEntry): OperatorType => {
  *
  * @param entry a single ExceptionItem entry
  */
-export const getExceptionOperatorSelect = (entry: ExceptionEntry): OperatorOption => {
-  const operatorType = getOperatorType(entry);
-  const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
-    return entry.operator === operatorOption.operator && operatorType === operatorOption.type;
-  });
+export const getExceptionOperatorSelect = (entry: Entry): OperatorOption => {
+  if (entriesNested.is(entry)) {
+    return isOperator;
+  } else {
+    const operatorType = getOperatorType(entry);
+    const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
+      return entry.operator === operatorOption.operator && operatorType === operatorOption.type;
+    });
 
-  return foundOperator ?? isOperator;
-};
-
-export const determineIfIsNested = (
-  tbd: ExceptionEntry | NestedExceptionEntry
-): tbd is NestedExceptionEntry => {
-  if (tbd.type === 'nested') {
-    return true;
+    return foundOperator ?? isOperator;
   }
-  return false;
 };
 
 /**
@@ -71,11 +65,9 @@ export const determineIfIsNested = (
  *
  * @param entries an ExceptionItem's entries
  */
-export const getFormattedEntries = (
-  entries: Array<ExceptionEntry | NestedExceptionEntry>
-): FormattedEntry[] => {
+export const getFormattedEntries = (entries: EntriesArray): FormattedEntry[] => {
   const formattedEntries = entries.map((entry) => {
-    if (determineIfIsNested(entry)) {
+    if (entriesNested.is(entry)) {
       const parent = { fieldName: entry.field, operator: null, value: null, isNested: false };
       return entry.entries.reduce<FormattedEntry[]>(
         (acc, nestedEntry) => {
@@ -96,6 +88,16 @@ export const getFormattedEntries = (
   return formattedEntries.flat();
 };
 
+export const getEntryValue = (entry: Entry): string | string[] | null => {
+  if (entriesList.is(entry)) {
+    return entry.list.id;
+  } else if (entriesExists.is(entry)) {
+    return null;
+  } else {
+    return entry.value;
+  }
+};
+
 /**
  * Helper method for `getFormattedEntries`
  */
@@ -106,11 +108,10 @@ export const formatEntry = ({
 }: {
   isNested: boolean;
   parent?: string;
-  item: ExceptionEntry;
+  item: Entry;
 }): FormattedEntry => {
   const operator = getExceptionOperatorSelect(item);
-  const operatorType = getOperatorType(item);
-  const value = operatorType === OperatorType.EXISTS ? null : item.value;
+  const value = getEntryValue(item);
 
   return {
     fieldName: isNested ? `${parent}.${item.field}` : item.field,
@@ -184,9 +185,9 @@ export const getDescriptionListContent = (
  */
 export const getFormattedComments = (comments: Comment[]): EuiCommentProps[] =>
   comments.map((comment) => ({
-    username: comment.user,
-    timestamp: moment(comment.timestamp).format('on MMM Do YYYY @ HH:mm:ss'),
+    username: comment.created_by,
+    timestamp: moment(comment.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
     event: i18n.COMMENT_EVENT,
-    timelineIcon: <EuiAvatar size="l" name={comment.user.toUpperCase()} />,
+    timelineIcon: <EuiAvatar size="l" name={comment.created_by.toUpperCase()} />,
     children: <EuiText size="s">{comment.comment}</EuiText>,
   }));
