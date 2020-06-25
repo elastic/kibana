@@ -32,6 +32,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+
+      // Clean-up custom time range on panel
+      await common.navigateToApp('dashboard');
+      await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
+      await panelActions.openContextMenu();
+      await panelActionsTimeRange.clickTimeRangeActionInContextMenu();
+      await panelActionsTimeRange.clickRemovePerPanelTimeRangeButton();
+      await dashboard.saveDashboard('Dashboard with Pie Chart');
     });
 
     it('action exists in panel context menu', async () => {
