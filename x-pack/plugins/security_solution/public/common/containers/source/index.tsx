@@ -86,6 +86,7 @@ interface UseWithSourceState {
   errorMessage: string | null;
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
+  loading: boolean;
 }
 
 export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null) => {
@@ -97,14 +98,14 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
     return configIndex;
   }, [configIndex, indexToAdd]);
 
-  const [loading, updateLoading] = useState(false);
-  const [{ browserFields, errorMessage, indicesExist, indexPattern }, setState] = useState<
+  const [{ browserFields, errorMessage, indicesExist, indexPattern, loading }, setState] = useState<
     UseWithSourceState
   >({
-    indicesExist: undefined,
     browserFields: EMPTY_BROWSER_FIELDS,
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
+    indicesExist: undefined,
+    loading: false,
   });
 
   const apolloClient = useApolloClient();
@@ -113,7 +114,7 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
     const abortCtrl = new AbortController();
 
     async function fetchSource() {
-      updateLoading(true);
+      setState((prevState) => ({ ...prevState, loading: true }));
       if (apolloClient) {
         apolloClient
           .query<SourceQuery.Query, SourceQuery.Variables>({
@@ -131,8 +132,8 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
           })
           .then(
             (result) => {
-              updateLoading(false);
               setState({
+                loading: false,
                 indicesExist: get('data.source.status.indicesExist', result),
                 browserFields: getBrowserFields(
                   defaultIndex.join(),
@@ -146,8 +147,11 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
               });
             },
             (error) => {
-              updateLoading(false);
-              setState((prevState) => ({ ...prevState, errorMessage: error.message }));
+              setState((prevState) => ({
+                ...prevState,
+                loading: false,
+                errorMessage: error.message,
+              }));
             }
           );
       }
