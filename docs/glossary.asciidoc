@@ -9,38 +9,54 @@
 == A
 
 [glossary]
-[[glossary-alerts-and-actions]] Alerts and Actions ::
+[[glossary-action]] action ::
 +
 --
-// tag::alerts-and-actions-def[]
-A {kib} app that provides comprehensive views across alert types and tools. It
-allows you to manage all your alerts and connector configurations in one
-place and view the active alert instances. Alerts and Actions works along side <<glossary-watcher,Watcher>>.
-Refer to {kibana-ref}/alerting-getting-started.html[Alerts and Actions].
-// end::alerts-and-actions-def[]
---
-
-[[glossary-action]] action ::
 // tag::action-def[]
 The alert-specific response that occurs when an alert fires. The response is
-customizable and can contain a number of alert context variables. An action
-can be channelled to external services through a connector. An alert can have multiple actions.
+customizable and can contain a number of alert context variables.
+An alert can have multiple actions.
 Refer to
 {kibana-ref}/action-types.html[Action and connector types].
 // end::action-def[]
-
-[[glossary-action-type]] action type ::
-// tag::action-type-def[]
-A programatically defined integration with another service, with an expected
-set of configuration and parameters.
-// end::action-type-def[]
+--
 
 [[glossary-advanced-settings]] Advanced Settings ::
 // tag::advanced-settings-def[]
 A UI for editing the settings that control the appearance and behavior
 (for example, date format, default index) of {kib}. The UI is part of Management.
-For more information, see {kibana-ref}/advanced-options.html[Advanced Settings].
+Refer to {kibana-ref}/advanced-options.html[Advanced Settings].
 // end::advanced-settings-def[]
+
+[[glossary-alert]] alert ::
+// tag::alert-def[]
+A specified set of conditions, schedules, and actions that notifies the user in some way when the conditions are met.
+see also <<glossary-alerts-and-actions,Alerts and Actions>>.
+// end::alert-def[]
+
+[[glossary-alerts-and-actions]] Alerts and Actions ::
+// tag::alerts-and-actions-def[]
+A UI that provides comprehensive views across alert types and tools. It
+allows you to manage all your alerts and connector configurations in one
+place and view the active alert instances. Alerts and Actions works along side <<glossary-watcher,Watcher>>.
+Refer to {kibana-ref}/alerting-getting-started.html[Alerts and Actions].
+// end::alerts-and-actions-def[]
+
+[[glossary-annotation]] annotation ::
+// tag::annotation-def[]
+In TSVB, a way to augment the data display with a tooltip that shows the results of a custom query.
++
+In machine learning, a way to augment a job with descriptive domain knowledge.
+Refer to this
+https://www.elastic.co/blog/augmenting-results-with-user-annotations-for-elastic-machine-learning[doc about user annotations].
+// end::annotation-def[]
+
+[[glossary-app]] app ::
+// tag::app-def[]
+A experience within Kibana that has a user interface and appears in the side navigation. An app may contain UIs,
+such as Inspect in Elastic Maps, or tabs, such as Metrics Explorer in Metrics.
+// end::app-def[]
+
 
 [float]
 [[b_glos]]
@@ -56,10 +72,36 @@ The background detail necessary to orient the location of a map.
 A filtering rule that excludes one or more members from a set.
 // end::blocklist-def[]
 
+[[glossary-bucket]] bucket ::
+// tag::bucket-def[]
+In {es}, a set of documents based on a certain criterion.
+// end::bucket-def[]
+
+[[glossary-bucket-aggregation]] bucket aggregation::
+// tag::bucket-aggregation-def[]
+An aggregation that creates buckets of documents. Each bucket is associated with a
+criterion (depending on the aggregation type), which determines whether or not a document
+in the current context falls into the bucket.
+// end::bucket-aggregation-def[]
 
 [float]
 [[c_glos]]
 == C
+
+[[glossary-canvas]] Canvas ::
+// tag::canvas-def[]
+Creates presentations and infographics that pull live data directly from {es}.
+Refer to {kibana-ref}/canvas.html[Canvas].
+// end::canvas-def[]
+
+[[glossary-canvas-language]] Canvas expression language::
+// tag::ccanvas-language-def[]
+A pipeline-based expression language for manipulating and visualizing data.
+Includes dozens of functions and other capabilities, such as table transforms,
+type casting, and sub-expressions. Supports TinyMath functions for complex math calculations.
+Refer to {kibana-ref}/canvas-function-reference.html[Canvas function reference].
+// end::canvas-language-def[]
+
 
 [[glossary-certainty]] certainty ::
 // tag::certainty-def[]
@@ -67,34 +109,46 @@ Specifies how many documents must contain a pair of terms before it is considere
 to be a useful connection in a graph.
 // end::certainty-def[]
 
-[[glossary-choropleth-map]] choropleth map ::
-// tag::choropleth-map-def[]
-A map that shade areas in proportion to metric values that represent an aggregate summary
-of a geographic characteristic (e.g. a map showing age or political
-affiliation across geopolitical boundaries).
-// end::choropleth-map-def[]
+[[glossary-connector]] connector ::
+// tag::connector-def[]
+A configuration UI with a service API, credentials, and
+other information that enables integration with an external system (the destination for an action).
+Refer to {kibana-ref}/action-types.html[Action and connector types].
+// end::connector-def[]
 
+[[glossary-console]] Console ::
+// tag::console-def[]
+A tool for interacting with the REST API of Elasticsearch.
+Console enables you to send requests to Elasticsearch, view responses,
+view API documentation, and get your request history.
+Refer to {kibana-ref}/console-kibana.html[Console].
+// end::console-def[]
 
 [float]
 [[d_glos]]
 == D
 
-[glossary-data-source]] data source ::
+[[glossary-dashboard]] dashboard ::
+// tag::dashboard-def[]
+A collection of panels that contain elements such as visualizations, saved searches, and maps.
+Provides insights into your data from multiple perspectives.
+// end::dashboard-def[]
+
+[[glossary-data-source]] data source ::
 // tag::data-source-def[]
-The data source for a map, Canvas element, and visualizations.
+A file, database, or service that provides the underlying data for a map, Canvas element, or visualization.
 // end::data-source-def[]
 
-[glossary-diversity-field]] diversity field ::
+[[glossary-diversity-field]] diversity field ::
 // tag::diversity-field-def[]
-A field for which only a certain number of documents will be accepted in your
-graph to avoid bias. For example, if you select "nationality" as a
-diversity field, a limited number of documents will be accepted per nationality
-in your sample.
+A field for which only a certain number of documents are accepted in a
+graph to avoid bias. For example, if "nationality" is the
+diversity field, a limited number of documents are accepted per nationality.
 // end::diversity-field-def[]
 
-[glossary-drilldown]] drilldown ::
+[[glossary-drilldown]] drilldown ::
 // tag::drilldown-def[]
-Custom navigation paths between apps. Refer to {kibana-ref}/drilldowns.html[Use drilldowns for dashboard actions].
+A custom navigation paths between apps. Refer to {kibana-ref}/drilldowns.html[Drilldowns].
 // end::drilldown-def[]
 
 
@@ -116,29 +170,34 @@ A service that serves basemap tiles, shape files, and other key features
 that are essential for visualizing geospatial data.
 // end::ems-def[]
 
+[[glossary-element]] element ::
+// tag::element-def[]
+A <<glossary-canvas,Canvas>> workpad object that enables you to display images, text, and visualizations.
+// end::element-def[]
+
 
 [float]
 [[f_glos]]
 == F
 
+
 [float]
 [[g_glos]]
 == G
 
-[[glossary-geojson]] GeoJSON ::
-// tag::GeoJSON-def[]
-An open-standard file format for storing geospatial vector data.
-// end::GeoJSON-def[]
+[[glossary-grok-debugger]] Grok Debugger ::
+// tag::grok-debugger-def[]
+A tool for building and debugging grok patterns. Grok is good for parsing logs,
+such as syslog, apache, and other webserver logs. Refer to
+{kibana-ref}/xpack-grokdebugger.html[Debugging grok expressions].
+// end::grok-debugger-def[]
+
 
 
 [float]
 [[h_glos]]
 == H
 
-[[glossary-heat map]] heat map ::
-// tag::GeoJSON-def[]
-A geographic visualization in which point data is clustered to show locations with higher densities.
-// end::heat-map-def[]
 
 
 [float]
@@ -155,7 +214,7 @@ A geographic visualization in which point data is clustered to show locations wi
 
 [[glossary-kql]] {kib} Query Language (KQL) ::
 // tag::kql-def[]
-The default language for querying in {kib}. The {kib} Query Language provides
+The default language for querying in {kib}. The KQL provides
 support for scripted fields.
 // end::kql-def[]
 
@@ -164,6 +223,15 @@ support for scripted fields.
 [[l_glos]]
 == L
 
+[[glossary-lens]] Lens ::
+// tag::lens-def[]
+Enables you to quickly build visualizations by dragging and dropping data fields.
+Lens makes makes smart visualization suggestions for your data,
+allowing for quick switching between visualization types. Refer to the
+{kibana}-ref/lens.html[Lens documentation].
+// end::lens-def[]
+
+
 [[glossary-lucene]] Lucene query syntax ::
 // tag::lucene-def[]
 The query syntax for {kib}’s legacy query language. The Lucene query
@@ -171,21 +239,21 @@ syntax is available under the options menu in the query bar and from the
 <<glossary-advanced-settings,Advanced Settings UI>>.
 // end::lucene-def[]
 
+[[glossary-license-management]] License Management ::
+// tag::license-management-def[]
+A user interface in <<glossary-management,Stack Management>> that allows you to view the status of your license,
+start a trial, or install a new license.
+// end::license-management-def[]
+
 [float]
 [[m_glos]]
 == M
 
 [[glossary-map]] map ::
 // tag::map-def[]
-A series of layers, drawn in a particular order.
+A representation of geographic data using symbols and labels.
 Refer to {kibana-ref}/maps.html[Maps].
 // end::map-def[]
-
-
-[[glossary-map-layer]] map layer ::
-// tag::map-layer-def[]
-A representation of geographic data using symbols and labels. Refer to <<glossary-map,map>>.
-// end::map-layer-def[]
 
 [[glossary-maps]] Maps ::
 // tag::maps-def[]
@@ -207,6 +275,13 @@ Refer to {kibana-ref}/maps.html[Maps].
 [[p_glos]]
 == P
 
+[[glossary-panel]] panel ::
+// tag::panel-def[]
+A module in a <<glossary-dashboard,dashboard>> that can contain a visualization,
+query element, search boxes, fields, charts, tables, and lists.
+// end::panel-def[]
+
+
 [float]
 [[q_glos]]
 == Q
@@ -221,6 +296,12 @@ information you want to retrieve and interact with.
 [float]
 [[r_glos]]
 == R
+
+[[glossary-rollup-job]] Rollup Jobs ::
+// tag::rollup-job-def[]
+A feature that enables you to define the data flow and schedule for
+rolling up historical data into a new, compact index.
+// end::rollup-job-def[]
 
 [float]
 [[s_glos]]
@@ -240,20 +321,25 @@ saved for later retrieval and reuse.
 
 [[glossary-scripted-field]] scripted field ::
 // tag::scripted-field-def[]
-A field that computes data on the fly from the data in your {es} indices.
-Scripted field data is shown in Discover and you can use them in your visualizations.
+A field that computes data on the fly from the data in {es} indices.
+Scripted field data is shown in Discover and are used in visualizations.
 // end::scripted-field-def[]
+
+[[glossary-shareable]] shareable ::
+// tag::shareable-def[]
+A Canvas workpad that can be embedded outside of Kibana
+(e.g. on an internal wiki or public website) using HTML and JavaScript.
+// end::shareable-def[]
 
 [[glossary-space]] space ::
 // tag::space-def[]
 A place for organizing dashboards, visualizations, and other saved objects by category.
-For example, you might create a space based on a team, use case, or individual.
+For example, a space might be based on a team, use case, or individual.
 // end::space-def[]
 
 [[glossary-feature-space]] Spaces ::
 // tag::space-feature-def[]
-A feature allows you to organize your dashboards, visualizations, and
-other saved objects into meaningful categories. Refer to
+A feature that allows you to organize your saved objects into meaningful categories. Refer to
 {kibana-ref}/xpack-spaces.html[Spaces].
 // end::space-feature-def[]
 
@@ -264,6 +350,12 @@ performance data for {es}, Logstash, and Beats. You can also monitor {kib}
 and route that data to the monitoring cluster. Refer to
 {kibana-ref}/xpack-monitoring.html[Stack Monitoring].
 // end::stack-monitoring-def[]
+
+[[glossary-management]] Stack Management ::
+// tag::management-def[]
+The home for managing the Elastic Stack — indices, clusters, licenses, UI settings,
+index patterns, spaces, and more.
+// end::management-def[]
 
 
 [float]
@@ -282,11 +374,25 @@ properties for data-driven styling and rich tooltip content in maps.
 A control that constrains the search results to a particular time period.
 // end::time-filter-def[]
 
+[[glossary-timelion]] Timelion ::
+// tag::timelion-def[]
+A tool for building a time series visualization that analyzes data in time order.
+Refer to {kibana-ref/timelion.html}[Timelion].
+// end::timelion-def[]
+
+
 [[glossary-time-series-data]] time series data ::
 // tag::time-series-data-def[]
-A control that constrains the search results to a particular time period.
+A series of data indexed in time order.
 // end::time-series-data-def[]
 
+
+[[glossary-TSVB-data]] TSVB ::
+// tag::TSVB-def[]
+A time series data visualizer that allows you to combine an
+infinite number of aggregations to display complex data.
+Refer to {kibana-ref}/TSVB.html[TSVB].
+// end::TSVB-def[]
 
 
 [float]
@@ -306,15 +412,28 @@ indices and guides you through resolving issues, including reindexing. Refer to
 [[v_glos]]
 == V
 
+[[glossary-vega]] Vega ::
+// tag::vega-def[]
+A declarative language used to create interactive visualizations.
+Refer to {kibana-ref}/vega-graph.html[Vega].
+// end::vega-def[]
+
 [[glossary-vector]] vector ::
 // tag::vector-def[]
 Points, lines, and polygons used to represent a map.
 // end::vector-def[]
 
-[[glossary-visualzation]] visualization ::
+[[glossary-visualization]] visualization ::
 // tag::visualization-def[]
 A graphical representation of query results (e.g., a histogram, line graph, pie chart, or heat map).
 // end::visualization-def[]
+
+[[glossary-visualize]] Visualize ::
+// tag::visualization-def[]
+The {kib} feature that enables you to create visualizations of the data in your
+{es} indices, which you can then add to a dashboard for analysis.
+// end::visualization-def[]
+
 
 
 [float]
@@ -325,5 +444,12 @@ A graphical representation of query results (e.g., a histogram, line graph, pie 
 // tag::watcher-def[]
 The original suite of alerting features.
 Refer to
-{kibana-ref}/watcher.html[Watcher].
+{kibana-ref}/watcher-ui.html[Watcher].
 // end::watcher-def[]
+
+[[glossary-workpad]] workpad ::
+// tag::workpad-def[]
+A workspace where you build presentations of your live data in <<glossary-canvas,Canvas>>.
+Refer to
+{kibana-ref}/create-canvas-workpad.html[Create a workpad].
+// end::workpad-def[]
