@@ -29,13 +29,14 @@ const ExceptionsViewerPaginationComponent = ({
 }: ExceptionsViewerPaginationProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const closePerPageMenu = useCallback((): void => setIsOpen(false), [setIsOpen]);
+  const handleClosePerPageMenu = useCallback((): void => setIsOpen(false), [setIsOpen]);
 
-  const onPerPageMenuClick = useCallback((): void => setIsOpen((isPopoverOpen) => !isPopoverOpen), [
-    setIsOpen,
-  ]);
+  const handlePerPageMenuClick = useCallback(
+    (): void => setIsOpen((isPopoverOpen) => !isPopoverOpen),
+    [setIsOpen]
+  );
 
-  const onPageClick = useCallback(
+  const handlePageClick = useCallback(
     (pageIndex: number): void => {
       onPaginationChange({
         filter: {},
@@ -63,14 +64,14 @@ const ExceptionsViewerPaginationComponent = ({
               totalItemCount: pagination.totalItemCount,
             },
           });
-          closePerPageMenu();
+          handleClosePerPageMenu();
         }}
         data-test-subj="exceptionsPerPageItem"
       >
         {i18n.NUMBER_OF_ITEMS(rows)}
       </EuiContextMenuItem>
     ));
-  }, [pagination, onPaginationChange, closePerPageMenu]);
+  }, [pagination, onPaginationChange, handleClosePerPageMenu]);
 
   const totalPages = useMemo((): number => {
     if (pagination.totalItemCount > 0) {
@@ -90,14 +91,14 @@ const ExceptionsViewerPaginationComponent = ({
               color="text"
               iconType="arrowDown"
               iconSide="right"
-              onClick={onPerPageMenuClick}
+              onClick={handlePerPageMenuClick}
               data-test-subj="exceptionsPerPageBtn"
             >
               {i18n.ITEMS_PER_PAGE(pagination.pageSize)}
             </EuiButtonEmpty>
           }
           isOpen={isOpen}
-          closePopover={closePerPageMenu}
+          closePopover={handleClosePerPageMenu}
           panelPaddingSize="none"
         >
           <EuiContextMenuPanel items={items} />
@@ -108,7 +109,7 @@ const ExceptionsViewerPaginationComponent = ({
         <EuiPagination
           pageCount={totalPages}
           activePage={pagination.pageIndex}
-          onPageClick={onPageClick}
+          onPageClick={handlePageClick}
           data-test-subj="exceptionsPagination"
         />
       </EuiFlexItem>

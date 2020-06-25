@@ -8,8 +8,8 @@
 
 ```typescript
 AggGroupLabels: {
-    [AggGroupNames.Buckets]: string;
-    [AggGroupNames.Metrics]: string;
-    [AggGroupNames.None]: string;
+    buckets: string;
+    metrics: string;
+    none: string;
 }
 ```

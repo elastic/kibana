@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionEntries } from './exception_entries';
-import { getFormattedEntryMock } from '../../mocks';
+import { getFormattedEntryMock } from '../../exceptions.mock';
 import { getEmptyValue } from '../../../empty_value';
 
 describe('ExceptionEntries', () => {
@@ -44,7 +44,7 @@ describe('ExceptionEntries', () => {
     expect(wrapper.find('[data-test-subj="exceptionsViewerAndBadge"]')).toHaveLength(1);
   });
 
-  test('it invokes "handlEdit" when edit button clicked', () => {
+  test('it invokes "onEdit" when edit button clicked', () => {
     const mockOnEdit = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -78,6 +78,39 @@ describe('ExceptionEntries', () => {
     deleteBtn.simulate('click');
 
     expect(mockOnDelete).toHaveBeenCalledTimes(1);
+  });
+
+  test('it renders edit button disabled if "disableDelete" is "true"', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ExceptionEntries
+          disableDelete={true}
+          entries={[getFormattedEntryMock()]}
+          onDelete={jest.fn()}
+          onEdit={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+    const editBtn = wrapper.find('[data-test-subj="exceptionsViewerEditBtn"] button').at(0);
+
+    expect(editBtn.prop('disabled')).toBeTruthy();
+  });
+
+  test('it renders delete button in loading state if "disableDelete" is "true"', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ExceptionEntries
+          disableDelete={true}
+          entries={[getFormattedEntryMock()]}
+          onDelete={jest.fn()}
+          onEdit={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+    const deleteBtn = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0);
+
+    expect(deleteBtn.prop('disabled')).toBeTruthy();
+    expect(deleteBtn.find('.euiLoadingSpinner')).toBeTruthy();
   });
 
   test('it renders nested entry', () => {

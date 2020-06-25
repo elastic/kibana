@@ -73,7 +73,7 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
             defaultMessage: 'MalwareScore',
           }
         ),
-        description: alertData.process.malware_classification?.score || '-',
+        description: alertData.process.Ext.malware_classification?.score || '-',
       },
       {
         title: i18n.translate(
@@ -91,7 +91,7 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
             defaultMessage: 'Signer',
           }
         ),
-        description: alertData.process.code_signature.subject_name,
+        description: alertData.process.Ext.code_signature[0].subject_name,
       },
       {
         title: i18n.translate(
@@ -100,7 +100,7 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
             defaultMessage: 'Username',
           }
         ),
-        description: alertData.process.token.user,
+        description: alertData.process.Ext.token.user,
       },
       {
         title: i18n.translate(
@@ -109,7 +109,7 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
             defaultMessage: 'Domain',
           }
         ),
-        description: alertData.process.token.domain,
+        description: alertData.process.Ext.token.domain,
       },
     ];
   }, [alertData]);

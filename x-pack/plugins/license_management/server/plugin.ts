@@ -7,7 +7,7 @@
 import { Plugin, CoreSetup } from 'kibana/server';
 
 import { ApiRoutes } from './routes';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { Dependencies } from './types';
 
 export class LicenseManagementServerPlugin implements Plugin<void, void, any, any> {

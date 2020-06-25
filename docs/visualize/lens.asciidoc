@@ -110,9 +110,7 @@ To start, you'll need to add the <<add-sample-data, sample ecommerce data>>.
 
 Drag and drop your data onto the visualization builder pane.
 
-. From the menu, click *Visualize*, then click *Create visualization*.
-
-. On the *New Visualization* window, click *Lens*.
+. Open *Lens*.
 
 . Select the *kibana_sample_data_ecommerce* index pattern.
 

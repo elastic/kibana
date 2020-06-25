@@ -33,7 +33,7 @@ const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
 expect.addSnapshotSerializer({
-  print: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
+  serialize: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
   test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),
 });
 
@@ -132,13 +132,14 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   const foo = config.bundles.find((b) => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
-  expect(foo.cache.getModuleCount()).toBe(5);
+  expect(foo.cache.getModuleCount()).toBe(6);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
+      <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
       <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
   `);
@@ -148,7 +149,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
     // code + styles + style/css-loader runtimes + public path updater
-    21
+    18
   );
 
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
@@ -159,11 +160,8 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/legacy/ui/public/icon.svg,
+      <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
       <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
   `);

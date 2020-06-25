@@ -22,11 +22,7 @@ const ShardRow = (props) => {
   return (
     <tr>
       {unassigned}
-      <Assigned
-        shardStats={props.shardStats}
-        data={props.data.children}
-        changeUrl={props.changeUrl}
-      />
+      <Assigned shardStats={props.shardStats} data={props.data.children} />
     </tr>
   );
 };
@@ -40,14 +36,7 @@ export class TableBody extends React.Component {
   );
 
   createRow = (data, index) => {
-    return (
-      <ShardRow
-        key={`shardRow-${index}`}
-        data={data}
-        {...this.props}
-        changeUrl={this.props.changeUrl}
-      />
-    );
+    return <ShardRow key={`shardRow-${index}`} data={data} {...this.props} />;
   };
 
   render() {

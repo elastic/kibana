@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';

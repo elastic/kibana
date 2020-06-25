@@ -24,6 +24,7 @@ import { isPlainObject, cloneDeep } from 'lodash';
 const TIMEFILTER = '%timefilter%';
 const AUTOINTERVAL = '%autointerval%';
 const MUST_CLAUSE = '%dashboard_context-must_clause%';
+const FILTER_CLAUSE = '%dashboard_context-filter_clause%';
 const MUST_NOT_CLAUSE = '%dashboard_context-must_not_clause%';
 
 // These values may appear in the  'url': { ... }  object
@@ -203,8 +204,22 @@ export class EsQueryParser {
         // For arrays, replace MUST_CLAUSE and MUST_NOT_CLAUSE string elements
         for (let pos = 0; pos < obj.length; ) {
           const item = obj[pos];
-          if (isQuery && (item === MUST_CLAUSE || item === MUST_NOT_CLAUSE)) {
-            const ctxTag = item === MUST_CLAUSE ? 'must' : 'must_not';
+          if (
+            isQuery &&
+            (item === FILTER_CLAUSE || item === MUST_CLAUSE || item === MUST_NOT_CLAUSE)
+          ) {
+            let ctxTag = '';
+            switch (item) {
+              case FILTER_CLAUSE:
+                ctxTag = 'filter';
+                break;
+              case MUST_CLAUSE:
+                ctxTag = 'must';
+                break;
+              case MUST_NOT_CLAUSE:
+                ctxTag = 'must_not';
+                break;
+            }
             const ctx = cloneDeep(this._filters);
             if (ctx && ctx.bool && ctx.bool[ctxTag]) {
               if (Array.isArray(ctx.bool[ctxTag])) {

@@ -36,14 +36,13 @@ import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_ICON } from '../common/constants';
+import { APP_ID, APP_ICON, SERVER_APP_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerAlertRoutes } from './endpoint/alerts/routes';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { IngestIndexPatternRetriever } from './endpoint/alerts/index_pattern';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -125,7 +124,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerPolicyRoutes(router, endpointContext);
 
     plugins.features.registerFeature({
-      id: APP_ID,
+      id: SERVER_APP_ID,
       name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
         defaultMessage: 'Security',
       }),
@@ -219,12 +218,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     this.endpointAppContextService.start({
-      indexPatternRetriever: new IngestIndexPatternRetriever(
-        plugins.ingestManager.esIndexPatternService,
-        this.context.logger
-      ),
       agentService: plugins.ingestManager.agentService,
+      registerIngestCallback: plugins.ingestManager.registerExternalCallback,
     });
+
     return {};
   }
 

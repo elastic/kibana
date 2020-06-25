@@ -17,20 +17,22 @@
  * under the License.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { uiSettingsServiceMock } from '../../../../../core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CollectorOptions } from '../../../../../plugins/usage_collection/server/collector/collector';
+import {
+  CollectorOptions,
+  createUsageCollectionSetupMock,
+} from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerManagementUsageCollector } from './';
 
 describe('telemetry_application_usage_collector', () => {
   let collector: CollectorOptions;
 
-  const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = {
-    makeUsageCollector: jest.fn().mockImplementation((config) => (collector = config)),
-    registerCollector: jest.fn(),
-  } as any;
+  const usageCollectionMock = createUsageCollectionSetupMock();
+  usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+    collector = config;
+    return createUsageCollectionSetupMock().makeUsageCollector(config);
+  });
 
   const uiSettingsClient = uiSettingsServiceMock.createClient();
   const getUiSettingsClient = jest.fn(() => uiSettingsClient);

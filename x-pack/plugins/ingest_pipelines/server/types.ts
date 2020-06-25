@@ -8,7 +8,7 @@ import { IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { License } from './services';
-import { isEsError } from './lib';
+import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   security: SecurityPluginSetup;

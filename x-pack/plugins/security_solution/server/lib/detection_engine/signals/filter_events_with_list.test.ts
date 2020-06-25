@@ -21,11 +21,11 @@ describe('filterEventsAgainstList', () => {
     listClient.getListItemByValues = jest.fn().mockResolvedValue([]);
   });
 
-  it('should respond with eventSearchResult if exceptionList is empty', async () => {
+  it('should respond with eventSearchResult if exceptionList is empty array', async () => {
     const res = await filterEventsAgainstList({
       logger: mockLogger,
       listClient,
-      exceptionsList: undefined,
+      exceptionsList: [],
       eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
         '1.1.1.1',
         '2.2.2.2',

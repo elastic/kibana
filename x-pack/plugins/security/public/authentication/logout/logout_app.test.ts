@@ -21,11 +21,6 @@ describe('logoutApp', () => {
     });
   });
 
-  afterAll(() => {
-    delete (window as any).sessionStorage;
-    delete (window as any).location;
-  });
-
   it('properly registers application', () => {
     const coreSetupMock = coreMock.createSetup();
 

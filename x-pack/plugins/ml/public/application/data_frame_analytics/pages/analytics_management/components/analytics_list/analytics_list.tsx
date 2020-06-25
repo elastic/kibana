@@ -48,7 +48,6 @@ import {
   SORT_DIRECTION,
 } from '../../../../../components/ml_in_memory_table';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
-import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
@@ -398,9 +397,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <RefreshAnalyticsListButton />
-            </EuiFlexItem>
             {!isManagementTable && createAnalyticsForm && (
               <EuiFlexItem grow={false}>
                 <CreateAnalyticsButton
@@ -412,7 +408,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
         <MlInMemoryTable
           allowNeutralSort={false}

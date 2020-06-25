@@ -193,11 +193,15 @@ export class FeatureTable extends Component<Props, State> {
         render: (roleEntry: Role, record: TableRow) => {
           const { feature } = record;
 
-          if (feature.reserved) {
-            return <EuiText size={'s'}>{feature.reserved.description}</EuiText>;
-          }
-
           const primaryFeaturePrivileges = feature.getPrimaryFeaturePrivileges();
+
+          if (feature.reserved && primaryFeaturePrivileges.length === 0) {
+            return (
+              <EuiText size={'s'} data-test-subj="reservedFeatureDescription">
+                {feature.reserved.description}
+              </EuiText>
+            );
+          }
 
           if (primaryFeaturePrivileges.length === 0) {
             return null;

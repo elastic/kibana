@@ -25,14 +25,14 @@ export const EMS_TILES_VECTOR_TILE_PATH = 'vector/tile';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
-export const TELEMETRY_TYPE = 'maps-telemetry';
+export const TELEMETRY_TYPE = APP_ID;
 
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 
-export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
+export const MAP_BASE_URL = `/${MAP_APP_PATH}/${MAP_SAVED_OBJECT_TYPE}`;
 
 export function createMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
@@ -98,6 +98,9 @@ export enum ES_GEO_FIELD_TYPE {
   GEO_POINT = 'geo_point',
   GEO_SHAPE = 'geo_shape',
 }
+
+// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IFieldType.type is compared to value
+export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
 export enum ES_SPATIAL_RELATIONS {
   INTERSECTS = 'INTERSECTS',
@@ -223,4 +226,10 @@ export enum INITIAL_LOCATION {
   LAST_SAVED_LOCATION = 'LAST_SAVED_LOCATION',
   FIXED_LOCATION = 'FIXED_LOCATION',
   BROWSER_LOCATION = 'BROWSER_LOCATION',
+}
+
+export enum LAYER_WIZARD_CATEGORY {
+  ELASTICSEARCH = 'ELASTICSEARCH',
+  REFERENCE = 'REFERENCE',
+  SOLUTIONS = 'SOLUTIONS',
 }

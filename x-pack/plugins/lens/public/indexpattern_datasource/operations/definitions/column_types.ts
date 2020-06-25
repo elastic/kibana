@@ -16,6 +16,7 @@ export interface BaseIndexPatternColumn extends Operation {
   operationType: string;
   sourceField: string;
   suggestedPriority?: DimensionPriority;
+  customLabel?: boolean;
 }
 
 // Formatting can optionally be added to any column

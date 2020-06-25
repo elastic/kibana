@@ -8,7 +8,7 @@ import {
   AGENT_NAME,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceAgentName(

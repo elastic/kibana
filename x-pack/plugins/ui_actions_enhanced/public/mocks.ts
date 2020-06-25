@@ -27,6 +27,7 @@ const createStartContract = (): Start => {
     ...uiActionsPluginMock.createStartContract(),
     getActionFactories: jest.fn(),
     getActionFactory: jest.fn(),
+    FlyoutManageDrilldowns: jest.fn(),
   };
 
   return startContract;

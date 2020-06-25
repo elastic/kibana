@@ -135,5 +135,5 @@ export const REFRESH = i18n.translate('xpack.securitySolution.exceptions.utility
 export const SHOWING_EXCEPTIONS = (items: number) =>
   i18n.translate('xpack.securitySolution.exceptions.utilityNumberExceptionsLabel', {
     values: { items },
-    defaultMessage: 'Showing {items} exceptions',
+    defaultMessage: 'Showing {items} {items, plural, =1 {exception} other {exceptions}}',
   });

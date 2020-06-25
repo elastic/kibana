@@ -97,6 +97,7 @@ const providersConfigSchema = schema.object(
           ...getCommonProviderSchemaProperties(),
           realm: schema.string(),
           maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+          useRelayStateDeepLink: schema.boolean({ defaultValue: false }),
         })
       )
     ),
@@ -150,6 +151,9 @@ export const ConfigSchema = schema.object({
     lifespan: schema.nullable(schema.duration()),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
+  sameSiteCookies: schema.maybe(
+    schema.oneOf([schema.literal('Strict'), schema.literal('Lax'), schema.literal('None')])
+  ),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {

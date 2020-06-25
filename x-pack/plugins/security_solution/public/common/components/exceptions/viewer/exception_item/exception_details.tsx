@@ -15,11 +15,12 @@ import {
 import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
 
-import { DescriptionListItem, ExceptionListItemSchema } from '../../types';
+import { DescriptionListItem } from '../../types';
 import { getDescriptionListContent } from '../../helpers';
 import * as i18n from '../../translations';
+import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
 
-const StyledExceptionDetails = styled(EuiFlexItem)`
+const MyExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorLightestShade};
     padding: ${theme.eui.euiSize};
@@ -49,9 +50,8 @@ const ExceptionDetailsComponent = ({
   );
 
   const commentsSection = useMemo((): JSX.Element => {
-    // TODO: return back to exceptionItem.comments once updated
-    const { comment } = exceptionItem;
-    if (comment.length > 0) {
+    const { comments } = exceptionItem;
+    if (comments.length > 0) {
       return (
         <EuiButtonEmpty
           onClick={onCommentsClick}
@@ -59,7 +59,9 @@ const ExceptionDetailsComponent = ({
           size="xs"
           data-test-subj="exceptionsViewerItemCommentsBtn"
         >
-          {!showComments ? i18n.COMMENTS_SHOW(comment.length) : i18n.COMMENTS_HIDE(comment.length)}
+          {!showComments
+            ? i18n.COMMENTS_SHOW(comments.length)
+            : i18n.COMMENTS_HIDE(comments.length)}
         </EuiButtonEmpty>
       );
     } else {
@@ -68,7 +70,7 @@ const ExceptionDetailsComponent = ({
   }, [showComments, onCommentsClick, exceptionItem]);
 
   return (
-    <StyledExceptionDetails grow={2}>
+    <MyExceptionDetails grow={2}>
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem grow={1}>
           <EuiDescriptionList compressed type="column" data-test-subj="exceptionsViewerItemDetails">
@@ -82,7 +84,7 @@ const ExceptionDetailsComponent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{commentsSection}</EuiFlexItem>
       </EuiFlexGroup>
-    </StyledExceptionDetails>
+    </MyExceptionDetails>
   );
 };
 
