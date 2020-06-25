@@ -141,7 +141,7 @@ export const HostList = () => {
   >('ingestManager', {
     path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
     state: {
-      onCancelNavigateTo: [
+      onDoneNavigateTo: [
         'securitySolution:management',
         { path: getEndpointListPath({ name: 'endpointList' }) },
       ],

@@ -104,8 +104,8 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   );
 
   const enrollmentCancelClickHandler = useCallback(() => {
-    if (routeState && routeState.onCancelNavigateTo) {
-      navigateToApp(routeState.onCancelNavigateTo[0], routeState.onCancelNavigateTo[1]);
+    if (routeState && routeState.onDoneNavigateTo) {
+      navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
     }
   }, [routeState, navigateToApp]);
 
@@ -171,7 +171,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                 }}
                 enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
                 onCancelEnrollment={
-                  routeState && routeState.onCancelNavigateTo
+                  routeState && routeState.onDoneNavigateTo
                     ? enrollmentCancelClickHandler
                     : undefined
                 }

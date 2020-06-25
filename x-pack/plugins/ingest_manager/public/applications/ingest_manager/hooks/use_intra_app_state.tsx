@@ -58,12 +58,12 @@ export function useIntraAppState<S = AnyIntraAppRouteState>():
     // ingest app. side affect is that the browser back button would not work
     // consistently either.
 
-    if (
-      location.pathname + location.search === intraAppState.forRoute &&
-      !wasHandled.has(intraAppState)
-    ) {
+    // Compare the routes only, strip any query params
+    const forBaseRoute = intraAppState.forRoute.split('?')[0];
+
+    if (location.pathname === forBaseRoute && !wasHandled.has(intraAppState)) {
       wasHandled.add(intraAppState);
       return intraAppState.routeState as S;
     }
-  }, [intraAppState, location.pathname, location.search]);
+  }, [intraAppState, location.pathname]);
 }

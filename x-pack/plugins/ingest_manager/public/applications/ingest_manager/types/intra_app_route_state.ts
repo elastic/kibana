@@ -26,7 +26,7 @@ export interface CreateDatasourceRouteState {
  */
 export interface AgentConfigDetailsDeployAgentAction {
   /** On cancel, navigate to the given app */
-  onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+  onDoneNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
 }
 
 /**
