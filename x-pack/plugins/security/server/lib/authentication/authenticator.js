@@ -221,13 +221,20 @@ class Authenticator {
       return this._providers.get(sessionValue.provider).deauthenticate(request, sessionValue.state);
     }
 
-    // Normally when there is no active session in Kibana, `deauthenticate` method shouldn't do anything
-    // and user will eventually be redirected to the home page to log in. But if SAML is supported there
-    // is a special case when logout is initiated by the IdP or another SP, then IdP will request _every_
-    // SP associated with the current user session to do the logout. So if Kibana (without active session)
-    // receives such a request it shouldn't redirect user to the home page, but rather redirect back to IdP
-    // with correct logout response and only Elasticsearch knows how to do that.
-    if (this._isSAMLRequest(request) && this._providers.has('saml')) {
+    // Normally when there is no active session in Kibana, `deauthenticate` method shouldn't do
+    // anything and user will eventually be redirected to the home page to log in. But when SAML SLO
+    // is supported there are two special cases that we need to handle even if there is no active
+    // Kibana session:
+    //
+    // 1. When IdP or another SP initiates logout, then IdP will request _every_ SP associated with
+    // the current user session to do the logout. So if Kibana receives such request it shouldn't
+    // redirect user to the home page, but rather redirect back to IdP with correct logout response
+    // and only Elasticsearch knows how to do that.
+    //
+    // 2. When Kibana initiates logout, then IdP may eventually respond with the logout response. So
+    // if Kibana receives such response it shouldn't redirect user to the home page, but rather
+    // redirect to the `loggedOut` URL instead.
+    if ((this._isSAMLRequestQuery(request) || this._isSAMLResponseQuery(request)) && this._providers.has('saml')) {
       return this._providers.get('saml').deauthenticate(request);
     }
 
@@ -261,7 +268,7 @@ class Authenticator {
     // If there is no way to predict which provider to use first, let's use the order providers are configured in.
     // Otherwise return provider that either owns session or can handle 3rd-party login request first, and only then
     // the rest of providers.
-    const shouldHandleSAMLResponse = this._isSAMLResponse(request) && this._providers.has('saml');
+    const shouldHandleSAMLResponse = this._isSAMLResponsePayload(request) && this._providers.has('saml');
     if (!sessionValue && !shouldHandleSAMLResponse) {
       yield* this._providers;
     } else {
@@ -298,22 +305,32 @@ class Authenticator {
   }
 
   /**
-   * Checks whether specified request represents SAML Request.
+   * Checks whether specified request has SAML Request in the query.
    * @param {Hapi.Request} request HapiJS request instance.
    * @returns {boolean}
    * @private
    */
-  _isSAMLRequest(request) {
+  _isSAMLRequestQuery(request) {
     return !!(request.query && request.query.SAMLRequest);
   }
 
   /**
-   * Checks whether specified request represents SAML Response.
+   * Checks whether specified request has SAML Response in the query.
    * @param {Hapi.Request} request HapiJS request instance.
    * @returns {boolean}
    * @private
    */
-  _isSAMLResponse(request) {
+  _isSAMLResponseQuery(request) {
+    return !!(request.query && request.query.SAMLResponse);
+  }
+
+  /**
+   * Checks whether specified request has SAML Response in the payload.
+   * @param {Hapi.Request} request HapiJS request instance.
+   * @returns {boolean}
+   * @private
+   */
+  _isSAMLResponsePayload(request) {
     return !!(request.payload && request.payload.SAMLResponse)
       && request.path === '/api/security/v1/saml';
   }

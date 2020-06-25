@@ -419,20 +419,22 @@ export class SAMLAuthenticationProvider {
   async deauthenticate(request, state) {
     this._options.log(['debug', 'security', 'saml'], `Trying to deauthenticate user via ${request.url.path}.`);
 
-    if ((!state || !state.accessToken) && !request.query.SAMLRequest) {
+    const isIdPInitiatedSLORequest = !!(request.query && request.query.SAMLRequest);
+    const isSPInitiatedSLOResponse = !!(request.query && request.query.SAMLResponse);
+    if ((!state || !state.accessToken) && !isIdPInitiatedSLORequest && !isSPInitiatedSLOResponse) {
       this._options.log(['debug', 'security', 'saml'], 'There is neither access token nor SAML session to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
     let logoutArgs;
-    if (request.query.SAMLRequest) {
+    if (isIdPInitiatedSLORequest) {
       this._options.log(['debug', 'security', 'saml'], 'Logout has been initiated by the Identity Provider.');
       logoutArgs = [
         'shield.samlInvalidate',
         // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
         { body: { queryString: request.url.search ? request.url.search.slice(1) : '', acs: this._getACS() } }
       ];
-    } else {
+    } else if (state) {
       this._options.log(['debug', 'security', 'saml'], 'Logout has been initiated by the user.');
       logoutArgs = [
         'shield.samlLogout',
@@ -441,9 +443,15 @@ export class SAMLAuthenticationProvider {
     }
 
     try {
-      // This operation should be performed on behalf of the user with a privilege that normal
-      // user usually doesn't have `cluster:admin/xpack/security/saml/logout (invalidate)`.
-      const { redirect } = await this._options.client.callWithInternalUser(...logoutArgs);
+      // It may _theoretically_ (highly unlikely in practice though) happen that when user receives
+      // logout response they may already have a new SAML session (isSPInitiatedSLOResponse == true
+      // and state !== undefined). In this case case it'd be safer to trigger SP initiated logout
+      // for the new session as well.
+      const redirect = logoutArgs
+        // This operation should be performed on behalf of the user with a privilege that normal
+        // user usually doesn't have `cluster:admin/xpack/security/saml/logout (invalidate)`.
+        ? (await this._options.client.callWithInternalUser(...logoutArgs)).redirect
+        : null;
 
       this._options.log(['debug', 'security', 'saml'], 'User session has been successfully invalidated.');
 
@@ -455,7 +463,7 @@ export class SAMLAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo('/logged_out');
+      return DeauthenticationResult.redirectTo(`${this._options.basePath}/logged_out`);
     } catch(err) {
       this._options.log(['debug', 'security', 'saml'], `Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
