@@ -23,13 +23,13 @@ export class TiledVectorLayer extends VectorLayer {
 
   static createDescriptor(
     descriptor: Partial<VectorLayerDescriptor>,
-    mapColors: string[]
+    mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(descriptor, mapColors);
     layerDescriptor.type = TiledVectorLayer.type;
 
     if (!layerDescriptor.style) {
-      const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
+      const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
       layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
 
