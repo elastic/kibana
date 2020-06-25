@@ -9,7 +9,7 @@ import React from 'react';
 
 import { PropertiesRight } from './properties_right';
 import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
 jest.mock('../../../../common/lib/kibana', () => {
   return {
@@ -67,6 +67,7 @@ describe('Properties Right', () => {
     status: TimelineStatus.active,
     showTimelineModal: false,
     title: 'title',
+    timelineType: TimelineType.default,
     updateNote: jest.fn(),
   };
 

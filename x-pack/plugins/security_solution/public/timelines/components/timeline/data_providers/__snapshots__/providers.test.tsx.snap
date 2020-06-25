@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Providers rendering renders correctly against snapshot 1`] = `
-<div>
+<Fragment>
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -12,18 +12,25 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     >
       <styled.div>
         <Memo(AddDataProviderPopoverComponent)
-          Button={[Function]}
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddDataProviderPopoverButton",
+              "type": [Function],
+            }
+          }
           timelineId="foo"
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -41,14 +48,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -63,13 +73,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -87,14 +97,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -109,13 +122,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -133,14 +146,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -155,13 +171,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -179,14 +195,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -201,13 +220,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -225,14 +244,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -247,13 +269,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -271,14 +293,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -293,13 +318,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -317,14 +342,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -339,13 +367,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -363,14 +391,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -385,13 +416,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -409,14 +440,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -431,13 +465,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -455,14 +489,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -477,13 +514,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -501,13 +538,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
-</div>
+</Fragment>
 `;

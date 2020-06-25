@@ -6,47 +6,50 @@ exports[`Empty rendering renders correctly against snapshot 1`] = `
   data-test-subj="empty"
   showSmallMsg={false}
 >
-  <NoWrap>
-    <Text
-      color="subdued"
-      size="s"
-    >
-      Drop anything
-    </Text>
-    <HighlightedBackground>
-      <BadgeHighlighted
-        className="highlighted-drop-target"
+  <div>
+    <NoWrap>
+      <Text
+        color="subdued"
+        size="s"
       >
-        highlighted
-      </BadgeHighlighted>
-    </HighlightedBackground>
-  </NoWrap>
-  <NoWrap>
-    <Text
-      color="subdued"
-      size="s"
-    >
-      here to build an
-    </Text>
-    <AndOrBadge
-      type="or"
-    />
-    <Text
-      color="subdued"
-      size="s"
-    >
-      query
-    </Text>
-    <Text
-      color="subdued"
-      size="s"
-    >
-      or click
-    </Text>
+        Drop anything
+      </Text>
+      <HighlightedBackground>
+        <BadgeHighlighted
+          className="highlighted-drop-target"
+        >
+          highlighted
+        </BadgeHighlighted>
+      </HighlightedBackground>
+      <Text
+        color="subdued"
+        size="s"
+      >
+        here to build an
+      </Text>
+      <AndOrBadge
+        type="or"
+      />
+      <Text
+        color="subdued"
+        size="s"
+      >
+        query
+      </Text>
+    </NoWrap>
+  </div>
+  <div>
     <Memo(AddDataProviderPopoverComponent)
-      Button={[Function]}
+      Button={
+        Object {
+          "$$typeof": Symbol(react.memo),
+          "compare": null,
+          "displayName": "AddDataProviderPopoverButton",
+          "type": [Function],
+        }
+      }
       timelineId="test"
     />
-  </NoWrap>
+  </div>
 </EmptyContainer>
 `;

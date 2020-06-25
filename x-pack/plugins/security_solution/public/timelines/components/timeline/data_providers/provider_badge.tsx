@@ -166,7 +166,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
 
     return (
       <ProviderContainer>
-        <div>
+        <>
           <ProviderBadgeStyled
             id={`${providerId}-${field}-${val}`}
             className={classes}
@@ -187,7 +187,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
           {type === DataProviderType.template && (
             <TemplateTimelineBadge>{'Template field'}</TemplateTimelineBadge>
           )}
-        </div>
+        </>
       </ProviderContainer>
     );
   }
