@@ -86,6 +86,7 @@ export const Resolver = React.memo(function Resolver({
   const { projectionMatrix, ref, onMouseDown } = useCamera();
   const isLoading = useSelector(selectors.isLoading);
   const hasError = useSelector(selectors.hasError);
+  const relatedEventsStats = useSelector(selectors.relatedEventsStats);
   const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
   const terminatedProcesses = useSelector(selectors.terminatedProcesses);
   const { colorMap } = useResolverTheme();
@@ -126,28 +127,18 @@ export const Resolver = React.memo(function Resolver({
           tabIndex={0}
           aria-activedescendant={activeDescendantId || undefined}
         >
-          {connectingEdgeLineSegments.map(
-            (
-              {
-                entity: {
-                  points: [startPosition, endPosition],
-                  metadata,
-                },
-              },
-              index
-            ) => (
-              <EdgeLine
-                edgeLineMetadata={metadata}
-                key={index}
-                startPosition={startPosition}
-                endPosition={endPosition}
-                projectionMatrix={projectionMatrix}
-              />
-            )
-          )}
-          {processNodePositions.map(({ entity, position }, index) => {
-            const adjacentNodeMap = processToAdjacencyMap.get(entity);
-            const processEntityId = entityId(entity);
+          {connectingEdgeLineSegments.map(({ points: [startPosition, endPosition], metadata }) => (
+            <EdgeLine
+              edgeLineMetadata={metadata}
+              key={metadata.uniqueId}
+              startPosition={startPosition}
+              endPosition={endPosition}
+              projectionMatrix={projectionMatrix}
+            />
+          ))}
+          {[...processNodePositions].map(([processEvent, position], index) => {
+            const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
+            const processEntityId = entityId(processEvent);
             if (!adjacentNodeMap) {
               // This should never happen
               throw new Error('Issue calculating adjacency node map.');
@@ -157,8 +148,9 @@ export const Resolver = React.memo(function Resolver({
                 key={index}
                 position={position}
                 projectionMatrix={projectionMatrix}
-                event={entity}
+                event={processEvent}
                 adjacentNodeMap={adjacentNodeMap}
+                relatedEventsStats={relatedEventsStats.get(entityId(processEvent))}
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
                 isProcessOrigin={false}
               />

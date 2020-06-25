@@ -14,8 +14,8 @@ import { useHistory } from 'react-router-dom';
 import querystring from 'querystring';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../lib/vector2';
-import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
-import { SymbolIds, useResolverTheme, NodeStyleMap, calculateResolverFontSize } from './assets';
+import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
+import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
@@ -375,8 +375,7 @@ const ProcessEventDotComponents = React.memo(
           })
         | null;
     } = React.createRef();
-    const { colorMap, nodeAssets } = useResolverTheme();
-    const processType = nodeType(isProcessTerminated, isProcessOrigin);
+    const { colorMap, cubeAssetsForNode } = useResolverTheme();
     const {
       backingFill,
       cubeSymbol,
@@ -384,7 +383,8 @@ const ProcessEventDotComponents = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = nodeAssets[processType];
+    } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+
     const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
     const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -717,22 +717,3 @@ export const ProcessEventDot = styled(ProcessEventDotComponents)`
     color: white;
   }
 `;
-
-const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
-  processCreated: 'runningProcessCube',
-  processRan: 'runningProcessCube',
-  processTerminated: 'terminatedProcessCube',
-  unknownProcessEvent: 'runningProcessCube',
-  processCausedAlert: 'runningTriggerCube',
-  unknownEvent: 'runningProcessCube',
-};
-
-function nodeType(isProcessTerminated: boolean, isProcessOrigin: boolean): keyof NodeStyleMap {
-  if (isProcessTerminated) {
-    return processTypeToCube.processTerminated;
-  } else if (isProcessOrigin) {
-    return processTypeToCube.processCausedAlert;
-  } else {
-    return processTypeToCube.processRan;
-  }
-}

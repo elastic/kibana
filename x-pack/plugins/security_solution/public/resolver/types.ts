@@ -165,8 +165,8 @@ export interface IndexedProcessNode extends BBox {
  * A type containing all things to actually be rendered to the DOM.
  */
 export interface VisibleEntites {
-  processNodePositions: IndexedProcessNode[];
-  connectingEdgeLineSegments: IndexedEdgeLineSegment[];
+  processNodePositions: ProcessPositions;
+  connectingEdgeLineSegments: EdgeLineSegment[];
 }
 
 /**
@@ -313,6 +313,8 @@ export interface DurationDetails {
  */
 export interface EdgeLineMetadata {
   elapsedTime?: DurationDetails;
+  // A string of the two joined process nodes concatted together.
+  uniqueId: string;
 }
 /**
  * A tuple of 2 vector2 points forming a polyline. Used to connect process nodes in the graph.
@@ -324,7 +326,7 @@ export type EdgeLinePoints = Vector2[];
  */
 export interface EdgeLineSegment {
   points: EdgeLinePoints;
-  metadata?: EdgeLineMetadata;
+  metadata: EdgeLineMetadata;
 }
 
 /**

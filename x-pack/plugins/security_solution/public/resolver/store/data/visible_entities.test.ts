@@ -91,7 +91,7 @@ describe('resolver visible entities', () => {
     processG = mockProcessEvent({
       endgame: {
         event_type_full: 'process_event',
-        event_subtype_full: 'termination_event',
+        event_subtype_full: 'creation_event',
         unique_pid: 7,
         unique_ppid: 6,
       },
@@ -100,7 +100,15 @@ describe('resolver visible entities', () => {
   });
   describe('when rendering a large tree with a small viewport', () => {
     beforeEach(() => {
-      const events: ResolverEvent[] = [processA, processB];
+      const events: ResolverEvent[] = [
+        processA,
+        processB,
+        processC,
+        processD,
+        processE,
+        processF,
+        processG,
+      ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
         events,
@@ -113,13 +121,13 @@ describe('resolver visible entities', () => {
     it('the visibleProcessNodePositions list should only include 2 nodes', () => {
       const { processNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
         store.getState()
-      )(Date.now());
-      expect(processNodePositions.length).toEqual(2);
+      )(0);
+      expect([...processNodePositions.keys()].length).toEqual(2);
     });
-    it('the visibleEdgeLineSegments list should only include 1 lines', () => {
+    it('the visibleEdgeLineSegments list should only include one edge line', () => {
       const { connectingEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
         store.getState()
-      )(Date.now());
+      )(0);
       expect(connectingEdgeLineSegments.length).toEqual(1);
     });
   });
@@ -139,21 +147,21 @@ describe('resolver visible entities', () => {
         events,
         stats: new Map(),
       };
-      const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [1000, 1000] };
+      const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [2000, 2000] };
       store.dispatch(action);
       store.dispatch(cameraAction);
     });
-    it('the visibleProcessNodePositions list should include all lines', () => {
+    it('the visibleProcessNodePositions list should include all process nodes', () => {
       const { processNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
         store.getState()
-      )(Date.now());
-      expect(processNodePositions.length).toEqual(5);
+      )(0);
+      expect([...processNodePositions.keys()].length).toEqual(5);
     });
     it('the visibleEdgeLineSegments list include all lines', () => {
       const { connectingEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
         store.getState()
-      )(Date.now());
-      expect(connectingEdgeLineSegments.length).toEqual(3);
+      )(0);
+      expect(connectingEdgeLineSegments.length).toEqual(4);
     });
   });
 });

@@ -100,11 +100,7 @@ export const terminatedProcesses = createSelector(
   function (results: DataState['results']) {
     return new Set(
       results.filter(isTerminatedProcess).map((terminatedEvent) => {
-        if (event.isLegacyEvent(terminatedEvent)) {
-          return terminatedEvent.endgame.unique_pid;
-        } else {
-          return terminatedEvent.process?.entity_id;
-        }
+        return uniquePidForProcess(terminatedEvent);
       })
     );
   }
@@ -186,7 +182,7 @@ function processEdgeLineSegments(
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
-    const edgeLineMetadata: EdgeLineMetadata = {};
+    const edgeLineMetadata: EdgeLineMetadata = { uniqueId: '' };
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
@@ -197,6 +193,9 @@ function processEdgeLineSegments(
     const { process, parent, parentWidth } = metadata;
     const position = positions.get(process);
     const parentPosition = positions.get(parent);
+    const parentId = event.entityId(parent);
+    const processEntityId = event.entityId(process);
+    const edgeLineId = parentId ? parentId + processEntityId : parentId;
 
     if (position === undefined || parentPosition === undefined) {
       /**
@@ -211,6 +210,7 @@ function processEdgeLineSegments(
       const elapsedTime = getFriendlyElapsedTime(parentTime, processTime);
       if (elapsedTime) edgeLineMetadata.elapsedTime = elapsedTime;
     }
+    edgeLineMetadata.uniqueId = edgeLineId;
 
     /**
      * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
@@ -255,6 +255,7 @@ function processEdgeLineSegments(
 
       const lineFromParentToMidwayLine: EdgeLineSegment = {
         points: [parentPosition, [parentPosition[0], midwayY]],
+        metadata: { uniqueId: `parentToMid${edgeLineId}` },
       };
 
       const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
@@ -275,6 +276,7 @@ function processEdgeLineSegments(
             midwayY,
           ],
         ],
+        metadata: { uniqueId: `midway${edgeLineId}` },
       };
 
       edgeLineSegments.push(
@@ -537,16 +539,15 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     for (const edgeLineSegment of edgeLineSegments) {
       const {
         points: [startPoint, endPoint],
-        metadata,
       } = edgeLineSegment;
 
       const transformedSegment: EdgeLineSegment = {
+        ...edgeLineSegment,
         points: [
           applyMatrix3(startPoint, isometricTransformMatrix),
           applyMatrix3(endPoint, isometricTransformMatrix),
         ],
       };
-      if (metadata) transformedSegment.metadata = metadata;
 
       transformedEdgeLineSegments.push(transformedSegment);
     }
@@ -611,7 +612,7 @@ export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
     // memoize the results of this call to avoid unnecessarily rerunning
     let lastBoundingBox: AABB | null = null;
     let currentlyVisible: VisibleEntites = {
-      processNodePositions: [],
+      processNodePositions: new Map<ResolverEvent, Vector2>(),
       connectingEdgeLineSegments: [],
     };
     return (boundingBox: AABB) => {
@@ -628,12 +629,14 @@ export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
           maxX,
           maxY,
         });
-        const visibleProcessNodePositions = entities.filter(
-          (entity): entity is IndexedProcessNode => entity.type === 'processNode'
+        const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
+          entities
+            .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
+            .map((node) => [node.entity, node.position])
         );
-        const connectingEdgeLineSegments = entities.filter(
-          (entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine'
-        );
+        const connectingEdgeLineSegments = entities
+          .filter((entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine')
+          .map((node) => node.entity);
         currentlyVisible = {
           processNodePositions: visibleProcessNodePositions,
           connectingEdgeLineSegments,
