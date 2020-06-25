@@ -162,7 +162,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
         .toArray()
         .map((row) => {
           return {
-            title: $(row).find('td:nth-child(3) *:not(:has(*)):visible').text(),
+            title: $(row).find('td:nth-child(3)').text().replace('Title', '').trim(),
             canViewInApp: Boolean($(row).find('td:nth-child(3) a').length),
           };
         });
