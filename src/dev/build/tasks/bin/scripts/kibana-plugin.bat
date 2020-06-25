@@ -15,7 +15,7 @@ If Not Exist "%NODE%" (
 
 set CONFIG_DIR=%KIBANA_PATH_CONF%
 If [%KIBANA_PATH_CONF%] == [] (
-  set CONFIG_DIR=%DIR%config
+  set CONFIG_DIR=%DIR%\config
 )
 
 IF EXIST "%CONFIG_DIR%\node.options" (
