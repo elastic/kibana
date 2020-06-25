@@ -40,6 +40,10 @@ describe('Policy Details', () => {
       policyView = render(<PolicyDetails />);
     });
 
+    it('should NOT display timeline', async () => {
+      expect(policyView.find('flyoutOverlay')).toHaveLength(0);
+    });
+
     it('should show loader followed by error message', () => {
       expect(policyView.find('EuiLoadingSpinner').length).toBe(1);
       policyView.update();
@@ -82,6 +86,10 @@ describe('Policy Details', () => {
       });
       history.push(policyDetailsPathUrl);
       policyView = render(<PolicyDetails />);
+    });
+
+    it('should NOT display timeline', async () => {
+      expect(policyView.find('flyoutOverlay')).toHaveLength(0);
     });
 
     it('should display back to list button and policy title', () => {
