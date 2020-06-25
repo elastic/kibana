@@ -16,6 +16,7 @@ import {
   TimelineRowAction,
   TimelineRowActionOnClick,
 } from '../../../timelines/components/timeline/body/actions';
+import { TimelineRowActionArgs } from '../../../timelines/components/manage_timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
