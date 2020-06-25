@@ -6,14 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiLink,
-  // @ts-ignore (elastic/eui#1557) EuiImage is not exported yet
-  EuiImage,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiImage, EuiIcon } from '@elastic/eui';
 
 import { CanvasAsset } from '../../../types';
 

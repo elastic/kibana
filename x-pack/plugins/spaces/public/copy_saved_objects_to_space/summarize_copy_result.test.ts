@@ -5,7 +5,7 @@
  */
 
 import { summarizeCopyResult } from './summarize_copy_result';
-import { ProcessedImportResponse } from 'src/legacy/core_plugins/kibana/public';
+import { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
 
 const createSavedObjectsManagementRecord = () => ({
   type: 'dashboard',
