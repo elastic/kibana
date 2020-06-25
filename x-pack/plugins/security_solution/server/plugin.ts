@@ -261,6 +261,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentService: plugins.ingestManager.agentService,
       manifestManager,
       registerIngestCallback: plugins.ingestManager.registerExternalCallback,
+      savedObjectsStart: core.savedObjects,
     });
 
     if (this.exceptionsPackagerTask) {
