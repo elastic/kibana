@@ -42,8 +42,8 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     find,
     errorOnFind,
     errorOnCreate,
-    createdId,
-    updatedId,
+    createdView,
+    updatedView,
     currentView,
     setCurrentView,
   } = useContext(SavedView.Context);
@@ -110,18 +110,20 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   }, [errorOnCreate]);
 
   useEffect(() => {
-    if (updatedId !== undefined) {
+    if (updatedView !== undefined) {
+      setCurrentView(updatedView);
       // INFO: Close the modal after the view is created.
       closeUpdateModal();
     }
-  }, [updatedId, closeUpdateModal]);
+  }, [updatedView, setCurrentView, closeUpdateModal]);
 
   useEffect(() => {
-    if (createdId !== undefined) {
+    if (createdView !== undefined) {
       // INFO: Close the modal after the view is created.
+      setCurrentView(createdView);
       closeCreateModal();
     }
-  }, [createdId, closeCreateModal]);
+  }, [createdView, setCurrentView, closeCreateModal]);
 
   useEffect(() => {
     if (deletedId !== undefined) {
@@ -145,7 +147,13 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
           button={
             <EuiFlexGroup gutterSize={'s'} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon onClick={showSavedViewMenu} iconType="globe" />
+                <EuiButtonIcon
+                  aria-label={i18n.translate('xpack.infra.savedView.changeView', {
+                    defaultMessage: 'Change view',
+                  })}
+                  onClick={showSavedViewMenu}
+                  iconType="globe"
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiDescriptionList onClick={showSavedViewMenu}>
@@ -198,7 +206,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             <EuiListGroupItem
               iconType={'save'}
               onClick={openSaveModal}
-              label={i18n.translate('xpack.infra.savedView.manageViews', {
+              label={i18n.translate('xpack.infra.savedView.saveNewView', {
                 defaultMessage: 'Save new view',
               })}
             />

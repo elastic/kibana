@@ -55,7 +55,7 @@ export function SavedViewListModal<ViewState>({ close, views, setView }: Props<V
           <EuiModalHeaderTitle>
             <FormattedMessage
               defaultMessage="Select a view to load"
-              id="xpack.infra.waffle.savedView.updateHeader"
+              id="xpack.infra.waffle.savedView.selectViewHeader"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>

@@ -24,7 +24,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { Layout } from './components/layout';
 import { useLinkProps } from '../../../hooks/use_link_props';
 import { SavedView } from '../../../containers/saved_view/saved_view';
-import { useWaffleViewState } from './hooks/use_waffle_view_state';
+import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
 import { useHistory } from '../../../utils/history_context';
 
 export const SnapshotPage = () => {
@@ -34,6 +34,7 @@ export const SnapshotPage = () => {
     isLoading,
     loadSourceFailureMessage,
     loadSource,
+    source,
     metricIndicesExist,
   } = useContext(Source.Context);
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
@@ -42,8 +43,6 @@ export const SnapshotPage = () => {
   const history = useHistory();
   const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
   const queryString = history?.location ? getQueryStringFromLocation(history.location) : '';
-
-  const { defaultViewState } = useWaffleViewState();
 
   const tutorialLinkProps = useLinkProps({
     app: 'home',
@@ -63,7 +62,7 @@ export const SnapshotPage = () => {
             })
           }
         />
-        {isLoading ? (
+        {isLoading && !source ? (
           <SourceLoadingPage />
         ) : metricIndicesExist ? (
           <>
@@ -71,7 +70,7 @@ export const SnapshotPage = () => {
             <SavedView.Provider
               shouldLoadDefault={!queryString}
               viewType={'inventory-view'}
-              defaultViewState={defaultViewState}
+              defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
             >
               <Layout />
             </SavedView.Provider>

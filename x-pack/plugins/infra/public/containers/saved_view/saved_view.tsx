@@ -49,8 +49,12 @@ export const useSavedView = (props: Props) => {
 
   const [currentView, setCurrentView] = useState<SavedView<any> | null>(null);
   const [loadingDefaultView, setLoadingDefaultView] = useState<boolean | null>(null);
-  const { create, error: errorOnCreate, createdId } = useCreateSavedObject(viewType);
-  const { update, error: errorOnUpdate, updatedId } = useUpdateSavedObject(viewType);
+  const { create, error: errorOnCreate, data: createdViewData, createdId } = useCreateSavedObject(
+    viewType
+  );
+  const { update, error: errorOnUpdate, data: updatedViewData, updatedId } = useUpdateSavedObject(
+    viewType
+  );
   const { deleteObject, deletedId } = useDeleteSavedObject(viewType);
   const { getObject, data: currentViewSavedObject } = useGetSavedObject(viewType);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -158,7 +162,7 @@ export const useSavedView = (props: Props) => {
     const items: Array<SavedView<ViewState>> = [
       {
         name: i18n.translate('xpack.infra.savedView.defaultViewNameHosts', {
-          defaultMessage: 'Hosts',
+          defaultMessage: 'Default view',
         }),
         id: '0',
         isDefault: !defaultViewId || defaultViewId === '0', // If there is no default view then hosts is the default
@@ -170,6 +174,14 @@ export const useSavedView = (props: Props) => {
 
     return items;
   }, [defaultViewState, savedObjects, viewType, defaultViewId, mapToView]);
+
+  const createdView = useMemo(() => {
+    return createdViewData ? mapToView(createdViewData) : null;
+  }, [createdViewData, mapToView]);
+
+  const updatedView = useMemo(() => {
+    return updatedViewData ? mapToView(updatedViewData) : null;
+  }, [updatedViewData, mapToView]);
 
   const loadDefaultView = useCallback(() => {
     setLoadingDefaultView(true);
@@ -222,9 +234,11 @@ export const useSavedView = (props: Props) => {
     defaultViewId,
     loading,
     updateView,
+    updatedView,
     updatedId,
     deletedId,
     createdId,
+    createdView,
     errorOnUpdate,
     errorOnFind,
     errorOnCreate: createError,
