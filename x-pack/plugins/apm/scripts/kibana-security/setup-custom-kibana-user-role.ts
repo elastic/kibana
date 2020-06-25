@@ -149,7 +149,7 @@ async function init() {
 async function isSecurityEnabled() {
   try {
     await callKibana({
-      url: `/api/security/v1/me`,
+      url: `/internal/security/me`,
     });
     return true;
   } catch (err) {
