@@ -15,6 +15,7 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   SeriesNameFn,
+  Fit,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
@@ -1384,6 +1385,60 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it should apply the fitting function to all non-bar series', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: createSampleDatatableWithRows([
+            { a: 1, b: 2, c: 'I', d: 'Foo' },
+            { a: 1, b: 5, c: 'J', d: 'Bar' },
+          ]),
+        },
+      };
+
+      const args: XYArgs = createArgsWithLayers([
+        sampleLayer,
+        { ...sampleLayer, seriesType: 'bar' },
+        { ...sampleLayer, seriesType: 'area' },
+      ]);
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args, fittingFunction: 'Carry' }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(AreaSeries).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(BarSeries).prop('fit')).toEqual(undefined);
+    });
+
+    test('it should apply None fitting function if not specified', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.None });
     });
   });
 });

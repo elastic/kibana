@@ -19,26 +19,50 @@ export const fittingFunctions = [
   'None',
 ] as const;
 
-export const fittingFunctionDescriptions = {
-  Carry: i18n.translate('xpack.lens.fittingFunctions.Carry', {
+export const fittingFunctionTitles: Record<FittingFunction, string> = {
+  Carry: i18n.translate('xpack.lens.fittingFunctionsTitle.Carry.', {
+    defaultMessage: 'Carry',
+  }),
+  Lookahead: i18n.translate('xpack.lens.fittingFunctionsTitle.Lookahead', {
+    defaultMessage: 'Lookahead',
+  }),
+  Nearest: i18n.translate('xpack.lens.fittingFunctionsTitle.Nearest', {
+    defaultMessage: 'Nearest',
+  }),
+  Average: i18n.translate('xpack.lens.fittingFunctionsTitle.Average', {
+    defaultMessage: 'Average',
+  }),
+  Linear: i18n.translate('xpack.lens.fittingFunctionsTitle.Linear', {
+    defaultMessage: 'Linear',
+  }),
+  Zero: i18n.translate('xpack.lens.fittingFunctionsTitle.Zero', {
+    defaultMessage: 'Zero',
+  }),
+  None: i18n.translate('xpack.lens.fittingFunctionsTitle.None', { defaultMessage: 'None' }),
+} as const;
+
+export const fittingFunctionDescriptions: Record<FittingFunction, string> = {
+  Carry: i18n.translate('xpack.lens.fittingFunctionsDescription.Carry', {
     defaultMessage: 'Repeat last value till next value',
   }),
-  Lookahead: i18n.translate('xpack.lens.fittingFunctions.Lookahead', {
+  Lookahead: i18n.translate('xpack.lens.fittingFunctionsDescription.Lookahead', {
     defaultMessage: 'Repeat next value till next value',
   }),
-  Nearest: i18n.translate('xpack.lens.fittingFunctions.Nearest', {
+  Nearest: i18n.translate('xpack.lens.fittingFunctionsDescription.Nearest', {
     defaultMessage: 'Fill gaps with the nearest existing value',
   }),
-  Average: i18n.translate('xpack.lens.fittingFunctions.Average', {
+  Average: i18n.translate('xpack.lens.fittingFunctionsDescription.Average', {
     defaultMessage: 'Fill gaps with the average of the nearest values',
   }),
-  Linear: i18n.translate('xpack.lens.fittingFunctions.Linear', {
+  Linear: i18n.translate('xpack.lens.fittingFunctionsDescription.Linear', {
     defaultMessage: 'Interpolate linearly between nearest values',
   }),
-  Zero: i18n.translate('xpack.lens.fittingFunctions.Zero', {
+  Zero: i18n.translate('xpack.lens.fittingFunctionsDescription.Zero', {
     defaultMessage: 'Fill gaps with zeros',
   }),
-  None: i18n.translate('xpack.lens.fittingFunctions.None', { defaultMessage: 'Do not fill gaps' }),
+  None: i18n.translate('xpack.lens.fittingFunctionsDescription.None', {
+    defaultMessage: 'Do not fill gaps',
+  }),
 } as const;
 
 export function getFitEnum(fittingFunction?: FittingFunction) {

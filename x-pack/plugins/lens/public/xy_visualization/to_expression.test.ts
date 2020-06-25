@@ -58,7 +58,7 @@ describe('#toExpression', () => {
 
   it('should default the fitting function to None', () => {
     expect(
-      xyVisualization.toExpression(
+      (xyVisualization.toExpression(
         {
           legend: { position: Position.Bottom, isVisible: true },
           preferredSeriesType: 'bar',
@@ -73,7 +73,7 @@ describe('#toExpression', () => {
           ],
         },
         frame
-      ).chain[0].arguments.fittingFunction[0]
+      ) as Ast).chain[0].arguments.fittingFunction[0]
     ).toEqual('None');
   });
 
