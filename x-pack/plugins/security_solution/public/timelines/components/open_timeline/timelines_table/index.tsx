@@ -26,7 +26,6 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-// import { getTemplateColumns } from './template_columns';
 
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -77,7 +76,6 @@ export const getTimelinesTableColumns = ({
     onToggleShowNotes,
     timelineType,
   }),
-  // ...getTemplateColumns(timelineType),
   ...getExtendedColumns(showExtendedColumns),
   ...getIconHeaderColumns(),
   ...getActionsColumns({

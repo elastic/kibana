@@ -55,7 +55,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     providerId,
     register,
     timelineId,
-    timelineType,
+    timelineType = TimelineType.default,
     toggleEnabledProvider,
     toggleExcludedProvider,
     toggleTypeProvider,
@@ -127,9 +127,11 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
         isInvalid={isInvalid}
         providerId={providerId}
         togglePopover={togglePopover}
+        toggleType={onToggleTypeProvider}
         val={val}
         operator={operator}
         type={type}
+        timelineType={timelineType!}
       />
     );
 

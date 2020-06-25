@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
@@ -248,8 +249,11 @@ const makeMapStateToProps = () => {
       sort,
       timelineType,
     } = timeline;
-    const kqlQueryExpression = getKqlQueryTimeline(state, id)!;
+    const kqlQueryTimeline = getKqlQueryTimeline(state, id);
 
+    // return events on empty search
+    const kqlQueryExpression =
+      kqlQueryTimeline && !isEmpty(kqlQueryTimeline) ? kqlQueryTimeline : ' ';
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 
     return {

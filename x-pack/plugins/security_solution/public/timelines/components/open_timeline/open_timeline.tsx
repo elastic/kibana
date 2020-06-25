@@ -53,7 +53,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     sortField,
     tabs,
     totalSearchResultsCount,
-    timelineType,
+    timelineType = TimelineType.default,
   }) => {
     const tableRef = useRef<EuiBasicTable<OpenTimelineResult>>();
 
@@ -70,6 +70,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       deleteTimelines,
       selectedItems,
       tableRef,
+      timelineType,
     });
 
     const nTimelines = useMemo(() => {
@@ -78,8 +79,8 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
       return (
         <FormattedMessage
-          id="xpack.securitySolution.open.timeline.showingNTemplatesLabel"
-          defaultMessage={`{totalSearchResultsCount} {totalSearchResultsCount, plural, one {${singleTerm}} other {${pluralTerm}}} {with}`}
+          id="xpack.securitySolution.open.timeline.showingNTimelinesLabel"
+          defaultMessage={`Showing: {totalSearchResultsCount} {totalSearchResultsCount, plural, one {${singleTerm}} other {${pluralTerm}}} {with}`}
           values={{
             totalSearchResultsCount,
             with: (
@@ -195,7 +196,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
               </UtilityBarGroup>
 
               <UtilityBarGroup>
-                <UtilityBarText>{i18n.SELECTED_TIMELINES(selectedItems.length)}</UtilityBarText>
+                <UtilityBarText>
+                  {i18n.SELECTED_TIMELINES(selectedItems.length, timelineType!)}
+                </UtilityBarText>
                 <UtilityBarAction
                   iconSide="right"
                   iconType="arrowDown"
@@ -231,7 +234,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             sortField={sortField}
             tableRef={tableRef}
             totalSearchResultsCount={totalSearchResultsCount}
-            timelineType={timelineType}
+            timelineType={timelineType!}
           />
         </EuiPanel>
       </>

@@ -142,7 +142,7 @@ export const getProviderActions = ({
             disabled:
               isLoading ||
               (type === DataProviderType.default && timelineType === TimelineType.default),
-            icon: 'logstashFilter',
+            icon: 'visText',
             name:
               type === DataProviderType.template
                 ? i18n.CONVERT_TO_FIELD

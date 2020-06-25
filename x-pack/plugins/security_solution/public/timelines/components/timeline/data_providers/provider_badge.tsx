@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 
@@ -17,7 +18,11 @@ import { DataProviderType, EXISTS_OPERATOR, QueryOperator } from './data_provide
 
 import * as i18n from './translations';
 
-const ProviderBadgeStyled = (styled(EuiBadge)`
+type ProviderBadgeStyledType = typeof EuiBadge & {
+  type: DataProviderType;
+};
+
+const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
   .euiToolTipAnchor {
     &::after {
       font-style: normal;
@@ -47,29 +52,37 @@ const ProviderBadgeStyled = (styled(EuiBadge)`
     margin-right: 0;
     margin-left: 4px;
   }
-  ${({ type }: { type: DataProviderType }) =>
+  ${({ type }) =>
     type === DataProviderType.template &&
     `
-    &.globalFilterItem {
-      background: #f8e9e9
-    }
+      &.globalFilterItem {
+        background: #f8e9e9
+      }
   `}
-` as unknown) as typeof EuiBadge;
+`;
 
-const TemplateTimelineBadge = styled.div`
+ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
+
+const ProviderFieldBadge = styled.div`
   display: block;
-  background: #dd0a73;
   color: #fff;
   padding: 4px 0 4px 6px;
   font-size: 0.6em;
   text-transform: uppercase;
 `;
 
-// const TemplateFieldIcon = styled(EuiIcon)`
-//   float: left;
-// `;
+const TemplateFieldBadge = styled(ProviderFieldBadge)`
+  background: #dd0a73;
+  padding: 4px 0 4px 6px;
+  font-size: 0.6em;
+  text-transform: uppercase;
+`;
 
-ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
+const TimelineFieldBadge = styled(ProviderFieldBadge)`
+  background: #98a2b3;
+`;
+
+const TimelineFieldBadgeButton = styled(EuiButtonEmpty)``;
 
 interface ProviderBadgeProps {
   deleteProvider: () => void;
@@ -80,9 +93,11 @@ interface ProviderBadgeProps {
   isInvalid: boolean;
   providerId: string;
   togglePopover: () => void;
+  toggleType: () => void;
   val: string | number;
   operator: QueryOperator;
   type: DataProviderType;
+  timelineType: TimelineType;
 }
 
 const closeButtonProps = {
@@ -101,8 +116,10 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
     operator,
     providerId,
     togglePopover,
+    toggleType,
     val,
     type,
+    timelineType,
   }) => {
     const deleteFilter: React.MouseEventHandler<HTMLButtonElement> = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -131,26 +148,8 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
 
     const prefix = useMemo(() => (isExcluded ? <span>{i18n.NOT} </span> : null), [isExcluded]);
 
-    const content = useMemo(() => {
-      // if (type === DataProviderType.template) {
-      //   return (
-      //     <>
-      //       <TemplateFieldIcon type="string" size="m" />
-      //       <strong>{'{ '}</strong>
-      //       {prefix}
-      //       {operator !== EXISTS_OPERATOR ? (
-      //         <span className="field-value">{`${field}`}</span>
-      //       ) : (
-      //         <span className="field-value">
-      //           {field} {i18n.EXISTS_LABEL}
-      //         </span>
-      //       )}
-      //       <strong>{' }'}</strong>
-      //     </>
-      //   );
-      // }
-
-      return (
+    const content = useMemo(
+      () => (
         <>
           {prefix}
           {operator !== EXISTS_OPERATOR ? (
@@ -161,8 +160,9 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             </span>
           )}
         </>
-      );
-    }, [field, formattedValue, operator, prefix]);
+      ),
+      [field, formattedValue, operator, prefix]
+    );
 
     return (
       <ProviderContainer>
@@ -185,7 +185,16 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             {content}
           </ProviderBadgeStyled>
           {type === DataProviderType.template && (
-            <TemplateTimelineBadge>{'Template field'}</TemplateTimelineBadge>
+            <TemplateFieldBadge>{'Template field'}</TemplateFieldBadge>
+          )}
+          {timelineType === TimelineType.template && (
+            <TimelineFieldBadge>
+              <EuiButtonEmpty onClick={toggleType} size="xs">
+                {type === DataProviderType.template
+                  ? i18n.CONVERT_TO_FIELD
+                  : i18n.CONVERT_TO_TEMPLATE_FIELD}
+              </EuiButtonEmpty>
+            </TimelineFieldBadge>
           )}
         </>
       </ProviderContainer>

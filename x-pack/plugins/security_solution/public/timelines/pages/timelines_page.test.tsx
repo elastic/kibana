@@ -10,8 +10,8 @@ import React from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPageComponent } from './timelines_page';
 
+jest.mock('react-router-dom');
 jest.mock('../../overview/components/events_by_dataset');
-
 jest.mock('../../common/lib/kibana', () => {
   return {
     useKibana: jest.fn(),
@@ -61,9 +61,13 @@ describe('TimelinesPageComponent', () => {
     test('it renders create timeline btn', () => {
       expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
     });
+
+    test('it renders no create template timeline btn', () => {
+      expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeTruthy();
+    });
   });
 
-  describe('If the user is not authorised', () => {
+  describe('If the user is not authorized', () => {
     beforeAll(() => {
       ((useKibana as unknown) as jest.Mock).mockReturnValue({
         services: {

@@ -76,6 +76,7 @@ const AddDataProviderPopoverComponent: React.FC<{
   const panels = [
     {
       id: 0,
+      width: 400,
       items: [
         {
           name: 'Add Field',
@@ -139,7 +140,7 @@ const AddDataProviderPopoverComponent: React.FC<{
         withTitle
         panelPaddingSize="none"
         ownFocus={true}
-        initialFocus=".filterEditor__hiddenItem"
+        // initialFocus=".filterEditor__hiddenItem"
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
@@ -159,7 +160,7 @@ export const AddDataProviderPopoverButton = React.memo(({ onClick }: { onClick: 
     fill
     iconSide="right"
   >
-    <EuiText size="s">{'Add filter'}</EuiText>
+    <EuiText size="s">{'Add field'}</EuiText>
   </EuiButton>
 ));
 

@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TimelineType } from '../../../../common/types/timeline';
 
 export const ALL_ACTIONS = i18n.translate(
   'xpack.securitySolution.open.timeline.allActionsTooltip',
@@ -224,12 +225,15 @@ export const ZERO_TIMELINES_MATCH = i18n.translate(
   }
 );
 
-export const SELECTED_TIMELINES = (selectedTimelines: number) =>
-  i18n.translate('xpack.securitySolution.open.timeline.selectedTimelinesTitle', {
+export const SELECTED_TIMELINES = (selectedTimelines: number, timelineType: TimelineType) => {
+  const singleTerm = timelineType === TimelineType.template ? 'template' : 'timeline';
+  const pluralTerm = timelineType === TimelineType.template ? 'templates' : 'timelines';
+
+  return i18n.translate('xpack.securitySolution.open.timeline.selectedTimelinesTitle', {
     values: { selectedTimelines },
-    defaultMessage:
-      'Selected {selectedTimelines} {selectedTimelines, plural, =1 {timeline} other {timelines}}',
+    defaultMessage: `Selected {selectedTimelines} {selectedTimelines, plural, =1 {${singleTerm}} other {${pluralTerm}}}`,
   });
+};
 
 export const SHOWING = i18n.translate('xpack.securitySolution.open.timeline.showingLabel', {
   defaultMessage: 'Showing:',

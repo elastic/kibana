@@ -40,7 +40,7 @@ describe('#getExtendedColumns', () => {
         </ThemeProvider>
       );
 
-      expect(wrapper.find('thead tr th').at(5).text()).toContain(i18n.MODIFIED_BY);
+      expect(wrapper.find('thead tr th').at(4).text()).toContain(i18n.MODIFIED_BY);
     });
 
     test('it renders the username when the timeline has an updatedBy property', () => {

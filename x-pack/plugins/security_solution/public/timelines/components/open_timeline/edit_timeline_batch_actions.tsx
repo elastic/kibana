@@ -7,6 +7,9 @@
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash/fp';
+
+import { TimelineType } from '../../../../common/types/timeline';
+
 import * as i18n from './translations';
 import { DeleteTimelines, OpenTimelineResult } from './types';
 import { EditTimelineActions } from './export_timeline';
@@ -24,10 +27,12 @@ export const useEditTimelineBatchActions = ({
   deleteTimelines,
   selectedItems,
   tableRef,
+  timelineType,
 }: {
   deleteTimelines?: DeleteTimelines;
   selectedItems?: OpenTimelineResult[];
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | undefined>;
+  timelineType: TimelineType;
 }) => {
   const {
     enableExportTimelineDownloader,
@@ -47,8 +52,7 @@ export const useEditTimelineBatchActions = ({
       disableExportTimelineDownloader();
       onCloseDeleteTimelineModal();
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [disableExportTimelineDownloader, onCloseDeleteTimelineModal, tableRef.current]
+    [disableExportTimelineDownloader, onCloseDeleteTimelineModal, tableRef]
   );
 
   const selectedIds = useMemo(() => getExportedIds(selectedItems ?? []), [selectedItems]);
@@ -74,7 +78,7 @@ export const useEditTimelineBatchActions = ({
             onComplete={onCompleteBatchActions.bind(null, closePopover)}
             title={
               selectedItems?.length !== 1
-                ? i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0)
+                ? i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0, timelineType)
                 : selectedItems[0]?.title ?? ''
             }
           />
@@ -103,14 +107,15 @@ export const useEditTimelineBatchActions = ({
       );
     },
     [
+      selectedItems,
       deleteTimelines,
+      selectedIds,
       isEnableDownloader,
       isDeleteTimelineModalOpen,
-      selectedIds,
-      selectedItems,
+      onCompleteBatchActions,
+      timelineType,
       handleEnableExportTimelineDownloader,
       handleOnOpenDeleteTimelineModal,
-      onCompleteBatchActions,
     ]
   );
   return { onCompleteBatchActions, getBatchItemsPopoverContent };
