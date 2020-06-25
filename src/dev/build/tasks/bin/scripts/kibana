@@ -22,4 +22,4 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-NODE_OPTIONS="--max-http-header-size=65536 $(grep -v ^# < ${CONFIG_DIR}/node.options | xargs) $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli" ${@}
+NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $(grep -v ^# < ${CONFIG_DIR}/node.options | xargs) $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli" ${@}

@@ -22,4 +22,4 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-NODE_OPTIONS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs) $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli_plugin" "$@"
+NODE_OPTIONS="--no-warnings $(grep -v ^# < ${CONFIG_DIR}/node.options | xargs) $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli_plugin" "$@"

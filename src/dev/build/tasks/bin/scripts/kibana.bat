@@ -28,7 +28,7 @@ for /F "eol=# tokens=*" %%i in (%CONFIG_DIR%\node.options) do (
 )
 
 :: Include pre-defined node option
-set "NODE_OPTIONS=--max-http-header-size=65536 %NODE_OPTIONS%"
+set "NODE_OPTIONS=--no-warnings --max-http-header-size=65536 %NODE_OPTIONS%"
 
 :: This should run independently as the last instruction
 :: as we need NODE_OPTIONS previously set to expand

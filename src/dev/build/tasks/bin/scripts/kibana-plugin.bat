@@ -26,6 +26,9 @@ for /F "eol=# tokens=*" %%i in (%CONFIG_DIR%\node.options) do (
   )
 )
 
+:: Include pre-defined node option
+set "NODE_OPTIONS=--no-warnings %NODE_OPTIONS%"
+
 TITLE Kibana Server
 "%NODE%" "%DIR%\src\cli_plugin" %*
 
