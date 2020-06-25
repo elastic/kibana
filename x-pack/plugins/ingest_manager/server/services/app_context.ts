@@ -12,7 +12,7 @@ import {
 } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
-import { IngestManagerAppContext } from '../plugin';
+import { ExternalCallback, ExternalCallbacksStorage, IngestManagerAppContext } from '../plugin';
 import { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
@@ -27,6 +27,7 @@ class AppContextService {
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
+  private externalCallbacks: ExternalCallbacksStorage = new Map();
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
@@ -47,7 +48,9 @@ class AppContextService {
     }
   }
 
-  public stop() {}
+  public stop() {
+    this.externalCallbacks.clear();
+  }
 
   public getEncryptedSavedObjects() {
     if (!this.encryptedSavedObjects) {
@@ -120,6 +123,19 @@ class AppContextService {
       throw new Error('Kibana version is not set.');
     }
     return this.kibanaVersion;
+  }
+
+  public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
+    if (!this.externalCallbacks.has(type)) {
+      this.externalCallbacks.set(type, new Set());
+    }
+    this.externalCallbacks.get(type)!.add(callback);
+  }
+
+  public getExternalCallbacks(type: ExternalCallback[0]) {
+    if (this.externalCallbacks) {
+      return this.externalCallbacks.get(type);
+    }
   }
 }
 
