@@ -66,7 +66,6 @@ const {
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import {
   esFilters,
-  fieldFormats,
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
@@ -114,7 +113,7 @@ app.config(($routeProvider) => {
       };
     },
   };
-  $routeProvider.when('/:id?', {
+  const discoverRoute = {
     ...defaults,
     template: indexTemplate,
     reloadOnSearch: false,
@@ -177,7 +176,10 @@ app.config(($routeProvider) => {
         });
       },
     },
-  });
+  };
+
+  $routeProvider.when('/view/:id?', discoverRoute);
+  $routeProvider.when('/', discoverRoute);
 });
 
 app.directive('discoverApp', function () {
@@ -415,7 +417,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: (searchId) => `#/${encodeURIComponent(searchId)}`,
+          makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -747,7 +749,7 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            history.push(`/${encodeURIComponent(savedSearch.id)}`);
+            history.push(`/view/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
@@ -848,7 +850,7 @@ function discoverController(
       x: {
         accessor: 0,
         label: agg.makeLabel(),
-        format: fieldFormats.serialize(agg),
+        format: agg.toSerializedFieldFormat(),
         params: {
           date: true,
           interval: moment.duration(esValue, esUnit),
@@ -860,7 +862,7 @@ function discoverController(
       },
       y: {
         accessor: 1,
-        format: fieldFormats.serialize(metric),
+        format: metric.toSerializedFieldFormat(),
         label: metric.makeLabel(),
       },
     };
@@ -926,7 +928,9 @@ function discoverController(
   };
 
   $scope.resetQuery = function () {
-    history.push(`/${encodeURIComponent($route.current.params.id)}`);
+    history.push(
+      $route.current.params.id ? `/view/${encodeURIComponent($route.current.params.id)}` : '/'
+    );
     $route.reload();
   };
 
