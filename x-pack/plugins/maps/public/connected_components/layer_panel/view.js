@@ -13,7 +13,7 @@ import { LayerErrors } from './layer_errors';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
 import {
-  EuiButtonIcon,
+  EuiIcon,
   EuiFlexItem,
   EuiTitle,
   EuiPanel,
@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
@@ -175,18 +174,7 @@ export class LayerPanel extends React.Component {
           <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
-                    defaultMessage: 'Fit to bounds',
-                  })}
-                  iconType={selectedLayer.getLayerTypeIconName()}
-                  onClick={this.props.fitToBounds}
-                >
-                  <FormattedMessage
-                    id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
-                    defaultMessage="Fit"
-                  />
-                </EuiButtonIcon>
+                <EuiIcon type={selectedLayer.getLayerTypeIconName()} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
