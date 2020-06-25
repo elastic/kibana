@@ -150,7 +150,6 @@ export class DashboardAppController {
     kbnUrlStateStorage,
     usageCollection,
     navigation,
-    dashboard,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
@@ -431,9 +430,16 @@ export class DashboardAppController {
               .getStateTransfer(scopedHistory())
               .getIncomingEmbeddablePackage();
             if (incomingState) {
-              container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
-                savedObjectId: incomingState.id,
-              });
+              if ('id' in incomingState) {
+                container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
+                  savedObjectId: incomingState.id,
+                });
+              } else if ('input' in incomingState) {
+                container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+                  incomingState.type,
+                  incomingState.input
+                );
+              }
             }
           }
 
@@ -1112,7 +1118,6 @@ export class DashboardAppController {
         outputSubscription.unsubscribe();
       }
       if (dashboardContainer) {
-        dashboard.setLastLoadedDashboardAppDashboardInput(dashboardContainer.getInput());
         dashboardContainer.destroy();
       }
     });

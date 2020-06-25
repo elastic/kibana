@@ -76,7 +76,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     I18nContext,
     setActiveUrl,
     visualizations,
-    dashboard,
     embeddable,
     featureFlagConfig,
     scopedHistory,
@@ -254,20 +253,13 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               };
 
               const createVisReference = () => {
-                const currentDashboardInput = dashboard.getLastLoadedDashboardAppDashboardInput();
+                const input = {
+                  savedVis: { ...vis.serialize() },
+                };
                 embeddable
-                  .getEmbeddableFactory('dashboard')
-                  .create(currentDashboardInput)
-                  .then((currentDashboard) => {
-                    if (currentDashboard) {
-                      const input = {
-                        savedVis: { ...vis.serialize() },
-                      };
-                      currentDashboard.addNewEmbeddable('visualization', input).then(() => {
-                        const dashInput = currentDashboard.getInput();
-                        dashboard.navigateToDashboard(dashInput);
-                      });
-                    }
+                  .getStateTransfer()
+                  .navigateToWithEmbeddablePackage($scope.getOriginatingApp(), {
+                    state: { input, type: VISUALIZE_EMBEDDABLE_TYPE },
                   });
               };
 

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { EmbeddableInput } from '../embeddables';
+
 /**
  * Represents a state package that contains the last active app id.
  * @public
@@ -31,19 +33,26 @@ export function isEmbeddableOriginatingAppState(
   return ensureFieldOfTypeExists('originatingApp', state, 'string');
 }
 
-/**
- * Represents a state package that contains all fields necessary to create an embeddable in a container.
- * @public
- */
-export interface EmbeddablePackageState {
+export interface EmbeddableByReference {
   type: string;
   id: string;
 }
 
+export interface EmbeddableByValue {
+  type: string;
+  input: EmbeddableInput;
+}
+
+/**
+ * Represents a state package that contains all fields necessary to create an embeddable in a container.
+ * @public
+ */
+export type EmbeddablePackageState = EmbeddableByValue | EmbeddableByReference;
+
 export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {
   return (
     ensureFieldOfTypeExists('type', state, 'string') &&
-    ensureFieldOfTypeExists('id', state, 'string')
+    (ensureFieldOfTypeExists('id', state, 'string') || ensureFieldOfTypeExists('input', state))
   );
 }
 

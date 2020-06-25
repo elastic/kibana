@@ -53,7 +53,6 @@ export interface VisualizeKibanaServices {
   kibanaLegacy: KibanaLegacyStart;
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
-  embeddable: EmbeddableStart;
   I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
   restorePreviousUrl: () => void;

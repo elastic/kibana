@@ -127,7 +127,6 @@ export class VisualizeEmbeddableFactory
   public async create(input: VisualizeInput & { savedVis?: SerializedVis }, parent?: IContainer) {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    const originatingAppParam = await this.getCurrentAppId();
     if (input.savedVis) {
       const visState = input.savedVis;
       const vis = new Vis(visState.type, visState);
