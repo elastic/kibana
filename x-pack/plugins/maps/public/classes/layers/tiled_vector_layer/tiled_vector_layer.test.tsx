@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { MockSyncContext } from '../__tests__/mock_sync_context';
+import sinon from 'sinon';
+
 jest.mock('ui/new_platform');
 jest.mock('../../../kibana_services', () => {
   return {
@@ -21,11 +24,19 @@ import { shallow } from 'enzyme';
 import { Feature } from 'geojson';
 import { MVTSingleLayerVectorSource } from '../../sources/mvt_single_layer_vector_source';
 import {
+  DataRequestDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
 } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { TiledVectorLayer } from './tiled_vector_layer';
+
+const defaultConfig = {
+  urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
+  layerName: 'foobar',
+  minSourceZoom: 4,
+  maxSourceZoom: 14,
+};
 
 function createLayer(
   layerOptions: Partial<VectorLayerDescriptor> = {},
@@ -33,10 +44,7 @@ function createLayer(
 ): TiledVectorLayer {
   const sourceDescriptor: TiledSingleLayerVectorSourceDescriptor = {
     type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-    urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
-    layerName: 'foobar',
-    minSourceZoom: 4,
-    maxSourceZoom: 14,
+    ...defaultConfig,
     fields: [],
     tooltipProperties: [],
     ...sourceOptions,
@@ -92,5 +100,76 @@ describe('getFeatureById', () => {
     });
     expect(feature.id).toEqual(undefined);
     expect(feature.type).toEqual('Feature');
+  });
+});
+
+describe('syncData', () => {
+  it('Should sync with source-params', async () => {
+    const layer: TiledVectorLayer = createLayer({}, {});
+
+    const syncContext = new Mock_sync_context({ dataFilters: {} });
+
+    await layer.syncData(syncContext);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.startLoading);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.stopLoading);
+
+    // @ts-expect-error
+    const call = syncContext.stopLoading.getCall(0);
+    expect(call.args[2]).toEqual(defaultConfig);
+  });
+
+  it('Should not resync when no changes to source params', async () => {
+    const layer1: TiledVectorLayer = createLayer({}, {});
+    const syncContext1 = new Mock_sync_context({ dataFilters: {} });
+
+    await layer1.syncData(syncContext1);
+
+    const dataRequestDescriptor: DataRequestDescriptor = {
+      data: { ...defaultConfig },
+      dataId: 'source',
+    };
+    const layer2: TiledVectorLayer = createLayer(
+      {
+        __dataRequests: [dataRequestDescriptor],
+      },
+      {}
+    );
+    const syncContext2 = new Mock_sync_context({ dataFilters: {} });
+    await layer2.syncData(syncContext2);
+    // @ts-expect-error
+    sinon.assert.notCalled(syncContext2.startLoading);
+    // @ts-expect-error
+    sinon.assert.notCalled(syncContext2.stopLoading);
+  });
+
+  it('Should resync when changes to source params', async () => {
+    const layer1: TiledVectorLayer = createLayer({}, {});
+    const syncContext1 = new Mock_sync_context({ dataFilters: {} });
+
+    await layer1.syncData(syncContext1);
+
+    const dataRequestDescriptor: DataRequestDescriptor = {
+      data: defaultConfig,
+      dataId: 'source',
+    };
+    const layer2: TiledVectorLayer = createLayer(
+      {
+        __dataRequests: [dataRequestDescriptor],
+      },
+      { layerName: 'barfoo' }
+    );
+    const syncContext2 = new Mock_sync_context({ dataFilters: {} });
+    await layer2.syncData(syncContext2);
+
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext2.startLoading);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext2.stopLoading);
+
+    // @ts-expect-error
+    const call = syncContext2.stopLoading.getCall(0);
+    expect(call.args[2]).toEqual({ ...defaultConfig, layerName: 'barfoo' });
   });
 });
