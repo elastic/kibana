@@ -8,9 +8,13 @@ export const ALERTS = '[data-test-subj="navigation-alerts"]';
 
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 
+export const CASES = '[data-test-subj="navigation-case"]';
+
 export const HOSTS = '[data-test-subj="navigation-hosts"]';
 
 export const KQL_INPUT = '[data-test-subj="queryInput"]';
+
+export const MANAGEMENT = '[data-test-subj="navigation-management"]';
 
 export const NETWORK = '[data-test-subj="navigation-network"]';
 
