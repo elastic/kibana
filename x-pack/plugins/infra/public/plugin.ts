@@ -13,7 +13,7 @@ import {
 } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
-import { getInventoryMetricAlertType } from './components/alerting/inventory/metric_inventory_threshold_alert_type';
+import { createInventoryMetricAlertType } from './alerting/inventory';
 import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
@@ -29,7 +29,7 @@ export class Plugin
   setup(core: CoreSetup<ClientPluginsStart, ClientStart>, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getInventoryMetricAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createInventoryMetricAlertType());
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createMetricThresholdAlertType());
 

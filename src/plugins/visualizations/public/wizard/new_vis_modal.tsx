@@ -28,7 +28,7 @@ import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
-import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../embeddable/public';
+import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 
 interface TypeSelectionProps {
@@ -42,6 +42,8 @@ interface TypeSelectionProps {
   usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
+  stateTransfer?: EmbeddableStateTransfer;
+  originatingApp?: string;
 }
 
 interface TypeSelectionState {
@@ -148,14 +150,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     let params;
     if ('aliasPath' in visType) {
       params = visType.aliasPath;
-      if (this.props.editorParams) {
-        const originatingAppParam = this.props.editorParams?.find((param: string) =>
-          param.startsWith(EMBEDDABLE_ORIGINATING_APP_PARAM)
-        );
-        params = originatingAppParam ? `${params}?${originatingAppParam}` : params;
-      }
       this.props.onClose();
-      this.props.application.navigateToApp(visType.aliasApp, { path: params });
+      this.navigate(visType.aliasApp, visType.aliasPath);
       return;
     }
 
@@ -168,11 +164,22 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     this.props.onClose();
     if (this.props.outsideVisualizeApp) {
-      this.props.application.navigateToApp('visualize', {
-        path: `#${basePath}${params.join('&')}`,
-      });
+      this.navigate('visualize', `#${basePath}${params.join('&')}`);
     } else {
       location.assign(this.props.addBasePath(`${baseUrl}${params.join('&')}`));
+    }
+  }
+
+  private navigate(appId: string, params: string) {
+    if (this.props.stateTransfer && this.props.originatingApp) {
+      this.props.stateTransfer.navigateToWithOriginatingApp(appId, {
+        path: params,
+        state: { originatingApp: this.props.originatingApp },
+      });
+    } else {
+      this.props.application.navigateToApp(appId, {
+        path: params,
+      });
     }
   }
 }
