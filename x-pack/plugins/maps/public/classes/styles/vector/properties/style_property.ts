@@ -8,7 +8,7 @@
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import { FieldMetaOptions, StylePropertyOptions } from '../../../../../common/descriptor_types';
+import { FieldMetaOptions } from '../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../common/constants';
 
 type LegendProps = {
@@ -30,7 +30,7 @@ export interface IStyleProperty<T> {
   getDisplayStyleName(): string;
 }
 
-export class AbstractStyleProperty<T = StylePropertyOptions> implements IStyleProperty<T> {
+export class AbstractStyleProperty<T> implements IStyleProperty<T> {
   protected readonly _options: T;
   protected readonly _styleName: VECTOR_STYLES;
 

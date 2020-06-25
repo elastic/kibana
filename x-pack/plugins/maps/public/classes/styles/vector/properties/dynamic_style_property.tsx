@@ -20,7 +20,6 @@ import { CategoricalFieldMetaPopover } from '../components/field_meta/categorica
 import {
   CategoryFieldMeta,
   CategoricalStyleMetaData,
-  DynamicStylePropertyOptions,
   FieldMetaOptions,
   OrdinalStyleMetaData,
   RangeFieldMeta,
@@ -46,7 +45,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
 }
 
-export class DynamicStyleProperty<T = DynamicStylePropertyOptions> extends AbstractStyleProperty
+export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T> {
   static type = STYLE_TYPE.DYNAMIC;
 
@@ -54,14 +53,14 @@ export class DynamicStyleProperty<T = DynamicStylePropertyOptions> extends Abstr
   protected readonly _layer: IVectorLayer;
   protected readonly _getFieldFormatter: (
     fieldName: string
-  ) => (value: string | undefined) => string | null;
+  ) => (value: string | undefined) => string;
 
   constructor(
     options: T,
     styleName: VECTOR_STYLES,
     field: IField | null,
     vectorLayer: IVectorLayer,
-    getFieldFormatter: (fieldName: string) => (value: string | undefined) => string | null
+    getFieldFormatter: (fieldName: string) => (value: string | undefined) => string
   ) {
     super(options, styleName);
     this._field = field;
