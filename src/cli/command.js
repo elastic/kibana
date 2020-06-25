@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import Chalk from 'chalk';
 
 import help from './help';

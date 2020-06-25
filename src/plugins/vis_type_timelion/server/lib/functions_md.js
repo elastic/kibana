@@ -19,7 +19,7 @@
 
 import loadFunctions from './load_functions.js';
 const functions = loadFunctions('series_functions/');
-import _ from 'lodash4';
+import _ from 'lodash';
 
 export default (function () {
   const functionArray = _.map(functions, function (val, key) {

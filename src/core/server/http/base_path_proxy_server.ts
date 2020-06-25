@@ -24,7 +24,7 @@ import apm from 'elastic-apm-node';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Server, Request, ResponseToolkit } from 'hapi';
 import HapiProxy from 'h2o2';
-import { sampleSize } from 'lodash4';
+import { sampleSize } from 'lodash';
 import BrowserslistUserAgent from 'browserslist-useragent';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';

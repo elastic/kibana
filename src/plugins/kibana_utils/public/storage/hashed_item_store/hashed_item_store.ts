@@ -70,7 +70,7 @@
  * For these reasons, HashedItemStore doesn't concern itself with this constraint.
  */
 
-import { pull, sortBy } from 'lodash4';
+import { pull, sortBy } from 'lodash';
 import { IStorage } from '../types';
 
 interface IndexedItem {

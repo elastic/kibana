@@ -20,7 +20,7 @@
 import { EventEmitter } from 'events';
 import { createZoomWarningMsg } from './map_messages';
 import $ from 'jquery';
-import _ from 'lodash4';
+import _ from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { ORIGIN } from '../common/constants/origin';

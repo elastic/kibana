@@ -18,7 +18,7 @@
  */
 
 import { i18nLoader } from '@kbn/i18n';
-import { size } from 'lodash4';
+import { size } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getIntegrityHashes, Integrities } from './file_integrity';
 import { KIBANA_LOCALIZATION_STATS_TYPE } from '../constants';

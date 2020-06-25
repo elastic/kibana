@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, set } from 'lodash4';
+import { get, set } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

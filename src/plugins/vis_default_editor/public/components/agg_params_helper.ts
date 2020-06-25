@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, isEmpty } from 'lodash4';
+import { get, isEmpty } from 'lodash';
 
 import {
   IAggConfig,

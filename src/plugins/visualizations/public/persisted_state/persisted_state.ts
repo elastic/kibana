@@ -29,7 +29,7 @@ import {
   merge,
   mergeWith,
   toPath,
-} from 'lodash4';
+} from 'lodash';
 
 function prepSetParams(key: PersistedStateKey, value: any, path: PersistedStatePath) {
   // key must be the value, set the entire state using it

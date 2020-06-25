@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isArray, last } from 'lodash4';
+import { isArray, last } from 'lodash';
 
 const DEFAULT_VALUE = 0;
 const extractValue = (data) => (data && data[1]) || null;

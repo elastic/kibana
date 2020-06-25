@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { keyBy } from 'lodash4';
+import { keyBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');

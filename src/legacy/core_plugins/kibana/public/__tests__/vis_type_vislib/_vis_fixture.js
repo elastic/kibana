@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import $ from 'jquery';
 
 import { Vis } from '../../../../../../plugins/vis_type_vislib/public/vislib/vis';

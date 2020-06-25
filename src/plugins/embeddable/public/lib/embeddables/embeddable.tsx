@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, isEqual } from 'lodash4';
+import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';

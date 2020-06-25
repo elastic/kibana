@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 export const createChangeHandler = (handleChange, model) => (part) => {
   const doc = _.assign({}, model, part);

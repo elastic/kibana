@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeepWith } from 'lodash4';
+import { cloneDeepWith } from 'lodash';
 import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';

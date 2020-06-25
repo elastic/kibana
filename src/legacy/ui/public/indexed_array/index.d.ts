@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ListIterator } from 'lodash4';
+import { ListIterator } from 'lodash';
 
 interface IndexedArrayConfig<T> {
   index?: string[];

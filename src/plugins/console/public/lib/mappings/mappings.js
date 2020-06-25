@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash4';
+import _ from 'lodash';
 import * as es from '../es/es';
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness

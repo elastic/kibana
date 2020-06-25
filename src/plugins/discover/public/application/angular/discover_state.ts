@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isEqual } from 'lodash4';
+import { isEqual } from 'lodash';
 import { History } from 'history';
 import {
   createStateContainer,

@@ -26,7 +26,7 @@ import {
   IRootScopeService,
 } from 'angular';
 import $ from 'jquery';
-import { cloneDeep, forOwn, get, set } from 'lodash4';
+import { cloneDeep, forOwn, get, set } from 'lodash';
 import * as Rx from 'rxjs';
 import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
 import { History } from 'history';

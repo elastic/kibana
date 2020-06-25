@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import paginatedTableTemplate from './paginated_table.html';
 
 export function PaginatedTable($filter) {

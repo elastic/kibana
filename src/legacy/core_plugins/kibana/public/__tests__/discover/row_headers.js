@@ -17,7 +17,7 @@
  * under the License.
  */
 import angular from 'angular';
-import _ from 'lodash4';
+import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';

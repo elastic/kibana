@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import rison from 'rison-node';
 import { uiModules } from 'ui/modules';
 import 'ui/directives/input_focus';

@@ -20,7 +20,7 @@
 import yauzl from 'yauzl';
 import path from 'path';
 import { createWriteStream, mkdir } from 'fs';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 
 /**
  * Returns an array of package objects. There will be one for each of

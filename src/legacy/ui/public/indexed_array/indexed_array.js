@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { inflector } from './inflector';
 import { organizeBy } from './helpers/organize_by';
 

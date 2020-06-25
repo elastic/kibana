@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import React, { useEffect, useCallback } from 'react';
 
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';

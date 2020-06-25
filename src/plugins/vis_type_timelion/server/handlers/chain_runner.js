@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import Bluebird from 'bluebird';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { defaults } from 'lodash4';
+import _, { defaults } from 'lodash';
 
 import { Optional } from '@kbn/utility-types';
 

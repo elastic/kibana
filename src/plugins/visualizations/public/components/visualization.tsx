@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import React from 'react';
 import { PersistedState } from '../../../../plugins/visualizations/public';
 import { memoizeLast } from '../legacy/memoize';

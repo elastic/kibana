@@ -18,7 +18,7 @@
  */
 import '../sense_editor.test.mocks';
 import { create } from '../create';
-import _ from 'lodash4';
+import _ from 'lodash';
 import $ from 'jquery';
 
 import * as kb from '../../../../lib/kb/kb';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash4';
+import { cloneDeep } from 'lodash';
 import { Capabilities, CapabilitiesSwitcher } from './types';
 import { KibanaRequest } from '../http';
 

@@ -18,7 +18,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import _ from 'lodash4';
+import _ from 'lodash';
 import { injectI18n } from '@kbn/i18n/react';
 import { InjectedIntlProps } from 'react-intl';
 

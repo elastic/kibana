@@ -18,7 +18,7 @@
  */
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import {

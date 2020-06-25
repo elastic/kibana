@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../common';
 import { getAngularModule, getServices } from '../../kibana_services';

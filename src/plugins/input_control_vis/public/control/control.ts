@@ -19,7 +19,7 @@
 
 /* eslint-disable no-multi-str*/
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { Filter } from 'src/plugins/data/public';

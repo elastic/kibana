@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { noop } from 'lodash4';
+import { noop } from 'lodash';
 
 import { createTransform } from './create_transform';
 import { rename, unused } from './deprecations';

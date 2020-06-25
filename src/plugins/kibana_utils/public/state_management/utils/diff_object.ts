@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { keys, isFunction, difference, filter, union, pick, each, assign, isEqual } from 'lodash4';
+import { keys, isFunction, difference, filter, union, pick, each, assign, isEqual } from 'lodash';
 
 export interface IDiffObject {
   removed: string[];

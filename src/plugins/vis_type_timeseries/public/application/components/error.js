@@ -20,7 +20,7 @@
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash4';
+import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const guidPattern = /\[[[a-f\d-\\]{36}\]/g;

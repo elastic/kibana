@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { ControlParams } from '../editor_utils';
 
 export function getLineageMap(controlParamsList: ControlParams[]) {

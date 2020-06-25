@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 const getRootCause = (err: Record<string, any> | string) => _.get(err, 'resp.error.root_cause');
 

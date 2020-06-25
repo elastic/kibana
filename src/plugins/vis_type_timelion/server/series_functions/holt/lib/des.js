@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash4';
+import _ from 'lodash';
 
 export default function des(points, alpha, beta) {
   let level;

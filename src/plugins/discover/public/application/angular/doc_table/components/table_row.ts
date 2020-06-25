@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import $ from 'jquery';
 // @ts-ignore
 import rison from 'rison-node';

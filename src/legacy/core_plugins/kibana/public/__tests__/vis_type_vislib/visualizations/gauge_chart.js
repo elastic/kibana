@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash4';
+import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import data from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_series_multiple';

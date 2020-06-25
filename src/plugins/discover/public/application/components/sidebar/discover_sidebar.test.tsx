@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { ReactWrapper } from 'enzyme';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';

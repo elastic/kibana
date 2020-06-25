@@ -40,7 +40,7 @@
  *     that has more than a single consecutive newline.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
 import grammar from 'raw-loader!../../../../../plugins/vis_type_timelion/common/chain.peg';

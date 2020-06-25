@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { each, isFunction } from 'lodash4';
+import { each, isFunction } from 'lodash';
 
 /**
  * Like _.groupBy, but allows specifying multiple groups for a

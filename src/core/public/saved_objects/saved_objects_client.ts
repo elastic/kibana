@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, pick, throttle } from 'lodash4';
+import { cloneDeep, pick, throttle } from 'lodash';
 import { resolve as resolveUrl } from 'url';
 
 import {

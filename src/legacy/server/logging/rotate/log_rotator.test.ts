@@ -31,8 +31,8 @@ jest.mock('chokidar', () => ({
   })),
 }));
 
-jest.mock('lodash4', () => ({
-  ...require.requireActual('lodash4'),
+jest.mock('lodash', () => ({
+  ...require.requireActual('lodash'),
   throttle: (fn: any) => fn,
 }));
 

@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash4';
+import _ from 'lodash';
 import tableCellFilterHtml from './table_cell_filter.html';
 
 export function KbnRows($compile) {

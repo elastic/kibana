@@ -28,7 +28,7 @@
  */
 
 import { EventEmitter } from 'events';
-import _ from 'lodash4';
+import _ from 'lodash';
 import { VisParams, PersistedState } from '../../../../plugins/visualizations/public';
 
 import { getTypes } from '../services';

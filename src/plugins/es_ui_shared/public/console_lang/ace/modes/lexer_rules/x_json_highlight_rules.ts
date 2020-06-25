@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as _ from 'lodash4';
+import * as _ from 'lodash';
 import ace from 'brace';
 import 'brace/mode/json';
 

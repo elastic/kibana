@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, find } from 'lodash4';
+import { get, find } from 'lodash';
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

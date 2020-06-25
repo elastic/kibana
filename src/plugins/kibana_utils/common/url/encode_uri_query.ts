@@ -18,7 +18,7 @@
  */
 
 import { ParsedQuery } from 'query-string';
-import { transform } from 'lodash4';
+import { transform } from 'lodash';
 
 /**
  * This method is intended for encoding *key* or *value* parts of query component. We need a custom

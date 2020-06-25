@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction, omitBy, union } from 'lodash4';
+import { isFunction, omitBy, union } from 'lodash';
 
 import { migrateAppState } from './migrate_app_state';
 import {

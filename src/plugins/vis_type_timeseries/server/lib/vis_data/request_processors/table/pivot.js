@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, last } from 'lodash4';
+import { get, last } from 'lodash';
 import { overwrite } from '../../helpers';
 
 import { basicAggs } from '../../../../../common/basic_aggs';

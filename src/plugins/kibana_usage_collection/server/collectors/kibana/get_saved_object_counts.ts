@@ -26,7 +26,7 @@
  * Unifying this logic from Monitoring that makes sense to have in OSS here and we will import it on the monitoring side to reuse it.
  */
 
-import { snakeCase } from 'lodash4';
+import { snakeCase } from 'lodash';
 import { APICaller } from 'kibana/server';
 
 const TYPES = [

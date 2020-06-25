@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mergeWith } from 'lodash4';
+import { mergeWith } from 'lodash';
 import { Capabilities } from './types';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>

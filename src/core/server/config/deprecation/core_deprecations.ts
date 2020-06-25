@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { has, get } from 'lodash4';
+import { has, get } from 'lodash';
 import { ConfigDeprecationProvider, ConfigDeprecation } from './types';
 
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {

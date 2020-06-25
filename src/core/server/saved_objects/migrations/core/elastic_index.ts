@@ -22,7 +22,7 @@
  * elasticsearch indices.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, CallCluster, NotFound, RawDoc, ShardsInfo } from './call_cluster';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 export function PromiseServiceCreator($q, $timeout) {
   function Promise(fn) {

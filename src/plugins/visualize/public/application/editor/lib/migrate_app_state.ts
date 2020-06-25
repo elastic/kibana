@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, omit } from 'lodash4';
+import { get, omit } from 'lodash';
 import { VisualizeAppState } from '../../types';
 
 /**

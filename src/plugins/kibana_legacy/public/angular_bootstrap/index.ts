@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { once } from 'lodash4';
+import { once } from 'lodash';
 import angular from 'angular';
 
 // @ts-ignore

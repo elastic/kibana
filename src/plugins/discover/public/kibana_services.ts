@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { createHashHistory } from 'history';
 import { ScopedHistory } from 'kibana/public';
 import { DiscoverServices } from './build_services';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 function allSeriesContainKey(seriesList, key) {
   const containsKeyInitialValue = true;

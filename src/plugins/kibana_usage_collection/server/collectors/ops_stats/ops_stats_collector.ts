@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { cloneDeep } from 'lodash4';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import { OpsMetrics } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';

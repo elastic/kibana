@@ -19,7 +19,7 @@
 
 import fn from './points';
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import assert from 'chai';
 const expect = assert.expect;
 import invoke from './helpers/invoke_series_fn.js';

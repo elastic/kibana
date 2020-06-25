@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 // @ts-ignore
 import realHits from 'fixtures/real_hits.js';
 // @ts-ignore

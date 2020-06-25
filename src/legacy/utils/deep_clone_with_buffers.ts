@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeepWith } from 'lodash4';
+import { cloneDeepWith } from 'lodash';
 
 // We should add `any` return type to overcome bug in lodash types, customizer
 // in lodash 3.* can return `undefined` if cloning is handled by the lodash, but

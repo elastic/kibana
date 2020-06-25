@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../core/public';
 import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { VisTypeAlias } from '../vis_types';

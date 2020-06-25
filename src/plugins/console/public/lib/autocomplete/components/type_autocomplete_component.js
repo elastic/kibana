@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash4';
+import _ from 'lodash';
 import { ListComponent } from './list_component';
 import { getTypes } from '../../mappings/mappings';
 function TypeGenerator(context) {

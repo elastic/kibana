@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash4';
+import _ from 'lodash';
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import * as topojson from 'topojson-client';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { last, findIndex, isNaN } from 'lodash4';
+import { last, findIndex, isNaN } from 'lodash';
 import React, { Component } from 'react';
 import { isColorDark } from '@elastic/eui';
 import { MetricVisValue } from './metric_vis_value';

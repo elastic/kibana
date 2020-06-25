@@ -18,7 +18,7 @@
  */
 
 import { ConfigOptions } from 'elasticsearch';
-import { cloneDeep } from 'lodash4';
+import { cloneDeep } from 'lodash';
 import { Duration } from 'moment';
 import { checkServerIdentity } from 'tls';
 import url from 'url';

@@ -19,7 +19,7 @@
 
 import { createProxyBundlesRoute } from '../bundles_route';
 import { fromNode } from 'bluebird';
-import { get, once } from 'lodash4';
+import { get, once } from 'lodash';
 
 export default (kbnServer, server, config) => {
   server.route(

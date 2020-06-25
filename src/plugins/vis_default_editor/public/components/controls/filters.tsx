@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { omit, isEqual } from 'lodash4';
+import { omit, isEqual } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMount } from 'react-use';

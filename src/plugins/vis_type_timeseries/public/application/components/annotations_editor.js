@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash4';
+import _ from 'lodash';
 import { collectionActions } from './lib/collection_actions';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { AddDeleteButtons } from './add_delete_buttons';

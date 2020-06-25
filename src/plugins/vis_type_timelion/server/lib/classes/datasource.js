@@ -22,7 +22,7 @@ import loadFunctions from '../load_functions.js';
 const fitFunctions = loadFunctions('fit_functions');
 import TimelionFunction from './timelion_function';
 import { offsetTime, preprocessOffset } from '../offset_time';
-import _ from 'lodash4';
+import _ from 'lodash';
 
 function offsetSeries(response, offset) {
   if (offset) {

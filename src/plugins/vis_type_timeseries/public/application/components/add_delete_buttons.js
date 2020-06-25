@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { EuiToolTip, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isBoolean } from 'lodash4';
+import { isBoolean } from 'lodash';
 
 export function AddDeleteButtons(props) {
   const { testSubj } = props;

@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import _ from 'lodash4';
+import _ from 'lodash';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { pick } from 'lodash4';
+import { pick } from 'lodash';
 import { injectMetaAttributes } from './inject_meta_attributes';
 
 export async function findRelationships(type, id, options = {}) {

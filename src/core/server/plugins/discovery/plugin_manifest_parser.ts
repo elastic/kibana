@@ -21,7 +21,7 @@ import { readFile, stat } from 'fs';
 import { resolve } from 'path';
 import { coerce } from 'semver';
 import { promisify } from 'util';
-import { snakeCase } from 'lodash4';
+import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '../../config';
 import { Logger } from '../../logging';
 import { PluginManifest } from '../types';

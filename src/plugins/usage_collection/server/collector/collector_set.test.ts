@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { noop } from 'lodash4';
+import { noop } from 'lodash';
 import { Collector } from './collector';
 import { CollectorSet } from './collector_set';
 import { UsageCollector } from './usage_collector';

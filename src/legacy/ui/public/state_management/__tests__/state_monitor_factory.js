@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { EventEmitter } from 'events';
-import { cloneDeep } from 'lodash4';
+import { cloneDeep } from 'lodash';
 import { stateMonitorFactory } from '../state_monitor_factory';
 
 describe('stateMonitorFactory', function () {

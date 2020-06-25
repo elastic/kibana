@@ -21,7 +21,7 @@ import * as chokidar from 'chokidar';
 import { isMaster } from 'cluster';
 import fs from 'fs';
 import { Server } from 'hapi';
-import { throttle } from 'lodash4';
+import { throttle } from 'lodash';
 import { tmpdir } from 'os';
 import { basename, dirname, join, sep } from 'path';
 import { Observable } from 'rxjs';

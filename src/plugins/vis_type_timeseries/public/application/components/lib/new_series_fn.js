@@ -18,7 +18,7 @@
  */
 
 import uuid from 'uuid';
-import _ from 'lodash4';
+import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
 

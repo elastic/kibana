@@ -18,7 +18,7 @@
  */
 
 import { SavedObjectMigrationFn } from 'kibana/server';
-import { cloneDeep, get, omit, has, flow } from 'lodash4';
+import { cloneDeep, get, omit, has, flow } from 'lodash';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {

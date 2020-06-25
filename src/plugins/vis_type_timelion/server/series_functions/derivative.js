@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
-import _ from 'lodash4';
+import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 
 export default new Chainable('derivative', {

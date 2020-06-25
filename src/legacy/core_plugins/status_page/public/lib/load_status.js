@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';

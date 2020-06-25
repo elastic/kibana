@@ -18,7 +18,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { head } from 'lodash4';
+import { head } from 'lodash';
 import url from 'url';
 
 // TODO: Remove this hack once we can get the ES config we need for Console proxy a better way.

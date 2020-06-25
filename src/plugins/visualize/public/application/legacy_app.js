@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find } from 'lodash4';
+import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { createHashHistory } from 'history';
 

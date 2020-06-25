@@ -35,7 +35,7 @@ jest.mock('process', () => ({
 
 import fs from 'fs';
 import os from 'os';
-import _ from 'lodash4';
+import _ from 'lodash';
 import sinon from 'sinon';
 import { cGroups as cGroupsFsStub, setMockFiles, readFileMock } from './__mocks__/_fs_stubs';
 import { Metrics } from './metrics';

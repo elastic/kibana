@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
 import { indexPatterns as indexPatternsUtils, IndexPatternAttributes } from '../../../data/public';

@@ -18,7 +18,7 @@
  */
 
 import Bluebird from 'bluebird';
-import _ from 'lodash4';
+import _ from 'lodash';
 
 /* @param {Array} args
  * - args[0] must be a seriesList

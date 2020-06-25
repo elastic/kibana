@@ -35,7 +35,7 @@ import webpack from 'webpack';
 import { promisify } from 'util';
 import path from 'path';
 import del from 'del';
-import { chunk } from 'lodash4';
+import { chunk } from 'lodash';
 import seedrandom from 'seedrandom';
 
 const readFileAsync = promisify(fs.readFile);

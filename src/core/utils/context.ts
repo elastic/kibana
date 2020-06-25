@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { flatten } from 'lodash4';
+import { flatten } from 'lodash';
 import { ShallowPromise } from '@kbn/utility-types';
 import { pick } from '.';
 import { CoreId, PluginOpaqueId } from '../server';

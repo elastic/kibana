@@ -19,7 +19,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import '../../../../../../plugins/vis_type_timelion/public/flot';
-import _ from 'lodash4';
+import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import { timefilter } from 'ui/timefilter';

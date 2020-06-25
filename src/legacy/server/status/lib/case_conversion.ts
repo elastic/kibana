@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mapKeys, snakeCase } from 'lodash4';
+import { mapKeys, snakeCase } from 'lodash';
 
 export function keysToSnakeCaseShallow(object: Record<string, any>) {
   return mapKeys(object, (value, key) => snakeCase(key));

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { startsWith } from 'lodash4';
+import { startsWith } from 'lodash';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../common/metric_types';
 

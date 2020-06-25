@@ -23,7 +23,7 @@
  * Licensed under the MIT license.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 function sum(data, fn) {
   return _.reduce(

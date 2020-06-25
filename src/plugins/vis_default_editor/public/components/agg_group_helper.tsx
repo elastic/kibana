@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { findIndex, isEmpty } from 'lodash4';
+import { findIndex, isEmpty } from 'lodash';
 import { IAggConfig } from 'src/plugins/data/public';
 import { AggsState } from './agg_group_state';
 import { Schema, getSchemaByName } from '../schemas';

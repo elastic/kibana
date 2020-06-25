@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { detectIE } from './detect_ie';
 
 export const createNumberHandler = (handleChange) => {

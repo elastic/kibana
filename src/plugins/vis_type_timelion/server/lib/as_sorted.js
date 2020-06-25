@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import unzipPairs from './unzip_pairs.js';
 
 export default function asSorted(timeValObject, fn) {

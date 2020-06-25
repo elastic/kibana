@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { keys } from 'lodash4';
+import { keys } from 'lodash';
 import moment, { unitOfTime } from 'moment';
 
 type Units = unitOfTime.Base | unitOfTime._quarter;

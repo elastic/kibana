@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 export const getValueBy = (fn, data) => {
   if (_.isNumber(data)) return data;

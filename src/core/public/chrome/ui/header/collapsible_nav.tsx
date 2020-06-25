@@ -29,7 +29,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { groupBy, sortBy } from 'lodash4';
+import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
 import { useObservable } from 'react-use';
 import * as Rx from 'rxjs';

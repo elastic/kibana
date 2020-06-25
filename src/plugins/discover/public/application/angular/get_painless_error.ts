@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 
 export function getPainlessError(error: Error) {
   const rootCause: Array<{ lang: string; script: string }> | undefined = get(

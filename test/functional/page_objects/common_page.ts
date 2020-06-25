@@ -19,7 +19,7 @@
 
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { FtrProviderContext } from '../ftr_provider_context';

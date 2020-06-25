@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import Boom from 'boom';
 import Bluebird from 'bluebird';
 import { unlinkSync as unlink } from 'fs';

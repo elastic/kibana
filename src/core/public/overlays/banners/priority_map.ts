@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { sortBy } from 'lodash4';
+import { sortBy } from 'lodash';
 
 interface PriorityValue {
   readonly priority: number;

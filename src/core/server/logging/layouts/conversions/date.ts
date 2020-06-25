@@ -17,7 +17,7 @@
  * under the License.
  */
 import moment from 'moment-timezone';
-import { last } from 'lodash4';
+import { last } from 'lodash';
 
 import { Conversion } from './type';
 import { LogRecord } from '../../log_record';

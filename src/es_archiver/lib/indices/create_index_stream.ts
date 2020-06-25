@@ -18,7 +18,7 @@
  */
 
 import { Transform, Readable } from 'stream';
-import { get, once } from 'lodash4';
+import { get, once } from 'lodash';
 import { Client } from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find } from 'lodash4';
+import { find } from 'lodash';
 import sinon from 'sinon';
 
 import * as states from './states';

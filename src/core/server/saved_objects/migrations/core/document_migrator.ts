@@ -61,7 +61,7 @@
  */
 
 import Boom from 'boom';
-import _ from 'lodash4';
+import _ from 'lodash';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';

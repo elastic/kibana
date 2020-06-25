@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { times } from 'lodash4';
+import { times } from 'lodash';
 import { SavedObjectsFindOptions, SavedObject } from 'src/core/server';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
 import { findAll } from './find_all';

@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import _ from 'lodash4';
+import _ from 'lodash';
 
 /*
  * Create a single-level array with strings for all the paths to values in the

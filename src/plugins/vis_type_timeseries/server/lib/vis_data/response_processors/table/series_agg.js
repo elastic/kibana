@@ -18,7 +18,7 @@
  */
 
 import { SeriesAgg } from './_series_agg';
-import _ from 'lodash4';
+import _ from 'lodash';
 import { calculateLabel } from '../../../../../common/calculate_label';
 
 export function seriesAgg(resp, panel, series) {

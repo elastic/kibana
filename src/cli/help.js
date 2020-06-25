@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 export default function help(command, spaces) {
   if (!_.size(command.commands)) {

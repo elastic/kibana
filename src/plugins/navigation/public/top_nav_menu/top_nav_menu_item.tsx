@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { upperFirst, isFunction } from 'lodash4';
+import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 

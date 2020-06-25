@@ -18,7 +18,7 @@
  */
 import PropTypes from 'prop-types';
 import React from 'react';
-import { last } from 'lodash4';
+import { last } from 'lodash';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { MultiValueRow } from './multi_value_row';

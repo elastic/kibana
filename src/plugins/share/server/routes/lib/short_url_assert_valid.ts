@@ -18,7 +18,7 @@
  */
 
 import { parse } from 'url';
-import { trim } from 'lodash4';
+import { trim } from 'lodash';
 import Boom from 'boom';
 
 export function shortUrlAssertValid(url: string) {

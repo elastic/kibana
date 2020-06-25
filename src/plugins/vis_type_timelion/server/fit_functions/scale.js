@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 // Downsampling of cumulative metrics
 // Good: count, sum

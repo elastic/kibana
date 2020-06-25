@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import Bluebird from 'bluebird';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash4';
+import { omit } from 'lodash';
 import uuid from 'uuid';
 import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
 import { APICaller } from '../../../elasticsearch/';

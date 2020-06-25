@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { clone, get } from 'lodash4';
+import { clone, get } from 'lodash';
 import { resolve } from 'url';
 
 // eslint-disable-next-line import/no-default-export

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, startsWith } from 'lodash4';
+import { get, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 

@@ -19,7 +19,7 @@
 
 import { Agent, IncomingMessage } from 'http';
 import * as url from 'url';
-import { pick, trimStart, trimEnd } from 'lodash4';
+import { pick, trimStart, trimEnd } from 'lodash';
 
 import { KibanaRequest, Logger, RequestHandler } from 'kibana/server';
 

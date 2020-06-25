@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { constant, once, compact, flatten } from 'lodash4';
+import { constant, once, compact, flatten } from 'lodash';
 
 import { isWorker } from 'cluster';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

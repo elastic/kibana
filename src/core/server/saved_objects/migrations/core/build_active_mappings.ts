@@ -22,7 +22,7 @@
  */
 
 import crypto from 'crypto';
-import { cloneDeep, mapValues } from 'lodash4';
+import { cloneDeep, mapValues } from 'lodash';
 import {
   IndexMapping,
   SavedObjectsMappingProperties,

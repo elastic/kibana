@@ -20,7 +20,7 @@
 import classNames from 'classnames';
 import React, { PureComponent } from 'react';
 import MarkdownIt from 'markdown-it';
-import { memoize } from 'lodash4';
+import { memoize } from 'lodash';
 import { getSecureRelForTarget } from '@elastic/eui';
 
 import './index.scss';

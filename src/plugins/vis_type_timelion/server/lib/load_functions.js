@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import glob from 'glob';
 import path from 'path';
 import processFunctionDefinition from './process_function_definition';

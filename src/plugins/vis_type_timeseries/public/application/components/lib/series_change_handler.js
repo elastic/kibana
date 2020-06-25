@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
 import { isBasicAgg } from '../../../../../../plugins/vis_type_timeseries/common/agg_lookup';
 import { handleAdd, handleChange } from './collection_actions';

@@ -21,7 +21,7 @@
  * Smokescreen tests for core migration logic
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { assert } from 'chai';
 import {
   DocumentMigrator,

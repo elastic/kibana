@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { IndexPattern } from '../../../../../../data/public';
 
 export type SortPairObj = Record<string, string>;

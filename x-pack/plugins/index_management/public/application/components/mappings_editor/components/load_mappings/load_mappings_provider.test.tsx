@@ -23,8 +23,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('lodash4', () => {
-  const original = jest.requireActual('lodash4');
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
 
   return {
     ...original,

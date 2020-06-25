@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get } from 'lodash4';
+import { get } from 'lodash';
 
 export async function getIndexPatternObject(req, indexPatternString) {
   let defaultIndex;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { assign } from 'lodash4';
+import { assign } from 'lodash';
 
 export function TableVisController($scope) {
   const uiStateSort = $scope.uiState ? $scope.uiState.get('vis.params.sort') : {};

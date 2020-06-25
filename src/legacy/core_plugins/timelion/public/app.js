@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 // required for `ngSanitize` angular module
 import 'angular-sanitize';
 

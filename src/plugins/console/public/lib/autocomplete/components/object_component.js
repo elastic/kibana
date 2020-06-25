@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { SharedComponent } from './index';
 /**
  * @param constants list of components that represent constant keys

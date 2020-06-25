@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import _ from 'lodash4';
+import _ from 'lodash';
 import { errors as esErrors } from 'elasticsearch';
 
 export function handleESError(error) {

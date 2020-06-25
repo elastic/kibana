@@ -20,7 +20,7 @@
 import fn from './average';
 import moment from 'moment';
 const expect = require('chai').expect;
-import _ from 'lodash4';
+import _ from 'lodash';
 
 describe('average.js', function () {
   describe('average', function () {

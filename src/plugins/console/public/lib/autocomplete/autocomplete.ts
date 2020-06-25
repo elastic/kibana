@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 // TODO: All of these imports need to be moved to the core editor so that it can inject components from there.

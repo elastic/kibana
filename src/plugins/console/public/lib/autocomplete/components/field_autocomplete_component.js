@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash4';
+import _ from 'lodash';
 import { getFields } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
 

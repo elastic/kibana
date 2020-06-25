@@ -19,7 +19,7 @@
 
 import { mockHttpServer } from './http_service.test.mocks';
 
-import { noop } from 'lodash4';
+import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';

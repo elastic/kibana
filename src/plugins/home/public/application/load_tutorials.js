@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { getServices } from './kibana_services';
 import { i18n } from '@kbn/i18n';
 

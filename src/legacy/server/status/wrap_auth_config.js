@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { assign, identity } from 'lodash4';
+import { assign, identity } from 'lodash';
 
 export const wrapAuthConfig = (allowAnonymous) => {
   if (allowAnonymous) {

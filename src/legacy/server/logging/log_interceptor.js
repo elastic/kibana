@@ -18,7 +18,7 @@
  */
 
 import Stream from 'stream';
-import { get, isEqual } from 'lodash4';
+import { get, isEqual } from 'lodash';
 
 const GET_CLIENT_HELLO = /GET_CLIENT_HELLO:http/;
 

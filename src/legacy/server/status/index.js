@@ -21,7 +21,7 @@ import ServerStatus from './server_status';
 import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
 import Oppsy from 'oppsy';
-import { cloneDeep } from 'lodash4';
+import { cloneDeep } from 'lodash';
 import { getOSInfo } from './lib/get_os_info';
 
 export function statusMixin(kbnServer, server, config) {

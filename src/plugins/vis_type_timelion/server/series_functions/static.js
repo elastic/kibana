@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash4';
+import _ from 'lodash';
 import Datasource from '../lib/classes/datasource';
 import Bluebird from 'bluebird';
 

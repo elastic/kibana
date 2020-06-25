@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mapValues } from 'lodash4';
+import { mapValues } from 'lodash';
 import { AnyExpressionFunctionDefinition } from '../../types';
 import { ExecutionContext } from '../../../execution/types';
 

@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { assign } from 'lodash4';
+import { assign } from 'lodash';
 import { AggSelect } from '../agg_select';
 import { FieldSelect } from '../field_select';
 import { AggRow } from '../agg_row';

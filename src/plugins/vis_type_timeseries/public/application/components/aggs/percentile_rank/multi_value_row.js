@@ -18,7 +18,7 @@
  */
 import PropTypes from 'prop-types';
 import React from 'react';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   htmlIdGenerator,

@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { isPlainObject, cloneDeep } from 'lodash4';
+import { isPlainObject, cloneDeep } from 'lodash';
 
 const TIMEFILTER = '%timefilter%';
 const AUTOINTERVAL = '%autointerval%';

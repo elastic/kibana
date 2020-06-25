@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { flow } from 'lodash4';
+import { flow } from 'lodash';
 import { filterAnnotations } from './filter';
 import { getAnnotationBuckets } from './buckets';
 

@@ -26,7 +26,7 @@ import {
 } from './cluster_client.test.mocks';
 
 import { errors } from 'elasticsearch';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import { Logger } from '../logging';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';

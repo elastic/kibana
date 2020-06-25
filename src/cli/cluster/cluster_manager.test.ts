@@ -50,7 +50,7 @@ const mockConfig: any = {
   },
 };
 
-import { sample } from 'lodash4';
+import { sample } from 'lodash';
 
 import { ClusterManager } from './cluster_manager';
 import { Worker } from './worker';

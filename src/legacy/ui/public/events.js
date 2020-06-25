@@ -23,7 +23,7 @@
  * @extends EventEmitter
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { EventEmitter } from 'events';
 import { fatalError } from './notify';
 import { createLegacyClass } from './utils/legacy_class';

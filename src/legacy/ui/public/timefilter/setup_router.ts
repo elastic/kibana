@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { IScope } from 'angular';
 import moment from 'moment';
 import chrome from 'ui/chrome';

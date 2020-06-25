@@ -20,7 +20,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { AppUpdater, CoreSetup, Plugin } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { sortBy } from 'lodash4';
+import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';

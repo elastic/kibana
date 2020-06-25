@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isPlainObject } from 'lodash4';
+import { isPlainObject } from 'lodash';
 
 export function setHeaders(originalHeaders: object, newHeaders: object) {
   if (!isPlainObject(originalHeaders)) {

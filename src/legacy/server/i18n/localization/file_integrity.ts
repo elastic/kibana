@@ -19,7 +19,7 @@
 
 import { createHash } from 'crypto';
 import * as fs from 'fs';
-import { zipObject } from 'lodash4';
+import { zipObject } from 'lodash';
 import * as stream from 'stream';
 import * as util from 'util';
 

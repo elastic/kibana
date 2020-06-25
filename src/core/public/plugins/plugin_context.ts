@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash4';
+import { omit } from 'lodash';
 import { DiscoveredPlugin } from '../../server';
 import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
 import { CoreContext } from '../core_system';

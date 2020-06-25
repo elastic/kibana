@@ -18,7 +18,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import { SavedObjectRelation } from '../types';
 
 export async function getRelationships(

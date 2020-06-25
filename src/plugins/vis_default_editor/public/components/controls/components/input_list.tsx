@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useEffect, Fragment, useCallback } from 'react';
-import { isEmpty, isEqual, mapValues, omitBy, pick } from 'lodash4';
+import { isEmpty, isEqual, mapValues, omitBy, pick } from 'lodash';
 import {
   EuiButtonIcon,
   EuiFlexGroup,

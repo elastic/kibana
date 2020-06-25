@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map, pick, zipObject } from 'lodash4';
+import { map, pick, zipObject } from 'lodash';
 
 import { ExpressionTypeDefinition } from '../types';
 import { PointSeries } from './pointseries';

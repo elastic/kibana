@@ -18,7 +18,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { findLast } from 'lodash4';
+import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import {

@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
-import { isEqual, isEmpty, debounce } from 'lodash4';
+import { isEqual, isEmpty, debounce } from 'lodash';
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { Visualization } from './visualization';
 import { VisPicker } from './vis_picker';

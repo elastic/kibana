@@ -18,7 +18,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { isEqual } from 'lodash4';
+import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, first, map, shareReplay, take } from 'rxjs/operators';
 

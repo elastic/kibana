@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { SharedComponent } from './shared_component';
 /** A component that suggests one of the give options, but accepts anything */
 export class ListComponent extends SharedComponent {

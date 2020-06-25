@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 
 import { vislibColorMaps, RawColorSchema } from './color_maps';
 

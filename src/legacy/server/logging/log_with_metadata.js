@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isPlainObject } from 'lodash4';
+import { isPlainObject } from 'lodash';
 
 import {
   metadataSymbol,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mapKeys, camelCase } from 'lodash4';
+import { mapKeys, camelCase } from 'lodash';
 
 export function keysToCamelCaseShallow(object: Record<string, any>) {
   return mapKeys(object, (value, key) => camelCase(key));

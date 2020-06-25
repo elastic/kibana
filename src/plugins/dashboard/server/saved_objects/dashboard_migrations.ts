@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, flow } from 'lodash4';
+import { get, flow } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { migrations730 } from './migrations_730';

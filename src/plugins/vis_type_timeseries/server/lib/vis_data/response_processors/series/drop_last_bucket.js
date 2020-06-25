@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 
 export function dropLastBucket(resp, panel, series) {

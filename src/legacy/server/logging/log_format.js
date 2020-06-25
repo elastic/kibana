@@ -19,7 +19,7 @@
 
 import Stream from 'stream';
 import moment from 'moment-timezone';
-import { get, _ } from 'lodash4';
+import { get, _ } from 'lodash';
 import queryString from 'query-string';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';

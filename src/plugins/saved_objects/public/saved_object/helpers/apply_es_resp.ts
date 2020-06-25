@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash4';
+import _ from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
 import { SavedObjectNotFound } from '../../../../kibana_utils/public';
 import {

@@ -93,7 +93,7 @@
  *
  * @param {[type]} prov [description]
  */
-import _ from 'lodash4';
+import _ from 'lodash';
 
 const nextId = _.partial(_.uniqueId, 'privateProvider#');
 

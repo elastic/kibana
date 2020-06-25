@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import RouteManager from '../route_manager';

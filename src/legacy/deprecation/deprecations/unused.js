@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, isUndefined, noop } from 'lodash4';
+import { get, isUndefined, noop } from 'lodash';
 import { unset } from '../../utils';
 
 export function unused(oldKey) {

@@ -19,7 +19,7 @@
 
 import { resolve, sep } from 'path';
 
-import { uniq } from 'lodash4';
+import { uniq } from 'lodash';
 
 import { getInstalledPackages, InstalledPackage } from '../installed_packages';
 import { REPO_ROOT } from '../../constants';

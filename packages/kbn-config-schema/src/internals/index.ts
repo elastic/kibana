@@ -27,7 +27,7 @@ import {
   ValidationErrorItem,
   ValidationOptions,
 } from 'joi';
-import { isPlainObject } from 'lodash3';
+import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
 import { Stream } from 'stream';
 import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';

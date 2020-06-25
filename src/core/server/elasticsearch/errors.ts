@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 
 const code = Symbol('ElasticsearchError');
 

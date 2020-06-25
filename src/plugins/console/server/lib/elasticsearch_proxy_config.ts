@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import http from 'http';
 import https from 'https';
 import url from 'url';

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { difference, map } from 'lodash4';
+import { difference, map } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 import { DiscoverServices } from '../../../../build_services';
 

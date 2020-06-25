@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import $ from 'jquery';
 import d3 from 'd3';
 import expect from '@kbn/expect';

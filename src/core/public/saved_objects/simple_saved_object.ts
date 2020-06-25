@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, has, set } from 'lodash4';
+import { get, has, set } from 'lodash';
 import { SavedObject as SavedObjectType } from '../../server';
 import { SavedObjectsClientContract } from './saved_objects_client';
 

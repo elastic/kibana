@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { merge } from 'lodash4';
+import _, { merge } from 'lodash';
 import glob from 'glob';
 import { basename, join, resolve } from 'path';
 import { readFileSync } from 'fs';

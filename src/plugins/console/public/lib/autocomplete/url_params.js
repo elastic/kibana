@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { ConstantComponent, ListComponent, SharedComponent } from './components';
 
 export class ParamComponent extends ConstantComponent {

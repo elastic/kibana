@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, defaultsDeep } from 'lodash4';
+import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 

@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { sortBy } from 'lodash4';
+import { sortBy } from 'lodash';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');

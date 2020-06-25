@@ -20,7 +20,7 @@
 import d3 from 'd3';
 import expect from '@kbn/expect';
 import $ from 'jquery';
-import _ from 'lodash4';
+import _ from 'lodash';
 
 // Data
 import seriesPos from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';

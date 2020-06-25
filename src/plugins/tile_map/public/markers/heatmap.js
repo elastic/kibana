@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
 import { L } from '../../../maps_legacy/public';

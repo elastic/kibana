@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { filter } from 'lodash4';
+import { filter } from 'lodash';
 import React, { useEffect, useState, useCallback } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {

@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash4';
+import _ from 'lodash';
 import reactcss from 'reactcss';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 import { COLORS } from '../constants/chart';

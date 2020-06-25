@@ -25,7 +25,7 @@
  * @description Persists generic "state" to and reads it from the URL.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import rison from 'rison-node';

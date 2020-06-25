@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { uniqBy } from 'lodash4';
+import _, { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';

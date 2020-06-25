@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 

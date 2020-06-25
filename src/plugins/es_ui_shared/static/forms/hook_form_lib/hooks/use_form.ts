@@ -18,7 +18,7 @@
  */
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { get } from 'lodash4';
+import { get } from 'lodash';
 
 import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
 import { mapFormFields, unflattenObject, Subject, Subscription } from '../lib';

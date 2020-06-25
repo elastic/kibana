@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { WorkQueue } from '../work_queue';

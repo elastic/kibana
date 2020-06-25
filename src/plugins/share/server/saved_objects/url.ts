@@ -17,7 +17,7 @@
  * under the License.
  */
 import { SavedObjectsType } from 'kibana/server';
-import { flow } from 'lodash4';
+import { flow } from 'lodash';
 import { migrateLegacyKibanaAppShortUrls } from './kibana_app_migration';
 
 export const url: SavedObjectsType = {

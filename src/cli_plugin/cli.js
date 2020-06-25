@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash4';
+import _ from 'lodash';
 import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
 import listCommand from './list';

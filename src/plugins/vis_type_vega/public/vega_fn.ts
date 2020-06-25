@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, KibanaContext, Render } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';

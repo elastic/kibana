@@ -18,7 +18,7 @@
  */
 
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
-import { get, isEqual } from 'lodash4';
+import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';

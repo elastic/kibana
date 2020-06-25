@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults } from 'lodash4';
+import { defaults } from 'lodash';
 
 import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { SavedObjectsErrorHelpers } from '../../saved_objects/';

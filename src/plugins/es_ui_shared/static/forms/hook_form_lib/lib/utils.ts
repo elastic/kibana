@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from 'lodash4';
+import { set } from 'lodash';
 import { FieldHook } from '../types';
 
 export const unflattenObject = (object: any) =>

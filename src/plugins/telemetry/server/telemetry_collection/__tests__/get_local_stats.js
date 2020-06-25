@@ -23,7 +23,7 @@ import sinon from 'sinon';
 import { mockGetClusterInfo } from './get_cluster_info';
 import { mockGetClusterStats } from './get_cluster_stats';
 
-import { omit } from 'lodash4';
+import { omit } from 'lodash';
 import { getLocalStats, handleLocalStats } from '../get_local_stats';
 
 const mockUsageCollection = (kibanaUsage = {}) => ({

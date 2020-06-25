@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash4';
+import { omit } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { APICaller } from 'kibana/server';
 import { StatsCollectionContext } from 'src/plugins/telemetry_collection_manager/server';

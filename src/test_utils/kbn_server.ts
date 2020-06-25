@@ -28,7 +28,7 @@ import {
   setupUsers,
   // @ts-ignore: implicit any for JS file
 } from '@kbn/test';
-import { defaultsDeep, get } from 'lodash4';
+import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';

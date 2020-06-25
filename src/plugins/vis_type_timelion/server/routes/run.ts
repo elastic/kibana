@@ -19,7 +19,7 @@
 import { IRouter, Logger } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import Bluebird from 'bluebird';
-import _ from 'lodash4';
+import _ from 'lodash';
 // @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';
 // @ts-ignore

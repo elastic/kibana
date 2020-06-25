@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash4';
+import { get } from 'lodash';
 import moment from 'moment';
 import { SerializedFieldFormat } from '../../../../plugins/expressions/public';
 import {

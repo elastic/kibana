@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { values } from 'lodash4';
+import { values } from 'lodash';
 import { format as formatUrl } from 'url';
 import { Agent as HttpsAgent, AgentOptions } from 'https';
 

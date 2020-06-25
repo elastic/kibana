@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { get } from 'lodash4';
+import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
