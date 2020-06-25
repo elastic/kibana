@@ -12,6 +12,7 @@ import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
 export interface OwnProps {
   end: number;
   id: string;
@@ -66,11 +67,13 @@ const AlertsTableComponent: React.FC<Props> = ({
 }) => {
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const { initializeTimeline } = useManageTimeline();
+  const { filterManager } = useKibana().services.data.query;
 
   useEffect(() => {
     initializeTimeline({
       id: timelineId,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      filterManager,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       title: i18n.ALERTS_TABLE_TITLE,
       unit: i18n.UNIT,

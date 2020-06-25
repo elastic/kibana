@@ -164,23 +164,15 @@ export const TimelineComponent: React.FC<Props> = ({
     [sort.columnId, sort.sortDirection]
   );
   const [isQueryLoading, setIsQueryLoading] = useState(false);
-  const {
-    initializeTimeline,
-    setIsTimelineLoading,
-    setTimelineFilterManager,
-  } = useManageTimeline();
+  const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
-    initializeTimeline({ id, indexToAdd });
+    initializeTimeline({ filterManager, id, indexToAdd });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingIndexName, isQueryLoading]);
-  useEffect(() => {
-    setTimelineFilterManager({ id, filterManager });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterManager]);
 
   return (
     <TimelineContainer data-test-subj="timeline">

@@ -328,12 +328,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       return [...defaultFilters, ...buildAlertStatusFilter(filterGroup)];
     }
   }, [defaultFilters, filterGroup]);
+  const { filterManager } = useKibana().services.data.query;
   const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
       id: timelineId,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      filterManager,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       loadingText: i18n.LOADING_ALERTS,
       title: i18n.ALERTS_TABLE_TITLE,

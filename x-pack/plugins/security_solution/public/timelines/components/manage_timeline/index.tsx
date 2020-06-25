@@ -15,6 +15,7 @@ import { Ecs, TimelineNonEcsData, TimelineItem } from '../../../graphql/types';
 
 interface ManageTimelineInit {
   documentType?: string;
+  filterManager?: FilterManager;
   footerText?: string;
   id: string;
   indexToAdd?: string[] | null;
@@ -75,11 +76,6 @@ type ActionManageTimeline =
           timelineItem,
         }: TimelineRowActionArgs) => TimelineRowAction[];
       };
-    }
-  | {
-      type: 'SET_TIMELINE_FILTER_MANAGER';
-      id: string;
-      payload: { filterManager: FilterManager };
     };
 
 export const timelineDefaults = {
@@ -106,7 +102,6 @@ const reducerManageTimeline = (state: ManageTimelineById, action: ActionManageTi
         },
       };
     case 'SET_TIMELINE_ACTIONS':
-    case 'SET_TIMELINE_FILTER_MANAGER':
       return {
         ...state,
         [action.id]: {
@@ -142,7 +137,6 @@ interface UseTimelineManager {
       timelineItem,
     }: TimelineRowActionArgs) => TimelineRowAction[];
   }) => void;
-  setTimelineFilterManager: (filterArgs: { id: string; filterManager: FilterManager }) => void;
 }
 
 const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseTimelineManager => {
@@ -177,17 +171,6 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
         type: 'SET_TIMELINE_ACTIONS',
         id,
         payload: { queryFields, timelineRowActions },
-      });
-    },
-    []
-  );
-
-  const setTimelineFilterManager = useCallback(
-    ({ id, filterManager }: { id: string; filterManager: FilterManager }) => {
-      dispatch({
-        type: 'SET_TIMELINE_FILTER_MANAGER',
-        id,
-        payload: { filterManager },
       });
     },
     []
@@ -228,7 +211,6 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     isManagedTimeline,
     setIsTimelineLoading,
     setTimelineRowActions,
-    setTimelineFilterManager,
   };
 };
 
