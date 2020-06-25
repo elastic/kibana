@@ -179,6 +179,21 @@ export const buildExpression = (
                     ],
                     isHistogram: [isHistogramDimension],
                     splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
+                    yAxisConfig: layer.yAxisConfig
+                      ? layer.yAxisConfig.map((yAxisConfig) => ({
+                          type: 'expression',
+                          chain: [
+                            {
+                              type: 'function',
+                              function: 'lens_xy_yAxisConfig',
+                              arguments: {
+                                forAccessor: [yAxisConfig.forAccessor],
+                                mode: [yAxisConfig.mode],
+                              },
+                            },
+                          ],
+                        }))
+                      : [],
                     seriesType: [layer.seriesType],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],

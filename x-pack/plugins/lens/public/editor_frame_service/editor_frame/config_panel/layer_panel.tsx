@@ -186,7 +186,7 @@ export function LayerPanel(
                     },
                   ];
 
-                  if (activeVisualization.renderDimensionEditor) {
+                  if (activeVisualization.renderDimensionEditor && group.enableDimensionEditor) {
                     tabs.push({
                       id: 'visualization',
                       name: i18n.translate('xpack.lens.editorFrame.formatStyleLabel', {

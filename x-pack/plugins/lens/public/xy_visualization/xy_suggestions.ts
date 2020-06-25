@@ -14,7 +14,7 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState, visualizationTypes } from './types';
+import { State, SeriesType, XYState, visualizationTypes, LayerConfig } from './types';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -379,13 +379,21 @@ function buildSuggestion({
   changeType: TableChangeType;
   keptLayerIds: string[];
 }) {
+  const existingLayer: LayerConfig | {} = getExistingLayer(currentState, layerId) || {};
+  const accessors = yValues.map((col) => col.columnId);
   const newLayer = {
-    ...(getExistingLayer(currentState, layerId) || {}),
+    ...existingLayer,
     layerId,
     seriesType,
     xAccessor: xValue.columnId,
     splitAccessor: splitBy?.columnId,
-    accessors: yValues.map((col) => col.columnId),
+    accessors,
+    yAxisConfig:
+      'yAxisConfig' in existingLayer && existingLayer.yAxisConfig
+        ? existingLayer.yAxisConfig.filter(
+            ({ forAccessor }) => accessors.indexOf(forAccessor) !== -1
+          )
+        : undefined,
   };
 
   const keptLayers = currentState

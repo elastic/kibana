@@ -272,6 +272,31 @@ export function XYChart({
       }
     : undefined;
 
+  // TODO implement this logic to figure out which axes and groups we need
+  /*
+  // restructure state
+  const series = {
+    auto: [{ layer: <id>, accessor: <id>, formatter: {} }],
+    left: [{ layer: <id>, accessor: <id>, formatter: {} }]
+    right: [{ layer: <id>, accessor: <id>, formatter: {} }]
+  }
+
+  // sort auto series:
+
+  forEach(series.auto as siri) {
+    if(left.size == 0 || (left.size > 0 && formattersMatch)) left.push(siri) // default to left if formatters work
+    else if(right.size == 0 || (right.size > 0 && formattersMatch)) right.push(siri) // default to right if formatters don't match
+    else if (right.size > left.size ) left.push(siri) // otherwise balance using round robin (exotic edge case)
+    else right.push(siri)
+  }
+
+  // apply
+
+  either create one left and one right axis with the first formatter in the list
+
+  or group the left and right series by formatter and make every tuple [side, formatter] a series group with an axis
+   */
+
   return (
     <Chart>
       <Settings
