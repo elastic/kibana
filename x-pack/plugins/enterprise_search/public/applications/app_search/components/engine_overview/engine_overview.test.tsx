@@ -15,7 +15,7 @@ import { KibanaContext } from '../../../';
 import { LicenseContext } from '../../../shared/licensing';
 import { mountWithContext, mockKibanaContext } from '../../../__mocks__';
 
-import { EmptyState, ErrorState, NoUserState } from '../empty_states';
+import { EmptyState, ErrorState } from '../empty_states';
 import { EngineTable, IEngineTablePagination } from './engine_table';
 
 import { EngineOverview } from './';
@@ -55,13 +55,6 @@ describe('EngineOverview', () => {
         get: () => ({ invalidPayload: true }),
       });
       expect(wrapper.find(ErrorState)).toHaveLength(1);
-    });
-
-    it('hasNoAccount', async () => {
-      const wrapper = await mountWithApiMock({
-        get: () => Promise.reject({ body: { message: 'no-as-account' } }),
-      });
-      expect(wrapper.find(NoUserState)).toHaveLength(1);
     });
   });
 
