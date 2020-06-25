@@ -427,7 +427,9 @@ export interface AuditableEvent {
 // @public (undocumented)
 export interface Auditor {
     // (undocumented)
-    add(event: AuditableEvent): void;
+    add: (event: AuditableEvent) => void;
+    // (undocumented)
+    withScope: <T = unknown>(name: string, fn: (...args: any[]) => Promise<T>) => Promise<T>;
 }
 
 // Warning: (ae-missing-release-tag) "AuditorFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -569,7 +571,7 @@ export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capa
 
 // @public
 export class ClusterClient implements IClusterClient {
-    constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
+    constructor(config: ElasticsearchClientConfig, log: Logger, getAuditorFactory: () => AuditorFactory, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): IScopedClusterClient;
     callAsInternalUser: APICaller;
     close(): void;

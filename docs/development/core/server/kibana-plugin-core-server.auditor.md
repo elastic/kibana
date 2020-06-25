@@ -10,9 +10,10 @@
 export interface Auditor 
 ```
 
-## Methods
+## Properties
 
-|  Method | Description |
-|  --- | --- |
-|  [add(event)](./kibana-plugin-core-server.auditor.add.md) |  |
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [add](./kibana-plugin-core-server.auditor.add.md) | <code>(event: AuditableEvent) =&gt; void</code> |  |
+|  [withScope](./kibana-plugin-core-server.auditor.withscope.md) | <code>&lt;T = unknown&gt;(name: string, fn: (...args: any[]) =&gt; Promise&lt;T&gt;) =&gt; Promise&lt;T&gt;</code> |  |
 

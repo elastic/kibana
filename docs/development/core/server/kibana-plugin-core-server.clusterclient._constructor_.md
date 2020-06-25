@@ -9,7 +9,7 @@ Constructs a new instance of the `ClusterClient` class
 <b>Signature:</b>
 
 ```typescript
-constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
+constructor(config: ElasticsearchClientConfig, log: Logger, getAuditorFactory: () => AuditorFactory, getAuthHeaders?: GetAuthHeaders);
 ```
 
 ## Parameters
@@ -18,5 +18,6 @@ constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: Get
 |  --- | --- | --- |
 |  config | <code>ElasticsearchClientConfig</code> |  |
 |  log | <code>Logger</code> |  |
+|  getAuditorFactory | <code>() =&gt; AuditorFactory</code> |  |
 |  getAuthHeaders | <code>GetAuthHeaders</code> |  |
 

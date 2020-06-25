@@ -215,8 +215,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [AuditTrailStart](./kibana-plugin-core-server.audittrailstart.md) |  |
 |  [AppenderConfigType](./kibana-plugin-core-server.appenderconfigtype.md) |  |
+|  [AuditTrailStart](./kibana-plugin-core-server.audittrailstart.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-core-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-core-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-core-server.authheaders.md) | Auth Headers map |
 |  [AuthResult](./kibana-plugin-core-server.authresult.md) |  |

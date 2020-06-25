@@ -2,21 +2,10 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [Auditor](./kibana-plugin-core-server.auditor.md) &gt; [add](./kibana-plugin-core-server.auditor.add.md)
 
-## Auditor.add() method
+## Auditor.add property
 
 <b>Signature:</b>
 
 ```typescript
-add(event: AuditableEvent): void;
+add: (event: AuditableEvent) => void;
 ```
-
-## Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  event | <code>AuditableEvent</code> |  |
-
-<b>Returns:</b>
-
-`void`
-
