@@ -171,8 +171,7 @@ export const postAgentCheckinHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
-    const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
-    const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId);
+    const agent = await AgentService.authenticateAgentWithAccessToken(soClient, request);
     const abortController = new AbortController();
     request.events.aborted$.subscribe(() => {
       abortController.abort();

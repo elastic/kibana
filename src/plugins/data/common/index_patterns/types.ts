@@ -103,6 +103,7 @@ export interface IIndexPatternsApiClient {
 }
 
 export type { SavedObject };
+
 export type AggregationRestrictions = Record<
   string,
   {

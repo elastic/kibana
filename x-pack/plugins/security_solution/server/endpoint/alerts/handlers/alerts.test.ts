@@ -11,7 +11,7 @@ import {
 } from '../../../../../../../src/core/server/mocks';
 import { registerAlertRoutes } from '../routes';
 import { alertingIndexGetQuerySchema } from '../../../../common/endpoint_alerts/schema/alert_index';
-import { createMockAgentService } from '../../mocks';
+import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 
@@ -28,9 +28,7 @@ describe('test alerts route', () => {
     routerMock = httpServiceMock.createRouter();
 
     endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.start({
-      agentService: createMockAgentService(),
-    });
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
     registerAlertRoutes(routerMock, {
       logFactory: loggingSystemMock.create(),
