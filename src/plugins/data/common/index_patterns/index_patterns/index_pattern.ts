@@ -505,9 +505,9 @@ export class IndexPattern implements IIndexPattern {
     );
     return this.savedObjectsClient
       .update(type, this.id, body, { version: this.version })
-      .then((resp: any) => {
+      .then((resp) => {
         this.id = resp.id;
-        this.version = resp._version;
+        this.version = resp.version;
       })
       .catch((err) => {
         if (
