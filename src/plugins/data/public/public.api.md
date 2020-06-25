@@ -5,7 +5,7 @@
 ```ts
 
 import { $Values } from '@kbn/utility-types';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { Action } from 'history';
 import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
@@ -586,7 +586,7 @@ export abstract class FieldFormat {
     static title: string;
     toJSON(): {
         id: unknown;
-        params: _.Dictionary<unknown> | undefined;
+        params: import("lodash3").Dictionary<unknown> | undefined;
     };
     type: any;
 }

@@ -13,13 +13,13 @@ Serialize this format to a simple POJO, with only the params that are not defaul
 ```typescript
 toJSON(): {
         id: unknown;
-        params: _.Dictionary<unknown> | undefined;
+        params: import("lodash3").Dictionary<unknown> | undefined;
     };
 ```
 <b>Returns:</b>
 
 `{
         id: unknown;
-        params: _.Dictionary<unknown> | undefined;
+        params: import("lodash3").Dictionary<unknown> | undefined;
     }`
 
