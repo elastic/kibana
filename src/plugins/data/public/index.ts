@@ -168,7 +168,6 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
 } from '../common/field_formats';
 
 import { DateFormat } from './field_formats';
@@ -178,8 +177,6 @@ export { baseFormattersPublic } from './field_formats';
 export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
-
-  serialize: serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,

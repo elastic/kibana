@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore Untyped library
+// @ts-expect-error untyped library
 import uniqBy from 'lodash.uniqby';
-// @ts-ignore Untyped Elastic library
+// @ts-expect-error untyped Elastic library
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit } from 'lodash';
 import moment from 'moment';
@@ -18,13 +18,10 @@ import {
   PointSeriesColumnName,
   PointSeriesColumns,
 } from 'src/plugins/expressions/common';
-// @ts-ignore Untyped local
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
-// @ts-ignore Untyped local
 import { unquoteString } from '../../../../common/lib/unquote_string';
-// @ts-ignore Untyped local
 import { isColumnReference } from './lib/is_column_reference';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { getExpressionType } from './lib/get_expression_type';
 import { getFunctionHelp, getFunctionErrors } from '../../../../i18n';
 
@@ -125,7 +122,7 @@ export function pointseries(): ExpressionFunctionDefinition<
             col.role = 'measure';
           }
 
-          // @ts-ignore untyped local: get_expression_type
+          // @ts-expect-error untyped local: get_expression_type
           columns[argName] = col;
         }
       });

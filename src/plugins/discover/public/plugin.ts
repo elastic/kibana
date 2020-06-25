@@ -36,7 +36,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
 import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
@@ -56,6 +56,7 @@ import {
   setScopedHistory,
   getScopedHistory,
   ensureHashHistoryLocation,
+  getServices,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
@@ -131,6 +132,7 @@ export interface DiscoverStartPlugins {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share?: SharePluginStart;
+  kibanaLegacy: KibanaLegacyStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
 }
@@ -196,6 +198,7 @@ export class DiscoverPlugin
       appUnMounted,
       stop: stopUrlTracker,
       setActiveUrl: setTrackedUrl,
+      restorePreviousUrl,
     } = createKbnUrlTracker({
       // we pass getter here instead of plain `history`,
       // so history is lazily created (when app is mounted)
@@ -221,7 +224,7 @@ export class DiscoverPlugin
         },
       ],
     });
-    setUrlTracker({ setTrackedUrl });
+    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -262,7 +265,19 @@ export class DiscoverPlugin
       },
     });
 
-    plugins.kibanaLegacy.forwardApp('discover', 'discover');
+    plugins.kibanaLegacy.forwardApp('doc', 'discover', (path) => {
+      return `#${path}`;
+    });
+    plugins.kibanaLegacy.forwardApp('context', 'discover', (path) => {
+      return `#${path}`;
+    });
+    plugins.kibanaLegacy.forwardApp('discover', 'discover', (path) => {
+      const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
+      if (!id) {
+        return `#${path.replace('/discover', '') || '/'}`;
+      }
+      return `#/view/${id}${tail || ''}`;
+    });
 
     if (plugins.home) {
       registerFeature(plugins.home);
@@ -358,6 +373,7 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
+      getServices().kibanaLegacy.loadFontAwesome();
       const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
       getInnerAngularModuleEmbeddable(
         embeddableAngularName,
