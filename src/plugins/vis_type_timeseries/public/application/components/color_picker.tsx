@@ -46,7 +46,7 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
   const initialColorValue = value?.includes('rgba')
     ? value.replace(COMMAS_NUMS_ONLY_RE, '')
     : value;
-  const [color, setColor] = useState(initialColorValue);
+  const [color, setColor] = useState(initialColorValue || '');
 
   const handleColorChange: EuiColorPickerProps['onChange'] = (text: string, { rgba, hex }) => {
     setColor(text);
