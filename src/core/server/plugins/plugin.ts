@@ -95,8 +95,6 @@ export class PluginWrapper<
   public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
     this.instance = this.createPluginInstance();
 
-    this.log.debug('Setting up plugin');
-
     return this.instance.setup(setupContext, plugins);
   }
 
@@ -112,8 +110,6 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    this.log.debug('Starting plugin');
-
     const startContract = await this.instance.start(startContext, plugins);
     this.startDependencies$.next([startContext, plugins, startContract]);
     return startContract;
@@ -126,8 +122,6 @@ export class PluginWrapper<
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
-
-    this.log.info('Stopping plugin');
 
     if (typeof this.instance.stop === 'function') {
       await this.instance.stop();
