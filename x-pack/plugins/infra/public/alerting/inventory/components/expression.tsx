@@ -270,7 +270,7 @@ export const Expressions: React.FC<Props> = (props) => {
           sourceId: alertParams.sourceId,
           lookback: previewLookbackInterval as Unit,
           alertInterval,
-        },
+        } as any,
       });
       setPreviewResult(result);
     } catch (e) {

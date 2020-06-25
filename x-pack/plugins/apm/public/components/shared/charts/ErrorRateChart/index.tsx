@@ -6,7 +6,7 @@
 import { EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import mean from 'lodash.mean';
+import { mean } from 'lodash';
 import React, { useCallback } from 'react';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';

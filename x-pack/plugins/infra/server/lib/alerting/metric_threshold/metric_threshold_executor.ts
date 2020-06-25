@@ -58,7 +58,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = alertResults.map((result) => buildFiredAlertReason(result[group])).join('\n');
+        reason = alertResults
+          .map((result) => buildFiredAlertReason(result[group] as any))
+          .join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
