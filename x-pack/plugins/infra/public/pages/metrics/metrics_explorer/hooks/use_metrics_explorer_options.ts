@@ -5,7 +5,8 @@
  */
 
 import createContainer from 'constate';
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { MetricsExplorerColor } from '../../../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
@@ -122,6 +123,21 @@ export const useMetricsExplorerOptions = () => {
     DEFAULT_CHART_OPTIONS
   );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
+
+  const { metricThresholdPrefill } = useAlertPrefillContext();
+  // For Jest compatibility; including metricThresholdPrefill as a dep in useEffect causes an
+  // infinite loop in test environment
+  const prefillContext = useMemo(() => metricThresholdPrefill, [metricThresholdPrefill]);
+
+  useEffect(() => {
+    if (prefillContext) {
+      const { setPrefillOptions } = prefillContext;
+      const { metrics, groupBy, filterQuery } = options;
+
+      setPrefillOptions({ metrics, groupBy, filterQuery });
+    }
+  }, [options, prefillContext]);
+
   return {
     defaultViewState: {
       options: DEFAULT_OPTIONS,
