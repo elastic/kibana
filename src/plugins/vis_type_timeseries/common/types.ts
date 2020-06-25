@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { TypeOf } from '@kbn/config-schema';
+import { metricsItems, panel, seriesItems } from './vis_schema';
 
-export const newMetricAggFn = () => {
-  return {
-    id: uuid.v1(),
-    type: 'count',
-  };
-};
+export type SeriesItemsSchema = TypeOf<typeof seriesItems>;
+export type MetricsItemsSchema = TypeOf<typeof metricsItems>;
+export type PanelSchema = TypeOf<typeof panel>;
