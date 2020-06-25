@@ -23,15 +23,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { Index, SlmPolicyPayload, SnapshotConfig } from '../../../../../../../common/types';
+import { SlmPolicyPayload } from '../../../../../../../common/types';
 import { useServices } from '../../../../../app_context';
 import { PolicyValidation } from '../../../../../services/validation';
-import { DataStreamBadge } from './data_stream_badge';
 
 interface Props {
   isManagedPolicy: boolean;
   policy: SlmPolicyPayload;
-  indices: Index[];
+  indices: string[];
   onUpdate: (arg: { indices?: string[] | string }) => void;
   errors: PolicyValidation['errors'];
 }
@@ -45,42 +44,55 @@ export const IndicesField: FunctionComponent<Props> = ({
 }) => {
   const { i18n } = useServices();
   const { config = {} } = policy;
-  const [isAllIndices, setIsAllIndices] = useState<boolean>(!Boolean(config.indices));
-  const [indicesSelection, setIndicesSelection] = useState<SnapshotConfig['indices']>(() => [
-    ...indices.map((i) => i.name),
-  ]);
+
+  // We assume all indices if the config has no indices entry or if we receive an empty array
+  const [isAllIndices, setIsAllIndices] = useState<boolean>(
+    !config.indices || (Array.isArray(config.indices) && config.indices.length === 0)
+  );
+  const [indicesSelection, setIndicesSelection] = useState<string[]>(() =>
+    Array.isArray(config.indices) && !isAllIndices
+      ? indices.filter((i) => (config.indices! as string[]).includes(i))
+      : [...indices]
+  );
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
-  const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(() => {
-    return indices.map(
-      (index): EuiSelectableOption => ({
-        label: index.name,
-        append: index.dataStream ? <DataStreamBadge dataStream={index.dataStream} /> : undefined,
-        checked:
-          isAllIndices ||
-          // If indices is a string, we default to custom input mode, so we mark individual indices
-          // as selected if user goes back to list mode
-          typeof config.indices === 'string' ||
-          (Array.isArray(config.indices) && config.indices.includes(index.name))
-            ? 'on'
-            : undefined,
-      })
-    );
-  });
+  const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(() =>
+    indices.map(
+      (index): EuiSelectableOption => {
+        return {
+          label: index,
+          checked:
+            isAllIndices ||
+            // If indices is a string, we default to custom input mode, so we mark individual indices
+            // as selected if user goes back to list mode
+            typeof config.indices === 'string' ||
+            indicesSelection.includes(index)
+              ? 'on'
+              : undefined,
+        };
+      }
+    )
+  );
 
   // State for using selectable indices list or custom patterns
   // Users with more than 100 indices will probably want to use an index pattern to select
-  // them instead, so we'll default to showing them the index pattern input.
-  const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(
+  // them instead, so we'll default to showing them the index pattern input. Also show the custom
+  // list if we have no exact matches in the configured array to some existing index.
+  const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(() =>
     typeof config.indices === 'string' ||
-      (Array.isArray(config.indices) && config.indices.length > 100)
+    (Array.isArray(config.indices) &&
+      (config.indices.length > 100 || !config.indices.every((c) => indices.some((i) => i === c))))
       ? 'custom'
       : 'list'
   );
 
   // State for custom patterns
-  const [indexPatterns, setIndexPatterns] = useState<string[]>(
-    typeof config.indices === 'string' ? (config.indices as string).split(',') : []
+  const [indexPatterns, setIndexPatterns] = useState<string[]>(() =>
+    typeof config.indices === 'string'
+      ? (config.indices as string).split(',')
+      : Array.isArray(config.indices)
+      ? config.indices
+      : []
   );
 
   const indicesSwitch = (
@@ -235,9 +247,8 @@ export const IndicesField: FunctionComponent<Props> = ({
                                 indicesOptions.forEach((option: EuiSelectableOption) => {
                                   option.checked = 'on';
                                 });
-                                const indicesNames = indices.map((i) => i.name);
-                                onUpdate({ indices: [...indicesNames] });
-                                setIndicesSelection([...indicesNames]);
+                                onUpdate({ indices: [...indices] });
+                                setIndicesSelection([...indices]);
                               }}
                             >
                               <FormattedMessage
@@ -280,24 +291,7 @@ export const IndicesField: FunctionComponent<Props> = ({
                   </EuiSelectable>
                 ) : (
                   <EuiComboBox
-                    options={indices.map((index) => ({ label: index.name, value: index }))}
-                    renderOption={({ value }) => {
-                      return value!.dataStream ? (
-                        <EuiFlexGroup
-                          responsive={false}
-                          justifyContent="spaceBetween"
-                          alignItems="center"
-                          gutterSize="none"
-                        >
-                          <EuiFlexItem>{value!.name}</EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <DataStreamBadge dataStream={value!.dataStream} />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      ) : (
-                        value!.name
-                      );
-                    }}
+                    options={indices.map((index) => ({ label: index }))}
                     placeholder={i18n.translate(
                       'xpack.snapshotRestore.policyForm.stepSettings.indicesPatternPlaceholder',
                       {
