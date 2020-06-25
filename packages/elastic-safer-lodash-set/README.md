@@ -1,4 +1,4 @@
-# @kbn/safer-lodash-set
+# @elastic/safer-lodash-set
 
 This module adds protection against prototype pollution to the [`set`]
 and [`setWith`] functions from [Lodash] and are API compatible with
@@ -23,15 +23,15 @@ console.log(object.x[0].y.z); // => 5
 The main module exposes two functions, `set` and `setWith`:
 
 ```js
-const { set, setWith } = require('@kbn/safer-lodash-set');
+const { set, setWith } = require('@elastic/safer-lodash-set');
 ```
 
 Besides the main module, it's also possible to require each function
 individually:
 
 ```js
-const set = require('@kbn/safer-lodash-set/set');
-const setWith = require('@kbn/safer-lodash-set/setWith');
+const set = require('@elastic/safer-lodash-set/set');
+const setWith = require('@elastic/safer-lodash-set/setWith');
 ```
 
 The APIs of these functions are identical to the equivalent Lodash

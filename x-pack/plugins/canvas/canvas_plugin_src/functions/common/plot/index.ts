@@ -6,7 +6,7 @@
 
 // @ts-expect-error no @typed def
 import keyBy from 'lodash.keyby';
-import { set } from '@kbn/safer-lodash-set';
+import { set } from '@elastic/safer-lodash-set';
 import { groupBy, get, map, sortBy } from 'lodash';
 import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
 // @ts-expect-error untyped local
