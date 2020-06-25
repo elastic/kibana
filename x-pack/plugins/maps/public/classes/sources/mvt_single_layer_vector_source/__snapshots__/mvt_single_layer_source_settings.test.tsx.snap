@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render with fields 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Layer name"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value="foobar"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Available levels"
+    labelType="label"
+  >
+    <ValidatedDualRange
+      allowEmptyRange={false}
+      compressed={true}
+      formRowDisplay="columnCompressed"
+      fullWidth={false}
+      label=""
+      max={24}
+      min={0}
+      onChange={[Function]}
+      prepend="Zoom"
+      showInput="inputWithPopover"
+      showLabels={true}
+      showRange={true}
+      value={
+        Array [
+          4,
+          14,
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Fields"
+    labelType="label"
+  >
+    <MVTFieldConfigEditor
+      fields={
+        Array [
+          Object {
+            "name": "foo",
+            "type": "String",
+          },
+          Object {
+            "name": "food",
+            "type": "String",
+          },
+          Object {
+            "name": "fooz",
+            "type": "Number",
+          },
+        ]
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</Fragment>
+`;
+
+exports[`should render without fields 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Layer name"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value="foobar"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Available levels"
+    labelType="label"
+  >
+    <ValidatedDualRange
+      allowEmptyRange={false}
+      compressed={true}
+      formRowDisplay="columnCompressed"
+      fullWidth={false}
+      label=""
+      max={24}
+      min={0}
+      onChange={[Function]}
+      prepend="Zoom"
+      showInput="inputWithPopover"
+      showLabels={true}
+      showRange={true}
+      value={
+        Array [
+          4,
+          14,
+        ]
+      }
+    />
+  </EuiFormRow>
+</Fragment>
+`;
