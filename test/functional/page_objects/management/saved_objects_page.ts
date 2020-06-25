@@ -157,32 +157,23 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
     async getTableSummary() {
       const table = await testSubjects.find('savedObjectsTable');
-      const rows = await table.findAllByCssSelector('tbody tr');
-
-      const summary = [];
-      for (const row of rows) {
-        const titleCell = await row.findByCssSelector('td:nth-child(3)');
-        const title = await titleCell.getVisibleText();
-
-        const viewInAppButtons = await row.findAllByCssSelector('td:nth-child(3) a');
-        const canViewInApp = Boolean(viewInAppButtons.length);
-        summary.push({
-          title,
-          canViewInApp,
+      const $ = await table.parseDomContent();
+      return $('tbody tr')
+        .toArray()
+        .map((row) => {
+          return {
+            title: $(row).find('td:nth-child(3) *:not(:has(*)):visible').text(),
+            canViewInApp: Boolean($(row).find('td:nth-child(3) a').length),
+          };
         });
-      }
-
-      return summary;
     }
 
     async clickTableSelectAll() {
-      const checkboxSelectAll = await testSubjects.find('checkboxSelectAll');
-      await checkboxSelectAll.click();
+      testSubjects.click('checkboxSelectAll');
     }
 
     async canBeDeleted() {
-      const deleteButton = await testSubjects.find('savedObjectsManagementDelete');
-      return await deleteButton.isEnabled();
+      return await testSubjects.isEnabled('savedObjectsManagementDelete');
     }
 
     async clickDelete() {

@@ -68,13 +68,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getAdvancedSettings(propertyName: string) {
       log.debug('in getAdvancedSettings');
-      const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
-      return await setting.getAttribute('value');
+      return await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'value');
     }
 
     async expectDisabledAdvancedSetting(propertyName: string) {
-      const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
-      expect(setting.getAttribute('disabled')).to.eql('');
+      expect(
+        await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'disabled')
+      ).to.eql('');
     }
 
     async getAdvancedSettingCheckbox(propertyName: string) {
@@ -274,9 +274,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async increasePopularity() {
-      const field = await testSubjects.find('editorFieldCount');
-      await field.clearValueWithKeyboard();
-      await field.type('1');
+      await testSubjects.setValue('editorFieldCount', '1', { clearWithKeyboard: true });
     }
 
     async getPopularity() {
@@ -499,9 +497,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setScriptedFieldName(name: string) {
       log.debug('set scripted field name = ' + name);
-      const field = await testSubjects.find('editorFieldName');
-      await field.clearValue();
-      await field.type(name);
+      await testSubjects.setValue('editorFieldName', name);
     }
 
     async setScriptedFieldLanguage(language: string) {
@@ -568,9 +564,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setScriptedFieldPopularity(popularity: string) {
       log.debug('set scripted field popularity = ' + popularity);
-      const field = await testSubjects.find('editorFieldCount');
-      await field.clearValue();
-      await field.type(popularity);
+      await testSubjects.setValue('editorFieldCount', popularity);
     }
 
     async setScriptedFieldScript(script: string) {
