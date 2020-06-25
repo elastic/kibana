@@ -5,9 +5,10 @@
  */
 export * from './comments';
 export * from './create_comments';
+export * from './update_comments';
 export * from './default_comments_array';
 export * from './default_create_comments_array';
-export * from './default_entries_array';
 export * from './default_update_comments_array';
+export * from './default_namespace';
+export * from './default_entries_array';
 export * from './entries';
-export * from './update_comments';

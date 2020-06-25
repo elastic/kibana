@@ -111,6 +111,16 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
         field: {
           type: 'keyword',
         },
+        list: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+          },
+        },
         operator: {
           type: 'keyword',
         },
