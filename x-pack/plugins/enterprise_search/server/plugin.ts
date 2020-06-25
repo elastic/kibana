@@ -19,6 +19,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { UICapabilities } from 'ui/capabilities';
 import { SecurityPluginSetup } from '../../security/server';
 
+import { checkAccess } from './lib/check_access';
 import { registerEnginesRoute } from './routes/app_search/engines';
 import { registerTelemetryRoute } from './routes/app_search/telemetry';
 import { registerTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -71,7 +72,13 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     capabilities.registerSwitcher(
       async (request: KibanaRequest, uiCapabilities: UICapabilities) => {
-        const hasAppSearchAccess = true; // TODO
+        const dependencies = { config, security, request, log: this.logger };
+
+        const hasAppSearchAccess = await checkAccess({
+          enterpriseSearchPath: 'as',
+          ...dependencies,
+        });
+        // TODO: hasWorkplaceSearchAccess
 
         return {
           ...uiCapabilities,
