@@ -55,6 +55,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     } = usePipelineProcessorsContext();
 
     const disabled = editor.mode.id !== 'idle';
+    const moving = editor.mode.id === 'movingProcessor';
     const selected = processor.id === movingProcessor?.id;
     const isBeingEdited =
       editor.mode.id === 'editingProcessor' && processor.id === editor.mode.arg.processor.id;
@@ -65,6 +66,10 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const panelClasses = classNames({
       'pipelineProcessorsEditor__item--selected': selected || isBeingEdited,
       'pipelineProcessorsEditor__item--dimmed': isDimmed,
+    });
+
+    const buttonClasses = classNames({
+      'pipelineProcessorsEditor__item--displayNone': moving,
     });
 
     return (
@@ -85,6 +90,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
+                  className={buttonClasses}
                   disabled={disabled}
                   aria-label={editorItemMessages.editorButtonLabel}
                   iconType="pencil"
@@ -98,17 +104,10 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {selected ? (
-                  <EuiButtonIcon
-                    aria-label={editorItemMessages.cancelMoveButtonLabel}
-                    data-test-subj="cancelMoveItemButton"
-                    size="s"
-                    onClick={onCancelMove}
-                    iconType="crossInACircleFilled"
-                  />
-                ) : (
+                {!selected && (
                   <EuiToolTip content={editorItemMessages.moveButtonLabel}>
                     <EuiButtonIcon
+                      className={buttonClasses}
                       data-test-subj="moveItemButton"
                       size="s"
                       disabled={disabled}
@@ -155,6 +154,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             <ContextMenu
               data-test-subj="moreMenu"
               disabled={disabled}
+              hidden={moving}
               showAddOnFailure={!processor.onFailure?.length}
               onAddOnFailure={() => {
                 editor.setMode({ id: 'creatingProcessor', arg: { selector } });

@@ -137,16 +137,6 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       });
     },
 
-    startAndCancelMove(processorSelector: string) {
-      act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('click');
-      });
-      component.update();
-      act(() => {
-        find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
-      });
-    },
-
     toggleOnFailure() {
       find('pipelineEditorOnFailureToggle').simulate('click');
     },

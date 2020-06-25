@@ -155,18 +155,6 @@ describe('Pipeline Editor', () => {
       ]);
     });
 
-    it('can cancel a move', () => {
-      const { actions, exists } = testBed;
-      const processorSelector = 'processors>0';
-      actions.startAndCancelMove(processorSelector);
-      // Assert that we have exited move mode for this processor
-      expect(exists(`moveItemButton-${processorSelector}`));
-      const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
-      const { processors } = onUpdateResult.getData();
-      // Assert that nothing has changed
-      expect(processors).toEqual(testProcessors.processors);
-    });
-
     it('moves to and from the global on-failure tree', async () => {
       const { actions } = testBed;
       actions.toggleOnFailure();

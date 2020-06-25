@@ -5,6 +5,10 @@
     border: 1px solid $euiColorPrimary;
   }
 
+  &--displayNone {
+    display: none;
+  }
+
   &--dimmed {
     box-shadow: none;
   }
