@@ -31,6 +31,12 @@ import { CommonAlertParams } from '../../common/types';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 
 const WATCH_NAME = 'elasticsearch_nodes';
+const RESOLVED = i18n.translate('xpack.monitoring.alerts.nodesChanged.resolved', {
+  defaultMessage: 'resolved',
+});
+const FIRING = i18n.translate('xpack.monitoring.alerts.nodesChanged.firing', {
+  defaultMessage: 'firing',
+});
 
 interface AlertNodesChangedStates {
   removed: AlertClusterStatsNode[];
@@ -42,6 +48,14 @@ export class NodesChangedAlert extends BaseAlert {
   public type = ALERT_NODES_CHANGED;
   public label = 'Nodes changed';
   public isLegacy = true;
+
+  protected actionVariables = [
+    { name: 'state', description: 'The current state of the alert.' },
+    { name: 'clusterName', description: 'The name of the cluster to which the nodes belong.' },
+    { name: 'added', description: 'The list of nodes added to the cluster.' },
+    { name: 'removed', description: 'The list of nodes removed from the cluster.' },
+    { name: 'restarted', description: 'The list of nodes restarted in the cluster.' },
+  ];
 
   private getNodeStates(nodes: AlertClusterStatsNodes): AlertNodesChangedStates {
     const removed = nodes.priorNodes.filter(
@@ -191,11 +205,13 @@ export class NodesChangedAlert extends BaseAlert {
     const nodes = item.meta as AlertClusterStatsNodes;
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
+        state: RESOLVED,
         clusterName: cluster.clusterName,
       });
     } else {
       const { removed, added, restarted } = this.getNodeStates(nodes);
       instance.scheduleActions('default', {
+        state: FIRING,
         clusterName: cluster.clusterName,
         added: added.map((node) => node.nodeName).join(','),
         removed: removed.map((node) => node.nodeName).join(','),
@@ -209,8 +225,9 @@ export class NodesChangedAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_EMAIL:
         return {
           subject: i18n.translate('xpack.monitoring.alerts.nodesChanged.emailSubject', {
-            defaultMessage: `Elasticsearch nodes have changed in {clusterName}`,
+            defaultMessage: `Elasticsearch nodes changed alert is {state} for {clusterName}`,
             values: {
+              state: '{{context.state}}',
               clusterName: '{{context.clusterName}}',
             },
           }),
@@ -227,8 +244,9 @@ export class NodesChangedAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_LOG:
         return {
           message: i18n.translate('xpack.monitoring.alerts.nodesChanged.serverLog', {
-            defaultMessage: `Elasticsearch nodes have changed in {clusterName}`,
+            defaultMessage: `Elasticsearch nodes changed alert is {state} for {clusterName}`,
             values: {
+              state: '{{context.state}}',
               clusterName: '{{context.clusterName}}',
             },
           }),

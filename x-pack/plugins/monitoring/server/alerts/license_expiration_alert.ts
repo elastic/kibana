@@ -48,6 +48,13 @@ export class LicenseExpirationAlert extends BaseAlert {
   public type = ALERT_LICENSE_EXPIRATION;
   public label = 'License expiration';
   public isLegacy = true;
+  protected actionVariables = [
+    { name: 'state', description: 'The current state of the alert.' },
+    { name: 'expiredDate', description: 'The date when the license expires.' },
+    { name: 'action', description: 'The recommended action to take based on this alert firing.' },
+    { name: 'clusterName', description: 'The name of the cluster to which the nodes belong.' },
+    { name: 'versionList', description: 'The list of unique versions.' },
+  ];
 
   protected dateFormat: string = '';
   protected emailAddress: string = '';

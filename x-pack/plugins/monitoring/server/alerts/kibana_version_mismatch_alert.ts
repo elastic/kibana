@@ -30,11 +30,23 @@ import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 
 const WATCH_NAME = 'kibana_version_mismatch';
+const RESOLVED = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.resolved', {
+  defaultMessage: 'resolved',
+});
+const FIRING = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.firing', {
+  defaultMessage: 'firing',
+});
 
 export class KibanaVersionMismatchAlert extends BaseAlert {
   public type = ALERT_KIBANA_VERSION_MISMATCH;
   public label = 'Kibana version mismatch';
   public isLegacy = true;
+
+  protected actionVariables = [
+    { name: 'state', description: 'The current state of the alert.' },
+    { name: 'clusterName', description: 'The name of the cluster to which the instances belong.' },
+    { name: 'versionList', description: 'The list of unique versions.' },
+  ];
 
   protected async fetchData(
     params: CommonAlertParams,
@@ -143,10 +155,12 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
     const versions = item.meta as AlertVersions;
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
+        state: RESOLVED,
         clusterName: cluster.clusterName,
       });
     } else {
       instance.scheduleActions('default', {
+        state: FIRING,
         clusterName: cluster.clusterName,
         versionList: versions.versions.join(','),
       });
@@ -158,8 +172,9 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_EMAIL:
         return {
           subject: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.emailSubject', {
-            defaultMessage: `Different versions of Kibana detected in {clusterName}`,
+            defaultMessage: `Kibana version mismatch alert is {state} for {clusterName}`,
             values: {
+              state: '{{context.state}}',
               clusterName: '{{context.clusterName}}',
             },
           }),
@@ -174,8 +189,9 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_LOG:
         return {
           message: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.serverLog', {
-            defaultMessage: `Different versions of Kibana detected in {clusterName}`,
+            defaultMessage: `Kibana version mismatch alert is {state} for {clusterName}`,
             values: {
+              state: '{{context.state}}',
               clusterName: '{{context.clusterName}}',
             },
           }),

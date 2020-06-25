@@ -30,11 +30,23 @@ import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 
 const WATCH_NAME = 'elasticsearch_version_mismatch';
+const RESOLVED = i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.resolved', {
+  defaultMessage: 'resolved',
+});
+const FIRING = i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.firing', {
+  defaultMessage: 'firing',
+});
 
 export class ElasticsearchVersionMismatchAlert extends BaseAlert {
   public type = ALERT_ELASTICSEARCH_VERSION_MISMATCH;
   public label = 'Elasticsearch version mismatch';
   public isLegacy = true;
+
+  protected actionVariables = [
+    { name: 'state', description: 'The current state of the alert.' },
+    { name: 'clusterName', description: 'The name of the cluster to which the nodes belong.' },
+    { name: 'versionList', description: 'The list of unique versions.' },
+  ];
 
   protected async fetchData(
     params: CommonAlertParams,
@@ -149,10 +161,12 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
     const versions = item.meta as AlertVersions;
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
+        state: RESOLVED,
         clusterName: cluster.clusterName,
       });
     } else {
       instance.scheduleActions('default', {
+        state: FIRING,
         clusterName: cluster.clusterName,
         versionList: versions.versions.join(','),
       });
@@ -166,8 +180,9 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
           subject: i18n.translate(
             'xpack.monitoring.alerts.elasticsearchVersionMismatch.emailSubject',
             {
-              defaultMessage: `Different versions of Elasticsearch detected in {clusterName}`,
+              defaultMessage: `Elasticsearch version mismatch alert is {state} for {clusterName}`,
               values: {
+                state: '{{context.state}}',
                 clusterName: '{{context.clusterName}}',
               },
             }
@@ -188,8 +203,9 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
           message: i18n.translate(
             'xpack.monitoring.alerts.elasticsearchVersionMismatch.serverLog',
             {
-              defaultMessage: `Different versions of Elasticsearch detected in {clusterName}`,
+              defaultMessage: `Elasticsearch version mismatch alert is {state} for {clusterName}`,
               values: {
+                state: '{{context.state}}',
                 clusterName: '{{context.clusterName}}',
               },
             }
