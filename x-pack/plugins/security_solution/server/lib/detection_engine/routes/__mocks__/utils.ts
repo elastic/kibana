@@ -8,6 +8,7 @@ import { Readable } from 'stream';
 
 import { HapiReadableStream } from '../../rules/types';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
 /**
  * Given a string, builds a hapi stream as our
@@ -76,38 +77,7 @@ export const getOutputRuleAlertForRest = (): Omit<
       ],
     },
   ],
-  exceptions_list: [
-    {
-      field: 'source.ip',
-      values_operator: 'included',
-      values_type: 'exists',
-    },
-    {
-      field: 'host.name',
-      values_operator: 'excluded',
-      values_type: 'match',
-      values: [
-        {
-          name: 'rock01',
-        },
-      ],
-      and: [
-        {
-          field: 'host.id',
-          values_operator: 'included',
-          values_type: 'match_all',
-          values: [
-            {
-              name: '123',
-            },
-            {
-              name: '678',
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  exceptions_list: getListArrayMock(),
   filters: [
     {
       query: {
