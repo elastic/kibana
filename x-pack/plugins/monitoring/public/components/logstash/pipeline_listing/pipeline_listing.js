@@ -46,7 +46,7 @@ export class PipelineListing extends Component {
         field: 'id',
         sortable: true,
         render: (id) => (
-          <EuiLink data-test-subj="id" href={getSafeForExternalLink(`/logstash/pipelines/${id}`)}>
+          <EuiLink data-test-subj="id" href={getSafeForExternalLink(`#/logstash/pipelines/${id}`)}>
             {id}
           </EuiLink>
         ),

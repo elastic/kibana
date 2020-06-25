@@ -18,11 +18,20 @@
  */
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DragHandleProps } from '../../types';
 
-export class SeriesDragHandler extends PureComponent {
+interface SeriesDragHandlerProps {
+  hideDragHandler: boolean;
+  dragHandleProps: DragHandleProps;
+}
+
+export class SeriesDragHandler extends PureComponent<SeriesDragHandlerProps> {
+  static defaultProps = {
+    hideDragHandler: true,
+  };
+
   render() {
     const { dragHandleProps, hideDragHandler } = this.props;
 
@@ -49,12 +58,3 @@ export class SeriesDragHandler extends PureComponent {
     );
   }
 }
-
-SeriesDragHandler.defaultProps = {
-  hideDragHandler: true,
-};
-
-SeriesDragHandler.propTypes = {
-  hideDragHandler: PropTypes.bool,
-  dragHandleProps: PropTypes.object.isRequired,
-};
