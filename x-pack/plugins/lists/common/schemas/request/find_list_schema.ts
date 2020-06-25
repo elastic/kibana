@@ -9,7 +9,6 @@
 import * as t from 'io-ts';
 
 import { cursor, filter, sort_field, sort_order } from '../common/schemas';
-import { RequiredKeepUndefined } from '../../types';
 import { StringToPositiveNumber } from '../types/string_to_positive_number';
 
 export const findListSchema = t.exact(
@@ -23,6 +22,7 @@ export const findListSchema = t.exact(
   })
 );
 
-export type FindListSchemaPartial = t.TypeOf<typeof findListSchema>;
+type FindListSchema = typeof findListSchema;
 
-export type FindListSchema = RequiredKeepUndefined<t.TypeOf<typeof findListSchema>>;
+export type FindListSchemaDecoded = t.TypeOf<FindListSchema>;
+export type FindListSchemaEncoded = t.OutputOf<FindListSchema>;

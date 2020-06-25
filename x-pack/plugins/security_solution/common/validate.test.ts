@@ -30,7 +30,7 @@ describe('validate', () => {
 });
 
 describe('validateEither', () => {
-  it('returns the decoded payload as right if valid', () => {
+  it('returns the ORIGINAL payload as right if valid', () => {
     const schema = t.exact(t.type({ a: t.number }));
     const payload = { a: 1 };
     const result = validateEither(schema, payload);

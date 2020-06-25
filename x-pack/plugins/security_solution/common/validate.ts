@@ -24,13 +24,12 @@ export const validate = <T extends t.Mixed>(
   return pipe(checked, fold(left, right));
 };
 
-export const validateEither = <T extends t.Mixed>(
+export const validateEither = <T extends t.Mixed, A extends unknown>(
   schema: T,
-  obj: unknown
-): Either<string, t.TypeOf<T>> =>
+  obj: A
+): Either<string, A> =>
   pipe(
     obj,
-    schema.decode,
-    <A>(a: Either<t.Errors, A>) => exactCheck(obj, a),
+    (a) => schema.validate(a, t.getDefaultContext(schema.asDecoder())),
     mapLeft((errors) => formatErrors(errors).join(','))
   );

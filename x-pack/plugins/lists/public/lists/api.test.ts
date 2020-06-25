@@ -6,11 +6,18 @@
 
 import { HttpFetchOptions } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
-import { getDeleteListSchemaMock } from '../../common/schemas/request/delete_list_schema.mock';
 import { getListResponseMock } from '../../common/schemas/response/list_schema.mock';
-import { DeleteListSchema } from '../../common/schemas';
+import { getFoundListSchemaMock } from '../../common/schemas/response/found_list_schema.mock';
 
-import { deleteList, exportList, findLists, importList } from './api';
+import {
+  DeleteListParams,
+  FindListsParams,
+  deleteList,
+  exportList,
+  findLists,
+  importList,
+} from './api';
+import { ApiPayload } from './types';
 
 describe('Value Lists API', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -26,7 +33,7 @@ describe('Value Lists API', () => {
 
     it('DELETEs specifying the id as a query parameter', async () => {
       const abortCtrl = new AbortController();
-      const payload: DeleteListSchema = getDeleteListSchemaMock();
+      const payload: ApiPayload<DeleteListParams> = { id: 'list-id' };
       await deleteList({
         http: httpMock,
         ...payload,
@@ -37,21 +44,21 @@ describe('Value Lists API', () => {
         '/api/lists',
         expect.objectContaining({
           method: 'DELETE',
-          query: getDeleteListSchemaMock(),
+          query: { id: 'list-id' },
         })
       );
     });
 
     it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
       const abortCtrl = new AbortController();
-      const payload: Omit<DeleteListSchema, 'id'> & {
+      const payload: Omit<ApiPayload<DeleteListParams>, 'id'> & {
         id: number;
-      } = { ...getDeleteListSchemaMock(), id: 23 };
+      } = { id: 23 };
 
       await expect(
         deleteList({
           http: httpMock,
-          ...((payload as unknown) as DeleteListSchema),
+          ...((payload as unknown) as ApiPayload<DeleteListParams>),
           signal: abortCtrl.signal,
         })
       ).rejects.toEqual('Invalid value "23" supplied to "id"');
@@ -60,7 +67,7 @@ describe('Value Lists API', () => {
 
     it('rejects with an error if response payload is invalid', async () => {
       const abortCtrl = new AbortController();
-      const payload: DeleteListSchema = getDeleteListSchemaMock();
+      const payload: ApiPayload<DeleteListParams> = { id: 'list-id' };
       const badResponse = { ...getListResponseMock(), id: undefined };
       httpMock.fetch.mockResolvedValue(badResponse);
 
@@ -75,11 +82,15 @@ describe('Value Lists API', () => {
   });
 
   describe('findLists', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getFoundListSchemaMock());
+    });
+
     it('GETs from the lists endpoint', async () => {
       const abortCtrl = new AbortController();
       await findLists({
         http: httpMock,
-        pageIndex: 0,
+        pageIndex: 1,
         pageSize: 10,
         signal: abortCtrl.signal,
       });
@@ -107,6 +118,35 @@ describe('Value Lists API', () => {
           query: { page: 1, per_page: 10 },
         })
       );
+    });
+
+    it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
+      const abortCtrl = new AbortController();
+      const payload: ApiPayload<FindListsParams> = { pageIndex: 10, pageSize: 0 };
+
+      await expect(
+        findLists({
+          http: httpMock,
+          ...payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "0" supplied to "per_page"');
+      expect(httpMock.fetch).not.toHaveBeenCalled();
+    });
+
+    it('rejects with an error if response payload is invalid', async () => {
+      const abortCtrl = new AbortController();
+      const payload: ApiPayload<FindListsParams> = { pageIndex: 1, pageSize: 10 };
+      const badResponse = { ...getFoundListSchemaMock(), cursor: undefined };
+      httpMock.fetch.mockResolvedValue(badResponse);
+
+      await expect(
+        findLists({
+          http: httpMock,
+          ...payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "cursor"');
     });
   });
 
