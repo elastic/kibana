@@ -14,6 +14,7 @@ import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks
 import { RuleTypeParams } from '../../types';
 import { IRuleStatusAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
 export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
@@ -44,38 +45,7 @@ export const sampleRuleAlertParams = (
   meta: undefined,
   threat: undefined,
   version: 1,
-  exceptionsList: [
-    {
-      field: 'source.ip',
-      values_operator: 'included',
-      values_type: 'exists',
-    },
-    {
-      field: 'host.name',
-      values_operator: 'excluded',
-      values_type: 'match',
-      values: [
-        {
-          name: 'rock01',
-        },
-      ],
-      and: [
-        {
-          field: 'host.id',
-          values_operator: 'included',
-          values_type: 'match_all',
-          values: [
-            {
-              name: '123',
-            },
-            {
-              name: '678',
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  exceptionsList: getListArrayMock(),
 });
 
 export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
