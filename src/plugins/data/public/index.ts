@@ -370,7 +370,6 @@ export {
   TabbedTable,
   SearchInterceptor,
   RequestTimeoutError,
-  AggParamsMapping,
 } from './search';
 
 // Search namespace
