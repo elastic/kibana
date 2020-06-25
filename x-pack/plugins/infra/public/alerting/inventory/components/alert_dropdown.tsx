@@ -7,6 +7,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
 import { AlertFlyout } from './alert_flyout';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -14,6 +15,9 @@ export const InventoryAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const kibana = useKibana();
+
+  const { inventoryPrefill } = useAlertPrefillContext();
+  const { nodeType, metric, filterQuery } = inventoryPrefill;
 
   const closePopover = useCallback(() => {
     setPopoverOpen(false);
@@ -57,7 +61,13 @@ export const InventoryAlertDropdown = () => {
       >
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
-      <AlertFlyout setVisible={setFlyoutVisible} visible={flyoutVisible} />
+      <AlertFlyout
+        setVisible={setFlyoutVisible}
+        visible={flyoutVisible}
+        nodeType={nodeType}
+        options={{ metric }}
+        filter={filterQuery}
+      />
     </>
   );
 };
