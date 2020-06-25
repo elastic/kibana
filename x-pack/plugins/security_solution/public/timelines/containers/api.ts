@@ -77,6 +77,9 @@ const patchTimeline = async ({
       body: JSON.stringify({ timeline, timelineId, version }),
     });
   } catch (err) {
+    // For Future developer
+    // We are not rejecting our promise here because we had issue with our RXJS epic
+    // the issue we were not able to pass the right object to it so we did manage the error in the success
     return Promise.resolve(decodeTimelineErrorResponse(err.body));
   }
   return decodeTimelineResponse(response);

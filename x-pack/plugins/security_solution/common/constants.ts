@@ -161,5 +161,5 @@ export const showAllOthersBucket: string[] = [
  * https://github.com/elastic/kibana/pull/66613
  * Remove the comment here to enable template timeline
  */
-export const disableTemplate = true;
-export const enableElasticFilter = false;
+export const disableTemplate = false;
+export const enableElasticFilter = true;

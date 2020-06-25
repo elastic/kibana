@@ -31,7 +31,6 @@ export function composeLibs(core: CoreStart): AppFrontendLibs {
 
   const libs: AppFrontendLibs = {
     apolloClient,
-    kibana: core,
   };
   return libs;
 }

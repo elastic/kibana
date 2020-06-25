@@ -30,13 +30,7 @@ export const renderApp = ({
   SubPluginRoutes,
 }: RenderAppProps) => {
   render(
-    <SecurityApp
-      apolloClient={apolloClient}
-      history={history}
-      services={services}
-      store={store}
-      kibana={services}
-    >
+    <SecurityApp apolloClient={apolloClient} history={history} services={services} store={store}>
       <SubPluginRoutes />
     </SecurityApp>,
     element

@@ -126,10 +126,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
       const fetchData = async () => {
         try {
           if (apolloClient != null) {
-            setAllTimelines({
-              ...allTimelines,
-              loading: true,
-            });
+            setAllTimelines((prevState) => ({ ...prevState, loading: true }));
 
             const variables: GetAllTimeline.Variables = {
               onlyUserFavorite,
@@ -211,7 +208,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
         abortCtrl.abort();
       };
     },
-    [apolloClient, allTimelines, dispatch, dispatchToaster]
+    [apolloClient, dispatch, dispatchToaster]
   );
 
   useEffect(() => {

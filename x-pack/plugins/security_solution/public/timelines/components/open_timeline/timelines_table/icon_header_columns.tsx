@@ -75,6 +75,6 @@ export const getIconHeaderColumns = ({
     },
   };
   const templateColumns = [columns.note, columns.favorite];
-  const defaultColumns = [columns.note, columns.pinnedEvent, columns.favorite];
+  const defaultColumns = [columns.pinnedEvent, columns.note, columns.favorite];
   return timelineType === TimelineType.template ? templateColumns : defaultColumns;
 };

@@ -262,8 +262,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       timelineType,
       templateTimelineType,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    fetchAllTimeline,
     onlyFavorites,
     pageSize,
     searchTimelineValue,

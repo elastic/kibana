@@ -86,7 +86,6 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   history,
   services,
   store,
-  kibana,
 }) => (
   <KibanaContextProvider
     services={{
@@ -94,7 +93,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       ...services,
     }}
   >
-    <StartApp apolloClient={apolloClient} history={history} store={store} kibana={kibana}>
+    <StartApp apolloClient={apolloClient} history={history} store={store}>
       {children}
     </StartApp>
   </KibanaContextProvider>
