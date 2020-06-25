@@ -134,6 +134,7 @@ export function createEsChoroplethLayerDescriptor({
       geoField: leftGeoField,
       scalingType: SCALING_TYPES.LIMIT,
       tooltipProperties: [leftJoinField],
+      applyGlobalQuery: false,
     }),
     leftField: leftJoinField,
     rightIndexPatternId,

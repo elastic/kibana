@@ -123,19 +123,24 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
       return;
     }
 
-    const fields = emsFileLayer.getFieldsInLanguage();
-    this.setState({
-      leftEmsFields: fields
-        .filter((field) => {
-          return field.type === 'id';
-        })
-        .map((field) => {
-          return {
-            value: field.name,
-            label: field.description,
-          };
-        }),
-    });
+    const leftEmsFields = emsFileLayer
+      .getFieldsInLanguage()
+      .filter((field) => {
+        return field.type === 'id';
+      })
+      .map((field) => {
+        return {
+          value: field.name,
+          label: field.description,
+        };
+      });
+    this.setState(
+      {
+        leftEmsFields,
+        leftJoinField: leftEmsFields.length ? leftEmsFields[0].value : null,
+      },
+      this._previewLayer
+    );
   };
 
   _onLeftSourceChange = (optionId: string) => {
