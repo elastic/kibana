@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }) {
 
   describe('Dashboard Embedding', function describeIndexTests() {
     before(async () => {
-      this.tags('ciGroup2');
       await esArchiver.load('kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
