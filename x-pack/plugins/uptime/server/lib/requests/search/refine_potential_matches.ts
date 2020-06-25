@@ -5,7 +5,7 @@
  */
 
 import { QueryContext } from './query_context';
-import { MonitorSummaryState, MonitorSummary } from '../../../../common/runtime_types';
+import { MonitorSummaryState, MonitorSummary, Ping } from '../../../../common/runtime_types';
 
 /**
  * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.
@@ -30,27 +30,18 @@ export const refinePotentialMatches = async (
 export const fullyMatchingIds = (queryResult: any, statusFilter?: string): MonitorSummary[] => {
   const summaries: MonitorSummary[] = [];
 
-  MonitorLoop: for (const monBucket of queryResult.aggregations.monitor.buckets) {
+  for (const monBucket of queryResult.aggregations.monitor.buckets) {
     const monitorId: string = monBucket.key;
 
     // Did at least one location match?
     let matched = false;
-    const monitorSummaryState: MonitorSummaryState = {
-      timestamp: '',
-      summaryPings: [],
-      monitor: {},
-      summary: {
-        status: 'up',
-        up: 0,
-        down: 0,
-      },
-      url: {},
-    };
+
+    const summaryPings: Ping[] = [];
 
     for (const locBucket of monBucket.location.buckets) {
-      const location = locBucket.key;
       const latest = locBucket.summaries.latest.hits.hits[0];
       const latestStillMatching = locBucket.latest_matching.top.hits.hits[0];
+      const status = latest._source.summary.down > 0 ? 'down' : 'up';
       // If the most recent document still matches the most recent document matching the current filters
       // we can include this in the result
       //
@@ -62,50 +53,51 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
       ) {
         matched = true;
       }
-      const status = latest._source.summary.down > 0 ? 'down' : 'up';
 
-      // This monitor doesn't match, so just skip ahead and don't add it to the output
-      // Only skip in case of up statusFilter, for a monitor to be up, all checks should be up
-      if (statusFilter === 'up' && statusFilter !== status) {
-        continue MonitorLoop;
-      }
-
-      monitorSummaryState.monitor.name = latest._source.monitor.name;
-      monitorSummaryState.summaryPings.push({
+      summaryPings.push({
         docId: latest._id,
         timestamp: latest._source['@timestamp'],
         ...latest._source,
       });
-      monitorSummaryState.url = latest._source.url;
-      if (monitorSummaryState.observer?.geo?.name) {
-        monitorSummaryState.observer.geo.name.push(location);
-      }
-      if (latest._source['@timestamp'] > monitorSummaryState.timestamp) {
-        monitorSummaryState.timestamp = latest._source['@timestamp'];
-      }
-      monitorSummaryState.tls = {
-        not_before: latest._source.tls?.certificate_not_valid_before,
-        not_after: latest._source.tls?.certificate_not_valid_after,
-      };
-      if (monitorSummaryState.summary) {
-        // unnecessary if, for type checker
-        monitorSummaryState.summary.up += latest._source.summary.up;
-        monitorSummaryState.summary.down += latest._source.summary.down;
-        if (latest._source.summary.down > 0) {
-          monitorSummaryState.summary.status = 'down';
-        }
-      }
     }
 
-    if (matched) {
-      summaries.push({
-        monitor_id: monitorId,
-        state: monitorSummaryState,
-      });
+    const someDown = summaryPings.some((p) => (p.summary?.down ?? 0) > 0);
+    const statusFilterOk = !statusFilter ? true : statusFilter === 'up' ? !someDown : someDown;
+
+    if (matched && statusFilterOk) {
+      summaries.push(summaryPingsToSummary(summaryPings));
     }
   }
 
   return summaries;
+};
+
+export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
+  summaryPings.sort((a, b) =>
+    a.timestamp > b.timestamp ? 1 : a.timestamp === b.timestamp ? 0 : -1
+  );
+  const latest = summaryPings[summaryPings.length - 1];
+  return {
+    monitor_id: latest.monitor.id,
+    state: {
+      timestamp: latest.timestamp,
+      monitor: {
+        name: latest.monitor?.name,
+      },
+      url: latest.url ?? {},
+      summary: {
+        up: summaryPings.reduce((acc, p) => (p.summary?.up ?? 0) + acc, 0),
+        down: summaryPings.reduce((acc, p) => (p.summary?.down ?? 0) + acc, 0),
+        status: summaryPings.some((p) => (p.summary?.down ?? 0) > 0) ? 'down' : 'up',
+      },
+      summaryPings,
+      tls: latest.tls,
+      // easier to ensure to use '' for an empty geo name in terms of types
+      observer: {
+        geo: { name: summaryPings.map((p) => p.observer?.geo?.name ?? '').filter((n) => n !== '') },
+      },
+    },
+  };
 };
 
 export const query = async (

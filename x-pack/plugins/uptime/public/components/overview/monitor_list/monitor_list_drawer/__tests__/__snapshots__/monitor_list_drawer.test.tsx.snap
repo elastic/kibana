@@ -65,6 +65,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
       Object {
         "monitor_id": "foo",
         "state": Object {
+          "monitor": Object {},
           "summary": Object {
             "down": 0,
             "up": 1,
@@ -200,6 +201,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
       Object {
         "monitor_id": "foo",
         "state": Object {
+          "monitor": Object {},
           "summary": Object {
             "down": 0,
             "up": 1,
