@@ -13,6 +13,6 @@ export function getBasePath() {
   return `#/`;
 }
 
-export function getEditPath(id: string) {
-  return `#/edit/${encodeURIComponent(id)}`;
+export function getEditPath(id: string | undefined) {
+  return id ? `#/edit/${encodeURIComponent(id)}` : '#/edit/value';
 }

@@ -13,20 +13,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   IndexPatternsContract,
-  IndexPattern,
   TimefilterContract,
 } from '../../../../../../src/plugins/data/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactoryDefinition,
-  ErrorEmbeddable,
-  EmbeddableInput,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
-import { Embeddable } from './embeddable';
-import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
-import { getEditPath } from '../../../common';
+import {
+  Embeddable,
+  LensSavedObjectAttributes,
+  LensByValueInput,
+  LensByReferenceInput,
+  LensEmbeddableInput,
+} from './embeddable';
+import { DOC_TYPE } from '../../persistence';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { AttributeService } from './attribute_service';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -48,6 +51,12 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     getIconForSavedObject: () => 'lensApp',
   };
 
+  private attributeService?: AttributeService<
+    LensSavedObjectAttributes,
+    LensByValueInput,
+    LensByReferenceInput
+  >;
+
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public isEditable = async () => {
@@ -67,55 +76,44 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   createFromSavedObject = async (
     savedObjectId: string,
-    input: Partial<EmbeddableInput> & { id: string },
+    input: LensEmbeddableInput,
     parent?: IContainer
   ) => {
+    return this.create(input, parent);
+  };
+
+  async create(input: LensEmbeddableInput, parent?: IContainer) {
     const {
-      savedObjectsClient,
-      coreHttp,
-      indexPatternService,
       timefilter,
       expressionRenderer,
       uiActions,
+      coreHttp,
+      indexPatternService,
     } = await this.getStartServices();
-    const store = new SavedObjectIndexStore(savedObjectsClient);
-    const savedVis = await store.load(savedObjectId);
-
-    const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(
-      async ({ id }) => {
-        try {
-          return await indexPatternService.get(id);
-        } catch (error) {
-          // Unable to load index pattern, ignore error as the index patterns are only used to
-          // configure the filter and query bar - there is still a good chance to get the visualization
-          // to show.
-          return null;
-        }
-      }
-    );
-    const indexPatterns = (
-      await Promise.all(promises)
-    ).filter((indexPattern: IndexPattern | null): indexPattern is IndexPattern =>
-      Boolean(indexPattern)
-    );
-
     return new Embeddable(
-      timefilter,
-      expressionRenderer,
-      uiActions?.getTrigger,
       {
-        savedVis,
-        editPath: getEditPath(savedObjectId),
-        editUrl: coreHttp.basePath.prepend(`app/lens${getEditPath(savedObjectId)}`),
+        attributeService: await this.getAttributeService(),
+        indexPatternService,
+        timefilter,
+        expressionRenderer,
         editable: await this.isEditable(),
-        indexPatterns,
+        basePath: coreHttp.basePath,
+        getTrigger: uiActions?.getTrigger,
       },
       input,
       parent
     );
-  };
+  }
 
-  async create(input: EmbeddableInput) {
-    return new ErrorEmbeddable('Lens can only be created from a saved object', input);
+  private async getAttributeService() {
+    const savedObjectsService = (await this.getStartServices()).savedObjectsClient;
+    if (!this.attributeService) {
+      this.attributeService = new AttributeService<
+        LensSavedObjectAttributes,
+        LensByValueInput,
+        LensByReferenceInput
+      >(this.type, savedObjectsService);
+    }
+    return this.attributeService;
   }
 }

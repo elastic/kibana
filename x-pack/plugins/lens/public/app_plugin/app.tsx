@@ -38,6 +38,7 @@ import {
   SavedQuery,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
+import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
 
 interface State {
   isLoading: boolean;
@@ -64,7 +65,7 @@ export function App({
   docId,
   docStorage,
   redirectTo,
-  originatingApp,
+  embeddableEditorIncomingState,
   navigation,
   onAppLeave,
   history,
@@ -77,7 +78,7 @@ export function App({
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
-  originatingApp?: string | undefined;
+  embeddableEditorIncomingState?: EmbeddableEditorState;
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
 }) {
@@ -256,6 +257,7 @@ export function App({
     if (!lastKnownDoc) {
       return;
     }
+
     const [pinnedFilters, appFilters] = _.partition(
       lastKnownDoc.state?.filters,
       esFilters.isFilterPinned
@@ -297,32 +299,34 @@ export function App({
     );
 
     const newlyCreated: boolean = saveProps.newCopyOnSave || !lastKnownDoc?.id;
-    docStorage
-      .save(doc)
-      .then(({ id }) => {
-        // Prevents unnecessary network request and disables save button
-        const newDoc = { ...doc, id };
-        setState((s) => ({
-          ...s,
-          isSaveModalVisible: false,
-          persistedDoc: newDoc,
-          lastKnownDoc: newDoc,
-        }));
-        if (docId !== id || saveProps.returnToOrigin) {
-          redirectTo(id, saveProps.returnToOrigin, newlyCreated);
-        }
-      })
-      .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.dir(e);
-        trackUiEvent('save_failed');
-        core.notifications.toasts.addDanger(
-          i18n.translate('xpack.lens.app.docSavingError', {
-            defaultMessage: 'Error saving document',
-          })
-        );
-        setState((s) => ({ ...s, isSaveModalVisible: false }));
-      });
+    if (!embeddableEditorIncomingState?.byValueMode) {
+      docStorage
+        .save(doc)
+        .then(({ id }) => {
+          // Prevents unnecessary network request and disables save button
+          const newDoc = { ...doc, id };
+          setState((s) => ({
+            ...s,
+            isSaveModalVisible: false,
+            persistedDoc: newDoc,
+            lastKnownDoc: newDoc,
+          }));
+          if (docId !== id || saveProps.returnToOrigin) {
+            redirectTo(id, saveProps.returnToOrigin, newlyCreated);
+          }
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.dir(e);
+          trackUiEvent('save_failed');
+          core.notifications.toasts.addDanger(
+            i18n.translate('xpack.lens.app.docSavingError', {
+              defaultMessage: 'Error saving document',
+            })
+          );
+          setState((s) => ({ ...s, isSaveModalVisible: false }));
+        });
+    }
   };
 
   const onError = useCallback(
@@ -349,7 +353,8 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...(!!originatingApp && lastKnownDoc?.id
+                ...((!!embeddableEditorIncomingState?.originatingApp && lastKnownDoc?.id) ||
+                embeddableEditorIncomingState?.byValueMode
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -374,14 +379,16 @@ export function App({
                   : []),
                 {
                   label:
-                    lastKnownDoc?.id && !!originatingApp
+                    lastKnownDoc?.id ||
+                    (embeddableEditorIncomingState?.byValueMode &&
+                      !!embeddableEditorIncomingState?.originatingApp)
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !originatingApp || !lastKnownDoc?.id,
+                  emphasize: !embeddableEditorIncomingState?.originatingApp,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
@@ -502,7 +509,7 @@ export function App({
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
-            originatingApp={originatingApp}
+            originatingApp={embeddableEditorIncomingState?.originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{

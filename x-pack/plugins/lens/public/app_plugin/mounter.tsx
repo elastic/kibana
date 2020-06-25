@@ -37,8 +37,9 @@ export async function mountApp(
   );
 
   const stateTransfer = embeddable?.getStateTransfer(params.history);
-  const { originatingApp } =
-    stateTransfer?.getIncomingOriginatingApp({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
+  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState({
+    keysToRemoveAfterFetch: ['originatingApp'],
+  });
 
   const instance = await createEditorFrame();
 
@@ -56,17 +57,20 @@ export async function mountApp(
   ) => {
     if (!id) {
       routeProps.history.push('/');
-    } else if (!originatingApp) {
+    } else if (!embeddableEditorIncomingState?.originatingApp) {
       routeProps.history.push(`/edit/${id}`);
-    } else if (!!originatingApp && id && returnToOrigin) {
+    } else if (!!embeddableEditorIncomingState?.originatingApp && id && returnToOrigin) {
       routeProps.history.push(`/edit/${id}`);
 
       if (newlyCreated && stateTransfer) {
-        stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-          state: { id, type: LENS_EMBEDDABLE_TYPE },
-        });
+        stateTransfer.navigateToWithEmbeddablePackage(
+          embeddableEditorIncomingState?.originatingApp,
+          {
+            state: { id, type: LENS_EMBEDDABLE_TYPE },
+          }
+        );
       } else {
-        coreStart.application.navigateToApp(originatingApp);
+        coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp);
       }
     }
   };
@@ -86,7 +90,7 @@ export async function mountApp(
         redirectTo={(id, returnToOrigin, newlyCreated) =>
           redirectTo(routeProps, id, returnToOrigin, newlyCreated)
         }
-        originatingApp={originatingApp}
+        embeddableEditorIncomingState={embeddableEditorIncomingState}
         onAppLeave={params.onAppLeave}
         history={routeProps.history}
       />

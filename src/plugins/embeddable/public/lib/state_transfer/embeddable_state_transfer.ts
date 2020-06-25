@@ -20,8 +20,8 @@
 import { cloneDeep } from 'lodash';
 import { ScopedHistory, ApplicationStart } from '../../../../../core/public';
 import {
-  EmbeddableOriginatingAppState,
-  isEmbeddableOriginatingAppState,
+  EmbeddableEditorState,
+  isEmbeddableEditorState,
   EmbeddablePackageState,
   isEmbeddablePackageState,
 } from './types';
@@ -45,10 +45,10 @@ export class EmbeddableStateTransfer {
    * @param history - the scoped history to fetch from
    * @param options.keysToRemoveAfterFetch - an array of keys to be removed from the state after they are retrieved
    */
-  public getIncomingOriginatingApp(options?: {
+  public getIncomingEditorState(options?: {
     keysToRemoveAfterFetch?: string[];
-  }): EmbeddableOriginatingAppState | undefined {
-    return this.getIncomingState<EmbeddableOriginatingAppState>(isEmbeddableOriginatingAppState, {
+  }): EmbeddableEditorState | undefined {
+    return this.getIncomingState<EmbeddableEditorState>(isEmbeddableEditorState, {
       keysToRemoveAfterFetch: options?.keysToRemoveAfterFetch,
     });
   }
@@ -72,15 +72,15 @@ export class EmbeddableStateTransfer {
    * A wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId
    * with {@link EmbeddableOriginatingAppState | originating app state}
    */
-  public async navigateToWithOriginatingApp(
+  public async navigateToEditor(
     appId: string,
     options?: {
       path?: string;
-      state: EmbeddableOriginatingAppState;
+      state: EmbeddableEditorState;
       appendToExistingState?: boolean;
     }
   ): Promise<void> {
-    await this.navigateToWithState<EmbeddableOriginatingAppState>(appId, options);
+    await this.navigateToWithState<EmbeddableEditorState>(appId, options);
   }
 
   /**
