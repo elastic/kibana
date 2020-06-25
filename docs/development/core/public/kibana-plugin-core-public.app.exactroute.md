@@ -4,7 +4,7 @@
 
 ## App.exactRoute property
 
-If set to true, the application's route will only be checked against an exact match
+If set to true, the application's route will only be checked against an exact match. Defaults to `false`<!-- -->.
 
 <b>Signature:</b>
 
