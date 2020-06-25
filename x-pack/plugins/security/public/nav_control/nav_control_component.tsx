@@ -117,8 +117,8 @@ export class SecurityNavControl extends Component<Props, State> {
     ];
 
     if (isCloudEnabled) {
-      items.push(
-        {
+      if (cloudResetPasswordUrl) {
+        items.push({
           name: (
             <FormattedMessage
               id="xpack.security.navControlComponent.cloudProfileLinkText"
@@ -128,8 +128,11 @@ export class SecurityNavControl extends Component<Props, State> {
           icon: <EuiIcon type="logoCloud" size="m" />,
           href: cloudResetPasswordUrl,
           'data-test-subj': 'cloudProfileLink',
-        },
-        {
+        });
+      }
+
+      if (cloudAccountUrl) {
+        items.push({
           name: (
             <FormattedMessage
               id="xpack.security.navControlComponent.cloudAccountLinkText"
@@ -139,8 +142,11 @@ export class SecurityNavControl extends Component<Props, State> {
           icon: <EuiIcon type="gear" size="m" />,
           href: cloudAccountUrl,
           'data-test-subj': 'cloudAccountLink',
-        },
-        {
+        });
+      }
+
+      if (cloudSecurityUrl) {
+        items.push({
           name: (
             <FormattedMessage
               id="xpack.security.navControlComponent.cloudSecurityLinkText"
@@ -150,8 +156,8 @@ export class SecurityNavControl extends Component<Props, State> {
           icon: <EuiIcon type="lock" size="m" />,
           href: cloudSecurityUrl,
           'data-test-subj': 'cloudSecurityLink',
-        }
-      );
+        });
+      }
     }
 
     items.push({

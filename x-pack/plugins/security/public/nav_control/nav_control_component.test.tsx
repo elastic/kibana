@@ -107,4 +107,36 @@ describe('SecurityNavControl', () => {
     expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
   });
+
+  it('renders a popover with additional cloud links for cloud users', async () => {
+    const props = {
+      user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
+      editProfileUrl: '',
+      logoutUrl: '',
+      isCloudEnabled: true,
+      cloudResetPasswordUrl: 'cloud/password/url',
+      cloudAccountUrl: 'cloud/account/url',
+      cloudSecurityUrl: 'cloud/security/url',
+    };
+
+    const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
+    await nextTick();
+    wrapper.update();
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'cloudProfileLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'cloudAccountLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'cloudSecurityLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(0);
+
+    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'cloudProfileLink')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'cloudAccountLink')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'cloudSecurityLink')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
+  });
 });
