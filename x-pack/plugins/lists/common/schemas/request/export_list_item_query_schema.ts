@@ -17,5 +17,5 @@ export const exportListItemQuerySchema = t.exact(
   })
 );
 
-export type ExportListItemQuerySchemaDecoded = t.TypeOf<typeof exportListItemQuerySchema>;
+export type ExportListItemQuerySchema = t.TypeOf<typeof exportListItemQuerySchema>;
 export type ExportListItemQuerySchemaEncoded = t.OutputOf<typeof exportListItemQuerySchema>;

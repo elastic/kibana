@@ -5,7 +5,8 @@
  */
 
 import { useAsyncTask } from '../../common/hooks/use_async_task';
-import { FindListsParams, findLists } from '../api';
+import { FindListsParams } from '../types';
+import { findLists } from '../api';
 
 export type FindListsTaskArgs = Omit<FindListsParams, 'signal'>;
 

@@ -23,8 +23,11 @@ describe('useFindLists', () => {
   });
 
   it('invokes Api.findLists', async () => {
-    const { result } = renderHook(() => useFindLists());
-    await act(() => result.current.start({ http: httpMock, pageIndex: 1, pageSize: 10 }));
+    const { result, waitForNextUpdate } = renderHook(() => useFindLists());
+    act(() => {
+      result.current.start({ http: httpMock, pageIndex: 1, pageSize: 10 });
+    });
+    await waitForNextUpdate();
 
     expect(Api.findLists).toHaveBeenCalledWith(
       expect.objectContaining({ http: httpMock, pageIndex: 1, pageSize: 10 })

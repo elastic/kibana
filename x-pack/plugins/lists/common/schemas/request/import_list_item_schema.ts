@@ -16,5 +16,5 @@ export const importListItemSchema = t.exact(
   })
 );
 
-export type ImportListItemSchemaDecoded = t.TypeOf<typeof importListItemSchema>;
+export type ImportListItemSchema = t.TypeOf<typeof importListItemSchema>;
 export type ImportListItemSchemaEncoded = t.OutputOf<typeof importListItemSchema>;

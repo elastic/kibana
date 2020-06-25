@@ -16,5 +16,5 @@ export const deleteListSchema = t.exact(
   })
 );
 
-export type DeleteListSchemaDecoded = t.TypeOf<typeof deleteListSchema>;
+export type DeleteListSchema = t.TypeOf<typeof deleteListSchema>;
 export type DeleteListSchemaEncoded = t.OutputOf<typeof deleteListSchema>;

@@ -15,5 +15,5 @@ export const importListItemQuerySchema = t.exact(t.partial({ list_id, type }));
 
 export type ImportListItemQuerySchemaPartial = Identity<t.TypeOf<typeof importListItemQuerySchema>>;
 
-export type ImportListItemQuerySchemaDecoded = t.TypeOf<typeof importListItemQuerySchema>;
+export type ImportListItemQuerySchema = t.TypeOf<typeof importListItemQuerySchema>;
 export type ImportListItemQuerySchemaEncoded = t.OutputOf<typeof importListItemQuerySchema>;

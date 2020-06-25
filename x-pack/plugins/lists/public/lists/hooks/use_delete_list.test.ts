@@ -23,8 +23,11 @@ describe('useDeleteList', () => {
   });
 
   it('invokes Api.deleteList', async () => {
-    const { result } = renderHook(() => useDeleteList());
-    await act(() => result.current.start({ http: httpMock, id: 'list' }));
+    const { result, waitForNextUpdate } = renderHook(() => useDeleteList());
+    act(() => {
+      result.current.start({ http: httpMock, id: 'list' });
+    });
+    await waitForNextUpdate();
 
     expect(Api.deleteList).toHaveBeenCalledWith(
       expect.objectContaining({ http: httpMock, id: 'list' })

@@ -5,7 +5,8 @@
  */
 
 import { useAsyncTask } from '../../common/hooks/use_async_task';
-import { ExportListParams, exportList } from '../api';
+import { ExportListParams } from '../types';
+import { exportList } from '../api';
 
 export type ExportListTaskArgs = Omit<ExportListParams, 'signal'>;
 

@@ -6,9 +6,9 @@
 
 import { LIST_ID, TYPE } from '../../constants.mock';
 
-import { ImportListItemQuerySchemaDecoded } from './import_list_item_query_schema';
+import { ImportListItemQuerySchema } from './import_list_item_query_schema';
 
-export const getImportListItemQuerySchemaMock = (): ImportListItemQuerySchemaDecoded => ({
+export const getImportListItemQuerySchemaMock = (): ImportListItemQuerySchema => ({
   list_id: LIST_ID,
   type: TYPE,
 });

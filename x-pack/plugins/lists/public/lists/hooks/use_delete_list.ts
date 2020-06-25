@@ -5,7 +5,8 @@
  */
 
 import { useAsyncTask } from '../../common/hooks/use_async_task';
-import { DeleteListParams, deleteList } from '../api';
+import { DeleteListParams } from '../types';
+import { deleteList } from '../api';
 
 export type DeleteListTaskArgs = Omit<DeleteListParams, 'signal'>;
 

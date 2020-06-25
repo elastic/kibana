@@ -22,7 +22,5 @@ export const findListSchema = t.exact(
   })
 );
 
-type FindListSchema = typeof findListSchema;
-
-export type FindListSchemaDecoded = t.TypeOf<FindListSchema>;
-export type FindListSchemaEncoded = t.OutputOf<FindListSchema>;
+export type FindListSchema = t.TypeOf<typeof findListSchema>;
+export type FindListSchemaEncoded = t.OutputOf<typeof findListSchema>;

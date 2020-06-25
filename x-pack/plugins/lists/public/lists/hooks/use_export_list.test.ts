@@ -22,11 +22,14 @@ describe('useExportList', () => {
   });
 
   it('invokes Api.exportList', async () => {
-    const { result } = renderHook(() => useExportList());
-    await act(() => result.current.start({ http: httpMock, id: 'list' }));
+    const { result, waitForNextUpdate } = renderHook(() => useExportList());
+    act(() => {
+      result.current.start({ http: httpMock, listId: 'list' });
+    });
+    await waitForNextUpdate();
 
     expect(Api.exportList).toHaveBeenCalledWith(
-      expect.objectContaining({ http: httpMock, id: 'list' })
+      expect.objectContaining({ http: httpMock, listId: 'list' })
     );
   });
 });
