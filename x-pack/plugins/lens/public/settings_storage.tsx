@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+
 const STORAGE_KEY = 'lens-settings';
 
 export const readFromStorage = (storage: IStorageWrapper, key: string) => {

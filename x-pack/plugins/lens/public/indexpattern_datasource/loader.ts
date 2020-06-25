@@ -25,7 +25,7 @@ import {
   IFieldType,
   IndexPatternTypeMeta,
 } from '../../../../../src/plugins/data/public';
-import { readFromStorage, writeToStorage } from '../../settings_storage';
+import { readFromStorage, writeToStorage } from '../settings_storage';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -74,12 +74,12 @@ const getLastUsedIndexPatternId = (
   storage: IStorageWrapper,
   indexPatternRefs: IndexPatternRef[]
 ) => {
-  const indexPattern = readFromStorage(storage, 'indexPattern');
+  const indexPattern = readFromStorage(storage, 'indexPatternId');
   return indexPattern && indexPatternRefs.find((i) => i.id === indexPattern)?.id;
 };
 
 const setLastUsedIndexPatternId = (storage: IStorageWrapper, value: string) => {
-  writeToStorage(storage, 'indexPattern', value);
+  writeToStorage(storage, 'indexPatternId', value);
 };
 
 export async function loadInitialState({
