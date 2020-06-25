@@ -40,6 +40,7 @@ interface FieldDependencies {
 
 export class Field implements IFieldType {
   name: string;
+  label: string;
   type: string;
   script?: string;
   lang?: string;
@@ -115,6 +116,8 @@ export class Field implements IFieldType {
 
     this.name = '';
     obj.fact('name');
+    this.label = '';
+    obj.fact('label');
     this.type = '';
     obj.fact('type');
     obj.fact('esTypes');
@@ -138,7 +141,11 @@ export class Field implements IFieldType {
 
     // computed values
     obj.comp('indexPattern', indexPattern);
-    obj.comp('displayName', shortDotsEnable ? shortenDottedString(spec.name) : spec.name);
+    if (spec.label) {
+      obj.comp('displayName', spec.label);
+    } else {
+      obj.comp('displayName', shortDotsEnable ? shortenDottedString(spec.name) : spec.name);
+    }
     this.$$spec = spec;
     obj.comp('$$spec', spec);
 

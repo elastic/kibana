@@ -409,6 +409,29 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     );
   }
 
+  renderlabel() {
+    const { field } = this.state;
+
+    return (
+      <EuiFormRow
+        label={i18n.translate('indexPatternManagement.CustomLabelLabel', {
+          defaultMessage: 'Custom Label',
+        })}
+      >
+        <EuiFieldText
+          value={field.label || ''}
+          placeholder={i18n.translate('indexPatternManagement.customLabelPlaceholder', {
+            defaultMessage: 'New custom label',
+          })}
+          data-test-subj="editorFieldLabel"
+          onChange={(e) => {
+            this.onFieldChange('label', e.target.value);
+          }}
+        />
+      </EuiFormRow>
+    );
+  }
+
   /**
    * renders a warning and a table of conflicting indices
    * in case there are indices with different types
@@ -865,6 +888,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
+          {this.renderlabel()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}
