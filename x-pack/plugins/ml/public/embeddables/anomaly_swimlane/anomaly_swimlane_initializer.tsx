@@ -92,7 +92,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.setupModal.title"
-            defaultMessage="Anomaly swimlane configuration"
+            defaultMessage="Anomaly swim lane configuration"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -121,7 +121,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
             label={
               <FormattedMessage
                 id="xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel"
-                defaultMessage="Swimlane type"
+                defaultMessage="Swim lane type"
               />
             }
           >
@@ -131,7 +131,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
               color="primary"
               isFullWidth
               legend={i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel', {
-                defaultMessage: 'Swimlane type',
+                defaultMessage: 'Swim lane type',
               })}
               options={swimlaneTypeOptions}
               idSelected={swimlaneType}

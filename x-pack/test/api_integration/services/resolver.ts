@@ -25,7 +25,8 @@ export interface Options extends TreeOptions {
  */
 export interface GeneratedTrees {
   trees: Tree[];
-  index: string;
+  eventsIndex: string;
+  alertsIndex: string;
 }
 
 export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
@@ -34,27 +35,30 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
   return {
     async createTrees(
       options: Options,
-      eventsIndex: string = 'events-endpoint-1'
+      eventsIndex: string = 'logs-endpoint.events.process-default',
+      alertsIndex: string = 'logs-endpoint.alerts-default'
     ): Promise<GeneratedTrees> {
       const allTrees: Tree[] = [];
       const generator = new EndpointDocGenerator();
       const numTrees = options.numTrees ?? 1;
       for (let j = 0; j < numTrees; j++) {
         const tree = generator.generateTree(options);
-        const body = tree.allEvents.reduce(
-          (array: Array<Record<string, any>>, doc) => (
-            /**
-             * We're using data streams which require that a bulk use `create` instead of `index`.
-             */
-            array.push({ create: { _index: eventsIndex } }, doc), array
-          ),
-          []
-        );
+        const body = tree.allEvents.reduce((array: Array<Record<string, any>>, doc) => {
+          let index = eventsIndex;
+          if (doc.event.kind === 'alert') {
+            index = alertsIndex;
+          }
+          /**
+           * We're using data streams which require that a bulk use `create` instead of `index`.
+           */
+          array.push({ create: { _index: index } }, doc);
+          return array;
+        }, []);
         // force a refresh here otherwise the documents might not be available when the tests search for them
         await client.bulk({ body, refresh: 'true' });
         allTrees.push(tree);
       }
-      return { trees: allTrees, index: eventsIndex };
+      return { trees: allTrees, eventsIndex, alertsIndex };
     },
     async deleteTrees(trees: GeneratedTrees) {
       /**
@@ -63,7 +67,14 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
        * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
        * is why we're using _data_stream here.
        */
-      await client.transport.request({ method: 'DELETE', path: `_data_stream/${trees.index}` });
+      await client.transport.request({
+        method: 'DELETE',
+        path: `_data_stream/${trees.eventsIndex}`,
+      });
+      await client.transport.request({
+        method: 'DELETE',
+        path: `_data_stream/${trees.alertsIndex}`,
+      });
     },
   };
 }
