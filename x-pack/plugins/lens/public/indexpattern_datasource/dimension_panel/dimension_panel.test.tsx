@@ -27,6 +27,14 @@ import { OperationMetadata } from '../../types';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 const expectedIndexPatterns = {
   1: {

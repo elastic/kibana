@@ -56,6 +56,26 @@ function asOperationOptions(operationTypes: OperationType[], compatibleWithCurre
     }));
 }
 
+const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
+  const [inputValue, setInputValue] = useState(value);
+  const onChangeDebounced = _.debounce(onChange, 256);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = String(e.target.value);
+    setInputValue(val);
+    onChangeDebounced(val);
+  };
+
+  return (
+    <EuiFieldText
+      compressed
+      data-test-subj="indexPattern-label-edit"
+      value={inputValue}
+      onChange={handleInputChange}
+    />
+  );
+};
+
 export function PopoverEditor(props: PopoverEditorProps) {
   const {
     selectedColumn,
@@ -321,11 +341,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   })}
                   display="rowCompressed"
                 >
-                  <EuiFieldText
-                    compressed
-                    data-test-subj="indexPattern-label-edit"
+                  <LabelInput
                     value={selectedColumn.label}
-                    onChange={(e) => {
+                    onChange={(value) => {
                       setState({
                         ...state,
                         layers: {
@@ -336,7 +354,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                               ...state.layers[layerId].columns,
                               [columnId]: {
                                 ...selectedColumn,
-                                label: e.target.value,
+                                label: value,
                                 customLabel: true,
                               },
                             },
