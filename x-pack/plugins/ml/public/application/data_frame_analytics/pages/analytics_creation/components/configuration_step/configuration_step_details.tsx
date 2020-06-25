@@ -21,6 +21,8 @@ import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { ANALYTICS_STEPS } from '../../page';
 
+const MAX_INCLUDES_LENGTH = 5;
+
 interface Props {
   setCurrentStep: React.Dispatch<React.SetStateAction<any>>;
   state: State;
@@ -64,7 +66,12 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.includedFields', {
         defaultMessage: 'Included fields',
       }),
-      description: includes.length > 0 ? includes.join(', ') : UNSET_CONFIG_ITEM,
+      description:
+        includes.length > MAX_INCLUDES_LENGTH
+          ? `${includes.slice(0, MAX_INCLUDES_LENGTH).join(', ')} ... (and ${
+              includes.length - MAX_INCLUDES_LENGTH
+            } more)`
+          : includes.join(', '),
     },
   ];
 
