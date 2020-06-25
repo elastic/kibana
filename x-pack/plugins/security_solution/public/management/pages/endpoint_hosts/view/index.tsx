@@ -35,7 +35,6 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { PolicyEmptyState, EndpointsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { useEndpointPackageInfo } from '../../policy/view/ingest_hooks';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import {
   CreateDatasourceRouteState,
@@ -87,6 +86,7 @@ export const HostList = () => {
     policyItems,
     selectedPolicyId,
     policyItemsLoading,
+    endpointPackageVersion,
   } = useHostSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
 
@@ -101,7 +101,6 @@ export const HostList = () => {
       hidePerPageOptions: false,
     };
   }, [pageIndex, pageSize, totalItemCount]);
-  const [packageInfo, isFetchingPackageInfo] = useEndpointPackageInfo();
 
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
@@ -122,7 +121,9 @@ export const HostList = () => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
     'ingestManager',
     {
-      path: `#/integrations${packageInfo ? `/endpoint-${packageInfo.version}/add-datasource` : ''}`,
+      path: `#/integrations${
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-datasource` : ''
+      }`,
       state: {
         onCancelNavigateTo: [
           'securitySolution:management',
@@ -146,6 +147,7 @@ export const HostList = () => {
         'securitySolution:management',
         { path: getEndpointListPath({ name: 'endpointList' }) },
       ],
+      baseRoute: `#/configs/${selectedPolicyId}`,
     },
   });
 
@@ -343,18 +345,14 @@ export const HostList = () => {
         <EndpointsEmptyState
           loading={loading}
           onActionClick={handleDeployEndpointsClick}
-          actionDisabled={isFetchingPackageInfo || selectedPolicyId === undefined}
+          actionDisabled={selectedPolicyId === undefined}
           handleSelectableOnChange={handleSelectableOnChange}
           selectionOptions={selectionOptions}
         />
       );
     } else {
       return (
-        <PolicyEmptyState
-          loading={policyItemsLoading}
-          onActionClick={handleCreatePolicyClick}
-          actionDisabled={isFetchingPackageInfo}
-        />
+        <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
       );
     }
   }, [
@@ -366,7 +364,6 @@ export const HostList = () => {
     onTableChange,
     listError?.message,
     handleCreatePolicyClick,
-    isFetchingPackageInfo,
     handleDeployEndpointsClick,
     handleSelectableOnChange,
     selectedPolicyId,

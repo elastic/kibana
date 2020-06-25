@@ -46,7 +46,6 @@ import { useFormatUrl } from '../../../../common/components/link_to';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
-import { useEndpointPackageInfo } from './ingest_hooks';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -129,7 +128,6 @@ export const PolicyList = React.memo(() => {
   const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
-  const [packageInfo, isFetchingPackageInfo] = useEndpointPackageInfo();
   const {
     selectPolicyItems: policyItems,
     selectPageIndex: pageIndex,
@@ -140,6 +138,7 @@ export const PolicyList = React.memo(() => {
     selectIsDeleting: isDeleting,
     selectDeleteStatus: deleteStatus,
     selectAgentStatusSummary: agentStatusSummary,
+    endpointPackageVersion,
   } = usePolicyListSelector(selector);
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
@@ -150,7 +149,9 @@ export const PolicyList = React.memo(() => {
       // Also,
       // We pass along soem state information so that the Ingest page can change the behaviour
       // of the cancel and submit buttons and redirect the user back to endpoint policy
-      path: `#/integrations${packageInfo ? `/endpoint-${packageInfo.version}/add-datasource` : ''}`,
+      path: `#/integrations${
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-datasource` : ''
+      }`,
       state: {
         onCancelNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
         onCancelUrl: formatUrl(getPoliciesPath()),
@@ -395,7 +396,6 @@ export const PolicyList = React.memo(() => {
           <EuiButton
             iconType="plusInCircle"
             onClick={handleCreatePolicyClick}
-            isDisabled={isFetchingPackageInfo}
             data-test-subj="headerCreateNewPolicyButton"
           >
             <FormattedMessage
@@ -434,7 +434,8 @@ export const PolicyList = React.memo(() => {
                 <PolicyEmptyState
                   loading={loading}
                   onActionClick={handleCreatePolicyClick}
-                  actionDisabled={isFetchingPackageInfo}
+                  actionDisabled={false}
+                  dataTestSubj="emptyPolicyTable"
                 />
               )}
             </>
@@ -442,7 +443,6 @@ export const PolicyList = React.memo(() => {
         }, [
           policyItems,
           loading,
-          isFetchingPackageInfo,
           columns,
           handleCreatePolicyClick,
           handleTableChange,

@@ -7,9 +7,18 @@
 import { HostResultList } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareFactory } from '../../../../common/store';
-import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
+import {
+  isOnHostPage,
+  hasSelectedHost,
+  uiQueryParams,
+  listData,
+  endpointPackageInfo,
+} from './selectors';
 import { HostState } from '../types';
-import { sendGetEndpointSpecificDatasources } from '../../policy/store/policy_list/services/ingest';
+import {
+  sendGetEndpointSpecificDatasources,
+  sendGetEndpointSecurityPackage,
+} from '../../policy/store/policy_list/services/ingest';
 
 export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (coreStart) => {
   return ({ getState, dispatch }) => (next) => async (action) => {
@@ -20,6 +29,20 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
       isOnHostPage(state) &&
       hasSelectedHost(state) !== true
     ) {
+      if (!endpointPackageInfo(state)) {
+        sendGetEndpointSecurityPackage(coreStart.http)
+          .then((packageInfo) => {
+            dispatch({
+              type: 'serverReturnedEndpointPackageInfo',
+              payload: packageInfo,
+            });
+          })
+          .catch((error) => {
+            // eslint-disable-next-line no-console
+            console.error(error);
+          });
+      }
+
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
       let hostResponse;
 

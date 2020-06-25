@@ -11,6 +11,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
+import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
@@ -69,6 +70,11 @@ interface ServerCancelledPolicyItemsLoading {
   type: 'serverCancelledPolicyItemsLoading';
 }
 
+interface ServerReturnedEndpointPackageInfo {
+  type: 'serverReturnedEndpointPackageInfo';
+  payload: GetPackagesResponse['response'][0];
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
@@ -80,4 +86,5 @@ export type HostAction =
   | ServerFailedToReturnPoliciesForOnboarding
   | UserSelectedEndpointPolicy
   | ServerCancelledHostListLoading
-  | ServerCancelledPolicyItemsLoading;
+  | ServerCancelledPolicyItemsLoading
+  | ServerReturnedEndpointPackageInfo;

@@ -27,6 +27,8 @@ export interface CreateDatasourceRouteState {
 export interface AgentConfigDetailsDeployAgentAction {
   /** On done, navigate to the given app */
   onDoneNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+  /** The base route */
+  baseRoute?: string;
 }
 
 /**

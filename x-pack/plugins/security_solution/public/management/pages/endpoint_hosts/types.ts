@@ -47,6 +47,7 @@ export interface HostState {
   policyItemsLoading: boolean;
   /** the selected policy ID in the onboarding flow */
   selectedPolicyId?: string;
+  endpointPackageInfo?: sring;
 }
 
 /**

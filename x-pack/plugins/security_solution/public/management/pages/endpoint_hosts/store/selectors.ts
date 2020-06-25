@@ -43,6 +43,13 @@ export const policyItemsLoading = (state: Immutable<HostState>) => state.policyI
 
 export const selectedPolicyId = (state: Immutable<HostState>) => state.selectedPolicyId;
 
+export const endpointPackageInfo = (state: Immutable<HostState>) => state.endpointPackageInfo;
+
+export const endpointPackageVersion = createSelector(
+  endpointPackageInfo,
+  (info) => info?.version ?? undefined
+);
+
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
  */
