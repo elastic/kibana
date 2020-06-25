@@ -144,7 +144,7 @@ export const Page: FC<Props> = ({ jobId }) => {
             <EuiFlexItem>
               <EuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size="m">
+                  <EuiTitle size="m" data-test-subj="mlDataFrameAnalyticsWizardHeaderTitle">
                     <h1>
                       {jobId === undefined && (
                         <FormattedMessage
