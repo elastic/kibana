@@ -6,7 +6,7 @@
 
 jest.mock('crypto', () => ({ randomBytes: jest.fn() }));
 
-import { loggingServiceMock } from '../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../src/core/server/mocks';
 import { createConfig, ConfigSchema } from './config';
 
 describe('config schema', () => {
@@ -793,6 +793,7 @@ describe('config schema', () => {
                 saml: {
                   saml1: { order: 0, realm: 'saml1' },
                   saml2: { order: 1, realm: 'saml2', maxRedirectURLSize: '1kb' },
+                  saml3: { order: 2, realm: 'saml3', useRelayStateDeepLink: true },
                 },
               },
             },
@@ -808,6 +809,7 @@ describe('config schema', () => {
                 "order": 0,
                 "realm": "saml1",
                 "showInSelector": true,
+                "useRelayStateDeepLink": false,
               },
               "saml2": Object {
                 "enabled": true,
@@ -817,6 +819,17 @@ describe('config schema', () => {
                 "order": 1,
                 "realm": "saml2",
                 "showInSelector": true,
+                "useRelayStateDeepLink": false,
+              },
+              "saml3": Object {
+                "enabled": true,
+                "maxRedirectURLSize": ByteSizeValue {
+                  "valueInBytes": 2048,
+                },
+                "order": 2,
+                "realm": "saml3",
+                "showInSelector": true,
+                "useRelayStateDeepLink": true,
               },
             },
           }
@@ -905,6 +918,7 @@ describe('config schema', () => {
               "order": 3,
               "realm": "saml3",
               "showInSelector": true,
+              "useRelayStateDeepLink": false,
             },
             "saml1": Object {
               "enabled": true,
@@ -914,6 +928,7 @@ describe('config schema', () => {
               "order": 1,
               "realm": "saml1",
               "showInSelector": true,
+              "useRelayStateDeepLink": false,
             },
             "saml2": Object {
               "enabled": true,
@@ -923,6 +938,7 @@ describe('config schema', () => {
               "order": 2,
               "realm": "saml2",
               "showInSelector": true,
+              "useRelayStateDeepLink": false,
             },
           },
         }
@@ -936,13 +952,13 @@ describe('createConfig()', () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({}, { dist: true }), logger, {
       isTLSEnabled: true,
     });
     expect(config.encryptionKey).toEqual('ab'.repeat(16));
 
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
@@ -952,11 +968,11 @@ describe('createConfig()', () => {
   });
 
   it('should log a warning if SSL is not configured', async () => {
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: false });
     expect(config.secureCookies).toEqual(false);
 
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Session cookies will be transmitted over insecure connections. This is not recommended.",
@@ -966,13 +982,13 @@ describe('createConfig()', () => {
   });
 
   it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({ secureCookies: true }), logger, {
       isTLSEnabled: false,
     });
     expect(config.secureCookies).toEqual(true);
 
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to function properly.",
@@ -982,15 +998,15 @@ describe('createConfig()', () => {
   });
 
   it('should set xpack.security.secureCookies if SSL is configured', async () => {
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: true });
     expect(config.secureCookies).toEqual(true);
 
-    expect(loggingServiceMock.collect(logger).warn).toEqual([]);
+    expect(loggingSystemMock.collect(logger).warn).toEqual([]);
   });
 
   it('transforms legacy `authc.providers` into new format', () => {
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
 
     expect(
       createConfig(
@@ -1057,7 +1073,7 @@ describe('createConfig()', () => {
         ConfigSchema.validate({
           authc: { providers: ['saml', 'basic'], saml: { realm: 'saml-realm' } },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.selector.enabled
     ).toBe(false);
@@ -1072,7 +1088,7 @@ describe('createConfig()', () => {
             saml: { realm: 'saml-realm' },
           },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.selector.enabled
     ).toBe(true);
@@ -1092,7 +1108,7 @@ describe('createConfig()', () => {
             },
           },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.selector.enabled
     ).toBe(false);
@@ -1109,7 +1125,7 @@ describe('createConfig()', () => {
             },
           },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.selector.enabled
     ).toBe(true);
@@ -1127,7 +1143,7 @@ describe('createConfig()', () => {
             },
           },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.sortedProviders
     ).toMatchInlineSnapshot(`

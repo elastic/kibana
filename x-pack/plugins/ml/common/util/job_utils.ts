@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import semver from 'semver';
+import { Duration } from 'moment';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 
@@ -433,7 +434,7 @@ export function basicJobValidation(
       messages.push({ id: 'bucket_span_empty' });
       valid = false;
     } else {
-      if (isValidTimeFormat(job.analysis_config.bucket_span)) {
+      if (isValidTimeInterval(job.analysis_config.bucket_span)) {
         messages.push({
           id: 'bucket_span_valid',
           bucketSpan: job.analysis_config.bucket_span,
@@ -490,14 +491,14 @@ export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
 
   if (datafeed) {
     let queryDelayMessage = { id: 'query_delay_valid' };
-    if (isValidTimeFormat(datafeed.query_delay) === false) {
+    if (isValidTimeInterval(datafeed.query_delay) === false) {
       queryDelayMessage = { id: 'query_delay_invalid' };
       valid = false;
     }
     messages.push(queryDelayMessage);
 
     let frequencyMessage = { id: 'frequency_valid' };
-    if (isValidTimeFormat(datafeed.frequency) === false) {
+    if (isValidTimeInterval(datafeed.frequency) === false) {
       frequencyMessage = { id: 'frequency_invalid' };
       valid = false;
     }
@@ -591,12 +592,33 @@ export function validateGroupNames(job: Job): ValidationResults {
   };
 }
 
-function isValidTimeFormat(value: string | undefined): boolean {
+/**
+ * Parses the supplied string to a time interval suitable for use in an ML anomaly
+ * detection job or datafeed.
+ * @param value the string to parse
+ * @return {Duration} the parsed interval, or null if it does not represent a valid
+ * time interval.
+ */
+export function parseTimeIntervalForJob(value: string | undefined): Duration | null {
+  if (value === undefined) {
+    return null;
+  }
+
+  // Must be a valid interval, greater than zero,
+  // and if specified in ms must be a multiple of 1000ms.
+  const interval = parseInterval(value, true);
+  return interval !== null && interval.asMilliseconds() !== 0 && interval.milliseconds() === 0
+    ? interval
+    : null;
+}
+
+// Checks that the value for a field which represents a time interval,
+// such as a job bucket span or datafeed query delay, is valid.
+function isValidTimeInterval(value: string | undefined): boolean {
   if (value === undefined) {
     return true;
   }
-  const interval = parseInterval(value);
-  return interval !== null && interval.asMilliseconds() !== 0;
+  return parseTimeIntervalForJob(value) !== null;
 }
 
 // Returns the latest of the last source data and last processed bucket timestamp,

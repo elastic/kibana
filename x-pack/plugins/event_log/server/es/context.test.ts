@@ -6,7 +6,7 @@
 
 import { createEsContext } from './context';
 import { ClusterClient, Logger } from '../../../../../src/core/server';
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 jest.mock('../lib/../../../../package.json', () => ({
   version: '1.2.3',
 }));
@@ -16,7 +16,7 @@ let logger: Logger;
 let clusterClient: EsClusterClient;
 
 beforeEach(() => {
-  logger = loggingServiceMock.createLogger();
+  logger = loggingSystemMock.createLogger();
   clusterClient = elasticsearchServiceMock.createClusterClient();
 });
 

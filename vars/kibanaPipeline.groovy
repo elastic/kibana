@@ -197,12 +197,15 @@ def runErrorReporter() {
 }
 
 def call(Map params = [:], Closure closure) {
-  def config = [timeoutMinutes: 135, checkPrChanges: false] + params
+  def config = [timeoutMinutes: 135, checkPrChanges: false, setCommitStatus: false] + params
 
   stage("Kibana Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
       timestamps {
         ansiColor('xterm') {
+          if (config.setCommitStatus) {
+            buildState.set('shouldSetCommitStatus', true)
+          }
           if (config.checkPrChanges && githubPr.isPr()) {
             pipelineLibraryTests()
 
@@ -213,7 +216,13 @@ def call(Map params = [:], Closure closure) {
               return
             }
           }
-          closure()
+          try {
+            closure()
+          } finally {
+            if (config.setCommitStatus) {
+              githubCommitStatus.onFinish()
+            }
+          }
         }
       }
     }

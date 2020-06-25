@@ -109,7 +109,6 @@ export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
 export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
 export function mlApiServicesProvider(httpService: HttpService) {
-  const { http } = httpService;
   return {
     getJobs(obj?: { jobId?: string }) {
       const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
@@ -142,14 +141,14 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     closeJob({ jobId }: { jobId: string }) {
-      return http<any>({
+      return httpService.http<any>({
         path: `${basePath()}/anomaly_detectors/${jobId}/_close`,
         method: 'POST',
       });
     },
 
     forceCloseJob({ jobId }: { jobId: string }) {
-      return http<any>({
+      return httpService.http<any>({
         path: `${basePath()}/anomaly_detectors/${jobId}/_close?force=true`,
         method: 'POST',
       });
@@ -278,14 +277,14 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     stopDatafeed({ datafeedId }: { datafeedId: string }) {
-      return http<any>({
+      return httpService.http<any>({
         path: `${basePath()}/datafeeds/${datafeedId}/_stop`,
         method: 'POST',
       });
     },
 
     forceStopDatafeed({ datafeedId }: { datafeedId: string }) {
-      return http<any>({
+      return httpService.http<any>({
         path: `${basePath()}/datafeeds/${datafeedId}/_stop?force=true`,
         method: 'POST',
       });
@@ -697,7 +696,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     getModelSnapshots(jobId: string, snapshotId?: string) {
-      return http<GetModelSnapshotsResponse>({
+      return httpService.http<GetModelSnapshotsResponse>({
         path: `${basePath()}/anomaly_detectors/${jobId}/model_snapshots${
           snapshotId !== undefined ? `/${snapshotId}` : ''
         }`,
@@ -709,7 +708,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       snapshotId: string,
       body: { description?: string; retain?: boolean }
     ) {
-      return http<any>({
+      return httpService.http<any>({
         path: `${basePath()}/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_update`,
         method: 'POST',
         body: JSON.stringify(body),
@@ -717,7 +716,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     deleteModelSnapshot(jobId: string, snapshotId: string) {
-      return http<any>({
+      return httpService.http<any>({
         path: `${basePath()}/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}`,
         method: 'DELETE',
       });
