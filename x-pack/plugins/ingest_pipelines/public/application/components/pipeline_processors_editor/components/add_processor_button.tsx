@@ -13,12 +13,14 @@ export interface Props {
   onClick: () => void;
 }
 
-export const AddProcessorButton: FunctionComponent<Props> = ({ onClick }) => {
+export const AddProcessorButton: FunctionComponent<Props> = (props) => {
+  const { onClick } = props;
   const {
     state: { editor },
   } = usePipelineProcessorsContext();
   return (
     <EuiButtonEmpty
+      data-test-subj="addProcessorButton"
       disabled={editor.mode.id !== 'idle'}
       iconSide="left"
       iconType="plusInCircle"
