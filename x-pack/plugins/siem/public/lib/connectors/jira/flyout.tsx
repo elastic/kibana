@@ -63,7 +63,7 @@ const JiraConnectorForm: React.FC<ConnectorFlyoutFormProps<JiraActionConnector>>
             fullWidth
             error={errors.email}
             isInvalid={isEmailInvalid}
-            label={i18n.EMAIL_LABEL}
+            label={i18n.JIRA_EMAIL_LABEL}
           >
             <EuiFieldText
               fullWidth
@@ -85,7 +85,7 @@ const JiraConnectorForm: React.FC<ConnectorFlyoutFormProps<JiraActionConnector>>
             fullWidth
             error={errors.apiToken}
             isInvalid={isApiTokenInvalid}
-            label={i18n.API_TOKEN_LABEL}
+            label={i18n.JIRA_API_TOKEN_LABEL}
           >
             <EuiFieldPassword
               fullWidth
