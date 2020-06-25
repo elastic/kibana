@@ -902,6 +902,10 @@ export interface IFieldType {
     sortable?: boolean;
     // (undocumented)
     subType?: IFieldSubType;
+    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    toSpec?: () => FieldSpec;
     // (undocumented)
     type: string;
     // (undocumented)
@@ -939,8 +943,6 @@ export interface IIndexPattern {
 //
 // @public (undocumented)
 export interface IIndexPatternFieldList extends Array<IndexPatternField> {
-    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     add(field: FieldSpec): void;
     // (undocumented)
@@ -995,7 +997,9 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     fieldFormatMap: any;
     // (undocumented)
-    fields: IIndexPatternFieldList;
+    fields: IIndexPatternFieldList & {
+        toSpec: () => FieldSpec[];
+    };
     // (undocumented)
     fieldsFetcher: any;
     // (undocumented)
@@ -1040,6 +1044,10 @@ export class IndexPattern implements IIndexPattern {
     id?: string;
     // (undocumented)
     init(forceFieldRefresh?: boolean): Promise<this>;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    initFromSpec(spec: IndexPatternSpec): this;
     // (undocumented)
     intervalName: string | undefined | null;
     // (undocumented)
@@ -1075,9 +1083,9 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     toJSON(): string | undefined;
     // (undocumented)
-    toString(): string;
+    toSpec(): IndexPatternSpec;
     // (undocumented)
-    type?: string;
+    toString(): string;
     // (undocumented)
     typeMeta?: IndexPatternTypeMeta;
     }
@@ -1116,12 +1124,15 @@ export interface IndexPatternAttributes {
 export class IndexPatternField implements IFieldType {
     // (undocumented)
     $$spec: FieldSpec;
+    // Warning: (ae-forgotten-export) The symbol "FieldSpecExportFmt" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "FieldDependencies" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IIndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, onNotification }: FieldDependencies);
+    constructor(indexPattern: IIndexPattern, spec: FieldSpecExportFmt | FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, onNotification }: FieldDependencies);
     // (undocumented)
     aggregatable?: boolean;
+    // Warning: (ae-forgotten-export) The symbol "FieldSpecConflictDescriptions" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    conflictDescriptions?: Record<string, string[]>;
+    conflictDescriptions?: FieldSpecConflictDescriptions;
     // (undocumented)
     count?: number;
     // (undocumented)
@@ -1150,6 +1161,8 @@ export class IndexPatternField implements IFieldType {
     sortable?: boolean;
     // (undocumented)
     subType?: IFieldSubType;
+    // (undocumented)
+    toSpec: () => FieldSpecExportFmt;
     // (undocumented)
     type: string;
     // (undocumented)
