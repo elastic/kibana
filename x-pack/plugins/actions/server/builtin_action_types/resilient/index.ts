@@ -34,7 +34,7 @@ interface GetActionTypeParams {
 export function getActionType(params: GetActionTypeParams): ActionType {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.servicenow',
+    id: '.resilient',
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
     validate: {

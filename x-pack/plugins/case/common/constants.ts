@@ -28,4 +28,4 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions`;
 export const ACTION_URL = '/api/actions';
 export const ACTION_TYPES_URL = '/api/actions/list_action_types';
 
-export const SUPPORTED_CONNECTORS = ['.servicenow', '.jira'];
+export const SUPPORTED_CONNECTORS = ['.servicenow', '.jira', '.resilient'];

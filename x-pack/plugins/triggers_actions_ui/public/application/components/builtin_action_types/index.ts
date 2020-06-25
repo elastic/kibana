@@ -10,6 +10,7 @@ import { getEmailActionType } from './email';
 import { getIndexActionType } from './es_index';
 import { getPagerDutyActionType } from './pagerduty';
 import { getWebhookActionType } from './webhook';
+import { getResilientActionType } from './resilient';
 import { TypeRegistry } from '../../type_registry';
 import { ActionTypeModel } from '../../../types';
 
@@ -24,4 +25,5 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getIndexActionType());
   actionTypeRegistry.register(getPagerDutyActionType());
   actionTypeRegistry.register(getWebhookActionType());
+  actionTypeRegistry.register(getResilientActionType());
 }
