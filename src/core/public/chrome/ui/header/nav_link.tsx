@@ -35,11 +35,12 @@ function LinkIcon({ url }: { url: string }) {
 interface Props {
   link: ChromeNavLink;
   legacyMode: boolean;
-  appId: string | undefined;
+  appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
   onClick?: Function;
   navigateToApp: CoreStart['application']['navigateToApp'];
+  externalLink?: boolean;
 }
 
 // TODO #64541
@@ -54,6 +55,7 @@ export function createEuiListItem({
   onClick = () => {},
   navigateToApp,
   dataTestSubj,
+  externalLink = false,
 }: Props) {
   const { legacy, active, id, title, disabled, euiIconType, icon, tooltip } = link;
   let { href } = link;
@@ -69,6 +71,7 @@ export function createEuiListItem({
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       onClick();
       if (
+        !externalLink && // ignore external links
         !legacyMode && // ignore when in legacy mode
         !legacy && // ignore links to legacy apps
         !event.defaultPrevented && // onClick prevented default

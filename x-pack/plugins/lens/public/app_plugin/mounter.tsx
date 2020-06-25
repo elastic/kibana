@@ -10,9 +10,8 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { parse } from 'query-string';
 
-import { removeQueryParam, Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
@@ -29,13 +28,17 @@ export async function mountApp(
   createEditorFrame: EditorFrameStart['createInstance']
 ) {
   const [coreStart, startDependencies] = await core.getStartServices();
-  const { data: dataStart, navigation } = startDependencies;
+  const { data: dataStart, navigation, embeddable } = startDependencies;
   const savedObjectsClient = coreStart.savedObjects.client;
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
 
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
+
+  const stateTransfer = embeddable?.getStateTransfer(params.history);
+  const { originatingApp } =
+    stateTransfer?.getIncomingOriginatingApp({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
 
   const instance = await createEditorFrame();
 
@@ -49,7 +52,6 @@ export async function mountApp(
     routeProps: RouteComponentProps<{ id?: string }>,
     id?: string,
     returnToOrigin?: boolean,
-    originatingApp?: string,
     newlyCreated?: boolean
   ) => {
     if (!id) {
@@ -59,11 +61,9 @@ export async function mountApp(
     } else if (!!originatingApp && id && returnToOrigin) {
       routeProps.history.push(`/edit/${id}`);
 
-      if (originatingApp === 'dashboards') {
-        const addLensId = newlyCreated ? id : '';
-        startDependencies.dashboard.addEmbeddableToDashboard({
-          embeddableId: addLensId,
-          embeddableType: LENS_EMBEDDABLE_TYPE,
+      if (newlyCreated && stateTransfer) {
+        stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+          state: { id, type: LENS_EMBEDDABLE_TYPE },
         });
       } else {
         coreStart.application.navigateToApp(originatingApp);
@@ -73,11 +73,6 @@ export async function mountApp(
 
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
-    const urlParams = parse(routeProps.location.search) as Record<string, string>;
-    const originatingAppFromUrl = urlParams.embeddableOriginatingApp;
-    if (urlParams.embeddableOriginatingApp) {
-      removeQueryParam(routeProps.history, 'embeddableOriginatingApp');
-    }
 
     return (
       <App
@@ -88,10 +83,10 @@ export async function mountApp(
         storage={new Storage(localStorage)}
         docId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-        redirectTo={(id, returnToOrigin, originatingApp, newlyCreated) =>
-          redirectTo(routeProps, id, returnToOrigin, originatingApp, newlyCreated)
+        redirectTo={(id, returnToOrigin, newlyCreated) =>
+          redirectTo(routeProps, id, returnToOrigin, newlyCreated)
         }
-        originatingAppFromUrl={originatingAppFromUrl}
+        originatingApp={originatingApp}
         onAppLeave={params.onAppLeave}
         history={routeProps.history}
       />
