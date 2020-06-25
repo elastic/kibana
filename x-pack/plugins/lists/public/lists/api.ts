@@ -4,9 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+
 import { HttpStart } from '../../../../../src/core/public';
-import { FoundListSchema, ListSchema, Type } from '../../common/schemas';
+import {
+  FoundListSchema,
+  ListSchema,
+  Type,
+  deleteListSchema,
+  listSchema,
+} from '../../common/schemas';
 import { LIST_ITEM_URL, LIST_URL } from '../../common/constants';
+import { validateEither } from '../../common/siem_common_deps';
 
 export interface FindListsParams {
   http: HttpStart;
@@ -64,12 +75,28 @@ export interface DeleteListParams {
   signal: AbortSignal;
 }
 
-export const deleteList = async ({ http, id, signal }: DeleteListParams): Promise<ListSchema> => {
-  return http.fetch<ListSchema>(LIST_URL, {
+const _deleteList = async ({ http, id, signal }: DeleteListParams): Promise<ListSchema> =>
+  http.fetch<ListSchema>(LIST_URL, {
     method: 'DELETE',
     query: { id },
     signal,
   });
+
+export const deleteList = async ({ http, id, signal }: DeleteListParams): Promise<ListSchema> => {
+  const deleteWithValidations = pipe(
+    { id },
+    (payload) => fromEither(validateEither(deleteListSchema, payload)),
+    chain((payload) => tryCatch(() => _deleteList({ http, signal, ...payload }), String)),
+    chain((response) => fromEither(validateEither(listSchema, response)))
+  );
+
+  return pipe(
+    await deleteWithValidations(),
+    fold(
+      (a) => Promise.reject(a),
+      (e) => Promise.resolve(e)
+    )
+  );
 };
 
 export interface ExportListParams {

@@ -25,8 +25,8 @@ export const validate = <T extends t.Mixed>(
 };
 
 export const validateEither = <T extends t.Mixed>(
-  obj: unknown,
-  schema: T
+  schema: T,
+  obj: unknown
 ): Either<string, t.TypeOf<T>> =>
   pipe(
     obj,

@@ -6,6 +6,9 @@
 
 import { HttpFetchOptions } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { getDeleteListSchemaMock } from '../../common/schemas/request/delete_list_schema.mock';
+import { getListResponseMock } from '../../common/schemas/response/list_schema.mock';
+import { DeleteListSchema } from '../../common/schemas';
 
 import { deleteList, exportList, findLists, importList } from './api';
 
@@ -17,11 +20,16 @@ describe('Value Lists API', () => {
   });
 
   describe('deleteList', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getListResponseMock());
+    });
+
     it('DELETEs specifying the id as a query parameter', async () => {
       const abortCtrl = new AbortController();
+      const payload: DeleteListSchema = getDeleteListSchemaMock();
       await deleteList({
         http: httpMock,
-        id: 'my_list',
+        ...payload,
         signal: abortCtrl.signal,
       });
 
@@ -29,9 +37,40 @@ describe('Value Lists API', () => {
         '/api/lists',
         expect.objectContaining({
           method: 'DELETE',
-          query: { id: 'my_list' },
+          query: getDeleteListSchemaMock(),
         })
       );
+    });
+
+    it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
+      const abortCtrl = new AbortController();
+      const payload: Omit<DeleteListSchema, 'id'> & {
+        id: number;
+      } = { ...getDeleteListSchemaMock(), id: 23 };
+
+      await expect(
+        deleteList({
+          http: httpMock,
+          ...((payload as unknown) as DeleteListSchema),
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "23" supplied to "id"');
+      expect(httpMock.fetch).not.toHaveBeenCalled();
+    });
+
+    it('rejects with an error if response payload is invalid', async () => {
+      const abortCtrl = new AbortController();
+      const payload: DeleteListSchema = getDeleteListSchemaMock();
+      const badResponse = { ...getListResponseMock(), id: undefined };
+      httpMock.fetch.mockResolvedValue(badResponse);
+
+      await expect(
+        deleteList({
+          http: httpMock,
+          ...payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
     });
   });
 

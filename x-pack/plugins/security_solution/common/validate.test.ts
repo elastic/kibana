@@ -33,7 +33,7 @@ describe('validateEither', () => {
   it('returns the decoded payload as right if valid', () => {
     const schema = t.exact(t.type({ a: t.number }));
     const payload = { a: 1 };
-    const result = validateEither(payload, schema);
+    const result = validateEither(schema, payload);
 
     expect(result).toEqual(right(payload));
   });
@@ -41,7 +41,7 @@ describe('validateEither', () => {
   it('returns an error string if invalid', () => {
     const schema = t.exact(t.type({ a: t.number }));
     const payload = { a: 'some other value' };
-    const result = validateEither(payload, schema);
+    const result = validateEither(schema, payload);
 
     expect(result).toEqual(left('Invalid value "some other value" supplied to "a"'));
   });
