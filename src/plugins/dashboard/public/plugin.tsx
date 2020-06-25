@@ -33,16 +33,9 @@ import {
   SavedObjectsClientContract,
   ScopedHistory,
 } from 'src/core/public';
-import { parseUrl } from 'query-string';
-import { DashboardContainerInput } from './index';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableInput,
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '../../embeddable/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
+import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 
@@ -57,7 +50,7 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../kibana_react/public';
-import { createKbnUrlTracker, setStateToKbnUrl, Storage } from '../../kibana_utils/public';
+import { createKbnUrlTracker, Storage } from '../../kibana_utils/public';
 import {
   initAngularBootstrap,
   KibanaLegacySetup,
@@ -91,8 +84,6 @@ import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { createDashboardContainerByValueRenderer } from './application';
-import { convertPanelStateToSavedDashboardPanel } from './application/lib/embeddable_saved_object_converters';
-import { DashboardPanels } from './application/embeddable/types';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -110,7 +101,6 @@ interface SetupDependencies {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
-  dashboard: DashboardStart;
 }
 
 interface StartDependencies {
@@ -123,7 +113,6 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
-  dashboard: DashboardStart;
 }
 
 export type Setup = void;
@@ -134,11 +123,8 @@ export interface DashboardStart {
     embeddableId: string;
     embeddableType: string;
   }) => void | undefined;
-  navigateToDashboard: (input: DashboardContainerInput) => void;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
-  getLastLoadedDashboardAppDashboardInput: () => DashboardContainerInput | undefined;
-  setLastLoadedDashboardAppDashboardInput: (dashboard: DashboardContainerInput | undefined) => void;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -151,7 +137,6 @@ declare module '../../../plugins/ui_actions/public' {
 
 export class DashboardPlugin
   implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
-  private currentDashboardInput: DashboardContainerInput | undefined;
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -184,7 +169,7 @@ export class DashboardPlugin
     }
 
     const getStartServices = async () => {
-      const [coreStart, deps, dashboardStart] = await core.getStartServices();
+      const [coreStart, deps] = await core.getStartServices();
 
       const useHideChrome = ({ toggleChrome } = { toggleChrome: true }) => {
         React.useEffect(() => {
@@ -218,7 +203,6 @@ export class DashboardPlugin
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         ExitFullScreenButton,
         uiActions: deps.uiActions,
-        dashboard: dashboardStart,
       };
     };
 
@@ -311,7 +295,6 @@ export class DashboardPlugin
           usageCollection,
           scopedHistory: () => this.currentHistory!,
           savedObjects,
-          dashboard: dashboardStart,
           restorePreviousUrl,
         };
         // make sure the index pattern list is up to date
@@ -373,32 +356,6 @@ export class DashboardPlugin
     }
   }
 
-  private navigateToDashboard(core: CoreStart, dashInput: EmbeddableInput) {
-    if (!this.getActiveUrl) {
-      return;
-    }
-    const lastDashboardUrl = this.getActiveUrl();
-    const { query, filters } = dashInput;
-    const panels = dashInput.panels as DashboardPanels;
-    const { url } = parseUrl(lastDashboardUrl);
-    const dashUrl = setStateToKbnUrl(
-      '_a',
-      {
-        query,
-        filters,
-        panels: Object.values(panels).map((panel) => {
-          return convertPanelStateToSavedDashboardPanel(
-            panel,
-            this.initializerContext.env.packageInfo.version
-          );
-        }),
-      },
-      { useHash: false },
-      url
-    );
-    core.application.navigateToApp('dashboards', { path: dashUrl });
-  }
-
   private addEmbeddableToDashboard(
     core: CoreStart,
     { embeddableId, embeddableType }: { embeddableId: string; embeddableType: string }
@@ -456,10 +413,6 @@ export class DashboardPlugin
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
-      getLastLoadedDashboardAppDashboardInput: () => this.currentDashboardInput,
-      setLastLoadedDashboardAppDashboardInput: (dashboardInput) =>
-        (this.currentDashboardInput = dashboardInput),
-      navigateToDashboard: this.navigateToDashboard.bind(this, core),
     };
   }
 

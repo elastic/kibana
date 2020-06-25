@@ -33,7 +33,6 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
 import { Storage } from '../../../kibana_utils/public';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
@@ -74,7 +73,6 @@ export interface RenderDeps {
   navigateToLegacyKibanaUrl: KibanaLegacyStart['navigateToLegacyKibanaUrl'];
   scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;
-  dashboard: DashboardStart;
   restorePreviousUrl: () => void;
 }
 
