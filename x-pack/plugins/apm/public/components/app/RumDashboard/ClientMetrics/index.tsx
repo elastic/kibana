@@ -11,13 +11,11 @@ import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { BackEndLabel, FrontEndLabel, PageViewsLabel } from '../translations';
 
-export const formatBigValue = (val?: number | null, fixed?: number): string => {
+export const formatBigValue = (val?: number | null): string => {
   if (val && val >= 1000) {
     const result = val / 1000;
-    if (fixed) {
-      return result.toFixed(fixed) + 'k';
-    }
-    return result + 'k';
+
+    return Math.round(result) + 'k';
   }
   return val + '';
 };
@@ -72,7 +70,7 @@ export const ClientMetrics = () => {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatBigValue(data?.pageViews?.value, 2) ?? '-'}
+          title={formatBigValue(data?.pageViews?.value) ?? '-'}
           description={PageViewsLabel}
           isLoading={status !== 'success'}
         />

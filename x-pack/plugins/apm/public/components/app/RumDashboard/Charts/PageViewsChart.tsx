@@ -16,7 +16,7 @@ import {
   Settings,
   timeFormatter,
 } from '@elastic/charts';
-import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
+import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
 
 import {
   EUI_CHARTS_THEME_DARK,
@@ -75,9 +75,9 @@ export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
-    <ChartWrapper loading={loading} height="200px">
+    <ChartWrapper loading={loading} height="250px">
       {(!loading || data) && (
-        <Chart size={{ height: 200 }}>
+        <Chart>
           <Settings
             baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
             theme={

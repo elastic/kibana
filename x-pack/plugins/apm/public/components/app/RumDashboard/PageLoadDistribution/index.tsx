@@ -15,13 +15,13 @@ import {
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { PageLoadDistLabel, ResetZoomLabel } from '../translations';
-import { BreakdownFilter } from '../BreakdownFilter';
+import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 export interface PercentileR {
-  min: string | null;
-  max: string | null;
+  min?: number | null;
+  max?: number | null;
 }
 
 export const PageLoadDistribution = () => {
@@ -48,8 +48,8 @@ export const PageLoadDistribution = () => {
               uiFilters: JSON.stringify(uiFilters),
               ...(percentileRange.min && percentileRange.max
                 ? {
-                    minPercentile: percentileRange.min,
-                    maxPercentile: percentileRange.max,
+                    minPercentile: String(percentileRange.min),
+                    maxPercentile: String(percentileRange.max),
                   }
                 : {}),
             },
@@ -61,7 +61,7 @@ export const PageLoadDistribution = () => {
   );
 
   const onPercentileChange = (min: number, max: number) => {
-    setPercentileRange({ min: String(min), max: String(max) });
+    setPercentileRange({ min, max });
   };
 
   const onBreakdownChange = (values: BreakdownItem[]) => {
@@ -104,7 +104,10 @@ export const PageLoadDistribution = () => {
         onPercentileChange={onPercentileChange}
         loading={status !== 'success'}
         breakdowns={breakdowns}
-        percentileRange={percentileRange}
+        percentileRange={{
+          max: percentileRange.max || data?.maxDuration,
+          min: percentileRange.min || data?.minDuration,
+        }}
       />
     </div>
   );

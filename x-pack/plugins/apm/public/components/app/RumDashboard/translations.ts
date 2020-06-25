@@ -79,15 +79,8 @@ export const OverallLabel = i18n.translate(
   }
 );
 
-export const LoadingLabel = i18n.translate(
-  'xpack.apm.filterGroup.loadingMessage',
-  {
-    defaultMessage: 'Loading...',
-  }
-);
-
-export const SearchBreakdownLabel = i18n.translate(
-  'xpack.uptime.filterGroup.searchMessage',
+export const SelectBreakdownLabel = i18n.translate(
+  'xpack.uptime.filterGroup.selectBreakdown',
   {
     defaultMessage: 'Search breakdown',
   }

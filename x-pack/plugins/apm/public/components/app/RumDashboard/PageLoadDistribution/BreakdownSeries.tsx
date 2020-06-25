@@ -6,8 +6,8 @@
 
 import React, { FC, useEffect } from 'react';
 import { CurveType, LineSeries, ScaleType } from '@elastic/charts';
-import { usePageLoadBreakdowns } from './use_breakdowns';
 import { PercentileR } from './index';
+import { useBreakdowns } from './use_breakdowns';
 
 interface Props {
   field: string;
@@ -22,7 +22,7 @@ export const BreakdownSeries: FC<Props> = ({
   percentileRange,
   onLoadingChange,
 }) => {
-  const { data, loading } = usePageLoadBreakdowns({
+  const { data, loading } = useBreakdowns({
     field,
     value,
     percentileRange,
@@ -33,13 +33,18 @@ export const BreakdownSeries: FC<Props> = ({
   }, [loading, onLoadingChange]);
 
   return (
-    <LineSeries
-      id={`${field}-${value}`}
-      name={value}
-      xScaleType={ScaleType.Linear}
-      yScaleType={ScaleType.Linear}
-      data={data?.pageLoadDistribution ?? []}
-      curve={CurveType.CURVE_NATURAL}
-    />
+    <>
+      {data?.map(({ data: seriesData, name }) => (
+        <LineSeries
+          id={`${field}-${value}-${name}`}
+          key={`${field}-${value}-${name}`}
+          name={name}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          data={seriesData ?? []}
+          curve={CurveType.CURVE_NATURAL}
+        />
+      ))}
+    </>
   );
 };

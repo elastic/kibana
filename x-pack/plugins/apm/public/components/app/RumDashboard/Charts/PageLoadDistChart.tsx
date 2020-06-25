@@ -25,12 +25,16 @@ import {
 import { Position } from '@elastic/charts/dist/utils/commons';
 import styled from 'styled-components';
 import { PercentileAnnotations } from '../PageLoadDistribution/PercentileAnnotations';
-import { PageLoadTimeLabel, PercPageLoadedLabel } from '../translations';
+import {
+  OverallLabel,
+  PageLoadTimeLabel,
+  PercPageLoadedLabel,
+} from '../translations';
 import { ChartWrapper } from '../ChartWrapper';
-import { BreakdownSeries } from '../PageLoadDistribution/BreakdownSeries';
 import { PercentileR } from '../PageLoadDistribution';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { BreakdownSeries } from '../PageLoadDistribution/BreakdownSeries';
 
 interface Props {
   onPercentileChange: (min: number, max: number) => void;
@@ -77,7 +81,7 @@ export const PageLoadDistChart: FC<Props> = ({
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
-    <ChartWrapper loading={loading || breakdownLoading} height="200px">
+    <ChartWrapper loading={loading || breakdownLoading} height="250px">
       {(!loading || data) && (
         <PageLoadChart>
           <Settings
@@ -105,25 +109,23 @@ export const PageLoadDistChart: FC<Props> = ({
           />
           <LineSeries
             id={'PagesPercentage'}
-            name={PercPageLoadedLabel}
+            name={OverallLabel}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
             curve={CurveType.CURVE_NATURAL}
           />
-          {breakdowns.map(({ name, type }) => {
-            return (
-              <BreakdownSeries
-                key={`${type}-${name}`}
-                field={type}
-                value={name}
-                percentileRange={percentileRange}
-                onLoadingChange={(bLoading) => {
-                  setBreakdownLoading(bLoading);
-                }}
-              />
-            );
-          })}
+          {breakdowns.map(({ name, type }) => (
+            <BreakdownSeries
+              key={`${type}-${name}`}
+              field={type}
+              value={name}
+              percentileRange={percentileRange}
+              onLoadingChange={(bLoading) => {
+                setBreakdownLoading(bLoading);
+              }}
+            />
+          ))}
         </PageLoadChart>
       )}
     </ChartWrapper>

@@ -11,53 +11,38 @@
  */
 
 import {
-  EuiFieldSearch,
+  EuiPopover,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiFilterSelectItem,
-  EuiNotificationBadge,
-  EuiPopover,
   EuiPopoverTitle,
+  EuiFilterSelectItem,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { LoadingLabel, SearchBreakdownLabel } from './translations';
-import { BreakdownItem } from '../../../../typings/ui_filters';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { SelectBreakdownLabel } from '../translations';
 
 export interface BreakdownGroupProps {
   id: string;
-  loading: boolean;
   disabled?: boolean;
   items: BreakdownItem[];
-  categories: BreakdownItem[];
   onChange: (values: BreakdownItem[]) => void;
-  title: string;
 }
 
 export const BreakdownGroup = ({
   id,
   disabled,
-  loading,
-  items: allItems,
   onChange,
-  title,
-  categories,
+  items: allItems,
 }: BreakdownGroupProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>('');
 
-  const [items, setItems] = useState<BreakdownItem[]>(allItems || []);
+  const [items, setItems] = useState<BreakdownItem[]>(allItems);
 
   useEffect(() => {
     setItems(allItems);
   }, [allItems]);
 
   const getSelItems = () => items.filter((tItem) => !!tItem.selected);
-
-  const getItemsToDisplay = () =>
-    items.filter(
-      (tItem) =>
-        tItem.name.toLowerCase().indexOf(query.toLocaleLowerCase()) >= 0
-    );
 
   return (
     <EuiFilterGroup>
@@ -75,7 +60,7 @@ export const BreakdownGroup = ({
             }}
             size="s"
           >
-            {title}
+            Breakdown
           </EuiFilterButton>
         }
         closePopover={() => {
@@ -89,22 +74,16 @@ export const BreakdownGroup = ({
         withTitle
         zIndex={10000}
       >
-        <EuiPopoverTitle>
-          <EuiFieldSearch
-            incremental={true}
-            disabled={items.length === 0}
-            onSearch={(tQuery) => setQuery(tQuery)}
-            placeholder={loading ? LoadingLabel : SearchBreakdownLabel}
-          />
-        </EuiPopoverTitle>
-        <div className="euiFilterSelect__items">
-          {!loading &&
-            getItemsToDisplay().map(({ name, count, selected }) => (
+        <EuiPopoverTitle>{SelectBreakdownLabel}</EuiPopoverTitle>
+        <div className="euiFilterSelect__items" style={{ minWidth: 200 }}>
+          {items
+            .filter(({ type }) => type === 'category')
+            .map(({ name, count, selected, type, fieldName }) => (
               <EuiFilterSelectItem
                 checked={!!selected ? 'on' : undefined}
                 data-cy={`filter-breakdown-item_${name}`}
                 key={name + count}
-                onClick={() =>
+                onClick={() => {
                   setItems((prevItems) =>
                     prevItems.map((tItem) => ({
                       ...tItem,
@@ -113,15 +92,10 @@ export const BreakdownGroup = ({
                           ? !tItem.selected
                           : tItem.selected,
                     }))
-                  )
-                }
+                  );
+                }}
               >
-                <span className="euiFacetButton__content">
-                  <span className="euiFacetButton__text">{name}</span>
-                  <EuiNotificationBadge color={selected ? 'accent' : 'subdued'}>
-                    {count}
-                  </EuiNotificationBadge>
-                </span>
+                {name}
               </EuiFilterSelectItem>
             ))}
         </div>

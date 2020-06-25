@@ -27,12 +27,11 @@ export async function getPageViewTrends({
   const breakdownAggs: AggregationInputMap = {};
   if (breakdowns) {
     const breakdownList: BreakdownItem[] = JSON.parse(breakdowns);
-    breakdownList.forEach(({ name, type }) => {
+    breakdownList.forEach(({ name, type, fieldName }) => {
       breakdownAggs[type + '__' + name] = {
-        filter: {
-          term: {
-            [type]: name,
-          },
+        terms: {
+          field: fieldName,
+          size: 9,
         },
       };
     });
@@ -50,14 +49,7 @@ export async function getPageViewTrends({
             field: '@timestamp',
             buckets: 50,
           },
-          aggs: {
-            transCount: {
-              value_count: {
-                field: 'transaction.type',
-              },
-            },
-            ...breakdownAggs,
-          },
+          aggs: breakdownAggs,
         },
       },
     },
@@ -68,15 +60,21 @@ export async function getPageViewTrends({
   const response = await client.search(params);
 
   const result = response.aggregations?.pageViews.buckets ?? [];
+
   return result.map((bucket) => {
-    const { key: xVal, transCount } = bucket;
+    const { key: xVal, doc_count: bCount } = bucket;
     const res: Record<string, null | number> = {
       x: xVal,
-      y: transCount.value,
+      y: bCount,
     };
-    Object.keys(breakdownAggs).forEach((key) => {
-      // @ts-ignore
-      res[key] = bucket[key]?.doc_count;
+
+    Object.keys(breakdownAggs).forEach((bKey) => {
+      const categoryBuckets = (bucket[bKey] as any).buckets;
+      categoryBuckets.forEach(
+        ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
+          res['category__' + key] = docCount;
+        }
+      );
     });
 
     return res;

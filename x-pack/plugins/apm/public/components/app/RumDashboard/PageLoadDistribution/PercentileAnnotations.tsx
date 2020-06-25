@@ -23,14 +23,14 @@ function generateAnnotationData(
   values?: Record<string, number>
 ): LineAnnotationDatum[] {
   return Object.entries(values ?? {}).map((value) => ({
-    dataValue: value[1],
+    dataValue: Math.round(value[1] / 1000),
     details: `${(+value[0]).toFixed(0)}`,
   }));
 }
 
 const PercentileMarker = styled.span`
   position: relative;
-  bottom: 140px;
+  bottom: 205px;
 `;
 
 export const PercentileAnnotations = ({ percentiles }: Props) => {
@@ -44,9 +44,15 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
     },
   };
 
-  const PercentileTooltip = ({ details }) => {
+  const PercentileTooltip = ({
+    annotation,
+  }: {
+    annotation: LineAnnotationDatum;
+  }) => {
     return (
-      <span data-cy="percentileTooltipTitle">Percentile: {details}th</span>
+      <span data-cy="percentileTooltipTitle">
+        {annotation.details}th Percentile
+      </span>
     );
   };
 
@@ -63,9 +69,9 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
           marker={
             <PercentileMarker data-cy="percentile-markers">
               <EuiToolTip
-                title={<PercentileTooltip details={annotation.details} />}
+                title={<PercentileTooltip annotation={annotation} />}
                 content={
-                  <span>Pages loaded: {annotation.dataValue.toFixed(2)}</span>
+                  <span>Pages loaded: {Math.round(annotation.dataValue)}</span>
                 }
               >
                 <>{annotation.details}th</>

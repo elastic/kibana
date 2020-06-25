@@ -14,11 +14,7 @@ interface Props {
   value: string;
 }
 
-export const usePageLoadBreakdowns = ({
-  percentileRange,
-  field,
-  value,
-}: Props) => {
+export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end } = urlParams;
@@ -28,19 +24,18 @@ export const usePageLoadBreakdowns = ({
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end && field && value) {
-        uiFilters.kuery = `${field}: ${value}`;
-
         return callApmApi({
-          pathname: '/api/apm/rum-client/page-load-distribution',
+          pathname: '/api/apm/rum-client/page-load-distribution/breakdown',
           params: {
             query: {
               start,
               end,
+              breakdown: value,
               uiFilters: JSON.stringify(uiFilters),
               ...(minP && maxP
                 ? {
-                    minPercentile: minP,
-                    maxPercentile: maxP,
+                    minPercentile: String(minP),
+                    maxPercentile: String(maxP),
                   }
                 : {}),
             },

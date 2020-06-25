@@ -11,7 +11,7 @@ import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { getPageViewTrends } from '../lib/rum_client/get_page_view_trends';
 import { getPageLoadDistribution } from '../lib/rum_client/get_page_load_distribution';
-import { getBreakdownFilters } from '../lib/rum_client/get_breakdown_filters';
+import { getPageLoadDistBreakdown } from '../lib/rum_client/get_pl_dist_breakdown';
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
@@ -46,14 +46,29 @@ export const rumPageLoadDistributionRoute = createRoute(() => ({
   },
 }));
 
-export const breakdownFiltersRoute = createRoute(() => ({
-  path: '/api/apm/rum-client/breakdown',
+export const rumPageLoadDistBreakdownRoute = createRoute(() => ({
+  path: '/api/apm/rum-client/page-load-distribution/breakdown',
   params: {
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      percentileRangeRt,
+      t.type({ breakdown: t.string }),
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return getBreakdownFilters({ setup });
+
+    const {
+      query: { minPercentile, maxPercentile, breakdown },
+    } = context.params;
+
+    return getPageLoadDistBreakdown(
+      setup,
+      Number(minPercentile),
+      Number(maxPercentile),
+      breakdown
+    );
   },
 }));
 

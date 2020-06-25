@@ -14,7 +14,6 @@ import {
   TRANSACTION_URL,
   USER_AGENT_NAME,
   USER_AGENT_DEVICE,
-  CLIENT_GEO,
   USER_AGENT_OS,
   CLIENT_GEO_COUNTRY_ISO_CODE,
 } from '../../../../common/elasticsearch_fieldnames';
