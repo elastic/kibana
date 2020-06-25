@@ -15,4 +15,6 @@ export class InnerJoin implements IJoin {
   getRightJoinSource(): IESTermSource;
 
   toDescriptor(): JoinDescriptor;
+
+  getSourceMetaDataRequestId(): string;
 }

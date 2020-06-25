@@ -187,7 +187,7 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
     colorCategory: 'palette_0',
   });
 
-  const meta = colorStyle.pluckCategoricalStyleMetaFromFieldMetaData({
+  const meta = colorStyle._pluckCategoricalStyleMetaFromFieldMetaData({
     foobar: {
       buckets: [
         {
