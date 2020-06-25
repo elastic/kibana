@@ -85,8 +85,7 @@ export async function findAllUnenrolledHostIds(client: IScopedClusterClient): Pr
     HostId
   >;
 
-  // eslint-disable-next-line no-return-await
-  return await fetchAllUnenrolledHostIdsWithScroll(response, client.callAsCurrentUser);
+  return fetchAllUnenrolledHostIdsWithScroll(response, client.callAsCurrentUser);
 }
 
 export async function fetchAllUnenrolledHostIdsWithScroll(
@@ -94,10 +93,10 @@ export async function fetchAllUnenrolledHostIdsWithScroll(
   client: APICaller,
   hits: HostId[] = []
 ): Promise<HostId[]> {
-  const newHits = response.hits?.hits || [];
-  const scrollId = response._scroll_id;
+  let newHits = response.hits?.hits || [];
+  let scrollId = response._scroll_id;
 
-  if (newHits.length > 0) {
+  while (newHits.length > 0) {
     const hostIds: HostId[] = newHits.map((hitSource: HitSource) => hitSource._source);
     hits.push(...hostIds);
 
@@ -108,8 +107,8 @@ export async function fetchAllUnenrolledHostIdsWithScroll(
       },
     });
 
-    // eslint-disable-next-line no-return-await
-    return await fetchAllUnenrolledHostIdsWithScroll(innerResponse, client, hits);
+    newHits = innerResponse.hits?.hits || [];
+    scrollId = innerResponse._scroll_id;
   }
   return hits;
 }
