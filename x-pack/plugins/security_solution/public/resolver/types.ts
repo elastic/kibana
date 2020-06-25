@@ -147,9 +147,10 @@ export type CameraState = {
  */
 export interface DataState {
   readonly results: readonly ResolverEvent[];
-  readonly relatedEventsStats: Map<string, ResolverNodeStats>;
+  readonly relatedEventsStats: Readonly<Map<string, ResolverNodeStats>>;
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
   readonly relatedEventsReady: Map<string, boolean>;
+  readonly lineageLimits: Readonly<{ children: string | null; ancestors: string | null }>;
   isLoading: boolean;
   hasError: boolean;
 }

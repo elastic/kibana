@@ -26,7 +26,7 @@ import {
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
 import { InfraLogSourceConfigurationProvider } from './infra_log_source_configuration';
 import { MachineLearningProvider } from './ml';
-import { IngestManagerProvider } from './ingest_manager';
+import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { ResolverGeneratorProvider } from './resolver';
 import { TransformProvider } from './transform';
 
