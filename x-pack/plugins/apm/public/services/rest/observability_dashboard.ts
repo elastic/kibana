@@ -34,6 +34,7 @@ export const fetchLandingPageData = async (
     appLink: '/app/apm',
     stats: {
       services: {
+        type: 'number',
         label: i18n.translate(
           'xpack.apm.observabilityDashboard.stats.services',
           { defaultMessage: 'Services' }
@@ -41,6 +42,7 @@ export const fetchLandingPageData = async (
         value: serviceCount,
       },
       transactions: {
+        type: 'number',
         label: i18n.translate(
           'xpack.apm.observabilityDashboard.stats.transactions',
           { defaultMessage: 'Transactions' }
