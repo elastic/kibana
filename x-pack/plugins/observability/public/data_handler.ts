@@ -19,25 +19,27 @@ interface FetchDataParams {
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
+
 export type HasData = () => Promise<boolean>;
 
-interface DataHandler {
-  fetchData: FetchData;
+interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
+  fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
   hasData: HasData;
 }
 
 const dataHandlers: Partial<Record<ObservabilityApp, DataHandler>> = {};
 
-export type RegisterDataHandler<T extends ObservabilityApp = ObservabilityApp> = (params: {
-  appName: T;
-  fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
-  hasData: HasData;
-}) => void;
-
-export const registerDataHandler: RegisterDataHandler = ({ appName, fetchData, hasData }) => {
+export function registerDataHandler<T extends ObservabilityApp>({
+  appName,
+  fetchData,
+  hasData,
+}: { appName: T } & DataHandler<T>) {
   dataHandlers[appName] = { fetchData, hasData };
-};
+}
 
-export function getDataHandler(appName: ObservabilityApp): DataHandler | undefined {
-  return dataHandlers[appName];
+export function getDataHandler<T extends ObservabilityApp>(appName: T) {
+  const dataHandler = dataHandlers[appName];
+  if (dataHandler) {
+    return dataHandler as DataHandler<T>;
+  }
 }

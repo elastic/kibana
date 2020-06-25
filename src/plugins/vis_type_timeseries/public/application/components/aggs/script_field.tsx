@@ -28,10 +28,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { MetricsItemsSchema } from 'src/plugins/vis_type_timeseries/common/types';
 import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 
 interface Props {
-  model: { type: string; field: string; script: string; metric_agg?: string };
+  model: MetricsItemsSchema;
   onChange: (event: React.SyntheticEvent) => void;
 }
 
@@ -74,7 +75,7 @@ export const ScriptField = ({ model, onChange }: Props) => {
               </div>
             }
           >
-            <EuiTextArea fullWidth onChange={onChange} value={model.script} rows={3} />
+            <EuiTextArea fullWidth onChange={onChange} value={model.script || ''} rows={3} />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

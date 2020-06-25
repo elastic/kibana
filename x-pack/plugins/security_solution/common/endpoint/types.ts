@@ -74,7 +74,7 @@ export interface ResolverNodeStats {
 /**
  * A child node can also have additional children so we need to provide a pagination cursor.
  */
-export interface ChildNode extends LifecycleNode {
+export interface ResolverChildNode extends ResolverLifecycleNode {
   /**
    * A child node's pagination cursor can be null for a couple reasons:
    * 1. At the time of querying it could have no children in ES, in which case it will be marked as
@@ -89,7 +89,7 @@ export interface ChildNode extends LifecycleNode {
  * has an array of lifecycle events.
  */
 export interface ResolverChildren {
-  childNodes: ChildNode[];
+  childNodes: ResolverChildNode[];
   /**
    * This is the children cursor for the origin of a tree.
    */
@@ -116,7 +116,7 @@ export interface ResolverTree {
 /**
  * The lifecycle events (start, end etc) for a node.
  */
-export interface LifecycleNode {
+export interface ResolverLifecycleNode {
   entityID: string;
   lifecycle: ResolverEvent[];
   /**
@@ -132,7 +132,7 @@ export interface ResolverAncestry {
   /**
    * An array of ancestors with the lifecycle events grouped together
    */
-  ancestors: LifecycleNode[];
+  ancestors: ResolverLifecycleNode[];
   /**
    * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
    * ancestors when the request returned. More could have been ingested by ES after the fact though.
@@ -350,7 +350,23 @@ export interface AlertEvent {
 }
 
 /**
- * The status of the host
+ * The status of the Endpoint Agent as reported by the Agent or the
+ * Security Solution app using events from Fleet.
+ */
+export enum EndpointStatus {
+  /**
+   * Agent is enrolled with Fleet
+   */
+  enrolled = 'enrolled',
+
+  /**
+   * Agent is unenrrolled from Fleet
+   */
+  unenrolled = 'unenrolled',
+}
+
+/**
+ * The status of the host, which is mapped to the Elastic Agent status in Fleet
  */
 export enum HostStatus {
   /**
@@ -386,6 +402,7 @@ export type HostMetadata = Immutable<{
     };
   };
   Endpoint: {
+    status: EndpointStatus;
     policy: {
       applied: {
         id: string;
