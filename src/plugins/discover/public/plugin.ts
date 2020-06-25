@@ -55,7 +55,7 @@ import {
   setServices,
   setScopedHistory,
   getScopedHistory,
-  ensureHashHistoryLocation,
+  syncHistoryLocations,
   getServices,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
@@ -246,7 +246,7 @@ export class DiscoverPlugin
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
         setScopedHistory(params.history);
-        ensureHashHistoryLocation();
+        syncHistoryLocations();
         appMounted();
         const {
           plugins: { data: dataStart },
