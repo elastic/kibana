@@ -154,7 +154,7 @@ export class ManageSpacePage extends Component<Props, State> {
 
         <EnabledFeatures
           space={this.state.space}
-          features={this.state.features}
+          features={this.state.features.map((f) => f.toRaw())}
           onChange={this.onSpaceChange}
           getUrlForApp={this.props.getUrlForApp}
           securityEnabled={this.props.securityEnabled}
