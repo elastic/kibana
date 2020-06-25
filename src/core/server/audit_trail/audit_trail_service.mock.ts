@@ -36,6 +36,7 @@ const createStartContractMock = () => {
 const createAuditorMock = () => {
   const mocked: jest.Mocked<Auditor> = {
     add: jest.fn(),
+    withScope: jest.fn(),
   };
   return mocked;
 };
@@ -43,5 +44,6 @@ const createAuditorMock = () => {
 export const auditTrailServiceMock = {
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
+  createAuditorFactory: createStartContractMock,
   createAuditor: createAuditorMock,
 };

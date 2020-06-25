@@ -12,19 +12,7 @@ import { SpacesPluginSetup } from '../../../spaces/server';
 
 interface Deps {
   getCurrentUser: SecurityPluginSetup['authc']['getCurrentUser'];
-  getActiveSpace: SpacesPluginSetup['spacesService']['getActiveSpace'];
-}
-
-function tail<T = any>(array: T[]) {
-  return array[array.length - 1];
-}
-
-async function safeCall<T>(fn: () => T | Promise<T>): Promise<T | undefined> {
-  try {
-    return await fn();
-  } catch {
-    return;
-  }
+  getSpaceId: SpacesPluginSetup['spacesService']['getSpaceId'];
 }
 
 export class AuditTrailClient implements Auditor {
@@ -35,29 +23,25 @@ export class AuditTrailClient implements Auditor {
     private readonly deps: Deps
   ) {}
 
-  openScope(name: string) {
-    if (this.scope.includes(name)) {
-      throw new Error(`"${name}" scope is already opened`);
+  withScope = async <T>(name: string, fn: (...args: any[]) => Promise<T>): Promise<T> => {
+    try {
+      this.scope.push(name);
+      return await fn();
+    } finally {
+      this.scope.pop();
     }
-    this.scope.push(name);
-  }
-
-  closeScope(name: string) {
-    if (tail(this.scope) !== name) {
-      throw new Error(`Cannot close ${name} scope`);
-    }
-    this.scope.shift();
-  }
+  };
 
   async add(event: AuditableEvent) {
     const user = this.deps.getCurrentUser(this.request);
-    const space = await safeCall(() => this.deps.getActiveSpace(this.request));
+    const spaceId = this.deps.getSpaceId(this.request);
 
     this.event$.next({
       message: event.message,
       type: event.type,
       user: user?.username,
-      space: space?.name,
+      space: spaceId,
+      scope: this.scope.join('>'),
     });
   }
 }

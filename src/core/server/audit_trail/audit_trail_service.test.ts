@@ -18,6 +18,7 @@
  */
 
 import { AuditTrailService } from './audit_trail_service';
+import { AuditorFactory } from './types';
 import { mockCoreContext } from '../core_context.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 
@@ -29,9 +30,9 @@ describe('AuditTrailService', () => {
       it('throws if registered the same auditor factory twice', () => {
         const auditTrail = new AuditTrailService(coreContext);
         const { register } = auditTrail.setup();
-        const auditorFactory = {
+        const auditorFactory: AuditorFactory = {
           asScoped() {
-            return { add: () => undefined };
+            return { add: () => undefined, withScope: (() => {}) as any };
           },
         };
         register(auditorFactory);
@@ -45,42 +46,31 @@ describe('AuditTrailService', () => {
   describe('#start', () => {
     describe('asScoped', () => {
       it('initialize every auditor with a request', () => {
-        const scopedMockOne = jest.fn(() => ({ add: () => undefined }));
-        const auditorFactoryOne = { asScoped: scopedMockOne };
-        const scopedMockTwo = jest.fn(() => ({ add: () => undefined }));
-        const auditorFactoryTwo = { asScoped: scopedMockTwo };
+        const scopedMock = jest.fn(() => ({ add: jest.fn(), withScope: jest.fn() }));
+        const auditorFactory = { asScoped: scopedMock };
 
         const auditTrail = new AuditTrailService(coreContext);
         const { register } = auditTrail.setup();
-        register(auditorFactoryOne);
-        register(auditorFactoryTwo);
+        register(auditorFactory);
 
         const { asScoped } = auditTrail.start();
         const kibanaRequest = httpServerMock.createKibanaRequest();
         asScoped(kibanaRequest);
 
-        expect(scopedMockOne).toHaveBeenCalledWith(kibanaRequest);
-        expect(scopedMockTwo).toHaveBeenCalledWith(kibanaRequest);
+        expect(scopedMock).toHaveBeenCalledWith(kibanaRequest);
       });
 
       it('passes auditable event to every auditor', () => {
-        const addEventMockOne = jest.fn();
-        const auditorFactoryOne = {
+        const addEventMock = jest.fn();
+        const auditorFactory = {
           asScoped() {
-            return { add: addEventMockOne };
-          },
-        };
-        const addEventMockTwo = jest.fn();
-        const auditorFactoryTwo = {
-          asScoped() {
-            return { add: addEventMockTwo };
+            return { add: addEventMock, withScope: jest.fn() };
           },
         };
 
         const auditTrail = new AuditTrailService(coreContext);
         const { register } = auditTrail.setup();
-        register(auditorFactoryOne);
-        register(auditorFactoryTwo);
+        register(auditorFactory);
 
         const { asScoped } = auditTrail.start();
         const kibanaRequest = httpServerMock.createKibanaRequest();
@@ -91,8 +81,7 @@ describe('AuditTrailService', () => {
         };
         auditor.add(message);
 
-        expect(addEventMockOne).toHaveBeenLastCalledWith(message);
-        expect(addEventMockTwo).toHaveBeenLastCalledWith(message);
+        expect(addEventMock).toHaveBeenLastCalledWith(message);
       });
     });
   });

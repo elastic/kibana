@@ -35,7 +35,7 @@ export class AuditTrailPlugin implements Plugin {
   public async setup(core: CoreSetup, deps: DepsSetup) {
     const depsApi = {
       getCurrentUser: deps.security.authc.getCurrentUser,
-      getActiveSpace: deps.spaces.spacesService.getActiveSpace,
+      getSpaceId: deps.spaces.spacesService.getSpaceId,
     };
 
     const event$ = new Subject<AuditEvent>();

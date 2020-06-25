@@ -19,12 +19,24 @@
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { KibanaRequest } from '../http';
-import { AuditorFactory, AuditableEvent, AuditTrailSetup, AuditTrailStart } from './types';
+import { KibanaRequest, LegacyRequest } from '../http';
+import { ensureRawRequest } from '../http/router';
+import { Auditor, AuditorFactory, AuditTrailSetup, AuditTrailStart } from './types';
 
+const defaultAuditorFactory: AuditorFactory = {
+  asScoped() {
+    return {
+      add() {},
+      withScope(name, fn) {
+        return fn();
+      },
+    };
+  },
+};
 export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrailStart> {
   private readonly log: Logger;
-  private readonly auditors: Set<AuditorFactory> = new Set();
+  private auditor: AuditorFactory = defaultAuditorFactory;
+  private readonly auditors = new WeakMap<LegacyRequest, Auditor>();
 
   constructor(core: CoreContext) {
     this.log = core.logger.get('audit_trail');
@@ -33,10 +45,10 @@ export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrai
   setup() {
     return {
       register: (auditor: AuditorFactory) => {
-        if (this.auditors.has(auditor)) {
+        if (this.auditor !== defaultAuditorFactory) {
           throw new Error('An auditor factory has been already registered');
         }
-        this.auditors.add(auditor);
+        this.auditor = auditor;
         this.log.debug('An auditor factory has been registered');
       },
     };
@@ -45,12 +57,10 @@ export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrai
   start() {
     return {
       asScoped: (request: KibanaRequest) => {
-        const scopedAuditors = [...this.auditors].map((a) => a.asScoped(request));
-        return {
-          add: (event: AuditableEvent) => {
-            scopedAuditors.forEach((a) => a.add(event));
-          },
-        };
+        if (!this.auditors.has(ensureRawRequest(request))) {
+          this.auditors.set(ensureRawRequest(request), this.auditor!.asScoped(request));
+        }
+        return this.auditors.get(ensureRawRequest(request))!;
       },
     };
   }

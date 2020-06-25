@@ -31,7 +31,8 @@ export interface AuditableEvent {
 }
 
 export interface Auditor {
-  add(event: AuditableEvent): void;
+  add: (event: AuditableEvent) => void;
+  withScope: <T = unknown>(name: string, fn: (...args: any[]) => Promise<T>) => Promise<T>;
 }
 
 export interface AuditorFactory {
