@@ -95,20 +95,32 @@ export const validatePolicy = (
     );
   }
 
-  if (config && typeof config.indices === 'string' && config.indices.trim().length === 0) {
-    validation.errors.indices.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.indexPatternRequiredErrorMessage', {
-        defaultMessage: 'At least one index pattern is required.',
-      })
+  const hasDataStreams = () => {
+    return (
+      config &&
+      ((typeof config.dataStreams === 'string' && config.dataStreams.trim().length > 0) ||
+        (Array.isArray(config.dataStreams) && config.dataStreams.length > 0))
     );
+  };
+
+  if (config && typeof config.indices === 'string' && config.indices.trim().length === 0) {
+    if (!hasDataStreams()) {
+      validation.errors.indices.push(
+        i18n.translate('xpack.snapshotRestore.policyValidation.indexPatternRequiredErrorMessage', {
+          defaultMessage: 'At least one index pattern is required.',
+        })
+      );
+    }
   }
 
   if (config && Array.isArray(config.indices) && config.indices.length === 0) {
-    validation.errors.indices.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage', {
-        defaultMessage: 'You must select at least one index.',
-      })
-    );
+    if (!hasDataStreams()) {
+      validation.errors.indices.push(
+        i18n.translate('xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage', {
+          defaultMessage: 'You must select at least one index.',
+        })
+      );
+    }
   }
 
   if (

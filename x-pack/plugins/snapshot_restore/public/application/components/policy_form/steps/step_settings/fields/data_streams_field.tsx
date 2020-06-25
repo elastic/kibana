@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload, SnapshotConfig } from '../../../../../../../common/types';
+import { SlmPolicyPayload } from '../../../../../../../common/types';
 import { PolicyValidation } from '../../../../../services/validation';
 
 interface Props {
@@ -41,12 +41,22 @@ export const DataStreamsField: FunctionComponent<Props> = ({
   errors,
 }) => {
   const { config = {} } = policy;
+
+  // No data streams are selected by default
   const [isAllDataStreams, setIsAllDataStreams] = useState<boolean>(
-    !config.dataStreams || (Array.isArray(config.dataStreams) && config.dataStreams.length === 0)
+    () =>
+      Array.isArray(config.dataStreams) &&
+      config.dataStreams.length > 0 &&
+      config.dataStreams.every((d) => dataStreams.includes(d))
   );
-  const [dataStreamsSelection, setDataStreamsSelection] = useState<SnapshotConfig['dataStreams']>([
-    ...dataStreams,
-  ]);
+
+  const [dataStreamsSelection, setDataStreamsSelection] = useState<string[]>(
+    isAllDataStreams
+      ? [...dataStreams]
+      : Array.isArray(config.dataStreams)
+      ? dataStreams.filter((d) => (config.dataStreams! as string[]).includes(d))
+      : []
+  );
 
   // States for choosing all data streams, or a subset, including caching previously chosen subset list
   const [dataStreamOptions, setDataStreamOptions] = useState<EuiSelectableOption[]>(() => {
@@ -80,7 +90,7 @@ export const DataStreamsField: FunctionComponent<Props> = ({
         const isChecked = e.target.checked;
         setIsAllDataStreams(isChecked);
         if (isChecked) {
-          onUpdate({ dataStreams: undefined });
+          onUpdate({ dataStreams: [...dataStreams] });
         } else {
           onUpdate({
             dataStreams: [...(dataStreamsSelection || [])],

@@ -20,10 +20,11 @@ import { SlmPolicyPayload } from '../../../../../../common/types';
 import { documentationLinksService } from '../../../../services/documentation';
 import { StepProps } from '../';
 
-import { IndicesField } from './fields';
+import { IndicesField, DataStreamsField } from './fields';
 
 export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   policy,
+  dataStreams,
   indices,
   updatePolicy,
   errors,
@@ -192,6 +193,14 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
         isManagedPolicy={isManagedPolicy}
         errors={errors}
         indices={indices}
+        policy={policy}
+        onUpdate={updatePolicyConfig}
+      />
+
+      <DataStreamsField
+        isManagedPolicy={isManagedPolicy}
+        errors={errors}
+        dataStreams={dataStreams}
         policy={policy}
         onUpdate={updatePolicyConfig}
       />

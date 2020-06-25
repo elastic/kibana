@@ -139,6 +139,8 @@ export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): Snapsho
   } = snapshotConfig;
 
   const indicesArray = indicesToArray(indices);
+  // Even though data streams are not indices, we can treat the input the same way
+  // we treat input for the indices field because it gets concatenated to it.
   const dataStreamsArray = indicesToArray(dataStreams);
 
   const snapshotConfigEs: SnapshotConfigEs = {

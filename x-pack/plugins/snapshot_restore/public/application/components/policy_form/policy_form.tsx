@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload, Index } from '../../../../common/types';
+import { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common/constants';
 import { PolicyValidation, validatePolicy } from '../../services/validation';
 import {
@@ -27,7 +27,8 @@ import { PolicyNavigation } from './navigation';
 
 interface Props {
   policy: SlmPolicyPayload;
-  indices: Index[];
+  dataStreams: string[];
+  indices: string[];
   currentUrl: string;
   isEditing?: boolean;
   isSaving: boolean;
@@ -39,6 +40,7 @@ interface Props {
 
 export const PolicyForm: React.FunctionComponent<Props> = ({
   policy: originalPolicy,
+  dataStreams,
   indices,
   currentUrl,
   isEditing,
@@ -132,6 +134,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
         <CurrentStepForm
           policy={policy}
           indices={indices}
+          dataStreams={dataStreams}
           updatePolicy={updatePolicy}
           isEditing={isEditing}
           currentUrl={currentUrl}

@@ -244,9 +244,10 @@ export function registerPolicyRoutes({
         );
 
         const body: PolicyIndicesResponse = {
+          dataStreams: resolvedIndicesResponse.data_streams.map(({ name }) => name).sort(),
           indices: resolvedIndicesResponse.indices
-            .map(({ name, data_stream }) => ({ name, dataStream: data_stream }))
-            .sort((a, b) => a.name.localeCompare(b.name)),
+            .flatMap((index) => (index.data_stream ? [] : index.name))
+            .sort(),
         };
 
         return res.ok({

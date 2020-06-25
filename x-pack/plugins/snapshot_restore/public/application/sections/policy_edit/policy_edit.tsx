@@ -16,6 +16,7 @@ import { BASE_PATH } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editPolicy, useLoadPolicy, useLoadIndices } from '../../services/http';
+import { separateDataStreamsFromIndices } from './separate_data_streams_from_indices';
 
 interface MatchParams {
   name: string;
@@ -55,9 +56,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
   const {
     error: errorLoadingIndices,
     isLoading: isLoadingIndices,
-    data: { indices } = {
-      indices: [],
-    },
+    data: indicesData,
   } = useLoadIndices();
 
   // Load policy
@@ -67,10 +66,20 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
 
   // Update policy state when data is loaded
   useEffect(() => {
-    if (policyData && policyData.policy) {
-      setPolicy(policyData.policy);
+    if (policyData && policyData.policy && indicesData) {
+      const indicesAndDataStreams = separateDataStreamsFromIndices(
+        indicesData,
+        policyData.policy.config?.indices ?? []
+      );
+      setPolicy({
+        ...policyData.policy,
+        config: {
+          ...policyData.policy.config,
+          ...indicesAndDataStreams,
+        },
+      });
     }
-  }, [policyData]);
+  }, [policyData, indicesData]);
 
   // Saving policy states
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -200,7 +209,8 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
         ) : null}
         <PolicyForm
           policy={policy}
-          indices={indices}
+          dataStreams={indicesData!.dataStreams}
+          indices={indicesData!.indices}
           currentUrl={pathname}
           isEditing={true}
           isSaving={isSaving}

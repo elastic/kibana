@@ -99,7 +99,7 @@ describe('<PolicyAdd />', () => {
           actions.clickNextButton();
         });
 
-        test('should require at least one index', async () => {
+        test('should require at least one index if no data streams are provided', async () => {
           const { find, form, component } = testBed;
 
           await act(async () => {
@@ -113,6 +113,18 @@ describe('<PolicyAdd />', () => {
           find('deselectIndicesLink').simulate('click');
 
           expect(form.getErrorsMessages()).toEqual(['You must select at least one index.']);
+        });
+        test('should not require at least one index if a data stream is provided', async () => {
+          const { form, component } = testBed;
+
+          await act(async () => {
+            // Toggle "All data streams" switch. Not all data streams are selected by default.
+            form.toggleEuiSwitch('allDataStreamsToggle', false);
+            await nextTick();
+            component.update();
+          });
+
+          expect(form.getErrorsMessages()).toEqual([]);
         });
       });
 

@@ -41,6 +41,8 @@ export type PolicyFormTestSubjects =
   | 'allIndicesToggle'
   | 'backButton'
   | 'deselectIndicesLink'
+  | 'allDataStreamsToggle'
+  | 'deselectDataStreamLink'
   | 'expireAfterValueInput'
   | 'expireAfterUnitSelect'
   | 'ignoreUnavailableIndicesToggle'

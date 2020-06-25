@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SlmPolicyPayload, Index } from '../../../../../common/types';
+import { SlmPolicyPayload } from '../../../../../common/types';
 import { PolicyValidation } from '../../../services/validation';
 
 export interface StepProps {
   policy: SlmPolicyPayload;
-  indices: Index[];
+  indices: string[];
+  dataStreams: string[];
   updatePolicy: (updatedSettings: Partial<SlmPolicyPayload>, validationHelperData?: any) => void;
   isEditing: boolean;
   currentUrl: string;

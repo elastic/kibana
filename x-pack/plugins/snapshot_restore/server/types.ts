@@ -44,7 +44,7 @@ interface DataObjectFromES {
 export interface ResolveIndexResponseFromES {
   indices: DataObjectFromES[];
   aliases: DataObjectFromES[];
-  data_streams: Array<Omit<DataObjectFromES, 'data_stream'>>;
+  data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
 }
 
 export type CallAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];

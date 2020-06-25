@@ -20,6 +20,7 @@ export const getSnapshot = ({
   versionId: 8000099,
   version: '8.0.0',
   indices: new Array(totalIndices).fill('').map(getRandomString),
+  dataStreams: [],
   includeGlobalState: 1,
   state,
   startTime: '2019-05-23T06:25:15.896Z',
