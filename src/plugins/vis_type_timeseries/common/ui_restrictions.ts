@@ -22,21 +22,30 @@
  * @constant
  * @public
  */
-export const RESTRICTIONS_KEYS = {
+export enum RESTRICTIONS_KEYS {
   /**
    * Key for getting the white listed group by fields from the UIRestrictions object.
    */
-  WHITE_LISTED_GROUP_BY_FIELDS: 'whiteListedGroupByFields',
+  WHITE_LISTED_GROUP_BY_FIELDS = 'whiteListedGroupByFields',
 
   /**
    * Key for getting the white listed metrics from the UIRestrictions object.
    */
-  WHITE_LISTED_METRICS: 'whiteListedMetrics',
+  WHITE_LISTED_METRICS = 'whiteListedMetrics',
 
   /**
    * Key for getting  the white listed Time Range modes from the UIRestrictions object.
    */
-  WHITE_LISTED_TIMERANGE_MODES: 'whiteListedTimerangeModes',
+  WHITE_LISTED_TIMERANGE_MODES = 'whiteListedTimerangeModes',
+}
+
+export interface UIRestrictions {
+  '*': boolean;
+  [restriction: string]: boolean;
+}
+
+export type TimeseriesUIRestrictions = {
+  [key in RESTRICTIONS_KEYS]: Record<string, UIRestrictions>;
 };
 
 /**
@@ -44,6 +53,6 @@ export const RESTRICTIONS_KEYS = {
  * @constant
  * @public
  */
-export const DEFAULT_UI_RESTRICTION = {
+export const DEFAULT_UI_RESTRICTION: UIRestrictions = {
   '*': true,
 };
