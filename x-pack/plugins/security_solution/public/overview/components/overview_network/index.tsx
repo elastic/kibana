@@ -5,15 +5,15 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
 import { HeaderSection } from '../../../common/components/header_section';
-import { useUiSetting$ } from '../../../common/lib/kibana';
+import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import {
   ID as OverviewNetworkQueryId,
@@ -21,10 +21,10 @@ import {
 } from '../../containers/overview_network';
 import { inputsModel } from '../../../common/store/inputs';
 import { getOverviewNetworkStats, OverviewNetworkStats } from '../overview_network_stats';
-import { getNetworkUrl } from '../../../common/components/link_to';
+import { getNetworkUrl, useFormatUrl } from '../../../common/components/link_to';
 import { InspectButtonContainer } from '../../../common/components/inspect';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
+import { SecurityPageName } from '../../../app/types';
+import { LinkButton } from '../../../common/components/links';
 
 export interface OverviewNetworkProps {
   startDate: number;
@@ -51,19 +51,32 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   startDate,
   setQuery,
 }) => {
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.hosts);
+  const { navigateToApp } = useKibana().services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const urlSearch = useGetUrlSearch(navTabs.network);
+
+  const goToNetwork = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        path: getNetworkUrl(urlSearch),
+      });
+    },
+    [navigateToApp, urlSearch]
+  );
+
   const networkPageButton = useMemo(
     () => (
-      <EuiButton href={getNetworkUrl(urlSearch)}>
+      <LinkButton onClick={goToNetwork} href={formatUrl(getNetworkUrl())}>
         <FormattedMessage
           id="xpack.securitySolution.overview.networkAction"
           defaultMessage="View network"
         />
-      </EuiButton>
+      </LinkButton>
     ),
-    [urlSearch]
+    [goToNetwork, formatUrl]
   );
+
   return (
     <EuiFlexItem>
       <InspectButtonContainer>

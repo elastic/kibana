@@ -61,9 +61,13 @@ export class Fetcher {
      */
     private readonly id: string,
     /**
-     * Index pattern for searching ES
+     * Index pattern for searching ES for events
      */
-    private readonly indexPattern: string,
+    private readonly eventsIndexPattern: string,
+    /**
+     * Index pattern for searching ES for alerts
+     */
+    private readonly alertsIndexPattern: string,
     /**
      * This is used for searching legacy events
      */
@@ -113,7 +117,7 @@ export class Fetcher {
 
     const ancestryHandler = new AncestryQueryHandler(
       options.ancestors,
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID,
       originNode
     );
@@ -122,7 +126,7 @@ export class Fetcher {
       options.events,
       this.id,
       options.afterEvent,
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID
     );
 
@@ -130,7 +134,7 @@ export class Fetcher {
       options.alerts,
       this.id,
       options.afterAlert,
-      this.indexPattern,
+      this.alertsIndexPattern,
       this.endpointID
     );
 
@@ -138,7 +142,7 @@ export class Fetcher {
       options.children,
       this.id,
       options.afterChild,
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID
     );
 
@@ -165,7 +169,7 @@ export class Fetcher {
 
     const childrenLifecycleHandler = new LifecycleQueryHandler(
       childrenTotalsHelper,
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID
     );
 
@@ -243,7 +247,7 @@ export class Fetcher {
       limit,
       this.id,
       after,
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID
     );
 
@@ -261,7 +265,7 @@ export class Fetcher {
       limit,
       this.id,
       after,
-      this.indexPattern,
+      this.alertsIndexPattern,
       this.endpointID
     );
 
@@ -279,7 +283,7 @@ export class Fetcher {
   }
 
   private async getNode(entityID: string): Promise<LifecycleNode | undefined> {
-    const query = new LifecycleQuery(this.indexPattern, this.endpointID);
+    const query = new LifecycleQuery(this.eventsIndexPattern, this.endpointID);
     const results = await query.searchAndFormat(this.client, entityID);
     if (results.length === 0) {
       return;
@@ -293,7 +297,7 @@ export class Fetcher {
     let childIDs = [id];
     let childrenQuery = new ChildrenQuery(
       TotalsPaginationBuilder.createBuilder(nodesLeft, after),
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID
     );
     const cache = new ChildrenNodesHelper(id);
@@ -309,7 +313,7 @@ export class Fetcher {
       nodesLeft = limit - cache.getNumNodes();
       childrenQuery = new ChildrenQuery(
         TotalsPaginationBuilder.createBuilder(nodesLeft),
-        this.indexPattern,
+        this.eventsIndexPattern,
         this.endpointID
       );
     }
@@ -322,7 +326,7 @@ export class Fetcher {
   private async doAncestors(limit: number, originNode: LifecycleNode) {
     const ancestryHandler = new AncestryQueryHandler(
       limit,
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID,
       originNode
     );
@@ -332,7 +336,10 @@ export class Fetcher {
   // TODO have this take an array of entity ids and have the tree accept the format this function returns so the tree
   // doesn't have to be instantiated before calling this function
   private async doStats(tree: Tree) {
-    const statsQuery = new StatsQuery(this.indexPattern, this.endpointID);
+    const statsQuery = new StatsQuery(
+      [this.eventsIndexPattern, this.alertsIndexPattern],
+      this.endpointID
+    );
     const ids = tree.ids();
     const res = await statsQuery.search(this.client, ids);
     const alerts = res.alerts;

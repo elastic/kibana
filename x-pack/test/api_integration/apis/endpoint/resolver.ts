@@ -178,7 +178,11 @@ const compareArrays = (
  * @param relatedEvents the related events received for a particular node
  * @param categories the related event info used when generating the resolver tree
  */
-const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEventInfo[]) => {
+const verifyStats = (
+  stats: ResolverNodeStats | undefined,
+  categories: RelatedEventInfo[],
+  relatedAlerts: number
+) => {
   expect(stats).to.not.be(undefined);
   let totalExpEvents = 0;
   for (const cat of categories) {
@@ -196,6 +200,7 @@ const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEv
     totalExpEvents += cat.count;
   }
   expect(stats?.events.total).to.be(totalExpEvents);
+  expect(stats?.totalAlerts);
 };
 
 /**
@@ -204,9 +209,13 @@ const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEv
  * @param nodes an array of lifecycle nodes that should have a stats field defined
  * @param categories the related event info used when generating the resolver tree
  */
-const verifyLifecycleStats = (nodes: LifecycleNode[], categories: RelatedEventInfo[]) => {
+const verifyLifecycleStats = (
+  nodes: LifecycleNode[],
+  categories: RelatedEventInfo[],
+  relatedAlerts: number
+) => {
   for (const node of nodes) {
-    verifyStats(node.stats, categories);
+    verifyStats(node.stats, categories, relatedAlerts);
   }
 };
 
@@ -220,13 +229,13 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     { category: RelatedEventCategory.File, count: 1 },
     { category: RelatedEventCategory.Registry, count: 1 },
   ];
-
+  const relatedAlerts = 4;
   let resolverTrees: GeneratedTrees;
   let tree: Tree;
   const treeOptions: Options = {
     ancestors: 5,
     relatedEvents: relatedEventsToGen,
-    relatedAlerts: 4,
+    relatedAlerts,
     children: 3,
     generations: 2,
     percentTerminated: 100,
@@ -676,11 +685,11 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.children.nextChild).to.equal(null);
           expect(body.children.childNodes.length).to.equal(12);
           verifyChildren(body.children.childNodes, tree, 4, 3);
-          verifyLifecycleStats(body.children.childNodes, relatedEventsToGen);
+          verifyLifecycleStats(body.children.childNodes, relatedEventsToGen, relatedAlerts);
 
           expect(body.ancestry.nextAncestor).to.equal(null);
           verifyAncestry(body.ancestry.ancestors, tree, true);
-          verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen);
+          verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen, relatedAlerts);
 
           expect(body.relatedEvents.nextEvent).to.equal(null);
           compareArrays(tree.origin.relatedEvents, body.relatedEvents.events, true);
@@ -689,7 +698,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           compareArrays(tree.origin.relatedAlerts, body.relatedAlerts.alerts, true);
 
           compareArrays(tree.origin.lifecycle, body.lifecycle, true);
-          verifyStats(body.stats, relatedEventsToGen);
+          verifyStats(body.stats, relatedEventsToGen, relatedAlerts);
         });
       });
     });
