@@ -8,15 +8,15 @@ import moment from 'moment';
 import { sortByOrder } from 'lodash';
 import { ESResponse } from './fetcher';
 
-function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
-  const values = transactionGroups
+function calculateRelativeImpacts(items: ITransactionGroup[]) {
+  const values = items
     .map(({ impact }) => impact)
     .filter((value) => value !== null) as number[];
 
   const max = Math.max(...values);
   const min = Math.min(...values);
 
-  return transactionGroups.map((bucket) => ({
+  return items.map((bucket) => ({
     ...bucket,
     impact:
       bucket.impact !== null
@@ -74,16 +74,12 @@ export function transactionGroupsTransformer({
   const buckets = getBuckets(response);
   const duration = moment.duration(end - start);
   const minutes = duration.asMinutes();
-  const transactionGroups = buckets.map((bucket) =>
-    getTransactionGroup(bucket, minutes)
-  );
+  const items = buckets.map((bucket) => getTransactionGroup(bucket, minutes));
 
-  const transactionGroupsWithRelativeImpact = calculateRelativeImpacts(
-    transactionGroups
-  );
+  const itemsWithRelativeImpact = calculateRelativeImpacts(items);
 
   return {
-    items: transactionGroupsWithRelativeImpact,
+    items: itemsWithRelativeImpact,
 
     // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
     // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit

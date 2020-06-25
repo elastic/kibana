@@ -13,7 +13,7 @@ describe('transactionGroupsTransformer', () => {
     const {
       bucketSize,
       isAggregationAccurate,
-      transactionGroups,
+      items,
     } = transactionGroupsTransformer({
       response: transactionGroupsResponse,
       start: 100,
@@ -23,7 +23,7 @@ describe('transactionGroupsTransformer', () => {
 
     expect(bucketSize).toBe(100);
     expect(isAggregationAccurate).toBe(true);
-    expect(transactionGroups).toMatchSnapshot();
+    expect(items).toMatchSnapshot();
   });
 
   it('should transform response correctly', () => {
@@ -59,7 +59,7 @@ describe('transactionGroupsTransformer', () => {
     ).toEqual({
       bucketSize: 100,
       isAggregationAccurate: true,
-      transactionGroups: [
+      items: [
         {
           averageResponseTime: 255966.30555555556,
           impact: 0,
@@ -123,17 +123,13 @@ describe('transactionGroupsTransformer', () => {
       },
     } as unknown) as ESResponse;
 
-    const { transactionGroups } = transactionGroupsTransformer({
+    const { items } = transactionGroupsTransformer({
       response,
       start: 100,
       end: 20000,
       bucketSize: 100,
     });
 
-    expect(transactionGroups.map((bucket) => bucket.impact)).toEqual([
-      100,
-      25,
-      0,
-    ]);
+    expect(items.map((bucket) => bucket.impact)).toEqual([100, 25, 0]);
   });
 });
