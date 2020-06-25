@@ -8,7 +8,11 @@ import { HttpStart } from 'kibana/public';
 import { INGEST_API_DATASOURCES, INGEST_API_EPM_PACKAGES } from './services/ingest';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse } from '../../types';
-import { GetPackagesResponse } from '../../../../../../../ingest_manager/common/types/rest_spec';
+import {
+  AssetReference,
+  GetPackagesResponse,
+  InstallationStatus,
+} from '../../../../../../../ingest_manager/common';
 
 const generator = new EndpointDocGenerator('policy-list');
 
@@ -52,7 +56,7 @@ export const setPolicyListApiMockImplementation = (
                   type: 'image/svg+xml',
                 },
               ],
-              status: 'installed',
+              status: 'installed' as InstallationStatus,
               savedObject: {
                 type: 'epm-packages',
                 id: 'endpoint',
@@ -76,7 +80,7 @@ export const setPolicyListApiMockImplementation = (
                     { id: 'logs-endpoint.events.registry', type: 'index-template' },
                     { id: 'logs-endpoint.events.security', type: 'index-template' },
                     { id: 'metrics-endpoint.telemetry', type: 'index-template' },
-                  ],
+                  ] as AssetReference[],
                   es_index_patterns: {
                     alerts: 'logs-endpoint.alerts-*',
                     events: 'events-endpoint-*',
@@ -99,7 +103,6 @@ export const setPolicyListApiMockImplementation = (
                 references: [],
                 updated_at: '2020-06-24T14:41:23.098Z',
                 version: 'Wzc0LDFd',
-                score: 0,
               },
             },
           ],
