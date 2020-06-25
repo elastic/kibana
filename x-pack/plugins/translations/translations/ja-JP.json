@@ -9009,8 +9009,6 @@
     "xpack.maps.layerPanel.filterEditor.emptyState.description": "フィルターを追加してレイヤーデータを絞ります。",
     "xpack.maps.layerPanel.filterEditor.queryBarSubmitButtonLabel": "フィルターを設定",
     "xpack.maps.layerPanel.filterEditor.title": "フィルタリング",
-    "xpack.maps.layerPanel.fitToBoundsAriaLabel": "境界に合わせる",
-    "xpack.maps.layerPanel.fitToBoundsButtonLabel": "合わせる",
     "xpack.maps.layerPanel.footer.cancelButtonLabel": "キャンセル",
     "xpack.maps.layerPanel.footer.closeButtonLabel": "閉じる",
     "xpack.maps.layerPanel.footer.removeLayerButtonLabel": "レイヤーを削除",
