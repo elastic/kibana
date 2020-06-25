@@ -42,8 +42,8 @@ export interface RawLicense {
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    featureUsage: FeatureUsageServiceStart;
     licensing: {
+      featureUsage: FeatureUsageServiceStart;
       license: ILicense;
     };
   }

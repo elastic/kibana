@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IContextProvider, RequestHandler } from 'src/core/server';
+import { IContextProvider, RequestHandler, StartServicesAccessor } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { ILicense } from '../common/types';
-import { FeatureUsageServiceStart } from './services';
+import { LicensingPluginStart } from './types';
 
 /**
  * Create a route handler context for access to Kibana license information.
@@ -18,12 +18,15 @@ import { FeatureUsageServiceStart } from './services';
  */
 export function createRouteHandlerContext(
   license$: Observable<ILicense>,
-  featureUsage: FeatureUsageServiceStart
+  getStartServices: StartServicesAccessor<{}, LicensingPluginStart>
 ): IContextProvider<RequestHandler<any, any, any>, 'licensing'> {
   return async function licensingRouteHandlerContext() {
+    const [, , { featureUsage }] = await getStartServices();
+    const license = await license$.pipe(take(1)).toPromise();
+
     return {
-      license: await license$.pipe(take(1)).toPromise(),
       featureUsage,
+      license,
     };
   };
 }

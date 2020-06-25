@@ -130,7 +130,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
     core.http.registerRouteHandlerContext(
       'licensing',
-      createRouteHandlerContext(license$, this.featureUsage.start())
+      createRouteHandlerContext(license$, core.getStartServices)
     );
 
     registerRoutes(core.http.createRouter(), core.getStartServices);
