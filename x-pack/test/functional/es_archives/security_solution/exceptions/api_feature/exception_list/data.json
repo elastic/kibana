@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "securitySolution-exceptions-artifact:endpoint-allowlist-linux-1.0.0",
+    "id": "securitySolution-exceptions-artifact:endpoint-allowlist-linux-1.0.0-0fa0ba277627f7cc116e198bac3e524e9a8befdca1591a1dd4830dc7952b2103",
     "index": ".kibana_1",
     "source": {
       "references": [
@@ -24,7 +24,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "securitySolution-exceptions-artifact:endpoint-allowlist-windows-1.0.0",
+    "id": "securitySolution-exceptions-artifact:endpoint-allowlist-windows-1.0.0-1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
     "index": ".kibana_1",
     "source": {
       "references": [
