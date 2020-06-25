@@ -5,11 +5,13 @@
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {
-    "dependency-check": "^4.1.0"
+    "dependency-check": "^4.1.0",
+    "tsd": "^0.11.0"
   },
   "scripts": {
     "lint": "dependency-check --no-dev package.json set.js setWith.js",
-    "test": "npm run lint && node test.js",
+    "test": "npm run lint && node test/patch_test.js && npm run test:types",
+    "test:types": "tsd",
     "update": "./scripts/update.sh",
     "save_state": "./scripts/save_state.sh"
   },
@@ -35,6 +37,9 @@
     "ignore": [
       "/lodash/"
     ]
+  },
+  "tsd": {
+    "directory": "test"
   },
   "private": true
 }

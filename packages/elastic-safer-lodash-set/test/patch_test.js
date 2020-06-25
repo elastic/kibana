@@ -19,8 +19,8 @@
 
 const assert = require('assert');
 
-const setFunctions = [require('./').set, require('./set')];
-const setWithFunctions = [require('./').setWith, require('./setWith')];
+const setFunctions = [require('../').set, require('../set')];
+const setWithFunctions = [require('../').setWith, require('../setWith')];
 const setAndSetWithFunctions = [].concat(setFunctions, setWithFunctions);
 
 setAndSetWithFunctions.forEach((set) => {
