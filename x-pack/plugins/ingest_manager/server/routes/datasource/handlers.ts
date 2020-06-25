@@ -14,6 +14,7 @@ import {
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
   DeleteDatasourcesRequestSchema,
+  NewDatasource,
 } from '../../types';
 import { CreateDatasourceResponse, DeleteDatasourcesResponse } from '../../../common';
 
@@ -76,23 +77,50 @@ export const createDatasourceHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-  const newData = { ...request.body };
+  const logger = appContextService.getLogger();
+  let newData = { ...request.body };
   try {
+    // If we have external callbacks, then process those now before creating the actual datasource
+    const externalCallbacks = appContextService.getExternalCallbacks('datasourceCreate');
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      let updatedNewData: NewDatasource = newData;
+
+      for (const callback of externalCallbacks) {
+        try {
+          // ensure that the returned value by the callback passes schema validation
+          updatedNewData = CreateDatasourceRequestSchema.body.validate(
+            await callback(updatedNewData)
+          );
+        } catch (error) {
+          // Log the error, but keep going and process the other callbacks
+          logger.error('An external registered [datasourceCreate] callback failed when executed');
+          logger.error(error);
+        }
+      }
+
+      // The type `NewDatasource` and the `DatasourceBaseSchema` are incompatible.
+      // `NewDatasrouce` defines `namespace` as optional string, which means that `undefined` is a
+      // valid value, however, the schema defines it as string with a minimum length of 1.
+      // Here, we need to cast the value back to the schema type and ignore the TS error.
+      // @ts-ignore
+      newData = updatedNewData as typeof CreateDatasourceRequestSchema.body;
+    }
+
     // Make sure the datasource package is installed
-    if (request.body.package?.name) {
+    if (newData.package?.name) {
       await ensureInstalledPackage({
         savedObjectsClient: soClient,
-        pkgName: request.body.package.name,
+        pkgName: newData.package.name,
         callCluster,
       });
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
-        pkgName: request.body.package.name,
-        pkgVersion: request.body.package.version,
+        pkgName: newData.package.name,
+        pkgVersion: newData.package.version,
       });
       newData.inputs = (await datasourceService.assignPackageStream(
         pkgInfo,
-        request.body.inputs
+        newData.inputs
       )) as TypeOf<typeof CreateDatasourceRequestSchema.body>['inputs'];
     }
 
@@ -103,6 +131,7 @@ export const createDatasourceHandler: RequestHandler<
       body,
     });
   } catch (e) {
+    logger.error(e);
     return response.customError({
       statusCode: 500,
       body: { message: e.message },
