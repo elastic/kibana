@@ -5,7 +5,7 @@
  */
 
 import './datapanel.scss';
-import { uniq, indexBy, groupBy } from 'lodash';
+import { uniq, indexBy, groupBy, throttle } from 'lodash';
 import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -14,15 +14,11 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanelProps,
   EuiPopover,
-  EuiText,
   EuiCallOut,
   EuiFormControlLayout,
-  EuiNotificationBadge,
   EuiSpacer,
-  EuiAccordion,
   EuiFilterGroup,
   EuiFilterButton,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,6 +37,7 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
+import { FieldsAccordion } from './fields_accordion';
 import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
 
 export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
@@ -235,18 +232,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const allFields = currentIndexPattern.fields;
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const hasSyncedExistingFields = existingFields[currentIndexPattern.title];
+  const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
+    (type) => type in fieldTypeNames
+  );
+
   useEffect(() => {
     // Reset the scroll if we have made material changes to the field list
     if (scrollContainer) {
       scrollContainer.scrollTop = 0;
       setPageSize(PAGINATION_SIZE);
-      lazyScroll();
     }
   }, [localState.nameFilter, localState.typeFilter, currentIndexPatternId, scrollContainer]);
-
-  const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
-    (type) => type in fieldTypeNames
-  );
 
   const fieldGroups: FieldsGroup = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
@@ -311,26 +307,39 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     }, defaultFieldGroups);
   }, [fieldGroups, localState.nameFilter, localState.typeFilter]);
 
-  const lazyScroll = () => {
+  const lazyScroll = useCallback(() => {
     if (scrollContainer) {
       const nearBottom =
         scrollContainer.scrollTop + scrollContainer.clientHeight >
         scrollContainer.scrollHeight * 0.9;
       if (nearBottom) {
-        const displayedFieldLength =
+        const displayedFieldsLength =
           (localState.isAvailableAccordionOpen ? filteredFieldGroups.availableFields.length : 0) +
           (localState.isEmptyAccordionOpen ? filteredFieldGroups.emptyFields.length : 0);
-        setPageSize(Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength)));
+        setPageSize(
+          Math.max(
+            PAGINATION_SIZE,
+            Math.min(pageSize + PAGINATION_SIZE * 0.5, displayedFieldsLength)
+          )
+        );
       }
     }
-  };
+  }, [
+    scrollContainer,
+    localState.isAvailableAccordionOpen,
+    localState.isEmptyAccordionOpen,
+    filteredFieldGroups,
+    pageSize,
+    setPageSize,
+  ]);
 
   const [paginatedAvailableFields, paginatedEmptyFields]: [
     IndexPatternField[],
     IndexPatternField[]
   ] = useMemo(() => {
     const { availableFields, emptyFields } = filteredFieldGroups;
-    const { isAvailableAccordionOpen, isEmptyAccordionOpen } = localState;
+    const isAvailableAccordionOpen = localState.isAvailableAccordionOpen;
+    const isEmptyAccordionOpen = localState.isEmptyAccordionOpen;
 
     if (isAvailableAccordionOpen && isEmptyAccordionOpen) {
       if (availableFields.length > pageSize) {
@@ -354,8 +363,18 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     pageSize,
   ]);
 
-  const hilight = localState.nameFilter.toLowerCase();
-  const hasFieldFilter = !!(localState.typeFilter.length || localState.nameFilter.length);
+  const fieldProps = useMemo(
+    () => ({
+      core,
+      data,
+      indexPattern: currentIndexPattern,
+      highlight: localState.nameFilter.toLowerCase(),
+      dateRange,
+      query,
+      filters,
+    }),
+    [core, data, currentIndexPattern, dateRange, query, filters, localState.nameFilter]
+  );
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -485,28 +504,34 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 setScrollContainer(el);
               }
             }}
-            onScroll={lazyScroll}
+            onScroll={throttle(lazyScroll, 100)}
           >
             <div className="lnsInnerIndexPatternDataPanel__list">
               {filteredFieldGroups.specialFields.map((field: IndexPatternField) => (
                 <FieldItem
-                  core={core}
-                  data={data}
-                  key={field.name}
-                  indexPattern={currentIndexPattern}
-                  field={field}
-                  highlight={hilight}
+                  {...fieldProps}
                   exists={!!fieldGroups.availableFields.length}
-                  dateRange={dateRange}
-                  query={query}
-                  filters={filters}
+                  field={field}
                   hideDetails={true}
+                  key={field.name}
                 />
               ))}
 
               <EuiSpacer size="s" />
-              <EuiAccordion
+              <FieldsAccordion
                 initialIsOpen={localState.isAvailableAccordionOpen}
+                id="lnsIndexPatternAvailableFields"
+                label={i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
+                  defaultMessage: 'Available fields',
+                })}
+                exists={true}
+                hasLoaded={!!hasSyncedExistingFields}
+                fieldsCount={filteredFieldGroups.availableFields.length}
+                isFiltered={
+                  filteredFieldGroups.availableFields.length !== fieldGroups.availableFields.length
+                }
+                paginatedFields={paginatedAvailableFields}
+                fieldProps={fieldProps}
                 onToggle={(open) => {
                   setLocalState((s) => ({
                     ...s,
@@ -519,71 +544,32 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
                   );
                 }}
-                data-test-subj="lnsIndexPatternAvailableFields"
-                id="lnsIndexPatternAvailableFields"
-                buttonContent={
-                  <EuiText size="xs">
-                    <strong>
-                      {i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
-                        defaultMessage: 'Available fields',
-                      })}
-                    </strong>
-                  </EuiText>
-                }
-                extraAction={
-                  hasSyncedExistingFields ? (
-                    <EuiNotificationBadge
-                      size="m"
-                      color={
-                        filteredFieldGroups.availableFields.length !==
-                        fieldGroups.availableFields.length
-                          ? 'accent'
-                          : 'subdued'
-                      }
-                    >
-                      {filteredFieldGroups.availableFields.length}
-                    </EuiNotificationBadge>
-                  ) : (
-                    <EuiFlexGroup justifyContent="spaceAround">
-                      <EuiFlexItem grow={false}>
-                        <EuiLoadingSpinner size="m" />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )
-                }
-              >
-                <EuiSpacer size="s" />
-                {!!filteredFieldGroups.availableFields.length ? (
-                  <div className="lnsInnerIndexPatternDataPanel__fieldItems">
-                    {paginatedAvailableFields.map((field: IndexPatternField) => {
-                      return (
-                        <FieldItem
-                          core={core}
-                          data={data}
-                          indexPattern={currentIndexPattern}
-                          key={field.name}
-                          field={field}
-                          highlight={hilight}
-                          exists={true}
-                          dateRange={dateRange}
-                          query={query}
-                          filters={filters}
-                        />
-                      );
-                    })}
-                  </div>
-                ) : (
+                renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={!!filters.length}
-                    isAffectedByFieldFilter={hasFieldFilter}
+                    isAffectedByFieldFilter={
+                      !!(localState.typeFilter.length || localState.nameFilter.length)
+                    }
                     isAffectedByTimerange={true}
                     existFieldsInIndex={!!fieldGroups.emptyFields.length}
                   />
-                )}
-              </EuiAccordion>
+                }
+              />
               <EuiSpacer size="m" />
-              <EuiAccordion
+              <FieldsAccordion
                 initialIsOpen={localState.isEmptyAccordionOpen}
+                isFiltered={
+                  filteredFieldGroups.emptyFields.length !== fieldGroups.emptyFields.length
+                }
+                fieldsCount={filteredFieldGroups.emptyFields.length}
+                paginatedFields={paginatedEmptyFields}
+                hasLoaded={!!hasSyncedExistingFields}
+                exists={false}
+                fieldProps={fieldProps}
+                id="lnsIndexPatternEmptyFields"
+                label={i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
+                  defaultMessage: 'Empty fields',
+                })}
                 onToggle={(open) => {
                   setLocalState((s) => ({
                     ...s,
@@ -597,57 +583,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
                   );
                 }}
-                data-test-subj="lnsIndexPatternEmptyFields"
-                id="lnsIndexPatternEmptyFields"
-                buttonContent={
-                  <EuiText size="xs">
-                    <strong>
-                      {i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
-                        defaultMessage: 'Empty fields',
-                      })}
-                    </strong>
-                  </EuiText>
-                }
-                extraAction={
-                  <EuiNotificationBadge
-                    size="m"
-                    color={
-                      filteredFieldGroups.emptyFields.length !== fieldGroups.emptyFields.length
-                        ? 'accent'
-                        : 'subdued'
-                    }
-                  >
-                    {filteredFieldGroups.emptyFields.length}
-                  </EuiNotificationBadge>
-                }
-              >
-                <EuiSpacer size="s" />
-                {!!filteredFieldGroups.emptyFields.length ? (
-                  <div className="lnsInnerIndexPatternDataPanel__fieldItems">
-                    {paginatedEmptyFields.map((field: IndexPatternField) => {
-                      return (
-                        <FieldItem
-                          core={core}
-                          data={data}
-                          indexPattern={currentIndexPattern}
-                          key={field.name}
-                          field={field}
-                          highlight={hilight}
-                          exists={false}
-                          dateRange={dateRange}
-                          query={query}
-                          filters={filters}
-                        />
-                      );
-                    })}
-                  </div>
-                ) : (
+                renderCallout={
                   <NoFieldsCallout
-                    isAffectedByFieldFilter={hasFieldFilter}
+                    isAffectedByFieldFilter={
+                      !!(localState.typeFilter.length || localState.nameFilter.length)
+                    }
                     existFieldsInIndex={!!fieldGroups.emptyFields.length}
                   />
-                )}
-              </EuiAccordion>
+                }
+              />
               <EuiSpacer size="m" />
             </div>
           </div>
