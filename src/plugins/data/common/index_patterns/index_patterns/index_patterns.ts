@@ -64,7 +64,7 @@ interface IndexPatternsServiceDeps {
   fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
   onError: OnError;
-  onRedirectNoIndexPattern: () => void;
+  onRedirectNoIndexPattern?: () => void;
 }
 
 export class IndexPatternsService {
@@ -90,7 +90,7 @@ export class IndexPatternsService {
     fieldFormats,
     onNotification,
     onError,
-    onRedirectNoIndexPattern,
+    onRedirectNoIndexPattern = () => {},
   }: IndexPatternsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;

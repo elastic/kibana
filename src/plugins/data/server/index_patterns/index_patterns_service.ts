@@ -28,7 +28,9 @@ import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
 
 export interface IndexPatternsServiceStart {
-  IndexPatternsServiceFactory: any;
+  IndexPatternsServiceFactory: (
+    kibanaRequest: KibanaRequest
+  ) => Promise<IndexPatternsCommonService>;
 }
 
 export class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> {
@@ -53,9 +55,8 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
           savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
           apiClient: new IndexPatternsApiServer(),
           fieldFormats: formats,
-          onError: () => {}, // todo
+          onError: (error) => {},
           onNotification: () => {},
-          onRedirectNoIndexPattern: () => {},
         });
       },
     };

@@ -43,7 +43,7 @@ import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
-const type = 'index-pattern';
+const savedObjectType = 'index-pattern';
 interface IUiSettingsValues {
   [key: string]: any;
   shortDotsEnable: any;
@@ -237,7 +237,7 @@ export class IndexPattern implements IIndexPattern {
 
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
-      throw new SavedObjectNotFound(type, this.id, 'management/kibana/indexPatterns');
+      throw new SavedObjectNotFound(savedObjectType, this.id, 'management/kibana/indexPatterns');
     }
 
     _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {
@@ -305,7 +305,10 @@ export class IndexPattern implements IIndexPattern {
       return this; // no id === no elasticsearch document
     }
 
-    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(type, this.id);
+    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
+      savedObjectType,
+      this.id
+    );
 
     const response = {
       version: savedObject.version,
@@ -317,6 +320,7 @@ export class IndexPattern implements IIndexPattern {
       sourceFilters: savedObject.attributes.sourceFilters,
       fieldFormatMap: savedObject.attributes.fieldFormatMap,
       typeMeta: savedObject.attributes.typeMeta,
+      type: savedObject.attributes.type,
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
@@ -403,7 +407,7 @@ export class IndexPattern implements IIndexPattern {
     field.count = count;
 
     try {
-      const res = await this.savedObjectsClient.update(type, this.id, this.prepBody(), {
+      const res = await this.savedObjectsClient.update(savedObjectType, this.id, this.prepBody(), {
         version: this.version,
       });
       this.version = res.version;
@@ -487,7 +491,7 @@ export class IndexPattern implements IIndexPattern {
       }
 
       const body = this.prepBody();
-      const response = await this.savedObjectsClient.create(type, body, { id: this.id });
+      const response = await this.savedObjectsClient.create(savedObjectType, body, { id: this.id });
 
       this.id = response.id;
       return response.id;
@@ -515,7 +519,7 @@ export class IndexPattern implements IIndexPattern {
       (key) => body[key] !== this.originalBody[key]
     );
     return this.savedObjectsClient
-      .update(type, this.id, body, { version: this.version })
+      .update(savedObjectType, this.id, body, { version: this.version })
       .then((resp) => {
         this.id = resp.id;
         this.version = resp.version;
@@ -634,7 +638,7 @@ export class IndexPattern implements IIndexPattern {
   destroy() {
     if (this.id) {
       this.patternCache.clear(this.id);
-      return this.savedObjectsClient.delete(type, this.id);
+      return this.savedObjectsClient.delete(savedObjectType, this.id);
     }
   }
 }
