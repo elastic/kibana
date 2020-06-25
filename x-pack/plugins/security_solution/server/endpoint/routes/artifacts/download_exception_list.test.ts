@@ -26,10 +26,7 @@ import { compressExceptionList } from '../../lib/artifacts/lists';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import {
-  createMockAgentService,
-  createMockEndpointAppContextServiceStartContract,
-} from '../../mocks';
+import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 
@@ -56,6 +53,25 @@ const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
     },
   ],
 };
+const mockIngestSOResponse = {
+  page: 1,
+  per_page: 100,
+  total: 1,
+  saved_objects: [
+    {
+      id: 'agent1',
+      type: 'agent',
+      references: [],
+      score: 0,
+      attributes: {
+        active: true,
+        access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
+      },
+    },
+  ],
+};
+const AuthHeader = 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==';
+
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockClusterClient: jest.Mocked<IClusterClient>;
@@ -66,6 +82,7 @@ describe('test alerts route', () => {
   let routeHandler: RequestHandler<unknown, unknown, unknown>;
   let endpointAppContextService: EndpointAppContextService;
   let cache: ExceptionsCache;
+  let ingestSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
@@ -76,7 +93,13 @@ describe('test alerts route', () => {
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
     cache = new ExceptionsCache(5);
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+    const startContract = createMockEndpointAppContextServiceStartContract();
+
+    // The authentication with the Fleet Plugin needs a separate scoped SO Client
+    ingestSavedObjectClient = savedObjectsClientMock.create();
+    ingestSavedObjectClient.find.mockReturnValue(Promise.resolve(mockIngestSOResponse));
+    startContract.savedObjectsStart.getScopedClient.mockReturnValue(ingestSavedObjectClient);
+    endpointAppContextService.start(startContract);
 
     registerDownloadExceptionListRoute(
       routerMock,
@@ -94,10 +117,13 @@ describe('test alerts route', () => {
       path: `/api/endpoint/allowlist/download/${mockArtifactName}/123456`,
       method: 'get',
       params: { sha256: '123456' },
+      headers: {
+        authorization: AuthHeader,
+      },
     });
 
+    // Mock the SavedObjectsClient get response for fetching the artifact
     const mockCompressedArtifact = await compressExceptionList(expectedEndpointExceptions);
-
     const mockArtifact = {
       id: '2468',
       type: 'test',
@@ -112,11 +138,9 @@ describe('test alerts route', () => {
         size: 100,
       },
     };
-
     const soFindResp: SavedObject<unknown> = {
       ...mockArtifact,
     };
-
     mockSavedObjectClient.get.mockImplementationOnce(() => Promise.resolve(soFindResp));
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
@@ -151,6 +175,9 @@ describe('test alerts route', () => {
       path: `/api/endpoint/allowlist/download/${mockArtifactName}/123456`,
       method: 'get',
       params: { sha256: '789' },
+      headers: {
+        authorization: AuthHeader,
+      },
     });
 
     mockSavedObjectClient.get.mockImplementationOnce(() =>
@@ -182,6 +209,9 @@ describe('test alerts route', () => {
       path: `/api/endpoint/allowlist/download/${mockArtifactName}/${mockSha}`,
       method: 'get',
       params: { sha256: mockSha, identifier: mockArtifactName },
+      headers: {
+        authorization: AuthHeader,
+      },
     });
 
     // Add to the download cache
@@ -207,5 +237,65 @@ describe('test alerts route', () => {
     expect(mockResponse.ok).toBeCalled();
     // The saved objects client should be bypassed as the cache will contain the download
     expect(mockSavedObjectClient.get.mock.calls.length).toEqual(0);
+  });
+
+  it('should respond with a 401 if a valid API Token is not supplied', async () => {
+    const mockSha = '123456789';
+    const mockRequest = httpServerMock.createKibanaRequest({
+      path: `/api/endpoint/allowlist/download/${mockArtifactName}/${mockSha}`,
+      method: 'get',
+      params: { sha256: mockSha, identifier: mockArtifactName },
+    });
+
+    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+      path.startsWith('/api/endpoint/allowlist/download')
+    )!;
+
+    await routeHandler(
+      ({
+        core: {
+          savedObjects: {
+            client: mockSavedObjectClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext,
+      mockRequest,
+      mockResponse
+    );
+    expect(mockResponse.unauthorized).toBeCalled();
+  });
+
+  it('should respond with a 404 if an agent cannot be linked to the API token', async () => {
+    const mockSha = '123456789';
+    const mockRequest = httpServerMock.createKibanaRequest({
+      path: `/api/endpoint/allowlist/download/${mockArtifactName}/${mockSha}`,
+      method: 'get',
+      params: { sha256: mockSha, identifier: mockArtifactName },
+      headers: {
+        authorization: AuthHeader,
+      },
+    });
+
+    // Mock the SavedObjectsClient find response for verifying the API token with no results
+    mockIngestSOResponse.saved_objects = [];
+    mockIngestSOResponse.total = 0;
+    ingestSavedObjectClient.find.mockReturnValue(Promise.resolve(mockIngestSOResponse));
+
+    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+      path.startsWith('/api/endpoint/allowlist/download')
+    )!;
+
+    await routeHandler(
+      ({
+        core: {
+          savedObjects: {
+            client: mockSavedObjectClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext,
+      mockRequest,
+      mockResponse
+    );
+    expect(mockResponse.notFound).toBeCalled();
   });
 });

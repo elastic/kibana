@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SavedObjectsServiceStart, KibanaRequest, SavedObjectsClient } from 'src/core/server';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
 import { getDatasourceCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
@@ -13,6 +14,7 @@ export type EndpointAppContextServiceStartContract = Pick<
 > & {
   manifestManager: ManifestManager;
   registerIngestCallback: IngestManagerStartContract['registerExternalCallback'];
+  savedObjectsStart: SavedObjectsServiceStart;
 };
 
 /**
@@ -22,10 +24,12 @@ export type EndpointAppContextServiceStartContract = Pick<
 export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
+  private savedObjectsStart: SavedObjectsServiceStart;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
     this.manifestManager = dependencies.manifestManager;
+    this.savedObjectsStart = dependencies.savedObjectsStart;
     dependencies.registerIngestCallback(
       'datasourceCreate',
       getDatasourceCreateCallback(this.manifestManager)
@@ -43,5 +47,11 @@ export class EndpointAppContextService {
 
   public getManifestManager(): ManifestManager | undefined {
     return this.manifestManager;
+  }
+
+  public getScopedSavedObjects(req: KibanaRequest) {
+    return this.savedObjectsStart.getScopedClient(req, {
+      excludedWrappers: ['security'],
+    });
   }
 }

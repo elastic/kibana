@@ -108,6 +108,7 @@ export class ManifestManager {
 
     // Get the last-dispatched manifest
     oldManifest = await this.getLastDispatchedManifest(ManifestConstants.SCHEMA_VERSION);
+    // console.log(oldManifest);
 
     if (oldManifest === null && opts.initialize) {
       oldManifest = new Manifest(new Date(), ManifestConstants.SCHEMA_VERSION); // create empty manifest

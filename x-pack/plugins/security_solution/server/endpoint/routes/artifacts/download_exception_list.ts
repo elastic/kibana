@@ -5,6 +5,8 @@
  */
 
 import { IRouter } from 'src/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { authenticateAgentWithAccessToken } from '../../../../../ingest_manager/server/services/agents/authenticate';
 import { validate } from '../../../../common/validate';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { ArtifactConstants, ExceptionsCache } from '../../lib/artifacts';
@@ -59,6 +61,17 @@ export function registerDownloadExceptionListRoute(
           return res.ok(validated);
         }
       };
+
+      try {
+        const scopedSOClient = endpointContext.service.getScopedSavedObjects(req);
+        await authenticateAgentWithAccessToken(scopedSOClient, req);
+      } catch (err) {
+        if (err.output.statusCode === 401) {
+          return res.unauthorized();
+        } else {
+          return res.notFound();
+        }
+      }
 
       const id = `${req.params.identifier}-${req.params.sha256}`;
       const cacheResp = cache.get(id);

@@ -5,6 +5,7 @@
  */
 
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { savedObjectsServiceMock } from 'src/core/server/mocks';
 
 import { xpackMocks } from '../../../../mocks';
 import {
@@ -24,6 +25,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 > => {
   return {
     agentService: createMockAgentService(),
+    savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
     registerIngestCallback: jest.fn<
       ReturnType<IngestManagerStartContract['registerExternalCallback']>,
