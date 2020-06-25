@@ -5,7 +5,6 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import _ from 'lodash';
 import {
   loadInitialState,
@@ -19,12 +18,10 @@ import { documentField } from './document_field';
 
 jest.mock('./operations');
 
-const createMockStorage = (lastData: Record<string, string>) => {
+const createMockStorage = (lastData?: Record<string, string>) => {
   return {
     get: jest.fn().mockImplementation(() => lastData),
-    set: jest.fn().mockImplementation((key, value) => {
-      lastData[key] = value;
-    }),
+    set: jest.fn(),
     remove: jest.fn(),
     clear: jest.fn(),
   };
@@ -281,9 +278,10 @@ describe('loader', () => {
 
   describe('loadInitialState', () => {
     it('should load a default state', async () => {
+      const storage = createMockStorage();
       const state = await loadInitialState({
         savedObjectsClient: mockClient(),
-        storage: createMockStorage(),
+        storage,
       });
 
       expect(state).toMatchObject({
@@ -297,13 +295,17 @@ describe('loader', () => {
         },
         layers: {},
         showEmptyFields: false,
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'a',
       });
     });
 
     it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', async () => {
+      const storage = createMockStorage({ indexPatternId: 'c' });
       const state = await loadInitialState({
         savedObjectsClient: mockClient(),
-        storage: createMockStorage({ indexPatternId: 'c' }),
+        storage,
       });
 
       expect(state).toMatchObject({
@@ -317,6 +319,9 @@ describe('loader', () => {
         },
         layers: {},
         showEmptyFields: false,
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'a',
       });
     });
 
@@ -341,10 +346,11 @@ describe('loader', () => {
     });
 
     it('should use the default index pattern id, if provided', async () => {
+      const storage = createMockStorage();
       const state = await loadInitialState({
         defaultIndexPatternId: 'b',
         savedObjectsClient: mockClient(),
-        storage: createMockStorage(),
+        storage,
       });
 
       expect(state).toMatchObject({
@@ -358,6 +364,9 @@ describe('loader', () => {
         },
         layers: {},
         showEmptyFields: false,
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'b',
       });
     });
 
@@ -390,10 +399,11 @@ describe('loader', () => {
           },
         },
       };
+      const storage = createMockStorage({ indexPatternId: 'a' });
       const state = await loadInitialState({
         state: savedState,
         savedObjectsClient: mockClient(),
-        storage: createMockStorage({ indexPatternId: 'a' }),
+        storage,
       });
 
       expect(state).toMatchObject({
@@ -407,6 +417,10 @@ describe('loader', () => {
         },
         layers: savedState.layers,
         showEmptyFields: false,
+      });
+
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'b',
       });
     });
   });

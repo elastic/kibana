@@ -105,12 +105,13 @@ export async function loadInitialState({
   );
 
   const currentIndexPatternId = requiredPatterns[0];
+  setLastUsedIndexPatternId(storage, currentIndexPatternId);
+
   const indexPatterns = await loadIndexPatterns({
     savedObjectsClient,
     cache: {},
     patterns: requiredPatterns,
   });
-
   if (state) {
     return {
       ...state,
