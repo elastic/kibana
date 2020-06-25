@@ -9737,7 +9737,6 @@
     "xpack.ml.dataframe.analyticsList.stopAnalyticsErrorMessage": "停止数据帧分析 {analyticsId} 时发生错误：{error}",
     "xpack.ml.dataframe.analyticsList.stopAnalyticsSuccessMessage": "数据帧分析 {analyticsId} 停止请求已确认。",
     "xpack.ml.dataframe.analyticsList.tableActionLabel": "操作",
-    "xpack.ml.dataframe.analyticsList.title": "分析作业",
     "xpack.ml.dataframe.analyticsList.type": "类型",
     "xpack.ml.dataframe.analyticsList.viewActionName": "查看",
     "xpack.ml.dataframe.analyticsList.viewAriaLabel": "查看",
