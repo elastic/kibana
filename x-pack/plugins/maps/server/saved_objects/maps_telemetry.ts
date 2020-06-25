@@ -6,7 +6,7 @@
 import { SavedObjectsType } from 'src/core/server';
 
 export const mapsTelemetrySavedObjects: SavedObjectsType = {
-  name: 'maps',
+  name: 'maps-telemetry',
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
