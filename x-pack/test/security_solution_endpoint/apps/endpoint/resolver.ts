@@ -249,6 +249,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('zoom-in');
     });
 
+    // inserting tests here
+
     after(async () => {
       await browser.setWindowSize(1600, 1000);
       await testSubjects.click('euiFlyoutCloseButton');
