@@ -56,8 +56,6 @@ export const operatorBuilder = ({
   });
 
   switch (operator) {
-    // case 'excluded':
-    //   return ` ${and} `;
     case 'included':
       return `${not} `;
     default:

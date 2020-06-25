@@ -1,4 +1,5 @@
 {
+  "list_id": "endpoint_list",
   "item_id": "endpoint_list_item_lg_val_list",
   "_tags": ["endpoint", "process", "malware", "os:windows"],
   "tags": ["user added string for a tag", "malware"],

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EntryList, EntriesArray, namespaceType } from '../../../lists/common/schemas';
+export { EntriesArray, namespaceType } from '../../../lists/common/schemas';

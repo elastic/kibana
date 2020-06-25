@@ -8,7 +8,11 @@ import { Logger } from 'src/core/server';
 
 import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse, SearchTypes } from './types';
-import { entriesList, ExceptionListItemSchema } from '../../../../../lists/common/schemas';
+import {
+  entriesList,
+  EntryList,
+  ExceptionListItemSchema,
+} from '../../../../../lists/common/schemas';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;
@@ -37,14 +41,8 @@ export const filterEventsAgainstList = async ({
         const { entries } = exceptionItem;
 
         const filteredHitsEntries = entries
-          .filter((t) => entriesList.is(t))
+          .filter((t): t is EntryList => entriesList.is(t))
           .map(async (entry) => {
-            // TODO: If this check is removed, then typescript doesn't
-            // recognize "entry" as EntryList despite .filter()
-            if (!entriesList.is(entry)) {
-              throw new Error('Malformed exception list provided');
-            }
-
             // acquire the list values we are checking for.
             const valuesOfGivenType = eventSearchResult.hits.hits.reduce(
               (acc, searchResultItem) => {
