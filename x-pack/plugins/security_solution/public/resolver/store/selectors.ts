@@ -184,6 +184,11 @@ const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
   dataSelectors.visibleProcessNodePositionsAndEdgeLineSegments
 );
 
+/**
+ * Return the visible edge lines and process nodes based on the camera position at `time`.
+ * The bounding box represents what the camera can see. The camera position is a function of time because it can be
+ * animated. So in order to get the currently visible entities, we need to pass in time.
+ */
 export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
   indexedProcessNodesAndEdgeLineSegments,
   boundingBox,

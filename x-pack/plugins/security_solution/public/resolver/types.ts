@@ -142,6 +142,9 @@ export type CameraState = {
     }
 );
 
+/**
+ * Wrappers around our internal types that make them compatible with `rbush`.
+ */
 export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
 
 /**

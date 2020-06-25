@@ -571,6 +571,8 @@ const indexedProcessNodePositionsAndEdgeLineSegments = createSelector(
     const processesToIndex: IndexedProcessNode[] = [];
     const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
 
+    // Make sure these numbers are big enough to cover the process nodes at all zoom levels.
+    // The process nodes don't extend equally in all directions from their center point.
     const processNodeViewWidth = 720;
     const processNodeViewHeight = 240;
     const lineSegmentPadding = 30;

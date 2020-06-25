@@ -111,8 +111,7 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        events,
-        stats: new Map(),
+        payload: { events, stats: new Map(), lineageLimits: { children: '', ancestors: '' } },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
@@ -144,8 +143,7 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        events,
-        stats: new Map(),
+        payload: { events, stats: new Map(), lineageLimits: { children: '', ancestors: '' } },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [2000, 2000] };
       store.dispatch(action);
