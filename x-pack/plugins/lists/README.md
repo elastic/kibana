@@ -157,12 +157,14 @@ And you can attach exception list items like so:
     {
       "field": "actingProcess.file.signer",
       "operator": "included",
-      "match": "Elastic, N.V."
+      "type": "match",
+      "value": "Elastic, N.V."
     },
     {
       "field": "event.category",
       "operator": "included",
-      "match_any": [
+      "type": "match_any",
+      "value": [
         "process",
         "malware"
       ]
