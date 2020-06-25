@@ -159,7 +159,9 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                 <span
                   className="euiTextColor euiTextColor--subdued"
                 >
-                  <EuiTitle>
+                  <EuiTitle
+                    size="m"
+                  >
                     <UpgradeFailureTitle
                       className="euiTitle euiTitle--medium"
                       titleText="Upgrade failed"
@@ -486,7 +488,9 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                 <span
                   className="euiTextColor euiTextColor--subdued"
                 >
-                  <EuiTitle>
+                  <EuiTitle
+                    size="m"
+                  >
                     <UpgradeFailureTitle
                       className="euiTitle euiTitle--medium"
                       titleText="Time for an upgrade!"
@@ -813,7 +817,9 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                 <span
                   className="euiTextColor euiTextColor--subdued"
                 >
-                  <EuiTitle>
+                  <EuiTitle
+                    size="m"
+                  >
                     <UpgradeFailureTitle
                       className="euiTitle euiTitle--medium"
                       titleText="Upgrade failed"

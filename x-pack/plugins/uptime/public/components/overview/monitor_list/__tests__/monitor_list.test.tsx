@@ -14,6 +14,12 @@ import { MonitorListComponent, noItemsMessage } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import * as redux from 'react-redux';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
+
 describe('MonitorList component', () => {
   let result: MonitorSummaryResult;
   let localStorageMock: any;
