@@ -45,9 +45,9 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return map<SimpleSavedObject<T>, SavedObject<T>>(response, simpleSavedObjectToSavedObject);
   }
 
-  async get(type: string, id: string) {
-    const response = await this.savedObjectClient.get(type, id);
-    return simpleSavedObjectToSavedObject(response);
+  async get<T = unknown>(type: string, id: string) {
+    const response = await this.savedObjectClient.get<T>(type, id);
+    return simpleSavedObjectToSavedObject<T>(response);
   }
   async update(
     type: string,

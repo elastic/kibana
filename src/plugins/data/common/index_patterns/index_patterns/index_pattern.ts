@@ -19,7 +19,6 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from 'src/core/public'; // todo probably want to factor this out
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
@@ -30,7 +29,13 @@ import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { OnNotification, OnError, UiSettingsCommon, IIndexPatternsApiClient } from '../types';
+import {
+  OnNotification,
+  OnError,
+  UiSettingsCommon,
+  IIndexPatternsApiClient,
+  IndexPatternAttributes,
+} from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
@@ -300,12 +305,18 @@ export class IndexPattern implements IIndexPattern {
       return this; // no id === no elasticsearch document
     }
 
-    const savedObject = await this.savedObjectsClient.get(type, this.id);
+    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(type, this.id);
 
     const response = {
       version: savedObject.version,
       found: savedObject.version ? true : false,
-      ...(_.cloneDeep(savedObject.attributes) as SavedObjectAttributes),
+      title: savedObject.attributes.title,
+      timeFieldName: savedObject.attributes.timeFieldName,
+      intervalName: savedObject.attributes.intervalName,
+      fields: savedObject.attributes.fields,
+      sourceFilters: savedObject.attributes.sourceFilters,
+      fieldFormatMap: savedObject.attributes.fieldFormatMap,
+      typeMeta: savedObject.attributes.typeMeta,
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();

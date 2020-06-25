@@ -51,6 +51,9 @@ export interface IndexPatternAttributes {
   title: string;
   typeMeta: string;
   timeFieldName?: string;
+  intervalName?: string;
+  sourceFilters?: string;
+  fieldFormatMap?: string;
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
@@ -73,7 +76,7 @@ export interface SavedObjectsClientCommonFindArgs {
 
 export interface SavedObjectsClientCommon {
   find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
-  get: (type: string, id: string) => Promise<SavedObject>;
+  get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
   update: (
     type: string,
     id: string,
