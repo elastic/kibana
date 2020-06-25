@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import queryString from 'query-string';
 import { AgentConfig, AgentConfigDetailsDeployAgentAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { useGetOneAgentConfig, useLink, useBreadcrumbs, useCore } from '../../../hooks';
@@ -55,8 +54,8 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   } = useCore();
   const routeState = useIntraAppState<AgentConfigDetailsDeployAgentAction>();
   const agentStatus = agentStatusRequest.data?.results;
-  const openEnrollmentFlyoutOpenByDefault =
-    queryString.parse(useLocation().search).openEnrollmentFlyout === 'true';
+  const queryParams = new URLSearchParams(useLocation().search);
+  const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
 
   const headerLeftContent = useMemo(
     () => (

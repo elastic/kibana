@@ -33,7 +33,7 @@ interface ManagementStep {
 const PolicyEmptyState = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
-  actionDisabled: boolean;
+  actionDisabled?: boolean;
 }>(({ loading, onActionClick, actionDisabled }) => {
   const policySteps = useMemo(
     () => [

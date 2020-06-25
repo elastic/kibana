@@ -134,6 +134,9 @@ export const HostList = () => {
           'securitySolution:management',
           { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
+        baseRoute: `/integrations${
+          endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-datasource` : ''
+        }`,
       },
     }
   );
@@ -147,7 +150,7 @@ export const HostList = () => {
         'securitySolution:management',
         { path: getEndpointListPath({ name: 'endpointList' }) },
       ],
-      baseRoute: `#/configs/${selectedPolicyId}`,
+      baseRoute: `/configs/${selectedPolicyId}`,
     },
   });
 

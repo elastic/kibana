@@ -27,6 +27,7 @@ export const initialHostListState: Immutable<HostState> = {
   policyItems: [],
   selectedPolicyId: undefined,
   policyItemsLoading: false,
+  endpointPackageInfo: undefined,
 };
 
 /* eslint-disable-next-line complexity */
@@ -109,6 +110,11 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
     return {
       ...state,
       policyItemsLoading: false,
+    };
+  } else if (action.type === 'serverReturnedEndpointPackageInfo') {
+    return {
+      ...state,
+      endpointPackageInfo: action.payload,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<HostState> = {

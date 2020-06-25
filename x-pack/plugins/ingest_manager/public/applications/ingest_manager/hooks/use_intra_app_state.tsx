@@ -27,13 +27,12 @@ export const IntraAppStateProvider = memo<{
   children: React.ReactNode;
 }>(({ kibanaScopedHistory, children }) => {
   const internalAppToAppState = useMemo<IntraAppState>(() => {
+    const intraAppState = kibanaScopedHistory.location.state as AnyIntraAppRouteState;
     return {
-      forRoute: kibanaScopedHistory.location.state.baseRoute
-        ? kibanaScopedHistory.location.state.baseRoute.substr(1)
-        : kibanaScopedHistory.location.hash.substr(1),
-      routeState: kibanaScopedHistory.location.state as AnyIntraAppRouteState,
+      forRoute: intraAppState.baseRoute ? intraAppState.baseRoute : '',
+      routeState: intraAppState,
     };
-  }, [kibanaScopedHistory.location.hash, kibanaScopedHistory.location.state]);
+  }, [kibanaScopedHistory.location.state]);
   return (
     <IntraAppStateContext.Provider value={internalAppToAppState}>
       {children}

@@ -19,6 +19,8 @@ export interface CreateDatasourceRouteState {
   onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
   /** Url to be used on cancel links */
   onCancelUrl?: string;
+  /** The base route */
+  baseRoute?: string;
 }
 
 /**

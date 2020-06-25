@@ -13,6 +13,7 @@ import {
   PolicyData,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
+import { GetPackagesResponse } from '../../../../../ingest_manager/common';
 
 export interface HostState {
   /** list of host **/
@@ -47,7 +48,8 @@ export interface HostState {
   policyItemsLoading: boolean;
   /** the selected policy ID in the onboarding flow */
   selectedPolicyId?: string;
-  endpointPackageInfo?: sring;
+  /** Endpoint package info */
+  endpointPackageInfo?: GetPackagesResponse['response'][0];
 }
 
 /**

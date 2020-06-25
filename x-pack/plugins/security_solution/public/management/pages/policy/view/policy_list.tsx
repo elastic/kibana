@@ -156,6 +156,9 @@ export const PolicyList = React.memo(() => {
         onCancelNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
         onCancelUrl: formatUrl(getPoliciesPath()),
         onSaveNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        baseRoute: `/integrations${
+          endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-datasource` : ''
+        }`,
       },
     }
   );
@@ -431,12 +434,7 @@ export const PolicyList = React.memo(() => {
                   hasActions={false}
                 />
               ) : (
-                <PolicyEmptyState
-                  loading={loading}
-                  onActionClick={handleCreatePolicyClick}
-                  actionDisabled={false}
-                  dataTestSubj="emptyPolicyTable"
-                />
+                <PolicyEmptyState loading={loading} onActionClick={handleCreatePolicyClick} />
               )}
             </>
           );
