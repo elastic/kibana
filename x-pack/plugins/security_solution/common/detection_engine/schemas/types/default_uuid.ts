@@ -18,8 +18,8 @@ import { NonEmptyString } from './non_empty_string';
 export const DefaultUuid = new t.Type<string, string, unknown>(
   'DefaultUuid',
   t.string.is,
-  (input): Either<t.Errors, string> =>
-    input == null ? t.success(uuid.v4()) : NonEmptyString.decode(input),
+  (input, context): Either<t.Errors, string> =>
+    input == null ? t.success(uuid.v4()) : NonEmptyString.validate(input, context),
   t.identity
 );
 

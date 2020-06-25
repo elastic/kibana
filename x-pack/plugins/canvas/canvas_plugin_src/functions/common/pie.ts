@@ -7,7 +7,7 @@
 import { get, keyBy, map, groupBy } from 'lodash';
 // @ts-ignore untyped local
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../../i18n';
 import {

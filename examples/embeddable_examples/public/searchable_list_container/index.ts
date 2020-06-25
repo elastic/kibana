@@ -18,4 +18,7 @@
  */
 
 export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+export {
+  SearchableListContainerFactoryDefinition,
+  SearchableListContainerFactory,
+} from './searchable_list_container_factory';

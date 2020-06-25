@@ -25,7 +25,11 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
+import {
+  Field as IndexPatternField,
+  IndexPattern,
+  IIndexPatternFieldList,
+} from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
 import { FieldFormatsStart } from '../../field_formats';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
@@ -367,6 +371,109 @@ describe('AggConfig', () => {
       // this relies on the assumption that js-engines consistently loop over properties in insertion order.
       // most likely the case, but strictly speaking not guaranteed by the JS and JSON specifications.
       expect(JSON.stringify(ac1.aggs) === JSON.stringify(ac2.aggs)).toBe(true);
+    });
+  });
+
+  describe('#toSerializedFieldFormat', () => {
+    beforeEach(() => {
+      indexPattern.fields.getByName = identity as IIndexPatternFieldList['getByName'];
+    });
+
+    it('works with aggs that have a special format type', () => {
+      const configStates = [
+        {
+          type: 'count',
+          params: {},
+        },
+        {
+          type: 'date_histogram',
+          params: { field: '@timestamp' },
+        },
+        {
+          type: 'terms',
+          params: { field: 'machine.os.keyword' },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+
+      expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "date",
+            "params": Object {
+              "pattern": "HH:mm:ss.SSS",
+            },
+          },
+          Object {
+            "id": "terms",
+            "params": Object {
+              "id": undefined,
+              "missingBucketLabel": "Missing",
+              "otherBucketLabel": "Other",
+            },
+          },
+        ]
+      `);
+    });
+
+    it('works with pipeline aggs', () => {
+      const configStates = [
+        {
+          type: 'max_bucket',
+          params: {
+            customMetric: {
+              type: 'cardinality',
+              params: {
+                field: 'bytes',
+              },
+            },
+          },
+        },
+        {
+          type: 'cumulative_sum',
+          params: {
+            buckets_path: '1',
+            customMetric: {
+              type: 'cardinality',
+              params: {
+                field: 'bytes',
+              },
+            },
+          },
+        },
+        {
+          type: 'percentile_ranks',
+          id: 'myMetricAgg',
+          params: {},
+        },
+        {
+          type: 'cumulative_sum',
+          params: {
+            metricAgg: 'myMetricAgg',
+          },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+
+      expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "percent",
+          },
+          Object {
+            "id": "percent",
+          },
+        ]
+      `);
     });
   });
 

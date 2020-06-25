@@ -5,6 +5,7 @@
  */
 import { GetResponse } from 'elasticsearch';
 import { KibanaRequest, RequestHandler } from 'kibana/server';
+import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import { AlertEvent } from '../../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../../../../../common/endpoint_alerts/types';
@@ -27,17 +28,13 @@ export const alertDetailsHandlerWrapper = function (
         id: alertId.id,
       })) as GetResponse<AlertEvent>;
 
-      const indexPattern = await endpointAppContext.service
-        .getIndexPatternRetriever()
-        .getEventIndexPattern(ctx);
-
       const config = await endpointAppContext.config();
       const pagination: AlertDetailsPagination = new AlertDetailsPagination(
         config,
         ctx,
         req.params,
         response,
-        indexPattern
+        alertsIndexPattern
       );
 
       const currentHostInfo = await getHostData(

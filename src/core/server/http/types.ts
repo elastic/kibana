@@ -48,6 +48,22 @@ export type RequestHandlerContextProvider<
 > = IContextProvider<RequestHandler<any, any, any>, TContextName>;
 
 /**
+ * @public
+ */
+export interface HttpAuth {
+  /**
+   * Gets authentication state for a request. Returned by `auth` interceptor.
+   * {@link GetAuthState}
+   */
+  get: GetAuthState;
+  /**
+   * Returns authentication status for a request.
+   * {@link IsAuthenticated}
+   */
+  isAuthenticated: IsAuthenticated;
+}
+
+/**
  * Kibana HTTP Service provides own abstraction for work with HTTP stack.
  * Plugins don't have direct access to `hapi` server and its primitives anymore. Moreover,
  * plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood.
@@ -185,28 +201,18 @@ export interface HttpServiceSetup {
    */
   basePath: IBasePath;
 
-  auth: {
-    /**
-     * Gets authentication state for a request. Returned by `auth` interceptor.
-     * {@link GetAuthState}
-     */
-    get: GetAuthState;
-    /**
-     * Returns authentication status for a request.
-     * {@link IsAuthenticated}
-     */
-    isAuthenticated: IsAuthenticated;
-  };
+  /**
+   * Auth status.
+   * See {@link HttpAuth}
+   *
+   * @deprecated use {@link HttpServiceStart.auth | the start contract} instead.
+   */
+  auth: HttpAuth;
 
   /**
    * The CSP config used for Kibana.
    */
   csp: ICspConfig;
-
-  /**
-   * Flag showing whether a server was configured to use TLS connection.
-   */
-  isTlsEnabled: boolean;
 
   /**
    * Provides ability to declare a handler function for a particular path and HTTP request method.
@@ -276,8 +282,28 @@ export interface InternalHttpServiceSetup
 
 /** @public */
 export interface HttpServiceStart {
-  /** Indicates if http server is listening on a given port */
-  isListening: (port: number) => boolean;
+  /**
+   * Access or manipulate the Kibana base path
+   * See {@link IBasePath}.
+   */
+  basePath: IBasePath;
+
+  /**
+   * Auth status.
+   * See {@link HttpAuth}
+   */
+  auth: HttpAuth;
+
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running http server.
+   */
+  getServerInfo: () => HttpServerInfo;
+}
+
+/** @internal */
+export interface InternalHttpServiceStart extends HttpServiceStart {
+  /** Indicates if the http server is listening on the configured port */
+  isListening: () => boolean;
 }
 
 /** @public */

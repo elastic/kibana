@@ -8,32 +8,27 @@ import { i18n } from '@kbn/i18n';
 import Hapi from 'hapi';
 import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
 import {
-  CSV_SEPARATOR_SETTING,
   CSV_QUOTE_VALUES_SETTING,
+  CSV_SEPARATOR_SETTING,
 } from '../../../../../../../src/plugins/share/server';
-import { ReportingCore } from '../../..';
 import { CSV_BOM_CHARS, CSV_JOB_TYPE } from '../../../../common/constants';
 import { getFieldFormats } from '../../../../server/services';
-import { cryptoFactory, LevelLogger } from '../../../lib';
-import { ESQueueWorkerExecuteFn, ExecuteJobFactory } from '../../../types';
-import { JobDocPayloadDiscoverCsv } from '../types';
+import { cryptoFactory } from '../../../lib';
+import { ESQueueWorkerExecuteFn, RunTaskFnFactory } from '../../../types';
+import { ScheduledTaskParamsCSV } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
 
-export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
-  JobDocPayloadDiscoverCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
+export const runTaskFnFactory: RunTaskFnFactory<ESQueueWorkerExecuteFn<
+  ScheduledTaskParamsCSV
+>> = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.kbnConfig.get('server', 'basePath');
 
-  return async function executeJob(
-    jobId: string,
-    job: JobDocPayloadDiscoverCsv,
-    cancellationToken: any
-  ) {
-    const elasticsearch = await reporting.getElasticsearchService();
+  return async function runTask(jobId, job, cancellationToken) {
+    const elasticsearch = reporting.getElasticsearchService();
     const jobLogger = logger.clone([jobId]);
 
     const {

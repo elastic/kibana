@@ -6,9 +6,9 @@
 
 import { groupBy, get, keyBy, set, map, sortBy } from 'lodash';
 import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getLegendConfig } from '../../../../common/lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';
 import { getFontSpec } from './get_font_spec';

@@ -11,29 +11,34 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  createSecuritySolutionStorageMock,
   TestProviders,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 export { nextTick } from '../../../../../../../test_utils';
 
 import { act } from 'react-dom/test-utils';
 
+jest.mock('../../../../common/components/link_to');
+
 jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
   return {
-    ...originalModule,
+    ...original,
     useKibana: jest.fn().mockReturnValue({
       services: {
         application: {
           capabilities: {
-            securitySolution: {
+            siem: {
               crud: true,
             },
           },
+          navigateToApp: jest.fn(),
         },
       },
     }),
@@ -50,27 +55,26 @@ jest.mock('../../../../common/components/utils', () => {
 });
 
 jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
+  const original = jest.requireActual('react-redux');
 
   return {
-    ...originalModule,
-    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1' }),
+    ...original,
+    useDispatch: () => mockDispatch,
+    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1', urlState: {} }),
   };
 });
-
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useDispatch: () => mockDispatch,
-  useSelector: jest.fn().mockReturnValue({ savedObjectId: '1', urlState: {} }),
-}));
 const mockHistoryPush = jest.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    push: mockHistoryPush,
-  }),
-}));
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      push: mockHistoryPush,
+    }),
+  };
+});
 
 jest.mock('./use_create_timeline', () => ({
   useCreateTimelineButton: jest.fn().mockReturnValue({ getButton: jest.fn() }),
@@ -97,12 +101,14 @@ const defaultProps = {
 };
 describe('Properties', () => {
   const state: State = mockGlobalState;
+  const { storage } = createSecuritySolutionStorageMock();
   let mockedWidth = 1000;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
     (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: mockedWidth });
   });
 
@@ -328,7 +334,7 @@ describe('Properties', () => {
     expect(wrapper.find('[data-test-subj="avatar"]').exists()).toEqual(false);
   });
 
-  test('insert timeline - new case', () => {
+  test('insert timeline - new case', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Properties {...{ ...defaultProps, title: 'coolness' }} />
@@ -337,7 +343,7 @@ describe('Properties', () => {
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
     wrapper.find('[data-test-subj="attach-timeline-case"]').first().simulate('click');
 
-    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SiemPageName.case}/create` });
+    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SecurityPageName.case}/create` });
     expect(mockDispatch).toBeCalledWith(
       setInsertTimeline({
         timelineId: defaultProps.timelineId,

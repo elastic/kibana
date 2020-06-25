@@ -147,9 +147,25 @@ export default function ({ getService }: FtrProviderContext) {
             progress: '100',
           },
           indexPreview: {
-            columns: 20,
+            columns: 10,
             rows: 5,
           },
+          histogramCharts: [
+            { chartAvailable: false, id: 'category', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'currency', legend: '1 category' },
+            {
+              chartAvailable: false,
+              id: 'customer_birth_date',
+              legend: '0 documents contain field.',
+            },
+            { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
+            { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'customer_gender', legend: '2 categories' },
+            { chartAvailable: true, id: 'customer_id', legend: 'top 20 of 46 categories' },
+            { chartAvailable: false, id: 'customer_last_name', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'customer_phone', legend: '1 category' },
+            { chartAvailable: true, id: 'day_of_week', legend: '7 categories' },
+          ],
         },
       },
       {
@@ -229,9 +245,10 @@ export default function ({ getService }: FtrProviderContext) {
             progress: '100',
           },
           indexPreview: {
-            columns: 20,
+            columns: 10,
             rows: 5,
           },
+          histogramCharts: [],
         },
       },
     ];
@@ -240,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
+          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {
@@ -289,6 +306,16 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
         });
 
+        it('enables the index preview histogram charts', async () => {
+          await transform.wizard.enableIndexPreviewHistogramCharts();
+        });
+
+        it('displays the index preview histogram charts', async () => {
+          await transform.wizard.assertIndexPreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
+        });
+
         it('adds the group by entries', async () => {
           for (const [index, entry] of testData.groupByEntries.entries()) {
             await transform.wizard.assertGroupByInputExists();
@@ -323,6 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('shows the pivot preview', async () => {
+          await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           await transform.wizard.assertPivotPreviewColumnValues(
             testData.expected.pivotPreview.column,
             testData.expected.pivotPreview.values
@@ -408,8 +436,6 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
-            sourceIndex: testData.source,
-            destinationIndex: testData.destinationIndex,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

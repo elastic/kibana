@@ -70,14 +70,14 @@ export class TaskRunner {
     return apiKey;
   }
 
-  async getServicesWithSpaceLevelPermissions(spaceId: string, apiKey: string | null) {
+  private getFakeKibanaRequest(spaceId: string, apiKey: string | null) {
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {
       requestHeaders.authorization = `ApiKey ${apiKey}`;
     }
 
-    const fakeRequest = {
+    return ({
       headers: requestHeaders,
       getBasePath: () => this.context.getBasePath(spaceId),
       path: '/',
@@ -90,9 +90,11 @@ export class TaskRunner {
           url: '/',
         },
       },
-    };
+    } as unknown) as KibanaRequest;
+  }
 
-    return this.context.getServices((fakeRequest as unknown) as KibanaRequest);
+  async getServicesWithSpaceLevelPermissions(spaceId: string, apiKey: string | null) {
+    return this.context.getServices(this.getFakeKibanaRequest(spaceId, apiKey));
   }
 
   private getExecutionHandler(
@@ -127,6 +129,7 @@ export class TaskRunner {
       spaceId,
       alertType: this.alertType,
       eventLogger: this.context.eventLogger,
+      request: this.getFakeKibanaRequest(spaceId, apiKey),
     });
   }
 

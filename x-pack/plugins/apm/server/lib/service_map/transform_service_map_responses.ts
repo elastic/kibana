@@ -17,12 +17,7 @@ import {
   ServiceConnectionNode,
   ExternalConnectionNode,
 } from '../../../common/service_map';
-import {
-  ConnectionsResponse,
-  ServicesResponse,
-  ServiceAnomalies,
-} from './get_service_map';
-import { addAnomaliesDataToNodes } from './ml_helpers';
+import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -67,12 +62,11 @@ export function getServiceNodes(allNodes: ConnectionNode[]) {
 }
 
 export type ServiceMapResponse = ConnectionsResponse & {
-  anomalies: ServiceAnomalies;
   services: ServicesResponse;
 };
 
 export function transformServiceMapResponses(response: ServiceMapResponse) {
-  const { anomalies, discoveredServices, services, connections } = response;
+  const { discoveredServices, services, connections } = response;
 
   const allNodes = getAllNodes(services, connections);
   const serviceNodes = getServiceNodes(allNodes);
@@ -214,18 +208,10 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
     return prev.concat(connection);
   }, []);
 
-  // Add anomlies data
-  const dedupedNodesWithAnomliesData = addAnomaliesDataToNodes(
-    dedupedNodes,
-    anomalies
-  );
-
   // Put everything together in elements, with everything in the "data" property
-  const elements = [...dedupedConnections, ...dedupedNodesWithAnomliesData].map(
-    (element) => ({
-      data: element,
-    })
-  );
+  const elements = [...dedupedConnections, ...dedupedNodes].map((element) => ({
+    data: element,
+  }));
 
   return { elements };
 }

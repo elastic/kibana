@@ -13,7 +13,7 @@ import {
   UpdateEmbeddableExpressionPayload,
 } from '../actions/embeddable';
 
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { assignNodeProperties } from './elements';
 
 export const embeddableReducer = handleActions<

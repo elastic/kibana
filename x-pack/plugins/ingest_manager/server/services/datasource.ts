@@ -56,6 +56,44 @@ class DatasourceService {
     };
   }
 
+  public async bulkCreate(
+    soClient: SavedObjectsClientContract,
+    datasources: NewDatasource[],
+    configId: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<Datasource[]> {
+    const isoDate = new Date().toISOString();
+    const { saved_objects: newSos } = await soClient.bulkCreate<Omit<Datasource, 'id'>>(
+      datasources.map((datasource) => ({
+        type: SAVED_OBJECT_TYPE,
+        attributes: {
+          ...datasource,
+          config_id: configId,
+          revision: 1,
+          created_at: isoDate,
+          created_by: options?.user?.username ?? 'system',
+          updated_at: isoDate,
+          updated_by: options?.user?.username ?? 'system',
+        },
+      }))
+    );
+
+    // Assign it to the given agent config
+    await agentConfigService.assignDatasources(
+      soClient,
+      configId,
+      newSos.map((newSo) => newSo.id),
+      {
+        user: options?.user,
+      }
+    );
+
+    return newSos.map((newSo) => ({
+      id: newSo.id,
+      ...newSo.attributes,
+    }));
+  }
+
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Datasource | null> {
     const datasourceSO = await soClient.get<DatasourceSOAttributes>(SAVED_OBJECT_TYPE, id);
     if (!datasourceSO) {
@@ -269,4 +307,5 @@ async function _assignPackageStreamToStream(
   return { ...stream };
 }
 
+export type DatasourceServiceInterface = DatasourceService;
 export const datasourceService = new DatasourceService();

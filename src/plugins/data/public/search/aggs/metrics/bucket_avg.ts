@@ -46,14 +46,17 @@ const averageBucketTitle = i18n.translate('data.search.aggs.metrics.averageBucke
 export const getBucketAvgMetricAgg = ({
   getInternalStartServices,
 }: BucketAvgMetricAggDependencies) => {
+  const { subtype, params, getFormat, getSerializedFormat } = siblingPipelineAggHelper;
+
   return new MetricAggType(
     {
       name: METRIC_TYPES.AVG_BUCKET,
       title: averageBucketTitle,
       makeLabel: (agg) => makeNestedLabel(agg, overallAverageLabel),
-      subtype: siblingPipelineAggHelper.subtype,
-      params: [...siblingPipelineAggHelper.params()],
-      getFormat: siblingPipelineAggHelper.getFormat,
+      subtype,
+      params: [...params()],
+      getFormat,
+      getSerializedFormat,
       getValue(agg, bucket) {
         const customMetric = agg.getParam('customMetric');
         const customBucket = agg.getParam('customBucket');

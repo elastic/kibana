@@ -16,7 +16,7 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
 import {
@@ -28,11 +28,9 @@ import {
 import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './index';
 import {
-  createMockAgentService,
-  createMockMetadataIndexPatternRetriever,
+  createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { AgentService } from '../../../../../ingest_manager/server';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
@@ -48,7 +46,9 @@ describe('test endpoint route', () => {
   let routeHandler: RequestHandler<any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
-  let mockAgentService: jest.Mocked<AgentService>;
+  let mockAgentService: ReturnType<
+    typeof createMockEndpointAppContextServiceStartContract
+  >['agentService'];
   let endpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
@@ -60,15 +60,13 @@ describe('test endpoint route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
-    mockAgentService = createMockAgentService();
     endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.start({
-      indexPatternRetriever: createMockMetadataIndexPatternRetriever(),
-      agentService: mockAgentService,
-    });
+    const startContract = createMockEndpointAppContextServiceStartContract();
+    endpointAppContextService.start(startContract);
+    mockAgentService = startContract.agentService;
 
     registerEndpointRoutes(routerMock, {
-      logFactory: loggingServiceMock.create(),
+      logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
     });
@@ -242,7 +240,7 @@ describe('test endpoint route', () => {
       expect(routeConfig.options).toEqual({ authRequired: true });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
-      expect(result).toHaveProperty('metadata.endpoint');
+      expect(result).toHaveProperty('metadata.Endpoint');
       expect(result.host_status).toEqual(HostStatus.ONLINE);
     });
 
