@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+interface TimestampFieldFromEs {
+  name: string;
+  mapping: {
+    type: string;
+  };
+}
+
+type TimestampField = TimestampFieldFromEs;
+
 export interface DataStreamFromEs {
   name: string;
-  timestamp_field: string;
+  timestamp_field: TimestampFieldFromEs;
   indices: DataStreamIndexFromEs[];
   generation: number;
 }
@@ -18,7 +27,7 @@ export interface DataStreamIndexFromEs {
 
 export interface DataStream {
   name: string;
-  timeStampField: string;
+  timeStampField: TimestampField;
   indices: DataStreamIndex[];
   generation: number;
 }

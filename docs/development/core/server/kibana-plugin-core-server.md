@@ -85,6 +85,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [EnvironmentMode](./kibana-plugin-core-server.environmentmode.md) |  |
 |  [ErrorHttpResponseOptions](./kibana-plugin-core-server.errorhttpresponseoptions.md) | HTTP response parameters |
 |  [FakeRequest](./kibana-plugin-core-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
+|  [HttpAuth](./kibana-plugin-core-server.httpauth.md) |  |
 |  [HttpResources](./kibana-plugin-core-server.httpresources.md) | HttpResources service is responsible for serving static &amp; dynamic assets for Kibana application via HTTP. Provides API allowing plug-ins to respond with: - a pre-configured HTML page bootstrapping Kibana client app - custom HTML page - custom JS script file. |
 |  [HttpResourcesRenderOptions](./kibana-plugin-core-server.httpresourcesrenderoptions.md) | Allows to configure HTTP response parameters |
 |  [HttpResourcesServiceToolkit](./kibana-plugin-core-server.httpresourcesservicetoolkit.md) | Extended set of [KibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) helpers used to respond with HTML or JS resource. |
@@ -107,7 +108,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LegacyServiceSetupDeps](./kibana-plugin-core-server.legacyservicesetupdeps.md) |  |
 |  [LegacyServiceStartDeps](./kibana-plugin-core-server.legacyservicestartdeps.md) |  |
 |  [Logger](./kibana-plugin-core-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
+|  [LoggerContextConfigInput](./kibana-plugin-core-server.loggercontextconfiginput.md) |  |
 |  [LoggerFactory](./kibana-plugin-core-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
+|  [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) | Provides APIs to plugins for customizing the plugin's logger. |
 |  [LogMeta](./kibana-plugin-core-server.logmeta.md) | Contextual metadata |
 |  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
 |  [NodesVersionCompatibility](./kibana-plugin-core-server.nodesversioncompatibility.md) |  |
@@ -157,6 +160,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsExportResultDetails](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-server.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindResponse](./kibana-plugin-core-server.savedobjectsfindresponse.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
+|  [SavedObjectsFindResult](./kibana-plugin-core-server.savedobjectsfindresult.md) |  |
 |  [SavedObjectsImportConflictError](./kibana-plugin-core-server.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |
 |  [SavedObjectsImportError](./kibana-plugin-core-server.savedobjectsimporterror.md) | Represents a failure to import. |
 |  [SavedObjectsImportMissingReferencesError](./kibana-plugin-core-server.savedobjectsimportmissingreferenceserror.md) | Represents a failure to import due to missing references. |
@@ -207,6 +211,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AppenderConfigType](./kibana-plugin-core-server.appenderconfigtype.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-core-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-core-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-core-server.authheaders.md) | Auth Headers map |
 |  [AuthResult](./kibana-plugin-core-server.authresult.md) |  |
@@ -240,6 +245,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [KibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client. |
 |  [KnownHeaders](./kibana-plugin-core-server.knownheaders.md) | Set of well-known HTTP headers. |
 |  [LifecycleResponseFactory](./kibana-plugin-core-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
+|  [LoggerConfigType](./kibana-plugin-core-server.loggerconfigtype.md) |  |
 |  [MIGRATION\_ASSISTANCE\_INDEX\_ACTION](./kibana-plugin-core-server.migration_assistance_index_action.md) |  |
 |  [MIGRATION\_DEPRECATION\_LEVEL](./kibana-plugin-core-server.migration_deprecation_level.md) |  |
 |  [MutatingOperationRefreshSetting](./kibana-plugin-core-server.mutatingoperationrefreshsetting.md) | Elasticsearch Refresh setting for mutating operation |

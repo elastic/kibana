@@ -435,6 +435,21 @@ export function relatedEventsStats(data: DataState) {
   return data.relatedEventsStats;
 }
 
+/**
+ * returns {Map<string, ResolverRelatedEvents>} a map of entity_ids to related event data.
+ */
+export function relatedEventsByEntityId(data: DataState) {
+  return data.relatedEvents;
+}
+
+/**
+ * returns {Map<string, boolean>} a map of entity_ids to booleans indicating if it is waiting on related event
+ * A value of `undefined` can be interpreted as `not yet requested`
+ */
+export function relatedEventsReady(data: DataState) {
+  return data.relatedEventsReady;
+}
+
 export const processAdjacencies = createSelector(
   indexedProcessTree,
   graphableProcesses,
@@ -514,3 +529,15 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     };
   }
 );
+
+/**
+ * Returns the `children` and `ancestors` limits for the current graph, if any.
+ *
+ * @param state {DataState} the DataState from the reducer
+ */
+export const limitsReached = (state: DataState): { children: boolean; ancestors: boolean } => {
+  return {
+    children: state.lineageLimits.children !== null,
+    ancestors: state.lineageLimits.ancestors !== null,
+  };
+};

@@ -38,7 +38,9 @@ import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { getManagementUrl } from '../../../..';
+import { getEndpointListPath } from '../../../../common/routing';
+import { SecurityPageName } from '../../../../../app/types';
+import { useFormatUrl } from '../../../../../common/components/link_to';
 
 export const HostDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -116,21 +118,23 @@ const PolicyResponseFlyoutPanel = memo<{
   const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
   const loading = useHostSelector(policyResponseLoading);
   const error = useHostSelector(policyResponseError);
+  const { formatUrl } = useFormatUrl(SecurityPageName.management);
   const [detailsUri, detailsRoutePath] = useMemo(
     () => [
-      getManagementUrl({
+      formatUrl(
+        getEndpointListPath({
+          name: 'endpointList',
+          ...queryParams,
+          selected_host: hostMeta.host.id,
+        })
+      ),
+      getEndpointListPath({
         name: 'endpointList',
-        ...queryParams,
-        selected_host: hostMeta.host.id,
-      }),
-      getManagementUrl({
-        name: 'endpointList',
-        excludePrefix: true,
         ...queryParams,
         selected_host: hostMeta.host.id,
       }),
     ],
-    [hostMeta.host.id, queryParams]
+    [hostMeta.host.id, formatUrl, queryParams]
   );
   const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsRoutePath);
   const backButtonProp = useMemo((): FlyoutSubHeaderProps['backButton'] => {

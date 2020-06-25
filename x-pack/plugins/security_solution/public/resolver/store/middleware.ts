@@ -14,6 +14,7 @@ import {
   ResolverAncestry,
   LifecycleNode,
   ResolverNodeStats,
+  ResolverRelatedEvents,
 } from '../../../common/endpoint/types';
 import * as event from '../../../common/endpoint/models/event';
 
@@ -76,6 +77,8 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
           }
           const nodeStats: Map<string, ResolverNodeStats> = new Map();
           nodeStats.set(entityId, stats);
+          const lineageLimits = { children: children.nextChild, ancestors: ancestry.nextAncestor };
+
           const events = [
             ...lifecycle,
             ...getLifecycleEventsAndStats(children.childNodes, nodeStats),
@@ -83,14 +86,42 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
           ];
           api.dispatch({
             type: 'serverReturnedResolverData',
-            events,
-            stats: nodeStats,
+            payload: {
+              events,
+              stats: nodeStats,
+              lineageLimits,
+            },
           });
         } catch (error) {
           api.dispatch({
             type: 'serverFailedToReturnResolverData',
           });
         }
+      }
+    } else if (
+      (action.type === 'userRequestedRelatedEventData' ||
+        action.type === 'appDetectedMissingEventData') &&
+      context
+    ) {
+      const entityIdToFetchFor = action.payload;
+      let result: ResolverRelatedEvents;
+      try {
+        result = await context.services.http.get(
+          `/api/endpoint/resolver/${entityIdToFetchFor}/events`,
+          {
+            query: { events: 100 },
+          }
+        );
+
+        api.dispatch({
+          type: 'serverReturnedRelatedEventData',
+          payload: result,
+        });
+      } catch (e) {
+        api.dispatch({
+          type: 'serverFailedToReturnRelatedEventData',
+          payload: action.payload,
+        });
       }
     }
   };
