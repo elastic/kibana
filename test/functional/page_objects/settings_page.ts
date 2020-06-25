@@ -74,7 +74,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async expectDisabledAdvancedSetting(propertyName: string) {
       expect(
         await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'disabled')
-      ).to.eql('');
+      ).to.eql('true');
     }
 
     async getAdvancedSettingCheckbox(propertyName: string) {
