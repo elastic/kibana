@@ -390,11 +390,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
             ],
           },
           data: {
-            aggs: {
-              getResponseAggs: () => {
-                return aggs;
-              },
-            } as any,
+            aggs,
             searchSource: {} as any,
           },
           isHierarchical: () => {
@@ -471,11 +467,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           },
           params: { gauge: {} },
           data: {
-            aggs: {
-              getResponseAggs: () => {
-                return aggs;
-              },
-            } as any,
+            aggs,
             searchSource: {} as any,
           },
           isHierarchical: () => {
