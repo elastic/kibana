@@ -38,9 +38,4 @@ describe('Skip to Bottom Button', function () {
     component.simulate('click');
     expect(props.onClick).toHaveBeenCalled();
   });
-
-  it('should match the snapshot', function () {
-    component = mountWithIntl(<SkipBottomButton {...props} />);
-    expect(component).toMatchSnapshot();
-  });
 });
