@@ -43,20 +43,11 @@ export class Plugin
       appRoute: '/app/logs',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
+        // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/logs_app');
 
-        return renderApp(
-          coreStart,
-          {
-            data: pluginsStart.data,
-            dataEnhanced: pluginsSetup.dataEnhanced,
-            home: pluginsSetup.home,
-            triggers_actions_ui: pluginsStart.triggers_actions_ui,
-            usageCollection: pluginsSetup.usageCollection,
-          },
-          params
-        );
+        return renderApp(coreStart, pluginsStart, params);
       },
     });
 
@@ -70,20 +61,11 @@ export class Plugin
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
+        // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/metrics_app');
 
-        return renderApp(
-          coreStart,
-          {
-            data: pluginsStart.data,
-            dataEnhanced: pluginsSetup.dataEnhanced,
-            home: pluginsSetup.home,
-            triggers_actions_ui: pluginsStart.triggers_actions_ui,
-            usageCollection: pluginsSetup.usageCollection,
-          },
-          params
-        );
+        return renderApp(coreStart, pluginsStart, params);
       },
     });
 
