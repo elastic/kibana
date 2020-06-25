@@ -61,7 +61,7 @@ export const PageLoadDistribution = () => {
   );
 
   const onPercentileChange = (min: number, max: number) => {
-    setPercentileRange({ min, max });
+    setPercentileRange({ min: min * 1000, max: max * 1000 });
   };
 
   const onBreakdownChange = (values: BreakdownItem[]) => {
