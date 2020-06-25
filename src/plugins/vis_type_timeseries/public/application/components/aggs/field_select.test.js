@@ -21,12 +21,8 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { FieldSelect } from './field_select';
 import { EuiComboBox } from '@elastic/eui';
-import {
-  SCRIPTED_FIELD_VALUE,
-  FIELDS,
-  INDEX_PATTERN,
-  UI_RESTRICTIONS,
-} from '../../../../common/constants';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
+import { FIELDS, INDEX_PATTERN, UI_RESTRICTIONS } from '../../../test_utils';
 
 describe('FieldSelect', () => {
   it('should have scripted field', () => {
