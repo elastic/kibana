@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { merge } from 'lodash3';
+import { merge, omitBy } from 'lodash';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
 
@@ -111,7 +111,6 @@ export class Fetch {
     });
   };
 
-  // TODO: need to migrate this to lodash4
   private createRequest(options: HttpFetchOptionsWithPath): Request {
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
@@ -138,7 +137,7 @@ export class Fetch {
 
     const url = format({
       pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
-      query,
+      query: omitBy(query, (v) => v === undefined),
     });
 
     // Make sure the system request header is only present if `asSystemRequest` is true.
