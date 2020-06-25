@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce, pick } from 'lodash';
+import { debounce, pick, omit } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import * as rt from 'io-ts';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
@@ -52,7 +52,7 @@ import { useSourceViaHttp } from '../../../containers/source/use_source_via_http
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 import { ExpressionRow } from './expression_row';
-import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
+import { AlertContextMeta, TimeUnit, MetricExpression, AlertParams } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { validateMetricThreshold } from './validation';
 
@@ -60,14 +60,7 @@ const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 interface Props {
   errors: IErrorObject[];
-  alertParams: {
-    criteria: MetricExpression[];
-    groupBy?: string;
-    filterQuery?: string;
-    sourceId?: string;
-    filterQueryText?: string;
-    alertOnNoData?: boolean;
-  };
+  alertParams: AlertParams;
   alertsContext: AlertsContextValue<AlertContextMeta>;
   alertInterval: string;
   setAlertParams(key: string, value: any): void;
@@ -81,6 +74,7 @@ const defaultExpression = {
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
+export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
@@ -247,6 +241,13 @@ export const Expressions: React.FC<Props> = (props) => {
     }
   }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
 
+  const preFillAlertGroupBy = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.currentOptions?.groupBy && !md.series) {
+      setAlertParams('groupBy', md.currentOptions.groupBy);
+    }
+  }, [alertsContext.metadata, setAlertParams]);
+
   const onSelectPreviewLookbackInterval = useCallback((e) => {
     setPreviewLookbackInterval(e.target.value);
     setPreviewResult(null);
@@ -284,6 +285,10 @@ export const Expressions: React.FC<Props> = (props) => {
 
     if (!alertParams.filterQuery) {
       preFillAlertFilter();
+    }
+
+    if (!alertParams.groupBy) {
+      preFillAlertGroupBy();
     }
 
     if (!alertParams.sourceId) {
@@ -465,7 +470,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 id="selectPreviewLookbackInterval"
                 value={previewLookbackInterval}
                 onChange={onSelectPreviewLookbackInterval}
-                options={previewOptions}
+                options={previewDOMOptions}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -587,6 +592,10 @@ export const Expressions: React.FC<Props> = (props) => {
     </>
   );
 };
+
+const previewDOMOptions: Array<{ text: string; value: string }> = previewOptions.map((o) =>
+  omit(o, 'shortText')
+);
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export

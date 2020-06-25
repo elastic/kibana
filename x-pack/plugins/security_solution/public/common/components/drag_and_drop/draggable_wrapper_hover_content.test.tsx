@@ -20,6 +20,7 @@ import {
   ManageGlobalTimeline,
   timelineDefaults,
 } from '../../../timelines/components/manage_timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 
 jest.mock('../link_to');
 
@@ -41,9 +42,24 @@ jest.mock('uuid', () => {
 });
 
 jest.mock('../../hooks/use_add_to_timeline');
+const mockAddFilters = jest.fn();
+const mockGetTimelineFilterManager = jest.fn().mockReturnValue({
+  addFilters: mockAddFilters,
+});
+jest.mock('../../../timelines/components/manage_timeline', () => {
+  const original = jest.requireActual('../../../timelines/components/manage_timeline');
+
+  return {
+    ...original,
+    useManageTimeline: () => ({
+      getTimelineFilterManager: mockGetTimelineFilterManager,
+      isManagedTimeline: jest.fn().mockReturnValue(false),
+    }),
+  };
+});
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
-const timelineId = 'cool-id';
+const timelineId = TimelineId.active;
 const field = 'process.name';
 const value = 'nice';
 const toggleTopN = jest.fn();
@@ -88,6 +104,9 @@ describe('DraggableWrapperHoverContent', () => {
 
   forOrOut.forEach((hoverAction) => {
     describe(`Filter ${hoverAction} value`, () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
       test(`it renders the 'Filter ${hoverAction} value' button when showTopN is false`, () => {
         const wrapper = mount(
           <TestProviders>
@@ -111,21 +130,16 @@ describe('DraggableWrapperHoverContent', () => {
           wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().exists()
         ).toBe(false);
       });
-
       describe('when run in the context of a timeline', () => {
-        let filterManager: FilterManager;
         let wrapper: ReactWrapper;
         let onFilterAdded: () => void;
 
         beforeEach(() => {
-          filterManager = new FilterManager(mockUiSettingsForFilterManager);
-          filterManager.addFilters = jest.fn();
           onFilterAdded = jest.fn();
           const manageTimelineForTesting = {
             [timelineId]: {
               ...timelineDefaults,
               id: timelineId,
-              filterManager,
             },
           };
 
@@ -141,7 +155,7 @@ describe('DraggableWrapperHoverContent', () => {
           wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
-          expect(filterManager.addFilters).toBeCalledWith({
+          expect(mockAddFilters).toBeCalledWith({
             meta: {
               alias: null,
               disabled: false,
@@ -174,7 +188,9 @@ describe('DraggableWrapperHoverContent', () => {
 
           wrapper = mount(
             <TestProviders>
-              <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded }} />
+              <DraggableWrapperHoverContent
+                {...{ ...defaultProps, onFilterAdded, timelineId: 'not-active-timeline' }}
+              />
             </TestProviders>
           );
         });
@@ -263,7 +279,7 @@ describe('DraggableWrapperHoverContent', () => {
           wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
-          expect(filterManager.addFilters).toBeCalledWith(expected);
+          expect(mockAddFilters).toBeCalledWith(expected);
         });
       });
 
@@ -278,7 +294,14 @@ describe('DraggableWrapperHoverContent', () => {
 
           wrapper = mount(
             <TestProviders>
-              <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded, value: '' }} />
+              <DraggableWrapperHoverContent
+                {...{
+                  ...defaultProps,
+                  onFilterAdded,
+                  timelineId: 'not-active-timeline',
+                  value: '',
+                }}
+              />
             </TestProviders>
           );
         });
@@ -542,6 +565,43 @@ describe('DraggableWrapperHoverContent', () => {
       );
 
       expect(wrapper.find(`[data-test-subj="copy-to-clipboard"]`).first().exists()).toBe(false);
+    });
+  });
+
+  describe('Filter Manager', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    test('filter manager, not active timeline', () => {
+      mount(
+        <TestProviders>
+          <DraggableWrapperHoverContent
+            {...{ ...defaultProps, timelineId: 'not-active-timeline' }}
+          />
+        </TestProviders>
+      );
+
+      expect(mockGetTimelineFilterManager).not.toBeCalled();
+    });
+    test('filter manager, active timeline', () => {
+      mount(
+        <TestProviders>
+          <DraggableWrapperHoverContent {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(mockGetTimelineFilterManager).toBeCalled();
+    });
+    test('filter manager, active timeline in draggableId', () => {
+      mount(
+        <TestProviders>
+          <DraggableWrapperHoverContent
+            {...{ ...defaultProps, draggableId: `blahblah-${TimelineId.active}-lala` }}
+          />
+        </TestProviders>
+      );
+
+      expect(mockGetTimelineFilterManager).toBeCalled();
     });
   });
 });
