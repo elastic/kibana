@@ -58,7 +58,6 @@ export interface RegistryPackage {
   icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
-  removable?: boolean;
   format_version: string;
   datasets?: Dataset[];
   config_templates?: RegistryConfigTemplate[];
@@ -203,6 +202,7 @@ interface PackageAdditions {
   title: string;
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
+  removable?: boolean;
 }
 
 // Managers public HTTP response types

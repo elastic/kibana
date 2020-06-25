@@ -337,4 +337,5 @@ async function _assignPackageStreamToStream(
   return { ...stream };
 }
 
+export type DatasourceServiceInterface = DatasourceService;
 export const datasourceService = new DatasourceService();

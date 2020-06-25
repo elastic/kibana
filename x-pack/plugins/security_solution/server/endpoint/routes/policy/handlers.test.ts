@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { createMockAgentService, createRouteHandlerContext } from '../../mocks';
+import {
+  createMockEndpointAppContextServiceStartContract,
+  createRouteHandlerContext,
+} from '../../mocks';
 import { getHostPolicyResponseHandler } from './handlers';
 import {
   IScopedClusterClient,
@@ -17,7 +20,6 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
-import { AgentService } from '../../../../../ingest_manager/server/services';
 import { SearchResponse } from 'elasticsearch';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -28,17 +30,13 @@ describe('test policy response handler', () => {
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockAgentService: jest.Mocked<AgentService>;
 
   beforeEach(() => {
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = new EndpointAppContextService();
-    mockAgentService = createMockAgentService();
-    endpointAppContextService.start({
-      agentService: mockAgentService,
-    });
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
   });
 
   afterEach(() => endpointAppContextService.stop());
