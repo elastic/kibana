@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { merge, omitBy } from 'lodash';
+import { omitBy } from 'lodash';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
 
@@ -41,6 +41,10 @@ interface Params {
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
+
+const removedUndefined = (obj: Record<string, any>) => {
+  return omitBy(obj, (v) => v === undefined);
+};
 
 export class Fetch {
   private readonly interceptors = new Set<HttpInterceptor>();
@@ -119,25 +123,23 @@ export class Fetch {
       asResponse,
       asSystemRequest,
       ...fetchOptions
-    } = merge(
-      {
-        method: 'GET',
-        credentials: 'same-origin',
-        prependBasePath: true,
-      },
-      options,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-          'kbn-version': this.params.kibanaVersion,
-        },
-      }
-    );
+    } = {
+      method: 'GET',
+      credentials: 'same-origin',
+      prependBasePath: true,
+      ...options,
+      // options can pass an `undefined` Content-Type to erase the default value.
+      // however we can't pass it to `fetch` as it will send an `Content-Type: Undefined` header
+      headers: removedUndefined({
+        'Content-Type': 'application/json',
+        ...options.headers,
+        'kbn-version': this.params.kibanaVersion,
+      }),
+    };
 
     const url = format({
       pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
-      query: omitBy(query, (v) => v === undefined),
+      query: removedUndefined(query),
     });
 
     // Make sure the system request header is only present if `asSystemRequest` is true.
