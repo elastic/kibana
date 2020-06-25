@@ -20,6 +20,7 @@
 const filter = (metric) => metric.type === 'filter_ratio';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
+import { SCRIPTED_FIELD_VALUE } from '../../../../../common/constants';
 
 export function ratios(req, panel, series) {
   return (next) => (doc) => {
@@ -38,10 +39,18 @@ export function ratios(req, panel, series) {
         if (metric.metric_agg !== 'count' && bucketTransform[metric.metric_agg]) {
           let metricAgg;
           try {
-            metricAgg = bucketTransform[metric.metric_agg]({
-              type: metric.metric_agg,
-              field: metric.field,
-            });
+            if (metric.field === SCRIPTED_FIELD_VALUE) {
+              metricAgg = bucketTransform[metric.metric_agg]({
+                type: metric.metric_agg,
+                field: metric.field,
+                script: metric.script,
+              });
+            } else {
+              metricAgg = bucketTransform[metric.metric_agg]({
+                type: metric.metric_agg,
+                field: metric.field,
+              });
+            }
           } catch (e) {
             metricAgg = {};
           }

@@ -19,5 +19,16 @@
 
 export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
 export const SCRIPTED_FIELD_VALUE = '__SCRIPT__';
-
-// Tests Constants
+export const FILTER_RATIO_AGGS = [
+  'count',
+  'avg',
+  'max',
+  'min',
+  'cardinality',
+  'positive_rate',
+  'std_deviation',
+  'sum',
+  'sum_of_squares',
+  'value_count',
+  'variance',
+];

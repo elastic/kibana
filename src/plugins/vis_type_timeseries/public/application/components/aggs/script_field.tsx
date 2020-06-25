@@ -31,12 +31,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 
 interface Props {
-  model: { type: string; field: string; script: string };
+  model: { type: string; field: string; script: string; metric_agg?: string };
   onChange: (event: React.SyntheticEvent) => void;
 }
 
 export const ScriptField = ({ model, onChange }: Props) => {
-  if (model.type === 'count' || model.field !== SCRIPTED_FIELD_VALUE) {
+  if (
+    model.type === 'count' ||
+    model.metric_agg === 'count' ||
+    model.field !== SCRIPTED_FIELD_VALUE
+  ) {
     return null;
   }
 

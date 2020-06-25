@@ -18,6 +18,7 @@
  */
 
 import { ratios } from './filter_ratios';
+import { SCRIPTED_FIELD_VALUE } from '../../../../../common/constants';
 
 describe('ratios(req, panel, series)', () => {
   let panel;
@@ -99,6 +100,66 @@ describe('ratios(req, panel, series)', () => {
                     metric: {
                       avg: {
                         field: 'cpu',
+                      },
+                    },
+                  },
+                  filter: {
+                    query_string: {
+                      analyze_wildcard: true,
+                      query: 'errors',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('returns filter ratio with scripted field', () => {
+    series.metrics[0].field = SCRIPTED_FIELD_VALUE;
+    series.metrics[0].script = 'doc["system.cpu.user.pct"]';
+    const next = (doc) => doc;
+    const doc = ratios(req, panel, series)(next)({});
+    expect(doc).toEqual({
+      aggs: {
+        test: {
+          aggs: {
+            timeseries: {
+              aggs: {
+                'metric-1': {
+                  bucket_script: {
+                    buckets_path: {
+                      denominator: 'metric-1-denominator>metric',
+                      numerator: 'metric-1-numerator>metric',
+                    },
+                    script:
+                      'params.numerator != null && params.denominator != null &&' +
+                      ' params.denominator > 0 ? params.numerator / params.denominator : 0',
+                  },
+                },
+                'metric-1-denominator': {
+                  aggs: {
+                    metric: {
+                      avg: {
+                        script: 'doc["system.cpu.user.pct"]',
+                      },
+                    },
+                  },
+                  filter: {
+                    query_string: {
+                      analyze_wildcard: true,
+                      query: '*',
+                    },
+                  },
+                },
+                'metric-1-numerator': {
+                  aggs: {
+                    metric: {
+                      avg: {
+                        script: 'doc["system.cpu.user.pct"]',
                       },
                     },
                   },

@@ -23,6 +23,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+import { FILTER_RATIO_AGGS } from '../../../../common/constants';
 
 const metricAggs = [
   {
@@ -245,6 +246,8 @@ function AggSelectUi(props) {
   let options;
   if (panelType === 'metrics') {
     options = metricAggs;
+  } else if (panelType === 'filter_ratio') {
+    options = metricAggs.filter((m) => FILTER_RATIO_AGGS.includes(m.value));
   } else {
     const disableSiblingAggs = (agg) => ({
       ...agg,
