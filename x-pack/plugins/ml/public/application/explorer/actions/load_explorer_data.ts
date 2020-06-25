@@ -9,8 +9,9 @@ import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 
 import { forkJoin, of, Observable, Subject } from 'rxjs';
-import { mergeMap, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, mergeMap, switchMap, tap } from 'rxjs/operators';
 
+import { useMemo } from 'react';
 import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
 import { explorerService } from '../explorer_dashboard_service';
 import {
@@ -22,15 +23,16 @@ import {
   loadAnomaliesTableData,
   loadDataForCharts,
   loadFilteredTopInfluencers,
-  loadOverallData,
   loadTopInfluencers,
-  loadViewBySwimlane,
   loadViewByTopFieldValuesForSelectedTime,
   AppStateSelectedCells,
   ExplorerJob,
   TimeRangeBounds,
 } from '../explorer_utils';
 import { ExplorerState } from '../reducers';
+import { useMlKibana, useTimefilter } from '../../contexts/kibana';
+import { ExplorerService } from '../../services/explorer_service';
+import { mlResultsServiceProvider } from '../../services/results_service';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -56,9 +58,7 @@ const memoizedLoadDataForCharts = memoize<typeof loadDataForCharts>(loadDataForC
 const memoizedLoadFilteredTopInfluencers = memoize<typeof loadFilteredTopInfluencers>(
   loadFilteredTopInfluencers
 );
-const memoizedLoadOverallData = memoize(loadOverallData);
 const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
-const memoizedLoadViewBySwimlane = memoize(loadViewBySwimlane);
 const memoizedLoadAnomaliesTableData = memoize(loadAnomaliesTableData);
 
 export interface LoadExplorerDataConfig {
@@ -73,6 +73,7 @@ export interface LoadExplorerDataConfig {
   tableInterval: string;
   tableSeverity: number;
   viewBySwimlaneFieldName: string;
+  swimlaneContainerWidth: number;
 }
 
 export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfig => {
@@ -87,12 +88,10 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
 
 /**
  * Fetches the data necessary for the Anomaly Explorer using observables.
- *
- * @param config LoadExplorerDataConfig
- *
- * @return Partial<ExplorerState>
  */
-function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<ExplorerState>> {
+const loadExplorerDataProvider = (explorerDataService: ExplorerService) => (
+  config: LoadExplorerDataConfig
+): Observable<Partial<ExplorerState>> => {
   if (!isLoadExplorerDataConfig(config)) {
     return of({});
   }
@@ -109,6 +108,7 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
     tableInterval,
     tableSeverity,
     viewBySwimlaneFieldName,
+    swimlaneContainerWidth,
   } = config;
 
   const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
@@ -152,12 +152,7 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
             influencersFilterQuery
           )
         : Promise.resolve({}),
-    overallState: memoizedLoadOverallData(
-      lastRefresh,
-      selectedJobs,
-      swimlaneBucketInterval,
-      bounds
-    ),
+    overallState: explorerDataService.loadOverallData(selectedJobs, swimlaneContainerWidth),
     tableData: memoizedLoadAnomaliesTableData(
       lastRefresh,
       selectedCells,
@@ -228,18 +223,17 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
                   influencersFilterQuery
                 )
               : Promise.resolve(influencers),
-          viewBySwimlaneState: memoizedLoadViewBySwimlane(
-            lastRefresh,
+          viewBySwimlaneState: explorerDataService.loadViewBySwimlane(
             topFieldValues,
             {
-              earliest: overallState.overallSwimlaneData.earliest,
-              latest: overallState.overallSwimlaneData.latest,
+              earliest: overallState.earliest,
+              latest: overallState.latest,
             },
             selectedJobs,
             viewBySwimlaneFieldName,
             swimlaneLimit,
-            influencersFilterQuery,
-            noInfluencersConfigured
+            swimlaneContainerWidth,
+            influencersFilterQuery
           ),
         }),
       (
@@ -249,21 +243,42 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
         return {
           annotationsData,
           influencers,
-          ...overallState,
-          ...viewBySwimlaneState,
+          loading: false,
+          viewBySwimlaneDataLoading: false,
+          overallSwimlaneData: overallState,
+          viewBySwimlaneData: viewBySwimlaneState,
           tableData,
         };
       }
     )
   );
-}
-
-const loadExplorerData$ = new Subject<LoadExplorerDataConfig>();
-const explorerData$ = loadExplorerData$.pipe(
-  switchMap((config: LoadExplorerDataConfig) => loadExplorerData(config))
-);
+};
 
 export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
+  const timefilter = useTimefilter();
+  const {
+    services: {
+      mlServices: { mlApiServices },
+      uiSettings,
+    },
+  } = useMlKibana();
+  const loadExplorerData = useMemo(() => {
+    const service = new ExplorerService(
+      timefilter,
+      uiSettings,
+      mlResultsServiceProvider(mlApiServices)
+    );
+    return loadExplorerDataProvider(service);
+  }, []);
+  const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);
+  const explorerData$ = useMemo(
+    () =>
+      loadExplorerData$.pipe(
+        debounceTime(500),
+        switchMap((config: LoadExplorerDataConfig) => loadExplorerData(config))
+      ),
+    []
+  );
   const explorerData = useObservable(explorerData$);
   return [explorerData, (c) => loadExplorerData$.next(c)];
 };

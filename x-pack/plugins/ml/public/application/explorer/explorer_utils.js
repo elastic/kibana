@@ -8,10 +8,8 @@
  * utils for Anomaly Explorer.
  */
 
-import { chain, each, get, union, uniq } from 'lodash';
+import { chain, get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
@@ -27,7 +25,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
-import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '../util/time_buckets';
+import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
 import {
@@ -435,105 +433,6 @@ export function getViewBySwimlaneOptions({
   };
 }
 
-export function processOverallResults(scoresByTime, searchBounds, interval) {
-  const overallLabel = i18n.translate('xpack.ml.explorer.overallLabel', {
-    defaultMessage: 'Overall',
-  });
-  const dataset = {
-    laneLabels: [overallLabel],
-    points: [],
-    interval,
-    earliest: searchBounds.min.valueOf() / 1000,
-    latest: searchBounds.max.valueOf() / 1000,
-  };
-
-  if (Object.keys(scoresByTime).length > 0) {
-    // Store the earliest and latest times of the data returned by the ES aggregations,
-    // These will be used for calculating the earliest and latest times for the swimlane charts.
-    each(scoresByTime, (score, timeMs) => {
-      const time = timeMs / 1000;
-      dataset.points.push({
-        laneLabel: overallLabel,
-        time,
-        value: score,
-      });
-
-      dataset.earliest = Math.min(time, dataset.earliest);
-      dataset.latest = Math.max(time + dataset.interval, dataset.latest);
-    });
-  }
-
-  return dataset;
-}
-
-export function processViewByResults(
-  scoresByInfluencerAndTime,
-  sortedLaneValues,
-  bounds,
-  viewBySwimlaneFieldName,
-  interval
-) {
-  // Processes the scores for the 'view by' swimlane.
-  // Sorts the lanes according to the supplied array of lane
-  // values in the order in which they should be displayed,
-  // or pass an empty array to sort lanes according to max score over all time.
-  const dataset = {
-    fieldName: viewBySwimlaneFieldName,
-    points: [],
-    interval,
-  };
-
-  // Set the earliest and latest to be the same as the overall swimlane.
-  dataset.earliest = bounds.earliest;
-  dataset.latest = bounds.latest;
-
-  const laneLabels = [];
-  const maxScoreByLaneLabel = {};
-
-  each(scoresByInfluencerAndTime, (influencerData, influencerFieldValue) => {
-    laneLabels.push(influencerFieldValue);
-    maxScoreByLaneLabel[influencerFieldValue] = 0;
-
-    each(influencerData, (anomalyScore, timeMs) => {
-      const time = timeMs / 1000;
-      dataset.points.push({
-        laneLabel: influencerFieldValue,
-        time,
-        value: anomalyScore,
-      });
-      maxScoreByLaneLabel[influencerFieldValue] = Math.max(
-        maxScoreByLaneLabel[influencerFieldValue],
-        anomalyScore
-      );
-    });
-  });
-
-  const sortValuesLength = sortedLaneValues.length;
-  if (sortValuesLength === 0) {
-    // Sort lanes in descending order of max score.
-    // Note the keys in scoresByInfluencerAndTime received from the ES request
-    // are not guaranteed to be sorted by score if they can be parsed as numbers
-    // (e.g. if viewing by HTTP response code).
-    dataset.laneLabels = laneLabels.sort((a, b) => {
-      return maxScoreByLaneLabel[b] - maxScoreByLaneLabel[a];
-    });
-  } else {
-    // Sort lanes according to supplied order
-    // e.g. when a cell in the overall swimlane has been selected.
-    // Find the index of each lane label from the actual data set,
-    // rather than using sortedLaneValues as-is, just in case they differ.
-    dataset.laneLabels = laneLabels.sort((a, b) => {
-      let aIndex = sortedLaneValues.indexOf(a);
-      let bIndex = sortedLaneValues.indexOf(b);
-      aIndex = aIndex > -1 ? aIndex : sortValuesLength;
-      bIndex = bIndex > -1 ? bIndex : sortValuesLength;
-      return aIndex - bIndex;
-    });
-  }
-
-  return dataset;
-}
-
 export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds =
     selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
@@ -720,138 +619,6 @@ export async function loadDataForCharts(
 
         resolve([]);
       });
-  });
-}
-
-export function loadOverallData(selectedJobs, interval, bounds) {
-  return new Promise((resolve) => {
-    // Loads the overall data components i.e. the overall swimlane and influencers list.
-    if (selectedJobs === null) {
-      resolve({
-        loading: false,
-        hasResuts: false,
-      });
-      return;
-    }
-
-    // Ensure the search bounds align to the bucketing interval used in the swimlane so
-    // that the first and last buckets are complete.
-    const searchBounds = getBoundsRoundedToInterval(bounds, interval, false);
-    const selectedJobIds = selectedJobs.map((d) => d.id);
-
-    // Load the overall bucket scores by time.
-    // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
-    // which wouldn't be the case if e.g. '1M' was used.
-    // Pass 'true' when obtaining bucket bounds due to the way the overall_buckets endpoint works
-    // to ensure the search is inclusive of end time.
-    const overallBucketsBounds = getBoundsRoundedToInterval(bounds, interval, true);
-    mlResultsService
-      .getOverallBucketScores(
-        selectedJobIds,
-        // Note there is an optimization for when top_n == 1.
-        // If top_n > 1, we should test what happens when the request takes long
-        // and refactor the loading calls, if necessary, to avoid delays in loading other components.
-        1,
-        overallBucketsBounds.min.valueOf(),
-        overallBucketsBounds.max.valueOf(),
-        interval.asSeconds() + 's'
-      )
-      .then((resp) => {
-        const overallSwimlaneData = processOverallResults(
-          resp.results,
-          searchBounds,
-          interval.asSeconds()
-        );
-
-        resolve({
-          loading: false,
-          overallSwimlaneData,
-        });
-      });
-  });
-}
-
-export function loadViewBySwimlane(
-  fieldValues,
-  bounds,
-  selectedJobs,
-  viewBySwimlaneFieldName,
-  swimlaneLimit,
-  influencersFilterQuery,
-  noInfluencersConfigured
-) {
-  return new Promise((resolve) => {
-    const finish = (resp) => {
-      if (resp !== undefined) {
-        const viewBySwimlaneData = processViewByResults(
-          resp.results,
-          fieldValues,
-          bounds,
-          viewBySwimlaneFieldName,
-          getSwimlaneBucketInterval(
-            selectedJobs,
-            getSwimlaneContainerWidth(noInfluencersConfigured)
-          ).asSeconds()
-        );
-
-        resolve({
-          viewBySwimlaneData,
-          viewBySwimlaneDataLoading: false,
-        });
-      } else {
-        resolve({ viewBySwimlaneDataLoading: false });
-      }
-    };
-
-    if (selectedJobs === undefined || viewBySwimlaneFieldName === undefined) {
-      finish();
-      return;
-    } else {
-      // Ensure the search bounds align to the bucketing interval used in the swimlane so
-      // that the first and last buckets are complete.
-      const timefilter = getTimefilter();
-      const timefilterBounds = timefilter.getActiveBounds();
-      const searchBounds = getBoundsRoundedToInterval(
-        timefilterBounds,
-        getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(noInfluencersConfigured)),
-        false
-      );
-      const selectedJobIds = selectedJobs.map((d) => d.id);
-
-      // load scores by influencer/jobId value and time.
-      // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
-      // which wouldn't be the case if e.g. '1M' was used.
-      const interval = `${getSwimlaneBucketInterval(
-        selectedJobs,
-        getSwimlaneContainerWidth(noInfluencersConfigured)
-      ).asSeconds()}s`;
-      if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
-        mlResultsService
-          .getInfluencerValueMaxScoreByTime(
-            selectedJobIds,
-            viewBySwimlaneFieldName,
-            fieldValues,
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf(),
-            interval,
-            swimlaneLimit,
-            influencersFilterQuery
-          )
-          .then(finish);
-      } else {
-        const jobIds =
-          fieldValues !== undefined && fieldValues.length > 0 ? fieldValues : selectedJobIds;
-        mlResultsService
-          .getScoresByBucket(
-            jobIds,
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf(),
-            interval,
-            swimlaneLimit
-          )
-          .then(finish);
-      }
-    }
   });
 }
 

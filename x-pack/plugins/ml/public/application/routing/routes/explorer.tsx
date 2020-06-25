@@ -174,6 +174,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       tableInterval: tableInterval.val,
       tableSeverity: tableSeverity.val,
       viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
+      swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
     }) ||
     undefined;
   useEffect(() => {
