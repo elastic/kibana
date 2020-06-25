@@ -112,16 +112,11 @@ export const AnomaliesTable: React.FunctionComponent<{
         return {
           ...aggregatedDatasetRows,
           [id]: anomaly ? (
-            <AnomaliesTableExpandedRow
-              anomaly={anomaly}
-              setTimeRange={setTimeRange}
-              timeRange={timeRange}
-              jobId={jobId}
-            />
+            <AnomaliesTableExpandedRow anomaly={anomaly} timeRange={timeRange} jobId={jobId} />
           ) : null,
         };
       }, {}),
-    [expandedIds, results, setTimeRange, timeRange, jobId]
+    [expandedIds, results, timeRange, jobId]
   );
 
   const [sorting, setSorting] = useState<SortingOptions>({
