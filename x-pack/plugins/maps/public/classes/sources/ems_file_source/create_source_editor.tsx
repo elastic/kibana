@@ -8,8 +8,8 @@ import React, { Component } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { getEMSClient } from '../../../meta';
+import { FileLayer } from '@elastic/ems-client';
+import { getEmsFileLayers } from '../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 
@@ -33,15 +33,10 @@ export class EMSFileCreateSourceEditor extends Component<Props, State> {
   };
 
   _loadFileOptions = async () => {
-    // @ts-ignore
-    const emsClient = getEMSClient();
-    // @ts-ignore
-    const fileLayers: unknown[] = await emsClient.getFileLayers();
+    const fileLayers: FileLayer[] = await getEmsFileLayers();
     const options = fileLayers.map((fileLayer) => {
       return {
-        // @ts-ignore
         value: fileLayer.getId(),
-        // @ts-ignore
         label: fileLayer.getDisplayName(),
       };
     });

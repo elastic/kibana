@@ -10,4 +10,5 @@ import * as i18n from './translations';
 export const config: ExternalServiceConfiguration = {
   id: '.jira',
   name: i18n.NAME,
+  minimumLicenseRequired: 'gold',
 };

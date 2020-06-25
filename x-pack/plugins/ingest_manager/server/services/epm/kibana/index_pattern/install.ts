@@ -86,6 +86,14 @@ export async function installIndexPatterns(
     savedObjectsClient,
     InstallationStatus.installed
   );
+
+  // TODO: move to install package
+  // cache all installed packages if they don't exist
+  const packagePromises = installedPackages.map((pkg) =>
+    Registry.ensureCachedArchiveInfo(pkg.pkgName, pkg.pkgVersion)
+  );
+  await Promise.all(packagePromises);
+
   if (pkgName && pkgVersion) {
     // add this package to the array if it doesn't already exist
     const foundPkg = installedPackages.find((pkg) => pkg.pkgName === pkgName);
@@ -299,6 +307,10 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
 export const flattenFields = (allFields: Fields): Fields => {
   const flatten = (fields: Fields): Fields =>
     fields.reduce<Field[]>((acc, field) => {
+      // if this is a group fields with no fields, skip the field
+      if (field.type === 'group' && !field.fields?.length) {
+        return acc;
+      }
       // recurse through nested fields
       if (field.type === 'group' && field.fields?.length) {
         // skip if field.enabled is not explicitly set to false

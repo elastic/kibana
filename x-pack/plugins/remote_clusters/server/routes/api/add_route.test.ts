@@ -28,7 +28,7 @@ describe('ADD remote clusters', () => {
     { licenseCheckResult = { valid: true }, apiResponses = [], asserts, payload }: TestOptions
   ) => {
     test(description, async () => {
-      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
+      const elasticsearchMock = elasticsearchServiceMock.createClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),

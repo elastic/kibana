@@ -5,53 +5,107 @@
  */
 
 import {
-  CreateExceptionListItemSchemaPartial,
-  CreateExceptionListSchemaPartial,
+  CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
-  FoundExceptionListItemSchema,
+  NamespaceType,
+  Page,
+  PerPage,
+  TotalOrUndefined,
+  UpdateExceptionListItemSchema,
+  UpdateExceptionListSchema,
 } from '../../common/schemas';
 import { HttpStart } from '../../../../../src/core/public';
 
-export interface ExceptionListAndItems extends ExceptionListSchema {
-  exceptionItems: FoundExceptionListItemSchema;
+export interface FilterExceptionsOptions {
+  filter: string;
+  tags: string[];
 }
 
-export type AddExceptionList = ExceptionListSchema | CreateExceptionListSchemaPartial;
+export interface Pagination {
+  page: Page;
+  perPage: PerPage;
+  total: TotalOrUndefined;
+}
 
-export type AddExceptionListItem = CreateExceptionListItemSchemaPartial | ExceptionListItemSchema;
+export type AddExceptionList = UpdateExceptionListSchema | CreateExceptionListSchema;
+
+export type AddExceptionListItem = CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
 
 export interface PersistHookProps {
   http: HttpStart;
   onError: (arg: Error) => void;
 }
 
+export interface ExceptionList extends ExceptionListSchema {
+  totalItems: number;
+}
+
+export interface UseExceptionListSuccess {
+  lists: ExceptionList[];
+  exceptions: ExceptionListItemSchema[];
+  pagination: Pagination;
+}
+
 export interface UseExceptionListProps {
   http: HttpStart;
-  id: string | undefined;
-  onError: (arg: Error) => void;
+  lists: ExceptionIdentifiers[];
+  onError?: (arg: string[]) => void;
+  filterOptions?: FilterExceptionsOptions;
+  pagination?: Pagination;
+  onSuccess?: (arg: UseExceptionListSuccess) => void;
+}
+
+export interface ExceptionIdentifiers {
+  id: string;
+  namespaceType: NamespaceType;
+  type?: string;
 }
 
 export interface ApiCallByListIdProps {
   http: HttpStart;
   listId: string;
+  namespaceType: NamespaceType;
+  filterOptions?: FilterExceptionsOptions;
+  pagination: Partial<Pagination>;
   signal: AbortSignal;
 }
 
 export interface ApiCallByIdProps {
   http: HttpStart;
   id: string;
+  namespaceType: NamespaceType;
   signal: AbortSignal;
+}
+
+export interface ApiCallMemoProps {
+  id: string;
+  namespaceType: NamespaceType;
+  onError: (arg: string[]) => void;
+  onSuccess: () => void;
 }
 
 export interface AddExceptionListProps {
   http: HttpStart;
-  list: AddExceptionList;
+  list: CreateExceptionListSchema;
   signal: AbortSignal;
 }
 
 export interface AddExceptionListItemProps {
   http: HttpStart;
-  listItem: AddExceptionListItem;
+  listItem: CreateExceptionListItemSchema;
+  signal: AbortSignal;
+}
+
+export interface UpdateExceptionListProps {
+  http: HttpStart;
+  list: UpdateExceptionListSchema;
+  signal: AbortSignal;
+}
+
+export interface UpdateExceptionListItemProps {
+  http: HttpStart;
+  listItem: UpdateExceptionListItemSchema;
   signal: AbortSignal;
 }

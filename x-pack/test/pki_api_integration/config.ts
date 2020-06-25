@@ -10,7 +10,7 @@ import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const servers = {
     ...xPackAPITestsConfig.get('servers'),

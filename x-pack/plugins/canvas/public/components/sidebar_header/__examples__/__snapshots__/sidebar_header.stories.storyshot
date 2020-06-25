@@ -55,6 +55,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -80,6 +81,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -105,6 +107,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -130,6 +133,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
         >
           <span
             className="euiToolTipAnchor"
+            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >

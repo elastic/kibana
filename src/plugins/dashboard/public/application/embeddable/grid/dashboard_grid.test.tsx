@@ -64,6 +64,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
       getEmbeddableFactories: start.getEmbeddableFactories,
+      getEmbeddablePanel: jest.fn(),
       getEmbeddableFactory,
     } as any,
     notifications: {} as any,
@@ -80,6 +81,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
   dashboardContainer = new DashboardContainer(initialInput, options);
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
+    PanelComponent: () => <div />,
     kibana: null as any,
     intl: null as any,
   };

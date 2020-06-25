@@ -6,7 +6,7 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
-import { CustomSelectionTable } from '../custom_selection_table';
+import { CustomSelectionTable } from '../../custom_selection_table';
 import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar';
 
@@ -107,7 +107,7 @@ export function JobSelectorTable({
         id: 'checkbox',
         isCheckbox: true,
         textOnly: false,
-        width: '24px',
+        width: '32px',
       },
       {
         label: 'job ID',
@@ -157,6 +157,9 @@ export function JobSelectorTable({
         filterDefaultFields={!singleSelection ? JOB_FILTER_FIELDS : undefined}
         items={jobs}
         onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
+        radioDisabledCheck={(item) => {
+          return timeseriesOnly && item.isSingleMetricViewerJob === false;
+        }}
         selectedIds={selectedIds}
         singleSelection={singleSelection}
         sortableProperties={sortableProperties}

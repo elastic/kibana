@@ -6,7 +6,7 @@
 
 import { DAY } from '../../shared_imports';
 
-export const BASE_PATH = '/management/data/snapshot_restore';
+export const BASE_PATH = '';
 export const DEFAULT_SECTION: Section = 'snapshots';
 export type Section = 'repositories' | 'snapshots' | 'restore_status' | 'policies';
 

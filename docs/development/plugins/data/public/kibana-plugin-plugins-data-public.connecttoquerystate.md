@@ -9,24 +9,9 @@ Helper to setup two-way syncing of global data and a state container
 <b>Signature:</b>
 
 ```typescript
-connectToQueryState: <S extends QueryState>({ timefilter: { timefilter }, filterManager, state$, }: Pick<{
-    filterManager: import("..").FilterManager;
-    timefilter: import("..").TimefilterSetup;
-    state$: import("rxjs").Observable<{
-        changes: QueryStateChange;
-        state: QueryState;
-    }>;
-    savedQueries: import("..").SavedQueryService;
-} | {
-    filterManager: import("..").FilterManager;
-    timefilter: import("..").TimefilterSetup;
-    state$: import("rxjs").Observable<{
-        changes: QueryStateChange;
-        state: QueryState;
-    }>;
-}, "state$" | "timefilter" | "filterManager">, stateContainer: BaseStateContainer<S>, syncConfig: {
-    time?: boolean | undefined;
-    refreshInterval?: boolean | undefined;
-    filters?: boolean | FilterStateStore | undefined;
+connectToQueryState: <S extends QueryState>({ timefilter: { timefilter }, filterManager, state$, }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'state$'>, stateContainer: BaseStateContainer<S>, syncConfig: {
+    time?: boolean;
+    refreshInterval?: boolean;
+    filters?: FilterStateStore | boolean;
 }) => () => void
 ```

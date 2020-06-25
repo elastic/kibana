@@ -36,7 +36,7 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
+        path: `/app/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'management.kibana.index_patterns',
       };
     },

@@ -22,7 +22,7 @@ import {
 } from '../../../../../src/plugins/expressions/public';
 import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
-
+import { desanitizeFilterContext } from '../utils';
 export interface DatatableColumns {
   columnIds: string[];
 }
@@ -180,7 +180,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
         ],
         timeFieldName,
       };
-      props.onClickValue(data);
+      props.onClickValue(desanitizeFilterContext(data));
     },
     [firstTable]
   );

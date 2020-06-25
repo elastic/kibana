@@ -6,7 +6,7 @@
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
+import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerts/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { defineAlertTypes } from './alert_types';
@@ -16,7 +16,7 @@ import { defineRoutes } from './routes';
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   actions: ActionsPluginSetup;
-  alerting: AlertingPluginSetup;
+  alerts: AlertingPluginSetup;
 }
 
 export interface FixtureStartDeps {
@@ -24,17 +24,14 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(
-    core: CoreSetup<FixtureStartDeps>,
-    { features, actions, alerting }: FixtureSetupDeps
-  ) {
+  public setup(core: CoreSetup<FixtureStartDeps>, { features, actions, alerts }: FixtureSetupDeps) {
     features.registerFeature({
-      id: 'alerting',
-      name: 'Alerting',
-      app: ['alerting', 'kibana'],
+      id: 'alerts',
+      name: 'Alerts',
+      app: ['alerts', 'kibana'],
       privileges: {
         all: {
-          app: ['alerting', 'kibana'],
+          app: ['alerts', 'kibana'],
           savedObject: {
             all: ['alert'],
             read: [],
@@ -43,7 +40,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           api: ['alerting-read', 'alerting-all'],
         },
         read: {
-          app: ['alerting', 'kibana'],
+          app: ['alerts', 'kibana'],
           savedObject: {
             all: [],
             read: ['alert'],
@@ -55,7 +52,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     });
 
     defineActionTypes(core, { actions });
-    defineAlertTypes(core, { alerting });
+    defineAlertTypes(core, { alerts });
     defineRoutes(core);
   }
 

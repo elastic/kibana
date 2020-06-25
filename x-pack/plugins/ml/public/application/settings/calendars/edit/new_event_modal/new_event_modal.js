@@ -24,7 +24,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import moment from 'moment';
-import { TIME_FORMAT } from '../events_table';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 import { generateTempId } from '../utils';
 
 import { i18n } from '@kbn/i18n';

@@ -250,7 +250,7 @@ export class AutoFollowPatternTable extends PureComponent {
 
               return (
                 <span
-                  onClick={() => (window.location.hash = routing.getAutoFollowPatternPath(name))}
+                  onClick={() => routing.navigate(routing.getAutoFollowPatternPath(name))}
                   data-test-subj="contextMenuEditButton"
                 >
                   <EuiIcon aria-label={label} type="pencil" className="euiContextMenu__icon" />

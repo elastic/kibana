@@ -38,6 +38,7 @@ import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
 import { canRedirectRequest } from './can_redirect_request';
 import { HTTPAuthorizationHeader } from './http_authentication';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
 
 /**
  * The shape of the session that is actually stored in the cookie.
@@ -94,6 +95,7 @@ export interface ProviderLoginAttempt {
 
 export interface AuthenticatorOptions {
   auditLogger: SecurityAuditLogger;
+  getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'session' | 'authc'>;
   basePath: HttpServiceSetup['basePath'];
@@ -240,6 +242,11 @@ export class Authenticator {
         client: this.options.clusterClient,
         logger: this.options.loggers.get('tokens'),
       }),
+      urls: {
+        loggedOut: options.config.authc.selector.enabled
+          ? `${options.basePath.serverBasePath}/login?msg=LOGGED_OUT`
+          : `${options.basePath.serverBasePath}/security/logged_out`,
+      },
     };
 
     this.providers = new Map(
@@ -502,6 +509,8 @@ export class Authenticator {
       currentUser.username,
       existingSession.provider
     );
+
+    this.options.getFeatureUsageService().recordPreAccessAgreementUsage();
   }
 
   /**

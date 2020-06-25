@@ -18,15 +18,18 @@
  */
 
 import { EsQueryConfig } from './build_es_query';
+import { UI_SETTINGS } from '../../';
 
 interface KibanaConfig {
   get<T>(key: string): T;
 }
 
 export function getEsQueryConfig(config: KibanaConfig) {
-  const allowLeadingWildcards = config.get('query:allowLeadingWildcards');
-  const queryStringOptions = config.get('query:queryString:options');
-  const ignoreFilterIfFieldNotInIndex = config.get('courier:ignoreFilterIfFieldNotInIndex');
+  const allowLeadingWildcards = config.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS);
+  const queryStringOptions = config.get(UI_SETTINGS.QUERY_STRING_OPTIONS);
+  const ignoreFilterIfFieldNotInIndex = config.get(
+    UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
+  );
   const dateFormatTZ = config.get('dateFormat:tz');
 
   return {

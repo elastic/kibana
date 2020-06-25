@@ -11,18 +11,22 @@ import dateMath from '@elastic/datemath';
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { getFieldFormats, getUiSettings } from './dependency_cache';
-import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/data/public';
+import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 const unitsDesc = dateMath.unitsDesc;
-const largeMax = unitsDesc.indexOf('w'); // Multiple units of week or longer converted to days for ES intervals.
+
+// Index of the list of time interval units at which larger units (i.e. weeks, months, years) need
+// need to be converted to multiples of the largest unit supported in ES aggregation intervals (i.e. days).
+// Note that similarly the largest interval supported for ML bucket spans is 'd'.
+const timeUnitsMaxSupportedIndex = unitsDesc.indexOf('w');
 
 const calcAuto = timeBucketsCalcAutoIntervalProvider();
 
 export function getTimeBucketsFromCache() {
   const uiSettings = getUiSettings();
   return new TimeBuckets({
-    'histogram:maxBars': uiSettings.get('histogram:maxBars'),
-    'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+    [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+    [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
     dateFormat: uiSettings.get('dateFormat'),
     'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
   });
@@ -35,8 +39,8 @@ export function getTimeBucketsFromCache() {
  */
 export function TimeBuckets(timeBucketsConfig) {
   this._timeBucketsConfig = timeBucketsConfig;
-  this.barTarget = this._timeBucketsConfig['histogram:barTarget'];
-  this.maxBars = this._timeBucketsConfig['histogram:maxBars'];
+  this.barTarget = this._timeBucketsConfig[UI_SETTINGS.HISTOGRAM_BAR_TARGET];
+  this.maxBars = this._timeBucketsConfig[UI_SETTINGS.HISTOGRAM_MAX_BARS];
 }
 
 /**
@@ -383,9 +387,11 @@ export function calcEsInterval(duration) {
     const val = duration.as(unit);
     // find a unit that rounds neatly
     if (val >= 1 && Math.floor(val) === val) {
-      // if the unit is "large", like years, but isn't set to 1, ES will throw an error.
+      // Apart from for date histograms, ES only supports time units up to 'd',
+      // meaning we can't for example use 'w' for job bucket spans.
+      // See https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#time-units
       // So keep going until we get out of the "large" units.
-      if (i <= largeMax && val !== 1) {
+      if (i <= timeUnitsMaxSupportedIndex) {
         continue;
       }
 

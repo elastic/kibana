@@ -116,16 +116,7 @@ export const validateNumTopFeatureImportanceValues = (
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const {
-    jobIdEmpty,
-    jobIdValid,
-    jobIdExists,
-    jobType,
-    createIndexPattern,
-    excludes,
-    maxDistinctValuesError,
-    requiredFieldsError,
-  } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern, excludes } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -330,8 +321,6 @@ export const validateAdvancedEditor = (state: State): State => {
   state.form.destinationIndexPatternTitleExists = destinationIndexPatternTitleExists;
 
   state.isValid =
-    maxDistinctValuesError === undefined &&
-    requiredFieldsError === undefined &&
     excludesValid &&
     trainingPercentValid &&
     state.form.modelMemoryLimitUnitValid &&
@@ -396,10 +385,8 @@ const validateForm = (state: State): State => {
     destinationIndexPatternTitleExists,
     createIndexPattern,
     dependentVariable,
-    maxDistinctValuesError,
     modelMemoryLimit,
     numTopFeatureImportanceValuesValid,
-    requiredFieldsError,
   } = state.form;
   const { estimatedModelMemoryLimit } = state;
 
@@ -414,8 +401,6 @@ const validateForm = (state: State): State => {
   state.form.modelMemoryLimitValidationResult = mmlValidationResult;
 
   state.isValid =
-    maxDistinctValuesError === undefined &&
-    requiredFieldsError === undefined &&
     !jobTypeEmpty &&
     !mmlValidationResult &&
     !jobIdEmpty &&
@@ -441,12 +426,6 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.RESET_REQUEST_MESSAGES:
       return { ...state, requestMessages: [] };
-
-    case ACTION.CLOSE_MODAL:
-      return { ...state, isModalVisible: false };
-
-    case ACTION.OPEN_MODAL:
-      return { ...state, isModalVisible: true };
 
     case ACTION.RESET_ADVANCED_EDITOR_MESSAGES:
       return { ...state, advancedEditorMessages: [] };
@@ -535,12 +514,6 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.SET_IS_JOB_STARTED:
       return { ...state, isJobStarted: action.isJobStarted };
-
-    case ACTION.SET_IS_MODAL_BUTTON_DISABLED:
-      return { ...state, isModalButtonDisabled: action.isModalButtonDisabled };
-
-    case ACTION.SET_IS_MODAL_VISIBLE:
-      return { ...state, isModalVisible: action.isModalVisible };
 
     case ACTION.SET_JOB_CONFIG:
       return validateAdvancedEditor({ ...state, jobConfig: action.payload });

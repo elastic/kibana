@@ -24,6 +24,28 @@ export enum ANALYSIS_CONFIG_TYPE {
   CLASSIFICATION = 'classification',
 }
 
+export enum ANALYSIS_ADVANCED_FIELDS {
+  ETA = 'eta',
+  FEATURE_BAG_FRACTION = 'feature_bag_fraction',
+  FEATURE_INFLUENCE_THRESHOLD = 'feature_influence_threshold',
+  GAMMA = 'gamma',
+  LAMBDA = 'lambda',
+  MAX_TREES = 'max_trees',
+  METHOD = 'method',
+  N_NEIGHBORS = 'n_neighbors',
+  NUM_TOP_CLASSES = 'num_top_classes',
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
+  OUTLIER_FRACTION = 'outlier_fraction',
+  RANDOMIZE_SEED = 'randomize_seed',
+}
+
+export enum OUTLIER_ANALYSIS_METHOD {
+  LOF = 'lof',
+  LDOF = 'ldof',
+  DISTANCE_KTH_NN = 'distance_kth_nn',
+  DISTANCE_KNN = 'distance_knn',
+}
+
 interface OutlierAnalysis {
   [key: string]: {};
   outlier_detection: {};
@@ -213,6 +235,16 @@ export const getPredictionFieldName = (
   return predictionFieldName;
 };
 
+export const getNumTopClasses = (
+  analysis: AnalysisConfig
+): ClassificationAnalysis['classification']['num_top_classes'] => {
+  let numTopClasses;
+  if (isClassificationAnalysis(analysis) && analysis.classification.num_top_classes !== undefined) {
+    numTopClasses = analysis.classification.num_top_classes;
+  }
+  return numTopClasses;
+};
+
 export const getNumTopFeatureImportanceValues = (
   analysis: AnalysisConfig
 ):
@@ -263,11 +295,13 @@ export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysi
 };
 
 export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
+  if (arg === undefined) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === 'bool';
 };
 
 export const isQueryStringQuery = (arg: any): arg is QueryStringQuery => {
+  if (arg === undefined) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === 'query_string';
 };

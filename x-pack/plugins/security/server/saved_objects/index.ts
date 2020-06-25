@@ -11,13 +11,16 @@ import {
   SavedObjectsClient,
 } from '../../../../../src/core/server';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
-import { Authorization } from '../authorization';
+import { AuthorizationServiceSetup } from '../authorization';
 import { SecurityAuditLogger } from '../audit';
 import { SpacesService } from '../plugin';
 
 interface SetupSavedObjectsParams {
   auditLogger: SecurityAuditLogger;
-  authz: Pick<Authorization, 'mode' | 'actions' | 'checkSavedObjectsPrivilegesWithRequest'>;
+  authz: Pick<
+    AuthorizationServiceSetup,
+    'mode' | 'actions' | 'checkSavedObjectsPrivilegesWithRequest'
+  >;
   savedObjects: CoreSetup['savedObjects'];
   getSpacesService(): SpacesService | undefined;
 }

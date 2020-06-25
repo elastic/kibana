@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Query } from '../../../../../src/plugins/data/public';
+import { Query } from '../../../../../src/plugins/data/common';
 import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {

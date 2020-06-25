@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions, AlertServices } from '../../../../../alerting/server';
+import { AlertExecutorOptions, AlertServices } from '../../../../../alerts/server';
 import {
   AlertStates,
   Comparator,

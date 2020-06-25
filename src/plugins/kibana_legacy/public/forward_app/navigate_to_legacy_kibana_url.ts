@@ -19,30 +19,26 @@
 
 import { ApplicationStart, IBasePath } from 'kibana/public';
 import { ForwardDefinition } from '../index';
+import { normalizePath } from '../utils/normalize_path';
 
 export const navigateToLegacyKibanaUrl = (
   path: string,
   forwards: ForwardDefinition[],
   basePath: IBasePath,
-  application: ApplicationStart,
-  location: Location
-) => {
-  // navigate to the respective path in the legacy kibana plugin by default (for unmigrated plugins)
-  let targetAppId = 'kibana';
-  let targetAppPath = path;
+  application: ApplicationStart
+): { navigated: boolean } => {
+  const normalizedPath = normalizePath(path);
 
   // try to find an existing redirect for the target path if possible
   // this avoids having to load the legacy app just to get redirected to a core application again afterwards
-  const relevantForward = forwards.find((forward) => path.startsWith(`/${forward.legacyAppId}`));
-  if (relevantForward) {
-    targetAppPath = relevantForward.rewritePath(path);
-    targetAppId = relevantForward.newAppId;
+  const relevantForward = forwards.find((forward) =>
+    normalizedPath.startsWith(`/${forward.legacyAppId}`)
+  );
+  if (!relevantForward) {
+    return { navigated: false };
   }
-
-  if (targetAppId === 'kibana') {
-    // exception for kibana app because redirect won't work right otherwise
-    location.href = basePath.prepend(`/app/kibana#${targetAppPath}`);
-  } else {
-    application.navigateToApp(targetAppId, { path: targetAppPath });
-  }
+  const targetAppPath = relevantForward.rewritePath(normalizedPath);
+  const targetAppId = relevantForward.newAppId;
+  application.navigateToApp(targetAppId, { path: targetAppPath, replace: true });
+  return { navigated: true };
 };

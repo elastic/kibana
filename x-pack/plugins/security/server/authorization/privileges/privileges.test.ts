@@ -8,6 +8,8 @@ import { Feature } from '../../../../features/server';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
 
+import { featuresPluginMock } from '../../../../features/server/mocks';
+
 const actions = new Actions('1.0.0-zeta1');
 
 describe('features', () => {
@@ -42,7 +44,9 @@ describe('features', () => {
       }),
     ];
 
-    const mockFeaturesService = { getFeatures: jest.fn().mockReturnValue(features) };
+    const mockFeaturesService = featuresPluginMock.createSetup();
+    mockFeaturesService.getFeatures.mockReturnValue(features);
+
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
     };

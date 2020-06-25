@@ -15,6 +15,7 @@ import {
   SortOrder,
 } from '../../../../common/runtime_types';
 import { MonitorEnricher } from './fetch_page';
+import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 export const enrichMonitorGroups: MonitorEnricher = async (
   queryContext: QueryContext,
@@ -137,11 +138,11 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         if (curCheck.tls == null) {
                           curCheck.tls = new HashMap();
                         }
-                        if (!doc["tls.server.x509.not_after"].isEmpty()) {
-                          curCheck.tls.not_after = doc["tls.server.x509.not_after"][0];
+                         if (!doc["tls.certificate_not_valid_after"].isEmpty()) {
+                          curCheck.tls.not_after = doc["tls.certificate_not_valid_after"][0];
                         }
-                        if (!doc["tls.server.x509.not_before"].isEmpty()) {
-                          curCheck.tls.not_before = doc["tls.server.x509.not_before"][0];
+                         if (!doc["tls.certificate_not_valid_before"].isEmpty()) {
+                          curCheck.tls.not_before = doc["tls.certificate_not_valid_before"][0];
                         }
 
                         state.checksByAgentIdIP[agentIdIP] = curCheck;
@@ -317,11 +318,13 @@ const getHistogramForMonitors = async (
       },
       aggs: {
         histogram: {
-          auto_date_histogram: {
+          date_histogram: {
             field: '@timestamp',
             // 12 seems to be a good size for performance given
             // long monitor lists of up to 100 on the overview page
-            buckets: 12,
+            fixed_interval:
+              getHistogramInterval(queryContext.dateRangeStart, queryContext.dateRangeEnd, 12) +
+              'ms',
             missing: 0,
           },
           aggs: {

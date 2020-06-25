@@ -9,10 +9,10 @@ import { Query } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
   getLayerById,
+  getLayerList,
   getLayerListRaw,
   getSelectedLayerId,
   getMapReady,
-  getTransientLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest } from '../reducers/non_serializable_instances';
@@ -27,7 +27,6 @@ import {
   SET_JOINS,
   SET_LAYER_VISIBILITY,
   SET_SELECTED_LAYER,
-  SET_TRANSIENT_LAYER,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
   TRACK_CURRENT_LAYER_STATE,
   UPDATE_LAYER_ORDER,
@@ -139,6 +138,41 @@ export function addLayerWithoutDataSync(layerDescriptor: LayerDescriptor) {
   };
 }
 
+export function addPreviewLayers(layerDescriptors: LayerDescriptor[]) {
+  return (dispatch: Dispatch) => {
+    dispatch<any>(removePreviewLayers());
+
+    layerDescriptors.forEach((layerDescriptor) => {
+      dispatch<any>(addLayer({ ...layerDescriptor, __isPreviewLayer: true }));
+    });
+  };
+}
+
+export function removePreviewLayers() {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    getLayerList(getState()).forEach((layer) => {
+      if (layer.isPreviewLayer()) {
+        dispatch<any>(removeLayer(layer.getId()));
+      }
+    });
+  };
+}
+
+export function promotePreviewLayers() {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    getLayerList(getState()).forEach((layer) => {
+      if (layer.isPreviewLayer()) {
+        dispatch({
+          type: UPDATE_LAYER_PROP,
+          id: layer.getId(),
+          propName: '__isPreviewLayer',
+          newValue: false,
+        });
+      }
+    });
+  };
+}
+
 export function setLayerVisibility(layerId: string, makeVisible: boolean) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     // if the current-state is invisible, we also want to sync data
@@ -193,28 +227,14 @@ export function setSelectedLayer(layerId: string | null) {
   };
 }
 
-export function removeTransientLayer() {
+export function setFirstPreviewLayerToSelectedLayer() {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const transientLayerId = getTransientLayerId(getState());
-    if (transientLayerId) {
-      await dispatch<any>(removeLayerFromLayerList(transientLayerId));
-      await dispatch<any>(setTransientLayer(null));
+    const firstPreviewLayer = getLayerList(getState()).find((layer) => {
+      return layer.isPreviewLayer();
+    });
+    if (firstPreviewLayer) {
+      dispatch<any>(setSelectedLayer(firstPreviewLayer.getId()));
     }
-  };
-}
-
-export function setTransientLayer(layerId: string | null) {
-  return {
-    type: SET_TRANSIENT_LAYER,
-    transientLayerId: layerId,
-  };
-}
-
-export function clearTransientLayerStateAndCloseFlyout() {
-  return async (dispatch: Dispatch) => {
-    await dispatch(updateFlyout(FLYOUT_STATE.NONE));
-    await dispatch<any>(setSelectedLayer(null));
-    await dispatch<any>(removeTransientLayer());
   };
 }
 

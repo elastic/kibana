@@ -8,7 +8,7 @@ import * as euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { Provider as UnstatedProvider, Subscribe } from 'unstated';
 import { Background } from './components/layouts/background';
@@ -19,19 +19,13 @@ import { TagsContainer } from './containers/tags';
 import { FrontendLibs } from './lib/types';
 import { AppRouter } from './router';
 import { services } from './kbn_services';
-import {
-  ManagementAppMountParams,
-  ManagementSectionId,
-} from '../../../../src/plugins/management/public';
+import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
 
-export const renderApp = (
-  { basePath, element, setBreadcrumbs }: ManagementAppMountParams,
-  libs: FrontendLibs
-) => {
+export const renderApp = ({ element, history }: ManagementAppMountParams, libs: FrontendLibs) => {
   ReactDOM.render(
     <ThemeProvider theme={{ eui: euiVars }}>
       <services.I18nContext>
-        <HashRouter basename={`/management/${ManagementSectionId.Ingest}/beats_management`}>
+        <Router history={history}>
           <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
             <BreadcrumbProvider useGlobalBreadcrumbs={libs.framework.versionGreaterThen('6.7.0')}>
               <Subscribe to={[BeatsContainer, TagsContainer]}>
@@ -48,7 +42,7 @@ export const renderApp = (
               </Subscribe>
             </BreadcrumbProvider>
           </UnstatedProvider>
-        </HashRouter>
+        </Router>
       </services.I18nContext>
     </ThemeProvider>,
     element

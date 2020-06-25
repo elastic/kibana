@@ -5,6 +5,6 @@
   "configPath": ["ui_actions_enhanced_examples"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["advancedUiActions", "data"],
+  "requiredPlugins": ["uiActionsEnhanced", "data", "discover"],
   "optionalPlugins": []
 }

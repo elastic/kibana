@@ -6,7 +6,7 @@
 
 import { Logger, ICustomClusterClient, UiSettingsServiceStart } from 'kibana/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { AlertServices } from '../../../../alerting/server';
+import { AlertServices } from '../../../../alerts/server';
 import { AlertCommonCluster } from '../../alerts/types';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../common/constants';
 import { fetchAvailableCcs } from './fetch_available_ccs';

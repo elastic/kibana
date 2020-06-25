@@ -8,7 +8,7 @@ import { IClusterClient, Logger } from 'kibana/server';
 import { RawKibanaPrivileges } from '../../common/model';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (
@@ -49,7 +49,7 @@ const registerPrivilegesWithClusterTest = (
       });
       for (const deletedPrivilege of deletedPrivileges) {
         expect(mockLogger.debug).toHaveBeenCalledWith(
-          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticearch for ${application}`
+          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticsearch for ${application}`
         );
         expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
           'shield.deletePrivilege',
@@ -82,7 +82,7 @@ const registerPrivilegesWithClusterTest = (
         `Registering Kibana Privileges with Elasticsearch for ${application}`
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        `Kibana Privileges already registered with Elasticearch for ${application}`
+        `Kibana Privileges already registered with Elasticsearch for ${application}`
       );
     };
   };
@@ -130,7 +130,7 @@ const registerPrivilegesWithClusterTest = (
         }
       }
     });
-    const mockLogger = loggingServiceMock.create().get() as jest.Mocked<Logger>;
+    const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
     let error;
     try {

@@ -161,7 +161,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
   private showExpiredBanner(license: ILicense) {
     const uploadUrl = this.coreStart!.http.basePath.prepend(
-      '/app/kibana#/management/stack/license_management/upload_license'
+      '/app/management/stack/license_management/upload_license'
     );
     this.coreStart!.overlays.banners.add(
       mountExpiredBanner({

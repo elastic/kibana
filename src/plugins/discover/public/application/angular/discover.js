@@ -66,12 +66,12 @@ const {
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import {
   esFilters,
-  fieldFormats,
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
   getDefaultQuery,
   search,
+  UI_SETTINGS,
 } from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
@@ -113,7 +113,7 @@ app.config(($routeProvider) => {
       };
     },
   };
-  $routeProvider.when('/:id?', {
+  const discoverRoute = {
     ...defaults,
     template: indexTemplate,
     reloadOnSearch: false,
@@ -162,8 +162,8 @@ app.config(($routeProvider) => {
                   mapping: {
                     search: '/',
                     'index-pattern': {
-                      app: 'kibana',
-                      path: `#/management/kibana/objects/savedSearches/${$route.current.params.id}`,
+                      app: 'management',
+                      path: `kibana/objects/savedSearches/${$route.current.params.id}`,
                     },
                   },
                   toastNotifications,
@@ -176,7 +176,10 @@ app.config(($routeProvider) => {
         });
       },
     },
-  });
+  };
+
+  $routeProvider.when('/view/:id?', discoverRoute);
+  $routeProvider.when('/', discoverRoute);
 });
 
 app.directive('discoverApp', function () {
@@ -414,7 +417,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: (searchId) => `#/${encodeURIComponent(searchId)}`,
+          makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -592,7 +595,8 @@ function discoverController(
     const query =
       $scope.searchSource.getField('query') ||
       getDefaultQuery(
-        localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+        localStorage.get('kibana.userQueryLanguage') ||
+          config.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
       );
     return {
       query,
@@ -745,11 +749,18 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            history.push(`/${encodeURIComponent(savedSearch.id)}`);
+            history.push(`/view/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
             chrome.docTitle.change(savedSearch.lastSavedTitle);
+            chrome.setBreadcrumbs([
+              {
+                text: discoverBreadcrumbsTitle,
+                href: '#/',
+              },
+              { text: savedSearch.title },
+            ]);
           }
         }
       });
@@ -839,7 +850,7 @@ function discoverController(
       x: {
         accessor: 0,
         label: agg.makeLabel(),
-        format: fieldFormats.serialize(agg),
+        format: agg.toSerializedFieldFormat(),
         params: {
           date: true,
           interval: moment.duration(esValue, esUnit),
@@ -851,7 +862,7 @@ function discoverController(
       },
       y: {
         accessor: 1,
-        format: fieldFormats.serialize(metric),
+        format: metric.toSerializedFieldFormat(),
         label: metric.makeLabel(),
       },
     };
@@ -870,6 +881,7 @@ function discoverController(
       if ($scope.vis.data.aggs.aggs[1]) {
         $scope.bucketInterval = $scope.vis.data.aggs.aggs[1].buckets.getInterval();
       }
+      $scope.updateTime();
     }
 
     $scope.hits = resp.hits.total;
@@ -916,7 +928,9 @@ function discoverController(
   };
 
   $scope.resetQuery = function () {
-    history.push(`/${encodeURIComponent($route.current.params.id)}`);
+    history.push(
+      $route.current.params.id ? `/view/${encodeURIComponent($route.current.params.id)}` : '/'
+    );
     $route.reload();
   };
 
@@ -960,13 +974,17 @@ function discoverController(
   };
 
   $scope.addColumn = function addColumn(columnName) {
-    $scope.indexPattern.popularizeField(columnName, 1);
+    if (uiCapabilities.discover.save) {
+      $scope.indexPattern.popularizeField(columnName, 1);
+    }
     const columns = columnActions.addColumn($scope.state.columns, columnName);
     setAppState({ columns });
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
-    $scope.indexPattern.popularizeField(columnName, 1);
+    if (uiCapabilities.discover.save) {
+      $scope.indexPattern.popularizeField(columnName, 1);
+    }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
     setAppState({ columns });
   };

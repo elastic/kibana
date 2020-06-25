@@ -10,7 +10,7 @@ interface ObjectToRemove {
   spaceId: string;
   id: string;
   type: string;
-  plugin?: string;
+  plugin: string;
 }
 
 export class ObjectRemover {
@@ -33,9 +33,8 @@ export class ObjectRemover {
   async removeAll() {
     await Promise.all(
       this.objectsToRemove.map(({ spaceId, id, type, plugin }) => {
-        const pluginPath = plugin ? `/${plugin}` : '';
         return this.supertest
-          .delete(`${getUrlPrefix(spaceId)}/api${pluginPath}/${type}/${id}`)
+          .delete(`${getUrlPrefix(spaceId)}/api/${plugin}/${type}/${id}`)
           .set('kbn-xsrf', 'foo')
           .expect(204);
       })

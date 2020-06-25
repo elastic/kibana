@@ -10,7 +10,7 @@ import { DashboardUrlGenerator } from '../../../../../../../src/plugins/dashboar
 import { ActionContext, Config } from './types';
 import { CollectConfigContainer } from './components';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../advanced_ui_actions/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../ui_actions_enhanced/public';
 import { txtGoToDashboard } from './i18n';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
@@ -22,7 +22,7 @@ import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_uti
 import { StartDependencies } from '../../../plugin';
 
 export interface Params {
-  start: StartServicesGetter<Pick<StartDependencies, 'data' | 'advancedUiActions'>>;
+  start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
   getDashboardUrlGenerator: () => DashboardUrlGenerator;
 }
 

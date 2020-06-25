@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export { stubIndexPattern, stubIndexPatternWithFields } from './index_patterns/index_pattern.stub';
-export { stubFields } from './index_patterns/field.stub';
-export * from '../common/es_query/filters/stubs';
+export * from '../common/stubs';

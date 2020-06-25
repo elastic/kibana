@@ -36,7 +36,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern": {
-        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"geometry\",\"type\":\"geo_shape\",\"esTypes\":[\"geo_shape\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"name\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"prop1\",\"type\":\"number\",\"esTypes\":[\"byte\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"geometry\",\"type\":\"geo_shape\",\"esTypes\":[\"geo_shape\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"name\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"prop1\",\"type\":\"number\",\"esTypes\":[\"byte\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
         "title": "geo_shapes*"
       },
       "type": "index-pattern"
@@ -546,6 +546,37 @@
         "layerListJSON": "[{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"COARSE\",\"type\":\"ES_GEO_GRID\",\"id\":\"9305f6ea-4518-4c06-95b9-33321aa38d6a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"},{\"type\":\"max\",\"field\":\"bytes\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max of bytes\",\"name\":\"max_of_bytes\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\"}]",
         "mapStateJSON": "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
         "title": "geo grid vector grid example",
+        "uiStateJSON": "{\"isDarkMode\":false}"
+      },
+      "type": "map"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:0c86d024-a767-11ea-bb37-0242ac130002",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "bounds": {
+          "coordinates": [
+            [
+              -160,
+              60
+            ],
+            [
+              160,
+              -60
+            ]
+          ],
+          "type": "envelope"
+        },
+        "description": "",
+        "layerListJSON": "[{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"COARSE\",\"type\":\"ES_GEO_GRID\",\"id\":\"64ddd934-a767-11ea-bb37-0242ac130002\",\"indexPatternId\":\"561253e0-f731-11e8-8487-11b9dd924f96\",\"geoField\":\"geometry\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "mapStateJSON": "{\"zoom\":3,\"center\":{\"lon\":76,\"lat\":4},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
+        "title": "geo grid vector grid example with shape",
         "uiStateJSON": "{\"isDarkMode\":false}"
       },
       "type": "map"

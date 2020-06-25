@@ -1,8 +1,8 @@
 [role="xpack"]
 [[using-kibana-with-security]]
-== Configuring security in {kib}
+== Configure security in {kib}
 ++++
-<titleabbrev>Configuring security</titleabbrev>
+<titleabbrev>Configure security</titleabbrev>
 ++++
 
 {kib} users have to log in when {security} is enabled on your cluster. You
@@ -99,10 +99,10 @@ use {kib}.
 For more information on Basic Authentication and additional methods of
 authenticating {kib} users, see <<kibana-authentication>>.
 
-You can manage privileges on the *Management / Security / Roles* page in {kib}.
+To manage privileges, open the menu, then go to *Stack Management > Security > Roles*.
 
-If you're using the native realm with Basic Authentication, you can assign roles
-using the *Management / Security / Users* page in {kib} or the
+If you're using the native realm with Basic Authentication, open then menu, 
+then go to *Stack Management > Security > Users* to assign roles, or use the
 {ref}/security-api.html#security-user-apis[user management APIs]. For example,
 the following creates a user named `jacknich` and assigns it the `kibana_admin`
 role:
@@ -145,3 +145,4 @@ include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
 include::securing-communications/elasticsearch-mutual-tls.asciidoc[]
 include::audit-logging.asciidoc[]
+include::access-agreement.asciidoc[]

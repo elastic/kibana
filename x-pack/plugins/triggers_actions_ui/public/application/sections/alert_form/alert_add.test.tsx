@@ -120,11 +120,7 @@ describe('alert_add', () => {
             },
           }}
         >
-          <AlertAdd
-            consumer={'alerting'}
-            addFlyoutVisible={true}
-            setAddFlyoutVisibility={() => {}}
-          />
+          <AlertAdd consumer={'alerts'} addFlyoutVisible={true} setAddFlyoutVisibility={() => {}} />
         </AlertsContextProvider>
       </AppContextProvider>
     );

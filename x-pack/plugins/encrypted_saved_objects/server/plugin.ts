@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import nodeCrypto from '@elastic/node-crypto';
 import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { first } from 'rxjs/operators';
 import { SecurityPluginSetup } from '../../security/server';
@@ -15,6 +16,7 @@ import {
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { setupSavedObjects, ClientInstanciator } from './saved_objects';
+import { getCreateMigration, CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -23,6 +25,7 @@ export interface PluginsSetup {
 export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   usingEphemeralEncryptionKey: boolean;
+  createMigration: CreateEncryptedSavedObjectsMigrationFn;
 }
 
 export interface EncryptedSavedObjectsPluginStart {
@@ -45,18 +48,18 @@ export class Plugin {
     core: CoreSetup,
     deps: PluginsSetup
   ): Promise<EncryptedSavedObjectsPluginSetup> {
-    const { config, usingEphemeralEncryptionKey } = await createConfig$(this.initializerContext)
-      .pipe(first())
-      .toPromise();
+    const {
+      config: { encryptionKey },
+      usingEphemeralEncryptionKey,
+    } = await createConfig$(this.initializerContext).pipe(first()).toPromise();
 
+    const crypto = nodeCrypto({ encryptionKey });
+
+    const auditLogger = new EncryptedSavedObjectsAuditLogger(
+      deps.security?.audit.getLogger('encryptedSavedObjects')
+    );
     const service = Object.freeze(
-      new EncryptedSavedObjectsService(
-        config.encryptionKey,
-        this.logger,
-        new EncryptedSavedObjectsAuditLogger(
-          deps.security?.audit.getLogger('encryptedSavedObjects')
-        )
-      )
+      new EncryptedSavedObjectsService(crypto, this.logger, auditLogger)
     );
 
     this.savedObjectsSetup = setupSavedObjects({
@@ -70,6 +73,18 @@ export class Plugin {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
       usingEphemeralEncryptionKey,
+      createMigration: getCreateMigration(
+        service,
+        (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
+          const serviceForMigration = new EncryptedSavedObjectsService(
+            crypto,
+            this.logger,
+            auditLogger
+          );
+          serviceForMigration.registerType(typeRegistration);
+          return serviceForMigration;
+        }
+      ),
     };
   }
 

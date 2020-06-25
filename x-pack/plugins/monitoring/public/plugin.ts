@@ -17,6 +17,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringPluginDependencies, MonitoringConfig } from './types';
 import {
@@ -69,6 +70,7 @@ export class MonitoringPlugin
         const { AngularApp } = await import('./angular');
         const deps: MonitoringPluginDependencies = {
           navigation: pluginsStart.navigation,
+          kibanaLegacy: pluginsStart.kibanaLegacy,
           element: params.element,
           core: coreStart,
           data: pluginsStart.data,
@@ -77,6 +79,7 @@ export class MonitoringPlugin
           externalConfig: this.getExternalConfig(),
         };
 
+        pluginsStart.kibanaLegacy.loadFontAwesome();
         this.setInitialTimefilter(deps);
         this.overrideAlertingEmailDefaults(deps);
 
@@ -110,7 +113,7 @@ export class MonitoringPlugin
     timefilter.setRefreshInterval(refreshInterval);
     timefilter.setTime(time);
     uiSettings.overrideLocalDefault(
-      'timepicker:refreshIntervalDefaults',
+      UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS,
       JSON.stringify(refreshInterval)
     );
     uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify(time));

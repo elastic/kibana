@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { History } from 'history';
 
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -233,15 +234,51 @@ export interface App<HistoryLocationState = unknown> extends AppBase {
    * base path from HTTP.
    */
   appRoute?: string;
+
+  /**
+   * If set to true, the application's route will only be checked against an exact match. Defaults to `false`.
+   *
+   * @example
+   * ```ts
+   * core.application.register({
+   *   id: 'my_app',
+   *   title: 'My App'
+   *   exactRoute: true,
+   *   mount: () => { ... },
+   * })
+   *
+   * // '[basePath]/app/my_app' will be matched
+   * // '[basePath]/app/my_app/some/path' will not be matched
+   * ```
+   */
+  exactRoute?: boolean;
 }
 
-/** @internal */
+/** @public */
 export interface LegacyApp extends AppBase {
   appUrl: string;
   subUrlBase?: string;
   linkToLastSubUrl?: boolean;
   disableSubUrlTracking?: boolean;
 }
+
+/**
+ * Public information about a registered {@link App | application}
+ *
+ * @public
+ */
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+  legacy: false;
+};
+
+/**
+ * Information about a registered {@link LegacyApp | legacy application}
+ *
+ * @public
+ */
+export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
+  legacy: true;
+};
 
 /**
  * A mount function called when the user navigates to this app's route.
@@ -435,10 +472,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
-   * import { CoreStart, AppMountParams } from 'src/core/public';
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
-   * export renderApp = ({ element, history, onAppLeave }: AppMountParams) => {
+   * export renderApp = ({ element, history, onAppLeave }: AppMountParameters) => {
    *    const { renderApp, hasUnsavedChanges } = await import('./application');
    *    onAppLeave(actions => {
    *      if(hasUnsavedChanges()) {
@@ -550,10 +587,17 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
     appBasePath: string;
     mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
     legacy: boolean;
+    exactRoute: boolean;
     unmountBeforeMounting: T extends LegacyApp ? true : boolean;
   },
   T extends LegacyApp ? never : 'unmountBeforeMounting'
 >;
+
+/** @internal */
+export interface ParsedAppUrl {
+  app: string;
+  path?: string;
+}
 
 /** @public */
 export interface ApplicationSetup {
@@ -642,6 +686,28 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
   ): void;
 }
 
+/**
+ * Options for the {@link ApplicationStart.navigateToApp | navigateToApp API}
+ */
+export interface NavigateToAppOptions {
+  /**
+   * optional path inside application to deep link to.
+   * If undefined, will use {@link AppBase.defaultPath | the app's default path}` as default.
+   */
+  path?: string;
+  /**
+   * optional state to forward to the application
+   */
+  state?: unknown;
+  /**
+   * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
+   *
+   * @remarks
+   * This option not be used when navigating from and/or to legacy applications.
+   */
+  replace?: boolean;
+}
+
 /** @public */
 export interface ApplicationStart {
   /**
@@ -650,14 +716,21 @@ export interface ApplicationStart {
   capabilities: RecursiveReadonly<Capabilities>;
 
   /**
+   * Observable emitting the list of currently registered apps and their associated status.
+   *
+   * @remarks
+   * Applications disabled by {@link Capabilities} will not be present in the map. Applications manually disabled from
+   * the client-side using an {@link AppUpdater | application updater} are present, with their status properly set as `inaccessible`.
+   */
+  applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
+
+  /**
    * Navigate to a given app
    *
    * @param appId
-   * @param options.path - optional path inside application to deep link to.
-   *                       If undefined, will use {@link AppBase.defaultPath | the app's default path}` as default.
-   * @param options.state - optional state to forward to the application
+   * @param options - navigation options
    */
-  navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;
+  navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
 
   /**
    * Navigate to given url, which can either be an absolute url or a relative path, in a SPA friendly way when possible.
@@ -721,18 +794,7 @@ export interface ApplicationStart {
 }
 
 /** @internal */
-export interface InternalApplicationStart
-  extends Pick<
-    ApplicationStart,
-    'capabilities' | 'navigateToApp' | 'navigateToUrl' | 'getUrlForApp' | 'currentAppId$'
-  > {
-  /**
-   * Apps available based on the current capabilities.
-   * Should be used to show navigation links and make routing decisions.
-   * Applications manually disabled from the client-side using {@link AppUpdater}
-   */
-  applications$: Observable<ReadonlyMap<string, App | LegacyApp>>;
-
+export interface InternalApplicationStart extends Omit<ApplicationStart, 'registerMountContext'> {
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
    * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
@@ -750,6 +812,12 @@ export interface InternalApplicationStart
 
   // Internal APIs
   getComponent(): JSX.Element | null;
+
+  /**
+   * The global history instance, exposed only to Core. Undefined when rendering a legacy application.
+   * @internal
+   */
+  history: History<unknown> | undefined;
 }
 
 /** @internal */

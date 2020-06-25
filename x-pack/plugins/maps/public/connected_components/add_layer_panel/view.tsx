@@ -17,17 +17,15 @@ interface Props {
   isIndexingReady: boolean;
   isIndexingSuccess: boolean;
   isIndexingTriggered: boolean;
-  previewLayer: (layerDescriptor: LayerDescriptor) => void;
-  removeTransientLayer: () => void;
+  addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => void;
+  promotePreviewLayers: () => void;
   resetIndexing: () => void;
-  selectLayerAndAdd: () => void;
   setIndexingTriggered: () => void;
 }
 
 interface State {
   importView: boolean;
   isIndexingSource: boolean;
-  layerDescriptor: LayerDescriptor | null;
   layerImportAddReady: boolean;
   layerWizard: LayerWizard | null;
 }
@@ -37,7 +35,6 @@ export class AddLayerPanel extends Component<Props, State> {
 
   state = {
     layerWizard: null,
-    layerDescriptor: null, // TODO get this from redux store instead of storing locally
     isIndexingSource: false,
     importView: false,
     layerImportAddReady: false,
@@ -57,21 +54,13 @@ export class AddLayerPanel extends Component<Props, State> {
     }
   }
 
-  _previewLayer = (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => {
+  _previewLayers = (layerDescriptors: LayerDescriptor[], isIndexingSource?: boolean) => {
     if (!this._isMounted) {
       return;
     }
-    if (!layerDescriptor) {
-      this.setState({
-        layerDescriptor: null,
-        isIndexingSource: false,
-      });
-      this.props.removeTransientLayer();
-      return;
-    }
 
-    this.setState({ layerDescriptor, isIndexingSource: !!isIndexingSource });
-    this.props.previewLayer(layerDescriptor);
+    this.setState({ isIndexingSource: layerDescriptors.length ? !!isIndexingSource : false });
+    this.props.addPreviewLayers(layerDescriptors);
   };
 
   _clearLayerData = ({ keepSourceType = false }: { keepSourceType: boolean }) => {
@@ -80,7 +69,6 @@ export class AddLayerPanel extends Component<Props, State> {
     }
 
     const newState: Partial<State> = {
-      layerDescriptor: null,
       isIndexingSource: false,
     };
     if (!keepSourceType) {
@@ -90,7 +78,7 @@ export class AddLayerPanel extends Component<Props, State> {
     // @ts-ignore
     this.setState(newState);
 
-    this.props.removeTransientLayer();
+    this.props.addPreviewLayers([]);
   };
 
   _onWizardSelect = (layerWizard: LayerWizard) => {
@@ -101,7 +89,7 @@ export class AddLayerPanel extends Component<Props, State> {
     if (this.state.isIndexingSource && !this.props.isIndexingTriggered) {
       this.props.setIndexingTriggered();
     } else {
-      this.props.selectLayerAndAdd();
+      this.props.promotePreviewLayers();
       if (this.state.importView) {
         this.setState({
           layerImportAddReady: false,
@@ -126,7 +114,7 @@ export class AddLayerPanel extends Component<Props, State> {
           });
     const isNextBtnEnabled = this.state.importView
       ? this.props.isIndexingReady || this.props.isIndexingSuccess
-      : !!this.state.layerDescriptor;
+      : true;
 
     return (
       <Fragment>
@@ -141,7 +129,7 @@ export class AddLayerPanel extends Component<Props, State> {
           onClear={() => this._clearLayerData({ keepSourceType: false })}
           onRemove={() => this._clearLayerData({ keepSourceType: true })}
           onWizardSelect={this._onWizardSelect}
-          previewLayer={this._previewLayer}
+          previewLayers={this._previewLayers}
         />
 
         <FlyoutFooter

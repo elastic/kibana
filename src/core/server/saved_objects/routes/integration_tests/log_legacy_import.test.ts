@@ -20,19 +20,19 @@
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerLogLegacyImportRoute } from '../log_legacy_import';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
-import { setupServer } from './test_utils';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
+import { setupServer } from '../test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('POST /api/saved_objects/_log_legacy_import', () => {
   let server: setupServerReturn['server'];
   let httpSetup: setupServerReturn['httpSetup'];
-  let logger: ReturnType<typeof loggingServiceMock.createLogger>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer());
-    logger = loggingServiceMock.createLogger();
+    logger = loggingSystemMock.createLogger();
 
     const router = httpSetup.createRouter('/api/saved_objects/');
     registerLogLegacyImportRoute(router, logger);
@@ -50,7 +50,7 @@ describe('POST /api/saved_objects/_log_legacy_import', () => {
       .expect(200);
 
     expect(result.body).toEqual({ success: true });
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
           "Importing saved objects from a .json file has been deprecated",

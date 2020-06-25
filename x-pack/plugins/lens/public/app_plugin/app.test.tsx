@@ -5,19 +5,26 @@
  */
 
 import React from 'react';
+import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
+import { AppMountParameters } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import {
+  SavedObjectSaveModal,
+  checkForDuplicateTitle,
+} from '../../../../../src/plugins/saved_objects/public';
+import { createMemoryHistory, History } from 'history';
 import {
   esFilters,
   FilterManager,
   IFieldType,
   IIndexPattern,
+  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
@@ -28,6 +35,17 @@ import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('../persistence');
 jest.mock('src/core/public');
+jest.mock('../../../../../src/plugins/saved_objects/public', () => {
+  // eslint-disable-next-line no-shadow
+  const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
+    '../../../../../src/plugins/saved_objects/public'
+  );
+  return {
+    SavedObjectSaveModal,
+    SavedObjectSaveModalOrigin,
+    checkForDuplicateTitle: jest.fn(),
+  };
+});
 
 const navigationStartMock = navigationPluginMock.createStartContract();
 
@@ -88,6 +106,8 @@ function createMockTimefilter() {
         return unsubscribe;
       },
     }),
+    getRefreshInterval: () => {},
+    getRefreshIntervalDefaults: () => {},
   };
 }
 
@@ -104,13 +124,10 @@ describe('Lens App', () => {
     storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    redirectTo: (
-      id?: string,
-      returnToOrigin?: boolean,
-      originatingApp?: string | undefined,
-      newlyCreated?: boolean
-    ) => void;
+    redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
     originatingApp: string | undefined;
+    onAppLeave: AppMountParameters['onAppLeave'];
+    history: History;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -131,6 +148,7 @@ describe('Lens App', () => {
           timefilter: {
             timefilter: createMockTimefilter(),
           },
+          state$: new Observable(),
         },
         indexPatterns: {
           get: jest.fn((id) => {
@@ -145,14 +163,9 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      redirectTo: jest.fn(
-        (
-          id?: string,
-          returnToOrigin?: boolean,
-          originatingApp?: string | undefined,
-          newlyCreated?: boolean
-        ) => {}
-      ),
+      redirectTo: jest.fn((id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => {}),
+      onAppLeave: jest.fn(),
+      history: createMemoryHistory(),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
       editorFrame: EditorFrameInstance;
@@ -161,13 +174,10 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (
-        id?: string,
-        returnToOrigin?: boolean,
-        originatingApp?: string | undefined,
-        newlyCreated?: boolean
-      ) => void;
+      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
       originatingApp: string | undefined;
+      onAppLeave: AppMountParameters['onAppLeave'];
+      history: History;
     }>;
   }
 
@@ -179,8 +189,10 @@ describe('Lens App', () => {
       jest.fn((type) => {
         if (type === 'timepicker:timeDefaults') {
           return { from: 'now-7d', to: 'now' };
-        } else if (type === 'search:queryLanguage') {
+        } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';
+        } else if (type === 'state:storeInSessionStorage') {
+          return false;
         } else {
           return [];
         }
@@ -357,22 +369,7 @@ describe('Lens App', () => {
         newTitle: string;
       }
 
-      let defaultArgs: jest.Mocked<{
-        editorFrame: EditorFrameInstance;
-        navigation: typeof navigationStartMock;
-        data: typeof dataStartMock;
-        core: typeof core;
-        storage: Storage;
-        docId?: string;
-        docStorage: SavedObjectStore;
-        redirectTo: (
-          id?: string,
-          returnToOrigin?: boolean,
-          originatingApp?: string | undefined,
-          newlyCreated?: boolean
-        ) => void;
-        originatingApp: string | undefined;
-      }>;
+      let defaultArgs: ReturnType<typeof makeDefaultArgs>;
 
       beforeEach(() => {
         defaultArgs = makeDefaultArgs();
@@ -486,30 +483,6 @@ describe('Lens App', () => {
         expect(getButton(instance).disableButton).toEqual(true);
       });
 
-      it('shows a disabled save button when there are no changes to the document', async () => {
-        const args = defaultArgs;
-        (args.docStorage.load as jest.Mock).mockResolvedValue({
-          id: '1234',
-          title: 'My cool doc',
-          expression: '',
-        } as jest.ResolvedValue<Document>);
-        args.editorFrame = frame;
-
-        instance = mount(<App {...args} />);
-        expect(getButton(instance).disableButton).toEqual(true);
-
-        const onChange = frame.mount.mock.calls[0][1].onChange;
-
-        act(() => {
-          onChange({
-            filterableIndexPatterns: [],
-            doc: ({ id: '1234', expression: 'valid expression' } as unknown) as Document,
-          });
-        });
-        instance.update();
-        expect(getButton(instance).disableButton).toEqual(false);
-      });
-
       it('shows a save button that is enabled when the frame has provided its state', async () => {
         const args = defaultArgs;
         args.editorFrame = frame;
@@ -543,7 +516,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -563,7 +536,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -631,7 +604,7 @@ describe('Lens App', () => {
           title: 'hello there',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, true);
       });
 
       it('saves app filters and does not save pinned filters', async () => {
@@ -668,6 +641,46 @@ describe('Lens App', () => {
         });
       });
 
+      it('checks for duplicate title before saving', async () => {
+        const args = defaultArgs;
+        args.editorFrame = frame;
+        (args.docStorage.save as jest.Mock).mockReturnValue(Promise.resolve({ id: '123' }));
+
+        instance = mount(<App {...args} />);
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        await act(async () =>
+          onChange({
+            filterableIndexPatterns: [],
+            doc: ({ id: '123', expression: 'valid expression' } as unknown) as Document,
+          })
+        );
+        instance.update();
+        await act(async () => {
+          getButton(instance).run(instance.getDOMNode());
+        });
+        instance.update();
+
+        const onTitleDuplicate = jest.fn();
+
+        await act(async () => {
+          instance.find(SavedObjectSaveModal).prop('onSave')({
+            onTitleDuplicate,
+            isTitleDuplicateConfirmed: false,
+            newCopyOnSave: false,
+            newDescription: '',
+            newTitle: 'test',
+          });
+        });
+
+        expect(checkForDuplicateTitle).toHaveBeenCalledWith(
+          expect.objectContaining({ id: '123' }),
+          false,
+          onTitleDuplicate,
+          expect.anything()
+        );
+      });
+
       it('does not show the copy button on first save', async () => {
         const args = defaultArgs;
         args.editorFrame = frame;
@@ -691,21 +704,7 @@ describe('Lens App', () => {
   });
 
   describe('query bar state management', () => {
-    let defaultArgs: jest.Mocked<{
-      editorFrame: EditorFrameInstance;
-      data: typeof dataStartMock;
-      navigation: typeof navigationStartMock;
-      core: typeof core;
-      storage: Storage;
-      docId?: string;
-      docStorage: SavedObjectStore;
-      redirectTo: (
-        id?: string,
-        returnToOrigin?: boolean,
-        originatingApp?: string | undefined,
-        newlyCreated?: boolean
-      ) => void;
-    }>;
+    let defaultArgs: ReturnType<typeof makeDefaultArgs>;
 
     beforeEach(() => {
       defaultArgs = makeDefaultArgs();
@@ -1000,5 +999,160 @@ describe('Lens App', () => {
     instance.update();
 
     expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
+  });
+
+  describe('showing a confirm message when leaving', () => {
+    let defaultArgs: ReturnType<typeof makeDefaultArgs>;
+    let defaultLeave: jest.Mock;
+    let confirmLeave: jest.Mock;
+
+    beforeEach(() => {
+      defaultArgs = makeDefaultArgs();
+      defaultLeave = jest.fn();
+      confirmLeave = jest.fn();
+      (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
+        id: '1234',
+        title: 'My cool doc',
+        expression: 'valid expression',
+        state: {
+          query: 'kuery',
+          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+        },
+      } as jest.ResolvedValue<Document>);
+    });
+
+    it('should not show a confirm message if there is no expression to save', () => {
+      instance = mount(<App {...defaultArgs} />);
+
+      const lastCall =
+        defaultArgs.onAppLeave.mock.calls[defaultArgs.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+
+      expect(defaultLeave).toHaveBeenCalled();
+      expect(confirmLeave).not.toHaveBeenCalled();
+    });
+
+    it('does not confirm if the user is missing save permissions', () => {
+      const args = defaultArgs;
+      args.core.application = {
+        ...args.core.application,
+        capabilities: {
+          ...args.core.application.capabilities,
+          visualize: { save: false, saveQuery: false, show: true },
+        },
+      };
+      args.editorFrame = frame;
+
+      instance = mount(<App {...args} />);
+
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+        })
+      );
+      instance.update();
+
+      const lastCall =
+        defaultArgs.onAppLeave.mock.calls[defaultArgs.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+
+      expect(defaultLeave).toHaveBeenCalled();
+      expect(confirmLeave).not.toHaveBeenCalled();
+    });
+
+    it('should confirm when leaving with an unsaved doc', () => {
+      defaultArgs.editorFrame = frame;
+      instance = mount(<App {...defaultArgs} />);
+
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+        })
+      );
+      instance.update();
+
+      const lastCall =
+        defaultArgs.onAppLeave.mock.calls[defaultArgs.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+
+      expect(confirmLeave).toHaveBeenCalled();
+      expect(defaultLeave).not.toHaveBeenCalled();
+    });
+
+    it('should confirm when leaving with unsaved changes to an existing doc', async () => {
+      defaultArgs.editorFrame = frame;
+      instance = mount(<App {...defaultArgs} />);
+      await act(async () => {
+        instance.setProps({ docId: '1234' });
+      });
+
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: '1234', expression: 'different expression' } as unknown) as Document,
+        })
+      );
+      instance.update();
+
+      const lastCall =
+        defaultArgs.onAppLeave.mock.calls[defaultArgs.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+
+      expect(confirmLeave).toHaveBeenCalled();
+      expect(defaultLeave).not.toHaveBeenCalled();
+    });
+
+    it('should not confirm when changes are saved', async () => {
+      defaultArgs.editorFrame = frame;
+      instance = mount(<App {...defaultArgs} />);
+      await act(async () => {
+        instance.setProps({ docId: '1234' });
+      });
+
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: '1234', expression: 'valid expression' } as unknown) as Document,
+        })
+      );
+      instance.update();
+
+      const lastCall =
+        defaultArgs.onAppLeave.mock.calls[defaultArgs.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+
+      expect(defaultLeave).toHaveBeenCalled();
+      expect(confirmLeave).not.toHaveBeenCalled();
+    });
+
+    it('should confirm when the latest doc is invalid', async () => {
+      defaultArgs.editorFrame = frame;
+      instance = mount(<App {...defaultArgs} />);
+      await act(async () => {
+        instance.setProps({ docId: '1234' });
+      });
+
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: '1234', expression: null } as unknown) as Document,
+        })
+      );
+      instance.update();
+
+      const lastCall =
+        defaultArgs.onAppLeave.mock.calls[defaultArgs.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+
+      expect(confirmLeave).toHaveBeenCalled();
+      expect(defaultLeave).not.toHaveBeenCalled();
+    });
   });
 });

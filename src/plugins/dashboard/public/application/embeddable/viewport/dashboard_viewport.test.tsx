@@ -54,6 +54,7 @@ function getProps(
     application: applicationServiceMock.createStartContract(),
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
+      getEmbeddablePanel: jest.fn(),
       getEmbeddableFactories: start.getEmbeddableFactories,
       getEmbeddableFactory: start.getEmbeddableFactory,
     } as any,
@@ -87,6 +88,7 @@ function getProps(
   dashboardContainer = new DashboardContainer(input, options);
   const defaultTestProps: DashboardViewportProps = {
     container: dashboardContainer,
+    PanelComponent: () => <div />,
   };
 
   return {

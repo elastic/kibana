@@ -44,7 +44,7 @@ export const GroupOfNodes: React.FC<Props> = ({
       <Nodes>
         {group.nodes.map((node) => (
           <Node
-            key={node.pathId}
+            key={`${node.pathId}:${node.name}`}
             options={options}
             squareSize={group.squareSize}
             node={node}

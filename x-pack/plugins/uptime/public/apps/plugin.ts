@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   CoreSetup,
   CoreStart,
@@ -16,8 +17,16 @@ import { PLUGIN } from '../../common/constants';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
-import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../triggers_actions_ui/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../src/plugins/data/public';
+import { alertTypeInitializers } from '../lib/alert_types';
+import { kibanaService } from '../state/kibana_service';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -27,6 +36,8 @@ export interface ClientPluginsSetup {
 
 export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 
 export type ClientSetup = void;
@@ -56,7 +67,7 @@ export class UptimePlugin
       appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
       euiIconType: 'uptimeApp',
-      order: 8900,
+      order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
@@ -66,6 +77,7 @@ export class UptimePlugin
         );
 
         const { element } = params;
+
         const libs: UMFrontendLibs = {
           framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins),
         };
@@ -74,7 +86,21 @@ export class UptimePlugin
     });
   }
 
-  public start(_start: CoreStart, _plugins: {}): void {}
+  public start(start: CoreStart, plugins: ClientPluginsStart): void {
+    kibanaService.core = start;
+    alertTypeInitializers.forEach((init) => {
+      const alertInitializer = init({
+        core: start,
+        plugins,
+      });
+      if (
+        plugins.triggers_actions_ui &&
+        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
+      ) {
+        plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
+      }
+    });
+  }
 
   public stop(): void {}
 }

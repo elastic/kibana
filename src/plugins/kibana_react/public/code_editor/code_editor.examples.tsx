@@ -20,7 +20,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { monaco as monacoEditor } from '@kbn/ui-shared-deps/monaco';
+import { monaco as monacoEditor } from '@kbn/monaco';
 import { CodeEditor } from './code_editor';
 
 // A sample language definition with a few example tokens

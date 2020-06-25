@@ -63,6 +63,17 @@ const getResolvedResults = (deps) => {
       })
       .then((embeddableHandler) => {
         results.embeddableHandler = embeddableHandler;
+
+        embeddableHandler.getOutput$().subscribe((output) => {
+          if (output.error) {
+            core.notifications.toasts.addError(output.error, {
+              title: i18n.translate('visualize.error.title', {
+                defaultMessage: 'Visualization error',
+              }),
+            });
+          }
+        });
+
         if (results.vis.data.savedSearchId) {
           return createSavedSearchesLoader({
             savedObjectsClient: core.savedObjects.client,
@@ -211,22 +222,16 @@ export function initVisualizeApp(app, deps) {
                   mapping: {
                     visualization: VisualizeConstants.LANDING_PAGE_PATH,
                     search: {
-                      app: 'kibana',
-                      path:
-                        '#/management/kibana/objects/savedVisualizations/' +
-                        $route.current.params.id,
+                      app: 'management',
+                      path: 'kibana/objects/savedVisualizations/' + $route.current.params.id,
                     },
                     'index-pattern': {
-                      app: 'kibana',
-                      path:
-                        '#/management/kibana/objects/savedVisualizations/' +
-                        $route.current.params.id,
+                      app: 'management',
+                      path: 'kibana/objects/savedVisualizations/' + $route.current.params.id,
                     },
                     'index-pattern-field': {
-                      app: 'kibana',
-                      path:
-                        '#/management/kibana/objects/savedVisualizations/' +
-                        $route.current.params.id,
+                      app: 'management',
+                      path: 'kibana/objects/savedVisualizations/' + $route.current.params.id,
                     },
                   },
                   toastNotifications,
@@ -239,9 +244,17 @@ export function initVisualizeApp(app, deps) {
         },
       })
       .otherwise({
-        template: '<span></span>',
-        controller: function () {
-          deps.kibanaLegacy.navigateToDefaultApp();
+        resolveRedirectTo: function ($rootScope) {
+          const path = window.location.hash.substr(1);
+          deps.restorePreviousUrl();
+          $rootScope.$applyAsync(() => {
+            const { navigated } = deps.kibanaLegacy.navigateToLegacyKibanaUrl(path);
+            if (!navigated) {
+              deps.kibanaLegacy.navigateToDefaultApp();
+            }
+          });
+          // prevent angular from completing the navigation
+          return new Promise(() => {});
         },
       });
   });

@@ -12,7 +12,6 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { AnomaliesResponse } from './get_service_map';
 import {
   transformServiceMapResponses,
   ServiceMapResponse,
@@ -36,14 +35,9 @@ const javaService = {
   [AGENT_NAME]: 'java',
 };
 
-const anomalies = ({
-  aggregations: { jobs: { buckets: [] } },
-} as unknown) as AnomaliesResponse;
-
 describe('transformServiceMapResponses', () => {
   it('maps external destinations to internal services', () => {
     const response: ServiceMapResponse = {
-      anomalies,
       services: [nodejsService, javaService],
       discoveredServices: [
         {
@@ -75,7 +69,6 @@ describe('transformServiceMapResponses', () => {
 
   it('collapses external destinations based on span.destination.resource.name', () => {
     const response: ServiceMapResponse = {
-      anomalies,
       services: [nodejsService, javaService],
       discoveredServices: [
         {
@@ -111,7 +104,6 @@ describe('transformServiceMapResponses', () => {
 
   it('picks the first span.type/subtype in an alphabetically sorted list', () => {
     const response: ServiceMapResponse = {
-      anomalies,
       services: [javaService],
       discoveredServices: [],
       connections: [
@@ -150,7 +142,6 @@ describe('transformServiceMapResponses', () => {
 
   it('processes connections without a matching "service" aggregation', () => {
     const response: ServiceMapResponse = {
-      anomalies,
       services: [javaService],
       discoveredServices: [],
       connections: [

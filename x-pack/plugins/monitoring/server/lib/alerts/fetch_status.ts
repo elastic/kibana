@@ -6,7 +6,7 @@
 import moment from 'moment';
 import { Logger } from '../../../../../../src/core/server';
 import { AlertCommonPerClusterState } from '../../alerts/types';
-import { AlertsClient } from '../../../../alerting/server';
+import { AlertsClient } from '../../../../alerts/server';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,

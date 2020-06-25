@@ -7,6 +7,7 @@
 import { APICaller } from 'kibana/server';
 
 import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
+import { Scroll } from '../lists/types';
 
 import { calculateScrollMath } from './calculate_scroll_math';
 import { getSearchAfterScroll } from './get_search_after_scroll';

@@ -21,7 +21,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
-import { App } from '../application';
+import { App, PublicAppInfo } from '../application';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -29,6 +29,7 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
+import { getAppInfo } from '../application/utils';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -55,8 +56,8 @@ function defaultStartDeps(availableApps?: App[]) {
   };
 
   if (availableApps) {
-    deps.application.applications$ = new Rx.BehaviorSubject<Map<string, App>>(
-      new Map(availableApps.map((app) => [app.id, app]))
+    deps.application.applications$ = new Rx.BehaviorSubject<Map<string, PublicAppInfo>>(
+      new Map(availableApps.map((app) => [app.id, getAppInfo(app) as PublicAppInfo]))
     );
   }
 
@@ -359,6 +360,27 @@ describe('start', () => {
                         Array [],
                       ]
                   `);
+    });
+  });
+
+  describe('custom nav link', () => {
+    it('updates/emits the current custom nav link', async () => {
+      const { chrome, service } = await start();
+      const promise = chrome.getCustomNavLink$().pipe(toArray()).toPromise();
+
+      chrome.setCustomNavLink({ title: 'Manage cloud deployment' });
+      chrome.setCustomNavLink(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+              Array [
+                undefined,
+                Object {
+                  "title": "Manage cloud deployment",
+                },
+                undefined,
+              ]
+            `);
     });
   });
 

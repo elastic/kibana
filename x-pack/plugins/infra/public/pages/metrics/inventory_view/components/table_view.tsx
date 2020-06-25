@@ -15,7 +15,7 @@ import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
-import { CONTAINER_CLASSNAME } from '../../../../apps/start_app';
+import { CONTAINER_CLASSNAME } from '../../../../apps/common_styles';
 
 interface Props {
   nodes: SnapshotNode[];

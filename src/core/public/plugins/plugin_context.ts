@@ -101,7 +101,6 @@ export function createPluginSetupContext<
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
     context: deps.context,
-    docLinks: deps.docLinks,
     fatalErrors: deps.fatalErrors,
     http: deps.http,
     notifications: deps.notifications,
@@ -135,6 +134,7 @@ export function createPluginStartContext<
 ): CoreStart {
   return {
     application: {
+      applications$: deps.application.applications$,
       currentAppId$: deps.application.currentAppId$,
       capabilities: deps.application.capabilities,
       navigateToApp: deps.application.navigateToApp,

@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
 import {
   RangeSelectTriggerContext,
   ValueClickTriggerContext,

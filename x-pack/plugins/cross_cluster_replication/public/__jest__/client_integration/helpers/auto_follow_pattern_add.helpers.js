@@ -12,7 +12,11 @@ import { routing } from '../../../app/services/routing';
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {
-    onRouter: (router) => (routing.reactRouter = router),
+    onRouter: (router) =>
+      (routing.reactRouter = {
+        ...router,
+        getUrlForApp: () => '',
+      }),
   },
 };
 

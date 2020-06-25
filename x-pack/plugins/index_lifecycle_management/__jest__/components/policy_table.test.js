@@ -12,6 +12,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import sinon from 'sinon';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
+import { scopedHistoryMock } from '../../../../../src/core/public/mocks';
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import { fetchedPolicies } from '../../public/application/store/actions';
 import { indexLifecycleManagementStore } from '../../public/application/store';
@@ -75,7 +76,7 @@ describe('policy table', () => {
     store = indexLifecycleManagementStore();
     component = (
       <Provider store={store}>
-        <PolicyTable />
+        <PolicyTable history={scopedHistoryMock.create()} navigateToApp={() => {}} />
       </Provider>
     );
     store.dispatch(fetchedPolicies(policies));
@@ -90,7 +91,7 @@ describe('policy table', () => {
     store = indexLifecycleManagementStore();
     component = (
       <Provider store={store}>
-        <PolicyTable />
+        <PolicyTable history={scopedHistoryMock.create()} navigateToApp={() => {}} />
       </Provider>
     );
     const rendered = mountWithIntl(component);

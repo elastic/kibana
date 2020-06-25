@@ -6,20 +6,18 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import * as labels from './translations';
 
 interface Props {
   newFilters: string[];
   onNewFilter: (val: string) => void;
+  alertFilters: { [key: string]: string[] };
 }
 
-export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) => {
+export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, alertFilters }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const { selectedFilters } = useFilterUpdate();
-
-  const getSelectedItems = (fieldName: string) => selectedFilters.get(fieldName) || [];
+  const getSelectedItems = (fieldName: string) => alertFilters?.[fieldName] ?? [];
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);

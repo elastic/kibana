@@ -35,10 +35,18 @@ export default function ({ getService }) {
         await createTemplate(payload).expect(200);
       });
 
+      // TODO: When the "Create" API handler is added for V2 template,
+      // update this test to list composable templates.
       it('should list all the index templates with the expected parameters', async () => {
-        const { body: templates } = await getAllTemplates().expect(200);
+        const { body: allTemplates } = await getAllTemplates().expect(200);
 
-        const createdTemplate = templates.find((template) => template.name === payload.name);
+        // Composable templates
+        expect(allTemplates.templates).to.eql([]);
+
+        // Legacy templates
+        const legacyTemplate = allTemplates.legacyTemplates.find(
+          (template) => template.name === payload.name
+        );
         const expectedKeys = [
           'name',
           'indexPatterns',
@@ -46,13 +54,12 @@ export default function ({ getService }) {
           'hasAliases',
           'hasMappings',
           'ilmPolicy',
-          'isManaged',
           'order',
           'version',
           '_kbnMeta',
         ].sort();
 
-        expect(Object.keys(createdTemplate).sort()).to.eql(expectedKeys);
+        expect(Object.keys(legacyTemplate).sort()).to.eql(expectedKeys);
       });
     });
 
@@ -71,7 +78,6 @@ export default function ({ getService }) {
           'indexPatterns',
           'template',
           'ilmPolicy',
-          'isManaged',
           'order',
           'version',
           '_kbnMeta',
@@ -155,7 +161,7 @@ export default function ({ getService }) {
         ).to.equal(templateName);
 
         const { body } = await deleteTemplates([
-          { name: templateName, formatVersion: payload._kbnMeta.formatVersion },
+          { name: templateName, isLegacy: payload._kbnMeta.isLegacy },
         ]).expect(200);
 
         expect(body.errors).to.be.empty;
