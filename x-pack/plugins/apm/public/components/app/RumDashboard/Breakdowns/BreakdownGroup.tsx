@@ -76,28 +76,26 @@ export const BreakdownGroup = ({
       >
         <EuiPopoverTitle>{SelectBreakdownLabel}</EuiPopoverTitle>
         <div className="euiFilterSelect__items" style={{ minWidth: 200 }}>
-          {items
-            .filter(({ type }) => type === 'category')
-            .map(({ name, count, selected, type, fieldName }) => (
-              <EuiFilterSelectItem
-                checked={!!selected ? 'on' : undefined}
-                data-cy={`filter-breakdown-item_${name}`}
-                key={name + count}
-                onClick={() => {
-                  setItems((prevItems) =>
-                    prevItems.map((tItem) => ({
-                      ...tItem,
-                      selected:
-                        name === tItem.name && count === tItem.count
-                          ? !tItem.selected
-                          : tItem.selected,
-                    }))
-                  );
-                }}
-              >
-                {name}
-              </EuiFilterSelectItem>
-            ))}
+          {items.map(({ name, count, selected }) => (
+            <EuiFilterSelectItem
+              checked={!!selected ? 'on' : undefined}
+              data-cy={`filter-breakdown-item_${name}`}
+              key={name + count}
+              onClick={() => {
+                setItems((prevItems) =>
+                  prevItems.map((tItem) => ({
+                    ...tItem,
+                    selected:
+                      name === tItem.name && count === tItem.count
+                        ? !tItem.selected
+                        : tItem.selected,
+                  }))
+                );
+              }}
+            >
+              {name}
+            </EuiFilterSelectItem>
+          ))}
         </div>
       </EuiPopover>
     </EuiFilterGroup>

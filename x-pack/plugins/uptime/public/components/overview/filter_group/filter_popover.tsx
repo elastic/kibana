@@ -23,7 +23,6 @@ export interface FilterPopoverProps {
   btnContent?: JSX.Element;
   forceOpen?: boolean;
   setForceOpen?: (val: boolean) => void;
-  size?: 's' | 'l' | 'xs';
 }
 
 const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>

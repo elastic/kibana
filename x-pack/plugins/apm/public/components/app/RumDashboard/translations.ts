@@ -82,6 +82,6 @@ export const OverallLabel = i18n.translate(
 export const SelectBreakdownLabel = i18n.translate(
   'xpack.uptime.filterGroup.selectBreakdown',
   {
-    defaultMessage: 'Search breakdown',
+    defaultMessage: 'Select breakdown',
   }
 );
