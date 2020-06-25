@@ -15,7 +15,7 @@ In one shell, from **~/kibana/x-pack**:
 `node scripts/functional_tests-server.js`
 
 In another shell, from **~kibana/x-pack**:
-`node ../scripts/functional_test_runner.js --config test/api_integration/config.js`.
+`node ../scripts/functional_test_runner.js --config test/api_integration/config.ts`.
 
 ### Manual e2e testing
 

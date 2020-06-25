@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const filterBar = getService('filterBar');
   const renderable = getService('renderable');
@@ -38,7 +38,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   describe('data table with index without time filter filters', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable w/o time filter';
 
-    before(async function() {
+    before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickDataTable');
@@ -58,7 +58,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
     });
 
-    it('should be able to save and load', async function() {
+    it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
@@ -71,7 +71,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // test to cover bug #54548 - add this visualization to a dashboard and filter
-    it('should add to dashboard and allow filtering', async function() {
+    it('should add to dashboard and allow filtering', async function () {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization(vizName1);

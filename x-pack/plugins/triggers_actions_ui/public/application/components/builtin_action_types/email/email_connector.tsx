@@ -45,7 +45,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               name="from"
               value={from || ''}
               data-test-subj="emailFromInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionConfig('from', e.target.value);
               }}
               onBlur={() => {
@@ -77,7 +77,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               name="host"
               value={host || ''}
               data-test-subj="emailHostInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionConfig('host', e.target.value);
               }}
               onBlur={() => {
@@ -111,7 +111,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                   name="port"
                   value={port || ''}
                   data-test-subj="emailPortInput"
-                  onChange={e => {
+                  onChange={(e) => {
                     editActionConfig('port', parseInt(e.target.value, 10));
                   }}
                   onBlur={() => {
@@ -133,7 +133,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                       }
                     )}
                     checked={secure || false}
-                    onChange={e => {
+                    onChange={(e) => {
                       editActionConfig('secure', e.target.checked);
                     }}
                   />
@@ -163,7 +163,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               name="user"
               value={user || ''}
               data-test-subj="emailUserInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionSecrets('user', nullableString(e.target.value));
               }}
             />
@@ -188,7 +188,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               name="password"
               value={password || ''}
               data-test-subj="emailPasswordInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionSecrets('password', nullableString(e.target.value));
               }}
             />

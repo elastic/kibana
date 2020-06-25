@@ -34,7 +34,7 @@ export function navigateToDefaultApp(
 
   // try to find an existing redirect for the target path if possible
   // this avoids having to load the legacy app just to get redirected to a core application again afterwards
-  const relevantForward = forwards.find(forward => defaultAppId.startsWith(forward.legacyAppId));
+  const relevantForward = forwards.find((forward) => defaultAppId.startsWith(forward.legacyAppId));
   if (relevantForward) {
     targetAppPath = relevantForward.rewritePath(`/${defaultAppId}`);
     targetAppId = relevantForward.newAppId;
@@ -43,12 +43,7 @@ export function navigateToDefaultApp(
   // when the correct app is already loaded, just set the hash to the right value
   // otherwise use navigateToApp (or setting href in case of kibana app)
   if (currentAppId !== targetAppId) {
-    if (targetAppId === 'kibana') {
-      // exception for kibana app because redirect won't work right otherwise
-      window.location.href = basePath.prepend(`/app/kibana${targetAppPath}`);
-    } else {
-      application.navigateToApp(targetAppId, { path: targetAppPath });
-    }
+    application.navigateToApp(targetAppId, { path: targetAppPath, replace: true });
   } else if (overwriteHash) {
     window.location.hash = targetAppPath;
   }

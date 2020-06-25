@@ -35,11 +35,11 @@ const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) => {
   _config[CONFIG_PATH] = settings;
   const migrated = applyDeprecations(
     _config,
-    deprecations.map(deprecation => ({
+    deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
     })),
-    msg => deprecationMessages.push(msg)
+    (msg) => deprecationMessages.push(msg)
   );
   return {
     messages: deprecationMessages,

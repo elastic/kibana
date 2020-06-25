@@ -43,10 +43,13 @@ import { useLoadWatches } from '../../../lib/api';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../../lib/navigation';
 import { useAppContext } from '../../../app_context';
 
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+
 export const WatchList = () => {
   // hooks
   const {
     setBreadcrumbs,
+    history,
     links: { watcherGettingStartedUrl },
   } = useAppContext();
   const [selection, setSelection] = useState([]);
@@ -242,7 +245,7 @@ export const WatchList = () => {
           return (
             <EuiLink
               data-test-subj={`watchIdColumn-${id}`}
-              href={`#/management/elasticsearch/watcher/watches/watch/${id}/status`}
+              {...reactRouterNavigate(history, `/watches/watch/${id}/status`)}
             >
               {id}
             </EuiLink>
@@ -326,7 +329,7 @@ export const WatchList = () => {
                     )}
                     iconType="pencil"
                     color="primary"
-                    href={`#/management/elasticsearch/watcher/watches/watch/${watch.id}/edit`}
+                    {...reactRouterNavigate(history, `/watches/watch/${watch.id}/edit`)}
                     data-test-subj="editWatchButton"
                   />
                 </EuiToolTip>
@@ -401,9 +404,7 @@ export const WatchList = () => {
               />
             )}
           </EuiButton>
-        ) : (
-          undefined
-        ),
+        ) : undefined,
       toolsRight: createWatchContextMenu,
     };
 

@@ -60,7 +60,7 @@ async function retry(log, fn) {
       }
 
       log.warning('...failure, retrying in 5 seconds:', error.message);
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       log.info('...retrying');
       return await doAttempt(attempt + 1);
     }
@@ -120,7 +120,7 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
   const arch = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
 
   const archive = manifest.archives.find(
-    archive =>
+    (archive) =>
       archive.version === desiredVersion &&
       archive.platform === platform &&
       archive.license === desiredLicense &&

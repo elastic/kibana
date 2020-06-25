@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -28,6 +28,8 @@ import { StartServicesAccessor } from 'src/core/public';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
+
+import './index.scss';
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
   defaultMessage: 'Advanced Settings',
@@ -60,7 +62,7 @@ export async function mountManagementSection(
 
   ReactDOM.render(
     <I18nProvider>
-      <HashRouter basename={params.basePath}>
+      <Router history={params.history}>
         <Switch>
           <Route path={['/:query', '/']}>
             <AdvancedSettings
@@ -72,7 +74,7 @@ export async function mountManagementSection(
             />
           </Route>
         </Switch>
-      </HashRouter>
+      </Router>
     </I18nProvider>,
     params.element
   );

@@ -36,4 +36,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new IndexPatternManagementPlugin(initializerContext);
 }
 
-export { IndexPatternCreationConfig, IndexPatternListConfig } from './service';
+export {
+  IndexPatternCreationConfig,
+  IndexPatternCreationOption,
+  IndexPatternListConfig,
+} from './service';

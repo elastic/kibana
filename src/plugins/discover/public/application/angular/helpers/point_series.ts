@@ -84,7 +84,7 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   const yAccessor = table.columns[y.accessor].id;
   const chart = {} as Chart;
 
-  chart.xAxisOrderedValues = uniq(table.rows.map(r => r[xAccessor] as number));
+  chart.xAxisOrderedValues = uniq(table.rows.map((r) => r[xAccessor] as number));
   chart.xAxisFormat = x.format;
   chart.xAxisLabel = table.columns[x.accessor].name;
 
@@ -101,8 +101,8 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   chart.yAxisLabel = table.columns[y.accessor].name;
 
   chart.values = table.rows
-    .filter(row => row && row[yAccessor] !== 'NaN')
-    .map(row => ({
+    .filter((row) => row && row[yAccessor] !== 'NaN')
+    .map((row) => ({
       x: row[xAccessor] as number,
       y: row[yAccessor] as number,
     }));

@@ -25,8 +25,7 @@ import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../elasticsearch_geo_utils';
 import { getInitialView } from './get_initial_view';
-
-import { getInjectedVarFunc } from '../../../kibana_services';
+import { getPreserveDrawingBuffer } from '../../../kibana_services';
 
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
@@ -114,23 +113,20 @@ export class MBMapContainer extends React.Component {
 
   async _createMbMapInstance() {
     const initialView = await getInitialView(this.props.goto, this.props.settings);
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const mbStyle = {
         version: 8,
         sources: {},
         layers: [],
+        glyphs: getGlyphUrl(),
       };
-      const glyphUrl = getGlyphUrl();
-      if (glyphUrl) {
-        mbStyle.glyphs = glyphUrl;
-      }
 
       const options = {
         attributionControl: false,
         container: this.refs.mapContainer,
         style: mbStyle,
         scrollZoom: this.props.scrollZoom,
-        preserveDrawingBuffer: getInjectedVarFunc()('preserveDrawingBuffer', false),
+        preserveDrawingBuffer: getPreserveDrawingBuffer(),
         interactive: !this.props.disableInteractive,
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
@@ -152,7 +148,7 @@ export class MBMapContainer extends React.Component {
       }
 
       let emptyImage;
-      mbMap.on('styleimagemissing', e => {
+      mbMap.on('styleimagemissing', (e) => {
         if (emptyImage) {
           mbMap.addImage(e.id, emptyImage);
         }
@@ -202,7 +198,7 @@ export class MBMapContainer extends React.Component {
     );
     // Attach event only if view control is visible, which shows lat/lon
     if (!this.props.hideViewControl) {
-      const throttledSetMouseCoordinates = _.throttle(e => {
+      const throttledSetMouseCoordinates = _.throttle((e) => {
         this.props.setMouseCoordinates({
           lat: e.lngLat.lat,
           lon: e.lngLat.lng,
@@ -268,7 +264,7 @@ export class MBMapContainer extends React.Component {
       this.props.layerList,
       this.props.spatialFiltersLayer
     );
-    this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
+    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap));
     syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
     moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
   };

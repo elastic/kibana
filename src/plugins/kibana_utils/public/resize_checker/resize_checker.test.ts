@@ -50,12 +50,12 @@ class MockElement {
   }
 }
 
-(ResizeObserver as any).mockImplementation(function(this: any, callback: any) {
-  this.observe = function(el: MockElement) {
+(ResizeObserver as any).mockImplementation(function (this: any, callback: any) {
+  this.observe = function (el: MockElement) {
     el.addEventListener('resize', callback);
   };
-  this.disconnect = function() {};
-  this.unobserve = function(el: MockElement) {
+  this.disconnect = function () {};
+  this.unobserve = function (el: MockElement) {
     el.removeEventListener('resize', callback);
   };
 });
@@ -69,7 +69,7 @@ describe('Resize Checker', () => {
       expect(checker).toBeInstanceOf(EventEmitter);
     });
 
-    it('emits a "resize" event', done => {
+    it('emits a "resize" event', (done) => {
       const el = new MockElement();
       const checker = new ResizeChecker(el as any);
       const listener = jest.fn();
@@ -85,7 +85,7 @@ describe('Resize Checker', () => {
   });
 
   describe('enable/disabled state', () => {
-    it('should not trigger events while disabled', done => {
+    it('should not trigger events while disabled', (done) => {
       const el = new MockElement();
       const checker = new ResizeChecker(el as any, { disabled: true });
       const listener = jest.fn();
@@ -100,7 +100,7 @@ describe('Resize Checker', () => {
       }, 100);
     });
 
-    it('should trigger resize events after calling enable', done => {
+    it('should trigger resize events after calling enable', (done) => {
       const el = new MockElement();
       const checker = new ResizeChecker(el as any, { disabled: true });
       const listener = jest.fn();
@@ -116,7 +116,7 @@ describe('Resize Checker', () => {
       }, 100);
     });
 
-    it('should not trigger the first time after enable when the size does not change', done => {
+    it('should not trigger the first time after enable when the size does not change', (done) => {
       const el = new MockElement();
       const checker = new ResizeChecker(el as any, { disabled: true });
       const listener = jest.fn();
@@ -134,7 +134,7 @@ describe('Resize Checker', () => {
   });
 
   describe('#modifySizeWithoutTriggeringResize()', () => {
-    it(`does not emit "resize" events caused by the block`, done => {
+    it(`does not emit "resize" events caused by the block`, (done) => {
       const el = new MockElement();
       const checker = new ResizeChecker(el as any, { disabled: true });
       const listener = jest.fn();
@@ -150,7 +150,7 @@ describe('Resize Checker', () => {
       }, 1000);
     });
 
-    it('does emit "resize" when modification is made between the block and resize notification', done => {
+    it('does emit "resize" when modification is made between the block and resize notification', (done) => {
       const el = new MockElement();
       const checker = new ResizeChecker(el as any, { disabled: true });
       const listener = jest.fn();
@@ -180,7 +180,7 @@ describe('Resize Checker', () => {
       expect(!(checker as any).observer).toBe(true);
     });
 
-    it('does not emit future resize events', done => {
+    it('does not emit future resize events', (done) => {
       const el = new MockElement();
       const checker = new ResizeChecker(el as any, { disabled: true });
       const listener = jest.fn();

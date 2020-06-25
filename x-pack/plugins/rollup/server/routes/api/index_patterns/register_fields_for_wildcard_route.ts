@@ -25,7 +25,7 @@ const getFieldsForWildcardRequest = async (
   response: any,
   IndexPatternsFetcher: any
 ) => {
-  const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
+  const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
   const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
   const { pattern, meta_fields: metaFields } = request.query;
 
@@ -79,7 +79,7 @@ export const registerFieldsForWildcardRoute = ({
           if (!rollupIndex) {
             return '[request query.params]: "rollup_index" is required';
           } else if (keys.length > 1) {
-            const invalidParams = keys.filter(key => key !== 'rollup_index');
+            const invalidParams = keys.filter((key) => key !== 'rollup_index');
             return `[request query.params]: ${invalidParams.join(', ')} is not allowed`;
           }
         } catch (err) {

@@ -37,7 +37,7 @@ export const Section: FunctionComponent<SectionProps> = ({
       if (!isValidElement(child)) {
         return accumulatedChildren;
       }
-      const metric = metrics?.find(m => m.id === child.props.id) ?? null;
+      const metric = metrics?.find((m) => m.id === child.props.id) ?? null;
       if (metric === null) {
         return accumulatedChildren;
       }
@@ -61,7 +61,7 @@ export const Section: FunctionComponent<SectionProps> = ({
     []
   );
 
-  const childrenWithProps = Children.map(children, child =>
+  const childrenWithProps = Children.map(children, (child) =>
     isValidElement(child)
       ? cloneElement(child, {
           metrics,

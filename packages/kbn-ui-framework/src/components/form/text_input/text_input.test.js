@@ -45,18 +45,34 @@ describe('KuiTextInput', () => {
     });
 
     describe('autoFocus', () => {
+      /* eslint-disable no-console */
+      // Silence until enzyme fixed https://github.com/enzymejs/enzyme/issues/2337
+      const originalError = console.error;
+      beforeAll(() => {
+        console.error = jest.fn();
+      });
+      afterAll(() => {
+        console.error = originalError;
+      });
+      /* eslint-enable no-console */
+
       test('sets focus on the element', () => {
         const component = mount(
-          <KuiTextInput autoFocus onChange={() => {}} data-test-subj="input" />
+          <KuiTextInput autoFocus={true} onChange={() => {}} data-test-subj="input" />,
+          { attachTo: document.body }
         );
 
         expect(findTestSubject(component, 'input').getDOMNode()).toBe(document.activeElement);
+        component.unmount();
       });
 
       test('does not focus the element by default', () => {
-        const component = mount(<KuiTextInput onChange={() => {}} data-test-subj="input" />);
+        const component = mount(<KuiTextInput onChange={() => {}} data-test-subj="input" />, {
+          attachTo: document.body,
+        });
 
         expect(findTestSubject(component, 'input').getDOMNode()).not.toBe(document.activeElement);
+        component.unmount();
       });
     });
 
@@ -89,7 +105,7 @@ describe('KuiTextInput', () => {
     });
 
     describe('size', () => {
-      TEXTINPUT_SIZE.forEach(size => {
+      TEXTINPUT_SIZE.forEach((size) => {
         test(`renders ${size}`, () => {
           const component = <KuiTextInput size={size} onChange={() => {}} />;
 

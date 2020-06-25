@@ -27,15 +27,15 @@ describe('callApmApi', () => {
       params: {
         path: {
           param1: 'foo',
-          param2: 'bar'
-        }
-      }
+          param2: 'bar',
+        },
+      },
     } as never);
 
     expect(callApi).toHaveBeenCalledWith(
       {},
       expect.objectContaining({
-        pathname: '/api/apm/foo/to/bar'
+        pathname: '/api/apm/foo/to/bar',
       })
     );
   });
@@ -46,9 +46,9 @@ describe('callApmApi', () => {
       params: {
         query: {
           foo: 'bar',
-          bar: 'foo'
-        }
-      }
+          bar: 'foo',
+        },
+      },
     } as never);
 
     expect(callApi).toHaveBeenCalledWith(
@@ -57,8 +57,8 @@ describe('callApmApi', () => {
         pathname: '/api/apm',
         query: {
           foo: 'bar',
-          bar: 'foo'
-        }
+          bar: 'foo',
+        },
       })
     );
   });
@@ -70,9 +70,9 @@ describe('callApmApi', () => {
       params: {
         body: {
           foo: 'bar',
-          bar: 'foo'
-        }
-      }
+          bar: 'foo',
+        },
+      },
     } as never);
 
     expect(callApi).toHaveBeenCalledWith(
@@ -82,8 +82,8 @@ describe('callApmApi', () => {
         method: 'POST',
         body: {
           foo: 'bar',
-          bar: 'foo'
-        }
+          bar: 'foo',
+        },
       })
     );
   });

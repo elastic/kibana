@@ -26,7 +26,7 @@ interface Props {
 export function asAngularSyncedObservable(collectProps: () => Props, angularDigest: () => void) {
   const boundCollectProps = () => {
     const collectedProps = collectProps();
-    Object.keys(collectedProps).forEach(key => {
+    Object.keys(collectedProps).forEach((key) => {
       const currentValue = collectedProps[key];
       if (typeof currentValue === 'function') {
         collectedProps[key] = (...args: unknown[]) => {

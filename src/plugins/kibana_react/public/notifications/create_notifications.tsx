@@ -44,13 +44,13 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
     });
   };
 
-  const success: KibanaReactNotifications['toasts']['success'] = input =>
+  const success: KibanaReactNotifications['toasts']['success'] = (input) =>
     show({ color: 'success', iconType: 'check', ...input });
 
-  const warning: KibanaReactNotifications['toasts']['warning'] = input =>
+  const warning: KibanaReactNotifications['toasts']['warning'] = (input) =>
     show({ color: 'warning', iconType: 'help', ...input });
 
-  const danger: KibanaReactNotifications['toasts']['danger'] = input =>
+  const danger: KibanaReactNotifications['toasts']['danger'] = (input) =>
     show({ color: 'danger', iconType: 'alert', ...input });
 
   const notifications: KibanaReactNotifications = {

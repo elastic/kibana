@@ -18,11 +18,13 @@
  */
 
 import { Breadcrumb as EuiBreadcrumb, IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
+import { EuiLink } from '@elastic/eui';
+import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
 import { HttpStart } from '../http';
@@ -32,9 +34,9 @@ import { IUiSettingsClient } from '../ui_settings';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
-import { ChromeNavLinks, NavLinksService } from './nav_links';
+import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
-import { Header, LoadingIndicator } from './ui';
+import { Header } from './ui';
 import { NavType } from './ui/header';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
@@ -115,9 +117,9 @@ export class ChromeService {
       // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
       of(true),
       application.currentAppId$.pipe(
-        flatMap(appId =>
+        flatMap((appId) =>
           application.applications$.pipe(
-            map(applications => {
+            map((applications) => {
               return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
             })
           )
@@ -146,6 +148,7 @@ export class ChromeService {
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
+    const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
 
@@ -165,12 +168,44 @@ export class ChromeService {
     // Can delete
     const getNavType$ = uiSettings.get$('pageNavigation').pipe(takeUntil(this.stop$));
 
+    const isIE = () => {
+      const ua = window.navigator.userAgent;
+      const msie = ua.indexOf('MSIE '); // IE 10 or older
+      const trident = ua.indexOf('Trident/'); // IE 11
+
+      return msie > 0 || trident > 0;
+    };
+
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
-      notifications.toasts.addWarning(
-        i18n.translate('core.chrome.legacyBrowserWarning', {
-          defaultMessage: 'Your browser does not meet the security requirements for Kibana.',
-        })
-      );
+      notifications.toasts.addWarning({
+        title: mountReactNode(
+          <FormattedMessage
+            id="core.chrome.legacyBrowserWarning"
+            defaultMessage="Your browser does not meet the security requirements for Kibana."
+          />
+        ),
+      });
+
+      if (isIE()) {
+        notifications.toasts.addWarning({
+          title: mountReactNode(
+            <FormattedMessage
+              id="core.chrome.browserDeprecationWarning"
+              defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
+              values={{
+                link: (
+                  <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
+                    <FormattedMessage
+                      id="core.chrome.browserDeprecationLink"
+                      defaultMessage="the support matrix on our website"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          ),
+        });
+      }
     }
 
     return {
@@ -180,31 +215,30 @@ export class ChromeService {
       docTitle,
 
       getHeaderComponent: () => (
-        <React.Fragment>
-          <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
-          <Header
-            application={application}
-            appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
-            badge$={badge$.pipe(takeUntil(this.stop$))}
-            basePath={http.basePath}
-            breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-            kibanaDocLink={docLinks.links.kibana}
-            forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-            helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-            helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-            homeHref={http.basePath.prepend('/app/home')}
-            isVisible$={this.isVisible$}
-            kibanaVersion={injectedMetadata.getKibanaVersion()}
-            legacyMode={injectedMetadata.getLegacyMode()}
-            navLinks$={navLinks.getNavLinks$()}
-            recentlyAccessed$={recentlyAccessed.get$()}
-            navControlsLeft$={navControls.getLeft$()}
-            navControlsRight$={navControls.getRight$()}
-            onIsLockedUpdate={setIsNavDrawerLocked}
-            isLocked$={getIsNavDrawerLocked$}
-            navType$={getNavType$}
-          />
-        </React.Fragment>
+        <Header
+          loadingCount$={http.getLoadingCount$()}
+          application={application}
+          appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
+          badge$={badge$.pipe(takeUntil(this.stop$))}
+          basePath={http.basePath}
+          breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+          customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
+          kibanaDocLink={docLinks.links.kibana}
+          forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+          helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+          helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+          homeHref={http.basePath.prepend('/app/home')}
+          isVisible$={this.isVisible$}
+          kibanaVersion={injectedMetadata.getKibanaVersion()}
+          legacyMode={injectedMetadata.getLegacyMode()}
+          navLinks$={navLinks.getNavLinks$()}
+          recentlyAccessed$={recentlyAccessed.get$()}
+          navControlsLeft$={navControls.getLeft$()}
+          navControlsRight$={navControls.getRight$()}
+          onIsLockedUpdate={setIsNavDrawerLocked}
+          isLocked$={getIsNavDrawerLocked$}
+          navType$={getNavType$}
+        />
       ),
 
       setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
@@ -226,7 +260,7 @@ export class ChromeService {
 
       getApplicationClasses$: () =>
         applicationClasses$.pipe(
-          map(set => [...set]),
+          map((set) => [...set]),
           takeUntil(this.stop$)
         ),
 
@@ -265,6 +299,12 @@ export class ChromeService {
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
 
       getNavType$: () => getNavType$,
+
+      getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
+
+      setCustomNavLink: (customNavLink?: ChromeNavLink) => {
+        customNavLink$.next(customNavLink);
+      },
     };
   }
 
@@ -390,6 +430,16 @@ export interface ChromeStart {
    * Override the current set of breadcrumbs
    */
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+
+  /**
+   * Get an observable of the current custom nav link
+   */
+  getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
+
+  /**
+   * Override the current set of custom nav link
+   */
+  setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
 
   /**
    * Get an observable of the current custom help conttent

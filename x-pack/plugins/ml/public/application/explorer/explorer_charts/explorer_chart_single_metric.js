@@ -128,7 +128,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .data(lineChartYScale.ticks())
         .enter()
         .append('text')
-        .text(d => {
+        .text((d) => {
           if (fieldFormat !== undefined) {
             return fieldFormat.convert(d, 'text');
           } else {
@@ -136,7 +136,7 @@ export class ExplorerChartSingleMetric extends React.Component {
           }
         })
         // Don't use an arrow function since we need access to `this`.
-        .each(function() {
+        .each(function () {
           maxYAxisLabelWidth = Math.max(
             this.getBBox().width + yAxis.tickPadding(),
             maxYAxisLabelWidth
@@ -158,9 +158,9 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       lineChartValuesLine = d3.svg
         .line()
-        .x(d => lineChartXScale(d.date))
-        .y(d => lineChartYScale(d.value))
-        .defined(d => d.value !== null);
+        .x((d) => lineChartXScale(d.date))
+        .y((d) => lineChartYScale(d.value))
+        .defined((d) => d.value !== null);
 
       lineChartGroup = svg
         .append('g')
@@ -212,7 +212,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .innerTickSize(-chartHeight)
         .outerTickSize(0)
         .tickPadding(10)
-        .tickFormat(d => moment(d).format(xAxisTickFormat));
+        .tickFormat((d) => moment(d).format(xAxisTickFormat));
 
       // With tooManyBuckets the chart would end up with no x-axis labels
       // because the ticks are based on the span of the emphasis section,
@@ -232,7 +232,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .tickPadding(10);
 
       if (fieldFormat !== undefined) {
-        yAxis.tickFormat(d => fieldFormat.convert(d, 'text'));
+        yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
       }
 
       const axes = lineChartGroup.append('g');
@@ -243,10 +243,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('transform', 'translate(0,' + chartHeight + ')')
         .call(xAxis);
 
-      axes
-        .append('g')
-        .attr('class', 'y axis')
-        .call(yAxis);
+      axes.append('g').attr('class', 'y axis').call(yAxis);
 
       if (tooManyBuckets === false) {
         removeLabelOverlap(gAxis, tickValuesStart, interval, vizWidth);
@@ -290,7 +287,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .selectAll('.metric-value')
         .data(
           data.filter(
-            d =>
+            (d) =>
               (d.value !== null || typeof d.anomalyScore === 'number') &&
               !showMultiBucketAnomalyMarker(d)
           )
@@ -304,18 +301,19 @@ export class ExplorerChartSingleMetric extends React.Component {
         .append('circle')
         .attr('r', LINE_CHART_ANOMALY_RADIUS)
         // Don't use an arrow function since we need access to `this`.
-        .on('mouseover', function(d) {
+        .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
         })
         .on('mouseout', () => tooltipService.hide());
 
-      const isAnomalyVisible = d => _.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severity;
+      const isAnomalyVisible = (d) =>
+        _.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severity;
 
       // Update all dots to new positions.
       dots
-        .attr('cx', d => lineChartXScale(d.date))
-        .attr('cy', d => lineChartYScale(d.value))
-        .attr('class', d => {
+        .attr('cx', (d) => lineChartXScale(d.date))
+        .attr('cy', (d) => lineChartYScale(d.value))
+        .attr('class', (d) => {
           let markerClass = 'metric-value';
           if (isAnomalyVisible(d)) {
             markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
@@ -327,7 +325,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       const multiBucketMarkers = lineChartGroup
         .select('.chart-markers')
         .selectAll('.multi-bucket')
-        .data(data.filter(d => isAnomalyVisible(d) && showMultiBucketAnomalyMarker(d) === true));
+        .data(data.filter((d) => isAnomalyVisible(d) && showMultiBucketAnomalyMarker(d) === true));
 
       // Remove multi-bucket markers that are no longer needed
       multiBucketMarkers.exit().remove();
@@ -336,20 +334,17 @@ export class ExplorerChartSingleMetric extends React.Component {
       multiBucketMarkers
         .enter()
         .append('path')
-        .attr(
-          'd',
-          d3.svg
-            .symbol()
-            .size(MULTI_BUCKET_SYMBOL_SIZE)
-            .type('cross')
-        )
+        .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
         .attr(
           'transform',
-          d => `translate(${lineChartXScale(d.date)}, ${lineChartYScale(d.value)})`
+          (d) => `translate(${lineChartXScale(d.date)}, ${lineChartYScale(d.value)})`
         )
-        .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`)
+        .attr(
+          'class',
+          (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`
+        )
         // Don't use an arrow function since we need access to `this`.
-        .on('mouseover', function(d) {
+        .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
         })
         .on('mouseout', () => tooltipService.hide());
@@ -358,7 +353,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       const scheduledEventMarkers = lineChartGroup
         .select('.chart-markers')
         .selectAll('.scheduled-event-marker')
-        .data(data.filter(d => d.scheduledEvents !== undefined));
+        .data(data.filter((d) => d.scheduledEvents !== undefined));
 
       // Remove markers that are no longer needed i.e. if number of chart points has decreased.
       scheduledEventMarkers.exit().remove();
@@ -374,8 +369,8 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       // Update all markers to new positions.
       scheduledEventMarkers
-        .attr('x', d => lineChartXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
-        .attr('y', d => lineChartYScale(d.value) - SCHEDULED_EVENT_SYMBOL_HEIGHT / 2);
+        .attr('x', (d) => lineChartXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
+        .attr('y', (d) => lineChartYScale(d.value) - SCHEDULED_EVENT_SYMBOL_HEIGHT / 2);
     }
 
     function showLineChartTooltip(marker, circle) {

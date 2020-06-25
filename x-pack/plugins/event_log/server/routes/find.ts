@@ -29,7 +29,7 @@ export const findRoute = (router: IRouter) => {
         query: findOptionsSchema,
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, unknown>,
       res: KibanaResponseFactory

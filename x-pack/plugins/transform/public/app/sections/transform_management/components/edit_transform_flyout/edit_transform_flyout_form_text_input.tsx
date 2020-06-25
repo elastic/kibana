@@ -36,7 +36,7 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
         placeholder={placeholder}
         isInvalid={errorMessages.length > 0}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         aria-label={label}
       />
     </EuiFormRow>

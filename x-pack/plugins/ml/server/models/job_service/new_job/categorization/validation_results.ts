@@ -28,17 +28,19 @@ export class ValidationResults {
   }
 
   public get overallResult() {
-    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID)) {
+    if (this._results.some((c) => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID)) {
       return CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
     }
-    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID)) {
+    if (
+      this._results.some((c) => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID)
+    ) {
       return CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID;
     }
     return CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
   }
 
   private _resultExists(id: VALIDATION_RESULT) {
-    return this._results.some(r => r.id === id);
+    return this._results.some((r) => r.id === id);
   }
 
   public createTokenCountResult(examples: CategoryFieldExample[], sampleSize: number) {
@@ -53,7 +55,7 @@ export class ValidationResults {
       return;
     }
 
-    const validExamplesSize = examples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT).length;
+    const validExamplesSize = examples.filter((e) => e.tokens.length >= VALID_TOKEN_COUNT).length;
     const percentValid = sampleSize === 0 ? 0 : validExamplesSize / sampleSize;
 
     let valid = CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
@@ -119,7 +121,7 @@ export class ValidationResults {
   }
 
   public createNullValueResult(examples: Array<string | null | undefined>) {
-    const nullCount = examples.filter(e => e === null).length;
+    const nullCount = examples.filter((e) => e === null).length;
 
     if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
       this._results.push({

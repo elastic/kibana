@@ -43,7 +43,7 @@ async function copyFile({ readStream, writeStream, progress }) {
     writeStream.on('error', reject);
 
     // report progress as we transfer
-    readStream.on('data', chunk => {
+    readStream.on('data', (chunk) => {
       progress.progress(chunk.length);
     });
 

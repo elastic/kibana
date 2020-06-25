@@ -25,7 +25,8 @@ import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './ty
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-const executeTriggerActions = jest.fn();
+const onClickValue = jest.fn();
+const onSelectRange = jest.fn();
 
 const dateHistogramData: LensMultiTable = {
   type: 'lens_multitable',
@@ -280,7 +281,7 @@ describe('xy_expression', () => {
     let convertSpy: jest.Mock;
 
     beforeEach(() => {
-      convertSpy = jest.fn(x => x);
+      convertSpy = jest.fn((x) => x);
       getFormatSpy = jest.fn();
       getFormatSpy.mockReturnValue({ convert: convertSpy });
     });
@@ -296,7 +297,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -344,7 +346,8 @@ describe('xy_expression', () => {
             timeZone="UTC"
             chartTheme={{}}
             histogramBarTarget={50}
-            executeTriggerActions={executeTriggerActions}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
           />
         );
         expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
@@ -379,7 +382,8 @@ describe('xy_expression', () => {
             timeZone="UTC"
             chartTheme={{}}
             histogramBarTarget={50}
-            executeTriggerActions={executeTriggerActions}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
           />
         );
 
@@ -415,7 +419,8 @@ describe('xy_expression', () => {
             timeZone="UTC"
             chartTheme={{}}
             histogramBarTarget={50}
-            executeTriggerActions={executeTriggerActions}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
           />
         );
 
@@ -452,7 +457,8 @@ describe('xy_expression', () => {
             timeZone="UTC"
             chartTheme={{}}
             histogramBarTarget={50}
-            executeTriggerActions={executeTriggerActions}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
           />
         );
 
@@ -496,7 +502,8 @@ describe('xy_expression', () => {
             timeZone="UTC"
             chartTheme={{}}
             histogramBarTarget={50}
-            executeTriggerActions={executeTriggerActions}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
           />
         );
 
@@ -530,7 +537,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(Settings).prop('xDomain')).toBeUndefined();
@@ -546,7 +554,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -563,7 +572,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -580,7 +590,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -602,21 +613,17 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
 
-      wrapper
-        .find(Settings)
-        .first()
-        .prop('onBrushEnd')!({ x: [1585757732783, 1585758880838] });
+      wrapper.find(Settings).first().prop('onBrushEnd')!({ x: [1585757732783, 1585758880838] });
 
-      expect(executeTriggerActions).toHaveBeenCalledWith('SELECT_RANGE_TRIGGER', {
-        data: {
-          column: 0,
-          table: dateHistogramData.tables.timeLayer,
-          range: [1585757732783, 1585758880838],
-        },
+      expect(onSelectRange).toHaveBeenCalledWith({
+        column: 0,
+        table: dateHistogramData.tables.timeLayer,
+        range: [1585757732783, 1585758880838],
         timeFieldName: 'order_date',
       });
     });
@@ -656,32 +663,30 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
 
-      wrapper
-        .find(Settings)
-        .first()
-        .prop('onElementClick')!([[geometry, series as XYChartSeriesIdentifier]]);
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
 
-      expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
-        data: {
-          data: [
-            {
-              column: 1,
-              row: 1,
-              table: data.tables.first,
-              value: 5,
-            },
-            {
-              column: 1,
-              row: 0,
-              table: data.tables.first,
-              value: 2,
-            },
-          ],
-        },
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 1,
+            row: 1,
+            table: data.tables.first,
+            value: 5,
+          },
+          {
+            column: 1,
+            row: 0,
+            table: data.tables.first,
+            value: 2,
+          },
+        ],
       });
     });
 
@@ -695,7 +700,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -713,7 +719,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -734,7 +741,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -753,7 +761,8 @@ describe('xy_expression', () => {
           timeZone="CEST"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(LineSeries).prop('timeZone')).toEqual('CEST');
@@ -771,7 +780,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
@@ -796,7 +806,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
@@ -815,7 +826,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
@@ -876,7 +888,8 @@ describe('xy_expression', () => {
             timeZone="UTC"
             chartTheme={{}}
             histogramBarTarget={50}
-            executeTriggerActions={executeTriggerActions}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
           />
         );
       };
@@ -1071,7 +1084,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);
@@ -1088,7 +1102,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(LineSeries).prop('yScaleType')).toEqual(ScaleType.Sqrt);
@@ -1105,7 +1120,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
 
@@ -1123,7 +1139,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
 
@@ -1141,7 +1158,8 @@ describe('xy_expression', () => {
           chartTheme={{}}
           histogramBarTarget={50}
           timeZone="UTC"
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
       expect(getFormatSpy).toHaveBeenCalledWith({
@@ -1161,14 +1179,12 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
 
-      const tickFormatter = instance
-        .find(Axis)
-        .first()
-        .prop('tickFormat');
+      const tickFormatter = instance.find(Axis).first().prop('tickFormat');
 
       if (!tickFormatter) {
         throw new Error('tickFormatter prop not found');
@@ -1248,7 +1264,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
 
@@ -1257,6 +1274,65 @@ describe('xy_expression', () => {
       // Only one series should be rendered, even though 2 are configured
       // This one series should only have one row, even though 2 are sent
       expect(series.prop('data')).toEqual([{ a: 1, b: 5, c: 'J', d: 'Row 2' }]);
+    });
+
+    test('it should not remove rows with falsy but non-undefined values', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'kibana_datatable',
+            columns: [
+              { id: 'a', name: 'a' },
+              { id: 'b', name: 'b' },
+              { id: 'c', name: 'c' },
+            ],
+            rows: [
+              { a: 0, b: 2, c: 5 },
+              { a: 1, b: 0, c: 7 },
+            ],
+          },
+        },
+      };
+
+      const args: XYArgs = {
+        xTitle: '',
+        yTitle: '',
+        legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'line',
+            xAccessor: 'a',
+            accessors: ['c'],
+            splitAccessor: 'b',
+            columnToLabel: '',
+            xScaleType: 'ordinal',
+            yScaleType: 'linear',
+            isHistogram: false,
+          },
+        ],
+      };
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const series = component.find(LineSeries);
+
+      expect(series.prop('data')).toEqual([
+        { a: 0, b: 2, c: 5 },
+        { a: 1, b: 0, c: 7 },
+      ]);
     });
 
     test('it should show legend for split series, even with one row', () => {
@@ -1302,7 +1378,8 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       );
 

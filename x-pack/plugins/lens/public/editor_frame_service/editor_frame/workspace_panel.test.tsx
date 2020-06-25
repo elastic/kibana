@@ -21,7 +21,17 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import {
+  DataPublicPluginStart,
+  esFilters,
+  IFieldType,
+  IIndexPattern,
+} from '../../../../../../src/plugins/data/public';
+import { TriggerId, UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
+import { TriggerContract } from '../../../../../../src/plugins/ui_actions/public/triggers';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 
 describe('workspace_panel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -29,10 +39,17 @@ describe('workspace_panel', () => {
   let mockDatasource: DatasourceMock;
 
   let expressionRendererMock: jest.Mock<React.ReactElement, [ReactExpressionRendererProps]>;
+  let uiActionsMock: jest.Mocked<UiActionsStart>;
+  let dataMock: jest.Mocked<DataPublicPluginStart>;
+  let trigger: jest.Mocked<TriggerContract<TriggerId>>;
 
   let instance: ReactWrapper<WorkspacePanelProps>;
 
   beforeEach(() => {
+    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract<TriggerId>>;
+    uiActionsMock = uiActionsPluginMock.createStartContract();
+    dataMock = dataPluginMock.createStartContract();
+    uiActionsMock.getTrigger.mockReturnValue(trigger);
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
 
@@ -60,6 +77,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -82,6 +100,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -104,6 +123,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -140,6 +160,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -198,6 +219,48 @@ describe('workspace_panel', () => {
     `);
   });
 
+  it('should execute a trigger on expression event', () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+
+    instance = mount(
+      <InnerWorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
+      />
+    );
+
+    const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
+
+    const eventData = {};
+    onEvent({ name: 'brush', data: eventData });
+
+    expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
+    expect(trigger.exec).toHaveBeenCalledWith({ data: eventData });
+  });
+
   it('should include data fetching for each layer in the expression', () => {
     const mockDatasource2 = createMockDatasource('a');
     const framePublicAPI = createMockFramePublicAPI();
@@ -237,6 +300,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -292,7 +356,7 @@ describe('workspace_panel', () => {
       .mockReturnValueOnce('datasource')
       .mockReturnValueOnce('datasource second');
 
-    expressionRendererMock = jest.fn(_arg => <span />);
+    expressionRendererMock = jest.fn((_arg) => <span />);
 
     await act(async () => {
       instance = mount(
@@ -316,6 +380,7 @@ describe('workspace_panel', () => {
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
+          plugins={{ uiActions: uiActionsMock, data: dataMock }}
         />
       );
     });
@@ -347,7 +412,7 @@ describe('workspace_panel', () => {
       .mockReturnValueOnce('datasource')
       .mockReturnValueOnce('datasource second');
 
-    expressionRendererMock = jest.fn(_arg => <span />);
+    expressionRendererMock = jest.fn((_arg) => <span />);
     await act(async () => {
       instance = mount(
         <InnerWorkspacePanel
@@ -370,6 +435,7 @@ describe('workspace_panel', () => {
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
+          plugins={{ uiActions: uiActionsMock, data: dataMock }}
         />
       );
     });
@@ -424,6 +490,7 @@ describe('workspace_panel', () => {
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
       />
     );
 
@@ -461,6 +528,7 @@ describe('workspace_panel', () => {
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
+          plugins={{ uiActions: uiActionsMock, data: dataMock }}
         />
       );
     });
@@ -504,6 +572,7 @@ describe('workspace_panel', () => {
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
+          plugins={{ uiActions: uiActionsMock, data: dataMock }}
         />
       );
     });
@@ -512,7 +581,7 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
-    expressionRendererMock.mockImplementation(_ => {
+    expressionRendererMock.mockImplementation((_) => {
       return <span />;
     });
 
@@ -559,6 +628,7 @@ describe('workspace_panel', () => {
             dispatch={mockDispatch}
             ExpressionRenderer={expressionRendererMock}
             core={coreMock.createSetup()}
+            plugins={{ uiActions: uiActionsMock, data: dataMock }}
           />
         </ChildDragDropProvider>
       );

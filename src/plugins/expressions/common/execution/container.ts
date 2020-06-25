@@ -66,16 +66,16 @@ export interface ExecutionPureTransitions<Output = ExpressionValue> {
 }
 
 export const executionPureTransitions: ExecutionPureTransitions = {
-  start: state => () => ({
+  start: (state) => () => ({
     ...state,
     state: 'pending',
   }),
-  setResult: state => result => ({
+  setResult: (state) => (result) => ({
     ...state,
     state: 'result',
     result,
   }),
-  setError: state => error => ({
+  setError: (state) => (error) => ({
     ...state,
     state: 'error',
     error,

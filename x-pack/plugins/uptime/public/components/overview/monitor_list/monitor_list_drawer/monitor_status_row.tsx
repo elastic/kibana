@@ -31,7 +31,7 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
   let checkListArray = [...locationNames];
   // If un-named location exists, move it to end
   if (locationNames.has(UNNAMED_LOCATION)) {
-    checkListArray = checkListArray.filter(item => item !== UNNAMED_LOCATION);
+    checkListArray = checkListArray.filter((item) => item !== UNNAMED_LOCATION);
     checkListArray.push(UNNAMED_LOCATION);
   }
 

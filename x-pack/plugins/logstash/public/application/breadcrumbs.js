@@ -12,7 +12,7 @@ export function getPipelineListBreadcrumbs() {
       text: i18n.translate('xpack.logstash.pipelines.listBreadcrumb', {
         defaultMessage: 'Pipelines',
       }),
-      href: '#/management/logstash/pipelines',
+      href: '#/management/ingest/pipelines',
     },
   ];
 }

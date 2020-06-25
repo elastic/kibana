@@ -23,16 +23,16 @@ import { Table, Column } from '../../types';
 import { setFormatService } from '../../../services';
 import { Serie } from './_add_to_siri';
 
-describe('pointSeriesChartDataFromTable', function() {
+describe('pointSeriesChartDataFromTable', function () {
   beforeAll(() => {
     setFormatService({
       deserialize: () => ({
-        convert: jest.fn(v => v),
+        convert: jest.fn((v) => v),
       }),
     } as any);
   });
 
-  it('handles a table with just a count', function() {
+  it('handles a table with just a count', function () {
     const table = {
       columns: [{ id: '0' } as Column],
       rows: [{ '0': 100 }],
@@ -55,7 +55,7 @@ describe('pointSeriesChartDataFromTable', function() {
     expect(series.values[0]).toHaveProperty('y', 100);
   });
 
-  it('handles a table with x and y column', function() {
+  it('handles a table with x and y column', function () {
     const table = {
       columns: [
         { id: '0', name: 'x' },
@@ -83,7 +83,7 @@ describe('pointSeriesChartDataFromTable', function() {
     expect(series.values).toHaveLength(3);
   });
 
-  it('handles a table with an x and two y aspects', function() {
+  it('handles a table with an x and two y aspects', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1', name: 'Count-0' }, { id: '2', name: 'Count-1' }],
       rows: [
@@ -105,13 +105,13 @@ describe('pointSeriesChartDataFromTable', function() {
     expect(chartData).toEqual(expect.any(Object));
     expect(chartData.series).toEqual(expect.any(Array));
     expect(chartData.series).toHaveLength(2);
-    chartData.series.forEach(function(siri: Serie, i: number) {
+    chartData.series.forEach(function (siri: Serie, i: number) {
       expect(siri).toHaveProperty('label', `Count-${i}`);
       expect(siri.values).toHaveLength(3);
     });
   });
 
-  it('handles a table with an x, a series, and two y aspects', function() {
+  it('handles a table with an x, a series, and two y aspects', function () {
     const table = {
       columns: [
         { id: '0', name: 'x' },
@@ -141,7 +141,7 @@ describe('pointSeriesChartDataFromTable', function() {
     expect(chartData.series).toEqual(expect.any(Array));
     // one series for each extension, and then one for each metric inside
     expect(chartData.series).toHaveLength(4);
-    chartData.series.forEach(function(siri: Serie) {
+    chartData.series.forEach(function (siri: Serie) {
       expect(siri.values).toHaveLength(2);
     });
   });

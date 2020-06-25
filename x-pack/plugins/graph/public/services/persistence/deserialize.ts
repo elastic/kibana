@@ -42,7 +42,7 @@ function deserializeUrlTemplate({
   iconClass,
   ...serializableProps
 }: SerializedUrlTemplate) {
-  const encoder = outlinkEncoders.find(outlinkEncoder => outlinkEncoder.id === encoderID);
+  const encoder = outlinkEncoders.find((outlinkEncoder) => outlinkEncoder.id === encoderID);
   if (!encoder) {
     return;
   }
@@ -68,7 +68,7 @@ export function lookupIndexPattern(
 ) {
   const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
   const indexPattern = indexPatterns.find(
-    pattern => pattern.attributes.title === serializedWorkspaceState.indexPattern
+    (pattern) => pattern.attributes.title === serializedWorkspaceState.indexPattern
   );
 
   if (indexPattern) {
@@ -84,7 +84,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
   return indexPattern
     .getNonScriptedFields()
     .filter(
-      field => !blockedFieldNames.includes(field.name) && !indexPatternsUtils.isNestedField(field)
+      (field) => !blockedFieldNames.includes(field.name) && !indexPatternsUtils.isNestedField(field)
     )
     .map((field, index) => ({
       name: field.name,
@@ -113,8 +113,8 @@ function getFieldsWithWorkspaceSettings(
   const allFields = mapFields(indexPattern);
 
   // merge in selected information into all fields
-  selectedFields.forEach(serializedField => {
-    const workspaceField = allFields.find(field => field.name === serializedField.name);
+  selectedFields.forEach((serializedField) => {
+    const workspaceField = allFields.find((field) => field.name === serializedField.name);
     if (!workspaceField) {
       return;
     }
@@ -132,8 +132,8 @@ function getBlacklistedNodes(
   serializedWorkspaceState: SerializedWorkspaceState,
   allFields: WorkspaceField[]
 ) {
-  return serializedWorkspaceState.blacklist.map(serializedNode => {
-    const currentField = allFields.find(field => field.name === serializedNode.field)!;
+  return serializedWorkspaceState.blacklist.map((serializedNode) => {
+    const currentField = allFields.find((field) => field.name === serializedNode.field)!;
     return {
       x: 0,
       y: 0,
@@ -169,16 +169,16 @@ function getNodesAndEdges(
   allFields: WorkspaceField[]
 ): GraphData {
   return {
-    nodes: persistedWorkspaceState.vertices.map(serializedNode => ({
+    nodes: persistedWorkspaceState.vertices.map((serializedNode) => ({
       ...serializedNode,
       id: '',
-      icon: allFields.find(field => field.name === serializedNode.field)!.icon,
+      icon: allFields.find((field) => field.name === serializedNode.field)!.icon,
       data: {
         field: serializedNode.field,
         term: serializedNode.term,
       },
     })),
-    edges: persistedWorkspaceState.links.map(serializedEdge => ({
+    edges: persistedWorkspaceState.links.map((serializedEdge) => ({
       ...serializedEdge,
       id: '',
     })),
@@ -210,7 +210,7 @@ export function savedWorkspaceToAppState(
     indexPattern,
     persistedWorkspaceState.selectedFields
   );
-  const selectedFields = allFields.filter(field => field.selected);
+  const selectedFields = allFields.filter((field) => field.selected);
   workspaceInstance.options.vertex_fields = selectedFields;
 
   // ================== advanced settings =============================
@@ -224,7 +224,7 @@ export function savedWorkspaceToAppState(
     // restore reference to sample diversity field
     const serializedField = advancedSettings.sampleDiversityField;
     advancedSettings.sampleDiversityField = allFields.find(
-      field => field.name === serializedField.name
+      (field) => field.name === serializedField.name
     );
   }
 

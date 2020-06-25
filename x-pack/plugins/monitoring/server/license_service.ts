@@ -31,7 +31,7 @@ export class LicenseService {
     );
 
     let rawLicense: Readonly<ILicense> | undefined;
-    let licenseSubscription: Subscription | undefined = license$.subscribe(nextRawLicense => {
+    let licenseSubscription: Subscription | undefined = license$.subscribe((nextRawLicense) => {
       rawLicense = nextRawLicense;
     });
 

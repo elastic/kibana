@@ -51,7 +51,9 @@ export function registerListRoute({ router, config, license, lib }: RouteDepende
     { path: addBasePath('/nodes/list'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const stats = await fetchNodeStats(context.core.elasticsearch.dataClient.callAsCurrentUser);
+        const stats = await fetchNodeStats(
+          context.core.elasticsearch.legacy.client.callAsCurrentUser
+        );
         const okResponse = { body: convertStatsIntoList(stats, disallowedNodeAttributes) };
         return response.ok(okResponse);
       } catch (e) {

@@ -6,32 +6,7 @@
 
 import { fromExpression, getType } from '@kbn/interpreter/common';
 import { ExpressionValue, ExpressionAstExpression } from 'src/plugins/expressions/public';
-import { notifyService } from '../services';
-
-import { CanvasStartDeps, CanvasSetupDeps } from '../plugin';
-
-let expressionsStarting: Promise<CanvasStartDeps['expressions']> | undefined;
-
-export const initInterpreter = function(
-  expressionsStart: CanvasStartDeps['expressions'],
-  expressionsSetup: CanvasSetupDeps['expressions']
-) {
-  expressionsStarting = startExpressions(expressionsStart, expressionsSetup);
-
-  return expressionsStarting;
-};
-
-async function startExpressions(
-  expressionsStart: CanvasStartDeps['expressions'],
-  expressionsSetup: CanvasSetupDeps['expressions']
-) {
-  await expressionsSetup.__LEGACY.loadLegacyServerFunctionWrappers();
-  return expressionsStart;
-}
-
-export const resetInterpreter = function() {
-  expressionsStarting = undefined;
-};
+import { notifyService, expressionsService } from '../services';
 
 interface Options {
   castToRender?: boolean;
@@ -41,12 +16,7 @@ interface Options {
  * Meant to be a replacement for plugins/interpreter/interpretAST
  */
 export async function interpretAst(ast: ExpressionAstExpression): Promise<ExpressionValue> {
-  if (!expressionsStarting) {
-    throw new Error('Interpreter has not been initialized');
-  }
-
-  const expressions = await expressionsStarting;
-  return await expressions.execute(ast).getData();
+  return await expressionsService.getService().execute(ast).getData();
 }
 
 /**
@@ -63,14 +33,8 @@ export async function runInterpreter(
   input: ExpressionValue,
   options: Options = {}
 ): Promise<ExpressionValue> {
-  if (!expressionsStarting) {
-    throw new Error('Interpreter has not been initialized');
-  }
-
-  const expressions = await expressionsStarting;
-
   try {
-    const renderable = await expressions.execute(ast, input).getData();
+    const renderable = await expressionsService.getService().execute(ast, input).getData();
 
     if (getType(renderable) === 'render') {
       return renderable;

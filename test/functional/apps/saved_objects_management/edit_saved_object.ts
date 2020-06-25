@@ -20,12 +20,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings']);
+  const browser = getService('browser');
+  const find = getService('find');
 
   const setFieldValue = async (fieldName: string, value: string) => {
     return testSubjects.setValue(`savedObjects-editField-${fieldName}`, value);
@@ -33,6 +35,26 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
   const getFieldValue = async (fieldName: string) => {
     return testSubjects.getAttribute(`savedObjects-editField-${fieldName}`, 'value');
+  };
+
+  const setAceEditorFieldValue = async (fieldName: string, fieldValue: string) => {
+    const editorId = `savedObjects-editField-${fieldName}-aceEditor`;
+    await find.clickByCssSelector(`#${editorId}`);
+    return browser.execute(
+      (editor: string, value: string) => {
+        return (window as any).ace.edit(editor).setValue(value);
+      },
+      editorId,
+      fieldValue
+    );
+  };
+
+  const getAceEditorFieldValue = async (fieldName: string) => {
+    const editorId = `savedObjects-editField-${fieldName}-aceEditor`;
+    await find.clickByCssSelector(`#${editorId}`);
+    return browser.execute((editor: string) => {
+      return (window as any).ace.edit(editor).getValue() as string;
+    }, editorId);
   };
 
   const focusAndClickButton = async (buttonSubject: string) => {
@@ -60,9 +82,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       let objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.includes('A Dashboard')).to.be(true);
 
-      await PageObjects.common.navigateToActualUrl(
-        'kibana',
-        '/management/kibana/objects/savedDashboards/i-exist'
+      await PageObjects.common.navigateToUrl(
+        'management',
+        'kibana/objects/savedDashboards/i-exist',
+        {
+          shouldUseHashForSubUrl: false,
+        }
       );
 
       await testSubjects.existOrFail('savedObjectEditSave');
@@ -78,9 +103,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       expect(objects.includes('A Dashboard')).to.be(false);
       expect(objects.includes('Edited Dashboard')).to.be(true);
 
-      await PageObjects.common.navigateToActualUrl(
-        'kibana',
-        '/management/kibana/objects/savedDashboards/i-exist'
+      await PageObjects.common.navigateToUrl(
+        'management',
+        'kibana/objects/savedDashboards/i-exist',
+        {
+          shouldUseHashForSubUrl: false,
+        }
       );
 
       expect(await getFieldValue('title')).to.eql('Edited Dashboard');
@@ -88,9 +116,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('allows to delete a saved object', async () => {
-      await PageObjects.common.navigateToActualUrl(
-        'kibana',
-        '/management/kibana/objects/savedDashboards/i-exist'
+      await PageObjects.common.navigateToUrl(
+        'management',
+        'kibana/objects/savedDashboards/i-exist',
+        {
+          shouldUseHashForSubUrl: false,
+        }
       );
 
       await focusAndClickButton('savedObjectEditDelete');
@@ -98,6 +129,59 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.includes('A Dashboard')).to.be(false);
+    });
+
+    it('preserves the object references when saving', async () => {
+      const testVisualizationUrl =
+        'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed';
+      const visualizationRefs = [
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: 'logstash-*',
+        },
+      ];
+
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+
+      const objects = await PageObjects.settings.getSavedObjectsInTable();
+      expect(objects.includes('A Pie')).to.be(true);
+
+      await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
+        shouldUseHashForSubUrl: false,
+      });
+
+      await testSubjects.existOrFail('savedObjectEditSave');
+
+      let displayedReferencesValue = await getAceEditorFieldValue('references');
+
+      expect(JSON.parse(displayedReferencesValue)).to.eql(visualizationRefs);
+
+      await focusAndClickButton('savedObjectEditSave');
+
+      await PageObjects.settings.getSavedObjectsInTable();
+
+      await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
+        shouldUseHashForSubUrl: false,
+      });
+
+      // Parsing to avoid random keys ordering issues in raw string comparison
+      expect(JSON.parse(await getAceEditorFieldValue('references'))).to.eql(visualizationRefs);
+
+      await setAceEditorFieldValue('references', JSON.stringify([], undefined, 2));
+
+      await focusAndClickButton('savedObjectEditSave');
+
+      await PageObjects.settings.getSavedObjectsInTable();
+
+      await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
+        shouldUseHashForSubUrl: false,
+      });
+
+      displayedReferencesValue = await getAceEditorFieldValue('references');
+
+      expect(JSON.parse(displayedReferencesValue)).to.eql([]);
     });
   });
 }

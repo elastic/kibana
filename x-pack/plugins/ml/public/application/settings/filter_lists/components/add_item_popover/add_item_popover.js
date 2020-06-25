@@ -40,7 +40,7 @@ export class AddItemPopover extends Component {
     };
   }
 
-  onItemsTextChange = e => {
+  onItemsTextChange = (e) => {
     this.setState({
       itemsText: e.target.value,
     });
@@ -62,7 +62,7 @@ export class AddItemPopover extends Component {
     const items = this.state.itemsText.split('\n');
     const addItems = [];
     // Remove duplicates.
-    items.forEach(item => {
+    items.forEach((item) => {
       if (addItems.indexOf(item) === -1 && item.length > 0) {
         addItems.push(item);
       }

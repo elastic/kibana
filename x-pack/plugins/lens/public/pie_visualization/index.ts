@@ -5,13 +5,12 @@
  */
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { CoreSetup, CoreStart } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { pieVisualization } from './pie_visualization';
 import { pie, getPieRenderer } from './register_expression';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { setExecuteTriggerActions } from '../services';
 
 export interface PieVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
@@ -44,10 +43,4 @@ export class PieVisualization {
 
     editorFrame.registerVisualization(pieVisualization);
   }
-
-  start(core: CoreStart, { uiActions }: PieVisualizationPluginStartPlugins) {
-    setExecuteTriggerActions(uiActions.executeTriggerActions);
-  }
-
-  stop() {}
 }

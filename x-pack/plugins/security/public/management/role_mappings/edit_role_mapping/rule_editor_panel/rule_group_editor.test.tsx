@@ -48,7 +48,7 @@ describe('RuleGroupEditor', () => {
     await nextTick();
     wrapper.update();
 
-    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere(menuItem => {
+    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere((menuItem) => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
@@ -76,13 +76,11 @@ describe('RuleGroupEditor', () => {
 
     const anyRule = new AnyRule();
 
-    findTestSubject(wrapper, 'ruleGroupTitle')
-      .first()
-      .simulate('click');
+    findTestSubject(wrapper, 'ruleGroupTitle').first().simulate('click');
     await nextTick();
     wrapper.update();
 
-    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere(menuItem => {
+    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere((menuItem) => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
@@ -116,13 +114,11 @@ describe('RuleGroupEditor', () => {
 
     const anyRule = new AnyRule();
 
-    findTestSubject(wrapper, 'ruleGroupTitle')
-      .first()
-      .simulate('click');
+    findTestSubject(wrapper, 'ruleGroupTitle').first().simulate('click');
     await nextTick();
     wrapper.update();
 
-    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere(menuItem => {
+    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere((menuItem) => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 

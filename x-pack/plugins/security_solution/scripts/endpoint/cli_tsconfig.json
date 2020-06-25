@@ -1,0 +1,7 @@
+{
+    "extends": "../../../../tsconfig.json",
+    "compilerOptions": {
+      "target": "es2019",
+      "resolveJsonModule": true
+    }
+  }

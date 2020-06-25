@@ -20,13 +20,13 @@
 import path from 'path';
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
 
-  describe('dashboard time zones', function() {
+  describe('dashboard time zones', function () {
     this.tags('includeFirefox');
 
     before(async () => {

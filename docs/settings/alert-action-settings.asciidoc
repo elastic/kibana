@@ -1,6 +1,6 @@
 [role="xpack"]
 [[alert-action-settings-kb]]
-=== Alerting and action settings in Kibana
+=== Alerting and action settings in {kib}
 ++++
 <titleabbrev>Alerting and action settings</titleabbrev>
 ++++

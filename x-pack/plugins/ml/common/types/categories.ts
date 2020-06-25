@@ -16,6 +16,8 @@ export interface Category {
   max_matching_length: number;
   examples: string[];
   grok_pattern: string;
+  partition_field_name?: string; // TODO: make non-optional once fields have been added to the results
+  partition_field_value?: string; // TODO: make non-optional once fields have been added to the results
 }
 
 export interface Token {

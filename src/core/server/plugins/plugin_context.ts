@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
@@ -107,8 +107,8 @@ export function createPluginInitializerContext(
        * @param ConfigClass A class (not an instance of a class) that contains a
        * static `schema` that we validate the config at the given `path` against.
        */
-      create() {
-        return coreContext.configService.atPath(pluginManifest.configPath);
+      create<T>() {
+        return coreContext.configService.atPath<T>(pluginManifest.configPath).pipe(shareReplay(1));
       },
       createIfExists() {
         return coreContext.configService.optionalAtPath(pluginManifest.configPath);
@@ -147,9 +147,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       createContextContainer: deps.context.createContextContainer,
     },
     elasticsearch: {
-      adminClient: deps.elasticsearch.adminClient,
-      dataClient: deps.elasticsearch.dataClient,
-      createClient: deps.elasticsearch.createClient,
+      legacy: deps.elasticsearch.legacy,
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
@@ -166,8 +164,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       basePath: deps.http.basePath,
       auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
       csp: deps.http.csp,
-      isTlsEnabled: deps.http.isTlsEnabled,
       getServerInfo: deps.http.getServerInfo,
+    },
+    logging: {
+      configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
     },
     metrics: {
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
@@ -213,6 +213,11 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
     elasticsearch: deps.elasticsearch,
+    http: {
+      auth: deps.http.auth,
+      basePath: deps.http.basePath,
+      getServerInfo: deps.http.getServerInfo,
+    },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,

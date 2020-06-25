@@ -35,7 +35,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
-      const types = testCaseArray.map(x => x.type);
+      const types = testCaseArray.map((x) => x.type);
       await expectForbidden(types)(response);
     } else {
       // permitted
@@ -61,7 +61,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     if (!options?.singleRequest) {
       // if we are testing cases that should result in a forbidden response, we can do each case individually
       // this ensures that multiple test cases of a single type will each result in a forbidden error
-      return cases.map(x => ({
+      return cases.map((x) => ({
         title: getTestTitle(x, responseStatusCode),
         request: [createRequest(x)],
         responseStatusCode,
@@ -72,7 +72,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     return [
       {
         title: getTestTitle(cases, responseStatusCode),
-        request: cases.map(x => createRequest(x)),
+        request: cases.map((x) => createRequest(x)),
         responseStatusCode,
         responseBody:
           options?.responseBodyOverride || expectResponseBody(cases, responseStatusCode),

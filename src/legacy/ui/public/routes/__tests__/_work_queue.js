@@ -24,32 +24,32 @@ import { WorkQueue } from '../work_queue';
 import sinon from 'sinon';
 import { createDefer } from 'ui/promises';
 
-describe('work queue', function() {
+describe('work queue', function () {
   let queue;
   let Promise;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject(function(_Promise_) {
+    ngMock.inject(function (_Promise_) {
       Promise = _Promise_;
     })
   );
-  beforeEach(function() {
+  beforeEach(function () {
     queue = new WorkQueue();
   });
-  afterEach(function() {
+  afterEach(function () {
     queue.empty();
   });
 
-  describe('#push', function() {
-    it('adds to the interval queue', function() {
+  describe('#push', function () {
+    it('adds to the interval queue', function () {
       queue.push(createDefer(Promise));
       expect(queue).to.have.length(1);
     });
   });
 
-  describe('#resolveWhenFull', function() {
-    it('resolves requests waiting for the queue to fill when appropriate', function() {
+  describe('#resolveWhenFull', function () {
+    it('resolves requests waiting for the queue to fill when appropriate', function () {
       const size = _.random(5, 50);
       queue.limit = size;
 
@@ -58,7 +58,7 @@ describe('work queue', function() {
       queue.resolveWhenFull(whenFull);
 
       // push all but one into the queue
-      _.times(size - 1, function() {
+      _.times(size - 1, function () {
         queue.push(createDefer(Promise));
       });
 
@@ -81,7 +81,7 @@ describe('work queue', function() {
     const size = _.random(5, 50);
     const stub = sinon.stub();
 
-    _.times(size, function() {
+    _.times(size, function () {
       const d = createDefer(Promise);
       // overwrite the defer methods with the stub
       d.resolve = stub;
@@ -92,9 +92,9 @@ describe('work queue', function() {
     then(size, stub);
   }
 
-  describe('#doWork', function() {
-    it('flushes the queue and resolves all promises', function() {
-      fillWithStubs(function(size, stub) {
+  describe('#doWork', function () {
+    it('flushes the queue and resolves all promises', function () {
+      fillWithStubs(function (size, stub) {
         expect(queue).to.have.length(size);
         queue.doWork();
         expect(queue).to.have.length(0);
@@ -103,9 +103,9 @@ describe('work queue', function() {
     });
   });
 
-  describe('#empty()', function() {
-    it('empties the internal queue WITHOUT resolving any promises', function() {
-      fillWithStubs(function(size, stub) {
+  describe('#empty()', function () {
+    it('empties the internal queue WITHOUT resolving any promises', function () {
+      fillWithStubs(function (size, stub) {
         expect(queue).to.have.length(size);
         queue.empty();
         expect(queue).to.have.length(0);

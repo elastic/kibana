@@ -30,13 +30,7 @@ describe('Configuration', () => {
   });
 
   function getStep(component: ShallowWrapper, index: number) {
-    return component
-      .find('EuiSteps')
-      .shallow()
-      .find('EuiStep')
-      .at(index)
-      .children()
-      .shallow();
+    return component.find('EuiSteps').shallow().find('EuiStep').at(index).children().shallow();
   }
 
   describe('shallow view', () => {
@@ -82,12 +76,7 @@ describe('Configuration', () => {
 
     it('reflect in Step1', async () => {
       const steps = component.find('EuiSteps').dive();
-      expect(
-        steps
-          .find('EuiStep')
-          .at(0)
-          .prop('title')
-      ).toBe('Select email action');
+      expect(steps.find('EuiStep').at(0).prop('title')).toBe('Select email action');
       expect(steps.find('Step1').prop('selectedEmailActionId')).toBe(actionId);
     });
 

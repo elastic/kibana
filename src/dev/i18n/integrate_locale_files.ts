@@ -116,7 +116,7 @@ function groupMessagesByNamespace(
 ) {
   const localizedMessagesByNamespace = new Map();
   for (const [messageId, messageValue] of localizedMessagesMap) {
-    const namespace = knownNamespaces.find(key => messageId.startsWith(`${key}.`));
+    const namespace = knownNamespaces.find((key) => messageId.startsWith(`${key}.`));
     if (!namespace) {
       throw createFailError(`Unknown namespace in id ${messageId}.`);
     }

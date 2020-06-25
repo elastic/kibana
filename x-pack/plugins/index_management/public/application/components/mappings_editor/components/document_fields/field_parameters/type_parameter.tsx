@@ -8,27 +8,33 @@ import React from 'react';
 import { EuiFormRow, EuiComboBox, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../services/documentation';
 import {
   getFieldConfig,
   filterTypesForMultiField,
   filterTypesForNonRootFields,
 } from '../../../lib';
 import { UseField } from '../../../shared_imports';
-import { ComboBoxOption } from '../../../types';
+import { ComboBoxOption, DataType } from '../../../types';
 import { FIELD_TYPES_OPTIONS } from '../../../constants';
 
 interface Props {
-  onTypeChange: (nextType: ComboBoxOption[]) => void;
   isRootLevelField: boolean;
   isMultiField?: boolean | null;
-  docLink?: string | undefined;
+  showDocLink?: boolean;
 }
 
-export const TypeParameter = ({ onTypeChange, isMultiField, docLink, isRootLevelField }: Props) => (
-  <UseField path="type" config={getFieldConfig('type')}>
-    {typeField => {
+export const TypeParameter = ({ isMultiField, isRootLevelField, showDocLink = false }: Props) => (
+  <UseField<ComboBoxOption[]> path="type" config={getFieldConfig<ComboBoxOption[]>('type')}>
+    {(typeField) => {
       const error = typeField.getErrorsMessages();
       const isInvalid = error ? Boolean(error.length) : false;
+
+      let docLink = null;
+      if (showDocLink && typeField.value.length > 0) {
+        const selectedType = typeField.value[0].value as DataType;
+        docLink = documentationService.getTypeDocLink(selectedType);
+      }
 
       return (
         <EuiFormRow
@@ -43,9 +49,7 @@ export const TypeParameter = ({ onTypeChange, isMultiField, docLink, isRootLevel
                     defaultMessage: '{typeName} documentation',
                     values: {
                       typeName:
-                        typeField.value && (typeField.value as ComboBoxOption[])[0]
-                          ? (typeField.value as ComboBoxOption[])[0].label
-                          : '',
+                        typeField.value && typeField.value[0] ? typeField.value[0].label : '',
                     },
                   })}
                 </EuiLink>
@@ -65,8 +69,8 @@ export const TypeParameter = ({ onTypeChange, isMultiField, docLink, isRootLevel
                 ? FIELD_TYPES_OPTIONS
                 : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS)
             }
-            selectedOptions={typeField.value as ComboBoxOption[]}
-            onChange={onTypeChange}
+            selectedOptions={typeField.value}
+            onChange={typeField.setValue}
             isClearable={false}
             data-test-subj="fieldType"
           />

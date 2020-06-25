@@ -9,7 +9,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiSelect
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
@@ -22,12 +22,12 @@ interface Props {
 
 const TransactionTypeFilter = ({ transactionTypes }: Props) => {
   const {
-    urlParams: { transactionType }
+    urlParams: { transactionType },
   } = useUrlParams();
 
-  const options = transactionTypes.map(type => ({
+  const options = transactionTypes.map((type) => ({
     text: type,
-    value: type
+    value: type,
   }));
 
   return (
@@ -35,7 +35,7 @@ const TransactionTypeFilter = ({ transactionTypes }: Props) => {
       <EuiTitle size="xxxs" textTransform="uppercase">
         <h4>
           {i18n.translate('xpack.apm.localFilters.titles.transactionType', {
-            defaultMessage: 'Transaction type'
+            defaultMessage: 'Transaction type',
           })}
         </h4>
       </EuiTitle>
@@ -46,13 +46,13 @@ const TransactionTypeFilter = ({ transactionTypes }: Props) => {
         options={options}
         value={transactionType}
         compressed={true}
-        onChange={event => {
+        onChange={(event) => {
           const newLocation = {
             ...history.location,
             search: fromQuery({
               ...toQuery(history.location.search),
-              transactionType: event.target.value
-            })
+              transactionType: event.target.value,
+            }),
           };
           history.push(newLocation);
         }}

@@ -47,7 +47,7 @@ export const BannersList: React.FunctionComponent<Props> = ({ banners$ }) => {
 
   return (
     <div className="kbnGlobalBannerList">
-      {banners.map(banner => (
+      {banners.map((banner) => (
         <BannerItem key={banner.id} banner={banner} />
       ))}
     </div>

@@ -13,19 +13,19 @@ describe('getCurrentBreadcrumb', () => {
       text: i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
         defaultMessage: 'Connectors',
       }),
-      href: `#${routeToConnectors}`,
+      href: `${routeToConnectors}`,
     });
     expect(getCurrentBreadcrumb('alerts')).toMatchObject({
       text: i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
         defaultMessage: 'Alerts',
       }),
-      href: `#${routeToAlerts}`,
+      href: `${routeToAlerts}`,
     });
     expect(getCurrentBreadcrumb('home')).toMatchObject({
       text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
         defaultMessage: 'Alerts and Actions',
       }),
-      href: `#${routeToHome}`,
+      href: `${routeToHome}`,
     });
   });
 });

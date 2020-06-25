@@ -52,6 +52,34 @@ declare module 'src/core/server' {
 export interface LicensingPluginSetup {
   /**
    * Steam of licensing information {@link ILicense}.
+   * @deprecated in favour of the counterpart provided from start contract
+   */
+  license$: Observable<ILicense>;
+  /**
+   * Triggers licensing information re-fetch.
+   * @deprecated in favour of the counterpart provided from start contract
+   */
+  refresh(): Promise<ILicense>;
+  /**
+   * Creates a license poller to retrieve a license data with.
+   * Allows a plugin to configure a cluster to retrieve data from at
+   * given polling frequency.
+   * @deprecated in favour of the counterpart provided from start contract
+   */
+  createLicensePoller: (
+    clusterClient: IClusterClient,
+    pollingFrequency: number
+  ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
+  /**
+   * APIs to register licensed feature usage.
+   */
+  featureUsage: FeatureUsageServiceSetup;
+}
+
+/** @public */
+export interface LicensingPluginStart {
+  /**
+   * Steam of licensing information {@link ILicense}.
    */
   license$: Observable<ILicense>;
   /**
@@ -67,14 +95,6 @@ export interface LicensingPluginSetup {
     clusterClient: IClusterClient,
     pollingFrequency: number
   ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
-  /**
-   * APIs to register licensed feature usage.
-   */
-  featureUsage: FeatureUsageServiceSetup;
-}
-
-/** @public */
-export interface LicensingPluginStart {
   /**
    * APIs to manage licensed feature usage.
    */

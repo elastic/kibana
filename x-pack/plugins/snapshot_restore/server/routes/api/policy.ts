@@ -184,10 +184,10 @@ export function registerPolicyRoutes({
       };
 
       await Promise.all(
-        policyNames.map(policyName => {
+        policyNames.map((policyName) => {
           return callAsCurrentUser('sr.deletePolicy', { name: policyName })
             .then(() => response.itemsDeleted.push(policyName))
-            .catch(e =>
+            .catch((e) =>
               response.errors.push({
                 name: policyName,
                 error: wrapEsError(e),

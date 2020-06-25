@@ -10,7 +10,7 @@ import { REMOTE_CLUSTER_NAME } from './constants';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
 import { registerHelpers as registerAutoFollowPatternHelpers } from './auto_follow_pattern.helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   const { addCluster, deleteAllClusters } = registerRemoteClustersHelpers(supertest);
@@ -21,7 +21,7 @@ export default function({ getService }) {
     deleteAllAutoFollowPatterns,
   } = registerAutoFollowPatternHelpers(supertest);
 
-  describe('auto follow patterns', function() {
+  describe('auto follow patterns', function () {
     this.tags(['skipCloud']);
 
     after(() => deleteAllAutoFollowPatterns().then(deleteAllClusters));

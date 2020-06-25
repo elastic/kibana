@@ -13,20 +13,15 @@ import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
-import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
+import { ES_GEO_FIELD_TYPES, SCALING_TYPES } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { ScalingForm } from './scaling_form';
-import { getTermsFields, supportsGeoTileAgg } from '../../../index_pattern_util';
-
-function getGeoFields(fields) {
-  return fields.filter(field => {
-    return (
-      !indexPatterns.isNestedField(field) &&
-      [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(field.type)
-    );
-  });
-}
+import {
+  getGeoFields,
+  getTermsFields,
+  getGeoTileAggNotSupportedReason,
+  supportsGeoTileAgg,
+} from '../../../index_pattern_util';
 
 function doesGeoFieldSupportGeoTileAgg(indexPattern, geoFieldName) {
   return indexPattern ? supportsGeoTileAgg(indexPattern.fields.getByName(geoFieldName)) : false;
@@ -63,7 +58,7 @@ export class CreateSourceEditor extends Component {
     this._isMounted = true;
   }
 
-  _onIndexPatternSelect = indexPatternId => {
+  _onIndexPatternSelect = (indexPatternId) => {
     this.setState(
       {
         indexPatternId,
@@ -72,7 +67,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _loadIndexPattern = indexPatternId => {
+  _loadIndexPattern = (indexPatternId) => {
     this.setState(
       {
         isLoadingIndexPattern: true,
@@ -82,7 +77,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _debouncedLoad = _.debounce(async indexPatternId => {
+  _debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
@@ -114,7 +109,7 @@ export class CreateSourceEditor extends Component {
 
     if (geoFields.length) {
       // make default selection, prefer aggregatable field over the first available
-      const firstAggregatableGeoField = geoFields.find(geoField => {
+      const firstAggregatableGeoField = geoFields.find((geoField) => {
         return geoField.aggregatable;
       });
       const defaultGeoFieldName = firstAggregatableGeoField
@@ -124,7 +119,7 @@ export class CreateSourceEditor extends Component {
     }
   }, 300);
 
-  _onGeoFieldSelect = geoFieldName => {
+  _onGeoFieldSelect = (geoFieldName) => {
     // Respect previous scaling type selection unless newly selected geo field does not support clustering.
     const scalingType =
       this.state.scalingType === SCALING_TYPES.CLUSTERS &&
@@ -217,6 +212,13 @@ export class CreateSourceEditor extends Component {
             this.state.indexPattern,
             this.state.geoFieldName
           )}
+          clusteringDisabledReason={
+            this.state.indexPattern
+              ? getGeoTileAggNotSupportedReason(
+                  this.state.indexPattern.fields.getByName(this.state.geoFieldName)
+                )
+              : null
+          }
           termFields={getTermsFields(this.state.indexPattern.fields)}
           topHitsSplitField={this.state.topHitsSplitField}
           topHitsSize={this.state.topHitsSize}
@@ -260,7 +262,7 @@ export class CreateSourceEditor extends Component {
                 defaultMessage: 'Select index pattern',
               }
             )}
-            fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE]}
+            fieldTypes={ES_GEO_FIELD_TYPES}
             onNoIndexPatterns={this._onNoIndexPatterns}
           />
         </EuiFormRow>

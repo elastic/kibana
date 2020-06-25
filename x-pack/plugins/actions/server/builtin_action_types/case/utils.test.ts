@@ -98,9 +98,9 @@ const fullParams: PushToServiceApiParams = {
 describe('normalizeMapping', () => {
   test('remove malicious fields', () => {
     const sanitizedMapping = normalizeMapping(SUPPORTED_SOURCE_FIELDS, maliciousMapping);
-    expect(sanitizedMapping.every(m => m.source !== '__proto__' && m.target !== '__proto__')).toBe(
-      true
-    );
+    expect(
+      sanitizedMapping.every((m) => m.source !== '__proto__' && m.target !== '__proto__')
+    ).toBe(true);
   });
 
   test('remove unsuppported source fields', () => {

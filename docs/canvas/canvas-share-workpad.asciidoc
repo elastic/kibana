@@ -10,14 +10,12 @@ When you've finished your workpad, you can share it outside of {kib}.
 
 Create a JSON file of your workpad that you can export outside of {kib}.
 
-. From your workpad, click the *Share workpad* icon.
+Click *Share > Download as JSON*.
 
-. Select *Download as JSON*.
-+
 [role="screenshot"]
 image::images/canvas-export-workpad.png[Export single workpad]
 
-Want to export multiple workpads? Go to the *Canvas workpads* view, select the workpads you want to export, then click *Export*.
+Want to export multiple workpads? Go to the *Canvas* home page, select the workpads you want to export, then click *Export*.
 
 [float]
 [[create-workpad-pdf]]
@@ -25,14 +23,12 @@ Want to export multiple workpads? Go to the *Canvas workpads* view, select the w
 
 If you have a license that supports the {report-features}, you can create a PDF copy of your workpad that you can save and share outside {kib}.
 
-For more information, refer to <<reporting-getting-started, Reporting from Kibana>>.
+Click *Share > PDF reports > Generate PDF*.
 
-. From your workpad, click the *Share workpad* icon, then select *PDF reports*.
-
-. Click *Generate PDF*.
-+
 [role="screenshot"]
 image::images/canvas-generate-pdf.gif[Generate PDF]
+
+For more information, refer to <<reporting-getting-started, Reporting from Kibana>>.
 
 [float]
 [[create-workpad-URL]]
@@ -40,14 +36,12 @@ image::images/canvas-generate-pdf.gif[Generate PDF]
 
 If you have a license that supports the {report-features}, you can create a POST URL that you can use to automatically generate PDF reports using Watcher or a script.
 
-For more information, refer to <<automating-report-generation, Automating report generation>>.
+Click *Share > PDF reports > Copy POST URL*.
 
-. From your workpad, click the *Share workpad* icon, then select *PDF reports*.
-
-. Click *Copy POST URL*.
-+
 [role="screenshot"]
 image::images/canvas-create-URL.gif[Create POST URL]
+
+For more information, refer to <<automating-report-generation, Automating report generation>>.
 
 [float]
 [[add-workpad-website]]
@@ -55,39 +49,17 @@ image::images/canvas-create-URL.gif[Create POST URL]
 
 beta[] Canvas allows you to create _shareables_, which are workpads that you download and securely share on any website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
-. From your workpad, click the *Share this workpad* icon, then select *Share on a website*.
+. Click *Share > Share on a website*.
 
-. On the *Share on a website* pane, follow the instructions.
+. Follow the *Share on a website* instructions.
 
 . To customize the workpad behavior to autoplay the pages or hide the toolbar, use the inline parameters.
 +
 To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. Canvas does not display elements that manipulate the data on the workpad.
 +
 [role="screenshot"]
-image::images/canvas-embed_workpad.gif[Share the workpad on a website]
+image::canvas/images/canvas-embed_workpad.gif[Share the workpad on a website]
 +
 NOTE: Shareable workpads encode the current state of the workpad in a JSON file. When you make changes to the workpad, the changes do not appear in the shareable workpad on your website.
 
-[float]
-[[change-the-workpad-settings]]
-==== Change the settings
-
-After you've added the workpad to your website, you can change the autoplay and toolbar settings.
-
-To change the autoplay settings:
-
-. Click the settings icon.
-
-. Click *Auto Play*, then change the settings.
-+
-[role="screenshot"]
-image::images/canvas_share_autoplay_480.gif[Autoplay settings]
-
-To change the toolbar settings:
-
-. Click the settings icon.
-
-. Click *Toolbar*, then change the settings.
-+
-[role="screenshot"]
-image::images/canvas_share_hidetoolbar_480.gif[Hide toolbar settings]
+. To change the settings, click the settings icon, then choose the settings you want to use.

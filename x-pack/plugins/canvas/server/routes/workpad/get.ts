@@ -34,7 +34,7 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
         workpad.attributes.pages &&
         workpad.attributes.pages.length
       ) {
-        workpad.attributes.pages.forEach(page => {
+        workpad.attributes.pages.forEach((page) => {
           const elements = (page.elements || []).filter(
             ({ id: pageId }) => !pageId.startsWith('group')
           );

@@ -106,7 +106,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       },
     });
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
         devTool.disable();
       } else if (devTool.isDisabled()) {

@@ -5,17 +5,26 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed, nextTick } from './helpers';
+import { componentHelpers, MappingsEditorTestBed } from './helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
 const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
-describe('Mappings editor: core', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/66457
+describe.skip('Mappings editor: core', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component
    */
   let data: any;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   afterEach(() => {
     onChangeHandler.mockReset();
@@ -33,7 +42,7 @@ describe('Mappings editor: core', () => {
       },
     };
 
-    await setup({ value: defaultMappings, onChange: onChangeHandler });
+    const { component } = setup({ value: defaultMappings, onChange: onChangeHandler });
 
     const expectedMappings = {
       _meta: {}, // Was not defined so an empty object is returned
@@ -47,7 +56,7 @@ describe('Mappings editor: core', () => {
       },
     };
 
-    ({ data } = await getMappingsEditorData());
+    ({ data } = await getMappingsEditorData(component));
     expect(data).toEqual(expectedMappings);
   });
 
@@ -69,7 +78,7 @@ describe('Mappings editor: core', () => {
           },
         },
       };
-      const testBed = await setup({ onChange: onChangeHandler, value });
+      const testBed = setup({ onChange: onChangeHandler, value });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -85,7 +94,7 @@ describe('Mappings editor: core', () => {
           },
         },
       };
-      const testBed = await setup({ onChange: onChangeHandler, value });
+      const testBed = setup({ onChange: onChangeHandler, value });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -102,7 +111,7 @@ describe('Mappings editor: core', () => {
     let testBed: MappingsEditorTestBed;
 
     beforeEach(async () => {
-      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
     });
 
     test('should keep the changes when switching tabs', async () => {
@@ -121,8 +130,9 @@ describe('Mappings editor: core', () => {
 
       const newField = { name: 'John', type: 'text' };
       await act(async () => {
-        await addField(newField.name, newField.type);
+        addField(newField.name, newField.type);
       });
+      component.update();
 
       expect(find('fieldsListItem').length).toEqual(1);
 
@@ -133,8 +143,9 @@ describe('Mappings editor: core', () => {
       // Navigate to dynamic templates tab
       // -------------------------------------
       await act(async () => {
-        await selectTab('templates');
+        selectTab('templates');
       });
+      component.update();
 
       let templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
@@ -142,10 +153,9 @@ describe('Mappings editor: core', () => {
       // Update the dynamic templates editor value
       const updatedValueTemplates = [{ after: 'bar' }];
       await act(async () => {
-        await updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
-        await nextTick();
-        component.update();
+        updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
       });
+      component.update();
 
       templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(updatedValueTemplates);
@@ -154,8 +164,9 @@ describe('Mappings editor: core', () => {
       // Switch to advanced settings tab and make some changes
       // ------------------------------------------------------
       await act(async () => {
-        await selectTab('advanced');
+        selectTab('advanced');
       });
+      component.update();
 
       let isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
@@ -168,10 +179,8 @@ describe('Mappings editor: core', () => {
       // Turn off dynamic mappings
       await act(async () => {
         form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
-        await nextTick();
-        component.update();
-        await nextTick();
       });
+      component.update();
 
       isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
@@ -181,12 +190,14 @@ describe('Mappings editor: core', () => {
       isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
       expect(isNumericDetectionVisible).toBe(false);
 
+      // await act(() => promise);
       // ----------------------------------------------------------------------------
       // Go back to dynamic templates tab and make sure our changes are still there
       // ----------------------------------------------------------------------------
       await act(async () => {
-        await selectTab('templates');
+        selectTab('templates');
       });
+      component.update();
 
       templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(updatedValueTemplates);
@@ -195,15 +206,17 @@ describe('Mappings editor: core', () => {
       // Go back to fields and make sure our created field is there
       // -----------------------------------------------------------
       await act(async () => {
-        await selectTab('fields');
+        selectTab('fields');
       });
+      component.update();
       field = find('fieldsListItem').at(0);
       expect(find('fieldName', field).text()).toEqual(newField.name);
 
       // Go back to advanced settings tab make sure dynamic mappings is disabled
       await act(async () => {
-        await selectTab('advanced');
+        selectTab('advanced');
       });
+      component.update();
 
       isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
@@ -252,11 +265,12 @@ describe('Mappings editor: core', () => {
     let testBed: MappingsEditorTestBed;
 
     beforeEach(async () => {
-      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
     });
 
     test('props.value => should prepopulate the editor data', async () => {
       const {
+        component,
         actions: { selectTab, getJsonEditorValue, getComboBoxValue, getToggleValue },
         find,
       } = testBed;
@@ -265,15 +279,16 @@ describe('Mappings editor: core', () => {
        * Mapped fields
        */
       // Test that root-level mappings "properties" are rendered as root-level "DOM tree items"
-      const fields = find('fieldsListItem.fieldName').map(item => item.text());
+      const fields = find('fieldsListItem.fieldName').map((item) => item.text());
       expect(fields).toEqual(Object.keys(defaultMappings.properties).sort());
 
       /**
        * Dynamic templates
        */
       await act(async () => {
-        await selectTab('templates');
+        selectTab('templates');
       });
+      component.update();
 
       // Test that dynamic templates JSON is rendered in the templates editor
       const templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
@@ -283,8 +298,9 @@ describe('Mappings editor: core', () => {
        * Advanced settings
        */
       await act(async () => {
-        await selectTab('advanced');
+        selectTab('advanced');
       });
+      component.update();
 
       const isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
@@ -314,6 +330,7 @@ describe('Mappings editor: core', () => {
       let updatedMappings = { ...defaultMappings };
 
       const {
+        find,
         actions: { addField, selectTab, updateJsonEditor },
         component,
         form,
@@ -332,10 +349,16 @@ describe('Mappings editor: core', () => {
       };
 
       await act(async () => {
-        await addField(newField.name, newField.type);
+        find('addFieldButton').simulate('click');
       });
+      component.update();
 
-      ({ data } = await getMappingsEditorData());
+      await act(async () => {
+        addField(newField.name, newField.type);
+      });
+      component.update();
+
+      ({ data } = await getMappingsEditorData(component));
       expect(data).toEqual(updatedMappings);
 
       /**
@@ -344,6 +367,7 @@ describe('Mappings editor: core', () => {
       await act(async () => {
         await selectTab('templates');
       });
+      component.update();
 
       const updatedTemplatesValue = [{ someTemplateProp: 'updated' }];
       updatedMappings = {
@@ -352,36 +376,35 @@ describe('Mappings editor: core', () => {
       };
 
       await act(async () => {
-        await updateJsonEditor('dynamicTemplatesEditor', updatedTemplatesValue);
-        await nextTick();
-        component.update();
+        updateJsonEditor('dynamicTemplatesEditor', updatedTemplatesValue);
       });
 
-      ({ data } = await getMappingsEditorData());
+      ({ data } = await getMappingsEditorData(component));
       expect(data).toEqual(updatedMappings);
 
       /**
        * Advanced settings
        */
       await act(async () => {
-        await selectTab('advanced');
+        selectTab('advanced');
       });
+      component.update();
 
       // Disbable dynamic mappings
       await act(async () => {
         form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
       });
 
-      ({ data } = await getMappingsEditorData());
+      ({ data } = await getMappingsEditorData(component));
 
       // When we disable dynamic mappings, we set it to "false" and remove date and numeric detections
       updatedMappings = {
         ...updatedMappings,
         dynamic: false,
-        date_detection: undefined,
-        dynamic_date_formats: undefined,
-        numeric_detection: undefined,
       };
+      delete updatedMappings.date_detection;
+      delete updatedMappings.dynamic_date_formats;
+      delete updatedMappings.numeric_detection;
 
       expect(data).toEqual(updatedMappings);
     });

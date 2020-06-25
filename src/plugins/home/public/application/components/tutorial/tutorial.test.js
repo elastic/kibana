@@ -67,10 +67,10 @@ const loadTutorialPromise = Promise.resolve(tutorial);
 const getTutorial = () => {
   return loadTutorialPromise;
 };
-const addBasePath = path => {
+const addBasePath = (path) => {
   return `BASE_PATH/${path}`;
 };
-const replaceTemplateStrings = text => {
+const replaceTemplateStrings = (text) => {
   return text;
 };
 
@@ -130,11 +130,7 @@ describe('isCloudEnabled is false', () => {
     );
     await loadTutorialPromise;
     component.update();
-    component
-      .find('button#onPremElasticCloud')
-      .closest('div')
-      .find('input')
-      .simulate('change');
+    component.find('button#onPremElasticCloud').closest('div').find('input').simulate('change');
     component.update();
     expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
   });

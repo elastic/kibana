@@ -19,9 +19,9 @@ export const apmTelemetry: SavedObjectsType = {
                 properties: {
                   version: {
                     type: 'keyword',
-                    ignore_above: 1024
-                  }
-                }
+                    ignore_above: 1024,
+                  },
+                },
               },
               service: {
                 properties: {
@@ -29,53 +29,53 @@ export const apmTelemetry: SavedObjectsType = {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   language: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   runtime: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           go: {
             properties: {
@@ -83,9 +83,9 @@ export const apmTelemetry: SavedObjectsType = {
                 properties: {
                   version: {
                     type: 'keyword',
-                    ignore_above: 1024
-                  }
-                }
+                    ignore_above: 1024,
+                  },
+                },
               },
               service: {
                 properties: {
@@ -93,53 +93,53 @@ export const apmTelemetry: SavedObjectsType = {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   language: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   runtime: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           java: {
             properties: {
@@ -147,9 +147,9 @@ export const apmTelemetry: SavedObjectsType = {
                 properties: {
                   version: {
                     type: 'keyword',
-                    ignore_above: 1024
-                  }
-                }
+                    ignore_above: 1024,
+                  },
+                },
               },
               service: {
                 properties: {
@@ -157,53 +157,53 @@ export const apmTelemetry: SavedObjectsType = {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   language: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   runtime: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           'js-base': {
             properties: {
@@ -211,9 +211,9 @@ export const apmTelemetry: SavedObjectsType = {
                 properties: {
                   version: {
                     type: 'keyword',
-                    ignore_above: 1024
-                  }
-                }
+                    ignore_above: 1024,
+                  },
+                },
               },
               service: {
                 properties: {
@@ -221,53 +221,53 @@ export const apmTelemetry: SavedObjectsType = {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   language: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   runtime: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           nodejs: {
             properties: {
@@ -275,9 +275,9 @@ export const apmTelemetry: SavedObjectsType = {
                 properties: {
                   version: {
                     type: 'keyword',
-                    ignore_above: 1024
-                  }
-                }
+                    ignore_above: 1024,
+                  },
+                },
               },
               service: {
                 properties: {
@@ -285,53 +285,53 @@ export const apmTelemetry: SavedObjectsType = {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   language: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   runtime: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           python: {
             properties: {
@@ -339,9 +339,9 @@ export const apmTelemetry: SavedObjectsType = {
                 properties: {
                   version: {
                     type: 'keyword',
-                    ignore_above: 1024
-                  }
-                }
+                    ignore_above: 1024,
+                  },
+                },
               },
               service: {
                 properties: {
@@ -349,53 +349,53 @@ export const apmTelemetry: SavedObjectsType = {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   language: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   runtime: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           ruby: {
             properties: {
@@ -403,9 +403,9 @@ export const apmTelemetry: SavedObjectsType = {
                 properties: {
                   version: {
                     type: 'keyword',
-                    ignore_above: 1024
-                  }
-                }
+                    ignore_above: 1024,
+                  },
+                },
               },
               service: {
                 properties: {
@@ -413,53 +413,53 @@ export const apmTelemetry: SavedObjectsType = {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   language: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   runtime: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           'rum-js': {
             properties: {
@@ -467,9 +467,9 @@ export const apmTelemetry: SavedObjectsType = {
                 properties: {
                   version: {
                     type: 'keyword',
-                    ignore_above: 1024
-                  }
-                }
+                    ignore_above: 1024,
+                  },
+                },
               },
               service: {
                 properties: {
@@ -477,154 +477,154 @@ export const apmTelemetry: SavedObjectsType = {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   language: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
+                        ignore_above: 1024,
+                      },
+                    },
                   },
                   runtime: {
                     properties: {
                       composite: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       name: {
                         type: 'keyword',
-                        ignore_above: 1024
+                        ignore_above: 1024,
                       },
                       version: {
                         type: 'keyword',
-                        ignore_above: 1024
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       counts: {
         properties: {
           agent_configuration: {
             properties: {
               all: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           error: {
             properties: {
               '1d': {
-                type: 'long'
+                type: 'long',
               },
               all: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           max_error_groups_per_service: {
             properties: {
               '1d': {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           max_transaction_groups_per_service: {
             properties: {
               '1d': {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           metric: {
             properties: {
               '1d': {
-                type: 'long'
+                type: 'long',
               },
               all: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           onboarding: {
             properties: {
               '1d': {
-                type: 'long'
+                type: 'long',
               },
               all: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           services: {
             properties: {
               '1d': {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           sourcemap: {
             properties: {
               '1d': {
-                type: 'long'
+                type: 'long',
               },
               all: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           span: {
             properties: {
               '1d': {
-                type: 'long'
+                type: 'long',
               },
               all: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           traces: {
             properties: {
               '1d': {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           transaction: {
             properties: {
               '1d': {
-                type: 'long'
+                type: 'long',
               },
               all: {
-                type: 'long'
-              }
-            }
-          }
-        }
+                type: 'long',
+              },
+            },
+          },
+        },
       },
       cardinality: {
         properties: {
@@ -635,20 +635,20 @@ export const apmTelemetry: SavedObjectsType = {
                   all_agents: {
                     properties: {
                       '1d': {
-                        type: 'long'
-                      }
-                    }
+                        type: 'long',
+                      },
+                    },
                   },
                   rum: {
                     properties: {
                       '1d': {
-                        type: 'long'
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        type: 'long',
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           transaction: {
             properties: {
@@ -657,25 +657,25 @@ export const apmTelemetry: SavedObjectsType = {
                   all_agents: {
                     properties: {
                       '1d': {
-                        type: 'long'
-                      }
-                    }
+                        type: 'long',
+                      },
+                    },
                   },
                   rum: {
                     properties: {
                       '1d': {
-                        type: 'long'
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+                        type: 'long',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       has_any_services: {
-        type: 'boolean'
+        type: 'boolean',
       },
       indices: {
         properties: {
@@ -686,115 +686,115 @@ export const apmTelemetry: SavedObjectsType = {
                   docs: {
                     properties: {
                       count: {
-                        type: 'long'
-                      }
-                    }
+                        type: 'long',
+                      },
+                    },
                   },
                   store: {
                     properties: {
                       size_in_bytes: {
-                        type: 'long'
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        type: 'long',
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           shards: {
             properties: {
               total: {
-                type: 'long'
-              }
-            }
-          }
-        }
+                type: 'long',
+              },
+            },
+          },
+        },
       },
       integrations: {
         properties: {
           ml: {
             properties: {
               all_jobs_count: {
-                type: 'long'
-              }
-            }
-          }
-        }
+                type: 'long',
+              },
+            },
+          },
+        },
       },
       retainment: {
         properties: {
           error: {
             properties: {
               ms: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           metric: {
             properties: {
               ms: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           onboarding: {
             properties: {
               ms: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           span: {
             properties: {
               ms: {
-                type: 'long'
-              }
-            }
+                type: 'long',
+              },
+            },
           },
           transaction: {
             properties: {
               ms: {
-                type: 'long'
-              }
-            }
-          }
-        }
+                type: 'long',
+              },
+            },
+          },
+        },
       },
       services_per_agent: {
         properties: {
           dotnet: {
             type: 'long',
-            null_value: 0
+            null_value: 0,
           },
           go: {
             type: 'long',
-            null_value: 0
+            null_value: 0,
           },
           java: {
             type: 'long',
-            null_value: 0
+            null_value: 0,
           },
           'js-base': {
             type: 'long',
-            null_value: 0
+            null_value: 0,
           },
           nodejs: {
             type: 'long',
-            null_value: 0
+            null_value: 0,
           },
           python: {
             type: 'long',
-            null_value: 0
+            null_value: 0,
           },
           ruby: {
             type: 'long',
-            null_value: 0
+            null_value: 0,
           },
           'rum-js': {
             type: 'long',
-            null_value: 0
-          }
-        }
+            null_value: 0,
+          },
+        },
       },
       tasks: {
         properties: {
@@ -803,119 +803,119 @@ export const apmTelemetry: SavedObjectsType = {
               took: {
                 properties: {
                   ms: {
-                    type: 'long'
-                  }
-                }
-              }
-            }
+                    type: 'long',
+                  },
+                },
+              },
+            },
           },
           agents: {
             properties: {
               took: {
                 properties: {
                   ms: {
-                    type: 'long'
-                  }
-                }
-              }
-            }
+                    type: 'long',
+                  },
+                },
+              },
+            },
           },
           cardinality: {
             properties: {
               took: {
                 properties: {
                   ms: {
-                    type: 'long'
-                  }
-                }
-              }
-            }
+                    type: 'long',
+                  },
+                },
+              },
+            },
           },
           groupings: {
             properties: {
               took: {
                 properties: {
                   ms: {
-                    type: 'long'
-                  }
-                }
-              }
-            }
+                    type: 'long',
+                  },
+                },
+              },
+            },
           },
           indices_stats: {
             properties: {
               took: {
                 properties: {
                   ms: {
-                    type: 'long'
-                  }
-                }
-              }
-            }
+                    type: 'long',
+                  },
+                },
+              },
+            },
           },
           integrations: {
             properties: {
               took: {
                 properties: {
                   ms: {
-                    type: 'long'
-                  }
-                }
-              }
-            }
+                    type: 'long',
+                  },
+                },
+              },
+            },
           },
           processor_events: {
             properties: {
               took: {
                 properties: {
                   ms: {
-                    type: 'long'
-                  }
-                }
-              }
-            }
+                    type: 'long',
+                  },
+                },
+              },
+            },
           },
           services: {
             properties: {
               took: {
                 properties: {
                   ms: {
-                    type: 'long'
-                  }
-                }
-              }
-            }
+                    type: 'long',
+                  },
+                },
+              },
+            },
           },
           versions: {
             properties: {
               took: {
                 properties: {
                   ms: {
-                    type: 'long'
-                  }
-                }
-              }
-            }
-          }
-        }
+                    type: 'long',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       version: {
         properties: {
           apm_server: {
             properties: {
               major: {
-                type: 'long'
+                type: 'long',
               },
               minor: {
-                type: 'long'
+                type: 'long',
               },
               patch: {
-                type: 'long'
-              }
-            }
-          }
-        }
-      }
-    } as SavedObjectsType['mappings']['properties']
-  }
+                type: 'long',
+              },
+            },
+          },
+        },
+      },
+    } as SavedObjectsType['mappings']['properties'],
+  },
 };

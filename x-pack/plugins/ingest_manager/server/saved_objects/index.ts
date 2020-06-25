@@ -18,7 +18,7 @@ import {
   GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
 } from '../constants';
 import { migrateDatasourcesToV790 } from './migrations/datasources_v790';
-
+import { migrateAgentConfigToV790 } from './migrations/agent_config_v790';
 /*
  * Saved object types and mappings
  *
@@ -126,11 +126,14 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         description: { type: 'text' },
         status: { type: 'keyword' },
         datasources: { type: 'keyword' },
-        updated_on: { type: 'keyword' },
+        updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword' },
       },
+    },
+    migrations: {
+      '7.9.0': migrateAgentConfigToV790,
     },
   },
   [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
@@ -259,7 +262,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
 };
 
 export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
-  Object.values(savedObjectTypes).forEach(type => {
+  Object.values(savedObjectTypes).forEach((type) => {
     savedObjects.registerType(type);
   });
 }

@@ -23,7 +23,7 @@ export class FeatureTable extends Component<Props, {}> {
   public render() {
     const { space, features } = this.props;
 
-    const items = features.map(feature => ({
+    const items = features.map((feature) => ({
       feature,
       space,
     }));
@@ -40,7 +40,7 @@ export class FeatureTable extends Component<Props, {}> {
 
     const isFeatureEnabled = (e.target as Record<string, any>).checked;
     if (isFeatureEnabled) {
-      disabledFeatures = disabledFeatures.filter(feature => feature !== featureId);
+      disabledFeatures = disabledFeatures.filter((feature) => feature !== featureId);
     } else {
       disabledFeatures = _.uniq([...disabledFeatures, featureId]);
     }
@@ -57,7 +57,7 @@ export class FeatureTable extends Component<Props, {}> {
     if (visible) {
       updatedSpace.disabledFeatures = [];
     } else {
-      updatedSpace.disabledFeatures = this.props.features.map(feature => feature.id);
+      updatedSpace.disabledFeatures = this.props.features.map((feature) => feature.id);
     }
 
     this.props.onChange(updatedSpace);

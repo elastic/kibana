@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Privileges } from '../../../../../../src/plugins/es_ui_shared/public';
+import { Privileges } from '../../../../../../src/plugins/es_ui_shared/common';
 
 import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,
@@ -40,7 +40,7 @@ export function registerAppRoutes({
         },
       };
 
-      if (!isSecurityEnabled) {
+      if (!isSecurityEnabled()) {
         // If security isn't enabled, let the user use app.
         return res.ok({ body: privilegesResult });
       }
@@ -75,7 +75,7 @@ export function registerAppRoutes({
               return true;
             }
 
-            const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every(privilege =>
+            const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every((privilege) =>
               privileges.includes(privilege)
             );
 

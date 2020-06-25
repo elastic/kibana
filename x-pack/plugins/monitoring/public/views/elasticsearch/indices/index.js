@@ -52,7 +52,7 @@ uiRoutes.when('/elasticsearch/indices', {
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
 
       // for binding
-      const toggleShowSystemIndices = isChecked => {
+      const toggleShowSystemIndices = (isChecked) => {
         // flip the boolean
         showSystemIndices = isChecked;
         // preserve setting in localStorage
@@ -63,7 +63,7 @@ uiRoutes.when('/elasticsearch/indices', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           this.renderReact(data);
         }
       );

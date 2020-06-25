@@ -23,7 +23,7 @@ const roundingRules = [
   [d(1, 'week'), d(1, 'd')],
   [d(3, 'week'), d(1, 'week')],
   [d(1, 'year'), d(1, 'month')],
-  [Infinity, d(1, 'year')]
+  [Infinity, d(1, 'year')],
 ];
 
 const revRoundingRules = roundingRules.slice(0).reverse();
@@ -73,5 +73,5 @@ export const calculateAuto = {
 
   atLeast: find(revRoundingRules, function atLeast(_bound, interval, target) {
     if (interval <= target) return interval;
-  })
+  }),
 };

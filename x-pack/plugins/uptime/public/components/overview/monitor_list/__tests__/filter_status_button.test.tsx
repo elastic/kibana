@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FilterStatusButton, FilterStatusButtonProps } from '../filter_status_button';
-import { renderWithRouter, shallowWithRouter } from '../../../../lib';
+import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
 
 describe('FilterStatusButton', () => {
   let props: FilterStatusButtonProps;
@@ -26,7 +26,11 @@ describe('FilterStatusButton', () => {
   });
 
   it('renders without errors for valid props', () => {
-    const wrapper = renderWithRouter(<FilterStatusButton {...props} />);
+    const wrapper = renderWithRouter(
+      <MountWithReduxProvider>
+        <FilterStatusButton {...props} />
+      </MountWithReduxProvider>
+    );
     expect(wrapper).toMatchSnapshot();
   });
 });

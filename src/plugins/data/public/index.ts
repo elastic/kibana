@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
+import { ConfigSchema } from '../config';
 
 /*
  * Filters:
@@ -169,7 +168,6 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
 } from '../common/field_formats';
 
 import { DateFormat } from './field_formats';
@@ -179,8 +177,6 @@ export { baseFormattersPublic } from './field_formats';
 export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
-
-  serialize: serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
@@ -266,6 +262,7 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  UI_SETTINGS,
 } from '../common';
 
 /*
@@ -341,8 +338,6 @@ export {
   SYNC_SEARCH_STRATEGY,
   getEsPreference,
   getSearchErrorType,
-  ISearchContext,
-  TSearchStrategyProvider,
   ISearchStrategy,
   ISearch,
   ISearchOptions,
@@ -360,6 +355,7 @@ export {
   ISearchSource,
   parseSearchSourceJSON,
   injectSearchSourceReferences,
+  getSearchParamsFromRequest,
   extractSearchSourceReferences,
   SearchSourceFields,
   EsQuerySortValue,
@@ -444,13 +440,15 @@ export {
   getKbnTypeNames,
 } from '../common';
 
+export * from '../common/field_mapping';
+
 /*
  * Plugin setup
  */
 
 import { DataPublicPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataPublicPlugin(initializerContext);
 }
 

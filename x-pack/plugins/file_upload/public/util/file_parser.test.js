@@ -7,8 +7,8 @@
 import { fileHandler } from './file_parser';
 jest.mock('./pattern_reader', () => ({}));
 
-const cleanAndValidate = jest.fn(a => a);
-const setFileProgress = jest.fn(a => a);
+const cleanAndValidate = jest.fn((a) => a);
+const setFileProgress = jest.fn((a) => a);
 
 const getFileReader = () => {
   const fileReader = {
@@ -24,7 +24,7 @@ const getPatternReader = () => {
     writeDataToPatternStream: jest.fn(),
     abortStream: jest.fn(),
   };
-  require('./pattern_reader').PatternReader = function() {
+  require('./pattern_reader').PatternReader = function () {
     this.writeDataToPatternStream = () => patternReader.writeDataToPatternStream();
     this.abortStream = () => patternReader.abortStream();
   };

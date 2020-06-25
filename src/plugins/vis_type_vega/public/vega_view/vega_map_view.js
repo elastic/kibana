@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import * as vega from 'vega-lib';
 import { i18n } from '@kbn/i18n';
+import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
 import { getEmsTileLayerId, getUISettings, getKibanaMapFactory } from '../services';
@@ -42,7 +42,7 @@ export class VegaMapView extends VegaBaseView {
       const mapStyle =
         mapConfig.mapStyle === 'default' ? emsTileLayerId.bright : mapConfig.mapStyle;
       const isDarkMode = getUISettings().get('theme:darkMode');
-      baseMapOpts = tmsServices.find(s => s.id === mapStyle);
+      baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       baseMapOpts = {
         ...baseMapOpts,
         ...(await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode)),

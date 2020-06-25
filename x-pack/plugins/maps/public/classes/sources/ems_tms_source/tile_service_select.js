@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 
-import { getEMSClient } from '../../../meta';
+import { getEmsTmsServices } from '../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
 
@@ -29,14 +29,13 @@ export class TileServiceSelect extends React.Component {
   }
 
   _loadTmsOptions = async () => {
-    const emsClient = getEMSClient();
-    const emsTMSServices = await emsClient.getTMSServices();
+    const emsTMSServices = await getEmsTmsServices();
 
     if (!this._isMounted) {
       return;
     }
 
-    const emsTmsOptions = emsTMSServices.map(tmsService => {
+    const emsTmsOptions = emsTMSServices.map((tmsService) => {
       return {
         value: tmsService.getId(),
         text: tmsService.getDisplayName() ? tmsService.getDisplayName() : tmsService.getId(),
@@ -51,7 +50,7 @@ export class TileServiceSelect extends React.Component {
     this.setState({ emsTmsOptions, hasLoaded: true });
   };
 
-  _onChange = e => {
+  _onChange = (e) => {
     const value = e.target.value;
     const isAutoSelect = value === AUTO_SELECT;
     this.props.onTileSelect({

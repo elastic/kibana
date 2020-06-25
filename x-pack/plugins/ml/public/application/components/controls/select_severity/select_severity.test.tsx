@@ -62,7 +62,7 @@ describe('SelectSeverity', () => {
     );
   });
 
-  test('state for currently selected value is updated correctly on click', done => {
+  test('state for currently selected value is updated correctly on click', (done) => {
     const wrapper = mount(
       <MemoryRouter>
         <SelectSeverity />

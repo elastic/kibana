@@ -13,10 +13,9 @@ type Pre790Datasource = Exclude<
   'created_at' | 'created_by' | 'updated_at' | 'updated_by'
 >;
 
-export const migrateDatasourcesToV790: SavedObjectMigrationFn<
-  Pre790Datasource,
-  Datasource
-> = doc => {
+export const migrateDatasourcesToV790: SavedObjectMigrationFn<Pre790Datasource, Datasource> = (
+  doc
+) => {
   const updatedDatasource = cloneDeep(doc);
   const defDate = new Date().toISOString();
 

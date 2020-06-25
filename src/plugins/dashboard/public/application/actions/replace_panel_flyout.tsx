@@ -107,7 +107,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
         })}
         savedObjectMetaData={[...this.props.getEmbeddableFactories()]
           .filter(
-            embeddableFactory =>
+            (embeddableFactory) =>
               Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
           )
           .map(({ savedObjectMetaData }) => savedObjectMetaData as any)}

@@ -25,7 +25,11 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
+import {
+  Field as IndexPatternField,
+  IndexPattern,
+  IIndexPatternFieldList,
+} from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
 import { FieldFormatsStart } from '../../field_formats';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
@@ -370,12 +374,115 @@ describe('AggConfig', () => {
     });
   });
 
+  describe('#toSerializedFieldFormat', () => {
+    beforeEach(() => {
+      indexPattern.fields.getByName = identity as IIndexPatternFieldList['getByName'];
+    });
+
+    it('works with aggs that have a special format type', () => {
+      const configStates = [
+        {
+          type: 'count',
+          params: {},
+        },
+        {
+          type: 'date_histogram',
+          params: { field: '@timestamp' },
+        },
+        {
+          type: 'terms',
+          params: { field: 'machine.os.keyword' },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+
+      expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "date",
+            "params": Object {
+              "pattern": "HH:mm:ss.SSS",
+            },
+          },
+          Object {
+            "id": "terms",
+            "params": Object {
+              "id": undefined,
+              "missingBucketLabel": "Missing",
+              "otherBucketLabel": "Other",
+            },
+          },
+        ]
+      `);
+    });
+
+    it('works with pipeline aggs', () => {
+      const configStates = [
+        {
+          type: 'max_bucket',
+          params: {
+            customMetric: {
+              type: 'cardinality',
+              params: {
+                field: 'bytes',
+              },
+            },
+          },
+        },
+        {
+          type: 'cumulative_sum',
+          params: {
+            buckets_path: '1',
+            customMetric: {
+              type: 'cardinality',
+              params: {
+                field: 'bytes',
+              },
+            },
+          },
+        },
+        {
+          type: 'percentile_ranks',
+          id: 'myMetricAgg',
+          params: {},
+        },
+        {
+          type: 'cumulative_sum',
+          params: {
+            metricAgg: 'myMetricAgg',
+          },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+
+      expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "percent",
+          },
+          Object {
+            "id": "percent",
+          },
+        ]
+      `);
+    });
+  });
+
   describe('#toExpressionAst', () => {
     beforeEach(() => {
       fieldFormats.getDefaultInstance = (() => ({
         getConverterFor: (t?: string) => t || identity,
       })) as any;
-      indexPattern.fields.getByName = name =>
+      indexPattern.fields.getByName = (name) =>
         ({
           format: {
             getConverterFor: (t?: string) => t || identity,
@@ -500,7 +607,7 @@ describe('AggConfig', () => {
       // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
       const range: MetricAggType = typesRegistry.get('range');
       range.expressionName = 'aggRange';
-      const rangesParam = range.params.find(p => p.name === 'ranges');
+      const rangesParam = range.params.find((p) => p.name === 'ranges');
       rangesParam!.toExpressionAst = (val: any) => ({
         type: 'function',
         function: 'aggRanges',
@@ -623,7 +730,7 @@ describe('AggConfig', () => {
       fieldFormats.getDefaultInstance = (() => ({
         getConverterFor: (t?: string) => t || identity,
       })) as any;
-      indexPattern.fields.getByName = name =>
+      indexPattern.fields.getByName = (name) =>
         ({
           format: {
             getConverterFor: (t?: string) => t || identity,
@@ -649,10 +756,7 @@ describe('AggConfig', () => {
         },
       };
       expect(aggConfig.fieldFormatter().toString()).toBe(
-        aggConfig
-          .getField()
-          .format.getConverterFor()
-          .toString()
+        aggConfig.getField().format.getConverterFor().toString()
       );
     });
 

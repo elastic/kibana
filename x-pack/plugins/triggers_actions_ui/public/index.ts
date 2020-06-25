@@ -15,13 +15,15 @@ export {
   AlertAction,
   Alert,
   AlertTypeModel,
-  AlertTypeParamsExpressionProps,
   ActionType,
+  ActionTypeRegistryContract,
+  AlertTypeParamsExpressionProps,
 } from './types';
 export {
   ConnectorAddFlyout,
   ConnectorEditFlyout,
 } from './application/sections/action_connector_form';
+export { loadActionTypes } from './application/lib/action_connector_api';
 
 export function plugin(ctx: PluginInitializerContext) {
   return new Plugin(ctx);

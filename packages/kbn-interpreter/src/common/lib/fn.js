@@ -39,7 +39,7 @@ export function Fn(config) {
 
   this.context = config.context || {};
 
-  this.accepts = type => {
+  this.accepts = (type) => {
     if (!this.context.types) return true; // If you don't tell us about context, we'll assume you don't care what you get
     return includes(this.context.types, type); // Otherwise, check it
   };

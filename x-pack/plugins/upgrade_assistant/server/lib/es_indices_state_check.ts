@@ -25,7 +25,7 @@ export const esIndicesStateCheck = async (
 
   const result: StatusCheckResult = {};
 
-  indices.forEach(index => {
+  indices.forEach((index) => {
     result[index] = getIndexStateFromClusterState(index, clusterState);
   });
 

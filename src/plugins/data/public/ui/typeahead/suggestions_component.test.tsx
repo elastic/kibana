@@ -119,10 +119,7 @@ describe('SuggestionsComponent', () => {
       />
     );
 
-    component
-      .find(SuggestionComponent)
-      .at(1)
-      .simulate('click');
+    component.find(SuggestionComponent).at(1).simulate('click');
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(mockSuggestions[1]);
   });
@@ -140,10 +137,7 @@ describe('SuggestionsComponent', () => {
       />
     );
 
-    component
-      .find(SuggestionComponent)
-      .at(1)
-      .simulate('mouseenter');
+    component.find(SuggestionComponent).at(1).simulate('mouseenter');
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(1);
   });

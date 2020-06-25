@@ -4,15 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore Untyped local
-import { createStore as createReduxStore, destroyStore as destroy } from './state/store';
-// @ts-ignore Untyped local
+import {
+  createStore as createReduxStore,
+  destroyStore as destroy,
+  getStore,
+  cloneStore,
+  // @ts-expect-error untyped local
+} from './state/store';
+// @ts-expect-error untyped local
 import { getInitialState } from './state/initial_state';
 
 import { CoreSetup } from '../../../../src/core/public';
 import { CanvasSetupDeps } from './plugin';
 
 export async function createStore(core: CoreSetup, plugins: CanvasSetupDeps) {
+  if (getStore()) {
+    return cloneStore();
+  }
+
+  return createFreshStore(core, plugins);
+}
+
+export async function createFreshStore(core: CoreSetup, plugins: CanvasSetupDeps) {
   const initialState = getInitialState();
 
   const basePath = core.http.basePath.get();

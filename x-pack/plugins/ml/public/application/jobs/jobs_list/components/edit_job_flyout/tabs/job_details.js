@@ -7,7 +7,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiComboBox } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiComboBox,
+  EuiFieldNumber,
+} from '@elastic/eui';
 
 import { ml } from '../../../../../services/ml_api_service';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +31,8 @@ export class JobDetails extends Component {
       mml: '',
       mmlValidationError: '',
       groupsValidationError: '',
+      modelSnapshotRetentionDays: 1,
+      dailyModelSnapshotRetentionAfterDays: 1,
     };
 
     this.setJobDetails = props.setJobDetails;
@@ -33,18 +42,18 @@ export class JobDetails extends Component {
     // load groups to populate the select options
     ml.jobs
       .groups()
-      .then(resp => {
-        const groups = resp.map(g => ({ label: g.id }));
+      .then((resp) => {
+        const groups = resp.map((g) => ({ label: g.id }));
         this.setState({ groups });
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Could not load groups', error);
       });
   }
 
   static getDerivedStateFromProps(props) {
     const selectedGroups =
-      props.jobGroups !== undefined ? props.jobGroups.map(g => ({ label: g })) : [];
+      props.jobGroups !== undefined ? props.jobGroups.map((g) => ({ label: g })) : [];
 
     return {
       description: props.jobDescription,
@@ -52,19 +61,39 @@ export class JobDetails extends Component {
       mml: props.jobModelMemoryLimit,
       mmlValidationError: props.jobModelMemoryLimitValidationError,
       groupsValidationError: props.jobGroupsValidationError,
+      modelSnapshotRetentionDays: props.jobModelSnapshotRetentionDays,
+      dailyModelSnapshotRetentionAfterDays: props.jobDailyModelSnapshotRetentionAfterDays,
     };
   }
 
-  onDescriptionChange = e => {
+  onDescriptionChange = (e) => {
     this.setJobDetails({ jobDescription: e.target.value });
   };
 
-  onMmlChange = e => {
+  onMmlChange = (e) => {
     this.setJobDetails({ jobModelMemoryLimit: e.target.value });
   };
 
-  onGroupsChange = selectedGroups => {
-    this.setJobDetails({ jobGroups: selectedGroups.map(g => g.label) });
+  onModelSnapshotRetentionDaysChange = (e) => {
+    const jobModelSnapshotRetentionDays = Math.floor(+e.target.value);
+
+    this.setJobDetails({
+      jobModelSnapshotRetentionDays,
+      ...(this.state.dailyModelSnapshotRetentionAfterDays > jobModelSnapshotRetentionDays
+        ? { jobDailyModelSnapshotRetentionAfterDays: jobModelSnapshotRetentionDays }
+        : {}),
+    });
+  };
+
+  onDailyModelSnapshotRetentionAfterDaysChange = (e) => {
+    const jobDailyModelSnapshotRetentionAfterDays = Math.floor(+e.target.value);
+    if (jobDailyModelSnapshotRetentionAfterDays <= this.state.modelSnapshotRetentionDays) {
+      this.setJobDetails({ jobDailyModelSnapshotRetentionAfterDays });
+    }
+  };
+
+  onGroupsChange = (selectedGroups) => {
+    this.setJobDetails({ jobGroups: selectedGroups.map((g) => g.label) });
   };
 
   onCreateGroup = (input, flattenedOptions) => {
@@ -82,7 +111,7 @@ export class JobDetails extends Component {
     // Create the option if it doesn't exist.
     if (
       flattenedOptions.findIndex(
-        option => option.label.trim().toLowerCase() === normalizedSearchValue
+        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
       ) === -1
     ) {
       groups.push(newGroup);
@@ -104,6 +133,8 @@ export class JobDetails extends Component {
       groups,
       mmlValidationError,
       groupsValidationError,
+      modelSnapshotRetentionDays,
+      dailyModelSnapshotRetentionAfterDays,
     } = this.state;
     const { datafeedRunning } = this.props;
     return (
@@ -170,6 +201,35 @@ export class JobDetails extends Component {
               isInvalid={mmlValidationError !== ''}
               error={mmlValidationError}
               disabled={datafeedRunning}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelSnapshotRetentionDaysLabel"
+                defaultMessage="Model snapshot retention days"
+              />
+            }
+          >
+            <EuiFieldNumber
+              min={0}
+              value={modelSnapshotRetentionDays}
+              onChange={this.onModelSnapshotRetentionDaysChange}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.jobDetails.dailyModelSnapshotRetentionAfterDaysLabel"
+                defaultMessage="Daily model snapshot retention after days"
+              />
+            }
+          >
+            <EuiFieldNumber
+              min={0}
+              max={modelSnapshotRetentionDays}
+              value={dailyModelSnapshotRetentionAfterDays}
+              onChange={this.onDailyModelSnapshotRetentionAfterDaysChange}
             />
           </EuiFormRow>
         </EuiForm>

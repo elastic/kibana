@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
-import { getEMSClient } from '../../../meta';
+import { getEmsTmsServices } from '../../../meta';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -66,10 +66,9 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async _getEMSTMSService() {
-    const emsClient = getEMSClient();
-    const emsTMSServices = await emsClient.getTMSServices();
+    const emsTMSServices = await getEmsTmsServices();
     const emsTileLayerId = this.getTileLayerId();
-    const tmsService = emsTMSServices.find(tmsService => tmsService.getId() === emsTileLayerId);
+    const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
     if (!tmsService) {
       throw new Error(
         i18n.translate('xpack.maps.source.emsTile.errorMessage', {

@@ -68,7 +68,7 @@ export class GuideDemo extends Component {
     });
 
     return (
-      <div className={classes} ref={c => (this.content = c)} {...rest}>
+      <div className={classes} ref={(c) => (this.content = c)} {...rest}>
         {children}
       </div>
     );

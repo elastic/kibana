@@ -26,6 +26,7 @@ import {
 import { Embeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
 import { getEditPath } from '../../../common';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -34,6 +35,7 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
+  uiActions?: UiActionsStart;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -74,6 +76,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       indexPatternService,
       timefilter,
       expressionRenderer,
+      uiActions,
     } = await this.getStartServices();
     const store = new SavedObjectIndexStore(savedObjectsClient);
     const savedVis = await store.load(savedObjectId);
@@ -99,6 +102,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     return new Embeddable(
       timefilter,
       expressionRenderer,
+      uiActions?.getTrigger,
       {
         savedVis,
         editPath: getEditPath(savedObjectId),

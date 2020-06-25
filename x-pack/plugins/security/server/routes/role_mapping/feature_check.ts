@@ -80,7 +80,7 @@ async function getEnabledRoleMappingsFeatures(clusterClient: IClusterClient, log
     .callAsInternalUser('nodes.info', {
       filterPath: 'nodes.*.settings.script',
     })
-    .catch(error => {
+    .catch((error) => {
       // fall back to assuming that node settings are unset/at their default values.
       // this will allow the role mappings UI to permit both role template script types,
       // even if ES will disallow it at mapping evaluation time.
@@ -95,7 +95,7 @@ async function getEnabledRoleMappingsFeatures(clusterClient: IClusterClient, log
       method: 'GET',
       path: '/_xpack/usage',
     })
-    .catch(error => {
+    .catch((error) => {
       // fall back to no external realms configured.
       // this will cause a warning in the UI about no compatible realms being enabled, but will otherwise allow
       // the mappings screen to function correctly.
@@ -115,12 +115,12 @@ async function getEnabledRoleMappingsFeatures(clusterClient: IClusterClient, log
   let canUseStoredScripts = true;
   let canUseInlineScripts = true;
   if (usesCustomScriptSettings(nodeScriptSettings)) {
-    canUseStoredScripts = Object.values(nodeScriptSettings.nodes).some(node => {
+    canUseStoredScripts = Object.values(nodeScriptSettings.nodes).some((node) => {
       const allowedTypes = node.settings.script.allowed_types;
       return !allowedTypes || allowedTypes.includes('stored');
     });
 
-    canUseInlineScripts = Object.values(nodeScriptSettings.nodes).some(node => {
+    canUseInlineScripts = Object.values(nodeScriptSettings.nodes).some((node) => {
       const allowedTypes = node.settings.script.allowed_types;
       return !allowedTypes || allowedTypes.includes('inline');
     });

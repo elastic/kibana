@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
 import { EventEmitter } from 'events';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -64,7 +64,7 @@ export class SampleTaskManagerFixturePlugin
             }
           }
 
-          await core.elasticsearch.adminClient.callAsInternalUser('index', {
+          await core.elasticsearch.legacy.client.callAsInternalUser('index', {
             index: '.kibana_task_manager_test_result',
             body: {
               type: 'task',
@@ -157,8 +157,8 @@ function millisecondsFromNow(ms: number) {
   return dt;
 }
 
-const once = function(emitter: EventEmitter, event: string): Promise<Record<string, unknown>> {
-  return new Promise(resolve => {
-    emitter.once(event, data => resolve(data || {}));
+const once = function (emitter: EventEmitter, event: string): Promise<Record<string, unknown>> {
+  return new Promise((resolve) => {
+    emitter.once(event, (data) => resolve(data || {}));
   });
 };

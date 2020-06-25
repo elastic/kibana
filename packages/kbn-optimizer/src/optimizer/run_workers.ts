@@ -50,15 +50,15 @@ export function runWorkers(
   return Rx.concat(
     // first batch of bundles are based on how up-to-date the cache is
     bundleCache$.pipe(
-      maybeMap(event => (event.type === 'bundle not cached' ? event.bundle : undefined)),
+      maybeMap((event) => (event.type === 'bundle not cached' ? event.bundle : undefined)),
       toArray()
     ),
     // subsequent batches are defined by changeEvent$
-    changeEvent$.pipe(maybeMap(c => (c.type === 'changes' ? c.bundles : undefined)))
+    changeEvent$.pipe(maybeMap((c) => (c.type === 'changes' ? c.bundles : undefined)))
   ).pipe(
-    mergeMap(bundles =>
+    mergeMap((bundles) =>
       Rx.from(assignBundlesToWorkers(bundles, config.maxWorkerCount)).pipe(
-        mergeMap(assignment =>
+        mergeMap((assignment) =>
           observeWorker(config, config.getWorkerConfig(optimizerCacheKey), assignment.bundles)
         )
       )

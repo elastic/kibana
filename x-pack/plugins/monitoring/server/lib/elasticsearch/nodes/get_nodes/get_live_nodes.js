@@ -12,7 +12,7 @@ export async function getLivesNodes(req) {
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
   const { nodes } = await callWithRequest(req, 'transport.request', params);
-  return Object.keys(nodes).map(nodeId => ({
+  return Object.keys(nodes).map((nodeId) => ({
     ...nodes[nodeId],
     id: nodeId,
     resolver: nodeId, // Maintain parity for UI

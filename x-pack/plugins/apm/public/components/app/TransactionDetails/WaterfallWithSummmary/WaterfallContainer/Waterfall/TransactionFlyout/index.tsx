@@ -12,7 +12,7 @@ import {
   EuiPortal,
   EuiSpacer,
   EuiTitle,
-  EuiHorizontalRule
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -32,7 +32,7 @@ interface Props {
 }
 
 function TransactionPropertiesTable({
-  transaction
+  transaction,
 }: {
   transaction: Transaction;
 }) {
@@ -50,7 +50,7 @@ export function TransactionFlyout({
   transaction: transactionDoc,
   onClose,
   errorCount = 0,
-  rootTransactionDuration
+  rootTransactionDuration,
 }: Props) {
   if (!transactionDoc) {
     return null;
@@ -67,7 +67,7 @@ export function TransactionFlyout({
                   {i18n.translate(
                     'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
                     {
-                      defaultMessage: 'Transaction details'
+                      defaultMessage: 'Transaction details',
                     }
                   )}
                 </h4>

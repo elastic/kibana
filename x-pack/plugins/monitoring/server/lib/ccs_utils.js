@@ -31,7 +31,7 @@ export function prefixIndexPattern(config, indexPattern, ccs) {
   }
 
   const patterns = indexPattern.split(',');
-  const prefixedPattern = patterns.map(pattern => `${ccs}:${pattern}`).join(',');
+  const prefixedPattern = patterns.map((pattern) => `${ccs}:${pattern}`).join(',');
 
   // if a wildcard is used, then we also want to search the local indices
   if (ccs === '*') {

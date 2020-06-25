@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Cross Cluster Replication app', function() {
+  describe('Cross Cluster Replication app', function () {
     this.tags(['ciGroup4', 'skipCloud']);
     loadTestFile(require.resolve('./home_page'));
   });

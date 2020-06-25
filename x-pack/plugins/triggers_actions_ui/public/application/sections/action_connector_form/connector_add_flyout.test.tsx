@@ -127,7 +127,7 @@ describe('connector_add_flyout', () => {
     const manageLink = callout.find('EuiButton');
     expect(manageLink).toHaveLength(1);
     expect(manageLink.getElements()[0].props.href).toMatchInlineSnapshot(
-      `"/app/kibana#/management/elasticsearch/license_management/"`
+      `"/app/management/stack/license_management"`
     );
 
     const subscriptionLink = callout.find('EuiButtonEmpty');

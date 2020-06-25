@@ -25,7 +25,7 @@ import { ChartTitle } from '../../../../../../../plugins/vis_type_vislib/public/
 import { VisConfig } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/vis_config';
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 
-describe('Vislib ChartTitle Class Test Suite', function() {
+describe('Vislib ChartTitle Class Test Suite', function () {
   let mockUiState;
   let chartTitle;
   let el;
@@ -90,15 +90,9 @@ describe('Vislib ChartTitle Class Test Suite', function() {
 
   beforeEach(() => {
     mockUiState = getMockUiState();
-    el = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'visWrapper')
-      .datum(data);
+    el = d3.select('body').append('div').attr('class', 'visWrapper').datum(data);
 
-    el.append('div')
-      .attr('class', 'chart-title')
-      .style('height', '20px');
+    el.append('div').attr('class', 'chart-title').style('height', '20px');
 
     const visConfig = new VisConfig(
       {
@@ -115,31 +109,26 @@ describe('Vislib ChartTitle Class Test Suite', function() {
     chartTitle = new ChartTitle(visConfig);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     el.remove();
   });
 
-  describe('render Method', function() {
-    beforeEach(function() {
+  describe('render Method', function () {
+    beforeEach(function () {
       chartTitle.render();
     });
 
-    it('should append an svg to div', function() {
+    it('should append an svg to div', function () {
       expect(el.select('.chart-title').selectAll('svg').length).to.be(1);
     });
 
-    it('should append text', function() {
-      expect(
-        !!el
-          .select('.chart-title')
-          .selectAll('svg')
-          .selectAll('text')
-      ).to.be(true);
+    it('should append text', function () {
+      expect(!!el.select('.chart-title').selectAll('svg').selectAll('text')).to.be(true);
     });
   });
 
-  describe('draw Method', function() {
-    it('should be a function', function() {
+  describe('draw Method', function () {
+    it('should be a function', function () {
       expect(_.isFunction(chartTitle.draw())).to.be(true);
     });
   });

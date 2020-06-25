@@ -7,19 +7,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 
 export function RangedStyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fieldLabel }) {
   return (
     <div>
-      <EuiSpacer size="xs" />
-      {header}
       <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
-        <EuiFlexItem grow={true}>
-          <EuiText size="xs">
-            <small>{minLabel}</small>
-          </EuiText>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" title={propertyLabel} content={fieldLabel}>
             <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
@@ -28,6 +21,14 @@ export function RangedStyleLegendRow({ header, minLabel, maxLabel, propertyLabel
               </small>
             </EuiText>
           </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {header}
+      <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+        <EuiFlexItem grow={true}>
+          <EuiText size="xs">
+            <small>{minLabel}</small>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiText textAlign="right" size="xs">

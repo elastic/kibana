@@ -30,12 +30,11 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-
-import { CRUD_APP_BASE_PATH } from '../../../constants';
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { PROXY_MODE } from '../../../../../common/constants';
-import { getRouterLinkProps } from '../../../services';
 import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
+import { getRouter } from '../../../services';
 import { proxyModeUrl } from '../../../services/documentation';
 
 export class DetailPanel extends Component {
@@ -114,7 +113,8 @@ export class DetailPanel extends Component {
 
   renderClusterWithDeprecatedSettingWarning(
     { hasDeprecatedProxySetting, isConfiguredByNode },
-    clusterName
+    clusterName,
+    history
   ) {
     if (!hasDeprecatedProxySetting) {
       return null;
@@ -156,7 +156,7 @@ export class DetailPanel extends Component {
               defaultMessage="{editLink} to update the settings."
               values={{
                 editLink: (
-                  <EuiLink {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${clusterName}`)}>
+                  <EuiLink {...reactRouterNavigate(history, `/edit/${clusterName}`)}>
                     <FormattedMessage
                       id="xpack.remoteClusters.detailPanel.deprecatedSettingsEditLinkLabel"
                       defaultMessage="Edit the cluster"
@@ -229,7 +229,7 @@ export class DetailPanel extends Component {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
-              {seeds.map(seed => (
+              {seeds.map((seed) => (
                 <EuiText size="s" key={seed}>
                   {seed}
                 </EuiText>
@@ -448,7 +448,7 @@ export class DetailPanel extends Component {
     );
   }
 
-  renderFlyoutBody() {
+  renderFlyoutBody(history) {
     const { cluster, clusterName } = this.props;
 
     return (
@@ -457,7 +457,7 @@ export class DetailPanel extends Component {
         {cluster && (
           <Fragment>
             {this.renderClusterConfiguredByNodeWarning(cluster)}
-            {this.renderClusterWithDeprecatedSettingWarning(cluster, clusterName)}
+            {this.renderClusterWithDeprecatedSettingWarning(cluster, clusterName, history)}
             {this.renderCluster(cluster)}
           </Fragment>
         )}
@@ -465,7 +465,7 @@ export class DetailPanel extends Component {
     );
   }
 
-  renderFlyoutFooter() {
+  renderFlyoutFooter(history) {
     const { cluster, clusterName, closeDetailPanel } = this.props;
 
     return (
@@ -490,7 +490,7 @@ export class DetailPanel extends Component {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <RemoveClusterButtonProvider clusterNames={[clusterName]}>
-                    {removeCluster => (
+                    {(removeCluster) => (
                       <EuiButtonEmpty
                         color="danger"
                         onClick={removeCluster}
@@ -507,7 +507,7 @@ export class DetailPanel extends Component {
 
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${clusterName}`)}
+                    {...reactRouterNavigate(history, `/edit/${clusterName}`)}
                     fill
                     color="primary"
                     data-test-subj="remoteClusterDetailPanelEditButton"
@@ -528,6 +528,7 @@ export class DetailPanel extends Component {
 
   render() {
     const { isOpen, closeDetailPanel, clusterName, cluster } = this.props;
+    const { history } = getRouter();
 
     if (!isOpen) {
       return null;
@@ -568,9 +569,9 @@ export class DetailPanel extends Component {
           </EuiFlexGroup>
         </EuiFlyoutHeader>
 
-        {this.renderFlyoutBody()}
+        {this.renderFlyoutBody(history)}
 
-        {this.renderFlyoutFooter()}
+        {this.renderFlyoutFooter(history)}
       </EuiFlyout>
     );
   }

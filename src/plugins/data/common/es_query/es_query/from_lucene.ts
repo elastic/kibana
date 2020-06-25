@@ -25,7 +25,7 @@ export function buildQueryFromLucene(
   queryStringOptions: Record<string, any>,
   dateFormatTZ?: string
 ) {
-  const combinedQueries = (queries || []).map(query => {
+  const combinedQueries = (queries || []).map((query) => {
     const queryDsl = luceneStringToDsl(query.query);
 
     return decorateQuery(queryDsl, queryStringOptions, dateFormatTZ);

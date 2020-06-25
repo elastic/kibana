@@ -62,6 +62,7 @@ function createCoreSetupMock({
   const mock = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, any, any]>, []>(() =>
       Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])

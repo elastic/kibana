@@ -11,7 +11,7 @@ import { fetchNodes } from '../../../../store/actions';
 import { NodeAllocation as PresentationComponent } from './node_allocation';
 
 export const NodeAllocation = connect(
-  state => ({
+  (state) => ({
     nodeOptions: getNodeOptions(state),
   }),
   {

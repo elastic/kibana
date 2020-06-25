@@ -5,7 +5,11 @@
  */
 
 jest.mock('../selectors/map_selectors', () => ({}));
-jest.mock('../kibana_services', () => ({}));
+jest.mock('./data_request_actions', () => {
+  return {
+    syncDataForAllLayers: () => {},
+  };
+});
 
 import { mapExtentChanged, setMouseCoordinates } from './map_actions';
 
@@ -18,14 +22,6 @@ describe('map_actions', () => {
   });
 
   describe('mapExtentChanged', () => {
-    beforeEach(() => {
-      // getLayerList mocked to return emtpy array because
-      // syncDataForAllLayers is triggered by selector and internally calls getLayerList
-      require('../selectors/map_selectors').getLayerList = () => {
-        return [];
-      };
-    });
-
     describe('store mapState is empty', () => {
       beforeEach(() => {
         require('../selectors/map_selectors').getDataFilters = () => {

@@ -20,7 +20,7 @@ export const getLogEntryRatePartitionedSeries = (results: LogEntryRateResults) =
     (buckets, bucket) => {
       return [
         ...buckets,
-        ...bucket.partitions.map(partition => ({
+        ...bucket.partitions.map((partition) => ({
           group: getFriendlyNameForPartitionId(partition.partitionId),
           time: bucket.startTime,
           value: partition.averageActualLogEntryRate,
@@ -136,7 +136,7 @@ export const getAnnotationsForAll = (results: LogEntryRateResults) => {
       }
       const severityCategory = getSeverityCategoryForScore(
         Math.max(
-          ...maxAnomalyScoresByPartition.map(partitionScore => partitionScore.maximumAnomalyScore)
+          ...maxAnomalyScoresByPartition.map((partitionScore) => partitionScore.maximumAnomalyScore)
         )
       );
       if (!severityCategory) {

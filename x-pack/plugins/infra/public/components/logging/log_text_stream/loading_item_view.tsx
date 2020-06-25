@@ -97,10 +97,10 @@ const LoadingItemViewExtra = euiStyled(EuiFlexGroup)`
 `;
 
 const ProgressEntryWrapper = euiStyled.div<{ position: Position }>`
-  padding-left: ${props => props.theme.eui.euiSizeS};
-  padding-top: ${props =>
+  padding-left: ${(props) => props.theme.eui.euiSizeS};
+  padding-top: ${(props) =>
     props.position === 'start' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
-  padding-bottom: ${props =>
+  padding-bottom: ${(props) =>
     props.position === 'end' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
 `;
 

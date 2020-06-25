@@ -16,11 +16,11 @@ describe('CustomLinkPopover', () => {
     {
       id: '2',
       label: 'bar',
-      url: 'http://elastic.co?service.name={{service.name}}'
-    }
+      url: 'http://elastic.co?service.name={{service.name}}',
+    },
   ] as CustomLink[];
   const transaction = ({
-    service: { name: 'foo.bar' }
+    service: { name: 'foo.bar' },
   } as unknown) as Transaction;
   it('renders popover', () => {
     const component = render(

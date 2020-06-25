@@ -18,7 +18,7 @@ describe('fetch_all_from_scroll', () => {
 
     stubCallWithRequest = sinon.stub();
     stubCallWithRequest.onCall(0).returns(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         const mockInnerResponse = {
           hits: {
             hits: ['newhit'],
@@ -30,7 +30,7 @@ describe('fetch_all_from_scroll', () => {
     );
 
     stubCallWithRequest.onCall(1).returns(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         const mockInnerResponse = {
           hits: {
             hits: [],
@@ -48,7 +48,7 @@ describe('fetch_all_from_scroll', () => {
       });
 
       it('should return an empty array of hits', () => {
-        return fetchAllFromScroll(mockResponse).then(hits => {
+        return fetchAllFromScroll(mockResponse).then((hits) => {
           expect(hits).to.eql([]);
         });
       });
@@ -67,7 +67,7 @@ describe('fetch_all_from_scroll', () => {
       });
 
       it('should return the hits from the response', () => {
-        return fetchAllFromScroll(mockResponse, stubCallWithRequest).then(hits => {
+        return fetchAllFromScroll(mockResponse, stubCallWithRequest).then((hits) => {
           expect(hits).to.eql(['foo', 'bar', 'newhit']);
         });
       });

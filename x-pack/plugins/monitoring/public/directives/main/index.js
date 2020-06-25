@@ -13,8 +13,9 @@ import { Legacy } from '../../legacy_shims';
 import { shortenPipelineHash } from '../../../common/formatting';
 import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 import { Subscription } from 'rxjs';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
-const setOptions = controller => {
+const setOptions = (controller) => {
   if (
     !controller.pipelineVersions ||
     !controller.pipelineVersions.length ||
@@ -35,7 +36,7 @@ const setOptions = controller => {
       <EuiFlexItem grow={false}>
         <EuiSelect
           value={controller.pipelineHash}
-          options={controller.pipelineVersions.map(option => {
+          options={controller.pipelineVersions.map((option) => {
             return {
               text: i18n.translate(
                 'xpack.monitoring.logstashNavigation.pipelineVersionDescription',
@@ -104,7 +105,6 @@ export class MonitoringMainController {
     const timefilter = Legacy.shims.timefilter;
     this._licenseService = options.licenseService;
     this._breadcrumbsService = options.breadcrumbsService;
-    this._kbnUrlService = options.kbnUrlService;
     this._executorService = options.executorService;
 
     Object.assign(this, options.attributes);
@@ -132,8 +132,8 @@ export class MonitoringMainController {
     if (this.pipelineHash) {
       this.pipelineHashShort = shortenPipelineHash(this.pipelineHash);
       this.onChangePipelineHash = () => {
-        return this._kbnUrlService.changePath(
-          `/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`
+        window.location.hash = getSafeForExternalLink(
+          `#/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`
         );
       };
     }
@@ -198,7 +198,7 @@ export class MonitoringMainController {
   }
 }
 
-export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) {
+export function monitoringMainProvider(breadcrumbs, license, $injector) {
   const $executor = $injector.get('$executor');
 
   return {
@@ -213,7 +213,7 @@ export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) 
         controller.addTimerangeObservers();
         const setupObj = getSetupObj();
         controller.setup(setupObj);
-        Object.keys(setupObj.attributes).forEach(key => {
+        Object.keys(setupObj.attributes).forEach((key) => {
           attributes.$observe(key, () => controller.setup(getSetupObj()));
         });
       });
@@ -225,7 +225,7 @@ export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) 
         const $route = $injector.get('$route');
         const globalState = $injector.get('globalState');
         scope.cluster = ($route.current.locals.clusters || []).find(
-          cluster => cluster.cluster_uuid === globalState.cluster_uuid
+          (cluster) => cluster.cluster_uuid === globalState.cluster_uuid
         );
       }
 
@@ -234,7 +234,6 @@ export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) 
           licenseService: license,
           breadcrumbsService: breadcrumbs,
           executorService: $executor,
-          kbnUrlService: kbnUrl,
           attributes: {
             name: attributes.name,
             product: attributes.product,
@@ -257,7 +256,7 @@ export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) 
           unmountComponentAtNode(controller.pipelineDropdownElement);
         controller.subscriptions && controller.subscriptions.unsubscribe();
       });
-      scope.$watch('pageData.versions', versions => {
+      scope.$watch('pageData.versions', (versions) => {
         controller.pipelineVersions = versions;
         setOptions(controller);
       });

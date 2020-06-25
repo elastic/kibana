@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('Setup', function() {
+export default function ({ loadTestFile }) {
+  describe('Setup', function () {
     // Setup mode is not supported in cloud
     this.tags(['skipCloud']);
 

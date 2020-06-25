@@ -16,7 +16,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
 
     it('should return 200 when creating a server-log action', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A server.log action',

@@ -27,7 +27,7 @@ import { FullscreenControl as Component } from './fullscreen_control';
 
 // TODO: a lot of this is borrowed code from `/components/workpad/index.js`.
 // We should consider extracting the next/prev page logic into to a shared lib file.
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   workpadId: getWorkpad(state).id,
   pages: getPages(state),
   selectedPageNumber: getSelectedPageIndex(state) + 1,
@@ -35,12 +35,12 @@ const mapStateToProps = state => ({
   autoplayEnabled: getAutoplay(state).enabled,
 });
 
-const mapDispatchToProps = dispatch => ({
-  setFullscreen: value => {
+const mapDispatchToProps = (dispatch) => ({
+  setFullscreen: (value) => {
     dispatch(setFullscreen(value));
     value && dispatch(selectToplevelNodes([]));
   },
-  enableAutoplay: enabled => dispatch(enableAutoplay(enabled)),
+  enableAutoplay: (enabled) => dispatch(enableAutoplay(enabled)),
   fetchAllRenderables: () => dispatch(fetchAllRenderables()),
 });
 
@@ -49,7 +49,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     ...ownProps,
     ...stateProps,
     ...dispatchProps,
-    setFullscreen: value => {
+    setFullscreen: (value) => {
       dispatchProps.setFullscreen(value);
 
       if (value === true) {
@@ -89,7 +89,7 @@ export const FullscreenControl = compose(
     return { getAnimation };
   }),
   withHandlers({
-    onPageChange: props => pageNumber => {
+    onPageChange: (props) => (pageNumber) => {
       if (pageNumber === props.selectedPageNumber) {
         return;
       }
@@ -104,11 +104,11 @@ export const FullscreenControl = compose(
   }),
   withHandlers({
     onTransitionEnd: ({ setTransition }) => () => setTransition(null),
-    nextPage: props => () => {
+    nextPage: (props) => () => {
       const pageNumber = Math.min(props.selectedPageNumber + 1, props.pages.length);
       props.onPageChange(pageNumber);
     },
-    previousPage: props => () => {
+    previousPage: (props) => () => {
       const pageNumber = Math.max(1, props.selectedPageNumber - 1);
       props.onPageChange(pageNumber);
     },

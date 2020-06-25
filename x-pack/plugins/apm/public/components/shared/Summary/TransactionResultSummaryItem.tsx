@@ -16,7 +16,7 @@ export function TransactionResultSummaryItem({ transactionResult }: Props) {
   return (
     <EuiToolTip
       content={i18n.translate('xpack.apm.transactionDetails.resultLabel', {
-        defaultMessage: 'Result'
+        defaultMessage: 'Result',
       })}
     >
       <EuiBadge color="default" title={undefined}>

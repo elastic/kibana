@@ -14,7 +14,7 @@ export function JobDescription({ job }) {
     <React.Fragment>
       <div className="job-description">
         {job.description} &nbsp;
-        {job.groups.map(group => (
+        {job.groups.map((group) => (
           <JobGroup key={group} name={group} />
         ))}
       </div>

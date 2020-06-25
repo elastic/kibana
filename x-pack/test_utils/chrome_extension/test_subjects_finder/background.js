@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable no-undef */
-chrome.runtime.onInstalled.addListener(function() {
+chrome.runtime.onInstalled.addListener(function () {
   chrome.storage.sync.set({ outputType: 'typescript' });
 
   chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {

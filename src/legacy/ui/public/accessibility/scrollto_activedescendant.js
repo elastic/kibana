@@ -30,7 +30,7 @@ uiModules.get('kibana').directive('scrolltoActivedescendant', () => ({
   link(scope, element, attrs) {
     scope.$watch(
       () => attrs.ariaActivedescendant,
-      val => {
+      (val) => {
         if (val) {
           const activeDescendant = element.find(`#${val}`);
           if (activeDescendant.length) {

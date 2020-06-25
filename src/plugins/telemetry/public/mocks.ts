@@ -25,7 +25,7 @@ import { httpServiceMock } from '../../../core/public/http/http_service.mock';
 import { notificationServiceMock } from '../../../core/public/notifications/notifications_service.mock';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
-import { TelemetryPluginStart, TelemetryPluginConfig } from './plugin';
+import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
 
 // The following is to be able to access private methods
 /* eslint-disable dot-notation */
@@ -59,7 +59,7 @@ export function mockTelemetryService({
   });
 
   const originalReportOptInStatus = telemetryService['reportOptInStatus'];
-  telemetryService['reportOptInStatus'] = jest.fn().mockImplementation(optInPayload => {
+  telemetryService['reportOptInStatus'] = jest.fn().mockImplementation((optInPayload) => {
     return originalReportOptInStatus(optInPayload); // Actually calling the original method
   });
 
@@ -77,20 +77,35 @@ export function mockTelemetryNotifications({
   });
 }
 
-export type Setup = jest.Mocked<TelemetryPluginStart>;
+export type Setup = jest.Mocked<TelemetryPluginSetup>;
+export type Start = jest.Mocked<TelemetryPluginStart>;
 
 export const telemetryPluginMock = {
   createSetupContract,
+  createStartContract,
 };
 
 function createSetupContract(): Setup {
   const telemetryService = mockTelemetryService();
-  const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
 
   const setupContract: Setup = {
     telemetryService,
-    telemetryNotifications,
   };
 
   return setupContract;
+}
+
+function createStartContract(): Start {
+  const telemetryService = mockTelemetryService();
+  const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+
+  const startContract: Start = {
+    telemetryService,
+    telemetryNotifications,
+    telemetryConstants: {
+      getPrivacyStatementUrl: jest.fn(),
+    },
+  };
+
+  return startContract;
 }

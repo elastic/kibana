@@ -14,7 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
-import { AGGREGATABLE_GEO_FIELD_TYPES, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
+import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
 export class CreateSourceEditor extends Component {
   static propTypes = {
@@ -38,7 +39,7 @@ export class CreateSourceEditor extends Component {
     this._isMounted = true;
   }
 
-  onIndexPatternSelect = indexPatternId => {
+  onIndexPatternSelect = (indexPatternId) => {
     this.setState(
       {
         indexPatternId,
@@ -47,7 +48,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  loadIndexPattern = indexPatternId => {
+  loadIndexPattern = (indexPatternId) => {
     this.setState(
       {
         isLoadingIndexPattern: true,
@@ -60,7 +61,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  debouncedLoad = _.debounce(async indexPatternId => {
+  debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
@@ -91,7 +92,7 @@ export class CreateSourceEditor extends Component {
     });
   }, 300);
 
-  _onSourceGeoSelect = sourceGeoField => {
+  _onSourceGeoSelect = (sourceGeoField) => {
     this.setState(
       {
         sourceGeoField,
@@ -100,7 +101,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _onDestGeoSelect = destGeoField => {
+  _onDestGeoSelect = (destGeoField) => {
     this.setState(
       {
         destGeoField,
@@ -177,7 +178,7 @@ export class CreateSourceEditor extends Component {
           placeholder={i18n.translate('xpack.maps.source.pewPew.indexPatternPlaceholder', {
             defaultMessage: 'Select index pattern',
           })}
-          fieldTypes={AGGREGATABLE_GEO_FIELD_TYPES}
+          fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT]}
         />
       </EuiFormRow>
     );

@@ -7,12 +7,19 @@ import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/pu
 import { AppServices } from './application';
 
 export {
+  AuthorizationProvider,
+  Error,
+  NotAuthorizedSection,
+  SectionError,
+  SectionLoading,
+  sendRequest,
   SendRequestConfig,
   SendRequestResponse,
-  UseRequestConfig,
-  sendRequest,
+  useAuthorizationContext,
   useRequest,
-} from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
+  UseRequestConfig,
+  WithPrivileges,
+} from '../../../../src/plugins/es_ui_shared/public/';
 
 export {
   FormSchema,
@@ -22,7 +29,13 @@ export {
   Form,
   getUseField,
   ValidationFuncArg,
+  FormData,
+  UseField,
+  FormHook,
   useFormContext,
+  FormDataProvider,
+  OnFormUpdateArg,
+  FieldConfig,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
@@ -34,21 +47,14 @@ export {
   getFormRow,
   Field,
   JsonEditorField,
+  FormRow,
+  ToggleField,
+  ComboBoxField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {
   isJSON,
   isEmptyString,
 } from '../../../../src/plugins/es_ui_shared/static/validators/string';
-
-export {
-  SectionLoading,
-  WithPrivileges,
-  AuthorizationProvider,
-  SectionError,
-  Error,
-  useAuthorizationContext,
-  NotAuthorizedSection,
-} from '../../../../src/plugins/es_ui_shared/public';
 
 export const useKibana = () => _useKibana<AppServices>();

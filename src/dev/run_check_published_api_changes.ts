@@ -268,14 +268,14 @@ async function run(
 
   const results = await Promise.all(
     folders
-      .filter(folder => (opts.filter.length ? folder.match(opts.filter) : true))
-      .map(folder => run(folder, { log, opts }))
+      .filter((folder) => (opts.filter.length ? folder.match(opts.filter) : true))
+      .map((folder) => run(folder, { log, opts }))
   );
 
-  if (results.find(r => r === false) !== undefined) {
+  if (results.find((r) => r === false) !== undefined) {
     process.exitCode = 1;
   }
-})().catch(e => {
+})().catch((e) => {
   console.log(e);
   process.exitCode = 1;
 });

@@ -103,7 +103,7 @@ Influencer.propTypes = {
 };
 
 function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues }) {
-  const influencerValues = fieldValues.map(valueData => (
+  const influencerValues = fieldValues.map((valueData) => (
     <Influencer
       key={valueData.influencerFieldValue}
       influencerFieldName={influencerFieldName}
@@ -147,7 +147,7 @@ export function InfluencersList({ influencers, influencerFilter }) {
     );
   }
 
-  const influencersByName = Object.keys(influencers).map(influencerFieldName => (
+  const influencersByName = Object.keys(influencers).map((influencerFieldName) => (
     <InfluencersByName
       key={influencerFieldName}
       influencerFieldName={influencerFieldName}

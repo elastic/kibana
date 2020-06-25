@@ -108,7 +108,7 @@ describe('XPackInfoLicense', () => {
   });
 
   test('isActiveLicense returns the true if active and typeChecker matches', () => {
-    const expectAbc123 = type => type === 'abc123';
+    const expectAbc123 = (type) => type === 'abc123';
 
     getRawLicense.mockReturnValue(
       licensingMock.createLicense({ license: { status: 'active', mode: 'abc123' } })

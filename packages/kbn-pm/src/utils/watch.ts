@@ -56,20 +56,20 @@ function getWatchHandlers(
   }: IWatchOptions
 ) {
   const typescriptHandler = buildOutput$.pipe(
-    first(data => data.includes('$ tsc')),
+    first((data) => data.includes('$ tsc')),
     map(() =>
       buildOutput$.pipe(
-        first(data => data.includes('Compilation complete.')),
+        first((data) => data.includes('Compilation complete.')),
         mapTo('tsc')
       )
     )
   );
 
   const webpackHandler = buildOutput$.pipe(
-    first(data => data.includes('$ webpack')),
+    first((data) => data.includes('$ webpack')),
     map(() =>
       buildOutput$.pipe(
-        first(data => data.includes('Chunk Names')),
+        first((data) => data.includes('Chunk Names')),
         mapTo('webpack')
       )
     )
@@ -100,7 +100,7 @@ export function waitUntilWatchIsReady(stream: NodeJS.EventEmitter, opts: IWatchO
 
   return Rx.race(getWatchHandlers(buildOutput$, opts))
     .pipe(
-      mergeMap(whenReady => whenReady),
+      mergeMap((whenReady) => whenReady),
       finalize(() => {
         stream.removeListener('data', onDataListener);
         stream.removeListener('end', onEndListener);

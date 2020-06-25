@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -37,7 +37,7 @@ interface Props {
   defaultViewState: MetricExplorerViewState;
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
-  onGroupByChange: (groupBy: string | null) => void;
+  onGroupByChange: (groupBy: string | null | string[]) => void;
   onFilterQuerySubmit: (query: string) => void;
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
@@ -61,7 +61,7 @@ export const MetricsExplorerToolbar = ({
   onViewStateChange,
 }: Props) => {
   const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
-  const [timepickerQuickRanges] = useKibanaUiSetting('timepicker:quickRanges');
+  const [timepickerQuickRanges] = useKibanaUiSetting(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
   const commonlyUsedRanges = mapKibanaQuickRangesToDatePickerRanges(timepickerQuickRanges);
 
   return (

@@ -38,7 +38,7 @@ export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boole
     fix,
   });
 
-  const paths = files.map(file => file.getRelativePath());
+  const paths = files.map((file) => file.getRelativePath());
   const report = cli.executeOnFiles(paths);
 
   if (fix) {

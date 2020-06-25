@@ -37,7 +37,7 @@ export type EsHitRecordList = EsHitRecord[];
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 // look from 1 day up to 10000 days into the past and future
-const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map(days => days * DAY_MILLIS);
+const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS);
 
 function fetchContextProvider(indexPatterns: IndexPatternsContract) {
   return {

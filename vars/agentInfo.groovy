@@ -5,7 +5,7 @@ def print() {
 
     def resourcesUrl =
       (
-        "https://infra-stats.elastic.co/app/visualize#/edit/8bd92360-1b92-11ea-b719-aba04518cc34" +
+        "https://infra-stats.elastic.co/app/kibana#/visualize/edit/8bd92360-1b92-11ea-b719-aba04518cc34" +
         "?_g=(time:(from:'${startTime}',to:'${endTime}'))" +
         "&_a=(query:'host.name:${env.NODE_NAME}')"
       )

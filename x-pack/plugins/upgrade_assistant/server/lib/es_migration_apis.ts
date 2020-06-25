@@ -32,13 +32,13 @@ export async function getUpgradeAssistantStatus(
       indexNames
     );
 
-    indices.forEach(indexData => {
+    indices.forEach((indexData) => {
       indexData.blockerForReindexing =
         indexStates[indexData.index!] === 'close' ? 'index-closed' : undefined;
     });
   }
 
-  const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
+  const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
 
   return {
     readyForUpgrade: criticalWarnings.length === 0,
@@ -52,7 +52,7 @@ const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
   Object.keys(deprecations.index_settings).reduce((indexDeprecations, indexName) => {
     return indexDeprecations.concat(
       deprecations.index_settings[indexName].map(
-        d =>
+        (d) =>
           ({
             ...d,
             index: indexName,
@@ -69,7 +69,7 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
 
   if (isCloudEnabled) {
     // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
-    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+    return combined.filter((d) => d.message !== 'Security realm settings structure changed');
   } else {
     return combined;
   }

@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 export function handleResponse(resp, min, max, shardStats) {
   // map the hits
   const hits = get(resp, 'hits.hits', []);
-  return hits.map(hit => {
+  return hits.map((hit) => {
     const stats = get(hit, '_source.index_stats');
     const earliestStats = get(hit, 'inner_hits.earliest.hits.hits[0]._source.index_stats');
 
@@ -137,7 +137,7 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then(resp =>
+  return callWithRequest(req, 'search', params).then((resp) =>
     handleResponse(resp, min, max, shardStats)
   );
 }

@@ -120,7 +120,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
       Array [
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -142,7 +142,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -190,6 +190,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                 isHollow={true}
                 number={1}
                 status="incomplete"
+                titleSize="s"
               >
                 <div
                   aria-label="Incomplete Step 1"
@@ -420,7 +421,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
       Array [
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -442,7 +443,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -490,6 +491,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                 isHollow={false}
                 number={1}
                 status="complete"
+                titleSize="s"
               >
                 <div
                   aria-label="Step 1"
@@ -502,12 +504,14 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                     <EuiIcon
                       aria-label="complete"
                       className="euiStepNumber__icon"
+                      size="m"
                       type="check"
                     >
                       <div
                         aria-label="complete"
                         className="euiStepNumber__icon"
                         data-euiicon-type="check"
+                        size="m"
                       />
                     </EuiIcon>
                   </EuiI18n>
@@ -623,7 +627,7 @@ exports[`renders 1`] = `
     Array [
       Object {
         "children": <React.Fragment>
-          <ForwardRef
+          <EuiFlexGroup
             alignItems="center"
             justifyContent="spaceBetween"
           >
@@ -645,7 +649,7 @@ exports[`renders 1`] = `
                 Load Kibana objects
               </EuiButton>
             </EuiFlexItem>
-          </ForwardRef>
+          </EuiFlexGroup>
           <EuiSpacer
             size="s"
           />

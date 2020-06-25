@@ -51,7 +51,7 @@ export async function runCheckTsProjectsCli() {
 
         log.verbose('Checking %s', file.getAbsolutePath());
 
-        const projects = PROJECTS.filter(p => p.isAbsolutePathSelected(file.getAbsolutePath()));
+        const projects = PROJECTS.filter((p) => p.isAbsolutePathSelected(file.getAbsolutePath()));
         if (projects.length === 0) {
           isNotInTsProject.push(file);
         }
@@ -68,7 +68,7 @@ export async function runCheckTsProjectsCli() {
       if (isNotInTsProject.length) {
         log.error(
           `The following files do not belong to a tsconfig.json file, or that tsconfig.json file is not listed in src/dev/typescript/projects.ts\n${isNotInTsProject
-            .map(file => ` - ${file.getRelativePath()}`)
+            .map((file) => ` - ${file.getRelativePath()}`)
             .join('\n')}`
         );
       }
@@ -76,7 +76,7 @@ export async function runCheckTsProjectsCli() {
       if (isInMultipleTsProjects.length) {
         log.error(
           `The following files belong to multiple tsconfig.json files listed in src/dev/typescript/projects.ts\n${isInMultipleTsProjects
-            .map(file => ` - ${file.getRelativePath()}`)
+            .map((file) => ` - ${file.getRelativePath()}`)
             .join('\n')}`
         );
       }

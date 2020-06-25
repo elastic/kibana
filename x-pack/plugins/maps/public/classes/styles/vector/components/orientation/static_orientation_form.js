@@ -9,7 +9,7 @@ import { ValidatedRange } from '../../../../../components/validated_range';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function StaticOrientationForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
-  const onOrientationChange = orientation => {
+  const onOrientationChange = (orientation) => {
     onStaticStyleChange(styleProperty.getStyleName(), { orientation });
   };
 

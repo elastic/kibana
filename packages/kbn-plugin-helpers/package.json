@@ -1,23 +1,22 @@
 {
   "name": "@kbn/plugin-helpers",
-  "private": true,
   "version": "9.0.2",
+  "private": true,
   "description": "Just some helpers for kibana plugin devs.",
-  "main": "lib/index.js",
+  "license": "Apache-2.0",
+  "main": "target/lib/index.js",
+  "scripts": {
+    "kbn:bootstrap": "tsc"
+  },
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
   },
-  "author": "Spencer Alger <email@spalger.com>",
-  "license": "Apache-2.0",
-  "peerDependencies": {
-    "@kbn/babel-preset": "1.0.0"
-  },
   "dependencies": {
-    "@babel/core": "^7.9.0",
+    "@babel/core": "^7.10.2",
     "argv-split": "^2.0.1",
     "commander": "^3.0.0",
     "del": "^5.1.0",
-    "execa": "^4.0.0",
+    "execa": "^4.0.2",
     "globby": "^8.0.1",
     "gulp-babel": "^8.0.0",
     "gulp-rename": "1.4.0",
@@ -27,6 +26,20 @@
     "node-sass": "^4.13.1",
     "through2": "^2.0.3",
     "through2-map": "^3.0.0",
+    "vinyl": "^2.2.0",
     "vinyl-fs": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/gulp-rename": "^0.0.33",
+    "@types/gulp-zip": "^4.0.1",
+    "@types/inquirer": "^6.5.0",
+    "@types/node-sass": "^4.11.0",
+    "@types/through2": "^2.0.35",
+    "@types/through2-map": "^3.0.0",
+    "@types/vinyl": "^2.0.4",
+    "typescript": "3.9.5"
+  },
+  "peerDependencies": {
+    "@kbn/babel-preset": "1.0.0"
   }
 }

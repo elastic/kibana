@@ -3,7 +3,8 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "optionalPlugins": ["alerting", "alertingBuiltins"],
+  "optionalPlugins": ["alerts", "alertingBuiltins"],
   "requiredPlugins": ["management", "charts", "data"],
-  "configPath": ["xpack", "trigger_actions_ui"]
+  "configPath": ["xpack", "trigger_actions_ui"],
+  "extraPublicDirs": ["public/common", "public/common/constants"]
 }

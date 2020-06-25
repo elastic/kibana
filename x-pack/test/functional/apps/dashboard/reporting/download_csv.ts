@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const csvPath = path.resolve(REPO_ROOT, 'target/functional-tests/downloads/Ecommerce Data.csv');
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -40,7 +40,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    it('Downloads a CSV export of a saved search panel', async function() {
+    it('Downloads a CSV export of a saved search panel', async function () {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
       const savedSearchPanel = await testSubjects.find('embeddablePanelHeading-EcommerceData');
@@ -54,7 +54,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       // just wait up to 5 seconds
       const success$ = Rx.interval(100).pipe(
         map(() => fs.existsSync(csvPath)),
-        filter(value => value === true),
+        filter((value) => value === true),
         first(),
         timeout(5000)
       );

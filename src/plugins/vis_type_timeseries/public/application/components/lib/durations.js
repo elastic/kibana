@@ -128,7 +128,7 @@ export const outputFormats = {
   Y: 'asYears',
 };
 
-export const isDuration = format => {
+export const isDuration = (format) => {
   const splittedFormat = format.split(',');
   const [input, output] = splittedFormat;
 

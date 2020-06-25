@@ -65,10 +65,16 @@ export const getDateRangeBucketAgg = ({
           TEXT_CONTEXT_TYPE,
           fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
         );
-        const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
+        const DateRangeFormat = FieldFormat.from(function (range: DateRangeKey) {
           return convertDateRangeToString(range, formatter);
         });
         return new DateRangeFormat();
+      },
+      getSerializedFormat(agg) {
+        return {
+          id: 'date_range',
+          params: agg.params.field ? agg.params.field.format.toJSON() : {},
+        };
       },
       makeLabel(aggConfig) {
         return aggConfig.getFieldDisplayName() + ' date ranges';

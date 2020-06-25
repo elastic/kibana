@@ -25,7 +25,7 @@ describe('getIndicesUnassignedShardStats', () => {
               callWithRequest: () => ({
                 aggregations: {
                   indices: {
-                    buckets: Object.keys(indices).map(id => ({
+                    buckets: Object.keys(indices).map((id) => ({
                       key: id,
                       state: {
                         primary: {

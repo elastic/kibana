@@ -9,8 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./delete_list_by_list_id.sh ${list_id}
+# Example: ./delete_list.sh ${list_id}
 curl -s -k \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X DELETE ${KIBANA_URL}${SPACE_URL}/api/lists?id="$1" | jq .
+ -X DELETE "${KIBANA_URL}${SPACE_URL}/api/lists?id=$1" | jq .

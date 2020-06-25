@@ -6,6 +6,6 @@
   "configPath": [
     "apm_oss"
   ],
-  "ui": false,
-  "requiredPlugins": []
+  "ui": true,
+  "requiredPlugins": ["home"]
 }

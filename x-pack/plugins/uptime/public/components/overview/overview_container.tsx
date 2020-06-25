@@ -10,14 +10,21 @@ import { OverviewPageComponent } from '../../pages/overview';
 import { selectIndexPattern } from '../../state/selectors';
 import { setEsKueryString } from '../../state/actions';
 
-export const OverviewPage: React.FC = props => {
+export const OverviewPage: React.FC = (props) => {
   const dispatch = useDispatch();
+
   const setEsKueryFilters = useCallback(
     (esFilters: string) => dispatch(setEsKueryString(esFilters)),
     [dispatch]
   );
-  const indexPattern = useSelector(selectIndexPattern);
+  const { index_pattern: indexPattern, loading } = useSelector(selectIndexPattern);
+
   return (
-    <OverviewPageComponent setEsKueryFilters={setEsKueryFilters} {...indexPattern} {...props} />
+    <OverviewPageComponent
+      setEsKueryFilters={setEsKueryFilters}
+      indexPattern={indexPattern}
+      loading={loading}
+      {...props}
+    />
   );
 };

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
   const retry = getService('retry');
@@ -27,8 +27,8 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/59717
-  describe.skip('Index patterns on aliases', function() {
-    before(async function() {
+  describe.skip('Index patterns on aliases', function () {
+    before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
       await esArchiver.loadIfNeeded('alias');
       await esArchiver.load('empty_kibana');
@@ -49,27 +49,27 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    it('should be able to create index pattern without time field', async function() {
+    it('should be able to create index pattern without time field', async function () {
       await PageObjects.settings.createIndexPattern('alias1', null);
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('alias1*');
     });
 
-    it('should be able to discover and verify no of hits for alias1', async function() {
+    it('should be able to discover and verify no of hits for alias1', async function () {
       const expectedHitCount = '4';
       await PageObjects.common.navigateToApp('discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
     });
 
-    it('should be able to create index pattern with timefield', async function() {
+    it('should be able to create index pattern with timefield', async function () {
       await PageObjects.settings.createIndexPattern('alias2', 'date');
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('alias2*');
     });
 
-    it('should be able to discover and verify no of hits for alias2', async function() {
+    it('should be able to discover and verify no of hits for alias2', async function () {
       const expectedHitCount = '5';
       const fromTime = 'Nov 12, 2016 @ 05:00:00.000';
       const toTime = 'Nov 19, 2016 @ 05:00:00.000';
@@ -78,7 +78,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.discover.selectIndexPattern('alias2*');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
-      await retry.try(async function() {
+      await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
     });

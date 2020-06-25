@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const createIndexName = function(sampleDataSetId: string, dataIndexId: string): string {
+export const createIndexName = function (sampleDataSetId: string, dataIndexId: string): string {
   // Sample data schema was updated to support multiple indices in 6.5.
   // This if statement ensures that sample data sets that used a single index prior to the schema change
   // have the same index name to avoid orphaned indices when uninstalling.

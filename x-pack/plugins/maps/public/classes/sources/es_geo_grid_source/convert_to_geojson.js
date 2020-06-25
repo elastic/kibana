@@ -16,10 +16,10 @@ export function convertCompositeRespToGeoJson(esResponse, renderAs) {
   return convertToGeoJson(
     esResponse,
     renderAs,
-    esResponse => {
+    (esResponse) => {
       return _.get(esResponse, 'aggregations.compositeSplit.buckets', []);
     },
-    gridBucket => {
+    (gridBucket) => {
       return gridBucket.key.gridSplit;
     }
   );
@@ -29,10 +29,10 @@ export function convertRegularRespToGeoJson(esResponse, renderAs) {
   return convertToGeoJson(
     esResponse,
     renderAs,
-    esResponse => {
+    (esResponse) => {
       return _.get(esResponse, 'aggregations.gridSplit.buckets', []);
     },
-    gridBucket => {
+    (gridBucket) => {
       return gridBucket.key;
     }
   );

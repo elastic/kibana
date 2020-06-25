@@ -89,8 +89,8 @@ export class InfraServerPlugin {
   }
 
   async setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
-    await new Promise(resolve => {
-      this.config$.subscribe(configValue => {
+    await new Promise((resolve) => {
+      this.config$.subscribe((configValue) => {
         this.config = configValue;
         resolve();
       });
@@ -149,7 +149,7 @@ export class InfraServerPlugin {
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerting, this.libs);
+    registerAlertTypes(plugins.alerts, this.libs);
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);

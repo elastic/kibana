@@ -14,7 +14,7 @@ import { hasField } from '../utils';
 const generator = htmlIdGenerator('lens-nesting');
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
-  const result = columnOrder.filter(c => c !== inner);
+  const result = columnOrder.filter((c) => c !== inner);
   const outerPosition = result.indexOf(outer);
 
   result.splice(outerPosition + 1, 0, inner);
@@ -130,7 +130,7 @@ export function BucketNestingEditor({
             ...aggColumns.map(({ value, text }) => ({ value, text })),
           ]}
           value={prevColumn}
-          onChange={e => setColumns(nestColumn(layer.columnOrder, e.target.value, columnId))}
+          onChange={(e) => setColumns(nestColumn(layer.columnOrder, e.target.value, columnId))}
         />
       </EuiFormRow>
     </>

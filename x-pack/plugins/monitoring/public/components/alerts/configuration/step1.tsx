@@ -44,7 +44,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     if (props.editAction) {
       await Legacy.shims.kfetch({
         method: 'PUT',
-        pathname: `${BASE_ACTION_API_PATH}/${props.editAction.id}`,
+        pathname: `${BASE_ACTION_API_PATH}/action/${props.editAction.id}`,
         body: JSON.stringify({
           name: props.editAction.name,
           config: omit(data, ['user', 'password']),
@@ -55,7 +55,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     } else {
       await Legacy.shims.kfetch({
         method: 'POST',
-        pathname: BASE_ACTION_API_PATH,
+        pathname: `${BASE_ACTION_API_PATH}/action`,
         body: JSON.stringify({
           name: i18n.translate('xpack.monitoring.alerts.configuration.emailAction.name', {
             defaultMessage: 'Email action for Stack Monitoring alerts',
@@ -75,7 +75,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
 
     await Legacy.shims.kfetch({
       method: 'DELETE',
-      pathname: `${BASE_ACTION_API_PATH}/${id}`,
+      pathname: `${BASE_ACTION_API_PATH}/action/${id}`,
     });
 
     if (props.editAction && props.editAction.id === id) {
@@ -101,7 +101,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
 
     const result = await Legacy.shims.kfetch({
       method: 'POST',
-      pathname: `${BASE_ACTION_API_PATH}/${props.selectedEmailActionId}/_execute`,
+      pathname: `${BASE_ACTION_API_PATH}/action/${props.selectedEmailActionId}/_execute`,
       body: JSON.stringify({ params }),
     });
     if (result.status === 'ok') {
@@ -178,7 +178,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
   );
 
   const options = [
-    ...props.emailActions.map(action => {
+    ...props.emailActions.map((action) => {
       const actionLabel = i18n.translate(
         'xpack.monitoring.alerts.configuration.selectAction.inputDisplay',
         {
@@ -207,7 +207,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     <EuiSuperSelect
       options={options}
       valueOfSelected={props.selectedEmailActionId}
-      onChange={id => props.setSelectedEmailActionId(id)}
+      onChange={(id) => props.setSelectedEmailActionId(id)}
       hasDividers
     />
   );
@@ -238,7 +238,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
 
   let manageConfiguration = null;
   const selectedEmailAction = props.emailActions.find(
-    action => action.id === props.selectedEmailActionId
+    (action) => action.id === props.selectedEmailActionId
   );
 
   if (
@@ -288,7 +288,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
               iconType="pencil"
               onClick={() => {
                 const editAction =
-                  props.emailActions.find(action => action.id === props.selectedEmailActionId) ||
+                  props.emailActions.find((action) => action.id === props.selectedEmailActionId) ||
                   null;
                 props.setEditAction(editAction);
               }}

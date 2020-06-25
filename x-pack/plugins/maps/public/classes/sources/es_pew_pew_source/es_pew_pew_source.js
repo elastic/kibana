@@ -26,13 +26,14 @@ export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 export class ESPewPewSource extends AbstractESAggSource {
   static type = SOURCE_TYPES.ES_PEW_PEW;
 
-  static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
+  static createDescriptor({ indexPatternId, sourceGeoField, destGeoField, metrics }) {
     return {
       type: ESPewPewSource.type,
       id: uuid(),
       indexPatternId: indexPatternId,
       sourceGeoField,
       destGeoField,
+      metrics: metrics ? metrics : [],
     };
   }
 

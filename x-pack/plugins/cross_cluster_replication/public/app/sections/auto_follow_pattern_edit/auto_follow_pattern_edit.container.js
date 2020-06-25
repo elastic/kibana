@@ -23,7 +23,7 @@ import { AutoFollowPatternEdit as AutoFollowPatternEditView } from './auto_follo
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   apiStatus: {
     get: getApiStatus(`${scope}-get`)(state),
     save: getApiStatus(`${scope}-save`)(state),
@@ -36,9 +36,9 @@ const mapStateToProps = state => ({
   autoFollowPattern: getSelectedAutoFollowPattern('edit')(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  getAutoFollowPattern: id => dispatch(getAutoFollowPattern(id)),
-  selectAutoFollowPattern: id => dispatch(selectEditAutoFollowPattern(id)),
+const mapDispatchToProps = (dispatch) => ({
+  getAutoFollowPattern: (id) => dispatch(getAutoFollowPattern(id)),
+  selectAutoFollowPattern: (id) => dispatch(selectEditAutoFollowPattern(id)),
   saveAutoFollowPattern: (id, autoFollowPattern) => {
     // Strip out errors.
     const { active, remoteCluster, leaderIndexPatterns, followIndexPattern } = autoFollowPattern;

@@ -10,7 +10,7 @@ import { Transaction } from '../../../../../../../../typings/es_schemas/ui/trans
 import {
   SPAN_NAME,
   TRANSACTION_NAME,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
@@ -29,7 +29,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
     ? [
         {
           label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
-            defaultMessage: 'Service'
+            defaultMessage: 'Service',
           }),
           fieldName: SERVICE_NAME,
           val: (
@@ -37,13 +37,13 @@ export function StickySpanProperties({ span, transaction }: Props) {
               {transaction.service.name}
             </TransactionOverviewLink>
           ),
-          width: '25%'
+          width: '25%',
         },
         {
           label: i18n.translate(
             'xpack.apm.transactionDetails.transactionLabel',
             {
-              defaultMessage: 'Transaction'
+              defaultMessage: 'Transaction',
             }
           ),
           fieldName: TRANSACTION_NAME,
@@ -58,8 +58,8 @@ export function StickySpanProperties({ span, transaction }: Props) {
               {transaction.transaction.name}
             </TransactionDetailLink>
           ),
-          width: '25%'
-        }
+          width: '25%',
+        },
       ]
     : [];
 
@@ -68,15 +68,15 @@ export function StickySpanProperties({ span, transaction }: Props) {
       label: i18n.translate(
         'xpack.apm.transactionDetails.spanFlyout.nameLabel',
         {
-          defaultMessage: 'Name'
+          defaultMessage: 'Name',
         }
       ),
       fieldName: SPAN_NAME,
       val: spanName || NOT_AVAILABLE_LABEL,
       truncated: true,
-      width: '25%'
+      width: '25%',
     },
-    ...transactionStickyProperties
+    ...transactionStickyProperties,
   ];
 
   return <StickyProperties stickyProperties={stickyProperties} />;

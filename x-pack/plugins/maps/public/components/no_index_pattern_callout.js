@@ -24,7 +24,7 @@ export function NoIndexPatternCallout() {
           id="xpack.maps.noIndexPattern.doThisPrefixDescription"
           defaultMessage="You'll need to "
         />
-        <EuiLink href={http.basePath.prepend('/app/kibana#/management/kibana/index_pattern')}>
+        <EuiLink href={http.basePath.prepend(`/app/management/kibana/indexPatterns`)}>
           <FormattedMessage
             id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
             defaultMessage="create an index pattern"

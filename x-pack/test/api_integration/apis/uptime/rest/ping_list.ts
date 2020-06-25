@@ -18,7 +18,7 @@ function decodePingsResponseData(response: any) {
   return decoded.right;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('pingList query', () => {
     before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));

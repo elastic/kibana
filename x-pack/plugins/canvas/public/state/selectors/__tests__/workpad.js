@@ -175,7 +175,7 @@ describe('workpad selectors', () => {
     it('returns all elements on the page', () => {
       const { elements } = state.persistent.workpad.pages[0];
 
-      const expected = elements.map(element => ({
+      const expected = elements.map((element) => ({
         ...element,
         ast: asts[element.id],
       }));

@@ -24,8 +24,8 @@ interface Props {
 
 export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => {
   const defaultValueArray =
-    defaultValue !== undefined ? defaultValue.split('||').map(value => ({ label: value })) : [];
-  const defaultValuesInOptions = defaultValueArray.filter(defaultFormat =>
+    defaultValue !== undefined ? defaultValue.split('||').map((value) => ({ label: value })) : [];
+  const defaultValuesInOptions = defaultValueArray.filter((defaultFormat) =>
     ALL_DATE_FORMAT_OPTIONS.includes(defaultFormat)
   );
 
@@ -57,7 +57,7 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
       defaultToggleValue={defaultToggleValue}
     >
       <UseField path="format" config={getFieldConfig('format')}>
-        {formatField => {
+        {(formatField) => {
           return (
             <EuiFormRow label={formatField.label} helpText={formatField.helpText} fullWidth>
               <EuiComboBox
@@ -69,7 +69,7 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
                 )}
                 options={comboBoxOptions}
                 selectedOptions={formatField.value as ComboBoxOption[]}
-                onChange={value => {
+                onChange={(value) => {
                   formatField.setValue(value);
                 }}
                 onCreateOption={(searchValue: string) => {

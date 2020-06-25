@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import {
   Coordinate,
-  RectCoordinate
+  RectCoordinate,
 } from '../../../../../../typings/timeseries';
 import { useChartsSync } from '../../../../../hooks/useChartsSync';
 // @ts-ignore
@@ -39,7 +39,7 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
     height,
     truncateLegends,
     stacked = false,
-    onHover
+    onHover,
   } = props;
 
   const syncedChartsProps = useChartsSync();

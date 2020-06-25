@@ -7,7 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_INDEX } from '../../common/constants';
-import { buildSiemResponse, transformError, validate } from '../siem_server_deps';
+import { buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/siem_common_deps';
 import { listItemIndexExistSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -31,7 +32,7 @@ export const readListIndexRoute = (router: IRouter): void => {
 
         if (listIndexExists || listItemIndexExists) {
           const [validated, errors] = validate(
-            { list_index: listIndexExists, lists_item_index: listItemIndexExists },
+            { list_index: listIndexExists, list_item_index: listItemIndexExists },
             listItemIndexExistSchema
           );
           if (errors != null) {

@@ -114,7 +114,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -125,7 +125,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
                   0 ms
                 </text>
@@ -149,7 +149,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -160,7 +160,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
                   500 ms
                 </text>
@@ -184,7 +184,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -195,7 +195,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
                   1,000 ms
                 </text>
@@ -219,7 +219,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -230,7 +230,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
                   1,500 ms
                 </text>
@@ -254,7 +254,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -265,7 +265,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
                   2,000 ms
                 </text>
@@ -289,7 +289,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -300,7 +300,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
                   2,500 ms
                 </text>
@@ -324,7 +324,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   x1={0}
                   x2={0}
                   y1={-0}
-                  y2={10}
+                  y2={0}
                 />
                 <text
                   className="rv-xy-plot__axis__tick__text"
@@ -335,7 +335,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                     }
                   }
                   textAnchor="middle"
-                  transform="translate(0, 18)"
+                  transform="translate(0, 8)"
                 >
                   3,000 ms
                 </text>
@@ -371,7 +371,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
-                  0.0 occ.
+                  0 occ.
                 </text>
               </g>
               <g
@@ -394,7 +394,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
-                  27.5 occ.
+                  28 occ.
                 </text>
               </g>
               <g
@@ -417,7 +417,7 @@ exports[`Histogram Initially should have default markup 1`] = `
                   textAnchor="end"
                   transform="translate(-8, 0)"
                 >
-                  55.0 occ.
+                  55 occ.
                 </text>
               </g>
             </g>
@@ -522,7 +522,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               y={112}
             />
             <rect
-              height={16.290909090909082}
+              height={16.290909090909096}
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -538,7 +538,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               }
               width={22.62857142857142}
               x={126.97142857142858}
-              y={95.70909090909092}
+              y={95.7090909090909}
             />
             <rect
               height={46.83636363636364}
@@ -576,7 +576,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               }
               width={22.628571428571405}
               x={177.25714285714287}
-              y={12.218181818181819}
+              y={12.218181818181822}
             />
             <rect
               height={103.85454545454544}
@@ -595,10 +595,10 @@ exports[`Histogram Initially should have default markup 1`] = `
               }
               width={22.628571428571377}
               x={202.40000000000003}
-              y={8.145454545454555}
+              y={8.145454545454548}
             />
             <rect
-              height={93.67272727272727}
+              height={93.67272727272726}
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -614,7 +614,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               }
               width={22.628571428571462}
               x={227.54285714285712}
-              y={18.327272727272728}
+              y={18.327272727272735}
             />
             <rect
               height={26.47272727272727}
@@ -655,7 +655,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               y={97.74545454545455}
             />
             <rect
-              height={8.145454545454541}
+              height={8.145454545454555}
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -671,7 +671,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               }
               width={22.62857142857149}
               x={302.97142857142853}
-              y={103.85454545454546}
+              y={103.85454545454544}
             />
             <rect
               height={6.109090909090909}
@@ -712,7 +712,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               y={112}
             />
             <rect
-              height={8.145454545454541}
+              height={8.145454545454555}
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -728,7 +728,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               }
               width={22.628571428571433}
               x={378.4}
-              y={103.85454545454546}
+              y={103.85454545454544}
             />
             <rect
               height={0}
@@ -1488,7 +1488,7 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
             <div
               className="c3"
             >
-              49.0 occurrences
+              49 occurrences
             </div>
           </styled.div>
         </div>

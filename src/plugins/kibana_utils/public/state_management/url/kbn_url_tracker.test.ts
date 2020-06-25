@@ -26,7 +26,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { unhashUrl } from './hash_unhash_url';
 
 jest.mock('./hash_unhash_url', () => ({
-  unhashUrl: jest.fn(x => x),
+  unhashUrl: jest.fn((x) => x),
 }));
 
 describe('kbnUrlTracker', () => {
@@ -111,7 +111,7 @@ describe('kbnUrlTracker', () => {
   });
 
   test('unhash all urls that are recorded while app is mounted', () => {
-    (unhashUrl as jest.Mock).mockImplementation(x => x + '?unhashed');
+    (unhashUrl as jest.Mock).mockImplementation((x) => x + '?unhashed');
     createTracker();
     urlTracker.appMounted();
     history.push('#/start/deep/path/2');

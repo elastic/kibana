@@ -11,19 +11,19 @@ import { INDEX_NAMES } from '../../../common/constants';
 import { checkLicense } from '../../lib/check_license';
 
 async function deletePipelines(callWithRequest: APICaller, pipelineIds: string[]) {
-  const deletePromises = pipelineIds.map(pipelineId => {
+  const deletePromises = pipelineIds.map((pipelineId) => {
     return callWithRequest('delete', {
       index: INDEX_NAMES.PIPELINES,
       id: pipelineId,
       refresh: 'wait_for',
     })
-      .then(success => ({ success }))
-      .catch(error => ({ error }));
+      .then((success) => ({ success }))
+      .catch((error) => ({ error }));
   });
 
   const results = await Promise.all(deletePromises);
-  const successes = results.filter(result => Reflect.has(result, 'success'));
-  const errors = results.filter(result => Reflect.has(result, 'error'));
+  const successes = results.filter((result) => Reflect.has(result, 'success'));
+  const errors = results.filter((result) => Reflect.has(result, 'error'));
 
   return {
     numSuccesses: successes.length,

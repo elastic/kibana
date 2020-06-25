@@ -83,10 +83,12 @@ export const AppContainer: FunctionComponent<Props> = ({
             appBasePath: mounter.appBasePath,
             history: createScopedHistory(appPath),
             element: elementRef.current!,
-            onAppLeave: handler => setAppLeaveHandler(appId, handler),
+            onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
           })) || null;
       } catch (e) {
         // TODO: add error UI
+        // eslint-disable-next-line no-console
+        console.error(e);
       } finally {
         setShowSpinner(false);
         setIsMounting(false);

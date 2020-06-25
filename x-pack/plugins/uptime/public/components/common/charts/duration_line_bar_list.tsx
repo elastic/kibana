@@ -23,7 +23,7 @@ interface Props {
 export const DurationAnomaliesBar = ({ anomalies, hiddenLegends }: Props) => {
   const anomalyAnnotations: Map<string, { rect: RectAnnotationDatum[]; color: string }> = new Map();
 
-  Object.keys(ANOMALY_SEVERITY).forEach(severityLevel => {
+  Object.keys(ANOMALY_SEVERITY).forEach((severityLevel) => {
     anomalyAnnotations.set(severityLevel.toLowerCase(), { rect: [], color: '' });
   });
 
@@ -49,9 +49,7 @@ export const DurationAnomaliesBar = ({ anomalies, hiddenLegends }: Props) => {
       const anomalyRect = {
         coordinates: {
           x0: moment(record.source.timestamp).valueOf(),
-          x1: moment(record.source.timestamp)
-            .add(record.source.bucket_span, 's')
-            .valueOf(),
+          x1: moment(record.source.timestamp).add(record.source.bucket_span, 's').valueOf(),
         },
         details: JSON.stringify(tooltipData),
       };

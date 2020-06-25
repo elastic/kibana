@@ -37,8 +37,8 @@ export function Mode() {
 }
 oop.inherits(Mode, JSONMode);
 
-(function() {
-  this.createWorker = function() {
+(function () {
+  this.createWorker = function () {
     return null;
   };
 

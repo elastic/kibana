@@ -42,7 +42,7 @@ export class ServiceSettings {
       tileApiUrl: this._mapConfig.emsTileApiUrl,
       landingPageUrl: this._mapConfig.emsLandingPageUrl,
       // Wrap to avoid errors passing window fetch
-      fetchFunction: function(...args) {
+      fetchFunction: function (...args) {
         return fetch(...args);
       },
     });
@@ -97,7 +97,7 @@ export class ServiceSettings {
     }
 
     const fileLayers = await this._emsClient.getFileLayers();
-    return fileLayers.map(fileLayer => {
+    return fileLayers.map((fileLayer) => {
       //backfill to older settings
       const format = fileLayer.getDefaultFormatType();
       const meta = fileLayer.getDefaultFormatMeta();
@@ -133,8 +133,8 @@ export class ServiceSettings {
       const servicesFromManifest = await this._emsClient.getTMSServices();
       const strippedServiceFromManifest = await Promise.all(
         servicesFromManifest
-          .filter(tmsService => tmsService.getId() === this._mapConfig.emsTileLayerId.bright)
-          .map(async tmsService => {
+          .filter((tmsService) => tmsService.getId() === this._mapConfig.emsTileLayerId.bright)
+          .map(async (tmsService) => {
             //shim for compatibility
             return {
               origin: tmsService.getOrigin(),
@@ -163,7 +163,7 @@ export class ServiceSettings {
 
   async getEMSHotLink(fileLayerConfig) {
     const fileLayers = await this._emsClient.getFileLayers();
-    const layer = fileLayers.find(fileLayer => {
+    const layer = fileLayers.find((fileLayer) => {
       const hasIdByName = fileLayer.hasId(fileLayerConfig.name); //legacy
       const hasIdById = fileLayer.hasId(fileLayerConfig.id);
       return hasIdByName || hasIdById;
@@ -184,7 +184,7 @@ export class ServiceSettings {
         serviceId = emsTileLayerId.bright;
       }
     }
-    const tmsService = tmsServices.find(service => {
+    const tmsService = tmsServices.find((service) => {
       return service.getId() === serviceId;
     });
     return {
@@ -218,7 +218,7 @@ export class ServiceSettings {
 
   async _getFileUrlFromEMS(fileLayerConfig) {
     const fileLayers = await this._emsClient.getFileLayers();
-    const layer = fileLayers.find(fileLayer => {
+    const layer = fileLayers.find((fileLayer) => {
       const hasIdByName = fileLayer.hasId(fileLayerConfig.name); //legacy
       const hasIdById = fileLayer.hasId(fileLayerConfig.id);
       return hasIdByName || hasIdById;

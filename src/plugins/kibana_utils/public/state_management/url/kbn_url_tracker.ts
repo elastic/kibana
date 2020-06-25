@@ -38,6 +38,10 @@ export interface KbnUrlTracker {
   stop: () => void;
   setActiveUrl: (newUrl: string) => void;
   getActiveUrl: () => string;
+  /**
+   * Resets internal state to the last active url, discarding the most recent change
+   */
+  restorePreviousUrl: () => void;
 }
 
 /**
@@ -122,6 +126,8 @@ export function createKbnUrlTracker({
 }): KbnUrlTracker {
   const storageInstance = storage || sessionStorage;
 
+  // local state storing previous active url to make restore possible
+  let previousActiveUrl: string = '';
   // local state storing current listeners and active url
   let activeUrl: string = '';
   let unsubscribeURLHistory: UnregisterCallback | undefined;
@@ -143,7 +149,7 @@ export function createKbnUrlTracker({
     }
 
     if (unsubscribeGlobalState) {
-      unsubscribeGlobalState.forEach(sub => sub.unsubscribe());
+      unsubscribeGlobalState.forEach((sub) => sub.unsubscribe());
       unsubscribeGlobalState = undefined;
     }
   }
@@ -157,6 +163,7 @@ export function createKbnUrlTracker({
       toastNotifications.addDanger(e.message);
     }
 
+    previousActiveUrl = activeUrl;
     activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
     storageInstance.setItem(storageKey, activeUrl);
   }
@@ -165,7 +172,7 @@ export function createKbnUrlTracker({
     unsubscribe();
     const historyInstance = history || (getHistory && getHistory()) || createHashHistory();
     // track current hash when within app
-    unsubscribeURLHistory = historyInstance.listen(location => {
+    unsubscribeURLHistory = historyInstance.listen((location) => {
       if (shouldTrackUrlUpdate(location.hash)) {
         setActiveUrl(location.hash.substr(1));
       }
@@ -176,13 +183,14 @@ export function createKbnUrlTracker({
     unsubscribe();
     // propagate state updates when in other apps
     unsubscribeGlobalState = stateParams.map(({ stateUpdate$, kbnUrlKey }) =>
-      stateUpdate$.subscribe(state => {
+      stateUpdate$.subscribe((state) => {
         const updatedUrl = setStateToKbnUrl(
           kbnUrlKey,
           state,
           { useHash: false },
           baseUrl + (activeUrl || defaultSubUrl)
         );
+        previousActiveUrl = activeUrl;
         // remove baseUrl prefix (just storing the sub url part)
         activeUrl = getActiveSubUrl(updatedUrl);
         storageInstance.setItem(storageKey, activeUrl);
@@ -198,6 +206,7 @@ export function createKbnUrlTracker({
   const storedUrl = storageInstance.getItem(storageKey);
   if (storedUrl) {
     activeUrl = storedUrl;
+    previousActiveUrl = storedUrl;
     setNavLink(storedUrl);
   }
 
@@ -216,6 +225,9 @@ export function createKbnUrlTracker({
     setActiveUrl,
     getActiveUrl() {
       return activeUrl;
+    },
+    restorePreviousUrl() {
+      activeUrl = previousActiveUrl;
     },
   };
 }

@@ -7,7 +7,7 @@
 import { forbidden } from 'boom';
 import { i18n } from '@kbn/i18n';
 
-const getStatusCode = err => {
+const getStatusCode = (err) => {
   return err.isBoom ? err.output.statusCode : err.statusCode;
 };
 

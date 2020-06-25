@@ -1,0 +1,11 @@
+{
+  "id": "uiActionsEnhanced",
+  "version": "kibana",
+  "configPath": ["xpack", "ui_actions_enhanced"],
+  "requiredPlugins": [
+    "embeddable",
+    "uiActions"
+  ],
+  "server": false,
+  "ui": true
+}

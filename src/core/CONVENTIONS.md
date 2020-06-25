@@ -68,7 +68,7 @@ my_plugin/
     ├── index.ts
     └── plugin.ts
 ```
-- [Manifest file](/docs/development/core/server/kibana-plugin-server.pluginmanifest.md) should be defined on top level.
+- [Manifest file](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md) should be defined on top level.
 - Both `server` and `public` should have an `index.ts` and a `plugin.ts` file:
   - `index.ts` should only contain:
     - The `plugin` export
@@ -167,17 +167,21 @@ leverage this pattern.
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart, AppMountParams } from '../../src/core/public';
+import { CoreStart, AppMountParameters } from 'src/core/public';
 
 import { MyAppRoot } from './components/app.ts';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export const renderApp = (core: CoreStart, deps: MyPluginDepsStart, { element, history }: AppMountParams) => {
+export const renderApp = (
+  core: CoreStart,
+  deps: MyPluginDepsStart,
+  { element, history }: AppMountParameters
+) => {
   ReactDOM.render(<MyAppRoot core={core} deps={deps} routerHistory={history} />, element);
   return () => ReactDOM.unmountComponentAtNode(element);
-}
+};
 ```
 
 ```ts
@@ -200,6 +204,36 @@ export class MyPlugin implements Plugin {
   }
 }
 ```
+
+Prefer the pattern shown above, using `core.getStartServices()`, rather than store local references retrieved from `start`. 
+
+**Bad:**
+```ts
+export class MyPlugin implements Plugin {
+ // Anti pattern
+  private coreStart?: CoreStart;
+  private depsStart?: DepsStart;  
+
+  public setup(core) {
+    core.application.register({
+      id: 'my-app',
+      async mount(params) {
+        const { renderApp } = await import('./application/my_app');
+        // Anti pattern - use `core.getStartServices()` instead!
+        return renderApp(this.coreStart, this.depsStart, params);
+      }
+    });
+  }  
+
+  public start(core, deps) {
+    // Anti pattern
+    this.coreStart = core;
+    this.depsStart = deps;
+  }
+}
+```
+
+The main reason to prefer the provided async accessor, is that it doesn't requires the developer to understand and reason about when that function can be called. Having an API that fails sometimes isn't a good API design, and it makes accurately testing this difficult.
 
 #### Services
 
@@ -302,7 +336,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const myType: SavedObjectsType = {
   name: 'my-type',
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'single',
   mappings: {
     properties: {
       someField: {

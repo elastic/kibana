@@ -9,9 +9,9 @@ jest.mock('../../../app/Main/route_config/index.tsx', () => ({
   routes: [
     {
       name: 'link_to_trace',
-      path: '/link-to/trace/:traceId'
-    }
-  ]
+      path: '/link-to/trace/:traceId',
+    },
+  ],
 }));
 
 describe('ExternalLinks', () => {

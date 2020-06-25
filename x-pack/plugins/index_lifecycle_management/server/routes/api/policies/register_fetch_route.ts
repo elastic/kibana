@@ -66,7 +66,7 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
     license.guardApiRoute(async (context, request, response) => {
       const query = request.query as typeof querySchema.type;
       const { withIndices } = query;
-      const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
 
       try {
         const policiesMap = await fetchPolicies(callAsCurrentUser);

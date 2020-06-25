@@ -20,18 +20,16 @@
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({
+export default function ({
   getService,
   getPageObjects,
   loadTestFile,
 }: PluginFunctionalProviderContext) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common']);
 
-  describe('state sync examples', function() {
+  describe('state sync examples', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
-      await PageObjects.common.navigateToApp('settings');
     });
 
     loadTestFile(require.resolve('./todo_app'));

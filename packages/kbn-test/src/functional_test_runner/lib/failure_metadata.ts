@@ -39,7 +39,7 @@ export class FailureMetadata {
       );
     }
 
-    lifecycle.beforeEachRunnable.add(runnable => {
+    lifecycle.beforeEachRunnable.add((runnable) => {
       this.currentRunnable = runnable;
     });
   }
@@ -57,7 +57,7 @@ export class FailureMetadata {
   }
 
   addMessages(messages: string[]) {
-    this.add(current => ({
+    this.add((current) => ({
       messages: [...(Array.isArray(current.messages) ? current.messages : []), ...messages],
     }));
   }
@@ -76,7 +76,7 @@ export class FailureMetadata {
     const slash = prefix.endsWith('/') ? '' : '/';
     const urlPath = Path.relative(REPO_ROOT, repoPath)
       .split(Path.sep)
-      .map(c => encodeURIComponent(c))
+      .map((c) => encodeURIComponent(c))
       .join('/');
 
     if (urlPath.startsWith('..')) {
@@ -91,7 +91,7 @@ export class FailureMetadata {
       url,
     };
 
-    this.add(current => ({
+    this.add((current) => ({
       screenshots: [...(Array.isArray(current.screenshots) ? current.screenshots : []), screenshot],
     }));
 

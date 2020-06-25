@@ -5,9 +5,10 @@
  */
 import Boom from 'boom';
 import { combineLatest } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
+import { TypeOf } from '@kbn/config-schema';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
@@ -30,7 +31,7 @@ import {
   KIBANA_ALERTING_ENABLED,
   KIBANA_STATS_TYPE_MONITORING,
 } from '../common/constants';
-import { MonitoringConfig } from './config';
+import { MonitoringConfig, createConfig, configSchema } from './config';
 // @ts-ignore
 import { requireUIRoutes } from './routes';
 // @ts-ignore
@@ -47,7 +48,7 @@ import { MonitoringLicenseService } from './types';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerting/server';
+} from '../../alerts/server';
 import { getLicenseExpiration } from './alerts/license_expiration';
 import { getClusterState } from './alerts/cluster_state';
 import { InfraPluginSetup } from '../../infra/server';
@@ -61,12 +62,12 @@ interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
-  alerting: AlertingPluginSetupContract;
+  alerts: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
 }
 
 interface PluginsStart {
-  alerting: AlertingPluginStartContract;
+  alerts: AlertingPluginStartContract;
 }
 
 interface MonitoringCoreConfig {
@@ -122,7 +123,9 @@ export class Plugin {
 
   async setup(core: CoreSetup, plugins: PluginsSetup) {
     const [config, legacyConfig] = await combineLatest([
-      this.initializerContext.config.create<MonitoringConfig>(),
+      this.initializerContext.config
+        .create<TypeOf<typeof configSchema>>()
+        .pipe(map((rawConfig) => createConfig(rawConfig))),
       this.initializerContext.config.legacy.globalConfig$,
     ])
       .pipe(first())
@@ -131,7 +134,7 @@ export class Plugin {
     this.legacyShimDependencies = {
       router: core.http.createRouter(),
       instanceUuid: core.uuid.getInstanceUuid(),
-      esDataClient: core.elasticsearch.dataClient,
+      esDataClient: core.elasticsearch.legacy.client,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
         KIBANA_STATS_TYPE_MONITORING
       ),
@@ -142,7 +145,7 @@ export class Plugin {
     const cluster = (this.cluster = instantiateClient(
       config.ui.elasticsearch,
       this.log,
-      core.elasticsearch.createClient
+      core.elasticsearch.legacy.createClient
     ));
 
     // Start our license service which will ensure
@@ -156,7 +159,7 @@ export class Plugin {
     await this.licenseService.refresh();
 
     if (KIBANA_ALERTING_ENABLED) {
-      plugins.alerting.registerType(
+      plugins.alerts.registerType(
         getLicenseExpiration(
           async () => {
             const coreStart = (await core.getStartServices())[0];
@@ -167,7 +170,7 @@ export class Plugin {
           config.ui.ccs.enabled
         )
       );
-      plugins.alerting.registerType(
+      plugins.alerts.registerType(
         getClusterState(
           async () => {
             const coreStart = (await core.getStartServices())[0];
@@ -357,7 +360,7 @@ export class Plugin {
             payload: req.body,
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
-            getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
+            getAlertsClient: () => plugins.alerts.getAlertsClientWithRequest(req),
             server: {
               config: legacyConfigWrapper,
               newPlatform: {

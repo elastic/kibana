@@ -111,13 +111,13 @@ export class KibanaParsedUrl {
       return;
     }
 
-    this.appPath = modifyUrl(this.appPath, parsed => {
+    this.appPath = modifyUrl(this.appPath, (parsed) => {
       parsed.query._g = newGlobalState;
     });
   }
 
   public addQueryParameter(name: string, val: string) {
-    this.appPath = modifyUrl(this.appPath, parsed => {
+    this.appPath = modifyUrl(this.appPath, (parsed) => {
       parsed.query[name] = val;
     });
   }
@@ -139,7 +139,7 @@ export class KibanaParsedUrl {
   }
 
   public getAbsoluteUrl() {
-    return modifyUrl(this.getRootRelativePath(), parsed => {
+    return modifyUrl(this.getRootRelativePath(), (parsed) => {
       parsed.protocol = this.protocol;
       parsed.port = this.port;
       parsed.hostname = this.hostname;

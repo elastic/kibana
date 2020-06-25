@@ -6,7 +6,7 @@
 
 const { unoptimizeTsConfig } = require('./optimize-tsconfig/unoptimize');
 
-unoptimizeTsConfig().catch(err => {
+unoptimizeTsConfig().catch((err) => {
   console.error(err);
   process.exit(1);
 });

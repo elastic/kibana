@@ -28,7 +28,7 @@ import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { GetInternalStartServicesFn, InternalStartServices } from '../../../types';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
-describe('parent pipeline aggs', function() {
+describe('parent pipeline aggs', function () {
   const getInternalStartServices: GetInternalStartServicesFn = () =>
     (({
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -61,7 +61,7 @@ describe('parent pipeline aggs', function() {
     },
   ];
 
-  metrics.forEach(metric => {
+  metrics.forEach((metric) => {
     describe(`${metric.title} metric`, () => {
       let aggDsl: Record<string, any>;
       let metricAgg: MetricAggType;
@@ -243,7 +243,7 @@ describe('parent pipeline aggs', function() {
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
         customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
 
-        aggConfig.type.params.forEach(param => {
+        aggConfig.type.params.forEach((param) => {
           param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
         });
         expect(customMetricSpy.mock.calls[0]).toEqual([customMetric, searchSource, {}]);

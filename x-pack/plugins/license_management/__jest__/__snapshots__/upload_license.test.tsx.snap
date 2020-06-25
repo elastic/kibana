@@ -112,6 +112,42 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           "refresh": [MockFunction],
         },
       },
+      "services": Object {
+        "history": Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        },
+      },
     }
   }
 >
@@ -126,12 +162,85 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       }
     }
   >
-    <Connect(UploadLicense)>
+    <Connect(UploadLicense)
+      history={
+        Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        }
+      }
+    >
       <UploadLicense
         addUploadErrorMessage={[Function]}
         applying={false}
         currentLicenseType=""
         errorMessage=""
+        history={
+          Object {
+            "action": "PUSH",
+            "block": [MockFunction],
+            "createHref": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+              ],
+            },
+            "createSubHistory": [MockFunction],
+            "go": [MockFunction],
+            "goBack": [MockFunction],
+            "goForward": [MockFunction],
+            "length": 1,
+            "listen": [MockFunction],
+            "location": Object {
+              "hash": "",
+              "key": undefined,
+              "pathname": "/",
+              "search": "",
+              "state": undefined,
+            },
+            "push": [MockFunction],
+            "replace": [MockFunction],
+          }
+        }
         isInvalid={false}
         messages={
           Array [
@@ -958,11 +1067,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="/home"
+                                onClick={[Function]}
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="/home"
+                                  onClick={[Function]}
                                   rel="noreferrer"
                                 >
                                   <span
@@ -1148,6 +1259,69 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           "refresh": [MockFunction],
         },
       },
+      "services": Object {
+        "history": Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        },
+      },
     }
   }
 >
@@ -1162,12 +1336,139 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       }
     }
   >
-    <Connect(UploadLicense)>
+    <Connect(UploadLicense)
+      history={
+        Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        }
+      }
+    >
       <UploadLicense
         addUploadErrorMessage={[Function]}
         applying={false}
         currentLicenseType=""
         errorMessage="The supplied license has expired."
+        history={
+          Object {
+            "action": "PUSH",
+            "block": [MockFunction],
+            "createHref": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+              ],
+            },
+            "createSubHistory": [MockFunction],
+            "go": [MockFunction],
+            "goBack": [MockFunction],
+            "goForward": [MockFunction],
+            "length": 1,
+            "listen": [MockFunction],
+            "location": Object {
+              "hash": "",
+              "key": undefined,
+              "pathname": "/",
+              "search": "",
+              "state": undefined,
+            },
+            "push": [MockFunction],
+            "replace": [MockFunction],
+          }
+        }
         isInvalid={false}
         needsAcknowledgement={false}
         setBreadcrumb={[Function]}
@@ -1424,11 +1725,13 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="/home"
+                                onClick={[Function]}
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="/home"
+                                  onClick={[Function]}
                                   rel="noreferrer"
                                 >
                                   <span
@@ -1614,6 +1917,69 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           "refresh": [MockFunction],
         },
       },
+      "services": Object {
+        "history": Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        },
+      },
     }
   }
 >
@@ -1628,12 +1994,139 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       }
     }
   >
-    <Connect(UploadLicense)>
+    <Connect(UploadLicense)
+      history={
+        Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        }
+      }
+    >
       <UploadLicense
         addUploadErrorMessage={[Function]}
         applying={false}
         currentLicenseType=""
         errorMessage="The supplied license is not valid for this product."
+        history={
+          Object {
+            "action": "PUSH",
+            "block": [MockFunction],
+            "createHref": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+              ],
+            },
+            "createSubHistory": [MockFunction],
+            "go": [MockFunction],
+            "goBack": [MockFunction],
+            "goForward": [MockFunction],
+            "length": 1,
+            "listen": [MockFunction],
+            "location": Object {
+              "hash": "",
+              "key": undefined,
+              "pathname": "/",
+              "search": "",
+              "state": undefined,
+            },
+            "push": [MockFunction],
+            "replace": [MockFunction],
+          }
+        }
         isInvalid={false}
         needsAcknowledgement={false}
         setBreadcrumb={[Function]}
@@ -1890,11 +2383,13 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="/home"
+                                onClick={[Function]}
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="/home"
+                                  onClick={[Function]}
                                   rel="noreferrer"
                                 >
                                   <span
@@ -2080,6 +2575,69 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           "refresh": [MockFunction],
         },
       },
+      "services": Object {
+        "history": Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        },
+      },
     }
   }
 >
@@ -2094,12 +2652,139 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       }
     }
   >
-    <Connect(UploadLicense)>
+    <Connect(UploadLicense)
+      history={
+        Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        }
+      }
+    >
       <UploadLicense
         addUploadErrorMessage={[Function]}
         applying={false}
         currentLicenseType=""
         errorMessage="Error encountered uploading license: Check your license file."
+        history={
+          Object {
+            "action": "PUSH",
+            "block": [MockFunction],
+            "createHref": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+              ],
+            },
+            "createSubHistory": [MockFunction],
+            "go": [MockFunction],
+            "goBack": [MockFunction],
+            "goForward": [MockFunction],
+            "length": 1,
+            "listen": [MockFunction],
+            "location": Object {
+              "hash": "",
+              "key": undefined,
+              "pathname": "/",
+              "search": "",
+              "state": undefined,
+            },
+            "push": [MockFunction],
+            "replace": [MockFunction],
+          }
+        }
         isInvalid={false}
         needsAcknowledgement={false}
         setBreadcrumb={[Function]}
@@ -2356,11 +3041,13 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="/home"
+                                onClick={[Function]}
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="/home"
+                                  onClick={[Function]}
                                   rel="noreferrer"
                                 >
                                   <span
@@ -2546,6 +3233,69 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           "refresh": [MockFunction],
         },
       },
+      "services": Object {
+        "history": Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        },
+      },
     }
   }
 >
@@ -2560,12 +3310,139 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       }
     }
   >
-    <Connect(UploadLicense)>
+    <Connect(UploadLicense)
+      history={
+        Object {
+          "action": "PUSH",
+          "block": [MockFunction],
+          "createHref": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+              Array [
+                Object {
+                  "pathname": "/home",
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+              Object {
+                "type": "return",
+                "value": "/home",
+              },
+            ],
+          },
+          "createSubHistory": [MockFunction],
+          "go": [MockFunction],
+          "goBack": [MockFunction],
+          "goForward": [MockFunction],
+          "length": 1,
+          "listen": [MockFunction],
+          "location": Object {
+            "hash": "",
+            "key": undefined,
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [MockFunction],
+        }
+      }
+    >
       <UploadLicense
         addUploadErrorMessage={[Function]}
         applying={false}
         currentLicenseType=""
         errorMessage="Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled"
+        history={
+          Object {
+            "action": "PUSH",
+            "block": [MockFunction],
+            "createHref": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+                Array [
+                  Object {
+                    "pathname": "/home",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/home",
+                },
+              ],
+            },
+            "createSubHistory": [MockFunction],
+            "go": [MockFunction],
+            "goBack": [MockFunction],
+            "goForward": [MockFunction],
+            "length": 1,
+            "listen": [MockFunction],
+            "location": Object {
+              "hash": "",
+              "key": undefined,
+              "pathname": "/",
+              "search": "",
+              "state": undefined,
+            },
+            "push": [MockFunction],
+            "replace": [MockFunction],
+          }
+        }
         isInvalid={false}
         needsAcknowledgement={false}
         setBreadcrumb={[Function]}
@@ -2822,11 +3699,13 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="/home"
+                                onClick={[Function]}
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="/home"
+                                  onClick={[Function]}
                                   rel="noreferrer"
                                 >
                                   <span

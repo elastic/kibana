@@ -53,7 +53,7 @@ export function dropdownControl(): ExpressionFunctionDefinition<
       let choices = [];
 
       if (input.rows[0][valueColumn]) {
-        choices = uniq(input.rows.map(row => row[valueColumn])).sort();
+        choices = uniq(input.rows.map((row) => row[valueColumn])).sort();
       }
 
       const column = filterColumn || valueColumn;

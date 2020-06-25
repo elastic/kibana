@@ -30,7 +30,7 @@ describe('min.js', () => {
   });
 
   it('keeps the min of a series vs a number', () => {
-    return invoke(fn, [seriesList, 20]).then(r => {
+    return invoke(fn, [seriesList, 20]).then((r) => {
       expect(_.map(r.output.list[0].data, 1)).to.eql([-51, 17, 20, 20]);
     });
   });

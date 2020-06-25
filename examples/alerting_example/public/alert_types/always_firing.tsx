@@ -71,7 +71,7 @@ export const AlwaysFiringExpression: React.FunctionComponent<AlwaysFiringParamsP
             <EuiFieldNumber
               name="instances"
               value={instances}
-              onChange={event => {
+              onChange={(event) => {
                 setAlertParams('instances', event.target.valueAsNumber);
               }}
             />

@@ -24,7 +24,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
 const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest') as SuperTest<Test>;
   const esArchiver = getService('esArchiver');
 

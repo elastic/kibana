@@ -46,14 +46,14 @@ export async function loadIndexPatterns({
   savedObjectsClient: SavedObjectsClient;
   cache: Record<string, IndexPattern>;
 }) {
-  const missingIds = patterns.filter(id => !cache[id]);
+  const missingIds = patterns.filter((id) => !cache[id]);
 
   if (missingIds.length === 0) {
     return cache;
   }
 
   const resp = await savedObjectsClient.bulkGet(
-    missingIds.map(id => ({ id, type: 'index-pattern' }))
+    missingIds.map((id) => ({ id, type: 'index-pattern' }))
   );
 
   return resp.savedObjects.reduce(
@@ -81,7 +81,7 @@ export async function loadInitialState({
   const requiredPatterns = _.unique(
     state
       ? Object.values(state.layers)
-          .map(l => l.indexPatternId)
+          .map((l) => l.indexPatternId)
           .concat(state.currentIndexPatternId)
       : [defaultIndexPatternId || indexPatternRefs[0].id]
   );
@@ -134,10 +134,10 @@ export async function changeIndexPattern({
       patterns: [id],
     });
 
-    setState(s => ({
+    setState((s) => ({
       ...s,
       layers: isSingleEmptyLayer(state.layers)
-        ? _.mapValues(state.layers, layer => updateLayerIndexPattern(layer, indexPatterns[id]))
+        ? _.mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
         : state.layers,
       indexPatterns: {
         ...s.indexPatterns,
@@ -174,7 +174,7 @@ export async function changeLayerIndexPattern({
       patterns: [indexPatternId],
     });
 
-    setState(s => ({
+    setState((s) => ({
       ...s,
       layers: {
         ...s.layers,
@@ -201,7 +201,7 @@ async function loadIndexPatternRefs(
   });
 
   return result.savedObjects
-    .map(o => ({
+    .map((o) => ({
       id: String(o.id),
       title: (o.attributes as { title: string }).title,
     }))
@@ -224,7 +224,7 @@ export async function syncExistingFields({
   dslQuery: object;
 }) {
   const emptinessInfo = await Promise.all(
-    indexPatterns.map(pattern => {
+    indexPatterns.map((pattern) => {
       const body: Record<string, string | object> = {
         dslQuery,
         fromDate: dateRange.fromDate,
@@ -241,7 +241,7 @@ export async function syncExistingFields({
     })
   );
 
-  setState(state => ({
+  setState((state) => ({
     ...state,
     existingFields: emptinessInfo.reduce((acc, info) => {
       acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
@@ -273,7 +273,7 @@ function fromSavedObject(
     title: attributes.title,
     fields: (JSON.parse(attributes.fields) as IFieldType[])
       .filter(
-        field =>
+        (field) =>
           !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
       )
       .concat(documentField) as IndexPatternField[],
@@ -294,7 +294,7 @@ function fromSavedObject(
     const aggs = Object.keys(typeMeta.aggs);
     newFields.forEach((field, index) => {
       const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
-      aggs.forEach(agg => {
+      aggs.forEach((agg) => {
         const restriction = typeMeta.aggs && typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
         if (restriction) {
           restrictionsObj[agg] = restriction;

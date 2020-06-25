@@ -133,7 +133,7 @@ const KuiLinkButton = ({
   children,
   ...rest
 }) => {
-  const onClick = e => {
+  const onClick = (e) => {
     if (disabled) {
       e.preventDefault();
     }

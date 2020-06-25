@@ -57,32 +57,32 @@ export function getPluginApi(
 
   const api: CanvasApi = {
     // Functions, types and renderers are registered directly to expression plugin
-    addFunctions: fns => {
-      fns.forEach(fn => {
+    addFunctions: (fns) => {
+      fns.forEach((fn) => {
         expressionsPluginSetup.registerFunction(fn);
       });
     },
-    addTypes: types => {
-      types.forEach(type => {
+    addTypes: (types) => {
+      types.forEach((type) => {
         expressionsPluginSetup.registerType(type as any);
       });
     },
-    addRenderers: renderers => {
+    addRenderers: (renderers) => {
       renderers.forEach((r: any) => {
         expressionsPluginSetup.registerRenderer(r);
       });
     },
 
     // All these others are local to canvas, and they will only register on start
-    addElements: elements => registries.elements.push(...elements),
-    addTransformUIs: transforms => registries.transformUIs.push(...transforms),
-    addDatasourceUIs: datasources => registries.datasourceUIs.push(...datasources),
-    addModelUIs: models => registries.modelUIs.push(...models),
-    addViewUIs: views => registries.viewUIs.push(...views),
-    addArgumentUIs: args => registries.argumentUIs.push(...args),
-    addTemplates: templates => registries.templates.push(...templates),
-    addTagUIs: tags => registries.tagUIs.push(...tags),
-    addTransitions: transitions => registries.transitions.push(...transitions),
+    addElements: (elements) => registries.elements.push(...elements),
+    addTransformUIs: (transforms) => registries.transformUIs.push(...transforms),
+    addDatasourceUIs: (datasources) => registries.datasourceUIs.push(...datasources),
+    addModelUIs: (models) => registries.modelUIs.push(...models),
+    addViewUIs: (views) => registries.viewUIs.push(...views),
+    addArgumentUIs: (args) => registries.argumentUIs.push(...args),
+    addTemplates: (templates) => registries.templates.push(...templates),
+    addTagUIs: (tags) => registries.tagUIs.push(...tags),
+    addTransitions: (transitions) => registries.transitions.push(...transitions),
   };
 
   return { api, registries };

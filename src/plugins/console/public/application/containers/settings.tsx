@@ -26,7 +26,7 @@ import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
 
 const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
-  return Object.keys(newSettings.autocomplete).filter(key => {
+  return Object.keys(newSettings.autocomplete).filter((key) => {
     // @ts-ignore
     return prevSettings.autocomplete[key] !== newSettings.autocomplete[key];
   });

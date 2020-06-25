@@ -52,13 +52,13 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
   let commandBlock;
   if (commands) {
     const cmdText = commands
-      .map(cmd => {
+      .map((cmd) => {
         return replaceTemplateStrings(cmd, paramValues);
       })
       .join('\n');
     copyButton = (
       <EuiCopy textToCopy={cmdText}>
-        {copy => (
+        {(copy) => (
           <EuiButton size="s" onClick={copy}>
             <FormattedMessage
               id="home.tutorial.instruction.copyButtonLabel"

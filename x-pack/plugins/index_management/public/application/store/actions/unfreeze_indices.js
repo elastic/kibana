@@ -12,7 +12,7 @@ import { notificationService } from '../../services/notification';
 
 export const unfreezeIndicesStart = createAction('INDEX_MANAGEMENT_UNFREEZE_INDICES_START');
 
-export const unfreezeIndices = ({ indexNames }) => async dispatch => {
+export const unfreezeIndices = ({ indexNames }) => async (dispatch) => {
   dispatch(unfreezeIndicesStart({ indexNames }));
   try {
     await request(indexNames);

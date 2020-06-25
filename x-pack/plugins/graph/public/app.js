@@ -46,26 +46,26 @@ export function initGraphApp(angularModule, deps) {
     addBasePath,
     getBasePath,
     data,
-    config,
     capabilities,
     coreStart,
     storage,
     canEditDrillDownUrls,
     graphSavePolicy,
     overlays,
+    savedObjects,
   } = deps;
 
   const app = angularModule;
 
-  app.directive('vennDiagram', function(reactDirective) {
+  app.directive('vennDiagram', function (reactDirective) {
     return reactDirective(VennDiagram);
   });
 
-  app.directive('graphVisualization', function(reactDirective) {
+  app.directive('graphVisualization', function (reactDirective) {
     return reactDirective(GraphVisualization);
   });
 
-  app.directive('graphListing', function(reactDirective) {
+  app.directive('graphListing', function (reactDirective) {
     return reactDirective(Listing, [
       ['coreStart', { watchDepth: 'reference' }],
       ['createItem', { watchDepth: 'reference' }],
@@ -77,10 +77,11 @@ export function initGraphApp(angularModule, deps) {
       ['hideWriteControls', { watchDepth: 'reference' }],
       ['capabilities', { watchDepth: 'reference' }],
       ['initialFilter', { watchDepth: 'reference' }],
+      ['initialPageSize', { watchDepth: 'reference' }],
     ]);
   });
 
-  app.directive('graphApp', function(reactDirective) {
+  app.directive('graphApp', function (reactDirective) {
     return reactDirective(
       GraphApp,
       [
@@ -101,32 +102,33 @@ export function initGraphApp(angularModule, deps) {
     );
   });
 
-  app.directive('graphVisualization', function(reactDirective) {
+  app.directive('graphVisualization', function (reactDirective) {
     return reactDirective(GraphVisualization, undefined, { restrict: 'A' });
   });
 
-  app.config(function($routeProvider) {
+  app.config(function ($routeProvider) {
     $routeProvider
       .when('/home', {
         template: listingTemplate,
         badge: getReadonlyBadge,
-        controller: function($location, $scope) {
-          $scope.listingLimit = config.get('savedObjects:listingLimit');
+        controller: function ($location, $scope) {
+          $scope.listingLimit = savedObjects.settings.getListingLimit();
+          $scope.initialPageSize = savedObjects.settings.getPerPage();
           $scope.create = () => {
             $location.url(getNewPath());
           };
-          $scope.find = search => {
+          $scope.find = (search) => {
             return findSavedWorkspace(
               { savedObjectsClient, basePath: coreStart.http.basePath },
               search,
               $scope.listingLimit
             );
           };
-          $scope.editItem = workspace => {
+          $scope.editItem = (workspace) => {
             $location.url(getEditPath(workspace));
           };
-          $scope.getViewUrl = workspace => getEditUrl(addBasePath, workspace);
-          $scope.delete = workspaces =>
+          $scope.getViewUrl = (workspace) => getEditUrl(addBasePath, workspace);
+          $scope.delete = (workspaces) =>
             deleteSavedWorkspace(
               savedObjectsClient,
               workspaces.map(({ id }) => id)
@@ -141,9 +143,9 @@ export function initGraphApp(angularModule, deps) {
         template: appTemplate,
         badge: getReadonlyBadge,
         resolve: {
-          savedWorkspace: function($rootScope, $route, $location) {
+          savedWorkspace: function ($rootScope, $route, $location) {
             return $route.current.params.id
-              ? getSavedWorkspace(savedObjectsClient, $route.current.params.id).catch(function(e) {
+              ? getSavedWorkspace(savedObjectsClient, $route.current.params.id).catch(function (e) {
                   toastNotifications.addError(e, {
                     title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
                       defaultMessage: "Couldn't load graph with ID",
@@ -158,16 +160,16 @@ export function initGraphApp(angularModule, deps) {
                 })
               : getSavedWorkspace(savedObjectsClient);
           },
-          indexPatterns: function() {
+          indexPatterns: function () {
             return savedObjectsClient
               .find({
                 type: 'index-pattern',
                 fields: ['title', 'type'],
                 perPage: 10000,
               })
-              .then(response => response.savedObjects);
+              .then((response) => response.savedObjects);
           },
-          GetIndexPatternProvider: function() {
+          GetIndexPatternProvider: function () {
             return indexPatterns;
           },
         },
@@ -178,7 +180,7 @@ export function initGraphApp(angularModule, deps) {
   });
 
   //========  Controller for basic UI ==================
-  app.controller('graphuiPlugin', function($scope, $route, $location) {
+  app.controller('graphuiPlugin', function ($scope, $route, $location) {
     function handleError(err) {
       const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
         defaultMessage: 'Graph Error',
@@ -212,7 +214,7 @@ export function initGraphApp(angularModule, deps) {
       $scope.loading = true;
       return coreStart.http
         .post('../api/graph/graphExplore', request)
-        .then(function(data) {
+        .then(function (data) {
           const response = data.resp;
           if (response.timed_out) {
             toastNotifications.addWarning(
@@ -231,7 +233,7 @@ export function initGraphApp(angularModule, deps) {
     }
 
     //Helper function for the graphClientWorkspace to perform a query
-    const callSearchNodeProxy = function(indexName, query, responseHandler) {
+    const callSearchNodeProxy = function (indexName, query, responseHandler) {
       const request = {
         body: JSON.stringify({
           index: indexName,
@@ -241,7 +243,7 @@ export function initGraphApp(angularModule, deps) {
       $scope.loading = true;
       coreStart.http
         .post('../api/graph/searchProxy', request)
-        .then(function(data) {
+        .then(function (data) {
           const response = data.resp;
           responseHandler(response);
         })
@@ -266,10 +268,10 @@ export function initGraphApp(angularModule, deps) {
           indexName: indexPattern,
           vertex_fields: [],
           // Here we have the opportunity to look up labels for nodes...
-          nodeLabeller: function() {
+          nodeLabeller: function () {
             //   console.log(newNodes);
           },
-          changeHandler: function() {
+          changeHandler: function () {
             //Allows DOM to update with graph layout changes.
             $scope.$apply();
           },
@@ -279,10 +281,10 @@ export function initGraphApp(angularModule, deps) {
         };
         $scope.workspace = createWorkspace(options);
       },
-      setLiveResponseFields: fields => {
+      setLiveResponseFields: (fields) => {
         $scope.liveResponseFields = fields;
       },
-      setUrlTemplates: urlTemplates => {
+      setUrlTemplates: (urlTemplates) => {
         $scope.urlTemplates = urlTemplates;
       },
       getWorkspace: () => {
@@ -300,7 +302,7 @@ export function initGraphApp(angularModule, deps) {
         $scope.workspaceInitialized = true;
       },
       savePolicy: graphSavePolicy,
-      changeUrl: newUrl => {
+      changeUrl: (newUrl) => {
         $scope.$evalAsync(() => {
           $location.url(newUrl);
         });
@@ -324,8 +326,8 @@ export function initGraphApp(angularModule, deps) {
     const allSavingDisabled = graphSavePolicy === 'none';
     $scope.spymode = 'request';
     $scope.colors = colorChoices;
-    $scope.isColorDark = color => isColorDark(...hexToRgb(color));
-    $scope.nodeClick = function(n, $event) {
+    $scope.isColorDark = (color) => isColorDark(...hexToRgb(color));
+    $scope.nodeClick = function (n, $event) {
       //Selection logic - shift key+click helps selects multiple nodes
       // Without the shift key we deselect all prior selections (perhaps not
       // a great idea for touch devices with no concept of shift key)
@@ -342,14 +344,14 @@ export function initGraphApp(angularModule, deps) {
       }
     };
 
-    $scope.clickEdge = function(edge) {
+    $scope.clickEdge = function (edge) {
       $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [
         edge.topSrc,
         edge.topTarget,
       ]);
     };
 
-    $scope.submit = function(searchTerm) {
+    $scope.submit = function (searchTerm) {
       $scope.workspaceInitialized = true;
       const numHops = 2;
       if (searchTerm.startsWith('{')) {
@@ -370,28 +372,28 @@ export function initGraphApp(angularModule, deps) {
       $scope.workspace.simpleSearch(searchTerm, $scope.liveResponseFields, numHops);
     };
 
-    $scope.selectSelected = function(node) {
+    $scope.selectSelected = function (node) {
       $scope.detail = {
         latestNodeSelection: node,
       };
       return ($scope.selectedSelectedVertex = node);
     };
 
-    $scope.isSelectedSelected = function(node) {
+    $scope.isSelectedSelected = function (node) {
       return $scope.selectedSelectedVertex === node;
     };
 
-    $scope.openUrlTemplate = function(template) {
+    $scope.openUrlTemplate = function (template) {
       const url = template.url;
       const newUrl = url.replace(urlTemplateRegex, template.encoder.encode($scope.workspace));
       window.open(newUrl, '_blank');
     };
 
-    $scope.aceLoaded = editor => {
+    $scope.aceLoaded = (editor) => {
       editor.$blockScrolling = Infinity;
     };
 
-    $scope.setDetail = function(data) {
+    $scope.setDetail = function (data) {
       $scope.detail = data;
     };
 
@@ -419,7 +421,7 @@ export function initGraphApp(angularModule, deps) {
             }),
           confirmModalOptions
         )
-        .then(isConfirmed => {
+        .then((isConfirmed) => {
           if (isConfirmed) {
             callback();
           }
@@ -427,7 +429,7 @@ export function initGraphApp(angularModule, deps) {
     }
     $scope.confirmWipeWorkspace = canWipeWorkspace;
 
-    $scope.performMerge = function(parentId, childId) {
+    $scope.performMerge = function (parentId, childId) {
       let found = true;
       while (found) {
         found = false;
@@ -446,9 +448,9 @@ export function initGraphApp(angularModule, deps) {
       $scope.detail = null;
     };
 
-    $scope.handleMergeCandidatesCallback = function(termIntersects) {
+    $scope.handleMergeCandidatesCallback = function (termIntersects) {
       const mergeCandidates = [];
-      termIntersects.forEach(ti => {
+      termIntersects.forEach((ti) => {
         mergeCandidates.push({
           id1: ti.id1,
           id2: ti.id2,
@@ -475,8 +477,8 @@ export function initGraphApp(angularModule, deps) {
       tooltip: i18n.translate('xpack.graph.topNavMenu.newWorkspaceTooltip', {
         defaultMessage: 'Create a new workspace',
       }),
-      run: function() {
-        canWipeWorkspace(function() {
+      run: function () {
+        canWipeWorkspace(function () {
           $scope.$evalAsync(() => {
             if ($location.url() === '/workspace/') {
               $route.reload();
@@ -514,7 +516,7 @@ export function initGraphApp(angularModule, deps) {
             });
           }
         },
-        disableButton: function() {
+        disableButton: function () {
           return allSavingDisabled || !hasFieldsSelector(store.getState());
         },
         run: () => {
@@ -528,7 +530,7 @@ export function initGraphApp(angularModule, deps) {
     }
     $scope.topNavMenu.push({
       key: 'inspect',
-      disableButton: function() {
+      disableButton: function () {
         return $scope.workspace === null;
       },
       label: i18n.translate('xpack.graph.topNavMenu.inspectLabel', {
@@ -548,7 +550,7 @@ export function initGraphApp(angularModule, deps) {
 
     $scope.topNavMenu.push({
       key: 'settings',
-      disableButton: function() {
+      disableButton: function () {
         return datasourceSelector(store.getState()).type === 'none';
       },
       label: i18n.translate('xpack.graph.topNavMenu.settingsLabel', {
@@ -603,7 +605,7 @@ export function initGraphApp(angularModule, deps) {
     };
 
     $scope.closeMenus = () => {
-      _.forOwn($scope.menus, function(_, key) {
+      _.forOwn($scope.menus, function (_, key) {
         $scope.menus[key] = false;
       });
     };

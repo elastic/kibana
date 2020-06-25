@@ -31,12 +31,12 @@ describe('makeKQLUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    makeKQLUsageCollector(usageCollectionMock, '.kibana');
+    makeKQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.kibana');
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = kql', () => {
-    makeKQLUsageCollector(usageCollectionMock, '.kibana');
+    makeKQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.kibana');
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('kql');
   });

@@ -15,7 +15,7 @@ import {
   simpleTrace,
   traceWithErrors,
   traceChildStartBeforeParent,
-  inferredSpans
+  inferredSpans,
 } from './waterfallContainer.stories.data';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 

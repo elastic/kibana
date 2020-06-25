@@ -27,7 +27,7 @@ describe('updateActionRoute', () => {
 
     const [config, handler] = router.put.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/{id}"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [

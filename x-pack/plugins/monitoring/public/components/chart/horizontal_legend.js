@@ -9,6 +9,7 @@ import { includes, isFunction } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiKeyboardAccessible } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import './horizontal_legend.scss';
 
 export class HorizontalLegend extends React.Component {
   constructor() {
@@ -71,7 +72,7 @@ export class HorizontalLegend extends React.Component {
         <EuiFlexItem grow={false}>
           <button
             className={classes.join(' ')}
-            onClick={event => this.props.onToggle(event, row.id)}
+            onClick={(event) => this.props.onToggle(event, row.id)}
           >
             <span className="monRhythmChart__legendLabel">
               <EuiIcon

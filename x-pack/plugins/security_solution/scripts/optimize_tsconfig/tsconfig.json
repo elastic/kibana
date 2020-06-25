@@ -1,0 +1,16 @@
+{
+  "include": [
+    "typings/**/*",
+    "plugins/lists/**/*",
+    "plugins/security_solution/**/*",
+    "plugins/apm/typings/numeral.d.ts",
+    "plugins/canvas/types/webpack.d.ts",
+    "plugins/triggers_actions_ui/**/*"
+  ],
+  "exclude": [
+    "test/**/*",
+    "**/__fixtures__/**/*",
+    "plugins/security_solution/cypress/**/*",
+    "**/typespec_tests.ts"
+  ]
+}

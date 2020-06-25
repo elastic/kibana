@@ -73,13 +73,18 @@ Executor.prototype.execute = preventParallelCalls(
   (command: { getName: () => string }) => NO_QUEUE_COMMANDS.includes(command.getName())
 );
 
+export interface BrowserConfig {
+  logPollingMs: number;
+  acceptInsecureCerts: boolean;
+}
+
 let attemptCounter = 0;
 let edgePaths: { driverPath: string | undefined; browserPath: string | undefined };
 async function attemptToCreateCommand(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number
+  config: BrowserConfig
 ) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
@@ -117,6 +122,7 @@ async function attemptToCreateCommand(
         if (certValidation === '0') {
           chromeOptions.push('ignore-certificate-errors');
         }
+
         if (remoteDebug === '1') {
           // Visit chrome://inspect in chrome to remotely view/debug
           chromeOptions.push('headless', 'disable-gpu', 'remote-debugging-port=9222');
@@ -128,6 +134,7 @@ async function attemptToCreateCommand(
         });
         chromeCapabilities.set('unexpectedAlertBehaviour', 'accept');
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
+        chromeCapabilities.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         let session;
         if (remoteSessionUrl) {
@@ -149,7 +156,7 @@ async function attemptToCreateCommand(
           consoleLog$: pollForLogEntry$(
             session,
             logging.Type.BROWSER,
-            logPollingMs,
+            config.logPollingMs,
             lifecycle.cleanup.after$
           ).pipe(
             takeUntil(lifecycle.cleanup.after$),
@@ -186,7 +193,7 @@ async function attemptToCreateCommand(
             consoleLog$: pollForLogEntry$(
               session,
               logging.Type.BROWSER,
-              logPollingMs,
+              config.logPollingMs,
               lifecycle.cleanup.after$
             ).pipe(
               takeUntil(lifecycle.cleanup.after$),
@@ -218,6 +225,7 @@ async function attemptToCreateCommand(
           'browser.helperApps.neverAsk.saveToDisk',
           'application/comma-separated-values, text/csv, text/plain'
         );
+        firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
@@ -253,8 +261,8 @@ async function attemptToCreateCommand(
         return {
           session,
           consoleLog$: chunk$.pipe(
-            map(chunk => chunk.toString('utf8')),
-            mergeMap(msg => {
+            map((chunk) => chunk.toString('utf8')),
+            mergeMap((msg) => {
               const match = msg.match(CONSOLE_LINE_RE);
               if (!match) {
                 log.debug('Firefox stdout: ' + msg);
@@ -337,7 +345,7 @@ export async function initWebDriver(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number
+  config: BrowserConfig
 ) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
@@ -368,7 +376,7 @@ export async function initWebDriver(
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, browserType, lifecycle, logPollingMs),
+          attemptToCreateCommand(log, browserType, lifecycle, config),
         ]);
 
         if (!command) {

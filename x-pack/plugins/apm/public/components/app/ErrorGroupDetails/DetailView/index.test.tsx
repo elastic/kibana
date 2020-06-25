@@ -33,15 +33,15 @@ describe('DetailView', () => {
       transaction: undefined,
       error: {
         timestamp: {
-          us: 0
+          us: 0,
         },
         http: { request: { method: 'GET' } },
         url: { full: 'myUrl' },
         service: { name: 'myService' },
         user: { id: 'myUserId' },
         error: { exception: { handled: true } },
-        transaction: { id: 'myTransactionId', sampled: true }
-      } as any
+        transaction: { id: 'myTransactionId', sampled: true },
+      } as any,
     };
 
     const wrapper = shallow(
@@ -62,10 +62,10 @@ describe('DetailView', () => {
       error: {
         error: {},
         timestamp: {
-          us: 0
-        }
+          us: 0,
+        },
       } as any,
-      transaction: undefined
+      transaction: undefined,
     };
     const wrapper = shallow(
       <DetailView
@@ -84,12 +84,12 @@ describe('DetailView', () => {
       transaction: undefined,
       error: {
         timestamp: {
-          us: 0
+          us: 0,
         },
         error: {},
         service: {},
-        user: {}
-      } as any
+        user: {},
+      } as any,
     };
     const wrapper = shallow(
       <DetailView
@@ -109,11 +109,11 @@ describe('DetailView', () => {
       transaction: undefined,
       error: {
         timestamp: {
-          us: 0
+          us: 0,
         },
         error: {},
-        context: {}
-      } as any
+        context: {},
+      } as any,
     };
     const wrapper = shallow(
       <DetailView
@@ -133,15 +133,15 @@ describe('DetailView', () => {
       transaction: undefined,
       error: {
         timestamp: {
-          us: 0
+          us: 0,
         },
         http: { response: { status_code: 404 } },
         url: { full: 'myUrl' },
         service: { name: 'myService' },
         user: { id: 'myUserId' },
         error: { exception: { handled: true } },
-        transaction: { id: 'myTransactionId', sampled: true }
-      } as any
+        transaction: { id: 'myTransactionId', sampled: true },
+      } as any,
     };
     expect(() =>
       shallow(

@@ -14,12 +14,12 @@ export function ErrorStatePrompt() {
       title={
         <div>
           {i18n.translate('xpack.apm.error.prompt.title', {
-            defaultMessage: `Sorry, an error occured :(`
+            defaultMessage: `Sorry, an error occured :(`,
           })}
         </div>
       }
       body={i18n.translate('xpack.apm.error.prompt.body', {
-        defaultMessage: `Please inspect your browser's developer console for details.`
+        defaultMessage: `Please inspect your browser's developer console for details.`,
       })}
       titleSize="s"
     />

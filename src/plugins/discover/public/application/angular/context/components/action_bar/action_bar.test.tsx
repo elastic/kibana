@@ -25,7 +25,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../query_parameters/constants';
 
 describe('Test Discover Context ActionBar for successor | predecessor records', () => {
-  ['successors', 'predecessors'].forEach(type => {
+  ['successors', 'predecessors'].forEach((type) => {
     const onChangeCount = jest.fn();
     const props = {
       defaultStepSize: 5,

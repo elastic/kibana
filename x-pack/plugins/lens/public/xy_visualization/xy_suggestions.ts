@@ -42,8 +42,8 @@ export function getSuggestions({
     // We reject any datasource suggestions which have a column of an unknown type.
     !table.isMultiRow ||
     table.columns.length <= 1 ||
-    table.columns.every(col => col.operation.dataType !== 'number') ||
-    table.columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
+    table.columns.every((col) => col.operation.dataType !== 'number') ||
+    table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType))
   ) {
     return [];
   }
@@ -62,7 +62,7 @@ function getSuggestionForColumns(
   keptLayerIds: string[],
   currentState?: State
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
-  const [buckets, values] = partition(table.columns, col => col.operation.isBucketed);
+  const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
 
   if (buckets.length === 1 || buckets.length === 2) {
     const [x, splitBy] = getBucketMappings(table, currentState);
@@ -95,7 +95,7 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentLayer =
     currentState && currentState.layers.find(({ layerId }) => layerId === table.layerId);
 
-  const buckets = table.columns.filter(col => col.operation.isBucketed);
+  const buckets = table.columns.filter((col) => col.operation.isBucketed);
   // reverse the buckets before prioritization to always use the most inner
   // bucket of the highest-prioritized group as x value (don't use nested
   // buckets as split series)
@@ -182,7 +182,7 @@ function getSuggestionsForLayer({
   if (!currentState && changeType === 'unchanged') {
     // Chart switcher needs to include every chart type
     return visualizationTypes
-      .map(visType => ({
+      .map((visType) => ({
         ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
         title: visType.label,
         hide: visType.id !== 'bar_stacked',
@@ -251,12 +251,12 @@ function getSuggestionsForLayer({
   // Combine all pre-built suggestions with hidden suggestions for remaining chart types
   return sameStateSuggestions.concat(
     visualizationTypes
-      .filter(visType => {
+      .filter((visType) => {
         return !sameStateSuggestions.find(
-          suggestion => suggestion.state.preferredSeriesType === visType.id
+          (suggestion) => suggestion.state.preferredSeriesType === visType.id
         );
       })
-      .map(visType => {
+      .map((visType) => {
         return {
           ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
           hide: true,
@@ -331,7 +331,7 @@ function getSuggestionTitle(
   tableLabel: string | undefined
 ) {
   const yTitle = yValues
-    .map(col => col.operation.label)
+    .map((col) => col.operation.label)
     .join(
       i18n.translate('xpack.lens.xySuggestions.yAxixConjunctionSign', {
         defaultMessage: ' & ',
@@ -385,12 +385,12 @@ function buildSuggestion({
     seriesType,
     xAccessor: xValue.columnId,
     splitAccessor: splitBy?.columnId,
-    accessors: yValues.map(col => col.columnId),
+    accessors: yValues.map((col) => col.columnId),
   };
 
   const keptLayers = currentState
     ? currentState.layers.filter(
-        layer => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
+        (layer) => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
       )
     : [];
 
@@ -425,5 +425,5 @@ function getScore(
 }
 
 function getExistingLayer(currentState: XYState | undefined, layerId: string) {
-  return currentState && currentState.layers.find(layer => layer.layerId === layerId);
+  return currentState && currentState.layers.find((layer) => layer.layerId === layerId);
 }

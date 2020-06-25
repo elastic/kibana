@@ -62,15 +62,15 @@ export class StartDatafeedModal extends Component {
     }
   }
 
-  setStartTime = time => {
+  setStartTime = (time) => {
     this.setState({ startTime: time });
   };
 
-  setEndTime = time => {
+  setEndTime = (time) => {
     this.setState({ endTime: time });
   };
 
-  setCreateWatch = e => {
+  setCreateWatch = (e) => {
     this.setState({ createWatch: e.target.checked });
   };
 
@@ -78,7 +78,7 @@ export class StartDatafeedModal extends Component {
     this.setState({ isModalVisible: false });
   };
 
-  setTimeRangeValid = timeRangeValid => {
+  setTimeRangeValid = (timeRangeValid) => {
     this.setState({ timeRangeValid });
   };
 
@@ -130,7 +130,7 @@ export class StartDatafeedModal extends Component {
       now,
       timeRangeValid,
     } = this.state;
-    const startableJobs = jobs !== undefined ? jobs.filter(j => j.hasDatafeed) : [];
+    const startableJobs = jobs !== undefined ? jobs.filter((j) => j.hasDatafeed) : [];
     // disable start button if the start and end times are the same
     const startDisabled =
       timeRangeValid === false || (startTime !== undefined && startTime === endTime);
@@ -222,6 +222,6 @@ StartDatafeedModal.propTypes = {
 };
 
 function getLowestLatestTime(jobs) {
-  const times = jobs.map(j => j.latestTimestampSortValue);
+  const times = jobs.map((j) => j.latestTimestampSortValue);
   return moment(Math.min(...times));
 }

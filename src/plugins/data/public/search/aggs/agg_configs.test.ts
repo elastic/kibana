@@ -172,7 +172,7 @@ describe('AggConfigs', () => {
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
       const sorted = ac.getRequestAggs();
-      const aggs = indexBy(ac.aggs, agg => agg.type.name);
+      const aggs = indexBy(ac.aggs, (agg) => agg.type.name);
 
       expect(sorted.shift()).toBe(aggs.terms);
       expect(sorted.shift()).toBe(aggs.histogram);
@@ -195,7 +195,7 @@ describe('AggConfigs', () => {
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
       const sorted = ac.getResponseAggs();
-      const aggs = indexBy(ac.aggs, agg => agg.type.name);
+      const aggs = indexBy(ac.aggs, (agg) => agg.type.name);
 
       expect(sorted.shift()).toBe(aggs.terms);
       expect(sorted.shift()).toBe(aggs.date_histogram);
@@ -212,7 +212,7 @@ describe('AggConfigs', () => {
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
       const sorted = ac.getResponseAggs();
-      const aggs = indexBy(ac.aggs, agg => agg.type.name);
+      const aggs = indexBy(ac.aggs, (agg) => agg.type.name);
 
       expect(sorted.shift()).toBe(aggs.terms);
       expect(sorted.shift()).toBe(aggs.date_histogram);
@@ -226,7 +226,7 @@ describe('AggConfigs', () => {
   describe('#toDsl', () => {
     beforeEach(() => {
       indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = name => (name as unknown) as IndexPatternField;
+      indexPattern.fields.getByName = (name) => (name as unknown) as IndexPatternField;
     });
 
     it('uses the sorted aggs', () => {
@@ -250,7 +250,7 @@ describe('AggConfigs', () => {
         fieldFormats,
       });
 
-      const aggInfos = ac.aggs.map(aggConfig => {
+      const aggInfos = ac.aggs.map((aggConfig) => {
         const football = {};
         aggConfig.toDsl = jest.fn().mockImplementation(() => football);
 
@@ -328,7 +328,7 @@ describe('AggConfigs', () => {
       expect(typeof dsl[histo.id]).toBe('object');
       expect(dsl[histo.id]).toHaveProperty('aggs');
 
-      metrics.forEach(metric => {
+      metrics.forEach((metric) => {
         expect(dsl[histo.id].aggs).toHaveProperty(metric.id);
         expect(dsl[histo.id].aggs[metric.id]).not.toHaveProperty('aggs');
       });

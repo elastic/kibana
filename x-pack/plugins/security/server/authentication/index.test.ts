@@ -12,7 +12,7 @@ jest.mock('./authenticator');
 import Boom from 'boom';
 
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   coreMock,
   httpServerMock,
   httpServiceMock,
@@ -42,6 +42,8 @@ import {
 } from './api_keys';
 import { SecurityLicense } from '../../common/licensing';
 import { SecurityAuditLogger } from '../audit';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 
 describe('setupAuthentication()', () => {
   let mockSetupAuthenticationParams: {
@@ -51,6 +53,7 @@ describe('setupAuthentication()', () => {
     http: jest.Mocked<CoreSetup['http']>;
     clusterClient: jest.Mocked<IClusterClient>;
     license: jest.Mocked<SecurityLicense>;
+    getFeatureUsageService: () => jest.Mocked<SecurityFeatureUsageServiceStart>;
   };
   let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<ScopedClusterClient>>;
   beforeEach(() => {
@@ -63,12 +66,15 @@ describe('setupAuthentication()', () => {
           secureCookies: true,
           cookieName: 'my-sid-cookie',
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: false }
       ),
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       license: licenseMock.create(),
-      loggers: loggingServiceMock.create(),
+      loggers: loggingSystemMock.create(),
+      getFeatureUsageService: jest
+        .fn()
+        .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
     };
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -215,7 +221,7 @@ describe('setupAuthentication()', () => {
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-      expect(loggingServiceMock.collect(mockSetupAuthenticationParams.loggers).error)
+      expect(loggingSystemMock.collect(mockSetupAuthenticationParams.loggers).error)
         .toMatchInlineSnapshot(`
         Array [
           Array [

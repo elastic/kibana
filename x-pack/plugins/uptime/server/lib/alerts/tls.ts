@@ -12,12 +12,10 @@ import { updateState } from './common';
 import { ACTION_GROUP_DEFINITIONS, DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
+import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 
 const { TLS } = ACTION_GROUP_DEFINITIONS;
 
-const DEFAULT_FROM = 'now-1d';
-const DEFAULT_TO = 'now';
-const DEFAULT_INDEX = 0;
 const DEFAULT_SIZE = 20;
 
 interface TlsAlertState {
@@ -39,7 +37,7 @@ const mapCertsToSummaryString = (
 ): string =>
   certs
     .slice(0, maxSummaryItems)
-    .map(cert => `${cert.common_name}, ${certLimitMessage(cert)}`)
+    .map((cert) => `${cert.common_name}, ${certLimitMessage(cert)}`)
     .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
 
 const getValidAfter = ({ not_after: date }: Cert) => {
@@ -66,11 +64,11 @@ export const getCertSummary = (
 ): TlsAlertState => {
   certs.sort((a, b) => sortCerts(a.not_after ?? '', b.not_after ?? ''));
   const expiring = certs.filter(
-    cert => new Date(cert.not_after ?? '').valueOf() < expirationThreshold
+    (cert) => new Date(cert.not_after ?? '').valueOf() < expirationThreshold
   );
 
   certs.sort((a, b) => sortCerts(a.not_before ?? '', b.not_before ?? ''));
-  const aging = certs.filter(cert => new Date(cert.not_before ?? '').valueOf() < ageThreshold);
+  const aging = certs.filter((cert) => new Date(cert.not_before ?? '').valueOf() < ageThreshold);
 
   return {
     count: certs.length,
@@ -113,12 +111,15 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
       dynamicSettings,
       from: DEFAULT_FROM,
       to: DEFAULT_TO,
-      index: DEFAULT_INDEX,
+      index: 0,
       size: DEFAULT_SIZE,
-      notValidAfter: `now+${dynamicSettings?.certExpirationThreshold ??
-        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
-      notValidBefore: `now-${dynamicSettings?.certAgeThreshold ??
-        DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold}d`,
+      notValidAfter: `now+${
+        dynamicSettings?.certExpirationThreshold ??
+        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
+      }d`,
+      notValidBefore: `now-${
+        dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
+      }d`,
       sortBy: 'common_name',
       direction: 'desc',
     });

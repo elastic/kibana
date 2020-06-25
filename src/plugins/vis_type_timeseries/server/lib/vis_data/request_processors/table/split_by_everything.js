@@ -21,10 +21,10 @@ import { overwrite } from '../../helpers';
 import { esQuery } from '../../../../../../data/server';
 
 export function splitByEverything(req, panel, esQueryConfig, indexPattern) {
-  return next => doc => {
+  return (next) => (doc) => {
     panel.series
-      .filter(c => !(c.aggregate_by && c.aggregate_function))
-      .forEach(column => {
+      .filter((c) => !(c.aggregate_by && c.aggregate_function))
+      .forEach((column) => {
         if (column.filter) {
           overwrite(
             doc,

@@ -9,7 +9,7 @@ import React from 'react';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import {
   DiscoverTransactionLink,
-  getDiscoverQuery
+  getDiscoverQuery,
 } from '../DiscoverTransactionLink';
 import mockTransaction from './mockTransaction.json';
 

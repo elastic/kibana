@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import classNames from 'classnames';
 
 import { i18n } from '@kbn/i18n';
@@ -14,24 +14,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
-  EuiComboBox,
-  EuiFormRow,
 } from '@elastic/eui';
 
-import { documentationService } from '../../../../../../services/documentation';
-import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_imports';
-
-import { TYPE_DEFINITION, EUI_SIZE } from '../../../../constants';
-
+import { useForm, Form, FormDataProvider } from '../../../../shared_imports';
+import { EUI_SIZE } from '../../../../constants';
 import { useDispatch } from '../../../../mappings_state';
-import {
-  fieldSerializer,
-  getFieldConfig,
-  filterTypesForMultiField,
-  filterTypesForNonRootFields,
-} from '../../../../lib';
-import { Field, MainType, SubType, NormalizedFields, ComboBoxOption } from '../../../../types';
-import { NameParameter, TypeParameter, OtherTypeNameParameter } from '../../field_parameters';
+import { fieldSerializer } from '../../../../lib';
+import { Field, NormalizedFields } from '../../../../types';
+import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
@@ -61,12 +51,12 @@ export const CreateField = React.memo(function CreateFieldComponent({
   });
 
   useEffect(() => {
-    const subscription = form.subscribe(updatedFieldForm => {
+    const subscription = form.subscribe((updatedFieldForm) => {
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
     });
 
     return subscription.unsubscribe;
-  }, [form, dispatch]);
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cancel = () => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
@@ -101,130 +91,34 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  /**
-   * When we change the type, we need to check if there is a subType array to choose from.
-   * If there is a subType array, we build the options list for the select (and in case the field is a multi-field
-   * we also filter out blacklisted types).
-   *
-   * @param type The selected field type
-   */
-  const getSubTypeMeta = useCallback(
-    (
-      type: MainType
-    ): {
-      subTypeLabel?: string;
-      subTypeOptions?: ComboBoxOption[];
-    } => {
-      const typeDefinition = TYPE_DEFINITION[type];
-      const hasSubTypes = typeDefinition !== undefined && typeDefinition.subTypes;
+  const renderFormFields = () => (
+    <EuiFlexGroup gutterSize="s">
+      {/* Field name */}
+      <EuiFlexItem>
+        <NameParameter />
+      </EuiFlexItem>
 
-      let subTypeOptions = hasSubTypes
-        ? typeDefinition
-            .subTypes!.types.map(subType => TYPE_DEFINITION[subType])
-            .map(
-              subType =>
-                ({ value: subType.value as SubType, label: subType.label } as ComboBoxOption)
-            )
-        : undefined;
+      {/* Field type */}
+      <EuiFlexItem>
+        <TypeParameter
+          isRootLevelField={isRootLevelField}
+          isMultiField={isMultiField}
+          showDocLink
+        />
+      </EuiFlexItem>
 
-      if (hasSubTypes) {
-        if (isMultiField) {
-          // If it is a multi-field, we need to filter out non-allowed types
-          subTypeOptions = filterTypesForMultiField<SubType>(subTypeOptions!);
-        } else if (isRootLevelField === false) {
-          subTypeOptions = filterTypesForNonRootFields(subTypeOptions!);
-        }
-      }
-
-      return {
-        subTypeOptions,
-        subTypeLabel: hasSubTypes ? typeDefinition.subTypes!.label : undefined,
-      };
-    },
-    [isMultiField, isRootLevelField]
-  );
-
-  const onTypeChange = useCallback(
-    (nextType: ComboBoxOption[]) => {
-      form.setFieldValue('type', nextType);
-
-      if (nextType.length) {
-        const { subTypeOptions } = getSubTypeMeta(nextType[0].value as MainType);
-        form.setFieldValue('subType', subTypeOptions ? [subTypeOptions[0]] : undefined);
-      }
-    },
-    [form, getSubTypeMeta]
-  );
-  const renderFormFields = useCallback(
-    ({ type }) => {
-      const isOtherType = type === 'other';
-      const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
-
-      const docLink = documentationService.getTypeDocLink(type) as string;
-
-      return (
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s">
-            {/* Field name */}
-            <EuiFlexItem>
-              <NameParameter />
-            </EuiFlexItem>
-            {/* Field type */}
-            <EuiFlexItem>
-              <TypeParameter
-                isRootLevelField={isRootLevelField}
-                isMultiField={isMultiField}
-                onTypeChange={onTypeChange}
-                docLink={docLink}
-              />
-            </EuiFlexItem>
-            {/* Other type */}
-            {isOtherType && (
-              <EuiFlexItem>
-                <OtherTypeNameParameter />
-              </EuiFlexItem>
-            )}
-            {/* Field sub type (if any) - will never be the case if we have an "other" type */}
-            {subTypeOptions && (
-              <EuiFlexItem>
-                <UseField
-                  path="subType"
-                  config={{
-                    ...getFieldConfig('type'),
-                    label: subTypeLabel,
-                    defaultValue: subTypeOptions[0].value,
-                  }}
-                >
-                  {subTypeField => {
-                    const error = subTypeField.getErrorsMessages();
-                    const isInvalid = error ? Boolean(error.length) : false;
-
-                    return (
-                      <EuiFormRow label={subTypeField.label} error={error} isInvalid={isInvalid}>
-                        <EuiComboBox
-                          placeholder={i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.createField.typePlaceholderLabel',
-                            {
-                              defaultMessage: 'Select a type',
-                            }
-                          )}
-                          singleSelection={{ asPlainText: true }}
-                          options={subTypeOptions}
-                          selectedOptions={subTypeField.value as ComboBoxOption[]}
-                          onChange={newSubType => subTypeField.setValue(newSubType)}
-                          isClearable={false}
-                        />
-                      </EuiFormRow>
-                    );
-                  }}
-                </UseField>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      );
-    },
-    [getSubTypeMeta, isMultiField, isRootLevelField, onTypeChange]
+      {/* Field subType (if any) */}
+      <FormDataProvider pathsToWatch="type">
+        {({ type }) => (
+          <SubTypeParameter
+            key={type}
+            type={type}
+            isMultiField={isMultiField ?? false}
+            isRootLevelField={isRootLevelField}
+          />
+        )}
+      </FormDataProvider>
+    </EuiFlexGroup>
   );
 
   const renderFormActions = () => (
@@ -258,18 +152,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
     </EuiFlexGroup>
   );
 
-  const renderParametersForm = useCallback(
-    ({ type, subType }) => {
-      const ParametersForm = getParametersFormForType(type, subType);
-      return ParametersForm ? (
-        <div className="mappingsEditor__createFieldRequiredProps">
-          <ParametersForm allFields={allFields} />
-        </div>
-      ) : null;
-    },
-    [allFields]
-  );
-
   return (
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
       <Form
@@ -293,13 +175,27 @@ export const CreateField = React.memo(function CreateFieldComponent({
           }}
         >
           <div className="mappingsEditor__createFieldContent">
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <FormDataProvider pathsToWatch="type">{renderFormFields}</FormDataProvider>
-              <EuiFlexItem>{renderFormActions()}</EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem className="mappingsEditor__createFieldContent__formFields">
+                {renderFormFields()}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
             </EuiFlexGroup>
 
             <FormDataProvider pathsToWatch={['type', 'subType']}>
-              {renderParametersForm}
+              {({ type, subType }) => {
+                const ParametersForm = getParametersFormForType(type, subType);
+
+                if (!ParametersForm) {
+                  return null;
+                }
+
+                return (
+                  <div className="mappingsEditor__createFieldRequiredProps">
+                    <ParametersForm key={subType ?? type} allFields={allFields} />
+                  </div>
+                );
+              }}
             </FormDataProvider>
           </div>
         </div>

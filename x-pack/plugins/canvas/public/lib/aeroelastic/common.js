@@ -8,10 +8,10 @@ import { select } from './select';
 
 // serves as reminder that we start with the state
 // todo remove it as we add TS annotations (State)
-const state = d => d;
+const state = (d) => d;
 
-const getScene = state => state.currentScene;
+const getScene = (state) => state.currentScene;
 export const scene = select(getScene)(state);
 
-const getPrimaryUpdate = state => state.primaryUpdate;
+const getPrimaryUpdate = (state) => state.primaryUpdate;
 export const primaryUpdate = select(getPrimaryUpdate)(state);

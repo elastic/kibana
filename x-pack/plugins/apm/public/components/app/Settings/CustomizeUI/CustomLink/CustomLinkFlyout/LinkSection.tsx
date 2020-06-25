@@ -8,7 +8,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -35,7 +35,7 @@ export const LinkSection = ({
   label,
   onChangeLabel,
   url,
-  onChangeUrl
+  onChangeUrl,
 }: Props) => {
   const inputFields: InputField[] = [
     {
@@ -43,31 +43,31 @@ export const LinkSection = ({
       label: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.flyout.link.label',
         {
-          defaultMessage: 'Label'
+          defaultMessage: 'Label',
         }
       ),
       helpText: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.flyout.link.label.helpText',
         {
           defaultMessage:
-            'This is the label shown in the actions context menu. Keep it as short as possible.'
+            'This is the label shown in the actions context menu. Keep it as short as possible.',
         }
       ),
       placeholder: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.flyout.link.label.placeholder',
         {
-          defaultMessage: 'e.g. Support tickets'
+          defaultMessage: 'e.g. Support tickets',
         }
       ),
       value: label,
-      onChange: onChangeLabel
+      onChange: onChangeLabel,
     },
     {
       name: 'url',
       label: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.flyout.link.url',
         {
-          defaultMessage: 'URL'
+          defaultMessage: 'URL',
         }
       ),
       helpText: (
@@ -77,14 +77,14 @@ export const LinkSection = ({
             {
               defaultMessage:
                 'Add field name variables to your URL to apply values e.g. {sample}.',
-              values: { sample: '{{trace.id}}' }
+              values: { sample: '{{trace.id}}' },
             }
           )}{' '}
           <Documentation
             label={i18n.translate(
               'xpack.apm.settings.customizeUI.customLink.flyout.link.url.doc',
               {
-                defaultMessage: 'Learn more in the docs.'
+                defaultMessage: 'Learn more in the docs.',
               }
             )}
           />
@@ -93,12 +93,12 @@ export const LinkSection = ({
       placeholder: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.flyout.link.url.placeholder',
         {
-          defaultMessage: 'e.g. https://www.elastic.co/'
+          defaultMessage: 'e.g. https://www.elastic.co/',
         }
       ),
       value: url,
-      onChange: onChangeUrl
-    }
+      onChange: onChangeUrl,
+    },
   ];
 
   return (
@@ -108,13 +108,13 @@ export const LinkSection = ({
           {i18n.translate(
             'xpack.apm.settings.customizeUI.customLink.flyout.action.title',
             {
-              defaultMessage: 'Link'
+              defaultMessage: 'Link',
             }
           )}
         </h3>
       </EuiTitle>
       <EuiSpacer size="l" />
-      {inputFields.map(field => {
+      {inputFields.map((field) => {
         return (
           <EuiFormRow
             fullWidth
@@ -126,7 +126,7 @@ export const LinkSection = ({
                 {i18n.translate(
                   'xpack.apm.settings.customizeUI.customLink.flyout.required',
                   {
-                    defaultMessage: 'Required'
+                    defaultMessage: 'Required',
                   }
                 )}
               </EuiText>
@@ -137,7 +137,7 @@ export const LinkSection = ({
               name={field.name}
               fullWidth
               value={field.value}
-              onChange={e => field.onChange(e.target.value)}
+              onChange={(e) => field.onChange(e.target.value)}
               data-test-subj={field.name}
             />
           </EuiFormRow>

@@ -12,6 +12,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import sinon from 'sinon';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
+import { scopedHistoryMock } from '../../../../../src/core/public/mocks';
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import { fetchedPolicies } from '../../public/application/store/actions';
 import { indexLifecycleManagementStore } from '../../public/application/store';
@@ -19,7 +20,7 @@ import { PolicyTable } from '../../public/application/sections/policy_table';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
 
-initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
+initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
 initUiMetric({ reportUiStats: () => {} });
 
 let server = null;
@@ -29,9 +30,7 @@ const policies = [];
 for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
-    modified_date: moment()
-      .subtract(i, 'days')
-      .valueOf(),
+    modified_date: moment().subtract(i, 'days').valueOf(),
     linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
     name: `testy${i}`,
   });
@@ -39,20 +38,20 @@ for (let i = 0; i < 105; i++) {
 jest.mock('');
 let component = null;
 
-const snapshot = rendered => {
+const snapshot = (rendered) => {
   expect(rendered).toMatchSnapshot();
 };
-const mountedSnapshot = rendered => {
+const mountedSnapshot = (rendered) => {
   expect(takeMountedSnapshot(rendered)).toMatchSnapshot();
 };
-const names = rendered => {
+const names = (rendered) => {
   return findTestSubject(rendered, 'policyTablePolicyNameLink');
 };
-const namesText = rendered => {
-  return names(rendered).map(button => button.text());
+const namesText = (rendered) => {
+  return names(rendered).map((button) => button.text());
 };
 
-const testSort = headerName => {
+const testSort = (headerName) => {
   const rendered = mountWithIntl(component);
   const nameHeader = findTestSubject(rendered, `policyTableHeaderCell-${headerName}`).find(
     'button'
@@ -64,7 +63,7 @@ const testSort = headerName => {
   rendered.update();
   snapshot(namesText(rendered));
 };
-const openContextMenu = buttonIndex => {
+const openContextMenu = (buttonIndex) => {
   const rendered = mountWithIntl(component);
   const actionsButton = findTestSubject(rendered, 'policyActionsContextMenuButton');
   actionsButton.at(buttonIndex).simulate('click');
@@ -77,7 +76,7 @@ describe('policy table', () => {
     store = indexLifecycleManagementStore();
     component = (
       <Provider store={store}>
-        <PolicyTable />
+        <PolicyTable history={scopedHistoryMock.create()} navigateToApp={() => {}} />
       </Provider>
     );
     store.dispatch(fetchedPolicies(policies));
@@ -92,7 +91,7 @@ describe('policy table', () => {
     store = indexLifecycleManagementStore();
     component = (
       <Provider store={store}>
-        <PolicyTable />
+        <PolicyTable history={scopedHistoryMock.create()} navigateToApp={() => {}} />
       </Provider>
     );
     const rendered = mountWithIntl(component);

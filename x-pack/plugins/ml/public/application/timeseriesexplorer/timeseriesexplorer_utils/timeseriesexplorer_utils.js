@@ -25,7 +25,7 @@ import { CHARTS_POINT_TARGET, TIME_FIELD_NAME } from '../timeseriesexplorer_cons
 // only time series view jobs are allowed
 export function createTimeSeriesJobData(jobs) {
   const singleTimeSeriesJobs = jobs.filter(isTimeSeriesViewJob);
-  return singleTimeSeriesJobs.map(job => {
+  return singleTimeSeriesJobs.map((job) => {
     const bucketSpan = parseInterval(job.analysis_config.bucket_span);
     return {
       id: job.job_id,
@@ -110,7 +110,7 @@ export function processDataForFocusAnomalies(
   if (chartData !== undefined && chartData.length > 0) {
     lastChartDataPointTime = chartData[chartData.length - 1].date.getTime();
   }
-  anomalyRecords.forEach(record => {
+  anomalyRecords.forEach((record) => {
     const recordTime = record[TIME_FIELD_NAME];
     const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
     if (chartPoint === undefined) {
@@ -123,7 +123,7 @@ export function processDataForFocusAnomalies(
 
   timesToAddPointsFor.sort((a, b) => a - b);
 
-  timesToAddPointsFor.forEach(time => {
+  timesToAddPointsFor.forEach((time) => {
     const pointToAdd = {
       date: new Date(time),
       value: null,
@@ -138,7 +138,7 @@ export function processDataForFocusAnomalies(
 
   // Iterate through the anomaly records adding the
   // various properties required for display.
-  anomalyRecords.forEach(record => {
+  anomalyRecords.forEach((record) => {
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
     const recordTime = record[TIME_FIELD_NAME];

@@ -38,6 +38,7 @@ import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
+import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 
 interface PageDef {
   title: string;
@@ -51,7 +52,7 @@ type NavProps = RouteComponentProps & {
 };
 
 const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
-  const navItems = pages.map(page => ({
+  const navItems = pages.map((page) => ({
     id: page.id,
     name: page.title,
     onClick: () => history.push(`/${page.id}`),
@@ -81,48 +82,58 @@ interface Props {
   inspector: InspectorStartContract;
   savedObject: SavedObjectsStart;
   uiSettingsClient: IUiSettingsClient;
+  embeddableExamples: EmbeddableExamplesStart;
 }
 
 const EmbeddableExplorerApp = ({
   basename,
   navigateToApp,
   embeddableApi,
-  inspector,
-  uiSettingsClient,
-  savedObject,
-  overlays,
-  uiActionsApi,
-  notifications,
+  embeddableExamples,
 }: Props) => {
   const pages: PageDef[] = [
     {
       title: 'Hello world embeddable',
       id: 'helloWorldEmbeddableSection',
       component: (
-        <HelloWorldEmbeddableExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />
+        <HelloWorldEmbeddableExample
+          helloWorldEmbeddableFactory={embeddableExamples.factories.getHelloWorldEmbeddableFactory()}
+        />
       ),
     },
     {
       title: 'Todo embeddable',
       id: 'todoEmbeddableSection',
       component: (
-        <TodoEmbeddableExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />
+        <TodoEmbeddableExample
+          todoEmbeddableFactory={embeddableExamples.factories.getTodoEmbeddableFactory()}
+        />
       ),
     },
     {
       title: 'List container embeddable',
       id: 'listContainerSection',
-      component: <ListContainerExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />,
+      component: (
+        <ListContainerExample
+          listContainerEmbeddableFactory={embeddableExamples.factories.getListContainerEmbeddableFactory()}
+          searchableListContainerEmbeddableFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
+        />
+      ),
     },
     {
       title: 'Dynamically adding children to a container',
-      id: 'embeddablePanelExamplae',
-      component: <EmbeddablePanelExample embeddableServices={embeddableApi} />,
+      id: 'embeddablePanelExample',
+      component: (
+        <EmbeddablePanelExample
+          embeddableServices={embeddableApi}
+          searchListContainerFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
+        />
+      ),
     },
   ];
 
   const routes = pages.map((page, i) => (
-    <Route key={i} path={`/${page.id}`} render={props => page.component} />
+    <Route key={i} path={`/${page.id}`} render={(props) => page.component} />
   ));
 
   return (

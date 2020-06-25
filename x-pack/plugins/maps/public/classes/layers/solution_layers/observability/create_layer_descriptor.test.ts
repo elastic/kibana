@@ -18,7 +18,7 @@ jest.mock('../../../../kibana_services', () => {
 });
 
 jest.mock('uuid/v4', () => {
-  return function() {
+  return function () {
     return '12345';
   };
 });

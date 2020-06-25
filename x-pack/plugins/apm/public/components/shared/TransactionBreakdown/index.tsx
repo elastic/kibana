@@ -14,7 +14,7 @@ import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useUiTracker } from '../../../../../observability/public';
 
 const emptyMessage = i18n.translate('xpack.apm.transactionBreakdown.noData', {
-  defaultMessage: 'No data within this time range.'
+  defaultMessage: 'No data within this time range.',
 });
 
 const TransactionBreakdown: React.FC<{

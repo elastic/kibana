@@ -51,7 +51,7 @@ export function HomeApp({ directories }) {
   const mlEnabled = environment.ml;
   const apmUiEnabled = environment.apmUi;
 
-  const renderTutorialDirectory = props => {
+  const renderTutorialDirectory = (props) => {
     return (
       <TutorialDirectory
         addBasePath={addBasePath}
@@ -61,7 +61,7 @@ export function HomeApp({ directories }) {
     );
   };
 
-  const renderTutorial = props => {
+  const renderTutorial = (props) => {
     return (
       <Tutorial
         addBasePath={addBasePath}

@@ -25,7 +25,6 @@ import angular, { IModule } from 'angular';
 import 'angular-sanitize';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
-  AppMountContext,
   ChromeStart,
   IUiSettingsClient,
   CoreStart,
@@ -42,7 +41,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../navigat
 import { DataPublicPluginStart } from '../../../data/public';
 import { SharePluginStart } from '../../../share/public';
 import { KibanaLegacyStart, configureAppAngularModule } from '../../../kibana_legacy/public';
-import { SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
 
 // required for i18nIdDirective
 import 'angular-sanitize';
@@ -69,17 +68,19 @@ export interface RenderDeps {
   embeddable: EmbeddableStart;
   localStorage: Storage;
   share?: SharePluginStart;
-  config: KibanaLegacyStart['config'];
   usageCollection?: UsageCollectionSetup;
   navigateToDefaultApp: KibanaLegacyStart['navigateToDefaultApp'];
+  navigateToLegacyKibanaUrl: KibanaLegacyStart['navigateToLegacyKibanaUrl'];
   scopedHistory: () => ScopedHistory;
+  savedObjects: SavedObjectsStart;
+  restorePreviousUrl: () => void;
 }
 
 let angularModuleInstance: IModule | null = null;
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
   if (!angularModuleInstance) {
-    angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
+    angularModuleInstance = createLocalAngularModule();
     // global routing stuff
     configureAppAngularModule(
       angularModuleInstance,
@@ -119,7 +120,7 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   return $injector;
 }
 
-function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
+function createLocalAngularModule() {
   createLocalI18nModule();
   createLocalIconModule();
 
@@ -134,7 +135,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
 function createLocalIconModule() {
   angular
     .module('app/dashboard/icon', ['react'])
-    .directive('icon', reactDirective => reactDirective(EuiIcon));
+    .directive('icon', (reactDirective) => reactDirective(EuiIcon));
 }
 
 function createLocalI18nModule() {

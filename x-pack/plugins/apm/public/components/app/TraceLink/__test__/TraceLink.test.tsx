@@ -17,13 +17,13 @@ jest.mock('../../Main/route_config', () => ({
   routes: [
     {
       path: '/services/:serviceName/transactions/view',
-      name: 'transaction_name'
+      name: 'transaction_name',
     },
     {
       path: '/traces',
-      name: 'traces'
-    }
-  ]
+      name: 'traces',
+    },
+  ],
 }));
 
 describe('TraceLink', () => {
@@ -36,16 +36,19 @@ describe('TraceLink', () => {
   });
 
   it('renders trace page when transaction is not found', () => {
-    spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
+    jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
       urlParams: {
         traceIdLink: '123',
         rangeFrom: 'now-24h',
-        rangeTo: 'now'
-      }
+        rangeTo: 'now',
+      },
+      refreshTimeRange: jest.fn(),
+      uiFilters: {},
     });
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       data: { transaction: undefined },
-      status: 'success'
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     const component = shallow(<TraceLink />);
@@ -56,12 +59,14 @@ describe('TraceLink', () => {
 
   describe('transaction page', () => {
     beforeAll(() => {
-      spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
+      jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
         urlParams: {
           traceIdLink: '123',
           rangeFrom: 'now-24h',
-          rangeTo: 'now'
-        }
+          rangeTo: 'now',
+        },
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
       });
     });
     it('renders with date range params', () => {
@@ -70,13 +75,14 @@ describe('TraceLink', () => {
         transaction: {
           id: '456',
           name: 'bar',
-          type: 'GET'
+          type: 'GET',
         },
-        trace: { id: 123 }
+        trace: { id: 123 },
       };
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: { transaction },
-        status: 'success'
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
       });
       const component = shallow(<TraceLink />);
       expect(component.prop('to')).toEqual(

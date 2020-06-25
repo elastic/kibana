@@ -24,7 +24,7 @@ export const UI_EXPORT_DEFAULTS = {
   webpackNoParseRules: [
     /node_modules[\/\\](angular|elasticsearch-browser)[\/\\]/,
     /node_modules[\/\\](mocha|moment)[\/\\]/,
-    /node_modules[\/\\]vega-lib[\/\\]build[\/\\]vega\.js$/,
+    /node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
   ],
 
   webpackAliases: {
@@ -33,7 +33,7 @@ export const UI_EXPORT_DEFAULTS = {
     test_harness: resolve(ROOT, 'src/test_harness/public'),
   },
 
-  styleSheetPaths: ['light', 'dark'].map(theme => ({
+  styleSheetPaths: ['light', 'dark'].map((theme) => ({
     theme,
     localPath: resolve(ROOT, 'src/core/public/index.scss'),
     publicPath: `core.${theme}.css`,
@@ -43,7 +43,5 @@ export const UI_EXPORT_DEFAULTS = {
     },
   })),
 
-  appExtensions: {
-    fieldFormatEditors: ['ui/field_editor/components/field_format_editor/register'],
-  },
+  appExtensions: {},
 };

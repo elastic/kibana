@@ -104,6 +104,18 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           },
         } as IFieldFormat;
       },
+      getSerializedFormat(agg) {
+        const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+        return {
+          id: 'terms',
+          params: {
+            id: format.id,
+            otherBucketLabel: agg.params.otherBucketLabel,
+            missingBucketLabel: agg.params.missingBucketLabel,
+            ...format.params,
+          },
+        };
+      },
       createFilter: createFilterTerms,
       postFlightRequest: async (
         resp: any,
@@ -255,7 +267,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           displayName: i18n.translate('data.search.aggs.otherBucket.labelForOtherBucketLabel', {
             defaultMessage: 'Label for other bucket',
           }),
-          shouldShow: agg => agg.getParam('otherBucket'),
+          shouldShow: (agg) => agg.getParam('otherBucket'),
           write: noop,
         },
         {
@@ -274,7 +286,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           displayName: i18n.translate('data.search.aggs.otherBucket.labelForMissingValuesLabel', {
             defaultMessage: 'Label for missing values',
           }),
-          shouldShow: agg => agg.getParam('missingBucket'),
+          shouldShow: (agg) => agg.getParam('missingBucket'),
           write: noop,
         },
         {

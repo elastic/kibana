@@ -19,7 +19,7 @@
 
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
-import { IIndexPattern, IFieldType } from '../../../common';
+import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../common';
 
 function resolver(title: string, field: IFieldType, query: string, boolFilter: any) {
   // Only cache results for a minute
@@ -37,6 +37,8 @@ interface ValueSuggestionsGetFnArgs {
   boolFilter?: any[];
   signal?: AbortSignal;
 }
+
+export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSuggestionsGetFn;
 
 export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsGetFn => {
   const requestSuggestions = memoize(
@@ -56,7 +58,9 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
     boolFilter,
     signal,
   }: ValueSuggestionsGetFnArgs): Promise<any[]> => {
-    const shouldSuggestValues = core!.uiSettings.get<boolean>('filterEditor:suggestValues');
+    const shouldSuggestValues = core!.uiSettings.get<boolean>(
+      UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
+    );
     const { title } = indexPattern;
 
     if (field.type === 'boolean') {

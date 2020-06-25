@@ -56,7 +56,7 @@ export class VectorStyleEditor extends Component {
   }
 
   async _loadFields() {
-    const getFieldMeta = async field => {
+    const getFieldMeta = async (field) => {
       return {
         label: await field.getLabel(),
         name: field.getName(),
@@ -75,13 +75,13 @@ export class VectorStyleEditor extends Component {
 
     this.setState({
       fields: fieldsArrayAll,
-      ordinalAndCategoricalFields: fieldsArrayAll.filter(field => {
+      ordinalAndCategoricalFields: fieldsArrayAll.filter((field) => {
         return (
           CATEGORICAL_DATA_TYPES.includes(field.type) || ORDINAL_DATA_TYPES.includes(field.type)
         );
       }),
-      dateFields: fieldsArrayAll.filter(field => field.type === 'date'),
-      numberFields: fieldsArrayAll.filter(field => field.type === 'number'),
+      dateFields: fieldsArrayAll.filter((field) => field.type === 'date'),
+      numberFields: fieldsArrayAll.filter((field) => field.type === 'number'),
     });
   }
 
@@ -112,11 +112,11 @@ export class VectorStyleEditor extends Component {
     return [...this.state.dateFields, ...this.state.numberFields];
   }
 
-  _handleSelectedFeatureChange = selectedFeature => {
+  _handleSelectedFeatureChange = (selectedFeature) => {
     this.setState({ selectedFeature });
   };
 
-  _onIsTimeAwareChange = event => {
+  _onIsTimeAwareChange = (event) => {
     this.props.onIsTimeAwareChange(event.target.checked);
   };
 

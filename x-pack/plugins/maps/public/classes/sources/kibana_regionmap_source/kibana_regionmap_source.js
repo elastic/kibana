@@ -51,7 +51,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getVectorFileMeta() {
     const regionList = getKibanaRegionList();
-    const meta = regionList.find(source => source.name === this._descriptor.name);
+    const meta = regionList.find((source) => source.name === this._descriptor.name);
     if (!meta) {
       throw new Error(
         i18n.translate('xpack.maps.source.kbnRegionMap.noConfigErrorMessage', {
@@ -79,7 +79,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getLeftJoinFields() {
     const vectorFileMeta = await this.getVectorFileMeta();
-    return vectorFileMeta.fields.map(f => this.createField({ fieldName: f.name }));
+    return vectorFileMeta.fields.map((f) => this.createField({ fieldName: f.name }));
   }
 
   async getDisplayName() {

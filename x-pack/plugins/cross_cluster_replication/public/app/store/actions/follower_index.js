@@ -23,12 +23,12 @@ import { getSelectedFollowerIndexId } from '../selectors';
 
 const { FOLLOWER_INDEX: scope } = SECTIONS;
 
-export const selectDetailFollowerIndex = id => ({
+export const selectDetailFollowerIndex = (id) => ({
   type: t.FOLLOWER_INDEX_SELECT_DETAIL,
   payload: id,
 });
 
-export const selectEditFollowerIndex = id => ({
+export const selectEditFollowerIndex = (id) => ({
   type: t.FOLLOWER_INDEX_SELECT_EDIT,
   payload: id,
 });
@@ -41,7 +41,7 @@ export const loadFollowerIndices = (isUpdating = false) =>
     handler: async () => await loadFollowerIndicesRequest(),
   });
 
-export const getFollowerIndex = id =>
+export const getFollowerIndex = (id) =>
   sendApiRequest({
     label: t.FOLLOWER_INDEX_GET,
     scope: `${scope}-get`,
@@ -77,13 +77,13 @@ export const saveFollowerIndex = (name, followerIndex, isUpdating = false) =>
           );
 
       getToasts().addSuccess(successMessage);
-      routing.navigate(`/follower_indices`, undefined, {
+      routing.navigate(`/follower_indices`, {
         name: encodeURIComponent(name),
       });
     },
   });
 
-export const pauseFollowerIndex = id =>
+export const pauseFollowerIndex = (id) =>
   sendApiRequest({
     label: t.FOLLOWER_INDEX_PAUSE,
     status: API_STATUS.SAVING,
@@ -142,14 +142,13 @@ export const pauseFollowerIndex = id =>
     },
   });
 
-export const resumeFollowerIndex = id =>
+export const resumeFollowerIndex = (id) =>
   sendApiRequest({
     label: t.FOLLOWER_INDEX_RESUME,
     status: API_STATUS.SAVING,
     scope,
     handler: async () => resumeFollowerIndexRequest(id),
     onSuccess(response, dispatch) {
-      console.log('response', response);
       /**
        * We can have 1 or more follower index resume operation
        * that can fail or succeed. We will show 1 toast notification for each.
@@ -202,7 +201,7 @@ export const resumeFollowerIndex = id =>
     },
   });
 
-export const unfollowLeaderIndex = id =>
+export const unfollowLeaderIndex = (id) =>
   sendApiRequest({
     label: t.FOLLOWER_INDEX_UNFOLLOW,
     status: API_STATUS.DELETING,

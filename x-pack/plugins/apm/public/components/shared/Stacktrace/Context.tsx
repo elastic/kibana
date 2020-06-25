@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { size } from 'lodash';
 import { tint } from 'polished';
 import React from 'react';
@@ -39,9 +38,9 @@ const LineHighlight = styled.div<{ lineNumber: number }>`
   position: absolute;
   width: 100%;
   height: ${px(units.eighth * 9)};
-  top: ${props => px(props.lineNumber * LINE_HEIGHT)};
+  top: ${(props) => px(props.lineNumber * LINE_HEIGHT)};
   pointer-events: none;
-  background-color: ${tint(0.1, theme.euiColorWarning)};
+  background-color: ${({ theme }) => tint(0.1, theme.eui.euiColorWarning)};
 `;
 
 const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
@@ -49,10 +48,10 @@ const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
   top: 0;
   left: 0;
   border-radius: ${borderRadius};
-  background: ${props =>
-    props.isLibraryFrame
-      ? theme.euiColorEmptyShade
-      : theme.euiColorLightestShade};
+  background: ${({ isLibraryFrame, theme }) =>
+    isLibraryFrame
+      ? theme.eui.euiColorEmptyShade
+      : theme.eui.euiColorLightestShade};
 `;
 
 const LineNumber = styled.div<{ highlight: boolean }>`
@@ -60,12 +59,12 @@ const LineNumber = styled.div<{ highlight: boolean }>`
   min-width: ${px(units.eighth * 21)};
   padding-left: ${px(units.half)};
   padding-right: ${px(units.quarter)};
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
   line-height: ${px(unit + units.eighth)};
   text-align: right;
-  border-right: 1px solid ${theme.euiColorLightShade};
-  background-color: ${props =>
-    props.highlight ? tint(0.1, theme.euiColorWarning) : null};
+  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  background-color: ${({ highlight, theme }) =>
+    highlight ? tint(0.1, theme.eui.euiColorWarning) : null};
 
   &:last-of-type {
     border-radius: 0 0 0 ${borderRadius};
@@ -76,7 +75,7 @@ const LineContainer = styled.div`
   overflow: auto;
   margin: 0 0 0 ${px(units.eighth * 21)};
   padding: 0;
-  background-color: ${theme.euiColorEmptyShade};
+  background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
 
   &:last-of-type {
     border-radius: 0 0 ${borderRadius} 0;

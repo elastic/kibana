@@ -26,7 +26,7 @@ import verticalRhythmSmallHtml from './vertical_rhythm_small.html';
 import verticalRhythmAsWrapperHtml from './vertical_rhythm_as_wrapper.html';
 import verticalRhythmOnComponentHtml from './vertical_rhythm_on_component.html';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="VerticalRhythm"

@@ -49,7 +49,7 @@ export class EsArchiver {
     this.client = client;
     this.dataDir = dataDir;
     this.log = log;
-    this.kbnClient = new KbnClient(log, [kibanaUrl]);
+    this.kbnClient = new KbnClient(log, { url: kibanaUrl });
   }
 
   /**
@@ -80,12 +80,20 @@ export class EsArchiver {
    *  @param {Object} options
    *  @property {Boolean} options.skipExisting - should existing indices
    *                                           be ignored or overwritten
+   *  @property {Boolean} options.useCreate - use a create operation instead of index for documents
    *  @return Promise<Stats>
    */
-  async load(name: string, { skipExisting = false }: { skipExisting?: boolean } = {}) {
+  async load(
+    name: string,
+    {
+      skipExisting = false,
+      useCreate = false,
+    }: { skipExisting?: boolean; useCreate?: boolean } = {}
+  ) {
     return await loadAction({
       name,
       skipExisting: !!skipExisting,
+      useCreate: !!useCreate,
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,

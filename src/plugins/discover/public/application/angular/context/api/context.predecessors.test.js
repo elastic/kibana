@@ -29,8 +29,8 @@ const ANCHOR_TIMESTAMP_3 = new Date(MS_PER_DAY * 3).toJSON();
 const ANCHOR_TIMESTAMP_1000 = new Date(MS_PER_DAY * 1000).toJSON();
 const ANCHOR_TIMESTAMP_3000 = new Date(MS_PER_DAY * 3000).toJSON();
 
-describe('context app', function() {
-  describe('function fetchPredecessors', function() {
+describe('context app', function () {
+  describe('function fetchPredecessors', function () {
     let fetchPredecessors;
     let mockSearchSource;
 
@@ -77,7 +77,7 @@ describe('context app', function() {
       };
     });
 
-    it('should perform exactly one query when enough hits are returned', function() {
+    it('should perform exactly one query when enough hits are returned', function () {
       mockSearchSource._stubHits = [
         mockSearchSource._createStubHit(MS_PER_DAY * 3000 + 2),
         mockSearchSource._createStubHit(MS_PER_DAY * 3000 + 1),
@@ -96,13 +96,13 @@ describe('context app', function() {
         0,
         3,
         []
-      ).then(hits => {
+      ).then((hits) => {
         expect(mockSearchSource.fetch.calledOnce).toBe(true);
         expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
       });
     });
 
-    it('should perform multiple queries with the last being unrestricted when too few hits are returned', function() {
+    it('should perform multiple queries with the last being unrestricted when too few hits are returned', function () {
       mockSearchSource._stubHits = [
         mockSearchSource._createStubHit(MS_PER_DAY * 3010),
         mockSearchSource._createStubHit(MS_PER_DAY * 3002),
@@ -121,7 +121,7 @@ describe('context app', function() {
         0,
         6,
         []
-      ).then(hits => {
+      ).then((hits) => {
         const intervals = mockSearchSource.setField.args
           .filter(([property]) => property === 'query')
           .map(([, { query }]) =>
@@ -141,7 +141,7 @@ describe('context app', function() {
       });
     });
 
-    it('should perform multiple queries until the expected hit count is returned', function() {
+    it('should perform multiple queries until the expected hit count is returned', function () {
       mockSearchSource._stubHits = [
         mockSearchSource._createStubHit(MS_PER_DAY * 1700),
         mockSearchSource._createStubHit(MS_PER_DAY * 1200),
@@ -159,7 +159,7 @@ describe('context app', function() {
         0,
         3,
         []
-      ).then(hits => {
+      ).then((hits) => {
         const intervals = mockSearchSource.setField.args
           .filter(([property]) => property === 'query')
           .map(([, { query }]) =>
@@ -175,7 +175,7 @@ describe('context app', function() {
       });
     });
 
-    it('should return an empty array when no hits were found', function() {
+    it('should return an empty array when no hits were found', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
@@ -186,12 +186,12 @@ describe('context app', function() {
         0,
         3,
         []
-      ).then(hits => {
+      ).then((hits) => {
         expect(hits).toEqual([]);
       });
     });
 
-    it('should configure the SearchSource to not inherit from the implicit root', function() {
+    it('should configure the SearchSource to not inherit from the implicit root', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
@@ -209,7 +209,7 @@ describe('context app', function() {
       });
     });
 
-    it('should set the tiebreaker sort order to the opposite as the time field', function() {
+    it('should set the tiebreaker sort order to the opposite as the time field', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',

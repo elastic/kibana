@@ -38,7 +38,7 @@ export function VectorStyleSymbolizeAsEditor({
     return id === styleOptions.value;
   });
 
-  const onSymbolizeAsChange = optionId => {
+  const onSymbolizeAsChange = (optionId) => {
     const styleDescriptor = {
       options: {
         value: optionId,

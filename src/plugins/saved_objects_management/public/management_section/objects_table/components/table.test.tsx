@@ -38,9 +38,9 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/index_patterns/1',
+        editUrl: '#/management/kibana/indexPatterns/patterns/1',
         inAppUrl: {
-          path: '/management/kibana/index_patterns/1',
+          path: '/management/kibana/indexPatterns/patterns/1',
           uiCapabilitiesPath: 'management.kibana.index_patterns',
         },
       },
@@ -65,9 +65,9 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/index_patterns/1',
+        editUrl: '#/management/kibana/indexPatterns/patterns/1',
         inAppUrl: {
-          path: '/management/kibana/index_patterns/1',
+          path: '/management/kibana/indexPatterns/patterns/1',
           uiCapabilitiesPath: 'management.kibana.index_patterns',
         },
       },

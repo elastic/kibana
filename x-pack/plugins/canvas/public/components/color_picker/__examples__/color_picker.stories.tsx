@@ -28,11 +28,11 @@ class Interactive extends React.Component<
       <div>
         <ColorPicker
           colors={this.state.colors}
-          onAddColor={value => this.setState({ colors: this.state.colors.concat(value) })}
-          onRemoveColor={value =>
-            this.setState({ colors: this.state.colors.filter(color => color !== value) })
+          onAddColor={(value) => this.setState({ colors: this.state.colors.concat(value) })}
+          onRemoveColor={(value) =>
+            this.setState({ colors: this.state.colors.filter((color) => color !== value) })
           }
-          onChange={value => this.setState({ value })}
+          onChange={(value) => this.setState({ value })}
           hasButtons={this.state.hasButtons}
           value={this.state.value}
         />

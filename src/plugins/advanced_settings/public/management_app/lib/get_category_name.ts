@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-const upperFirst = (str = '') => str.replace(/^./, strng => strng.toUpperCase());
+const upperFirst = (str = '') => str.replace(/^./, (strng) => strng.toUpperCase());
 
 const names: Record<string, string> = {
   general: i18n.translate('advancedSettings.categoryNames.generalLabel', {
@@ -46,8 +46,8 @@ const names: Record<string, string> = {
   search: i18n.translate('advancedSettings.categoryNames.searchLabel', {
     defaultMessage: 'Search',
   }),
-  siem: i18n.translate('advancedSettings.categoryNames.siemLabel', {
-    defaultMessage: 'SIEM',
+  securitySolution: i18n.translate('advancedSettings.categoryNames.securitySolutionLabel', {
+    defaultMessage: 'Security Solution',
   }),
 };
 

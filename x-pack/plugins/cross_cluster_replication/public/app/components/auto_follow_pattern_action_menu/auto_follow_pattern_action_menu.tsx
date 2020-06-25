@@ -99,7 +99,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
           }),
           icon: <EuiIcon type="pencil" />,
           onClick: () => {
-            window.location.hash = routing.getAutoFollowPatternPath(patterns[0].name);
+            routing.navigate(routing.getAutoFollowPatternPath(patterns[0].name));
           },
         }
       : null,
@@ -169,7 +169,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
 export const AutoFollowPatternActionMenu = (props: Omit<Props, 'deleteAutoFollowPatterns'>) => (
   <AutoFollowPatternDeleteProvider>
     {(deleteAutoFollowPattern: (ids: string[]) => void) => (
-      <AutoFollowPatternActionMenuUI deleteAutoFollowPattern={deleteAutoFollowPattern} {...props} />
+      <AutoFollowPatternActionMenuUI {...props} deleteAutoFollowPattern={deleteAutoFollowPattern} />
     )}
   </AutoFollowPatternDeleteProvider>
 );

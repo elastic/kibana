@@ -20,8 +20,8 @@
 import { getDefaultFieldFilter, setFieldFilterProp, isFieldFiltered } from './field_filter';
 import { IndexPatternField } from '../../../../../../data/public';
 
-describe('field_filter', function() {
-  it('getDefaultFieldFilter should return default filter state', function() {
+describe('field_filter', function () {
+  it('getDefaultFieldFilter should return default filter state', function () {
     expect(getDefaultFieldFilter()).toMatchInlineSnapshot(`
       Object {
         "aggregatable": null,
@@ -32,7 +32,7 @@ describe('field_filter', function() {
       }
     `);
   });
-  it('setFieldFilterProp should return allow filter changes', function() {
+  it('setFieldFilterProp should return allow filter changes', function () {
     const state = getDefaultFieldFilter();
     const targetState = {
       aggregatable: true,
@@ -83,12 +83,12 @@ describe('field_filter', function() {
       { filter: { aggregatable: true }, result: ['extension'] },
       { filter: { aggregatable: true, searchable: false }, result: [] },
       { filter: { type: 'string' }, result: ['extension'] },
-    ].forEach(test => {
+    ].forEach((test) => {
       const filtered = fieldList
-        .filter(field =>
+        .filter((field) =>
           isFieldFiltered(field, { ...defaultState, ...test.filter }, { bytes: 1, extension: 1 })
         )
-        .map(field => field.name);
+        .map((field) => field.name);
 
       expect(filtered).toEqual(test.result);
     });

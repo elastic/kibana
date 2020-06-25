@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const alerting = getService('alerting');
 
-  describe('Home page', function() {
+  describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
     });

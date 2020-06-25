@@ -34,7 +34,7 @@ export const JsonEditorField = ({ field, ...rest }: Props) => {
   const { label, helpText, value, setValue } = field;
 
   const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback<OnJsonEditorUpdateHandler>(
-    updatedJson => {
+    (updatedJson) => {
       setValue(updatedJson.data.raw);
     },
     [setValue]

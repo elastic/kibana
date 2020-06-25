@@ -6,7 +6,7 @@
 
 import { sortBy } from 'lodash';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-// @ts-ignore unconverted lib file
+// @ts-expect-error unconverted lib file
 import { queryDatatable } from '../../../../common/lib/datatable/query';
 import { DemoRows } from './demo_rows_types';
 import { getDemoRows } from './get_demo_rows';

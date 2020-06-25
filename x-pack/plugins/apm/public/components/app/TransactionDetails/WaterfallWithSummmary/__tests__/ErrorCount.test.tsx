@@ -29,7 +29,7 @@ describe('ErrorCount', () => {
       getByText('1 Error'),
       new MouseEvent('click', {
         bubbles: true,
-        cancelable: true
+        cancelable: true,
       })
     );
     expect(mock).not.toHaveBeenCalled();

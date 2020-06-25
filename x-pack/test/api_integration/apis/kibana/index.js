@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
+export default function ({ loadTestFile }) {
   describe('kibana', () => {
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./kql_telemetry'));

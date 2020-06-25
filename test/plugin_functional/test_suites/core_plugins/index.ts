@@ -19,7 +19,7 @@
 import { PluginFunctionalProviderContext } from '../../services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: PluginFunctionalProviderContext) {
+export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('core plugins', () => {
     loadTestFile(require.resolve('./applications'));
     loadTestFile(require.resolve('./legacy_plugins'));
@@ -30,5 +30,6 @@ export default function({ loadTestFile }: PluginFunctionalProviderContext) {
     loadTestFile(require.resolve('./application_leave_confirm'));
     loadTestFile(require.resolve('./application_status'));
     loadTestFile(require.resolve('./rendering'));
+    loadTestFile(require.resolve('./logging'));
   });
 }

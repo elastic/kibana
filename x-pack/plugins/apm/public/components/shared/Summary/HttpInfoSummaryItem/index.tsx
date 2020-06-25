@@ -38,7 +38,7 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
   const methodLabel = i18n.translate(
     'xpack.apm.transactionDetails.requestMethodLabel',
     {
-      defaultMessage: 'Request method'
+      defaultMessage: 'Request method',
     }
   );
 

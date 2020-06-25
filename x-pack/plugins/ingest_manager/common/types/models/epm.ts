@@ -58,7 +58,6 @@ export interface RegistryPackage {
   icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
-  removable?: boolean;
   format_version: string;
   datasets?: Dataset[];
   datasources?: RegistryDatasource[];
@@ -206,6 +205,7 @@ interface PackageAdditions {
   title: string;
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
+  removable?: boolean;
 }
 
 // Managers public HTTP response types
@@ -275,6 +275,9 @@ export interface IndexTemplate {
     settings: any;
     mappings: object;
     aliases: object;
+  };
+  data_stream: {
+    timestamp_field: string;
   };
 }
 

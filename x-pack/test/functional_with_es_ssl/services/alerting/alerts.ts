@@ -38,7 +38,7 @@ export class Alerts {
   ) {
     this.log.debug(`creating alert ${name}`);
 
-    const { data: alert, status, statusText } = await this.axios.post(`/api/alert`, {
+    const { data: alert, status, statusText } = await this.axios.post(`/api/alerts/alert`, {
       enabled: true,
       name,
       tags,
@@ -63,7 +63,7 @@ export class Alerts {
   public async createNoOp(name: string) {
     this.log.debug(`creating alert ${name}`);
 
-    const { data: alert, status, statusText } = await this.axios.post(`/api/alert`, {
+    const { data: alert, status, statusText } = await this.axios.post(`/api/alerts/alert`, {
       enabled: true,
       name,
       tags: ['foo'],
@@ -96,7 +96,7 @@ export class Alerts {
   ) {
     this.log.debug(`creating alert ${name}`);
 
-    const { data: alert, status, statusText } = await this.axios.post(`/api/alert`, {
+    const { data: alert, status, statusText } = await this.axios.post(`/api/alerts/alert`, {
       enabled: true,
       name,
       tags: ['foo'],
@@ -132,7 +132,7 @@ export class Alerts {
   public async deleteAlert(id: string) {
     this.log.debug(`deleting alert ${id}`);
 
-    const { data: alert, status, statusText } = await this.axios.delete(`/api/alert/${id}`);
+    const { data: alert, status, statusText } = await this.axios.delete(`/api/alerts/alert/${id}`);
     if (status !== 204) {
       throw new Error(
         `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(alert)}`
@@ -144,7 +144,7 @@ export class Alerts {
   public async getAlertState(id: string) {
     this.log.debug(`getting alert ${id} state`);
 
-    const { data } = await this.axios.get(`/api/alert/${id}/state`);
+    const { data } = await this.axios.get(`/api/alerts/alert/${id}/state`);
     return data;
   }
 
@@ -152,7 +152,7 @@ export class Alerts {
     this.log.debug(`muting instance ${instanceId} under alert ${id}`);
 
     const { data: alert, status, statusText } = await this.axios.post(
-      `/api/alert/${id}/alert_instance/${instanceId}/_mute`
+      `/api/alerts/alert/${id}/alert_instance/${instanceId}/_mute`
     );
     if (status !== 204) {
       throw new Error(

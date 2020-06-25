@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
+import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 import { demoSearchStrategyProvider } from './demo_search_strategy';
 import {
@@ -56,18 +56,13 @@ declare module '../../../src/plugins/data/server' {
 }
 
 export class DemoDataPlugin implements Plugin<void, void, IDemoSearchExplorerDeps> {
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor() {}
 
   public setup(core: CoreSetup, deps: IDemoSearchExplorerDeps) {
-    deps.data.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
-      DEMO_SEARCH_STRATEGY,
-      demoSearchStrategyProvider
-    );
-    deps.data.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
+    deps.data.search.registerSearchStrategy(DEMO_SEARCH_STRATEGY, demoSearchStrategyProvider());
+    deps.data.search.registerSearchStrategy(
       ASYNC_DEMO_SEARCH_STRATEGY,
-      asyncDemoSearchStrategyProvider
+      asyncDemoSearchStrategyProvider()
     );
   }
 

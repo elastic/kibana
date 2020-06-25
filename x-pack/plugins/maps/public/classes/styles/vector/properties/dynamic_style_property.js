@@ -7,10 +7,12 @@
 import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
-import { STYLE_TYPE, SOURCE_META_ID_ORIGIN, FIELD_ORIGIN } from '../../../../../common/constants';
+import {
+  STYLE_TYPE,
+  SOURCE_META_DATA_REQUEST_ID,
+  FIELD_ORIGIN,
+} from '../../../../../common/constants';
 import React from 'react';
-import { OrdinalLegend } from './components/ordinal_legend';
-import { CategoricalLegend } from './components/categorical_legend';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
 
@@ -24,7 +26,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     this._getFieldFormatter = getFieldFormatter;
   }
 
-  getValueSuggestions = query => {
+  getValueSuggestions = (query) => {
     const field = this.getField();
     const fieldSource = this._getFieldSource();
     return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
@@ -32,10 +34,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   _getStyleMetaDataRequestId(fieldName) {
     if (this.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
-      return SOURCE_META_ID_ORIGIN;
+      return SOURCE_META_DATA_REQUEST_ID;
     }
 
-    const join = this._layer.getValidJoins().find(join => {
+    const join = this._layer.getValidJoins().find((join) => {
       return join.getRightJoinSource().hasMatchingMetricField(fieldName);
     });
     return join ? join.getSourceMetaDataRequestId() : null;
@@ -119,14 +121,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return 0;
   }
 
-  hasOrdinalBreaks() {
-    return false;
-  }
-
-  isOrdinalRanged() {
-    return true;
-  }
-
   isComplete() {
     return !!this._field;
   }
@@ -148,7 +142,8 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     if (this.isOrdinal()) {
       return this._field.getOrdinalFieldMetaRequest();
     } else if (this.isCategorical()) {
-      return this._field.getCategoricalFieldMetaRequest(this.getNumberOfCategories());
+      const numberOfCategories = this.getNumberOfCategories();
+      return this._field.getCategoricalFieldMetaRequest(numberOfCategories);
     } else {
       return null;
     }
@@ -257,7 +252,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return null;
     }
 
-    const ordered = fieldMetaData[rootFieldName].buckets.map(bucket => {
+    const ordered = fieldMetaData[rootFieldName].buckets.map((bucket) => {
       return {
         key: bucket.key,
         count: bucket.doc_count,
@@ -279,47 +274,12 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   getNumericalMbFeatureStateValue(value) {
-    if (typeof value === 'number') {
-      return value;
-    }
-
     const valueAsFloat = parseFloat(value);
     return isNaN(valueAsFloat) ? null : valueAsFloat;
   }
 
-  renderBreakedLegend() {
+  renderLegendDetailRow() {
     return null;
-  }
-
-  _renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId }) {
-    return (
-      <CategoricalLegend
-        style={this}
-        isPointsOnly={isPointsOnly}
-        isLinesOnly={isLinesOnly}
-        symbolId={symbolId}
-      />
-    );
-  }
-
-  _renderRangeLegend() {
-    return <OrdinalLegend style={this} />;
-  }
-
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
-    if (this.isOrdinal()) {
-      if (this.isOrdinalRanged()) {
-        return this._renderRangeLegend();
-      } else if (this.hasOrdinalBreaks()) {
-        return this._renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId });
-      } else {
-        return null;
-      }
-    } else if (this.isCategorical()) {
-      return this._renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId });
-    } else {
-      return null;
-    }
   }
 
   renderFieldMetaPopover(onFieldMetaOptionsChange) {
