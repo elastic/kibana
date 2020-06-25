@@ -33,18 +33,16 @@ function createRoot() {
           },
         },
       },
-      loggers: [
-        {
-          context: 'parent',
+      loggers: {
+        parent: {
           appenders: ['test-console'],
           level: 'warn',
         },
-        {
-          context: 'parent.child',
+        'parent.child': {
           appenders: ['test-console'],
           level: 'error',
         },
-      ],
+      },
     },
   });
 }
