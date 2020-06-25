@@ -23,7 +23,7 @@
 export const Right = (x) => ({
   chain: (f) => f(x),
   map: (f) => Right(f(x)),
-  fold: (f, g) => g(x),
+  fold: (leftFn, rightFn) => rightFn(x),
   inspect: () => `Right(${x})`,
 });
 
@@ -38,7 +38,7 @@ export function right(x) {
 export const Left = (x) => ({
   chain: (f) => Left(x),
   map: (f) => Left(x),
-  fold: (f, g) => f(x),
+  fold: (leftFn, rightFn) => leftFn(x),
   inspect: () => `Left(${x})`,
 });
 

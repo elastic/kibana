@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover, EuiText } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useState } from 'react';
+import { EuiPopover, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
+import { useTheme } from '../../../../../hooks/useTheme';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -34,6 +34,7 @@ const TimeLegend = styled(Legend)`
 const ErrorLink = styled(ErrorDetailLink)`
   display: block;
   margin: ${px(units.half)} 0 ${px(units.half)} 0;
+  overflow-wrap: break-word;
 `;
 
 const Button = styled(Legend)`
@@ -42,7 +43,18 @@ const Button = styled(Legend)`
   align-items: flex-end;
 `;
 
+// We chose 240 characters because it fits most error messages and it's still easily readable on a screen.
+function truncateMessage(errorMessage?: string) {
+  const maxLength = 240;
+  if (typeof errorMessage === 'string' && errorMessage.length > maxLength) {
+    return errorMessage.substring(0, maxLength) + '…';
+  } else {
+    return errorMessage;
+  }
+}
+
 export const ErrorMarker: React.FC<Props> = ({ mark }) => {
+  const theme = useTheme();
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 
@@ -52,7 +64,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     <Button
       data-test-subj="popover"
       clickable
-      color={theme.euiColorDanger}
+      color={theme.eui.euiColorDanger}
       shape={Shape.square}
       onClick={togglePopover}
     />
@@ -72,6 +84,10 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     rangeFrom,
     rangeTo,
   };
+
+  const errorMessage =
+    error.error.log?.message || error.error.exception?.[0]?.message;
+  const truncatedErrorMessage = truncateMessage(errorMessage);
 
   return (
     <EuiPopover
@@ -99,8 +115,9 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
             serviceName={error.service.name}
             errorGroupId={error.error.grouping_key}
             query={query}
+            title={errorMessage}
           >
-            {error.error.log?.message || error.error.exception?.[0]?.message}
+            {truncatedErrorMessage}
           </ErrorLink>
         </EuiText>
       </Popover>

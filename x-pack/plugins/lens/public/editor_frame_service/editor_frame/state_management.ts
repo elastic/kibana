@@ -18,6 +18,7 @@ export interface PreviewState {
 export interface EditorFrameState extends PreviewState {
   persistedId?: string;
   title: string;
+  description?: string;
   stagedPreview?: PreviewState;
   activeDatasourceId: string | null;
 }
@@ -157,6 +158,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         ...state,
         persistedId: action.doc.id,
         title: action.doc.title,
+        description: action.doc.description,
         datasourceStates: Object.entries(action.doc.state.datasourceStates).reduce(
           (stateMap, [datasourceId, datasourceState]) => ({
             ...stateMap,

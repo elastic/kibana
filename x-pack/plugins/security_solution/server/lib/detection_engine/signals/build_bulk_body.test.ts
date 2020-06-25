@@ -18,7 +18,7 @@ describe('buildBulkBody', () => {
     jest.clearAllMocks();
   });
 
-  test('if bulk body builds well-defined body', () => {
+  test('bulk body builds well-defined body', () => {
     const sampleParams = sampleRuleAlertParams();
     const fakeSignalSourceHit = buildBulkBody({
       doc: sampleDocNoSortId(),
@@ -80,6 +80,7 @@ describe('buildBulkBody', () => {
           references: ['http://google.com'],
           severity: 'high',
           tags: ['some fake tag 1', 'some fake tag 2'],
+          threat: [],
           throttle: 'no_actions',
           type: 'query',
           to: 'now',
@@ -128,7 +129,7 @@ describe('buildBulkBody', () => {
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
-  test('if bulk body builds original_event if it exists on the event to begin with', () => {
+  test('bulk body builds original_event if it exists on the event to begin with', () => {
     const sampleParams = sampleRuleAlertParams();
     const doc = sampleDocNoSortId();
     doc._source.event = {
@@ -216,6 +217,7 @@ describe('buildBulkBody', () => {
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           throttle: 'no_actions',
+          threat: [],
           exceptions_list: [
             {
               field: 'source.ip',
@@ -254,7 +256,7 @@ describe('buildBulkBody', () => {
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
-  test('if bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
+  test('bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
     const sampleParams = sampleRuleAlertParams();
     const doc = sampleDocNoSortId();
     doc._source.event = {
@@ -329,6 +331,7 @@ describe('buildBulkBody', () => {
           query: 'user.name: root or user.name: admin',
           references: ['http://google.com'],
           severity: 'high',
+          threat: [],
           tags: ['some fake tag 1', 'some fake tag 2'],
           type: 'query',
           to: 'now',
@@ -378,7 +381,7 @@ describe('buildBulkBody', () => {
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
-  test('if bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
+  test('bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
     const sampleParams = sampleRuleAlertParams();
     const doc = sampleDocNoSortId();
     doc._source.event = {
@@ -447,6 +450,7 @@ describe('buildBulkBody', () => {
           references: ['http://google.com'],
           severity: 'high',
           tags: ['some fake tag 1', 'some fake tag 2'],
+          threat: [],
           type: 'query',
           to: 'now',
           note: '',

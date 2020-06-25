@@ -104,7 +104,7 @@ describe('Range Agg', () => {
     );
   };
 
-  describe('formating', () => {
+  describe('formatting', () => {
     test('formats bucket keys properly', () => {
       const aggConfigs = getAggConfigs();
       const agg = aggConfigs.aggs[0];
@@ -113,6 +113,24 @@ describe('Range Agg', () => {
       expect(format(buckets[0])).toBe('≥ -∞ and < 1 KB');
       expect(format(buckets[1])).toBe('≥ 1 KB and < 2.5 KB');
       expect(format(buckets[2])).toBe('≥ 2.5 KB and < +∞');
+    });
+  });
+
+  describe('getSerializedFormat', () => {
+    test('generates a serialized field format in the expected shape', () => {
+      const aggConfigs = getAggConfigs();
+      const agg = aggConfigs.aggs[0];
+      expect(agg.type.getSerializedFormat(agg)).toMatchInlineSnapshot(`
+        Object {
+          "id": "range",
+          "params": Object {
+            "id": "number",
+            "params": Object {
+              "pattern": "0,0.[000] b",
+            },
+          },
+        }
+      `);
     });
   });
 });

@@ -6,7 +6,7 @@
 
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { eventId } from '../../../../../common/endpoint/models/event';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
  * Represents a single result bucket of an aggregation

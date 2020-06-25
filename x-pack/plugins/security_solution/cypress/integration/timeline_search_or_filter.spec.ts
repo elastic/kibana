@@ -7,14 +7,14 @@
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/siem_main';
+import { openTimeline } from '../tasks/security_main';
 import { executeTimelineKQL } from '../tasks/timeline';
 
-import { HOSTS_PAGE } from '../urls/navigation';
+import { HOSTS_URL } from '../urls/navigation';
 
 describe('timeline search or filter KQL bar', () => {
   beforeEach(() => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    loginAndWaitForPage(HOSTS_URL);
   });
 
   it('executes a KQL query', () => {

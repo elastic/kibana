@@ -46,6 +46,7 @@ import {
 } from '../../../../kibana_react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -57,7 +58,7 @@ export interface DashboardContainerInput extends ContainerInput {
   useMargins: boolean;
   title: string;
   description?: string;
-  isEmbeddedExternally: boolean;
+  isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
@@ -98,24 +99,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public renderEmpty?: undefined | (() => React.ReactNode);
 
+  private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
+
   constructor(
     initialInput: DashboardContainerInput,
     private readonly options: DashboardContainerOptions,
+    stateTransfer?: EmbeddableStateTransfer,
     parent?: Container
   ) {
     super(
       {
-        panels: {},
-        isEmbeddedExternally: false,
-        isFullScreenMode: false,
-        filters: [],
-        useMargins: true,
         ...initialInput,
       },
       { embeddableLoaded: {} },
       options.embeddable.getEmbeddableFactory,
       parent
     );
+    this.embeddablePanel = options.embeddable.getEmbeddablePanel(stateTransfer);
   }
 
   protected createNewPanelState<
@@ -191,7 +191,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           <DashboardViewport
             renderEmpty={this.renderEmpty}
             container={this}
-            PanelComponent={this.options.embeddable.EmbeddablePanel}
+            PanelComponent={this.embeddablePanel}
           />
         </KibanaContextProvider>
       </I18nProvider>,

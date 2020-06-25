@@ -5,6 +5,8 @@
  */
 import { ReactNode } from 'react';
 
+import { Operator, OperatorType } from '../../../lists_plugin_deps';
+
 export interface OperatorOption {
   message: string;
   value: string;
@@ -12,37 +14,11 @@ export interface OperatorOption {
   type: OperatorType;
 }
 
-export enum Operator {
-  INCLUSION = 'included',
-  EXCLUSION = 'excluded',
-}
-
-export enum OperatorType {
-  NESTED = 'nested',
-  PHRASE = 'match',
-  PHRASES = 'match_any',
-  EXISTS = 'exists',
-  LIST = 'list',
-}
-
 export interface FormattedEntry {
   fieldName: string;
   operator: string | null;
-  value: string | null;
+  value: string | string[] | null;
   isNested: boolean;
-}
-
-export interface NestedExceptionEntry {
-  field: string;
-  type: string;
-  entries: ExceptionEntry[];
-}
-
-export interface ExceptionEntry {
-  field: string;
-  type: string;
-  operator: Operator;
-  value: string;
 }
 
 export interface DescriptionListItem {
@@ -51,28 +27,31 @@ export interface DescriptionListItem {
 }
 
 export interface Comment {
-  user: string;
-  timestamp: string;
+  created_by: string;
+  created_at: string;
   comment: string;
 }
 
-// TODO: Delete once types are updated
-export interface ExceptionListItemSchema {
-  _tags: string[];
-  comments: Comment[];
-  created_at: string;
-  created_by: string;
-  description?: string;
-  entries: Array<ExceptionEntry | NestedExceptionEntry>;
-  id: string;
-  item_id: string;
-  list_id: string;
-  meta?: unknown;
-  name: string;
-  namespace_type: 'single' | 'agnostic';
+export enum ExceptionListType {
+  DETECTION_ENGINE = 'detection',
+  ENDPOINT = 'endpoint',
+}
+
+export interface FilterOptions {
+  filter: string;
+  showDetectionsList: boolean;
+  showEndpointList: boolean;
   tags: string[];
-  tie_breaker_id: string;
-  type: string;
-  updated_at: string;
-  updated_by: string;
+}
+
+export interface Filter {
+  filter: Partial<FilterOptions>;
+  pagination: Partial<ExceptionsPagination>;
+}
+
+export interface ExceptionsPagination {
+  pageIndex: number;
+  pageSize: number;
+  totalItemCount: number;
+  pageSizeOptions: number[];
 }

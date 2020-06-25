@@ -21,16 +21,19 @@ import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { APP_ID } from '../../../../../common/constants';
 import {
   TimelineTypeLiteral,
   TimelineStatus,
   TimelineType,
 } from '../../../../../common/types/timeline';
-
-import { SiemPageName } from '../../../../app/types';
+import { navTabs } from '../../../../app/home/home_navigations';
+import { SecurityPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
+import { useGetUrlSearch } from '../../../../common/components/navigation/use_get_url_search';
+import { getCreateCaseUrl } from '../../../../common/components/link_to';
 import { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
@@ -41,6 +44,7 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
+import { setInsertTimeline } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
@@ -144,23 +148,31 @@ interface NewCaseProps {
 export const NewCase = React.memo<NewCaseProps>(
   ({ onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const history = useHistory();
+    const urlSearch = useGetUrlSearch(navTabs.case);
+    const dispatch = useDispatch();
     const { savedObjectId } = useSelector((state: State) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
+    const { navigateToApp } = useKibana().services.application;
+
     const handleClick = useCallback(() => {
       onClosePopover();
-      history.push({
-        pathname: `/${SiemPageName.case}/create`,
-        state: {
-          insertTimeline: {
-            timelineId,
-            timelineSavedObjectId: savedObjectId,
-            timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-          },
-        },
+      dispatch(
+        setInsertTimeline({
+          timelineId,
+          timelineSavedObjectId: savedObjectId,
+          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+        })
+      );
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCreateCaseUrl(urlSearch),
       });
+      history.push({
+        pathname: `/${SecurityPageName.case}/create`,
+      });
+
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [onClosePopover, history, timelineId, timelineTitle]);
+    }, [dispatch, navigateToApp, onClosePopover, history, timelineId, timelineTitle, urlSearch]);
 
     return (
       <EuiButtonEmpty
@@ -178,6 +190,36 @@ export const NewCase = React.memo<NewCaseProps>(
 );
 NewCase.displayName = 'NewCase';
 
+interface ExistingCaseProps {
+  onClosePopover: () => void;
+  onOpenCaseModal: () => void;
+  timelineStatus: TimelineStatus;
+}
+export const ExistingCase = React.memo<ExistingCaseProps>(
+  ({ onClosePopover, onOpenCaseModal, timelineStatus }) => {
+    const handleClick = useCallback(() => {
+      onClosePopover();
+      onOpenCaseModal();
+    }, [onOpenCaseModal, onClosePopover]);
+
+    return (
+      <>
+        <EuiButtonEmpty
+          data-test-subj="attach-timeline-existing-case"
+          color="text"
+          iconSide="left"
+          iconType="paperClip"
+          disabled={timelineStatus === TimelineStatus.draft}
+          onClick={handleClick}
+        >
+          {i18n.ATTACH_TIMELINE_TO_EXISTING_CASE}
+        </EuiButtonEmpty>
+      </>
+    );
+  }
+);
+ExistingCase.displayName = 'ExistingCase';
+
 export interface NewTimelineProps {
   createTimeline?: CreateTimeline;
   closeGearMenu?: () => void;
@@ -189,7 +231,7 @@ export interface NewTimelineProps {
 export const NewTimeline = React.memo<NewTimelineProps>(
   ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
     const uiCapabilities = useKibana().services.application.capabilities;
-    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.securitySolution.crud;
+    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
 
     const { getButton } = useCreateTimelineButton({
       timelineId,

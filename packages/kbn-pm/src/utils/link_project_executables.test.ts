@@ -23,7 +23,7 @@ jest.mock('./fs');
 
 import { resolve } from 'path';
 
-import { ToolingLogCollectingWriter } from '@kbn/dev-utils';
+import { ToolingLogCollectingWriter } from '@kbn/dev-utils/tooling_log';
 
 import { absolutePathSnapshotSerializer, stripAnsiSnapshotSerializer } from '../test_helpers';
 import { linkProjectExecutables } from './link_project_executables';
@@ -115,9 +115,9 @@ describe('bin script points to a file', () => {
     expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " debg Linking package executables",
-        " debg [foo] bar -> ../bar/bin/bar.js",
-        " debg [baz] bar -> ../bar/bin/bar.js",
+         debg Linking package executables,
+         debg [foo] bar -> ../bar/bin/bar.js,
+         debg [baz] bar -> ../bar/bin/bar.js,
       ]
     `);
   });

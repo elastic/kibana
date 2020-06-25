@@ -27,7 +27,7 @@ exports[`TimeField should render a loading state 1`] = `
       </div>
     }
     label={
-      <ForwardRef
+      <EuiFlexGroup
         alignItems="center"
         gutterSize="xs"
         justifyContent="spaceBetween"
@@ -50,7 +50,7 @@ exports[`TimeField should render a loading state 1`] = `
             size="s"
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     labelType="label"
   >
@@ -98,7 +98,7 @@ exports[`TimeField should render a selected time field 1`] = `
       </div>
     }
     label={
-      <ForwardRef
+      <EuiFlexGroup
         alignItems="center"
         gutterSize="xs"
         justifyContent="spaceBetween"
@@ -117,7 +117,7 @@ exports[`TimeField should render a selected time field 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <ForwardRef
+          <EuiLink
             className="timeFieldRefreshButton"
             onClick={[Function]}
           >
@@ -126,9 +126,9 @@ exports[`TimeField should render a selected time field 1`] = `
               id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     labelType="label"
   >
@@ -179,7 +179,7 @@ exports[`TimeField should render normally 1`] = `
       </div>
     }
     label={
-      <ForwardRef
+      <EuiFlexGroup
         alignItems="center"
         gutterSize="xs"
         justifyContent="spaceBetween"
@@ -198,7 +198,7 @@ exports[`TimeField should render normally 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <ForwardRef
+          <EuiLink
             className="timeFieldRefreshButton"
             onClick={[Function]}
           >
@@ -207,9 +207,9 @@ exports[`TimeField should render normally 1`] = `
               id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
               values={Object {}}
             />
-          </ForwardRef>
+          </EuiLink>
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     labelType="label"
   >

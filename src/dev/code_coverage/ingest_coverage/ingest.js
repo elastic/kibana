@@ -19,79 +19,40 @@
 
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
-import chalk from 'chalk';
-import { green, always, pretty } from './utils';
-import { fromNullable } from './either';
 import { COVERAGE_INDEX, TOTALS_INDEX } from './constants';
+import { errMsg, redact } from './ingest_helpers';
+import { noop } from './utils';
+import { right, left } from './either';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
-const redacted = redact(node);
 const client = new Client({ node });
-
-const indexName = (body) => (body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX);
+const pipeline = process.env.PIPELINE_NAME || 'team_assignment';
+const redacted = redact(node);
 
 export const ingest = (log) => async (body) => {
-  const index = indexName(body);
+  const index = body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX;
+  const maybeWithPipeline = maybeTeamAssign(index, body);
+  const withIndex = { index, body: maybeWithPipeline };
+  const dontSend = noop;
 
-  if (process.env.NODE_ENV === 'integration_test') {
-    log.debug(`### Just Logging, ${green('NOT actually sending')} to [${green(index)}]`);
-    logSuccess(log, index, body);
-  } else {
-    try {
-      log.debug(`### Actually sending to: ${green(index)}`);
-      await client.index({ index, body });
-      logSuccess(log, index, body);
-    } catch (e) {
-      throw createFailError(errMsg(index, body, e));
-    }
-  }
+  log.verbose(withIndex);
+
+  process.env.NODE_ENV === 'integration_test'
+    ? left(null)
+    : right(withIndex).fold(dontSend, async function doSend(finalPayload) {
+        await send(index, redacted, finalPayload);
+      });
 };
-function logSuccess(log, index, body) {
-  const logShort = () => `### Sent:
-### ES HOST (redacted): ${redacted}
-### Index: ${green(index)}`;
 
-  logShort();
-  log.verbose(pretty(body));
-
-  const { staticSiteUrl } = body;
-
-  logShort();
-  log.debug(`### staticSiteUrl: ${staticSiteUrl}`);
-}
-function errMsg(index, body, e) {
-  const orig = fromNullable(e.body).fold(
-    always(''),
-    () => `### Orig Err:\n${pretty(e.body.error)}`
-  );
-
-  const red = color('red');
-
-  return `
-### ES HOST (redacted): \n\t${red(redacted)}
-### INDEX: \n\t${red(index)}
-### Partial orig err stack: \n\t${partial(e.stack)}
-### Item BODY:\n${pretty(body)}
-${orig}
-
-### Troubleshooting Hint:
-${red('Perhaps the coverage data was not merged properly?\n')}
-`;
-}
-
-function partial(x) {
-  return x.split('\n').splice(0, 2).join('\n');
-}
-function redact(x) {
-  const url = new URL(x);
-  if (url.password) {
-    return `${url.protocol}//${url.host}`;
-  } else {
-    return x;
+async function send(idx, redacted, requestBody) {
+  try {
+    await client.index(requestBody);
+  } catch (e) {
+    throw createFailError(errMsg(idx, redacted, requestBody, e));
   }
 }
-function color(whichColor) {
-  return function colorInner(x) {
-    return chalk[whichColor].bgWhiteBright(x);
-  };
+
+export function maybeTeamAssign(index, body) {
+  const payload = index === TOTALS_INDEX ? body : { ...body, pipeline };
+  return payload;
 }

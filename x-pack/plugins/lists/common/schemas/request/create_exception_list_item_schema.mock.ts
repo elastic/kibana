@@ -5,7 +5,7 @@
  */
 
 import {
-  COMMENT,
+  COMMENTS,
   DESCRIPTION,
   ENTRIES,
   ITEM_TYPE,
@@ -21,7 +21,7 @@ import { CreateExceptionListItemSchema } from './create_exception_list_item_sche
 
 export const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemSchema => ({
   _tags: _TAGS,
-  comment: COMMENT,
+  comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,
   item_id: undefined,
