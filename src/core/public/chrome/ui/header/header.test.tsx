@@ -45,6 +45,7 @@ function mockProps() {
     isVisible$: new BehaviorSubject(true),
     kibanaDocLink: '/docs',
     navLinks$: new BehaviorSubject([]),
+    customNavLink$: new BehaviorSubject(undefined),
     recentlyAccessed$: new BehaviorSubject([]),
     forceAppSwitcherNavigation$: new BehaviorSubject(false),
     helpExtension$: new BehaviorSubject(undefined),
@@ -75,6 +76,12 @@ describe('Header', () => {
     const navLinks$ = new BehaviorSubject([
       { id: 'kibana', title: 'kibana', baseUrl: '', legacy: false },
     ]);
+    const customNavLink$ = new BehaviorSubject({
+      id: 'cloud-deployment-link',
+      title: 'Manage cloud deployment',
+      baseUrl: '',
+      legacy: false,
+    });
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
     ]);
@@ -87,6 +94,7 @@ describe('Header', () => {
         recentlyAccessed$={recentlyAccessed$}
         isLocked$={isLocked$}
         navType$={navType$}
+        customNavLink$={customNavLink$}
       />
     );
     expect(component).toMatchSnapshot();

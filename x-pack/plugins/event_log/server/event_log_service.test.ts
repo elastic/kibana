@@ -7,9 +7,9 @@
 import { IEventLogConfig } from './types';
 import { EventLogService } from './event_log_service';
 import { contextMock } from './es/context.mock';
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
-const loggingService = loggingServiceMock.create();
+const loggingService = loggingSystemMock.create();
 const systemLogger = loggingService.get();
 
 describe('EventLogService', () => {
