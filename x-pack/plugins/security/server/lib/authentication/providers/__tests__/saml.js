@@ -559,7 +559,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).to.be(true);
-      expect(authenticationResult.redirectURL).to.be('/logged_out');
+      expect(authenticationResult.redirectURL).to.be('/test-base-path/logged_out');
     });
 
     it('redirects to /logged_out if `redirect` field in SAML logout response is not defined.', async () => {
@@ -581,11 +581,11 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).to.be(true);
-      expect(authenticationResult.redirectURL).to.be('/logged_out');
+      expect(authenticationResult.redirectURL).to.be('/test-base-path/logged_out');
     });
 
     it('relies on SAML logout if query string is not empty, but does not include SAMLRequest.', async () => {
-      const request = requestFixture({ search: '?Whatever=something%20unrelated' });
+      const request = requestFixture({ search: '?Whatever=something%20unrelated&SAMLResponse=xxx%20yyy' });
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
@@ -603,7 +603,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).to.be(true);
-      expect(authenticationResult.redirectURL).to.be('/logged_out');
+      expect(authenticationResult.redirectURL).to.be('/test-base-path/logged_out');
     });
 
     it('relies SAML invalidate call even if access token is presented.', async () => {
@@ -631,7 +631,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).to.be(true);
-      expect(authenticationResult.redirectURL).to.be('/logged_out');
+      expect(authenticationResult.redirectURL).to.be('/test-base-path/logged_out');
     });
 
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is null.', async () => {
@@ -656,7 +656,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).to.be(true);
-      expect(authenticationResult.redirectURL).to.be('/logged_out');
+      expect(authenticationResult.redirectURL).to.be('/test-base-path/logged_out');
     });
 
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is not defined.', async () => {
@@ -681,7 +681,18 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).to.be(true);
-      expect(authenticationResult.redirectURL).to.be('/logged_out');
+      expect(authenticationResult.redirectURL).to.be('/test-base-path/logged_out');
+    });
+
+    it('redirects to /logged_out if SAML logout response is received.', async () => {
+      const request = requestFixture({ search: '?SAMLResponse=xxx%20yyy' });
+
+      const authenticationResult = await provider.deauthenticate(request);
+
+      sinon.assert.notCalled(callWithInternalUser);
+
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/test-base-path/logged_out');
     });
 
     it('redirects user to the IdP if SLO is supported by IdP in case of SP initiated logout.', async () => {
