@@ -22,7 +22,7 @@ import { Query, Filter } from '../../../../../src/plugins/data/public';
 import { DatasourceDataPanelProps } from '../types';
 import { IndexPattern } from './types';
 
-export interface FieldProps {
+export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];
   data: DataPublicPluginStart;
   indexPattern: IndexPattern;
@@ -30,6 +30,20 @@ export interface FieldProps {
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
   filters: Filter[];
+}
+
+export interface FieldsAccordionProps {
+  initialIsOpen: boolean;
+  onToggle: (open: boolean) => void;
+  id: string;
+  label: string;
+  hasLoaded: boolean;
+  fieldsCount: number;
+  isFiltered: boolean;
+  paginatedFields: IndexPatternField[];
+  fieldProps: FieldItemSharedProps;
+  renderCallout: JSX.Element;
+  exists: boolean;
 }
 
 export const InnerFieldsAccordion = function InnerFieldsAccordion({
@@ -44,26 +58,12 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   fieldProps,
   renderCallout,
   exists,
-}: {
-  initialIsOpen: boolean;
-  onToggle: (open: boolean) => void;
-  id: string;
-  label: string;
-  hasLoaded: boolean;
-  fieldsCount: number;
-  isFiltered: boolean;
-  paginatedFields: IndexPatternField[];
-  fieldProps: FieldProps;
-  renderCallout: JSX.Element;
-  exists: boolean;
-}) {
+}: FieldsAccordionProps) {
   const renderField = useCallback(
     (field: IndexPatternField) => {
-      return (
-        <FieldItem {...fieldProps} key={field.name} field={field} exists={exists ? true : false} />
-      );
+      return <FieldItem {...fieldProps} key={field.name} field={field} exists={!!exists} />;
     },
-    [fieldProps]
+    [fieldProps, exists]
   );
 
   return (
