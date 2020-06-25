@@ -56,11 +56,17 @@ export interface ExternalServiceParams {
   [index: string]: any;
 }
 
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
+}
+
 export interface ExternalService {
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
-  findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
+  createComment: (params: ExternalServiceParams) => Promise<ExternalServiceCommentResponse>;
 }
 
 export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
@@ -97,4 +103,22 @@ export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
+}
+
+export interface UpdateFieldText {
+  text: string;
+}
+
+export interface UpdateFieldTextArea {
+  textarea: { format: 'html' | 'text'; content: string };
+}
+
+interface UpdateField {
+  field: { name: string };
+  old_value: UpdateFieldText | UpdateFieldTextArea;
+  new_value: UpdateFieldText | UpdateFieldTextArea;
+}
+
+export interface UpdateIncidentRequest {
+  changes: UpdateField[];
 }

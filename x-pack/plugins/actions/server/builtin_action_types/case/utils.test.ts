@@ -63,7 +63,7 @@ const maliciousMapping: MapRecord[] = [
 ];
 
 const fullParams: PushToServiceApiParams = {
-  caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
+  savedObjectId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   title: 'a title',
   description: 'a description',
   createdAt: '2020-03-13T08:34:53.450Z',
@@ -132,7 +132,7 @@ describe('buildMap', () => {
 describe('mapParams', () => {
   test('maps params correctly', () => {
     const params = {
-      caseId: '123',
+      savedObjectId: '123',
       incidentId: '456',
       title: 'Incident title',
       description: 'Incident description',
@@ -148,7 +148,7 @@ describe('mapParams', () => {
 
   test('do not add fields not in mapping', () => {
     const params = {
-      caseId: '123',
+      savedObjectId: '123',
       incidentId: '456',
       title: 'Incident title',
       description: 'Incident description',
@@ -164,7 +164,7 @@ describe('mapParams', () => {
 describe('prepareFieldsForTransformation', () => {
   test('prepare fields with defaults', () => {
     const res = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
     });
     expect(res).toEqual([
@@ -185,7 +185,7 @@ describe('prepareFieldsForTransformation', () => {
 
   test('prepare fields with default pipes', () => {
     const res = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
       defaultPipes: ['myTestPipe'],
     });
@@ -209,7 +209,7 @@ describe('prepareFieldsForTransformation', () => {
 describe('transformFields', () => {
   test('transform fields for creation correctly', () => {
     const fields = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
     });
 
@@ -226,8 +226,8 @@ describe('transformFields', () => {
 
   test('transform fields for update correctly', () => {
     const fields = prepareFieldsForTransformation({
-      params: {
-        ...fullParams,
+      externalCase: {
+        ...fullParams.externalCase,
         updatedAt: '2020-03-15T08:34:53.450Z',
         updatedBy: {
           username: 'anotherUser',
@@ -262,7 +262,7 @@ describe('transformFields', () => {
 
   test('add newline character to descripton', () => {
     const fields = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
     });
@@ -280,7 +280,7 @@ describe('transformFields', () => {
 
   test('append username if fullname is undefined when create', () => {
     const fields = prepareFieldsForTransformation({
-      params: fullParams,
+      externalCase: fullParams.externalCase,
       mapping: finalMapping,
     });
 
@@ -300,8 +300,8 @@ describe('transformFields', () => {
 
   test('append username if fullname is undefined when update', () => {
     const fields = prepareFieldsForTransformation({
-      params: {
-        ...fullParams,
+      externalCase: {
+        ...fullParams.externalCase,
         updatedAt: '2020-03-15T08:34:53.450Z',
         updatedBy: {
           username: 'anotherUser',

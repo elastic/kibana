@@ -41,7 +41,7 @@ const pushToServiceHandler = async ({
   }
 
   const fields = prepareFieldsForTransformation({
-    params,
+    externalCase: params.externalCase,
     mapping,
     defaultPipes,
   });

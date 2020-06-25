@@ -182,17 +182,17 @@ export const addTimeZoneToDate = (date: string, timezone = 'GMT'): string => {
 };
 
 export const prepareFieldsForTransformation = ({
-  params,
+  externalCase,
   mapping,
   defaultPipes = ['informationCreated'],
 }: PrepareFieldsForTransformArgs): PipedField[] => {
-  return Object.keys(params.externalCase)
+  return Object.keys(externalCase)
     .filter((p) => mapping.get(p)?.actionType != null && mapping.get(p)?.actionType !== 'nothing')
     .map((p) => {
       const actionType = mapping.get(p)?.actionType ?? 'nothing';
       return {
         key: p,
-        value: params.externalCase[p],
+        value: externalCase[p],
         actionType,
         pipes: actionType === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
       };
