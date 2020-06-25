@@ -8,7 +8,7 @@ export default function ({ loadTestFile }) {
   describe('EPM Endpoints', function () {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./list'));
-    // loadTestFile(require.resolve('./file'));
+    loadTestFile(require.resolve('./file'));
     //loadTestFile(require.resolve('./template'));
     loadTestFile(require.resolve('./ilm'));
   });
