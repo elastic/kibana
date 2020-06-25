@@ -12,8 +12,9 @@ export const mapsTelemetrySavedObjects: SavedObjectsType = {
   mappings: {
     properties: {
       settings: {
+        index: false,
         properties: {
-          showMapVisualizationTypes: { type: 'boolean', index: false },
+          showMapVisualizationTypes: { type: 'boolean' },
         },
       },
       indexPatternsWithGeoFieldCount: { type: 'long', index: false },
@@ -22,23 +23,24 @@ export const mapsTelemetrySavedObjects: SavedObjectsType = {
       mapsTotalCount: { type: 'long', index: false },
       timeCaptured: { type: 'date', index: false },
       attributesPerMap: {
+        index: false,
         properties: {
           dataSourcesCount: {
             properties: {
-              min: { type: 'long', index: false },
-              max: { type: 'long', index: false },
-              avg: { type: 'long', index: false },
+              min: { type: 'long' },
+              max: { type: 'long' },
+              avg: { type: 'long' },
             },
           },
           layersCount: {
             properties: {
-              min: { type: 'long', index: false },
-              max: { type: 'long', index: false },
-              avg: { type: 'long', index: false },
+              min: { type: 'long' },
+              max: { type: 'long' },
+              avg: { type: 'long' },
             },
           },
-          layerTypesCount: { type: 'object', index: false },
-          emsVectorLayersCount: { type: 'object', index: false },
+          layerTypesCount: { type: 'object' },
+          emsVectorLayersCount: { type: 'object' },
         },
       },
     },
