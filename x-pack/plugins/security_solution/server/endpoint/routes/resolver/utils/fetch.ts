@@ -12,14 +12,11 @@ import {
   ResolverRelatedAlerts,
   LifecycleNode,
 } from '../../../../../common/endpoint/types';
-import { entityId, ancestryArray } from '../../../../../common/endpoint/models/event';
+import { ancestryArray } from '../../../../../common/endpoint/models/event';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
-import { ChildrenQuery } from '../queries/children';
 import { StatsQuery } from '../queries/stats';
-import { createLifecycle, createChildren } from './node';
-import { ChildrenNodesHelper } from './children_helper';
-import { TotalsPaginationBuilder } from './totals_pagination';
+import { createLifecycle } from './node';
 import { MultiSearcher, QueryInfo } from '../queries/multi_searcher';
 import { AncestryQueryHandler } from './ancestry_query_handler';
 import { RelatedEventsQueryHandler } from './events_query_handler';
@@ -194,7 +191,7 @@ export class Fetcher {
     const originNode = await this.getNode(this.id);
     const ancestryHandler = new AncestryQueryHandler(
       limit,
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID,
       originNode
     );
@@ -208,28 +205,17 @@ export class Fetcher {
    * @param after a cursor to use as the starting point for retrieving children
    */
   public async children(limit: number, after?: string): Promise<ResolverChildren> {
-    const originNode = await this.getNode(this.id);
-    if (!originNode) {
-      return createChildren();
-    }
-
-    if (!ancestryArray(originNode.lifecycle[0])) {
-      const helper = await this.findChildrenWithoutAncestry(this.id, limit, after);
-
-      return helper.getNodes();
-    }
-
     const childrenHandler = new ChildrenStartQueryHandler(
       limit,
       this.id,
       after,
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID
     );
     const helper = await childrenHandler.search(this.client);
     const childrenLifecycleHandler = new LifecycleQueryHandler(
       helper,
-      this.indexPattern,
+      this.eventsIndexPattern,
       this.endpointID
     );
 
@@ -292,37 +278,6 @@ export class Fetcher {
     return createLifecycle(entityID, results);
   }
 
-  private async findChildrenWithoutAncestry(id: string, limit: number, after?: string) {
-    let nodesLeft = limit;
-    let childIDs = [id];
-    let childrenQuery = new ChildrenQuery(
-      TotalsPaginationBuilder.createBuilder(nodesLeft, after),
-      this.eventsIndexPattern,
-      this.endpointID
-    );
-    const cache = new ChildrenNodesHelper(id);
-
-    while (childIDs.length > 0) {
-      const { totals, results } = await childrenQuery.search(this.client, childIDs);
-      if (results.length === 0) {
-        break;
-      }
-      childIDs = results.map(entityId);
-
-      cache.addPagination(totals, results);
-      nodesLeft = limit - cache.getNumNodes();
-      childrenQuery = new ChildrenQuery(
-        TotalsPaginationBuilder.createBuilder(nodesLeft),
-        this.eventsIndexPattern,
-        this.endpointID
-      );
-    }
-    const lifecycleQuery = new LifecycleQuery(this.indexPattern, this.endpointID);
-    const children = await lifecycleQuery.search(this.client, cache.getEntityIDs());
-    cache.addLifecycleEvents(children);
-    return cache;
-  }
-
   private async doAncestors(limit: number, originNode: LifecycleNode) {
     const ancestryHandler = new AncestryQueryHandler(
       limit,
@@ -341,7 +296,7 @@ export class Fetcher {
       this.endpointID
     );
     const ids = tree.ids();
-    const res = await statsQuery.search(this.client, ids);
+    const res = await statsQuery.searchAndFormat(this.client, ids);
     const alerts = res.alerts;
     const events = res.events;
     ids.forEach((id) => {

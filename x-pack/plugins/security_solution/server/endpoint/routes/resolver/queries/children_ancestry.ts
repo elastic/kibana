@@ -25,14 +25,14 @@ export class ChildrenAncestryQuery extends ResolverQuery<PaginatedResults> {
     throw new Error('Legacy query for children ancestry is not supported');
   }
 
-  // TODO use ancestry array here
+  // TODO limit the _source here to only process.Ext.ancestry, and
   protected query(entityIDs: string[]): JsonObject {
     return {
       query: {
         bool: {
           filter: [
             {
-              terms: { 'process.parent.entity_id': entityIDs },
+              terms: { 'process.Ext.ancestry': entityIDs },
             },
             {
               term: { 'event.category': 'process' },
@@ -52,7 +52,7 @@ export class ChildrenAncestryQuery extends ResolverQuery<PaginatedResults> {
 
   formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
     return {
-      results: ResolverQuery.getResults(response),
+      results: this.getResults(response),
       totals: TotalsPaginationBuilder.getTotals(response.aggregations),
     };
   }

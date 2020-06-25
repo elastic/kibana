@@ -189,6 +189,23 @@ describe('data generator', () => {
       }
     });
 
+    it('creates the right number childrenLevels', () => {
+      let totalChildren = 0;
+      for (const level of tree.childrenLevels) {
+        totalChildren += level.length;
+      }
+      expect(totalChildren).toEqual(tree.children.size);
+      expect(tree.childrenLevels.length).toEqual(generations);
+    });
+
+    it('has the right nodes in both the childrenLevels and children map', () => {
+      for (const level of tree.childrenLevels) {
+        for (const node of level) {
+          expect(tree.children.get(node.id)).toEqual(node);
+        }
+      }
+    });
+
     it('has the right related events for each node', () => {
       const checkRelatedEvents = (node: TreeNode) => {
         expect(node.relatedEvents.length).toEqual(4);

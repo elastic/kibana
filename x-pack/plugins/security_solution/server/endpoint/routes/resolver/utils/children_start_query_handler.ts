@@ -7,7 +7,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
-import { ChildrenAncestryQuery } from '../queries/children_ancestry';
+import { ChildrenQuery } from '../queries/children';
 import { TotalsPaginationBuilder } from './totals_pagination';
 import { QueryInfo } from '../queries/multi_searcher';
 import { QueryHandler } from './fetch';
@@ -16,8 +16,8 @@ import { ChildrenNodesHelper } from './children_helper';
 export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelper> {
   private readonly childrenHelper: ChildrenNodesHelper;
   private limitLeft: number;
-  private query: ChildrenAncestryQuery;
-  private nodeToQuery: string | undefined;
+  private query: ChildrenQuery;
+  private nodeToQuery: string[] | undefined;
 
   constructor(
     private readonly limit: number,
@@ -26,14 +26,14 @@ export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelp
     private readonly indexPattern: string,
     private readonly legacyEndpointID: string | undefined
   ) {
-    this.query = new ChildrenAncestryQuery(
+    this.query = new ChildrenQuery(
       TotalsPaginationBuilder.createBuilder(limit, after),
       indexPattern,
       legacyEndpointID
     );
     this.childrenHelper = new ChildrenNodesHelper(entityID);
     this.limitLeft = this.limit;
-    this.nodeToQuery = entityID;
+    this.nodeToQuery = [entityID];
   }
 
   private setNoMore() {
@@ -50,11 +50,19 @@ export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelp
       return;
     }
 
+    console.log('results: ', JSON.stringify(results, null, 2));
+
     this.childrenHelper.addPagination(totals, results);
     this.limitLeft = this.limit - this.childrenHelper.getNumNodes();
-    this.nodeToQuery = this.childrenHelper.getIncompleteNodes().values().next().value;
 
-    this.query = new ChildrenAncestryQuery(
+    // need to rethink this
+    this.nodeToQuery = Array.from(this.childrenHelper.getIncompleteNodes().values());
+    console.log('node to query ', this.nodeToQuery);
+    console.log('limit left ', this.limitLeft);
+    console.log('results ', results.length);
+    this.query = new ChildrenQuery(
+      // TODO create new method that takes the raw cursor information to ensure that we don't refind the last set of results
+      // just pass in the result set and have it pull the information for the last event because it should be sorting by timestamp asc
       TotalsPaginationBuilder.createBuilder(this.limitLeft),
       this.indexPattern,
       this.legacyEndpointID
@@ -62,7 +70,7 @@ export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelp
   };
 
   hasMore(): boolean {
-    return this.limit > 0 && this.nodeToQuery !== undefined;
+    return this.limitLeft > 0 && this.nodeToQuery !== undefined && this.nodeToQuery.length > 0;
   }
 
   nextQuery(): QueryInfo | undefined {
@@ -81,8 +89,12 @@ export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelp
   }
 
   async search(client: IScopedClusterClient) {
-    if (this.hasMore()) {
-      this.handleResponse(await this.query.search(client, this.nodeToQuery || ''));
+    while (this.hasMore()) {
+      const info = this.nextQuery();
+      if (!info) {
+        break;
+      }
+      this.handleResponse(await this.query.search(client, info.ids));
     }
     return this.getResults();
   }

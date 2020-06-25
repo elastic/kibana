@@ -67,7 +67,16 @@ export class ChildrenQuery extends ResolverQuery<PaginatedResults> {
         bool: {
           filter: [
             {
-              terms: { 'process.parent.entity_id': entityIDs },
+              bool: {
+                should: [
+                  {
+                    terms: { 'process.parent.entity_id': entityIDs },
+                  },
+                  {
+                    terms: { 'process.Ext.ancestry': entityIDs },
+                  },
+                ],
+              },
             },
             {
               term: { 'event.category': 'process' },
@@ -87,7 +96,7 @@ export class ChildrenQuery extends ResolverQuery<PaginatedResults> {
 
   formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
     return {
-      results: ResolverQuery.getResults(response),
+      results: this.getResults(response),
       totals: TotalsPaginationBuilder.getTotals(response.aggregations),
     };
   }

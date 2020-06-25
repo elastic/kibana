@@ -78,6 +78,12 @@ describe('Children helper', () => {
     expect(helper.getEntityIDs()).toEqual(Array.from(tree.children.keys()));
   });
 
+  it('returns the correct number of nodes', () => {
+    const children = getAllChildrenEvents(tree);
+    helper.addLifecycleEvents(children);
+    expect(helper.getNumNodes()).toEqual(tree.children.size);
+  });
+
   it('returns the incomplete nodes', () => {
     const children = getAllChildrenEvents(tree);
     const parents = findParents(tree.children);
@@ -94,6 +100,34 @@ describe('Children helper', () => {
     expect(incompleteNodes.size).toEqual(2);
     expect(incompleteNodes.has(entityId(parents[0]))).toBeTruthy();
     expect(incompleteNodes.has(tree.origin.id)).toBeTruthy();
+    expect(incompleteNodes.has(entityId(parents[1]))).toBeFalsy();
+  });
+
+  it('returns the incomplete nodes after multiple pagination additions', () => {
+    const children = getAllChildrenEvents(tree);
+    const parents = findParents(tree.children);
+
+    let totals = {
+      [tree.origin.id]: 100,
+      [entityId(parents[0])]: 10,
+      [entityId(parents[1])]: 0,
+    };
+
+    helper.addPagination(totals, getStartEvents(children));
+
+    totals = {
+      [tree.origin.id]: 3,
+      [entityId(parents[0])]: 2,
+      [entityId(parents[1])]: 0,
+    };
+
+    // add the new pagination totals that should mark all the nodes as complete
+    helper.addPagination(totals, getStartEvents(children));
+    helper.addLifecycleEvents(children);
+    const incompleteNodes = helper.getIncompleteNodes();
+    expect(incompleteNodes.size).toEqual(0);
+    expect(incompleteNodes.has(entityId(parents[0]))).toBeFalsy();
+    expect(incompleteNodes.has(tree.origin.id)).toBeFalsy();
     expect(incompleteNodes.has(entityId(parents[1]))).toBeFalsy();
   });
 

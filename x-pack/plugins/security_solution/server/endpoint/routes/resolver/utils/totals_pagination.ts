@@ -53,7 +53,8 @@ export class TotalsPaginationBuilder {
    * @param results the events that were returned by the ES query
    */
   static buildCursor(total: number, results: ResolverEvent[]): string | null {
-    if (total > results.length && results.length > 0) {
+    // TODO remove total?
+    if (results.length > 0) {
       return PaginationBuilder.buildCursor(results);
     }
     return null;

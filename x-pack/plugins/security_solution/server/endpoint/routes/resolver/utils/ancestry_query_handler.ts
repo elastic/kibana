@@ -37,6 +37,12 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
       levels
     );
     this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
+
+    // add the origin node to the response if it exists
+    if (originNode) {
+      this.ancestry.ancestors.push(originNode);
+      this.ancestry.nextAncestor = parentEntityId(originNode.lifecycle[0]) || null;
+    }
   }
 
   private static getAncestryAsArray(event: ResolverEvent | undefined): string[] {

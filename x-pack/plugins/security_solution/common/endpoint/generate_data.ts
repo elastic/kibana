@@ -16,6 +16,7 @@ import {
   PolicyData,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
+import { parentEntityId } from './models/event';
 
 export type Event = AlertEvent | EndpointEvent;
 /**
@@ -258,6 +259,11 @@ export interface Tree {
    * Map of entity_id to node
    */
   children: Map<string, TreeNode>;
+  /**
+   * An array of levels of the children, that doesn't include the origin or any ancestors
+   * childrenLevels[0] are the direct children of the origin node. The next level would be those children's descendants
+   */
+  childrenLevels: TreeNode[][];
   /**
    * Map of entity_id to node
    */
@@ -623,6 +629,43 @@ export class EndpointDocGenerator {
       return nodeMap.set(nodeId, node);
     };
 
+    const groupNodesByParent = (children: Map<string, TreeNode>) => {
+      const nodesByParent: Map<string, TreeNode[]> = new Map();
+      for (const node of children.values()) {
+        const parentID = parentEntityId(node.lifecycle[0]);
+        if (parentID) {
+          let groupedNodes = nodesByParent.get(parentID);
+
+          if (!groupedNodes) {
+            groupedNodes = [];
+            nodesByParent.set(parentID, groupedNodes);
+          }
+          groupedNodes.push(node);
+        }
+      }
+
+      return nodesByParent;
+    };
+
+    const createLevels = (
+      childrenByParent: Map<string, TreeNode[]>,
+      levels: TreeNode[][],
+      currentNodes: TreeNode[] | undefined
+    ): TreeNode[][] => {
+      if (!currentNodes || currentNodes.length === 0) {
+        return levels;
+      }
+      levels.push(currentNodes);
+      const nextLevel: TreeNode[] = [];
+      for (const node of currentNodes) {
+        const children = childrenByParent.get(node.id);
+        if (children) {
+          nextLevel.push(...children);
+        }
+      }
+      return createLevels(childrenByParent, levels, nextLevel);
+    };
+
     const ancestry = this.createAlertEventAncestry(optionsWithDef);
 
     // create a mapping of entity_id -> {lifecycle, related events, and related alerts}
@@ -637,12 +680,15 @@ export class EndpointDocGenerator {
     const children = Array.from(this.descendantsTreeGenerator(alert, optionsWithDef));
 
     const childrenNodes: Map<string, TreeNode> = children.reduce(addEventToMap, new Map());
+    const childrenByParent = groupNodesByParent(childrenNodes);
+    const levels = createLevels(childrenByParent, [], childrenByParent.get(origin.id));
 
     return {
       children: childrenNodes,
       ancestry: ancestryNodes,
       allEvents: [...ancestry, ...children],
       origin,
+      childrenLevels: levels,
     };
   }
 

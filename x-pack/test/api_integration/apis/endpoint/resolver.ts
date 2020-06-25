@@ -242,9 +242,11 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     percentWithRelated: 100,
     numTrees: 1,
     alwaysGenMaxChildrenPerNode: true,
+    useAncestryArray: true,
+    ancestryArraySize: 2,
   };
 
-  describe('Resolver', () => {
+  describe.only('Resolver', () => {
     before(async () => {
       await esArchiver.load('endpoint/resolver/api_feature');
       resolverTrees = await resolver.createTrees(treeOptions);
@@ -598,7 +600,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
       });
 
-      describe('endpoint events', () => {
+      describe.only('endpoint events', () => {
         it('returns all children for the origin', async () => {
           const { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=100`)
@@ -611,8 +613,11 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('returns a single generation of children', async () => {
+          // this gets a node should have 3 children which were created in succession so that the timestamps
+          // are ordered correctly to be retrieved in a single call
+          const distantChildEntityID = tree.childrenLevels[0][0].id;
           const { body }: { body: ResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=3`)
+            .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=3`)
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
           verifyChildren(body.childNodes, tree, 1, 3);
@@ -642,7 +647,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=3`)
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
-          verifyChildren(body.childNodes, tree, 1, 3);
+          verifyChildren(body.childNodes, tree);
           expect(body.nextChild).to.be(null);
 
           ({ body } = await supertest
