@@ -107,7 +107,7 @@ describe('syncData', () => {
   it('Should sync with source-params', async () => {
     const layer: TiledVectorLayer = createLayer({}, {});
 
-    const syncContext = new Mock_sync_context({ dataFilters: {} });
+    const syncContext = new MockSyncContext({ dataFilters: {} });
 
     await layer.syncData(syncContext);
     // @ts-expect-error
@@ -122,7 +122,7 @@ describe('syncData', () => {
 
   it('Should not resync when no changes to source params', async () => {
     const layer1: TiledVectorLayer = createLayer({}, {});
-    const syncContext1 = new Mock_sync_context({ dataFilters: {} });
+    const syncContext1 = new MockSyncContext({ dataFilters: {} });
 
     await layer1.syncData(syncContext1);
 
@@ -136,7 +136,7 @@ describe('syncData', () => {
       },
       {}
     );
-    const syncContext2 = new Mock_sync_context({ dataFilters: {} });
+    const syncContext2 = new MockSyncContext({ dataFilters: {} });
     await layer2.syncData(syncContext2);
     // @ts-expect-error
     sinon.assert.notCalled(syncContext2.startLoading);
@@ -146,7 +146,7 @@ describe('syncData', () => {
 
   it('Should resync when changes to source params', async () => {
     const layer1: TiledVectorLayer = createLayer({}, {});
-    const syncContext1 = new Mock_sync_context({ dataFilters: {} });
+    const syncContext1 = new MockSyncContext({ dataFilters: {} });
 
     await layer1.syncData(syncContext1);
 
@@ -160,7 +160,7 @@ describe('syncData', () => {
       },
       { layerName: 'barfoo' }
     );
-    const syncContext2 = new Mock_sync_context({ dataFilters: {} });
+    const syncContext2 = new MockSyncContext({ dataFilters: {} });
     await layer2.syncData(syncContext2);
 
     // @ts-expect-error
