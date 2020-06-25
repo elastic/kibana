@@ -8,14 +8,13 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { compose, withState } from 'recompose';
 import { camelCase } from 'lodash';
-// @ts-ignore Untyped local
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WithKibanaProps } from '../../';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { selectToplevelNodes } from '../../state/actions/transient';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { insertNodes } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';

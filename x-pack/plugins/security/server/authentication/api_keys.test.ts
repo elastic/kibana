@@ -10,7 +10,7 @@ import { APIKeys } from './api_keys';
 
 import {
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
   elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -35,7 +35,7 @@ describe('API Keys', () => {
 
     apiKeys = new APIKeys({
       clusterClient: mockClusterClient,
-      logger: loggingServiceMock.create().get('api-keys'),
+      logger: loggingSystemMock.create().get('api-keys'),
       license: mockLicense,
     });
   });
