@@ -2172,6 +2172,17 @@
     once "^1.4.0"
     pump "^3.0.0"
 
+"@elastic/elasticsearch@^7.7.1":
+  version "7.7.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.7.1.tgz#ad95145fcd779206d101560cb90cdeb3041d2984"
+  integrity sha512-OzCitXAMQ4pC6EwtPCO0KBygjDFcBMBrJ6pBguYuZxtMbRLOPjcS1Er31N0+J6mp2Q8pU0HGm1FAGfGe6FJReQ==
+  dependencies:
+    debug "^4.1.1"
+    decompress-response "^4.2.0"
+    ms "^2.1.1"
+    pump "^3.0.0"
+    secure-json-parse "^2.1.0"
+
 "@elastic/ems-client@7.9.3":
   version "7.9.3"
   resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.9.3.tgz#71b79914f76e347f050ead8474ad65d761e94a8a"
@@ -27732,6 +27743,11 @@ scss-tokenizer@^0.2.3:
   dependencies:
     js-base64 "^2.1.8"
     source-map "^0.4.2"
+
+secure-json-parse@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/secure-json-parse/-/secure-json-parse-2.1.0.tgz#ae76f5624256b5c497af887090a5d9e156c9fb20"
+  integrity sha512-GckO+MS/wT4UogDyoI/H/S1L0MCcKS1XX/vp48wfmU7Nw4woBmb8mIpu4zPBQjKlRT88/bt9xdoV4111jPpNJA==
 
 seedrandom@^3.0.5:
   version "3.0.5"
