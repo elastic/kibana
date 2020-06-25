@@ -8,12 +8,11 @@ import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { HttpStart } from '../../../../../src/core/public';
 import {
+  DeleteListSchemaEncoded,
   FindListSchemaEncoded,
   FoundListSchema,
   ListSchema,
-  Type,
   deleteListSchema,
   findListSchema,
   foundListSchema,
@@ -23,7 +22,13 @@ import { LIST_ITEM_URL, LIST_URL } from '../../common/constants';
 import { validateEither } from '../../common/siem_common_deps';
 import { toPromise } from '../common/fp_utils';
 
-import { ApiParams } from './types';
+import {
+  ApiParams,
+  DeleteListParams,
+  ExportListParams,
+  FindListsParams,
+  ImportListParams,
+} from './types';
 
 const findLists = async ({
   http,
@@ -42,13 +47,6 @@ const findLists = async ({
     signal,
   });
 };
-
-export interface FindListsParams {
-  http: HttpStart;
-  pageSize: number | undefined;
-  pageIndex: number | undefined;
-  signal: AbortSignal;
-}
 
 const findListsWithValidation = async ({
   http,
@@ -69,14 +67,6 @@ const findListsWithValidation = async ({
 
 export { findListsWithValidation as findLists };
 
-export interface ImportListParams {
-  http: HttpStart;
-  file: File;
-  listId: string | undefined;
-  signal: AbortSignal;
-  type: Type | undefined;
-}
-
 export const importList = async ({
   file,
   http,
@@ -96,13 +86,11 @@ export const importList = async ({
   });
 };
 
-export interface DeleteListParams {
-  http: HttpStart;
-  id: string;
-  signal: AbortSignal;
-}
-
-const deleteList = async ({ http, id, signal }: DeleteListParams): Promise<ListSchema> =>
+const deleteList = async ({
+  http,
+  id,
+  signal,
+}: ApiParams & DeleteListSchemaEncoded): Promise<ListSchema> =>
   http.fetch<ListSchema>(LIST_URL, {
     method: 'DELETE',
     query: { id },
@@ -123,12 +111,6 @@ const deleteListWithValidation = async ({
   );
 
 export { deleteListWithValidation as deleteList };
-
-export interface ExportListParams {
-  http: HttpStart;
-  id: string;
-  signal: AbortSignal;
-}
 
 export const exportList = async ({ http, id, signal }: ExportListParams): Promise<Blob> => {
   return http.fetch<Blob>(`${LIST_ITEM_URL}/_export`, {

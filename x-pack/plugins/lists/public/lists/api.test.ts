@@ -9,15 +9,8 @@ import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { getListResponseMock } from '../../common/schemas/response/list_schema.mock';
 import { getFoundListSchemaMock } from '../../common/schemas/response/found_list_schema.mock';
 
-import {
-  DeleteListParams,
-  FindListsParams,
-  deleteList,
-  exportList,
-  findLists,
-  importList,
-} from './api';
-import { ApiPayload } from './types';
+import { deleteList, exportList, findLists, importList } from './api';
+import { ApiPayload, DeleteListParams, FindListsParams } from './types';
 
 describe('Value Lists API', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

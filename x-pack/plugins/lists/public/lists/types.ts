@@ -5,9 +5,29 @@
  */
 
 import { HttpStart } from '../../../../../src/core/public';
+import { Type } from '../../common/schemas';
 
 export interface ApiParams {
   http: HttpStart;
   signal: AbortSignal;
 }
 export type ApiPayload<T extends ApiParams> = Omit<T, 'http' | 'signal'>;
+
+export interface FindListsParams extends ApiParams {
+  pageSize: number | undefined;
+  pageIndex: number | undefined;
+}
+
+export interface ImportListParams extends ApiParams {
+  file: File;
+  listId: string | undefined;
+  type: Type | undefined;
+}
+
+export interface DeleteListParams extends ApiParams {
+  id: string;
+}
+
+export interface ExportListParams extends ApiParams {
+  id: string;
+}
