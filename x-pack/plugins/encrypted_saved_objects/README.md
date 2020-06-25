@@ -197,7 +197,7 @@ const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
 );
 ```
 
-As you can see in this example how we provide a legacy type which describes the _input_ which needs to be decrypted.
+As you can see in this example we provide a legacy type which describes the _input_ which needs to be decrypted.
 The migration function will default to using the registered type to encrypt the migrated document after the migration is applied.
 
 If you need to migrate between two legacy types, you can specify both types at once:
