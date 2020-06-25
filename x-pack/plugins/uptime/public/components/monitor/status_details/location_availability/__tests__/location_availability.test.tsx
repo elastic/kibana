@@ -10,21 +10,37 @@ import { LocationAvailability } from '../location_availability';
 import { MonitorLocations } from '../../../../../../common/runtime_types';
 import { LocationMissingWarning } from '../../location_map/location_missing';
 
+class LocalStorageMock {
+  constructor() {
+    this.store = { 'xpack.uptime.detailPage.selectedView': 'list' };
+  }
+
+  clear() {
+    this.store = {};
+  }
+
+  getItem(key) {
+    return this.store[key] || null;
+  }
+
+  setItem(key, value) {
+    this.store[key] = value.toString();
+  }
+
+  removeItem(key) {
+    delete this.store[key];
+  }
+}
+
 // Note For shallow test, we need absolute time strings
 describe('LocationAvailability component', () => {
   let monitorLocations: MonitorLocations;
-  let localStorageMock: any;
-
-  let selectedView = 'list';
 
   beforeEach(() => {
-    localStorageMock = {
-      getItem: jest.fn().mockImplementation(() => selectedView),
-      setItem: jest.fn(),
-    };
-
     // @ts-ignore replacing a call to localStorage we use for monitor list size
-    global.localStorage = localStorageMock;
+    global.localStorage = new LocalStorageMock();
+
+    global.localStorage.setItem('xpack.uptime.detailPage.selectedView', 'list');
 
     monitorLocations = {
       monitorId: 'wapo',
@@ -62,7 +78,7 @@ describe('LocationAvailability component', () => {
   });
 
   it('shows warning if geo information is missing', () => {
-    selectedView = 'map';
+    global.localStorage.setItem('xpack.uptime.detailPage.selectedView', 'map');
     monitorLocations = {
       monitorId: 'wapo',
       up_history: 8,
