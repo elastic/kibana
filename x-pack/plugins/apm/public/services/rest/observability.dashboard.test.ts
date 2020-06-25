@@ -6,6 +6,9 @@
 
 import { fetchLandingPageData, hasData } from './observability_dashboard';
 import * as createCallApmApi from './createCallApmApi';
+import { getTheme } from '../../utils/get_theme';
+
+const theme = getTheme({ isDarkMode: false });
 
 describe('Observability dashboard data', () => {
   const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi');
@@ -43,7 +46,7 @@ describe('Observability dashboard data', () => {
           endTime: '2',
           bucketSize: '3',
         },
-        { isDarkMode: false }
+        { theme }
       );
       expect(response).toEqual({
         title: 'APM',
@@ -85,7 +88,7 @@ describe('Observability dashboard data', () => {
           endTime: '2',
           bucketSize: '3',
         },
-        { isDarkMode: false }
+        { theme }
       );
       expect(response).toEqual({
         title: 'APM',

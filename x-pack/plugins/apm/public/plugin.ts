@@ -42,6 +42,7 @@ import {
   fetchLandingPageData,
   hasData,
 } from './services/rest/observability_dashboard';
+import { getTheme } from './utils/get_theme';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -78,11 +79,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
 
     if (plugins.observability) {
-      const isDarkMode = core.uiSettings.get('theme:darkMode');
+      const theme = getTheme({
+        isDarkMode: core.uiSettings.get('theme:darkMode'),
+      });
       plugins.observability.dashboard.register({
         appName: 'apm',
         fetchData: async (params) => {
-          return fetchLandingPageData(params, { isDarkMode });
+          return fetchLandingPageData(params, { theme });
         },
         hasData,
       });

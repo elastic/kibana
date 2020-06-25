@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import {
+  SERVICE_NAME,
+  PROCESSOR_EVENT,
+} from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceCount({
@@ -23,7 +27,22 @@ export async function getServiceCount({
     ],
     body: {
       size: 0,
-      query: { bool: { filter: [{ range: rangeFilter(start, end) }] } },
+      query: {
+        bool: {
+          filter: [
+            { range: rangeFilter(start, end) },
+            {
+              terms: {
+                [PROCESSOR_EVENT]: [
+                  ProcessorEvent.error,
+                  ProcessorEvent.transaction,
+                  ProcessorEvent.metric,
+                ],
+              },
+            },
+          ],
+        },
+      },
       aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
     },
   };
