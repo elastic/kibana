@@ -36,26 +36,18 @@ export const createListItemRoute = (router: IRouter): void => {
             statusCode: 404,
           });
         } else {
-          const listItem = await lists.getListItemByValue({ listId, type: list.type, value });
-          if (listItem.length !== 0) {
-            return siemResponse.error({
-              body: `list_id: "${listId}" already contains the given value: ${value}`,
-              statusCode: 409,
-            });
+          const createdListItem = await lists.createListItem({
+            id,
+            listId,
+            meta,
+            type: list.type,
+            value,
+          });
+          const [validated, errors] = validate(createdListItem, listItemSchema);
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
-            const createdListItem = await lists.createListItem({
-              id,
-              listId,
-              meta,
-              type: list.type,
-              value,
-            });
-            const [validated, errors] = validate(createdListItem, listItemSchema);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
+            return response.ok({ body: validated ?? {} });
           }
         }
       } catch (err) {
