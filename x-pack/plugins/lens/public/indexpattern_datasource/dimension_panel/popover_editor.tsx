@@ -6,7 +6,7 @@
 
 import './popover_editor.scss';
 import _ from 'lodash';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexItem,
@@ -58,6 +58,11 @@ function asOperationOptions(operationTypes: OperationType[], compatibleWithCurre
 
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const [inputValue, setInputValue] = useState(value);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value, setInputValue]);
+
   const onChangeDebounced = _.debounce(onChange, 256);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
