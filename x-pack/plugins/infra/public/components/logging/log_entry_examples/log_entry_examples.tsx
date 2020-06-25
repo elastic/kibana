@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { euiStyled } from '../../../../../observability/public';
-import { LogEntryExampleMessage } from './log_entry_example';
 import { LogEntryExampleMessagesEmptyIndicator } from './log_entry_examples_empty_indicator';
 import { LogEntryExampleMessagesFailureIndicator } from './log_entry_examples_failure_indicator';
 import { LogEntryExampleMessagesLoadingIndicator } from './log_entry_examples_loading_indicator';
@@ -15,20 +14,17 @@ import { LogEntryExampleMessagesLoadingIndicator } from './log_entry_examples_lo
 interface Props {
   isLoading: boolean;
   hasFailedLoading: boolean;
-  examples: Array<{
-    dataset: string;
-    message: string;
-    timestamp: number;
-  }>;
+  hasResults: boolean;
   exampleCount: number;
   onReload: () => void;
 }
 export const LogEntryExampleMessages: React.FunctionComponent<Props> = ({
-  examples,
   isLoading,
   hasFailedLoading,
   exampleCount,
+  hasResults,
   onReload,
+  children,
 }) => {
   return (
     <Wrapper>
@@ -36,17 +32,10 @@ export const LogEntryExampleMessages: React.FunctionComponent<Props> = ({
         <LogEntryExampleMessagesLoadingIndicator exampleCount={exampleCount} />
       ) : hasFailedLoading ? (
         <LogEntryExampleMessagesFailureIndicator onRetry={onReload} />
-      ) : examples.length === 0 ? (
+      ) : !hasResults ? (
         <LogEntryExampleMessagesEmptyIndicator onReload={onReload} />
       ) : (
-        examples.map((example, exampleIndex) => (
-          <LogEntryExampleMessage
-            dataset={example.dataset}
-            key={exampleIndex}
-            message={example.message}
-            timestamp={example.timestamp}
-          />
-        ))
+        children
       )}
     </Wrapper>
   );

@@ -9,14 +9,13 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useMount } from 'react-use';
-
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
 import { AnomalyRecord } from '../../use_log_entry_rate_results';
 import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
 import { useLogEntryRateExamples } from '../../use_log_entry_rate_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { bucketSpan } from '../../../../../../common/log_analysis/job_parameters';
+import { LogEntryRateExampleMessage } from './log_entry_example';
 
 const EXAMPLE_COUNT = 5;
 
@@ -28,7 +27,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   anomaly: AnomalyRecord;
   timeRange: TimeRange;
   jobId: string;
-}> = ({ anomaly }) => {
+}> = ({ anomaly, timeRange, jobId }) => {
   const {
     sourceConfiguration: { sourceId },
   } = useLogEntryRateModuleContext();
@@ -58,12 +57,25 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             <h3>{examplesTitle}</h3>
           </EuiTitle>
           <LogEntryExampleMessages
-            examples={logEntryRateExamples}
             isLoading={isLoadingLogEntryRateExamples}
             hasFailedLoading={hasFailedLoadingLogEntryRateExamples}
+            hasResults={logEntryRateExamples.length > 0}
             exampleCount={EXAMPLE_COUNT}
             onReload={getLogEntryRateExamples}
-          />
+          >
+            {logEntryRateExamples.map((example, exampleIndex) => (
+              <LogEntryRateExampleMessage
+                key={exampleIndex}
+                id={example.id}
+                dataset={example.dataset}
+                message={example.message}
+                timestamp={example.timestamp}
+                tiebreaker={example.tiebreaker}
+                timeRange={timeRange}
+                jobId={jobId}
+              />
+            ))}
+          </LogEntryExampleMessages>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup>

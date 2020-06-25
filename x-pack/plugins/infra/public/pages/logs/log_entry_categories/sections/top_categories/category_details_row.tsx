@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { TimeRange } from '../../../../../../common/http_api/shared';
+import { CategoryExampleMessage } from './category_example_message';
 
 const exampleCount = 5;
 
@@ -37,9 +38,18 @@ export const CategoryDetailsRow: React.FunctionComponent<{
     <LogEntryExampleMessages
       isLoading={isLoadingLogEntryCategoryExamples}
       hasFailedLoading={hasFailedLoadingLogEntryCategoryExamples}
-      examples={logEntryCategoryExamples}
+      hasResults={logEntryCategoryExamples.length > 0}
       exampleCount={exampleCount}
       onReload={getLogEntryCategoryExamples}
-    />
+    >
+      {logEntryCategoryExamples.map((example, exampleIndex) => (
+        <CategoryExampleMessage
+          key={exampleIndex}
+          dataset={example.dataset}
+          message={example.message}
+          timestamp={example.timestamp}
+        />
+      ))}
+    </LogEntryExampleMessages>
   );
 };

@@ -42,9 +42,11 @@ export type GetLogEntryRateExamplesRequestPayload = rt.TypeOf<
  */
 
 const logEntryRateExampleRT = rt.type({
+  id: rt.string,
   dataset: rt.string,
   message: rt.string,
   timestamp: rt.number,
+  tiebreaker: rt.number,
 });
 
 export type LogEntryRateExample = rt.TypeOf<typeof logEntryRateExampleRT>;

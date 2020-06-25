@@ -29,6 +29,7 @@ import {
   NoLogAnalysisResultsIndexError,
 } from './errors';
 import { createMlJobsQuery, mlJobsResponseRT } from './queries/ml_jobs';
+import { InfraSource } from '../sources';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -160,7 +161,8 @@ export class LogEntryRateAnalysis {
     startTime: number,
     endTime: number,
     dataset: string,
-    exampleCount: number
+    exampleCount: number,
+    sourceConfiguration: InfraSource
   ) {
     const finalizeLogEntryRateExamplesSpan = startTracingSpan(
       'get log entry rate example log entries'
@@ -176,6 +178,7 @@ export class LogEntryRateAnalysis {
     const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
     const indices = customSettings?.logs_source_config?.indexPattern;
     const timestampField = customSettings?.logs_source_config?.timestampField;
+    const tiebreakerField = sourceConfiguration.configuration.fields.tiebreaker;
 
     if (indices == null || timestampField == null) {
       throw new InsufficientLogAnalysisMlJobConfigurationError(
@@ -190,6 +193,7 @@ export class LogEntryRateAnalysis {
       requestContext,
       indices,
       timestampField,
+      tiebreakerField,
       startTime,
       endTime,
       dataset,
@@ -210,6 +214,7 @@ export class LogEntryRateAnalysis {
     requestContext: RequestHandlerContext,
     indices: string,
     timestampField: string,
+    tiebreakerField: string,
     startTime: number,
     endTime: number,
     dataset: string,
@@ -226,6 +231,7 @@ export class LogEntryRateAnalysis {
         createLogEntryRateExamplesQuery(
           indices,
           timestampField,
+          tiebreakerField,
           startTime,
           endTime,
           dataset,
@@ -238,9 +244,11 @@ export class LogEntryRateAnalysis {
 
     return {
       examples: hits.map((hit) => ({
+        id: hit._id,
         dataset,
         message: hit._source.message ?? '',
         timestamp: hit.sort[0],
+        tiebreaker: hit.sort[1],
       })),
       timing: {
         spans: [esSearchSpan],
@@ -248,7 +256,6 @@ export class LogEntryRateAnalysis {
     };
   }
 
-  // TODO: Move this elsewhere and have categories and log rate share this method
   private async fetchMlJob(requestContext: RequestHandlerContext, jobId: string) {
     const finalizeMlGetJobSpan = startTracingSpan('Fetch ML job from ES');
 

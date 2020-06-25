@@ -25,6 +25,7 @@ const anyObject = schema.object({}, { unknowns: 'allow' });
 export const initGetLogEntryRateExamplesRoute = ({
   framework,
   logEntryRateAnalysis,
+  sources,
 }: InfraBackendLibs) => {
   framework.registerRoute(
     {
@@ -48,6 +49,11 @@ export const initGetLogEntryRateExamplesRoute = ({
         fold(throwErrors(Boom.badRequest), identity)
       );
 
+      const sourceConfiguration = await sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        sourceId
+      );
+
       try {
         const {
           data: logEntryRateExamples,
@@ -59,7 +65,8 @@ export const initGetLogEntryRateExamplesRoute = ({
           startTime,
           endTime,
           dataset,
-          exampleCount
+          exampleCount,
+          sourceConfiguration
         );
 
         return response.ok({

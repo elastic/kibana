@@ -13,6 +13,7 @@ import { partitionField } from '../../../../common/log_analysis';
 export const createLogEntryRateExamplesQuery = (
   indices: string,
   timestampField: string,
+  tiebreakerField: string,
   startTime: number,
   endTime: number,
   dataset: string,
@@ -39,13 +40,7 @@ export const createLogEntryRateExamplesQuery = (
         ],
       },
     },
-    sort: [
-      {
-        [timestampField]: {
-          order: 'asc',
-        },
-      },
-    ],
+    sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
   },
   _source: ['event.dataset', 'message'],
   index: indices,
@@ -53,13 +48,14 @@ export const createLogEntryRateExamplesQuery = (
 });
 
 export const logEntryRateExampleHitRT = rt.type({
+  _id: rt.string,
   _source: rt.partial({
     event: rt.partial({
       dataset: rt.string,
     }),
     message: rt.string,
   }),
-  sort: rt.tuple([rt.number]),
+  sort: rt.tuple([rt.number, rt.number]),
 });
 
 export type LogEntryRateExampleHit = rt.TypeOf<typeof logEntryRateExampleHitRT>;

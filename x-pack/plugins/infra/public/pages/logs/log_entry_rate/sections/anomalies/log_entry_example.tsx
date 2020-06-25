@@ -5,30 +5,71 @@
  */
 
 import React, { useMemo } from 'react';
-
-import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
+import moment from 'moment';
+import { encode } from 'rison-node';
+import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {
   LogEntryColumn,
   LogEntryFieldColumn,
   LogEntryMessageColumn,
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
-} from '../log_text_stream';
-import { LogColumnConfiguration } from '../../../utils/source_configuration';
+} from '../../../../../components/logging/log_text_stream';
+import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
+import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
+import { getEntitySpecificSingleMetricViewerLink } from '../../../../../components/logging/log_analysis_results/analyze_in_ml_button';
+import { LogEntryRateExample } from '../../../../../../common/http_api/log_analysis/results';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
 
-export const LogEntryExampleMessage: React.FunctionComponent<{
-  dataset: string;
-  message: string;
-  timestamp: number;
-}> = ({ dataset, message, timestamp }) => {
+type Props = LogEntryRateExample & {
+  timeRange: TimeRange;
+  jobId: string;
+};
+
+export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
+  id,
+  dataset,
+  message,
+  timestamp,
+  tiebreaker,
+  timeRange,
+  jobId,
+}) => {
   // the dataset must be encoded for the field column and the empty value must
   // be turned into a user-friendly value
   const encodedDatasetFieldValue = useMemo(
     () => JSON.stringify(getFriendlyNameForPartitionId(dataset)),
     [dataset]
+  );
+
+  const viewInStreamLinkProps = useLinkProps({
+    app: 'logs',
+    pathname: 'stream',
+    search: {
+      logPosition: encode({
+        end: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        position: { tiebreaker, time: timestamp },
+        start: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        streamLive: false,
+      }),
+      flyoutOptions: encode({
+        surroundingLogsId: id,
+      }),
+      logFilter: encode({
+        expression: `${partitionField}: ${dataset}`,
+        kind: 'kuery',
+      }),
+    },
+  });
+
+  const viewAnomalyInMachineLearningLinkProps = useLinkProps(
+    getEntitySpecificSingleMetricViewerLink(jobId, timeRange, {
+      [partitionField]: dataset,
+    })
   );
 
   return (
@@ -69,6 +110,7 @@ const timestampColumnId = 'log-entry-example-timestamp-column' as const;
 const messageColumnId = 'log-entry-examples-message-column' as const;
 const datasetColumnId = 'log-entry-examples-dataset-column' as const;
 
+// TODO: Tweak these widths for log entry rate instead of categories
 const columnWidths = {
   [timestampColumnId]: {
     growWeight: 0,
