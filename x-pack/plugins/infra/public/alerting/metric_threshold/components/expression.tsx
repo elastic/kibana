@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce, pick } from 'lodash';
+import { debounce, pick, omit } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
@@ -41,7 +41,7 @@ import { useSourceViaHttp } from '../../../containers/source/use_source_via_http
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 import { ExpressionRow } from './expression_row';
-import { AlertContextMeta, MetricExpression } from '../types';
+import { AlertContextMeta, MetricExpression, AlertParams } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { validateMetricThreshold } from './validation';
 
@@ -49,14 +49,7 @@ const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 interface Props {
   errors: IErrorObject[];
-  alertParams: {
-    criteria: MetricExpression[];
-    groupBy?: string;
-    filterQuery?: string;
-    sourceId?: string;
-    filterQueryText?: string;
-    alertOnNoData?: boolean;
-  };
+  alertParams: AlertParams;
   alertsContext: AlertsContextValue<AlertContextMeta>;
   alertInterval: string;
   setAlertParams(key: string, value: any): void;
@@ -70,6 +63,7 @@ const defaultExpression = {
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
+export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
@@ -241,6 +235,10 @@ export const Expressions: React.FC<Props> = (props) => {
       preFillAlertFilter();
     }
 
+    if (!alertParams.groupBy) {
+      preFillAlertGroupBy();
+    }
+
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id || 'default');
     }
@@ -401,6 +399,10 @@ export const Expressions: React.FC<Props> = (props) => {
     </>
   );
 };
+
+const previewDOMOptions: Array<{ text: string; value: string }> = previewOptions.map((o) =>
+  omit(o, 'shortText')
+);
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
