@@ -24,7 +24,7 @@ import { IRouter } from '../../../../src/core/server';
 
 /**
  *
- * @param router Regisers a get route that returns a random number between one and another number suplied by the user.
+ * @param router Registers a get route that returns a random number between one and another number suplied by the user.
  */
 export function registerGetRandomNumberBetweenRoute(router: IRouter) {
   router.get(
