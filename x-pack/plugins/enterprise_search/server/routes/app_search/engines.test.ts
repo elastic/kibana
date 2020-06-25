@@ -5,7 +5,7 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { MockRouter } from '../__mocks__/router.mock';
+import { MockRouter, mockConfig } from '../__mocks__';
 
 import { registerEnginesRoute } from './engines';
 
@@ -37,9 +37,7 @@ describe('engine routes', () => {
       registerEnginesRoute({
         router: mockRouter.router,
         log: mockLogger,
-        config: {
-          host: 'http://localhost:3002',
-        },
+        config: mockConfig,
       });
     });
 
@@ -61,24 +59,6 @@ describe('engine routes', () => {
           body: { results: [{ name: 'engine1' }], meta: { page: { total_results: 1 } } },
           headers: { 'content-type': 'application/json' },
         });
-      });
-    });
-
-    describe('when the underlying App Search API redirects to /login', () => {
-      beforeEach(() => {
-        AppSearchAPI.shouldBeCalledWith(
-          `http://localhost:3002/as/engines/collection?type=indexed&page%5Bcurrent%5D=1&page%5Bsize%5D=10`,
-          { headers: { Authorization: AUTH_HEADER } }
-        ).andReturnRedirect();
-      });
-
-      it('should return 403 with a message', async () => {
-        await mockRouter.callRoute(mockRequest);
-
-        expect(mockRouter.response.forbidden).toHaveBeenCalledWith({
-          body: 'no-as-account',
-        });
-        expect(mockLogger.info).toHaveBeenCalledWith('No corresponding App Search account found');
       });
     });
 
@@ -152,18 +132,6 @@ describe('engine routes', () => {
     const AppSearchAPI = {
       shouldBeCalledWith(expectedUrl: string, expectedParams: object) {
         return {
-          andReturnRedirect() {
-            fetchMock.mockImplementation((url: string, params: object) => {
-              expect(url).toEqual(expectedUrl);
-              expect(params).toEqual(expectedParams);
-
-              return Promise.resolve(
-                new Response('{}', {
-                  url: '/login',
-                })
-              );
-            });
-          },
           andReturn(response: object) {
             fetchMock.mockImplementation((url: string, params: object) => {
               expect(url).toEqual(expectedUrl);
