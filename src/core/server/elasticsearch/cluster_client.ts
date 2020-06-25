@@ -20,6 +20,7 @@ import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 
 import { ElasticsearchErrorHelpers } from './errors';
+import { Auditor, AuditorFactory } from '../audit_trail';
 import { GetAuthHeaders, isRealRequest, LegacyRequest } from '../http';
 import { filterHeaders, Headers, KibanaRequest, ensureRawRequest } from '../http/router';
 import { Logger } from '../logging';
@@ -135,6 +136,8 @@ export class ClusterClient implements IClusterClient {
    */
   private scopedClient?: Client;
 
+  private auditor?: Auditor;
+
   /**
    * Indicates whether this cluster client (and all internal raw Elasticsearch JS clients) has been closed.
    */
@@ -143,6 +146,7 @@ export class ClusterClient implements IClusterClient {
   constructor(
     private readonly config: ElasticsearchClientConfig,
     private readonly log: Logger,
+    private readonly getAuditorFactory: () => AuditorFactory,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
     this.client = new Client(parseElasticsearchClientConfig(config, log));
@@ -209,7 +213,12 @@ export class ClusterClient implements IClusterClient {
         })
       );
     }
-
+    if (request && isRealRequest(request)) {
+      const kibanaRequest =
+        request instanceof KibanaRequest ? request : KibanaRequest.from(request);
+      const auditorFactory = this.getAuditorFactory();
+      this.auditor = auditorFactory.asScoped(kibanaRequest);
+    }
     return new ScopedClusterClient(
       this.callAsInternalUser,
       this.callAsCurrentUser,
@@ -232,6 +241,13 @@ export class ClusterClient implements IClusterClient {
     options?: CallAPIOptions
   ) => {
     this.assertIsNotClosed();
+
+    if (this.auditor) {
+      this.auditor!.add({
+        message: endpoint,
+        type: 'elasticsearch.call',
+      });
+    }
 
     return await (callAPI.bind(null, this.scopedClient!) as APICaller)(
       endpoint,

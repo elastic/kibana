@@ -30,6 +30,7 @@ import { get } from 'lodash';
 import { Logger } from '../logging';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServerMock } from '../http/http_server.mocks';
+import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { ClusterClient } from './cluster_client';
 
 const logger = loggingSystemMock.create();
@@ -42,7 +43,11 @@ test('#constructor creates client with parsed config', () => {
   const mockEsConfig = { apiVersion: 'es-version' } as any;
   const mockLogger = logger.get();
 
-  const clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+  const clusterClient = new ClusterClient(
+    mockEsConfig,
+    mockLogger,
+    auditTrailServiceMock.createAuditorFactory
+  );
   expect(clusterClient).toBeDefined();
 
   expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
@@ -68,7 +73,11 @@ describe('#callAsInternalUser', () => {
     };
     MockClient.mockImplementation(() => mockEsClientInstance);
 
-    clusterClient = new ClusterClient({ apiVersion: 'es-version' } as any, logger.get());
+    clusterClient = new ClusterClient(
+      { apiVersion: 'es-version' } as any,
+      logger.get(),
+      auditTrailServiceMock.createAuditorFactory
+    );
   });
 
   test('fails if cluster client is closed', async () => {
@@ -237,7 +246,11 @@ describe('#asScoped', () => {
       requestHeadersWhitelist: ['one', 'two'],
     } as any;
 
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory
+    );
     jest.clearAllMocks();
   });
 
@@ -272,7 +285,11 @@ describe('#asScoped', () => {
 
   test('properly configures `ignoreCertAndKey` for various configurations', () => {
     // Config without SSL.
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory
+    );
 
     mockParseElasticsearchClientConfig.mockClear();
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
@@ -285,7 +302,11 @@ describe('#asScoped', () => {
 
     // Config ssl.alwaysPresentCertificate === false
     mockEsConfig = { ...mockEsConfig, ssl: { alwaysPresentCertificate: false } } as any;
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory
+    );
 
     mockParseElasticsearchClientConfig.mockClear();
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
@@ -298,7 +319,11 @@ describe('#asScoped', () => {
 
     // Config ssl.alwaysPresentCertificate === true
     mockEsConfig = { ...mockEsConfig, ssl: { alwaysPresentCertificate: true } } as any;
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory
+    );
 
     mockParseElasticsearchClientConfig.mockClear();
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
@@ -341,7 +366,11 @@ describe('#asScoped', () => {
   });
 
   test('does not fail when scope to not defined request', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory
+    );
     clusterClient.asScoped();
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
@@ -352,7 +381,11 @@ describe('#asScoped', () => {
   });
 
   test('does not fail when scope to a request without headers', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory
+    );
     clusterClient.asScoped({} as any);
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
@@ -363,7 +396,12 @@ describe('#asScoped', () => {
   });
 
   test('calls getAuthHeaders and filters results for a real request', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger, () => ({ one: '1', three: '3' }));
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory,
+      () => ({ one: '1', three: '3' })
+    );
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { two: '2' } }));
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
@@ -374,7 +412,12 @@ describe('#asScoped', () => {
   });
 
   test('getAuthHeaders results rewrite extends a request headers', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger, () => ({ one: 'foo' }));
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory,
+      () => ({ one: 'foo' })
+    );
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1', two: '2' } }));
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
@@ -393,7 +436,11 @@ describe('#asScoped', () => {
   });
 
   test('filters a fake request headers', async () => {
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory
+    );
     clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
 
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
@@ -420,7 +467,8 @@ describe('#close', () => {
 
     clusterClient = new ClusterClient(
       { apiVersion: 'es-version', requestHeadersWhitelist: [] } as any,
-      logger.get()
+      logger.get(),
+      auditTrailServiceMock.createAuditorFactory
     );
   });
 

@@ -42,6 +42,7 @@ import {
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
+import { AuditTrailStart, AuditorFactory } from '../audit_trail';
 import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './types';
 import { CallAPIOptions } from './api_types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
@@ -57,12 +58,17 @@ interface SetupDeps {
   http: InternalHttpServiceSetup;
 }
 
+interface StartDeps {
+  auditTrail: AuditTrailStart;
+}
+
 /** @internal */
 export class ElasticsearchService
   implements CoreService<InternalElasticsearchServiceSetup, ElasticsearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private subscription?: Subscription;
+  private auditorFactory?: AuditorFactory;
   private stop$ = new Subject();
   private kibanaVersion: string;
   private createClient?: (
@@ -170,7 +176,8 @@ export class ElasticsearchService
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
-  public async start() {
+  public async start({ auditTrail }: StartDeps) {
+    this.auditorFactory = auditTrail;
     if (typeof this.client === 'undefined' || typeof this.createClient === 'undefined') {
       throw new Error('ElasticsearchService needs to be setup before calling start');
     } else {
@@ -199,7 +206,15 @@ export class ElasticsearchService
     return new ClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
+      this.getAuditorFactory,
       getAuthHeaders
     );
   }
+
+  private getAuditorFactory = () => {
+    if (!this.auditorFactory) {
+      throw new Error('auditTrail has not been initialized');
+    }
+    return this.auditorFactory;
+  };
 }
