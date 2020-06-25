@@ -12,7 +12,7 @@ import {
 import { EncryptedSavedObjectTypeRegistration, EncryptedSavedObjectsService } from './crypto';
 
 type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (
-  doc: SavedObjectUnsanitizedDoc<InputAttributes> | SavedObjectUnsanitizedDoc<InputAttributes>,
+  doc: SavedObjectUnsanitizedDoc<InputAttributes> | SavedObjectUnsanitizedDoc<MigratedAttributes>,
   context: SavedObjectMigrationContext
 ) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 

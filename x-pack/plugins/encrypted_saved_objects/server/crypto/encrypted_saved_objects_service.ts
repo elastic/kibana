@@ -6,8 +6,8 @@
 
 import { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import typeDetect from 'type-detect';
-import { Logger } from 'src/core/server';
 import stringify from 'json-stable-stringify';
+import { Logger } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
@@ -122,17 +122,6 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
-   * Returns a registered type from the registry.
-   * @param type Saved object type.
-   */
-  public getType(type: string) {
-    if (!this.typeDefinitions.has(type)) {
-      throw new Error(`Cannot get the "${type}" saved object type as it has not been registered.`);
-    }
-    return this.typeDefinitions.get(type);
-  }
-
-  /**
    * Takes saved object attributes for the specified type and, depending on the type definition,
    * either decrypts or strips encrypted attributes (e.g. in case AAD or encryption key has changed
    * and decryption is no longer possible).
@@ -204,7 +193,7 @@ export class EncryptedSavedObjectsService {
     descriptor: SavedObjectDescriptor,
     attributes: T,
     params?: CommonParameters
-  ): Generator<[unknown, string], T, string> {
+  ): Iterator<[unknown, string], T, string> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;
@@ -378,21 +367,11 @@ export class EncryptedSavedObjectsService {
     return iteratorResult.value;
   }
 
-  /**
-   * Takes saved object attributes for the specified type and decrypts all of them that are supposed
-   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
-   * attributes were decrypted original attributes dictionary is returned.
-   * @param descriptor Descriptor of the saved object to decrypt attributes for.
-   * @param attributes Dictionary of __ALL__ saved object attributes.
-   * @param [params] Additional parameters.
-   * @throws Will throw if decryption fails for whatever reason.
-   * @throws Will throw if any of the attributes to decrypt is not a string.
-   */
   private *attributesToDecryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
     params?: CommonParameters
-  ): Generator<[string, string], T, EncryptOutput> {
+  ): Iterator<[string, string], T, EncryptOutput> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;

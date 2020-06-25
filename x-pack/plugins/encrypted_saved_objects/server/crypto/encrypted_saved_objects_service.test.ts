@@ -13,7 +13,6 @@ import { EncryptionError } from './encryption_error';
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { encryptedSavedObjectsAuditLoggerMock } from '../audit/index.mock';
-import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 
 const crypto = nodeCrypto({ encryptionKey: 'encryption-key-abc' });
 
@@ -83,22 +82,6 @@ describe('#isRegistered', () => {
     expect(service.isRegistered('known-type-1')).toBe(true);
     expect(service.isRegistered('known-type-2')).toBe(true);
     expect(service.isRegistered('unknown-type')).toBe(false);
-  });
-});
-
-describe('#getType', () => {
-  it('returns the type when it is registered', () => {
-    const type = { type: 'eso-type', attributesToEncrypt: new Set(['attr-1']) };
-    service.registerType(type);
-    expect(service.getType('eso-type')).toMatchObject(
-      new EncryptedSavedObjectAttributesDefinition(type)
-    );
-  });
-
-  it('throws when the type is not registered', () => {
-    expect(() => service.getType('unknown-eso-type')).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot get the \\"unknown-eso-type\\" saved object type as it has not been registered."`
-    );
   });
 });
 

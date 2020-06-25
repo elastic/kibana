@@ -119,18 +119,16 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
 });
 
 function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSetup) {
-  const type = {
-    type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
-    attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
-  };
-
   const typePriorTo790 = {
     type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute']),
   };
 
   // current type is registered
-  deps.encryptedSavedObjects.registerType(type);
+  deps.encryptedSavedObjects.registerType({
+    type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
+    attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
+  });
 
   core.savedObjects.registerType({
     name: SAVED_OBJECT_WITH_MIGRATION_TYPE,
@@ -152,7 +150,7 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
     migrations: {
       // in this version we migrated a non encrypted field and type didnt change
       '7.8.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedTypePre790>(
-        function shouldbeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+        function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
           return true;
         },
         (
@@ -170,11 +168,12 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
           };
         },
         // type hasn't changed as the field we're updating is not an encrypted one
+        typePriorTo790,
         typePriorTo790
       ),
       // in this version we encrypted an existing non encrypted field
       '7.9.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedType>(
-        function shouldbeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+        function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
           return true;
         },
         (
@@ -193,8 +192,7 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
             },
           };
         },
-        typePriorTo790,
-        type
+        typePriorTo790
       ),
     },
   });

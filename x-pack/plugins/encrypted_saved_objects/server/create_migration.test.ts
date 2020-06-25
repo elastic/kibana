@@ -6,7 +6,7 @@
 
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { migrationMocks } from 'src/core/server/mocks';
-import { encryptedSavedObjectsServiceMock } from './crypto/encrypted_saved_objects_service.mocks';
+import { encryptedSavedObjectsServiceMock } from './crypto/index.mock';
 import { getCreateMigration } from './create_migration';
 
 afterEach(() => {
@@ -30,10 +30,10 @@ describe('createMigration()', () => {
     encryptedAttr?: string;
   }
 
-  const encryptionSavedObjectservice = encryptedSavedObjectsServiceMock.create();
+  const encryptionSavedObjectService = encryptedSavedObjectsServiceMock.create();
 
   it('throws if the types arent compatible', async () => {
-    const migrationCreator = getCreateMigration(encryptionSavedObjectservice, () =>
+    const migrationCreator = getCreateMigration(encryptionSavedObjectService, () =>
       encryptedSavedObjectsServiceMock.create()
     );
     expect(() =>
@@ -63,7 +63,7 @@ describe('createMigration()', () => {
       );
 
       const migrationCreator = getCreateMigration(
-        encryptionSavedObjectservice,
+        encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
       const noopMigration = migrationCreator<InputType, MigrationType>(
@@ -77,8 +77,8 @@ describe('createMigration()', () => {
         firstAttr: 'first_attr',
       };
 
-      encryptionSavedObjectservice.decryptAttributesSync.mockReturnValueOnce(attributes);
-      encryptionSavedObjectservice.encryptAttributesSync.mockReturnValueOnce(attributes);
+      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+      encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
 
       noopMigration(
         {
@@ -90,7 +90,7 @@ describe('createMigration()', () => {
         { log }
       );
 
-      expect(encryptionSavedObjectservice.decryptAttributesSync).toHaveBeenCalledWith(
+      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
         {
           id: '123',
           type: 'known-type-1',
@@ -99,7 +99,7 @@ describe('createMigration()', () => {
         attributes
       );
 
-      expect(encryptionSavedObjectservice.encryptAttributesSync).toHaveBeenCalledWith(
+      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
         {
           id: '123',
           type: 'known-type-1',
@@ -116,7 +116,7 @@ describe('createMigration()', () => {
       const instantiateServiceWithLegacyType = jest.fn(() => serviceWithLegacyType);
 
       const migrationCreator = getCreateMigration(
-        encryptionSavedObjectservice,
+        encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
       const noopMigration = migrationCreator<InputType, MigrationType>(
@@ -132,7 +132,7 @@ describe('createMigration()', () => {
       };
 
       serviceWithLegacyType.decryptAttributesSync.mockReturnValueOnce(attributes);
-      encryptionSavedObjectservice.encryptAttributesSync.mockReturnValueOnce(attributes);
+      encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
 
       noopMigration(
         {
@@ -153,7 +153,7 @@ describe('createMigration()', () => {
         attributes
       );
 
-      expect(encryptionSavedObjectservice.encryptAttributesSync).toHaveBeenCalledWith(
+      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
         {
           id: '123',
           type: 'known-type-1',
@@ -175,7 +175,7 @@ describe('createMigration()', () => {
         .mockImplementationOnce(() => serviceWithMigrationLegacyType);
 
       const migrationCreator = getCreateMigration(
-        encryptionSavedObjectservice,
+        encryptionSavedObjectService,
         instantiateServiceWithLegacyType
       );
       return migrationCreator<InputType, MigrationType>(
