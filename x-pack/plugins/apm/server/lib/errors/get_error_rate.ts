@@ -107,7 +107,11 @@ export async function getErrorRate({
     const relativeRate = errorCount / transactionCountByTimestamp[key];
     return { x: key, y: relativeRate };
   });
-  const average = mean((errorRates ?? []).map((errorRate) => errorRate.y));
+  const average = mean(
+    (errorRates ?? [])
+      .map((errorRate) => errorRate.y)
+      .filter((y) => isFinite(y))
+  );
 
   return {
     average,

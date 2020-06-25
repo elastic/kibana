@@ -54,26 +54,26 @@ export async function getServiceMapServiceNodeInfo({
   };
 
   const [
-    errorMetrics,
-    transactionMetrics,
-    cpuMetrics,
-    memoryMetrics,
+    errorStats,
+    transactionStats,
+    cpuStats,
+    memoryStats,
   ] = await Promise.all([
-    getErrorMetrics({ serviceName, setup, environment }),
-    getTransactionMetrics(taskParams),
-    getCpuMetrics(taskParams),
-    getMemoryMetrics(taskParams),
+    getErrorStats({ serviceName, setup, environment }),
+    getTransactionStats(taskParams),
+    getCpuStats(taskParams),
+    getMemoryStats(taskParams),
   ]);
 
   return {
-    ...errorMetrics,
-    ...transactionMetrics,
-    ...cpuMetrics,
-    ...memoryMetrics,
+    ...errorStats,
+    ...transactionStats,
+    ...cpuStats,
+    ...memoryStats,
   };
 }
 
-async function getErrorMetrics({
+async function getErrorStats({
   environment,
   serviceName,
   setup,
@@ -82,10 +82,8 @@ async function getErrorMetrics({
   serviceName: string;
   setup: Options['setup'];
 }) {
-  const groupId = undefined;
   const { average, noHits } = await getErrorRate({
     serviceName,
-    groupId,
     environment,
     setup: { ...setup, uiFiltersES: [] },
   });
@@ -93,7 +91,7 @@ async function getErrorMetrics({
   return { avgErrorRate: noHits ? null : average };
 }
 
-async function getTransactionMetrics({
+async function getTransactionStats({
   setup,
   filter,
   minutes,
@@ -136,7 +134,7 @@ async function getTransactionMetrics({
   };
 }
 
-async function getCpuMetrics({
+async function getCpuStats({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
@@ -177,7 +175,7 @@ async function getCpuMetrics({
   };
 }
 
-async function getMemoryMetrics({
+async function getMemoryStats({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
