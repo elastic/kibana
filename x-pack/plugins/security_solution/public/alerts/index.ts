@@ -4,15 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAlertsRoutes } from './routes';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
+import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
+import { AlertsRoutes } from './routes';
 import { SecuritySubPlugin } from '../app/types';
+
+const ALERTS_TIMELINE_IDS: TimelineIdLiteral[] = [
+  TimelineId.alertsRulesDetailsPage,
+  TimelineId.alertsPage,
+];
 
 export class Alerts {
   public setup() {}
 
-  public start(): SecuritySubPlugin {
+  public start(storage: Storage): SecuritySubPlugin {
     return {
-      routes: getAlertsRoutes(),
+      SubPluginRoutes: AlertsRoutes,
+      storageTimelines: {
+        timelineById: getTimelinesInStorageByIds(storage, ALERTS_TIMELINE_IDS),
+      },
     };
   }
 }

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
@@ -29,11 +29,17 @@ import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
 
-import { InventoryAlertDropdown } from '../../components/alerting/inventory/alert_dropdown';
+import { InventoryAlertDropdown } from '../../alerting/inventory/components/alert_dropdown';
 import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
+
+const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
+  defaultMessage: 'Add data',
+});
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
+
+  const kibana = useKibana();
 
   return (
     <EuiErrorBoundary>
@@ -101,6 +107,18 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     <EuiFlexItem grow={false}>
                       <Route path={'/explorer'} component={MetricsAlertDropdown} />
                       <Route path={'/inventory'} component={InventoryAlertDropdown} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        href={kibana.services?.application?.getUrlForApp(
+                          '/home#/tutorial_directory/metrics'
+                        )}
+                        size="s"
+                        color="primary"
+                        iconType="plusInCircle"
+                      >
+                        {ADD_DATA_LABEL}
+                      </EuiButtonEmpty>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </AppNavigation>

@@ -104,7 +104,7 @@ export function getMapsAppUrl(
 
   return {
     app: 'maps',
-    path: `#/map?${mapAppParams.toString()}`,
+    path: `/map#?${mapAppParams.toString()}`,
   };
 }
 
