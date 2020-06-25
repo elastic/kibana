@@ -88,10 +88,10 @@ export const EventColumnView = React.memo<Props>(
     updateNote,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(() => getManageTimelineById(timelineId).timelineRowActions, [
-      getManageTimelineById,
-      timelineId,
-    ]);
+    const timelineActions = useMemo(
+      () => getManageTimelineById(timelineId).timelineRowActions({ nonEcsData: data, ecsData }),
+      [data, ecsData, getManageTimelineById, timelineId]
+    );
     const [isPopoverOpen, setPopover] = useState(false);
 
     const onButtonClick = useCallback(() => {

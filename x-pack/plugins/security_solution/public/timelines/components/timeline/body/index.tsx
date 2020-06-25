@@ -96,10 +96,10 @@ export const Body = React.memo<BodyProps>(
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
     const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(() => getManageTimelineById(id).timelineRowActions, [
-      getManageTimelineById,
-      id,
-    ]);
+    const timelineActions = useMemo(
+      () => getManageTimelineById(id).timelineRowActions({ timelineItem: data }),
+      [data, getManageTimelineById, id]
+    );
 
     const additionalActionWidth = useMemo(() => {
       let hasContextMenu = false;

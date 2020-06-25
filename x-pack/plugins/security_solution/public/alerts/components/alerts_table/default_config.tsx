@@ -170,18 +170,7 @@ export const requiredFieldsForActions = [
   'signal.rule.id',
 ];
 
-export const getAlertActions = ({
-  apolloClient,
-  canUserCRUD,
-  createTimeline,
-  hasIndexWrite,
-  onAlertStatusUpdateFailure,
-  onAlertStatusUpdateSuccess,
-  setEventsDeleted,
-  setEventsLoading,
-  status,
-  updateTimelineIsLoading,
-}: {
+interface AlertActionArgs extends TimelineRowActionArgs {
   apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
   createTimeline: CreateTimeline;
@@ -192,7 +181,23 @@ export const getAlertActions = ({
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   status: Status;
   updateTimelineIsLoading: UpdateTimelineLoading;
-}): TimelineRowAction[] => {
+}
+
+export const getAlertActions = ({
+  apolloClient,
+  canUserCRUD,
+  createTimeline,
+  ecsData: ecsRowData,
+  hasIndexWrite,
+  nonEcsData,
+  onAlertStatusUpdateFailure,
+  onAlertStatusUpdateSuccess,
+  setEventsDeleted,
+  setEventsLoading,
+  status,
+  timelineItem,
+  updateTimelineIsLoading,
+}: AlertActionArgs): TimelineRowAction[] => {
   const openAlertActionComponent: TimelineRowAction = {
     ariaLabel: 'Open alert',
     content: <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>,

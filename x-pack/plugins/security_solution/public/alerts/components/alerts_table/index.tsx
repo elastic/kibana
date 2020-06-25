@@ -22,7 +22,10 @@ import { inputsSelectors, State, inputsModel } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import {
+  TimelineRowActionArgs,
+  useManageTimeline,
+} from '../../../timelines/components/manage_timeline';
 import { useApolloClient } from '../../../common/utils/apollo_context';
 
 import { updateAlertStatusAction } from './actions';
@@ -288,18 +291,21 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Send to Timeline / Update Alert Status Actions for each table row
   const additionalActions = useMemo(
-    () =>
+    () => ({ ecsData, nonEcsData, timelineItem }: TimelineRowActionArgs) =>
       getAlertActions({
         apolloClient,
         canUserCRUD,
-        hasIndexWrite,
         createTimeline: createTimelineCallback,
-        setEventsLoading: setEventsLoadingCallback,
-        setEventsDeleted: setEventsDeletedCallback,
-        status: filterGroup,
-        updateTimelineIsLoading,
-        onAlertStatusUpdateSuccess,
+        ecsData,
+        hasIndexWrite,
+        nonEcsData,
         onAlertStatusUpdateFailure,
+        onAlertStatusUpdateSuccess,
+        setEventsDeleted: setEventsDeletedCallback,
+        setEventsLoading: setEventsLoadingCallback,
+        status: filterGroup,
+        timelineItem,
+        updateTimelineIsLoading,
       }),
     [
       apolloClient,
