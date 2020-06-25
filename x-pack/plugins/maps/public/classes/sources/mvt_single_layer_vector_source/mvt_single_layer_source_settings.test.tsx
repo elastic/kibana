@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
-
 jest.mock('../../../kibana_services', () => ({}));
 
 import React from 'react';
