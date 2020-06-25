@@ -3909,15 +3909,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
     />
     <EuiOverlayMask
       onClick={[Function]}
-    >
-      <Portal
-        containerInfo={
-          <div
-            class="euiOverlayMask"
-          />
-        }
-      />
-    </EuiOverlayMask>
+    />
     <EuiFocusTrap
       clickOutsideDisables={true}
       disabled={false}

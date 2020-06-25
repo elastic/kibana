@@ -13,29 +13,14 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = 
 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 2`] = `
 Array [
-  <EuiLink
+  <span
+    aria-current="false"
     className="euiBreadcrumb"
-    color="subdued"
     data-test-subj="breadcrumb first"
     title="First"
-  >
-    <button
-      className="euiLink euiLink--subdued euiBreadcrumb"
-      data-test-subj="breadcrumb first"
-      title="First"
-      type="button"
-    >
-      First
-    </button>
-  </EuiLink>,
-  <button
-    className="euiLink euiLink--subdued euiBreadcrumb"
-    data-test-subj="breadcrumb first"
-    title="First"
-    type="button"
   >
     First
-  </button>,
+  </span>,
   <span
     aria-current="page"
     className="euiBreadcrumb euiBreadcrumb--last"

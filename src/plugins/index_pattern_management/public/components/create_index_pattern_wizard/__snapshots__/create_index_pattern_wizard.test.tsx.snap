@@ -17,6 +17,7 @@ exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
   </div>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
@@ -60,6 +61,7 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
   </div>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
@@ -86,6 +88,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
   </div>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
@@ -123,6 +126,7 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
   </div>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
@@ -160,6 +164,7 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
   </div>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
@@ -203,6 +208,7 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
   </div>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
