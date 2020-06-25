@@ -13,8 +13,10 @@ import {
   Logger,
   SavedObjectsServiceStart,
   IRouter,
+  KibanaRequest,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SecurityPluginSetup } from '../../security/server';
 
 import { registerEnginesRoute } from './routes/app_search/engines';
 import { registerTelemetryRoute } from './routes/app_search/telemetry';
@@ -23,10 +25,13 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 
 export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface ServerConfigType {
   host?: string;
+  enabled: boolean;
+  accessCheckTimeout: number;
 }
 
 export interface IRouteDependencies {
@@ -47,7 +52,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public async setup(
     { http, savedObjects, getStartServices }: CoreSetup,
-    { usageCollection }: PluginsSetup
+    { usageCollection, security }: PluginsSetup
   ) {
     const router = http.createRouter();
     const config = await this.config.pipe(first()).toPromise();
