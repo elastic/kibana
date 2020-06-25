@@ -113,6 +113,8 @@ describe('data generator', () => {
         percentWithRelated: 100,
         relatedEvents: 0,
         relatedAlerts: 0,
+        useAncestryArray: true,
+        ancestryArraySize: ANCESTRY_LIMIT,
       });
       tree.ancestry.delete(tree.origin.id);
     });
@@ -150,6 +152,8 @@ describe('data generator', () => {
           { category: RelatedEventCategory.Network, count: 1 },
         ],
         relatedAlerts,
+        useAncestryArray: true,
+        ancestryArraySize: ANCESTRY_LIMIT,
       });
     });
 
@@ -162,24 +166,24 @@ describe('data generator', () => {
     };
 
     const verifyAncestry = (event: Event, genTree: Tree) => {
-      if (event.process.Ext.ancestry.length > 0) {
-        expect(event.process.parent?.entity_id).toBe(event.process.Ext.ancestry[0]);
+      if (event.process.Ext.ancestry!.length > 0) {
+        expect(event.process.parent?.entity_id).toBe(event.process.Ext.ancestry![0]);
       }
-      for (let i = 0; i < event.process.Ext.ancestry.length; i++) {
-        const ancestor = event.process.Ext.ancestry[i];
+      for (let i = 0; i < event.process.Ext.ancestry!.length; i++) {
+        const ancestor = event.process.Ext.ancestry![i];
         const parent = genTree.children.get(ancestor) || genTree.ancestry.get(ancestor);
         expect(ancestor).toBe(parent?.lifecycle[0].process.entity_id);
 
         // the next ancestor should be the grandparent
-        if (i + 1 < event.process.Ext.ancestry.length) {
-          const grandparent = event.process.Ext.ancestry[i + 1];
+        if (i + 1 < event.process.Ext.ancestry!.length) {
+          const grandparent = event.process.Ext.ancestry![i + 1];
           expect(grandparent).toBe(parent?.lifecycle[0].process.parent?.entity_id);
         }
       }
     };
 
     it('has ancestry array defined', () => {
-      expect(tree.origin.lifecycle[0].process.Ext.ancestry.length).toBe(ANCESTRY_LIMIT);
+      expect(tree.origin.lifecycle[0].process.Ext.ancestry!.length).toBe(ANCESTRY_LIMIT);
       for (const event of tree.allEvents) {
         verifyAncestry(event, tree);
       }
@@ -290,7 +294,11 @@ describe('data generator', () => {
     let events: Event[];
 
     beforeEach(() => {
-      events = generator.createAlertEventAncestry(3, 0, 0, 0, 0);
+      events = generator.createAlertEventAncestry({
+        ancestors: 3,
+        percentTerminated: 0,
+        percentWithRelated: 0,
+      });
     });
 
     it('with n-1 process events', () => {
@@ -375,7 +383,7 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const root = generator.generateEvent({ timestamp });
     const generations = 2;
-    const events = [root, ...generator.descendantsTreeGenerator(root, generations)];
+    const events = [root, ...generator.descendantsTreeGenerator(root, { generations })];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, generations);
     expect(visitedEvents).toEqual(events.length);
