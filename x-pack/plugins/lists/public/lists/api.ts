@@ -5,7 +5,7 @@
  */
 
 import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
-import { fold } from 'fp-ts/lib/Either';
+import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { HttpStart } from '../../../../../src/core/public';
@@ -18,6 +18,7 @@ import {
 } from '../../common/schemas';
 import { LIST_ITEM_URL, LIST_URL } from '../../common/constants';
 import { validateEither } from '../../common/siem_common_deps';
+import { toPromise } from '../common/fp_utils';
 
 export interface FindListsParams {
   http: HttpStart;
@@ -82,22 +83,14 @@ const _deleteList = async ({ http, id, signal }: DeleteListParams): Promise<List
     signal,
   });
 
-export const deleteList = async ({ http, id, signal }: DeleteListParams): Promise<ListSchema> => {
-  const deleteWithValidations = pipe(
+export const deleteList = async ({ http, id, signal }: DeleteListParams): Promise<ListSchema> =>
+  pipe(
     { id },
     (payload) => fromEither(validateEither(deleteListSchema, payload)),
     chain((payload) => tryCatch(() => _deleteList({ http, signal, ...payload }), String)),
-    chain((response) => fromEither(validateEither(listSchema, response)))
+    chain((response) => fromEither(validateEither(listSchema, response))),
+    flow(toPromise)
   );
-
-  return pipe(
-    await deleteWithValidations(),
-    fold(
-      (a) => Promise.reject(a),
-      (e) => Promise.resolve(e)
-    )
-  );
-};
 
 export interface ExportListParams {
   http: HttpStart;
