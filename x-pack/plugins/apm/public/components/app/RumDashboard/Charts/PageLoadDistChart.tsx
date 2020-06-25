@@ -36,9 +36,16 @@ import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { BreakdownSeries } from '../PageLoadDistribution/BreakdownSeries';
 
+interface PageLoadData {
+  pageLoadDistribution: Array<{ x: number; y: number }>;
+  percentiles: Record<string, number> | undefined;
+  minDuration: number;
+  maxDuration: number;
+}
+
 interface Props {
   onPercentileChange: (min: number, max: number) => void;
-  data: any;
+  data?: PageLoadData | null;
   breakdowns: BreakdownItem[];
   percentileRange: PercentileR;
   loading: boolean;

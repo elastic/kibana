@@ -32,7 +32,7 @@ import { ChartWrapper } from '../ChartWrapper';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
-  data: any;
+  data?: Array<Record<string, number | null>>;
   loading: boolean;
 }
 
