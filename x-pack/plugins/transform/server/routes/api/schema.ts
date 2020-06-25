@@ -27,4 +27,5 @@ export const deleteTransformSchema = schema.object({
   ),
   deleteDestIndex: schema.maybe(schema.boolean()),
   deleteDestIndexPattern: schema.maybe(schema.boolean()),
+  forceDelete: schema.maybe(schema.boolean()),
 });

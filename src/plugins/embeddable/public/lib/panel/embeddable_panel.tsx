@@ -43,6 +43,7 @@ import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
+import { EmbeddableStateTransfer } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -62,6 +63,7 @@ interface Props {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
+  stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
 }
 
@@ -299,7 +301,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       ),
       new InspectPanelAction(this.props.inspector),
       new RemovePanelAction(),
-      new EditPanelAction(this.props.getEmbeddableFactory, this.props.application),
+      new EditPanelAction(
+        this.props.getEmbeddableFactory,
+        this.props.application,
+        this.props.stateTransfer
+      ),
     ];
 
     const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
