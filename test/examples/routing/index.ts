@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         await testSubjects.click('routingExampleFetchRandomNumber');
         const numberAsString = await testSubjects.getVisibleText('routingExampleRandomNumber');
         expect(numberAsString).to.not.be(undefined);
-        const number = parseFloat(numberAsString, 10);
+        const number = parseFloat(numberAsString);
         expect(number).to.be.lessThan(10);
         expect(number).to.be.greaterThan(0);
       });
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
           'routingExampleRandomNumberBetween'
         );
         expect(numberAsString).to.not.be(undefined);
-        const number = parseFloat(numberAsString, 10);
+        const number = parseFloat(numberAsString);
         expect(number).to.be.lessThan(3);
         expect(number).to.be.greaterThan(0);
       });
