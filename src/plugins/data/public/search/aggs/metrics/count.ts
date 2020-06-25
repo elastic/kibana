@@ -45,6 +45,11 @@ export const getCountMetricAgg = ({ getInternalStartServices }: CountMetricAggDe
 
         return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       },
+      getSerializedFormat(agg) {
+        return {
+          id: 'number',
+        };
+      },
       getValue(agg, bucket) {
         return bucket.doc_count;
       },

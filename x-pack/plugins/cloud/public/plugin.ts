@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -12,6 +13,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 interface CloudConfigType {
   id?: string;
   resetPasswordUrl?: string;
+  deploymentUrl?: string;
 }
 
 interface CloudSetupDependencies {
@@ -24,10 +26,14 @@ export interface CloudSetup {
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  private config!: CloudConfigType;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<CloudConfigType>();
+  }
 
   public async setup(core: CoreSetup, { home }: CloudSetupDependencies) {
-    const { id, resetPasswordUrl } = this.initializerContext.config.get<CloudConfigType>();
+    const { id, resetPasswordUrl } = this.config;
     const isCloudEnabled = getIsCloudEnabled(id);
 
     if (home) {
@@ -44,6 +50,16 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public start(coreStart: CoreStart) {
+    const { deploymentUrl } = this.config;
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
+    if (deploymentUrl) {
+      coreStart.chrome.setCustomNavLink({
+        title: i18n.translate('xpack.cloud.deploymentLinkLabel', {
+          defaultMessage: 'Manage this deployment',
+        }),
+        euiIconType: 'arrowLeft',
+        href: deploymentUrl,
+      });
+    }
   }
 }
