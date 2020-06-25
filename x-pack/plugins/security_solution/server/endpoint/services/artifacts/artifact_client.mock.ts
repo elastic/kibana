@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+
 import { ArtifactClient } from './artifact_client';
 import { getInternalArtifactMock } from '../../schemas';
 
@@ -12,3 +14,7 @@ export class ArtifactClientMock extends ArtifactClient {
   public createArtifact = jest.fn().mockResolvedValue(getInternalArtifactMock());
   public deleteArtifact = jest.fn().mockResolvedValue(getInternalArtifactMock());
 }
+
+export const getArtifactClientMock = (): ArtifactClientMock => {
+  return new ArtifactClientMock(savedObjectsClientMock.create());
+};

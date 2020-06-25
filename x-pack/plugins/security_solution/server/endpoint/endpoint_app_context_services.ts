@@ -5,11 +5,13 @@
  */
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
 import { getDatasourceCreateCallback } from './ingest_integration';
+import { ManifestManager } from './services/artifacts';
 
 export type EndpointAppContextServiceStartContract = Pick<
   IngestManagerStartContract,
   'agentService'
 > & {
+  manifestManager: ManifestManager;
   registerIngestCallback: IngestManagerStartContract['registerExternalCallback'];
 };
 

@@ -14,6 +14,7 @@ import {
 } from '../../../ingest_manager/server';
 import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
 import { createDatasourceServiceMock } from '../../../ingest_manager/server/mocks';
+import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 
 /**
  * Crates a mocked input contract for the `EndpointAppContextService#start()` method
@@ -23,6 +24,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 > => {
   return {
     agentService: createMockAgentService(),
+    manifestManager: getManifestManagerMock(),
     registerIngestCallback: jest.fn<
       ReturnType<IngestManagerStartContract['registerExternalCallback']>,
       Parameters<IngestManagerStartContract['registerExternalCallback']>
@@ -40,35 +42,6 @@ import { ArtifactClient, ManifestManager } from './services';
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
-  };
-};
-
-/**
- * Creates a mock ArtifactClient
- */
-export const createMockArtifactClient = (): jest.Mocked<ArtifactClient> => {
-  return {
-    getArtifact: 'TODO',
-    createArtifact: 'TODO',
-    deleteArtifact: 'TODO',
-  };
-};
-
-/**
- * Creates a mock ManifestManager
- */
-export const createMockManifestManager = (): jest.Mocked<ManifestManager> => {
-  return {
-    refresh: 'TODO',
-  };
-};
-
-/**
- * Creates a mock ExceptionListClient
- */
-export const createMockExceptionListClient = (): jest.Mocked<ExceptionListClient> => {
-  return {
-    findExceptionListItem: 'TODO',
   };
 };
 

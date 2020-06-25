@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { loggerMock } from '../../../../../../../../src/core/server/logging/logger.mock';
+import { Logger } from '../../../../../../../../src/core/server';
+import {
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '../../../../../../../../src/core/server/mocks';
 
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
+import { listMock } from '../../../../../../lists/server/mocks';
+
 import { Manifest } from '../../../lib/artifacts';
-import { ManifestManager } from './manifest_manager';
-
-// TODO
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getExceptionListClientMock } from '../../../../../../lists/server/services/exception_lists/exception_list_client.mock';
-
 import { getInternalArtifactMock, getInternalArtifactsMock } from '../../../schemas';
+
 import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
+
+import { ManifestManager } from './manifest_manager';
 
 function mockBuildExceptionListArtifacts() {
   // mock buildArtifactFunction
@@ -33,14 +33,14 @@ export class ManifestManagerMock extends ManifestManager {
   private getLastDispatchedManifest = jest
     .fn()
     .mockResolvedValue(new Manifest(new Date(), '1.0.0'));
-  private getManifestClient = jest.fn().mockValue(getManifestClientMock());
+  private getManifestClient = jest.fn().mockReturnValue(getManifestClientMock());
 }
 
 export const getManifestManagerMock = (): ManifestManagerMock => {
   return new ManifestManagerMock({
     artifactClient: getArtifactClientMock(),
-    exceptionListClient: getExceptionListClientMock(),
+    exceptionListClient: listMock.getExceptionListClient(),
     savedObjectsClient: savedObjectsClientMock.create(),
-    logger: loggerMock.create(),
+    logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
   });
 };

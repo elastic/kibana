@@ -26,7 +26,10 @@ import { compressExceptionList } from '../../lib/artifacts/lists';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { createMockAgentService } from '../../mocks';
+import {
+  createMockAgentService,
+  createMockEndpointAppContextServiceStartContract,
+} from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 
@@ -73,11 +76,7 @@ describe('test alerts route', () => {
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
     cache = new ExceptionsCache(5);
-
-    endpointAppContextService.start({
-      agentService: createMockAgentService(),
-      manifestManager: undefined,
-    });
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
     registerDownloadExceptionListRoute(
       routerMock,
