@@ -78,7 +78,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
       }
 
       if (hideLegend === true) {
-        // @ts-ignore LegendOpen missing on VisualizeInput
+        // @ts-expect-error LegendOpen missing on VisualizeInput
         visOptions.legendOpen = false;
       }
 
