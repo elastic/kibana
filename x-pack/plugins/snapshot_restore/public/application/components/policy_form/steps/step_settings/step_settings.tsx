@@ -20,12 +20,12 @@ import { SlmPolicyPayload } from '../../../../../../common/types';
 import { documentationLinksService } from '../../../../services/documentation';
 import { StepProps } from '../';
 
-import { IndicesField, DataStreamsField } from './fields';
+import { IndicesField } from './fields';
 
 export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   policy,
-  dataStreams,
   indices,
+  dataStreams,
   updatePolicy,
   errors,
 }) => {
@@ -133,7 +133,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.includeGlobalStateDescription"
-          defaultMessage="Stores the global state of the cluster as part of the snapshot, including data streams metadata."
+          defaultMessage="Stores the global state of the cluster as part of the snapshot."
         />
       }
       fullWidth
@@ -192,15 +192,8 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       <IndicesField
         isManagedPolicy={isManagedPolicy}
         errors={errors}
-        indices={indices}
-        policy={policy}
-        onUpdate={updatePolicyConfig}
-      />
-
-      <DataStreamsField
-        isManagedPolicy={isManagedPolicy}
-        errors={errors}
         dataStreams={dataStreams}
+        indices={indices}
         policy={policy}
         onUpdate={updatePolicyConfig}
       />

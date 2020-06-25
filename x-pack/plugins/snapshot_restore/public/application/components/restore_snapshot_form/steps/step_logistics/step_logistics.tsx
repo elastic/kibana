@@ -526,7 +526,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
             defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-              templates with the same name. Also restores persistent settings and data streams metadata."
+              templates with the same name. Also restores persistent settings."
           />
         }
         fullWidth

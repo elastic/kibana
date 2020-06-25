@@ -16,7 +16,6 @@ import { BASE_PATH } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editPolicy, useLoadPolicy, useLoadIndices } from '../../services/http';
-import { separateDataStreamsFromIndices } from './separate_data_streams_from_indices';
 
 interface MatchParams {
   name: string;
@@ -66,20 +65,10 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
 
   // Update policy state when data is loaded
   useEffect(() => {
-    if (policyData && policyData.policy && indicesData) {
-      const indicesAndDataStreams = separateDataStreamsFromIndices(
-        indicesData,
-        policyData.policy.config?.indices ?? []
-      );
-      setPolicy({
-        ...policyData.policy,
-        config: {
-          ...policyData.policy.config,
-          ...indicesAndDataStreams,
-        },
-      });
+    if (policyData && policyData.policy) {
+      setPolicy(policyData.policy);
     }
-  }, [policyData, indicesData]);
+  }, [policyData]);
 
   // Saving policy states
   const [isSaving, setIsSaving] = useState<boolean>(false);

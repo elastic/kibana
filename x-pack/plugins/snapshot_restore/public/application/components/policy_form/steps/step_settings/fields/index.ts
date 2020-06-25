@@ -5,4 +5,3 @@
  */
 
 export { IndicesField } from './indices_field';
-export { DataStreamsField } from './data_streams_field';

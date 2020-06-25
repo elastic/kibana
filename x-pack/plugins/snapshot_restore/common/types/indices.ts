@@ -5,6 +5,6 @@
  */
 
 export interface PolicyIndicesResponse {
-  dataStreams: string[];
   indices: string[];
+  dataStreams: string[];
 }

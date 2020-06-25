@@ -114,18 +114,6 @@ describe('<PolicyAdd />', () => {
 
           expect(form.getErrorsMessages()).toEqual(['You must select at least one index.']);
         });
-        test('should not require at least one index if a data stream is provided', async () => {
-          const { form, component } = testBed;
-
-          await act(async () => {
-            // Toggle "All data streams" switch. Not all data streams are selected by default.
-            form.toggleEuiSwitch('allDataStreamsToggle', false);
-            await nextTick();
-            component.update();
-          });
-
-          expect(form.getErrorsMessages()).toEqual([]);
-        });
       });
 
       describe('retention (step 3)', () => {

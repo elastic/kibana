@@ -5,7 +5,6 @@
  */
 export interface SnapshotConfig {
   indices?: string | string[];
-  dataStreams?: string | string[];
   ignoreUnavailable?: boolean;
   includeGlobalState?: boolean;
   partial?: boolean;
