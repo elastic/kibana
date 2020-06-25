@@ -246,7 +246,7 @@ export default async function ({ readConfigFile }) {
           kibana: [
             {
               feature: {
-                canvas: ['read','view_index_metadata'],
+                canvas: ['read'],
               },
               spaces: ['*'],
             },
@@ -260,13 +260,13 @@ export default async function ({ readConfigFile }) {
           kibana: [
             {
               feature: {
-                canvas: ['read'],
+                discover: ['read'],
               },
               spaces: ['*'],
             },
           ],
         },
-
+        
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {
