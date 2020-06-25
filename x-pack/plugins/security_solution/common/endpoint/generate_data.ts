@@ -14,6 +14,7 @@ import {
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
   PolicyData,
+  EndpointStatus,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
 
@@ -209,6 +210,7 @@ interface HostInfo {
   };
   host: Host;
   Endpoint: {
+    status: EndpointStatus;
     policy: {
       applied: {
         id: string;
@@ -305,7 +307,7 @@ export class EndpointDocGenerator {
    * Creates new random policy id for the host to simulate new policy application
    */
   public updatePolicyId() {
-    this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    this.commonInfo.Endpoint.policy.applied.id = this.randomChoice(APPLIED_POLICIES).id;
     this.commonInfo.Endpoint.policy.applied.status = this.randomChoice([
       HostPolicyResponseActionStatus.success,
       HostPolicyResponseActionStatus.failure,
@@ -333,6 +335,7 @@ export class EndpointDocGenerator {
         os: this.randomChoice(OS),
       },
       Endpoint: {
+        status: EndpointStatus.enrolled,
         policy: {
           applied: this.randomChoice(APPLIED_POLICIES),
         },

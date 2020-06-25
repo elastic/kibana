@@ -8,7 +8,7 @@ export enum CONSTANTS {
   appQuery = 'query',
   caseDetails = 'case.details',
   casePage = 'case.page',
-  detectionsPage = 'detections.page',
+  alertsPage = 'alerts.page',
   filters = 'filters',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
@@ -25,7 +25,7 @@ export enum CONSTANTS {
 
 export type UrlStateType =
   | 'case'
-  | 'detections'
+  | 'alerts'
   | 'host'
   | 'network'
   | 'overview'

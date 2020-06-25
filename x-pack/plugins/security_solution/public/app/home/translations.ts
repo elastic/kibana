@@ -25,6 +25,10 @@ export const DETECTION_ENGINE = i18n.translate(
   }
 );
 
+export const Alerts = i18n.translate('xpack.securitySolution.navigation.alerts', {
+  defaultMessage: 'Alerts',
+});
+
 export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',
 });

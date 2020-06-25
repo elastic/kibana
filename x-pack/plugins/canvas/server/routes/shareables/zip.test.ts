@@ -8,7 +8,7 @@ jest.mock('archiver');
 
 const archiver = require('archiver') as jest.Mock;
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { httpServiceMock, httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { initializeZipShareableWorkpadRoute } from './zip';
 import { API_ROUTE_SHAREABLE_ZIP } from '../../../common/lib';
 import {
@@ -29,7 +29,7 @@ describe('Zips Canvas shareables runtime together with workpad', () => {
     const router = httpService.createRouter();
     initializeZipShareableWorkpadRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.post.mock.calls[0][1];
