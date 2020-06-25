@@ -55,8 +55,8 @@ const ExceptionItemComponent = ({
   }, [exceptionItem.entries]);
 
   const handleDelete = useCallback((): void => {
-    onDeleteException({ id: exceptionItem.id, namespaceType: exceptionItem.namespace_type });
-  }, [onDeleteException, exceptionItem]);
+    onDeleteException({ id: exceptionItem.id, namespace_type: exceptionItem.namespace_type });
+  }, [onDeleteException, exceptionItem.id, exceptionItem.namespace_type]);
 
   const handleEdit = useCallback((): void => {
     onEditException(exceptionItem);
@@ -68,10 +68,10 @@ const ExceptionItemComponent = ({
 
   const formattedComments = useMemo((): EuiCommentProps[] => {
     return getFormattedComments(exceptionItem.comments);
-  }, [exceptionItem]);
+  }, [exceptionItem.comments]);
 
   const disableDelete = useMemo((): boolean => {
-    const foundItems = loadingItemIds.filter((t) => t.id === exceptionItem.id);
+    const foundItems = loadingItemIds.filter(({ id }) => id === exceptionItem.id);
     return foundItems.length > 0;
   }, [loadingItemIds, exceptionItem.id]);
 

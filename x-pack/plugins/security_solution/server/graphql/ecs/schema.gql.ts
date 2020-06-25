@@ -411,6 +411,7 @@ export const ecsSchema = gql`
     updated_by: ToStringArray
     version: ToStringArray
     note: ToStringArray
+    exceptions_list: ToAny
   }
 
   type SignalField {

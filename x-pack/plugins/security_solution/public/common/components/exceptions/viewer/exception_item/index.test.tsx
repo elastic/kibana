@@ -76,7 +76,7 @@ describe('ExceptionItem', () => {
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
       id: '1',
-      namespaceType: 'single',
+      namespace_type: 'single',
     });
   });
 

@@ -66,7 +66,7 @@ describe('ExceptionsViewer', () => {
             {
               id: '5b543420',
               type: 'endpoint',
-              namespaceType: 'single',
+              namespace_type: 'single',
             },
           ]}
           availableListTypes={[ExceptionListType.DETECTION_ENGINE]}
@@ -114,7 +114,7 @@ describe('ExceptionsViewer', () => {
             {
               id: '5b543420',
               type: 'endpoint',
-              namespaceType: 'single',
+              namespace_type: 'single',
             },
           ]}
           availableListTypes={[ExceptionListType.DETECTION_ENGINE]}

@@ -122,7 +122,7 @@ storiesOf('Components|ExceptionItem', module)
 
     return (
       <ExceptionItem
-        loadingItemIds={[{ id, namespaceType: namespace_type }]}
+        loadingItemIds={[{ id, namespace_type }]}
         commentsAccordionId={'accordion--comments'}
         exceptionItem={{ id, namespace_type, ...rest }}
         onDeleteException={action('onClick')}

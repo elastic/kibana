@@ -59,7 +59,7 @@ export interface UseExceptionListProps {
 
 export interface ExceptionIdentifiers {
   id: string;
-  namespaceType: NamespaceType;
+  namespace_type: NamespaceType;
   type?: string;
 }
 

@@ -207,6 +207,7 @@ export const timelineQuery = gql`
                   to
                   filters
                   note
+                  exceptions_list
                 }
               }
               suricata {

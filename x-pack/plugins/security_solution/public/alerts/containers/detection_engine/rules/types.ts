@@ -7,6 +7,10 @@
 import * as t from 'io-ts';
 
 import { RuleTypeSchema } from '../../../../../common/detection_engine/types';
+import {
+  listArray,
+  listArrayOrUndefined,
+} from '../../../../../common/detection_engine/schemas/types';
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
@@ -53,6 +57,7 @@ export const NewRuleSchema = t.intersection([
     to: t.string,
     updated_by: t.string,
     note: t.string,
+    exceptions_list: listArrayOrUndefined,
   }),
 ]);
 
@@ -118,6 +123,7 @@ export const RuleSchema = t.intersection([
     timeline_title: t.string,
     note: t.string,
     version: t.number,
+    exceptions_list: listArray,
   }),
 ]);
 
