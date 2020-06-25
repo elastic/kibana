@@ -122,7 +122,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
               id="selectPreviewLookbackInterval"
               value={previewLookbackInterval}
               onChange={onSelectPreviewLookbackInterval}
-              options={previewOptions}
+              options={previewDOMOptions}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -342,6 +342,10 @@ const previewOptions = [
     }),
   },
 ];
+
+const previewDOMOptions: Array<{ text: string; value: string }> = previewOptions.map((o) =>
+  omit(o, 'shortText')
+);
 
 const firedTimeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTime', {
   defaultMessage: 'time',

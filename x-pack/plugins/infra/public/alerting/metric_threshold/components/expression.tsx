@@ -400,10 +400,6 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 };
 
-const previewDOMOptions: Array<{ text: string; value: string }> = previewOptions.map((o) =>
-  omit(o, 'shortText')
-);
-
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
 export default Expressions;
