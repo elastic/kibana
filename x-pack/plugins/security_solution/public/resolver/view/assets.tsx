@@ -12,6 +12,9 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '../../common/lib/kibana';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
+import { ResolverEvent } from '../../../common/endpoint/types';
+import * as processModel from '../models/process_event';
+import { ResolverProcessType } from '../types';
 
 type ResolverColorNames =
   | 'descriptionText'
@@ -405,7 +408,37 @@ export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   height: 0;
 `;
 
-export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleMap } => {
+const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
+  processCreated: 'runningProcessCube',
+  processRan: 'runningProcessCube',
+  processTerminated: 'terminatedProcessCube',
+  unknownProcessEvent: 'runningProcessCube',
+  processCausedAlert: 'runningTriggerCube',
+  unknownEvent: 'runningProcessCube',
+};
+
+/**
+ * This will return which type the ResolverEvent will display as in the Node component
+ * it will be something like 'runningProcessCube' or 'terminatedProcessCube'
+ *
+ * @param processEvent {ResolverEvent} the event to get the Resolver Component Node type of
+ */
+export function nodeType(processEvent: ResolverEvent): keyof NodeStyleMap {
+  const processType = processModel.eventType(processEvent);
+  if (processType in processTypeToCube) {
+    return processTypeToCube[processType];
+  }
+  return 'runningProcessCube';
+}
+
+/**
+ * A hook to bring Resolver theming information into components.
+ */
+export const useResolverTheme = (): {
+  colorMap: ColorMap;
+  nodeAssets: NodeStyleMap;
+  cubeAssetsForNode: (arg0: ResolverEvent) => NodeStyleConfig;
+} => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
 
@@ -478,7 +511,15 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
     },
   };
 
-  return { colorMap, nodeAssets };
+  /**
+   * Export assets to reuse symbols/icons in other places in the app (e.g. tables, etc.)
+   * @param processEvent : The process event to fetch node assets for
+   */
+  function cubeAssetsForNode(processEvent: ResolverEvent) {
+    return nodeAssets[nodeType(processEvent)];
+  }
+
+  return { colorMap, nodeAssets, cubeAssetsForNode };
 };
 
 export const calculateResolverFontSize = (

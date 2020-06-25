@@ -17,7 +17,7 @@ import {
 } from '../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
   coreMock,
 } from '../../../../../../src/core/server/mocks';
 import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
@@ -121,7 +121,7 @@ describe.skip('onPostAuthInterceptor', () => {
     // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
     elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
-    const loggingMock = loggingServiceMock.create().asLoggerFactory().get('xpack', 'spaces');
+    const loggingMock = loggingSystemMock.create().asLoggerFactory().get('xpack', 'spaces');
 
     const featuresPlugin = {
       getFeatures: () =>

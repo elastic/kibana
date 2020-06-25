@@ -64,6 +64,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
       getEmbeddableFactories: start.getEmbeddableFactories,
+      getEmbeddablePanel: jest.fn(),
       getEmbeddableFactory,
     } as any,
     notifications: {} as any,

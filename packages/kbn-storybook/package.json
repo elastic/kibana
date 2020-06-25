@@ -23,7 +23,7 @@
     "mini-css-extract-plugin": "0.7.0",
     "normalize-path": "3.0.0",
     "react-docgen-typescript-loader": "3.1.0",
-    "rxjs": "6.5.2",
+    "rxjs": "6.5.5",
     "serve-static": "1.14.1",
     "styled-components": "^5.1.0",
     "webpack": "^4.41.5"

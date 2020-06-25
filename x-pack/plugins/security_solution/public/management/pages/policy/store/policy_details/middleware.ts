@@ -17,7 +17,6 @@ import {
   sendPutDatasource,
 } from '../policy_list/services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
-import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
@@ -41,23 +40,6 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
           payload: error.body || error,
         });
         return;
-      }
-
-      // Until we get the Default configuration into the Endpoint package so that the datasource has
-      // the expected data structure, we will add it here manually.
-      if (!policyItem.inputs.length) {
-        policyItem.inputs = [
-          {
-            type: 'endpoint',
-            enabled: true,
-            streams: [],
-            config: {
-              policy: {
-                value: policyConfigFactory(),
-              },
-            },
-          },
-        ];
       }
 
       dispatch({

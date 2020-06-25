@@ -9,14 +9,14 @@ import { get, isEmpty } from 'lodash/fp';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { decodeIpv6 } from '../../../common/lib/helpers';
-import {
-  getNetworkUrl,
-  getIPDetailsUrl,
-} from '../../../common/components/link_to/redirect_to_network';
+import { getIPDetailsUrl } from '../../../common/components/link_to/redirect_to_network';
 import { networkModel } from '../../store';
 import * as i18n from '../translations';
 import { NetworkRouteType } from '../navigation/types';
 import { NetworkRouteSpyState } from '../../../common/utils/route/types';
+import { GetUrlForApp } from '../../../common/components/navigation/types';
+import { APP_ID } from '../../../../common/constants';
+import { SecurityPageName } from '../../../app/types';
 
 export const type = networkModel.NetworkType.details;
 const TabNameMappedToI18nKey: Record<NetworkRouteType, string> = {
@@ -30,12 +30,15 @@ const TabNameMappedToI18nKey: Record<NetworkRouteType, string> = {
 
 export const getBreadcrumbs = (
   params: NetworkRouteSpyState,
-  search: string[]
+  search: string[],
+  getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: `${getNetworkUrl()}${!isEmpty(search[0]) ? search[0] : ''}`,
+      href: getUrlForApp(`${APP_ID}:${SecurityPageName.network}`, {
+        path: !isEmpty(search[0]) ? search[0] : '',
+      }),
     },
   ];
   if (params.detailName != null) {
@@ -43,9 +46,13 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: decodeIpv6(params.detailName),
-        href: `${getIPDetailsUrl(params.detailName, params.flowTarget)}${
-          !isEmpty(search[1]) ? search[1] : ''
-        }`,
+        href: getUrlForApp(`${APP_ID}:${SecurityPageName.network}`, {
+          path: getIPDetailsUrl(
+            params.detailName,
+            params.flowTarget,
+            !isEmpty(search[0]) ? search[0] : ''
+          ),
+        }),
       },
     ];
   }
