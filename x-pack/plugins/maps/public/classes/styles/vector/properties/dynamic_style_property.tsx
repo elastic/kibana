@@ -19,9 +19,8 @@ import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
 import {
   CategoryFieldMeta,
-  CategoricalStyleMetaData,
   FieldMetaOptions,
-  OrdinalStyleMetaData,
+  StyleMetaData,
   RangeFieldMeta,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
@@ -105,7 +104,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
       return rangeFieldMetaFromLocalFeatures;
     }
 
-    const data = styleMetaDataRequest.getData() as OrdinalStyleMetaData;
+    const data = styleMetaDataRequest.getData() as StyleMetaData;
     const rangeFieldMeta = this._pluckOrdinalStyleMetaFromFieldMetaData(data);
     return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
   }
@@ -130,7 +129,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
       return categoryFieldMetaFromLocalFeatures;
     }
 
-    const data = styleMetaDataRequest.getData() as CategoricalStyleMetaData;
+    const data = styleMetaDataRequest.getData() as StyleMetaData;
     const rangeFieldMeta = this._pluckCategoricalStyleMetaFromFieldMetaData(data);
     return rangeFieldMeta ? rangeFieldMeta : categoryFieldMetaFromLocalFeatures;
   }
@@ -263,13 +262,13 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
     } as CategoryFieldMeta;
   }
 
-  _pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData: OrdinalStyleMetaData) {
+  _pluckOrdinalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData) {
     if (!this.isOrdinal() || !this._field) {
       return null;
     }
 
-    const stats = fieldMetaData[this._field.getRootName()];
-    if (!stats) {
+    const stats = styleMetaData[this._field.getRootName()];
+    if (!stats || !('avg' in stats)) {
       return null;
     }
 
@@ -287,24 +286,23 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
     };
   }
 
-  _pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData: CategoricalStyleMetaData) {
+  _pluckCategoricalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData) {
     if (!this.isCategorical() || !this._field) {
       return null;
     }
 
-    const rootFieldName = this._field.getRootName();
-    if (!fieldMetaData[rootFieldName] || !fieldMetaData[rootFieldName].buckets) {
+    const fieldMeta = styleMetaData[this._field.getRootName()];
+    if (!fieldMeta || !('buckets' in fieldMeta)) {
       return null;
     }
 
-    const ordered = fieldMetaData[rootFieldName].buckets.map((bucket) => {
-      return {
-        key: bucket.key,
-        count: bucket.doc_count,
-      };
-    });
     return {
-      categories: ordered,
+      categories: fieldMeta.buckets.map((bucket) => {
+        return {
+          key: bucket.key,
+          count: bucket.doc_count,
+        };
+      }),
     };
   }
 

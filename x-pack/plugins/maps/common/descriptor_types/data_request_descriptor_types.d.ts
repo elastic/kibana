@@ -64,21 +64,18 @@ export type DataMeta = Partial<VectorSourceRequestMeta> &
   Partial<VectorStyleRequestMeta> &
   Partial<ESSearchSourceResponseMeta>;
 
-export type OrdinalStyleMetaData = {
-  // key is field name for field requiring ordinal style meta
-  [key: string]: {
-    avg: number;
-    max: number;
-    min: number;
-    std_deviation: number;
-  };
-};
-
-export type CategoricalStyleMetaData = {
-  // key is field name for field requiring categorical style meta
-  [key: string]: {
-    buckets: Array<{ key: string; doc_count: number }>;
-  };
+export type StyleMetaData = {
+  // key is field name for field requiring style meta
+  [key: string]:
+    | {
+        avg: number;
+        max: number;
+        min: number;
+        std_deviation: number;
+      }
+    | {
+        buckets: Array<{ key: string; doc_count: number }>;
+      };
 };
 
 export type DataRequestDescriptor = {
