@@ -4,18 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
+import { chain, fromEither, map, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
   DeleteListSchemaEncoded,
+  ExportListItemQuerySchemaEncoded,
   FindListSchemaEncoded,
   FoundListSchema,
+  ImportListItemQuerySchemaEncoded,
+  ImportListItemSchemaEncoded,
   ListSchema,
   deleteListSchema,
+  exportListItemQuerySchema,
   findListSchema,
   foundListSchema,
+  importListItemQuerySchema,
+  importListItemSchema,
   listSchema,
 } from '../../common/schemas';
 import { LIST_ITEM_URL, LIST_URL } from '../../common/constants';
@@ -67,24 +73,52 @@ const findListsWithValidation = async ({
 
 export { findListsWithValidation as findLists };
 
-export const importList = async ({
+const importList = async ({
   file,
   http,
-  listId,
+  list_id,
   type,
   signal,
-}: ImportListParams): Promise<ListSchema> => {
+}: ApiParams & ImportListItemSchemaEncoded & ImportListItemQuerySchemaEncoded): Promise<
+  ListSchema
+> => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', file as Blob);
 
   return http.fetch<ListSchema>(`${LIST_ITEM_URL}/_import`, {
     body: formData,
     headers: { 'Content-Type': undefined },
     method: 'POST',
-    query: { list_id: listId, type },
+    query: { list_id, type },
     signal,
   });
 };
+
+const importListWithValidation = async ({
+  file,
+  http,
+  listId,
+  type,
+  signal,
+}: ImportListParams): Promise<ListSchema> =>
+  pipe(
+    {
+      list_id: listId,
+      type,
+    },
+    (query) => fromEither(validateEither(importListItemQuerySchema, query)),
+    chain((query) =>
+      pipe(
+        fromEither(validateEither(importListItemSchema, { file })),
+        map((body) => ({ ...body, ...query }))
+      )
+    ),
+    chain((payload) => tryCatch(() => importList({ http, signal, ...payload }), String)),
+    chain((response) => fromEither(validateEither(listSchema, response))),
+    flow(toPromise)
+  );
+
+export { importListWithValidation as importList };
 
 const deleteList = async ({
   http,
@@ -112,10 +146,28 @@ const deleteListWithValidation = async ({
 
 export { deleteListWithValidation as deleteList };
 
-export const exportList = async ({ http, id, signal }: ExportListParams): Promise<Blob> => {
-  return http.fetch<Blob>(`${LIST_ITEM_URL}/_export`, {
+const exportList = async ({
+  http,
+  list_id,
+  signal,
+}: ApiParams & ExportListItemQuerySchemaEncoded): Promise<Blob> =>
+  http.fetch<Blob>(`${LIST_ITEM_URL}/_export`, {
     method: 'POST',
-    query: { list_id: id },
+    query: { list_id },
     signal,
   });
-};
+
+const exportListWithValidation = async ({
+  http,
+  listId,
+  signal,
+}: ExportListParams): Promise<Blob> =>
+  pipe(
+    { list_id: listId },
+    (payload) => fromEither(validateEither(exportListItemQuerySchema, payload)),
+    chain((payload) => tryCatch(() => exportList({ http, signal, ...payload }), String)),
+    chain((response) => fromEither(validateEither(listSchema, response))),
+    flow(toPromise)
+  );
+
+export { exportListWithValidation as exportList };

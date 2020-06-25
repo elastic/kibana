@@ -10,7 +10,13 @@ import { getListResponseMock } from '../../common/schemas/response/list_schema.m
 import { getFoundListSchemaMock } from '../../common/schemas/response/found_list_schema.mock';
 
 import { deleteList, exportList, findLists, importList } from './api';
-import { ApiPayload, DeleteListParams, FindListsParams } from './types';
+import {
+  ApiPayload,
+  DeleteListParams,
+  ExportListParams,
+  FindListsParams,
+  ImportListParams,
+} from './types';
 
 describe('Value Lists API', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -144,12 +150,16 @@ describe('Value Lists API', () => {
   });
 
   describe('importList', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getListResponseMock());
+    });
+
     it('POSTs the file', async () => {
       const abortCtrl = new AbortController();
-      const fileMock = ('my file' as unknown) as File;
+      const file = new File([], 'name');
 
       await importList({
-        file: fileMock,
+        file,
         http: httpMock,
         listId: 'my_list',
         signal: abortCtrl.signal,
@@ -167,15 +177,15 @@ describe('Value Lists API', () => {
         [unknown, HttpFetchOptions]
       >;
       const actualFile = (body as FormData).get('file');
-      expect(actualFile).toEqual('my file');
+      expect(actualFile).toEqual(file);
     });
 
     it('sends type and id as query parameters', async () => {
       const abortCtrl = new AbortController();
-      const fileMock = ('my file' as unknown) as File;
+      const file = new File([], 'name');
 
       await importList({
-        file: fileMock,
+        file,
         http: httpMock,
         listId: 'my_list',
         signal: abortCtrl.signal,
@@ -189,15 +199,76 @@ describe('Value Lists API', () => {
         })
       );
     });
+
+    it('rejects with an error if request body is invalid (and does not make API call)', async () => {
+      const abortCtrl = new AbortController();
+      const payload: ApiPayload<ImportListParams> = {
+        file: (undefined as unknown) as File,
+        listId: 'list-id',
+        type: 'ip',
+      };
+
+      await expect(
+        importList({
+          http: httpMock,
+          ...payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "file"');
+      expect(httpMock.fetch).not.toHaveBeenCalled();
+    });
+
+    it('rejects with an error if request params are invalid (and does not make API call)', async () => {
+      const abortCtrl = new AbortController();
+      const file = new File([], 'name');
+      const payload: ApiPayload<ImportListParams> = {
+        file,
+        listId: 'list-id',
+        type: 'other' as 'ip',
+      };
+
+      await expect(
+        importList({
+          http: httpMock,
+          ...payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "other" supplied to "type"');
+      expect(httpMock.fetch).not.toHaveBeenCalled();
+    });
+
+    it('rejects with an error if response payload is invalid', async () => {
+      const abortCtrl = new AbortController();
+      const file = new File([], 'name');
+      const payload: ApiPayload<ImportListParams> = {
+        file,
+        listId: 'list-id',
+        type: 'ip',
+      };
+      const badResponse = { ...getListResponseMock(), id: undefined };
+      httpMock.fetch.mockResolvedValue(badResponse);
+
+      await expect(
+        importList({
+          http: httpMock,
+          ...payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+    });
   });
 
   describe('exportList', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getListResponseMock());
+    });
+
     it('POSTs to the export endpoint', async () => {
       const abortCtrl = new AbortController();
 
       await exportList({
         http: httpMock,
-        id: 'my_list',
+        listId: 'my_list',
         signal: abortCtrl.signal,
       });
       expect(httpMock.fetch).toHaveBeenCalledWith(
@@ -213,7 +284,7 @@ describe('Value Lists API', () => {
 
       await exportList({
         http: httpMock,
-        id: 'my_list',
+        listId: 'my_list',
         signal: abortCtrl.signal,
       });
       expect(httpMock.fetch).toHaveBeenCalledWith(
@@ -222,6 +293,39 @@ describe('Value Lists API', () => {
           query: { list_id: 'my_list' },
         })
       );
+    });
+
+    it('rejects with an error if request params are invalid (and does not make API call)', async () => {
+      const abortCtrl = new AbortController();
+      const payload: ApiPayload<ExportListParams> = {
+        listId: (23 as unknown) as string,
+      };
+
+      await expect(
+        exportList({
+          http: httpMock,
+          ...payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "23" supplied to "list_id"');
+      expect(httpMock.fetch).not.toHaveBeenCalled();
+    });
+
+    it('rejects with an error if response payload is invalid', async () => {
+      const abortCtrl = new AbortController();
+      const payload: ApiPayload<ExportListParams> = {
+        listId: 'list-id',
+      };
+      const badResponse = { ...getListResponseMock(), id: undefined };
+      httpMock.fetch.mockResolvedValue(badResponse);
+
+      await expect(
+        exportList({
+          http: httpMock,
+          ...payload,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
     });
   });
 });

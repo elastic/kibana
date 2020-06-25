@@ -29,5 +29,5 @@ export interface DeleteListParams extends ApiParams {
 }
 
 export interface ExportListParams extends ApiParams {
-  id: string;
+  listId: string;
 }
