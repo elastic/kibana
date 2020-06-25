@@ -25,23 +25,6 @@ const noUnenrolledEndpoint = () =>
 
 describe('test find all unenrolled HostId', () => {
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
-  const expectedAllUnenrolledHostQuery = {
-    index: metadataMirrorIndexPattern,
-    scroll: '10s',
-    body: {
-      size: 1000,
-      _source: ['host.id'],
-      query: {
-        bool: {
-          filter: {
-            term: {
-              'Endpoint.status': EndpointStatus.unenrolled,
-            },
-          },
-        },
-      },
-    },
-  };
 
   it('can find all hits with scroll', async () => {
     const firstHostId = '1fdca33f-799f-49f4-939c-ea4383c77671';
@@ -74,9 +57,23 @@ describe('test find all unenrolled HostId', () => {
       .mockImplementationOnce(noUnenrolledEndpoint);
     const hostIds = await findAllUnenrolledHostIds(mockScopedClient);
 
-    expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]).toEqual(
-      expectedAllUnenrolledHostQuery
-    );
+    expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]).toEqual({
+      index: metadataMirrorIndexPattern,
+      scroll: '30s',
+      body: {
+        size: 1000,
+        _source: ['host.id'],
+        query: {
+          bool: {
+            filter: {
+              term: {
+                'Endpoint.status': EndpointStatus.unenrolled,
+              },
+            },
+          },
+        },
+      },
+    });
     expect(hostIds).toEqual([
       { host: { id: firstEndpointHostId } },
       { host: { id: secondEndpointHostId } },
@@ -94,6 +91,9 @@ describe('test find unenrolled endpoint host id by hostId', () => {
       Promise.resolve(createSearchResponse(firstEndpointHostId, 'initialScrollId'))
     );
     const endpointHostId = await findUnenrolledHostByHostId(mockScopedClient, firstEndpointHostId);
+    expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.index).toEqual(
+      metadataMirrorIndexPattern
+    );
     expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body).toEqual({
       size: 1,
       _source: ['host.id'],

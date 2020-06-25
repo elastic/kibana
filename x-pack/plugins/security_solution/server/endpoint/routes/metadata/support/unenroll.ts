@@ -9,7 +9,7 @@ import { SearchResponse } from 'elasticsearch';
 import { metadataMirrorIndexPattern } from '../../../../../common/endpoint/constants';
 import { EndpointStatus } from '../../../../../common/endpoint/types';
 
-const KEEPALIVE = '10s';
+const KEEPALIVE = '30s';
 const SIZE = 1000;
 
 export interface HostId {
