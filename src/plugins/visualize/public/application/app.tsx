@@ -19,12 +19,12 @@
 
 import './app.scss';
 import React, { useEffect } from 'react';
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 
 import { syncQueryStateWithUrl } from '../../../data/public';
 import { useKibana } from '../../../kibana_react/public';
 import { VisualizeServices } from './types';
-import { VisualizeEditor, VisualizeListing } from './components';
+import { VisualizeEditor, VisualizeListing, VisualizeNoMatch } from './components';
 import { VisualizeConstants } from './visualize_constants';
 
 export const VisualizeApp = () => {
@@ -57,7 +57,7 @@ export const VisualizeApp = () => {
       >
         <VisualizeListing />
       </Route>
-      <Redirect to={VisualizeConstants.LANDING_PAGE_PATH} />
+      <VisualizeNoMatch />
     </Switch>
   );
 };

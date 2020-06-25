@@ -147,6 +147,7 @@ export class VisualizePlugin
             history,
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
           }),
+          kibanaLegacy: pluginsStart.kibanaLegacy,
           pluginInitializerContext: this.initializerContext,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
