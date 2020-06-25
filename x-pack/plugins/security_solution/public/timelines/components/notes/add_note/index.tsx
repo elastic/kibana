@@ -61,12 +61,11 @@ export const AddNote = React.memo<{
       }),
     [associateNote, getNewNoteId, newNote, updateNewNote, updateNote]
   );
-  const hasNewNote = newNote.trim().length > 0;
   return (
     <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
       <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
       <EuiFlexItem grow={true}>
-        <MarkdownHint show={hasNewNote} />
+        <MarkdownHint show={newNote.trim().length > 0} />
       </EuiFlexItem>
       <ButtonsContainer gutterSize="none">
         {onCancelAddNote != null ? (
@@ -77,7 +76,7 @@ export const AddNote = React.memo<{
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="add-note"
-            isDisabled={!hasNewNote}
+            isDisabled={newNote.trim().length === 0}
             fill={true}
             onClick={handleClick}
           >

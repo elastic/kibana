@@ -46,6 +46,7 @@ import { createTimelines } from './utils/create_timelines';
 import { TimelineStatus } from '../../../../common/types/timeline';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
+const DEFAULT_IMPORT_ERROR = `Something went wrong, there's something we didn't handle properly, please help us improve by providing the file you try to import on https://discuss.elastic.co/c/security/siem`;
 
 export const importTimelinesRoute = (
   router: IRouter,
@@ -187,10 +188,7 @@ export const importTimelinesRoute = (
                         const errorMessage = compareTimelinesStatus.checkIsFailureCases(
                           TimelineStatusActions.createViaImport
                         );
-                        const message =
-                          errorMessage?.body != null
-                            ? errorMessage.body
-                            : `${timelineType} timeline ${TimelineStatusActions.createViaImport} error`;
+                        const message = errorMessage?.body ?? DEFAULT_IMPORT_ERROR;
 
                         resolve(
                           createBulkErrorObject({
@@ -220,9 +218,7 @@ export const importTimelinesRoute = (
                             TimelineStatusActions.updateViaImport
                           );
 
-                          const message =
-                            errorMessage?.body ??
-                            `${timelineType} timeline ${TimelineStatusActions.updateViaImport} error`;
+                          const message = errorMessage?.body ?? DEFAULT_IMPORT_ERROR;
 
                           resolve(
                             createBulkErrorObject({
