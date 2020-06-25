@@ -11,8 +11,16 @@ import { ComponentTemplateDeserialized } from '../shared_imports';
 import { ComponentTemplateForm } from '../shared';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
-export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProps> = ({
+interface Props {
+  /**
+   * This value may be passed in to prepopulate the creation form (e.g., to clone a template)
+   */
+  sourceComponentTemplate?: any;
+}
+
+export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
   history,
+  sourceComponentTemplate,
 }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
@@ -61,6 +69,7 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
         <EuiSpacer size="l" />
 
         <ComponentTemplateForm
+          defaultValue={sourceComponentTemplate}
           onSave={onSave}
           isSaving={isSaving}
           saveError={saveError}

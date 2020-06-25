@@ -210,7 +210,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               componentProps={{
                 euiCodeEditorProps: {
                   ['data-test-subj']: 'metaEditor',
-                  height: '300px',
+                  height: '200px',
                   'aria-label': i18n.translate(
                     'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaAriaLabel',
                     {

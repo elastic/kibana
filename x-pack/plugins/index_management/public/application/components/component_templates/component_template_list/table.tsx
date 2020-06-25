@@ -26,6 +26,7 @@ export interface Props {
   onReloadClick: () => void;
   onDeleteClick: (componentTemplateName: string[]) => void;
   onEditClick: (componentTemplateName: string) => void;
+  onCloneClick: (componentTemplateName: string) => void;
   history: ScopedHistory;
 }
 
@@ -34,6 +35,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   onReloadClick,
   onDeleteClick,
   onEditClick,
+  onCloneClick,
   history,
 }) => {
   const { trackMetric } = useComponentTemplatesContext();
@@ -220,20 +222,34 @@ export const ComponentTable: FunctionComponent<Props> = ({
             name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.actionEditText', {
               defaultMessage: 'Edit',
             }),
-            isPrimary: true,
             description: i18n.translate(
               'xpack.idxMgmt.componentTemplatesList.table.actionEditDecription',
               {
                 defaultMessage: 'Edit this component template',
               }
             ),
+            onClick: ({ name }: ComponentTemplateListItem) => onEditClick(name),
+            isPrimary: true,
             icon: 'pencil',
             type: 'icon',
-            onClick: ({ name }: ComponentTemplateListItem) => onEditClick(name),
+            'data-test-subj': 'editComponentTemplateButton',
           },
           {
-            'data-test-subj': 'deleteComponentTemplateButton',
-            isPrimary: true,
+            name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.actionCloneText', {
+              defaultMessage: 'Clone',
+            }),
+            description: i18n.translate(
+              'xpack.idxMgmt.componentTemplatesList.table.actionCloneDecription',
+              {
+                defaultMessage: 'Clone this component template',
+              }
+            ),
+            onClick: ({ name }: ComponentTemplateListItem) => onCloneClick(name),
+            icon: 'copy',
+            type: 'icon',
+            'data-test-subj': 'cloneComponentTemplateButton',
+          },
+          {
             name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.deleteActionLabel', {
               defaultMessage: 'Delete',
             }),
@@ -241,11 +257,13 @@ export const ComponentTable: FunctionComponent<Props> = ({
               'xpack.idxMgmt.componentTemplatesList.table.deleteActionDescription',
               { defaultMessage: 'Delete this component template' }
             ),
+            onClick: ({ name }) => onDeleteClick([name]),
+            enabled: ({ usedBy }) => usedBy.length === 0,
+            isPrimary: true,
             type: 'icon',
             icon: 'trash',
             color: 'danger',
-            onClick: ({ name }) => onDeleteClick([name]),
-            enabled: ({ usedBy }) => usedBy.length === 0,
+            'data-test-subj': 'deleteComponentTemplateButton',
           },
         ],
       },

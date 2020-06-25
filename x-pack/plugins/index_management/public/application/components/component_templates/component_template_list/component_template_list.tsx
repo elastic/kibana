@@ -34,12 +34,16 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
   const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
 
-  const goToList = () => {
+  const goToComponentTemplateList = () => {
     return history.push('component_templates');
   };
 
   const goToEditComponentTemplate = (name: string) => {
     return history.push(`edit_component_template/${encodeURIComponent(name)}`);
+  };
+
+  const goToCloneComponentTemplate = (name: string) => {
+    return history.push(`create_component_template/${encodeURIComponent(name)}`);
   };
 
   // Track component loaded
@@ -69,6 +73,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
         onReloadClick={sendRequest}
         onDeleteClick={setComponentTemplatesToDelete}
         onEditClick={goToEditComponentTemplate}
+        onCloneClick={goToCloneComponentTemplate}
         history={history as ScopedHistory}
       />
     );
@@ -88,7 +93,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
               // refetch the component templates
               sendRequest();
               // go back to list view (if deleted from details flyout)
-              goToList();
+              goToComponentTemplateList();
             }
             setComponentTemplatesToDelete([]);
           }}
@@ -99,7 +104,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
       {/* details flyout */}
       {componentTemplateName && (
         <ComponentTemplateDetailsFlyout
-          onClose={goToList}
+          onClose={goToComponentTemplateList}
           componentTemplateName={componentTemplateName}
           actions={[
             {
@@ -108,6 +113,13 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
               }),
               icon: 'pencil',
               handleActionClick: () => goToEditComponentTemplate(componentTemplateName),
+            },
+            {
+              name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.cloneActionLabel', {
+                defaultMessage: 'Clone',
+              }),
+              icon: 'copy',
+              handleActionClick: () => goToCloneComponentTemplate(componentTemplateName),
             },
             {
               name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {

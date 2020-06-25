@@ -13,3 +13,5 @@ export { ComponentTemplateDetailsFlyout } from './component_template_details';
 export { ComponentTemplateCreate } from './component_template_create';
 
 export { ComponentTemplateEdit } from './component_template_edit';
+
+export { ComponentTemplateClone } from './component_template_clone';

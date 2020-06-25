@@ -18,8 +18,8 @@ import {
 const { emptyField, containsCharsField, isJsonField } = fieldValidators;
 const { toInt } = fieldFormatters;
 
-const stringifyJson = (json: any): string =>
-  Array.isArray(json) ? JSON.stringify(json, null, 2) : '{\n\n}';
+const stringifyJson = (json: { [key: string]: any }): string =>
+  Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
 
 const parseJson = (jsonString: string): object => {
   let parsedJSON: any;
