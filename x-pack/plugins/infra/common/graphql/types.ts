@@ -879,6 +879,10 @@ export namespace SourceConfigurationFields {
     fields: Fields;
 
     logColumns: LogColumns[];
+
+    inventoryDefaultView: string;
+
+    metricsExplorerDefaultView: string;
   };
 
   export type Fields = {

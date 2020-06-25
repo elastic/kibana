@@ -96,11 +96,6 @@ export const Layout = () => {
     }
   }, [reload, currentView]);
 
-  // if (loadingDefaultView) {
-  //   // If we're loading the default view, don't show anything yet because we don't have data.
-  //   return null;
-  // }
-
   return (
     <>
       <PageContent>

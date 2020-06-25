@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiBadge } from '@elastic/eui';
 import { SavedView } from '../../containers/saved_view/saved_view';
 
 interface Props<ViewState> {

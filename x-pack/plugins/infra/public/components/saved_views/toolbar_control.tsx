@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback, useState, useEffect, useContext } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { SavedViewCreateModal } from './create_modal';
 import { SavedViewUpdateModal } from './update_modal';
 import { SavedViewManageViewsFlyout } from './manage_views_flyout';
@@ -141,51 +143,67 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
       <EuiFlexGroup>
         <EuiPopover
           button={
-            <EuiDescriptionList onClick={showSavedViewMenu}>
-              <EuiDescriptionListTitle>Current View</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {currentView ? currentView.name : 'Default View'}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
+            <EuiFlexGroup gutterSize={'s'} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon onClick={showSavedViewMenu} iconType="globe" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiDescriptionList onClick={showSavedViewMenu}>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      defaultMessage="Current view"
+                      id="xpack.infra.savedView.currentView"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {currentView
+                      ? currentView.name
+                      : i18n.translate('xpack.infra.savedView.defaultView', {
+                          defaultMessage: 'Default view',
+                        })}
+                  </EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
           isOpen={isSavedViewMenuOpen}
           closePopover={hideSavedViewMenu}
           anchorPosition="upCenter"
         >
           <EuiListGroup flush={true}>
-            <EuiListGroupItem iconType={'indexSettings'} onClick={loadViews} label="Manage Views" />
+            <EuiListGroupItem
+              iconType={'indexSettings'}
+              onClick={loadViews}
+              label={i18n.translate('xpack.infra.savedView.manageViews', {
+                defaultMessage: 'Manage views',
+              })}
+            />
 
-            <EuiListGroupItem iconType={'refresh'} onClick={openUpdateModal} label="Update View" />
+            <EuiListGroupItem
+              iconType={'refresh'}
+              onClick={openUpdateModal}
+              label={i18n.translate('xpack.infra.savedView.updateView', {
+                defaultMessage: 'Update view',
+              })}
+            />
 
             <EuiListGroupItem
               iconType={'importAction'}
               onClick={openViewListModal}
-              label="Load View"
+              label={i18n.translate('xpack.infra.savedView.loadView', {
+                defaultMessage: 'Load view',
+              })}
             />
 
-            <EuiListGroupItem iconType={'save'} onClick={openSaveModal} label="Save new view" />
-
             <EuiListGroupItem
-              onClick={() => {}}
-              iconType={'editorUndo'}
-              label="Reset view"
-              isDisabled
+              iconType={'save'}
+              onClick={openSaveModal}
+              label={i18n.translate('xpack.infra.savedView.manageViews', {
+                defaultMessage: 'Save new view',
+              })}
             />
           </EuiListGroup>
         </EuiPopover>
-
-        {/* <EuiButtonEmpty iconType="save" onClick={openSaveModal} data-test-subj="openSaveViewModal">
-          <FormattedMessage
-            defaultMessage="Save"
-            id="xpack.infra.waffle.savedViews.saveViewLabel"
-          />
-        </EuiButtonEmpty>
-        <EuiButtonEmpty iconType="importAction" onClick={loadViews} data-test-subj="loadViews">
-          <FormattedMessage
-            defaultMessage="Load"
-            id="xpack.infra.waffle.savedViews.loadViewsLabel"
-          />
-        </EuiButtonEmpty> */}
       </EuiFlexGroup>
 
       {createModalOpen && (

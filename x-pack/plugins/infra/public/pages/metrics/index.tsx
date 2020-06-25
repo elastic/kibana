@@ -15,7 +15,10 @@ import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
 import { Header } from '../../components/header';
-import { MetricsExplorerOptionsContainer } from './metrics_explorer/hooks/use_metrics_explorer_options';
+import {
+  MetricsExplorerOptionsContainer,
+  DEFAULT_METRICS_EXPLORER_VIEW_STATE,
+} from './metrics_explorer/hooks/use_metrics_explorer_options';
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { WithSource } from '../../containers/with_source';
 import { Source } from '../../containers/source';
@@ -31,6 +34,7 @@ import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters
 
 import { InventoryAlertDropdown } from '../../alerting/inventory/components/alert_dropdown';
 import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
+import { SavedView } from '../../containers/saved_view/saved_view';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -133,11 +137,19 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                           <MetricsExplorerOptionsContainer.Provider>
                             <WithMetricsExplorerOptionsUrlState />
                             {configuration ? (
-                              <MetricsExplorerPage
-                                derivedIndexPattern={createDerivedIndexPattern('metrics')}
-                                source={configuration}
-                                {...props}
-                              />
+                              <SavedView.Provider
+                                shouldLoadDefault={
+                                  true /* TODO need to look at the URL and make sure there is no state already there.*/
+                                }
+                                viewType={'metrics-explorer-view'}
+                                defaultViewState={DEFAULT_METRICS_EXPLORER_VIEW_STATE}
+                              >
+                                <MetricsExplorerPage
+                                  derivedIndexPattern={createDerivedIndexPattern('metrics')}
+                                  source={configuration}
+                                  {...props}
+                                />
+                              </SavedView.Provider>
                             ) : (
                               <SourceLoadingPage />
                             )}

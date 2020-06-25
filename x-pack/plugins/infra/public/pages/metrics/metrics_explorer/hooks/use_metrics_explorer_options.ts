@@ -85,6 +85,12 @@ export const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   metrics: DEFAULT_METRICS,
 };
 
+export const DEFAULT_METRICS_EXPLORER_VIEW_STATE = {
+  options: DEFAULT_OPTIONS,
+  chartOptions: DEFAULT_CHART_OPTIONS,
+  currentTimerange: DEFAULT_TIMERANGE,
+};
+
 function parseJsonOrDefault<Obj>(value: string | null, defaultValue: Obj): Obj {
   if (!value) {
     return defaultValue;

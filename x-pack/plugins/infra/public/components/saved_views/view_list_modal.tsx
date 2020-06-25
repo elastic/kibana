@@ -6,20 +6,8 @@
 
 import React, { useCallback, useState } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiModalFooter,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiInMemoryTable,
-  EuiFlexGroup,
-  EuiButton,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiModalFooter, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiBadge } from '@elastic/eui';
 import {
   EuiOverlayMask,
   EuiModal,
@@ -29,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SavedView } from '../../containers/saved_view/saved_view';
 
 interface Props<ViewState> {
@@ -76,7 +65,11 @@ export function SavedViewListModal<ViewState>({ close, views, setView }: Props<V
             searchable={true}
             options={options || views.map((v) => ({ label: v.name, key: v.id }))}
             onChange={onChange}
-            searchProps={{ placeholder: 'Search for saved views' }}
+            searchProps={{
+              placeholder: i18n.translate('xpack.infra.savedView.searchPlaceholder', {
+                defaultMessage: 'Search for saved views',
+              }),
+            }}
             listProps={{ bordered: true }}
           >
             {(list, search) => (

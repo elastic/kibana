@@ -34,7 +34,6 @@ interface Props {
   timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
-  defaultViewState: MetricExplorerViewState;
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
   onGroupByChange: (groupBy: string | null | string[]) => void;
@@ -42,7 +41,6 @@ interface Props {
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
   onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
-  onViewStateChange: (vs: MetricExplorerViewState) => void;
 }
 
 export const MetricsExplorerToolbar = ({
@@ -57,8 +55,6 @@ export const MetricsExplorerToolbar = ({
   onAggregationChange,
   chartOptions,
   onChartOptionsChange,
-  defaultViewState,
-  onViewStateChange,
 }: Props) => {
   const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
   const [timepickerQuickRanges] = useKibanaUiSetting(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
@@ -123,14 +119,11 @@ export const MetricsExplorerToolbar = ({
 
         <EuiFlexItem grow={false}>
           <SavedViewsToolbarControls
-            defaultViewState={defaultViewState}
             viewState={{
               options,
               chartOptions,
               currentTimerange: timeRange,
             }}
-            viewType={metricsExplorerViewSavedObjectName}
-            onViewChange={onViewStateChange}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ marginRight: 5 }}>

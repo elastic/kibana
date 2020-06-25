@@ -6,7 +6,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { useTrackPageview } from '../../../../../observability/public';
 import { SourceQuery } from '../../../../common/graphql/types';
@@ -15,6 +15,7 @@ import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
+import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 
 interface MetricsExplorerPageProps {
   source: SourceQuery.Query['source']['configuration'];
@@ -40,9 +41,16 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     defaultViewState,
     onViewStateChange,
   } = useMetricsExplorerState(source, derivedIndexPattern);
+  const { currentView } = useSavedViewContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
+
+  useEffect(() => {
+    if (currentView) {
+      onViewStateChange(currentView);
+    }
+  }, [currentView, onViewStateChange]);
 
   return (
     <EuiErrorBoundary>
@@ -68,8 +76,6 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
         onMetricsChange={handleMetricsChange}
         onAggregationChange={handleAggregationChange}
         onChartOptionsChange={setChartOptions}
-        defaultViewState={defaultViewState}
-        onViewStateChange={onViewStateChange}
       />
       {error ? (
         <NoData

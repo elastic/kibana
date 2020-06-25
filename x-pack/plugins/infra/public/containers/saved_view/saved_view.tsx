@@ -195,9 +195,8 @@ export const useSavedView = (props: Props) => {
   }, [setCurrentView, defaultViewId, defaultViewState]);
 
   useEffect(() => {
-    // const shouldLoadDefault = props.shouldLoadDefault;
+    const shouldLoadDefault = props.shouldLoadDefault;
 
-    const shouldLoadDefault = true;
     if (loadingDefaultView || currentView) {
       return;
     }
