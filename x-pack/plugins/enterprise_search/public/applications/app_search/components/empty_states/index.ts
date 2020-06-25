@@ -6,5 +6,4 @@
 
 export { LoadingState } from './loading_state';
 export { EmptyState } from './empty_state';
-export { NoUserState } from './no_user_state';
 export { ErrorState } from './error_state';

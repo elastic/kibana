@@ -24,7 +24,7 @@ import { KibanaContext, IKibanaContext } from '../../../index';
 import EnginesIcon from '../../assets/engine.svg';
 import MetaEnginesIcon from '../../assets/meta_engine.svg';
 
-import { LoadingState, EmptyState, NoUserState, ErrorState } from '../empty_states';
+import { LoadingState, EmptyState, ErrorState } from '../empty_states';
 import { EngineOverviewHeader } from '../engine_overview_header';
 import { EngineTable } from './engine_table';
 
@@ -35,7 +35,6 @@ export const EngineOverview: React.FC = () => {
   const { license } = useContext(LicenseContext) as ILicenseContext;
 
   const [isLoading, setIsLoading] = useState(true);
-  const [hasNoAccount, setHasNoAccount] = useState(false);
   const [hasErrorConnecting, setHasErrorConnecting] = useState(false);
 
   const [engines, setEngines] = useState([]);
@@ -59,11 +58,7 @@ export const EngineOverview: React.FC = () => {
 
       setIsLoading(false);
     } catch (error) {
-      if (error?.body?.message === 'no-as-account') {
-        setHasNoAccount(true);
-      } else {
-        setHasErrorConnecting(true);
-      }
+      setHasErrorConnecting(true);
     }
   };
 
@@ -84,7 +79,6 @@ export const EngineOverview: React.FC = () => {
   }, [license, metaEnginesPage]);
 
   if (hasErrorConnecting) return <ErrorState />;
-  if (hasNoAccount) return <NoUserState />;
   if (isLoading) return <LoadingState />;
   if (!engines.length) return <EmptyState />;
 

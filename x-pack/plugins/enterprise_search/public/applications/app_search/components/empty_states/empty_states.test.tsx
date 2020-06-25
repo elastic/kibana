@@ -8,12 +8,7 @@ import '../../../__mocks__/shallow_usecontext.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiEmptyPrompt, EuiButton, EuiCode, EuiLoadingContent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { shallowWithIntl } from '../../../__mocks__';
-
-jest.mock('../../../shared/get_username', () => ({ getUserName: jest.fn() }));
-import { getUserName } from '../../../shared/get_username';
+import { EuiEmptyPrompt, EuiButton, EuiLoadingContent } from '@elastic/eui';
 
 jest.mock('../../../shared/telemetry', () => ({
   sendTelemetry: jest.fn(),
@@ -21,31 +16,13 @@ jest.mock('../../../shared/telemetry', () => ({
 }));
 import { sendTelemetry } from '../../../shared/telemetry';
 
-import { ErrorState, NoUserState, EmptyState, LoadingState } from './';
+import { ErrorState, EmptyState, LoadingState } from './';
 
 describe('ErrorState', () => {
   it('renders', () => {
     const wrapper = shallow(<ErrorState />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
-  });
-});
-
-describe('NoUserState', () => {
-  it('renders', () => {
-    const wrapper = shallow(<NoUserState />);
-
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
-  });
-
-  it('renders with username', () => {
-    (getUserName as jest.Mock).mockImplementationOnce(() => 'dolores-abernathy');
-
-    const wrapper = shallowWithIntl(<NoUserState />);
-    const prompt = wrapper.find(EuiEmptyPrompt).dive();
-    const description1 = prompt.find(FormattedMessage).at(1).dive();
-
-    expect(description1.find(EuiCode).prop('children')).toContain('dolores-abernathy');
   });
 });
 
