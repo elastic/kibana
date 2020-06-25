@@ -12,8 +12,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { throwErrors } from '../../../../common/runtime_types';
 import { InfraBackendLibs } from '../../../lib/infra_types';
-import { NoLogAnalysisResultsIndexError } from '../../../lib/log_analysis';
-
+import { NoLogAnalysisResultsIndexError, getLogEntryRateExamples } from '../../../lib/log_analysis';
+import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import {
   getLogEntryRateExamplesRequestPayloadRT,
   getLogEntryRateExamplesSuccessReponsePayloadRT,
@@ -22,11 +22,7 @@ import {
 
 const anyObject = schema.object({}, { unknowns: 'allow' });
 
-export const initGetLogEntryRateExamplesRoute = ({
-  framework,
-  logEntryRateAnalysis,
-  sources,
-}: InfraBackendLibs) => {
+export const initGetLogEntryRateExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -55,18 +51,17 @@ export const initGetLogEntryRateExamplesRoute = ({
       );
 
       try {
-        const {
-          data: logEntryRateExamples,
-          timing,
-        } = await logEntryRateAnalysis.getLogEntryRateExamples(
+        assertHasInfraMlPlugins(requestContext);
+
+        const { data: logEntryRateExamples, timing } = await getLogEntryRateExamples(
           requestContext,
-          request,
           sourceId,
           startTime,
           endTime,
           dataset,
           exampleCount,
-          sourceConfiguration
+          sourceConfiguration,
+          framework.callWithRequest
         );
 
         return response.ok({
