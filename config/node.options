@@ -3,7 +3,7 @@
 ## Please note you should specify one option per line
 
 ## max size of old space in megabytes
-#--max-old-space-size=512
+#--max-old-space-size=4096
 
 ## turn off warnings output
 --no-warnings
