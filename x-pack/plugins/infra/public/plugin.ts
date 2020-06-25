@@ -4,34 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin as PluginClass,
-  PluginInitializerContext,
-} from 'kibana/public';
+import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { createInventoryMetricAlertType } from './alerting/inventory';
 import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
-import { ClientPluginsSetup, ClientPluginsStart } from './types';
+import {
+  InfraClientSetupDeps,
+  InfraClientStartDeps,
+  InfraClientCoreSetup,
+  InfraClientCoreStart,
+  InfraClientPluginClass,
+} from './types';
+import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 
-export type ClientSetup = void;
-export type ClientStart = void;
-
-export class Plugin
-  implements PluginClass<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
+export class Plugin implements InfraClientPluginClass {
   constructor(_context: PluginInitializerContext) {}
 
-  setup(core: CoreSetup<ClientPluginsStart, ClientStart>, pluginsSetup: ClientPluginsSetup) {
+  setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
     registerFeatures(pluginsSetup.home);
 
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createInventoryMetricAlertType());
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createMetricThresholdAlertType());
+
+    pluginsSetup.observability.dashboard.register<'infra_logs'>({
+      appName: 'infra_logs',
+      hasData: getLogsHasDataFetcher(core.getStartServices),
+      fetchData: getLogsOverviewDataFetcher(core.getStartServices),
+    });
 
     core.application.register({
       id: 'logs',
@@ -84,7 +87,9 @@ export class Plugin
     });
   }
 
-  start(core: CoreStart, _plugins: ClientPluginsStart) {
+  start(core: InfraClientCoreStart, _plugins: InfraClientStartDeps) {
     registerStartSingleton(core);
   }
+
+  stop() {}
 }
