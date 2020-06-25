@@ -69,9 +69,17 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           });
           return;
         }
+      } else {
+        dispatch({
+          type: 'serverCancelledPolicyItemsLoading',
+        });
       }
     }
     if (action.type === 'userChangedUrl' && hasSelectedHost(state) === true) {
+      dispatch({
+        type: 'serverCancelledPolicyItemsLoading',
+      });
+
       // If user navigated directly to a host details page, load the host list
       if (listData(state).length === 0) {
         const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
@@ -93,6 +101,10 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           });
           return;
         }
+      } else {
+        dispatch({
+          type: 'serverCancelledHostListLoading',
+        });
       }
 
       // call the host details api

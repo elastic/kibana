@@ -61,6 +61,14 @@ interface UserSelectedEndpointPolicy {
   };
 }
 
+interface ServerCancelledHostListLoading {
+  type: 'serverCancelledHostListLoading';
+}
+
+interface ServerCancelledPolicyItemsLoading {
+  type: 'serverCancelledPolicyItemsLoading';
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
@@ -70,4 +78,6 @@ export type HostAction =
   | ServerFailedToReturnHostPolicyResponse
   | ServerReturnedPoliciesForOnboarding
   | ServerFailedToReturnPoliciesForOnboarding
-  | UserSelectedEndpointPolicy;
+  | UserSelectedEndpointPolicy
+  | ServerCancelledHostListLoading
+  | ServerCancelledPolicyItemsLoading;

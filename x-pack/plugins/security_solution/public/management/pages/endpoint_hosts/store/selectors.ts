@@ -39,6 +39,8 @@ export const detailsError = (state: Immutable<HostState>) => state.detailsError;
 
 export const policyItems = (state: Immutable<HostState>) => state.policyItems;
 
+export const policyItemsLoading = (state: Immutable<HostState>) => state.policyItemsLoading;
+
 export const selectedPolicyId = (state: Immutable<HostState>) => state.selectedPolicyId;
 
 /**

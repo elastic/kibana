@@ -26,8 +26,10 @@ export const initialHostListState: Immutable<HostState> = {
   location: undefined,
   policyItems: [],
   selectedPolicyId: undefined,
+  policyItemsLoading: false,
 };
 
+/* eslint-disable-next-line complexity */
 export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
   state = initialHostListState,
   action
@@ -71,13 +73,13 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
     return {
       ...state,
       policyItems: action.payload.policyItems,
-      loading: false,
+      policyItemsLoading: false,
     };
   } else if (action.type === 'serverFailedToReturnPoliciesForOnboarding') {
     return {
       ...state,
       error: action.payload,
-      loading: false,
+      policyItemsLoading: false,
     };
   } else if (action.type === 'serverReturnedHostPolicyResponse') {
     return {
@@ -98,6 +100,16 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       selectedPolicyId: action.payload.selectedPolicyId,
       policyResponseLoading: false,
     };
+  } else if (action.type === 'serverCancelledHostListLoading') {
+    return {
+      ...state,
+      loading: false,
+    };
+  } else if (action.type === 'serverCancelledPolicyItemsLoading') {
+    return {
+      ...state,
+      policyItemsLoading: false,
+    };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<HostState> = {
       ...state,
@@ -115,6 +127,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           ...state,
           location: action.payload,
           loading: true,
+          policyItemsLoading: true,
           error: undefined,
           detailsError: undefined,
         };
@@ -152,6 +165,8 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       error: undefined,
       detailsError: undefined,
       policyResponseError: undefined,
+      loading: true,
+      policyItemsLoading: true,
     };
   }
   return state;

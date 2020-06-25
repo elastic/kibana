@@ -43,6 +43,8 @@ export interface HostState {
   location?: Immutable<AppLocation>;
   /** policies */
   policyItems: PolicyData[];
+  /** policies are loading */
+  policyItemsLoading: boolean;
   /** the selected policy ID in the onboarding flow */
   selectedPolicyId?: string;
 }

@@ -83,7 +83,7 @@ describe('when on the hosts page', () => {
 
     it('should show policy selection', async () => {
       const renderResult = render();
-      const onboardingPolicySelect = await renderResult.findAllByTestId('onboardingPolicySelect');
+      const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
       expect(onboardingPolicySelect).not.toBeNull();
     });
   });
