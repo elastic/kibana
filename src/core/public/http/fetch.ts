@@ -42,7 +42,7 @@ interface Params {
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
 
-const removedUndefined = (obj: Record<string, any>) => {
+const removedUndefined = (obj: Record<string, any> | undefined) => {
   return omitBy(obj, (v) => v === undefined);
 };
 
@@ -147,7 +147,7 @@ export class Fetch {
       fetchOptions.headers['kbn-system-request'] = 'true';
     }
 
-    return new Request(url, fetchOptions);
+    return new Request(url, fetchOptions as RequestInit);
   }
 
   private async fetchResponse(fetchOptions: HttpFetchOptionsWithPath): Promise<HttpResponse<any>> {
