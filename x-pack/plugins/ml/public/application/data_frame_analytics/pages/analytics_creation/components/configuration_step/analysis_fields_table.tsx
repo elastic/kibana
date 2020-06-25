@@ -74,7 +74,7 @@ const checkboxDisabledCheck = (item: FieldSelectionItem) =>
 export const MemoizedAnalysisFieldsTable: FC<{
   excludes: string[];
   loadingItems: boolean;
-  setFormState: any;
+  setFormState: React.Dispatch<React.SetStateAction<any>>;
   tableItems: FieldSelectionItem[];
 }> = memo(
   ({ excludes, loadingItems, setFormState, tableItems }) => {
