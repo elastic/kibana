@@ -29,29 +29,13 @@ export const InlineTextInput: FunctionComponent<Props> = ({
     'pipelineProcessorsEditor__item__textContainer--notEditing': !isShowingTextInput && !disabled,
   });
 
-  const content =
-    isShowingTextInput && !disabled ? (
-      <EuiFieldText
-        controlOnly
-        fullWidth
-        compressed
-        value={textValue}
-        aria-label={ariaLabel}
-        className="pipelineProcessorsEditor__item__textInput"
-        inputRef={(el) => el?.focus()}
-        onChange={(event) => setTextValue(event.target.value)}
-      />
-    ) : (
-      <EuiText size="s" color="subdued">
-        <div className="pipelineProcessorsEditor__item__description">
-          {text || <em>{placeholder}</em>}
-        </div>
-      </EuiText>
-    );
-
   const submitChange = useCallback(() => {
-    setIsShowingTextInput(false);
-    onChange(textValue);
+    // Give any on blur handlers the chance to complete if the user is
+    // tabbing over this component.
+    setTimeout(() => {
+      setIsShowingTextInput(false);
+      onChange(textValue);
+    });
   }, [setIsShowingTextInput, onChange, textValue]);
 
   useEffect(() => {
@@ -71,14 +55,31 @@ export const InlineTextInput: FunctionComponent<Props> = ({
     };
   }, [isShowingTextInput, submitChange, setIsShowingTextInput]);
 
-  return (
+  return isShowingTextInput && !disabled ? (
+    <div className={`pipelineProcessorsEditor__item__textContainer ${containerClasses}`}>
+      <EuiFieldText
+        controlOnly
+        onBlur={submitChange}
+        fullWidth
+        compressed
+        value={textValue}
+        aria-label={ariaLabel}
+        className="pipelineProcessorsEditor__item__textInput"
+        inputRef={(el) => el?.focus()}
+        onChange={(event) => setTextValue(event.target.value)}
+      />
+    </div>
+  ) : (
     <div
       className={`pipelineProcessorsEditor__item__textContainer ${containerClasses}`}
       tabIndex={0}
       onFocus={() => setIsShowingTextInput(true)}
-      onBlur={submitChange}
     >
-      {content}
+      <EuiText size="s" color="subdued">
+        <div className="pipelineProcessorsEditor__item__description">
+          {text || <em>{placeholder}</em>}
+        </div>
+      </EuiText>
     </div>
   );
 };
