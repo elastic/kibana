@@ -37,8 +37,6 @@ export const mapsTelemetrySavedObjects: SavedObjectsType = {
               avg: { type: 'long' },
             },
           },
-          layerTypesCount: { dynamic: 'true', properties: {} },
-          emsVectorLayersCount: { dynamic: 'true', properties: {} },
         },
       },
     },
