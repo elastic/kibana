@@ -53,9 +53,11 @@ export const storedDatasourcesToAgentInputs = (
       };
 
       if (datasource.package) {
-        fullInput.package = {
-          name: datasource.package.name,
-          version: datasource.package.version,
+        fullInput.meta = {
+          package: {
+            name: datasource.package.name,
+            version: datasource.package.version,
+          },
         };
       }
 
