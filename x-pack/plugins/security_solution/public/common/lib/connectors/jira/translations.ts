@@ -44,7 +44,7 @@ export const JIRA_EMAIL_LABEL = i18n.translate(
 );
 
 export const JIRA_EMAIL_REQUIRED = i18n.translate(
-  'xpack.securitySolution.case.connectors.common.requiredEmailTextField',
+  'xpack.securitySolution.case.connectors.jira.requiredEmailTextField',
   {
     defaultMessage: 'Email or Username is required',
   }
@@ -53,14 +53,14 @@ export const JIRA_EMAIL_REQUIRED = i18n.translate(
 export const JIRA_API_TOKEN_LABEL = i18n.translate(
   'xpack.securitySolution.case.connectors.jira.apiTokenTextFieldLabel',
   {
-    defaultMessage: 'Api token or Password',
+    defaultMessage: 'API token or Password',
   }
 );
 
 export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
   'xpack.securitySolution.case.connectors.jira.requiredApiTokenTextField',
   {
-    defaultMessage: 'Api token or Password is required',
+    defaultMessage: 'API token or Password is required',
   }
 );
 
