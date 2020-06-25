@@ -80,7 +80,7 @@ export class EncryptedSavedObjectsService {
   > = new Map();
 
   /**
-   * @param Crypto nodeCrypto instance.
+   * @param crypto nodeCrypto instance.
    * @param logger Ordinary logger instance.
    * @param audit Audit logger instance.
    */
