@@ -89,7 +89,7 @@ export function IndexPatternDataPanel({
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
     (id: string) => changeIndexPattern(id, state, setState),
-    [state, setState]
+    [state, setState, changeIndexPattern]
   );
 
   const indexPatternList = uniq(
@@ -242,22 +242,22 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       setPageSize(PAGINATION_SIZE);
       lazyScroll();
     }
-  }, [localState.nameFilter, localState.typeFilter, currentIndexPatternId]);
+  }, [localState.nameFilter, localState.typeFilter, currentIndexPatternId, scrollContainer]);
 
   const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
     (type) => type in fieldTypeNames
   );
 
-  const containsData = (field: IndexPatternField) => {
-    const fieldByName = indexBy(allFields, 'name');
-    const overallField = fieldByName[field.name];
-
-    return (
-      overallField && fieldExists(existingFields, currentIndexPattern.title, overallField.name)
-    );
-  };
-
   const fieldGroups: FieldsGroup = useMemo(() => {
+    const containsData = (field: IndexPatternField) => {
+      const fieldByName = indexBy(allFields, 'name');
+      const overallField = fieldByName[field.name];
+
+      return (
+        overallField && fieldExists(existingFields, currentIndexPattern.title, overallField.name)
+      );
+    };
+
     const allSupportedTypesFields = allFields.filter((field) =>
       supportedFieldTypes.has(field.type)
     );
@@ -285,7 +285,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         } else return 'emptyFields';
       }),
     };
-  }, [allFields, existingFields[currentIndexPattern.title], currentIndexPattern]);
+  }, [allFields, existingFields, currentIndexPattern, hasSyncedExistingFields]);
 
   const filteredFieldGroups: FieldsGroup = useMemo(() => {
     const filterFieldGroup = (fieldGroup: IndexPatternField[]) =>
@@ -531,57 +531,54 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   </EuiText>
                 }
                 extraAction={
-                  <EuiNotificationBadge
-                    size="m"
-                    color={
-                      filteredFieldGroups.availableFields.length !==
-                      fieldGroups.availableFields.length
-                        ? 'accent'
-                        : 'subdued'
-                    }
-                  >
-                    {filteredFieldGroups.availableFields.length}
-                  </EuiNotificationBadge>
-                }
-              >
-                <EuiSpacer size="s" />
-                {hasSyncedExistingFields ? (
-                  !!filteredFieldGroups.availableFields.length ? (
-                    <div className="lnsInnerIndexPatternDataPanel__fieldItems">
-                      {paginatedAvailableFields.map((field: IndexPatternField) => {
-                        return (
-                          <FieldItem
-                            core={core}
-                            data={data}
-                            indexPattern={currentIndexPattern}
-                            key={field.name}
-                            field={field}
-                            highlight={hilight}
-                            exists={true}
-                            dateRange={dateRange}
-                            query={query}
-                            filters={filters}
-                          />
-                        );
-                      })}
-                    </div>
+                  hasSyncedExistingFields ? (
+                    <EuiNotificationBadge
+                      size="m"
+                      color={
+                        filteredFieldGroups.availableFields.length !==
+                        fieldGroups.availableFields.length
+                          ? 'accent'
+                          : 'subdued'
+                      }
+                    >
+                      {filteredFieldGroups.availableFields.length}
+                    </EuiNotificationBadge>
                   ) : (
-                    <NoFieldsCallout
-                      isAffectedByGlobalFilter={!!filters.length}
-                      isAffectedByFieldFilter={hasFieldFilter}
-                      isAffectedByTimerange={true}
-                      existFieldsInIndex={!!fieldGroups.emptyFields.length}
-                    />
-                  )
-                ) : (
-                  <>
-                    <EuiSpacer size="m" />
                     <EuiFlexGroup justifyContent="spaceAround">
                       <EuiFlexItem grow={false}>
                         <EuiLoadingSpinner size="m" />
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  </>
+                  )
+                }
+              >
+                <EuiSpacer size="s" />
+                {!!filteredFieldGroups.availableFields.length ? (
+                  <div className="lnsInnerIndexPatternDataPanel__fieldItems">
+                    {paginatedAvailableFields.map((field: IndexPatternField) => {
+                      return (
+                        <FieldItem
+                          core={core}
+                          data={data}
+                          indexPattern={currentIndexPattern}
+                          key={field.name}
+                          field={field}
+                          highlight={hilight}
+                          exists={true}
+                          dateRange={dateRange}
+                          query={query}
+                          filters={filters}
+                        />
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <NoFieldsCallout
+                    isAffectedByGlobalFilter={!!filters.length}
+                    isAffectedByFieldFilter={hasFieldFilter}
+                    isAffectedByTimerange={true}
+                    existFieldsInIndex={!!fieldGroups.emptyFields.length}
+                  />
                 )}
               </EuiAccordion>
               <EuiSpacer size="m" />
