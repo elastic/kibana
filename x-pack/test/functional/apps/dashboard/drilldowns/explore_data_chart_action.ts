@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
-        await pieChart.filterOnPieSlice('160,000');
+        await pieChart.clickOnPieSlice('160,000');
         await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
         await testSubjects.existOrFail(ACTION_TEST_SUBJ);
       });

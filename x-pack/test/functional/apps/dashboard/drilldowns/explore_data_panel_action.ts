@@ -24,16 +24,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Explore underlying data - panel action', function () {
-    before(async () => {
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash*' });
+    before(
+      'change default index pattern to verify action navigates to correct index pattern',
+      async () => {
+        await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash*' });
+      }
+    );
+
+    before('start on Dashboard landing page', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.preserveCrossAppState();
     });
 
-    after(async () => {
+    after('set back default index pattern', async () => {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+    });
 
-      // Clean-up custom time range on panel
+    after('clean-up custom time range on panel', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
       await panelActions.openContextMenu();
