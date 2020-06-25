@@ -289,6 +289,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   },
 
   renderDimensionEditor(domElement, { state, layerId, setState, accessor }) {
+    // TODO move this in xy_config_panel
     const index = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[index];
     const axisMode =
@@ -298,6 +299,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     render(
       <I18nProvider>
         <EuiFormRow
+          display="columnCompressed"
           label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
             defaultMessage: 'Axis side',
           })}
@@ -307,6 +309,8 @@ export const xyVisualization: Visualization<State, PersistableState> = {
               defaultMessage: 'Axis side',
             })}
             name="axisSide"
+            buttonSize="compressed"
+            className="eui-displayInlineBlock"
             options={[
               {
                 id: `${idPrefix}auto`,
