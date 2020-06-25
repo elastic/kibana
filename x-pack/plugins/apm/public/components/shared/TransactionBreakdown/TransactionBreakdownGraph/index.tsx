@@ -5,7 +5,6 @@
  */
 
 import React, { useMemo } from 'react';
-import numeral from '@elastic/numeral';
 import { throttle } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
@@ -21,7 +20,7 @@ interface Props {
 }
 
 const tickFormatY = (y: Maybe<number>) => {
-  return numeral(y || 0).format('0 %');
+  return asPercent(y ?? 0, 1);
 };
 
 const formatTooltipValue = (coordinate: Coordinate) => {

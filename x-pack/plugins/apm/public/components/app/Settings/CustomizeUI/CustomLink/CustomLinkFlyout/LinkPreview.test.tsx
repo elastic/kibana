@@ -15,9 +15,9 @@ import {
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 
 describe('LinkPreview', () => {
-  let callApmApiSpy: jasmine.Spy;
+  let callApmApiSpy: jest.SpyInstance<any, never>;
   beforeAll(() => {
-    callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({
+    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockReturnValue({
       transaction: { id: 'foo' },
     });
   });

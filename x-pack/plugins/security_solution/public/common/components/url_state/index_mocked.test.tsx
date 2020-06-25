@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { HookWrapper } from '../../mock/hook_wrapper';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 
 import { CONSTANTS } from './constants';
 import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_dependencies';
@@ -42,7 +42,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         page: CONSTANTS.networkPage,
         examplePath: '/network',
         namespaceLower: 'network',
-        pageName: SiemPageName.network,
+        pageName: SecurityPageName.network,
         detailName: undefined,
       }).noSearch.definedQuery;
       const wrapper = mount(
@@ -93,7 +93,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         page: CONSTANTS.networkPage,
         examplePath: '/network',
         namespaceLower: 'network',
-        pageName: SiemPageName.network,
+        pageName: SecurityPageName.network,
         detailName: undefined,
       }).noSearch.undefinedQuery;
       const wrapper = mount(
@@ -124,7 +124,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         page: CONSTANTS.networkPage,
         examplePath: '/network',
         namespaceLower: 'network',
-        pageName: SiemPageName.network,
+        pageName: SecurityPageName.network,
         detailName: undefined,
       }).noSearch.undefinedQuery;
 
@@ -187,14 +187,14 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             page: CONSTANTS.hostsPage,
             examplePath: '/hosts',
             namespaceLower: 'hosts',
-            pageName: SiemPageName.hosts,
+            pageName: SecurityPageName.hosts,
             detailName: undefined,
           }).noSearch.undefinedQuery;
           const updatedProps = getMockPropsObj({
             page: CONSTANTS.networkPage,
             examplePath: '/network',
             namespaceLower: 'network',
-            pageName: SiemPageName.network,
+            pageName: SecurityPageName.network,
             detailName: undefined,
           }).noSearch.definedQuery;
           const wrapper = mount(
