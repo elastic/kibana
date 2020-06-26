@@ -70,7 +70,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   private _isMounted: boolean = false;
 
   state = {
-    leftSource: BOUNDARIES_SOURCE.ELASTICSEARCH,
+    leftSource: BOUNDARIES_SOURCE.EMS,
     leftEmsFileId: null,
     leftEmsFields: [],
     leftIndexPattern: null,
