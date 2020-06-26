@@ -73,6 +73,9 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>(
     undefined
   );
+  const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>(
+    undefined
+  );
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
@@ -117,7 +120,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     dependentVariableEmpty ||
     jobType === undefined ||
     maxDistinctValuesError !== undefined ||
-    requiredFieldsError !== undefined;
+    requiredFieldsError !== undefined ||
+    unsupportedFieldsError !== undefined;
 
   const loadDepVarOptions = async (formState: State['form']) => {
     setLoadingDepVarOptions(true);
@@ -187,6 +191,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         setLoadingFieldOptions(false);
         setFieldOptionsFetchFail(false);
         setMaxDistinctValuesError(undefined);
+        setUnsupportedFieldsError(undefined);
         setIncludesTableItems(fieldSelection ? fieldSelection : []);
         setFormState({
           ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
@@ -200,12 +205,17 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       }
     } else {
       let maxDistinctValuesErrorMessage;
+      let unsupportedFieldsErrorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
         errorMessage.includes('status_exception') &&
         (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
       ) {
         maxDistinctValuesErrorMessage = errorMessage;
+      }
+
+      if (errorMessage.includes('status_exception') && errorMessage.includes('unsupported type')) {
+        unsupportedFieldsErrorMessage = errorMessage;
       }
 
       if (
@@ -231,6 +241,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       setLoadingFieldOptions(false);
       setFieldOptionsFetchFail(true);
       setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
+      setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
       setFormState({
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
@@ -392,15 +403,25 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       )}
       <EuiFormRow
         fullWidth
-        isInvalid={requiredFieldsError !== undefined}
-        error={
-          requiredFieldsError !== undefined && [
-            i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
-              defaultMessage: 'Invalid. {message}',
-              values: { message: requiredFieldsError },
-            }),
-          ]
-        }
+        isInvalid={requiredFieldsError !== undefined || unsupportedFieldsError !== undefined}
+        error={[
+          ...(requiredFieldsError !== undefined
+            ? [
+                i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+                  defaultMessage: 'Invalid. {message}',
+                  values: { message: requiredFieldsError },
+                }),
+              ]
+            : []),
+          ...(unsupportedFieldsError !== undefined
+            ? [
+                i18n.translate('xpack.ml.dataframe.analytics.create.unsupportedFieldsError', {
+                  defaultMessage: 'Invalid. {message}',
+                  values: { message: unsupportedFieldsError },
+                }),
+              ]
+            : []),
+        ]}
       >
         <Fragment />
       </EuiFormRow>

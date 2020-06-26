@@ -132,13 +132,13 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect', { timeout: 5000 });
     },
 
-    // async assertExcludedFieldsSelection(expectedSelection: string[]) {
-    //   const actualSelection = await comboBox.getComboBoxSelectedOptions(
-    //     'mlAnalyticsCreateJobWizardIncludesSelect'
-    //   );
+    // async assertIncludedFieldsSelection(expectedSelection: string[]) {
+    //   const includesTable = await testSubjects.find('mlAnalyticsCreateJobWizardIncludesSelect');
+    //   const actualSelection = await includesTable.findByClassName('euiTableRow-isSelected');
+
     //   expect(actualSelection).to.eql(
     //     expectedSelection,
-    //     `Excluded fields should be '${expectedSelection}' (got '${actualSelection}')`
+    //     `Included fields should be '${expectedSelection}' (got '${actualSelection}')`
     //   );
     // },
 
@@ -306,6 +306,17 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
+    async assertPredictionFieldNameValue(expectedValue: string) {
+      const actualPredictedFieldName = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardPredictionFieldNameInput',
+        'value'
+      );
+      expect(actualPredictedFieldName).to.eql(
+        expectedValue,
+        `Prediction field name should be '${expectedValue}' (got '${actualPredictedFieldName}')`
+      );
+    },
+
     async setModelMemory(modelMemory: string) {
       await retry.tryForTime(15 * 1000, async () => {
         await mlCommon.setValueWithChecks(
@@ -398,11 +409,14 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       }
       await this.assertSourceDataPreviewExists();
       await this.assertIncludeFieldsSelectionExists();
-      // await this.assertExcludedFieldsSelection(job.analyzed_fields.excludes);
+      // await this.assertIncludedFieldsSelection(job.analyzed_fields.includes);
     },
 
-    async assertInitialCloneJobAdditionalOptionsStep(job: DataFrameAnalyticsConfig) {
-      await this.assertModelMemoryValue(job.model_memory_limit);
+    async assertInitialCloneJobAdditionalOptionsStep(
+      analysis: DataFrameAnalyticsConfig['analysis'],
+      jobType
+    ) {
+      await this.assertPredictionFieldNameValue(analysis[jobType].prediction_field_name);
     },
 
     async assertInitialCloneJobDetailsStep(job: DataFrameAnalyticsConfig) {

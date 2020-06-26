@@ -22,8 +22,8 @@ export const ConfigurationStep: FC<CreateAnalyticsStepProps> = ({
   const showForm = step === ANALYTICS_STEPS.CONFIGURATION;
   const showDetails = step !== ANALYTICS_STEPS.CONFIGURATION && stepActivated === true;
 
-  const dataTestSubj = `mlAnalyticsCreateJobWizardConfigurationStep ${showForm ? 'active' : ''}${
-    showDetails ? 'summary' : ''
+  const dataTestSubj = `mlAnalyticsCreateJobWizardConfigurationStep${showForm ? ' active' : ''}${
+    showDetails ? ' summary' : ''
   }`;
 
   return (

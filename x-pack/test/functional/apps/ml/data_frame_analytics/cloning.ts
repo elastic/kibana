@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
           suiteTitle: 'classification job supported by the form',
           archive: 'ml/bm_classification',
           indexPattern: { name: 'ft_bank_marketing', timeField: '@timestamp' },
+          jobType: 'classification',
           job: {
             id: `bm_1_${timestamp}`,
             description:
@@ -45,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             analysis: {
               classification: {
+                prediction_field_name: 'test',
                 dependent_variable: 'y',
                 training_percent: 20,
               },
@@ -61,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           suiteTitle: 'outlier detection job supported by the form',
           archive: 'ml/ihp_outlier',
           indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
+          jobType: 'outlier_detection',
           job: {
             id: `ihp_1_${timestamp}`,
             description: 'This is the job description',
@@ -77,7 +80,9 @@ export default function ({ getService }: FtrProviderContext) {
               results_field: 'ml',
             },
             analysis: {
-              outlier_detection: {},
+              outlier_detection: {
+                prediction_field_name: 'test',
+              },
             },
             analyzed_fields: {
               includes: [],
@@ -90,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
           suiteTitle: 'regression job supported by the form',
           archive: 'ml/egs_regression',
           indexPattern: { name: 'ft_egs_regression', timeField: '@timestamp' },
+          jobType: 'regression',
           job: {
             id: `egs_1_${timestamp}`,
             description: 'This is the job description',
@@ -107,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             analysis: {
               regression: {
+                prediction_field_name: 'test',
                 dependent_variable: 'stab',
                 training_percent: 20,
               },
@@ -175,7 +182,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should have correct init form values for additional options step', async () => {
           await ml.dataFrameAnalyticsCreation.assertInitialCloneJobAdditionalOptionsStep(
-            testData.job as DataFrameAnalyticsConfig
+            testData.job.analysis as DataFrameAnalyticsConfig['analysis'],
+            testData.jobType
           );
         });
 
