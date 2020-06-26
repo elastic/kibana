@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '../../../core/server';
 import { ConfigSchema } from '../config';
 import { IndexPatternsService } from './index_patterns';
 import { ISearchSetup, ISearchStart } from './search';
@@ -52,12 +58,14 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   private readonly indexPatterns = new IndexPatternsService();
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
     this.autocompleteService = new AutocompleteService(initializerContext);
+    this.logger = initializerContext.logger.get('data');
   }
 
   public setup(
@@ -83,7 +91,10 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     return {
       search: this.searchService.start(),
       fieldFormats,
-      indexPatterns: this.indexPatterns.start(core, fieldFormats),
+      indexPatterns: this.indexPatterns.start(core, {
+        fieldFormats,
+        logger: this.logger.get('indexPatterns'),
+      }),
     };
   }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, KibanaRequest } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, KibanaRequest, Logger } from 'kibana/server';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -33,6 +33,11 @@ export interface IndexPatternsServiceStart {
   ) => Promise<IndexPatternsCommonService>;
 }
 
+export interface IndexPatternsServiceStartDeps {
+  fieldFormats: FieldFormatsStart;
+  logger: Logger;
+}
+
 export class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> {
   public setup(core: CoreSetup) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
@@ -41,7 +46,7 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
     registerRoutes(core.http);
   }
 
-  public start(core: CoreStart, fieldFormats: FieldFormatsStart) {
+  public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
     const { uiSettings, savedObjects } = core;
 
     return {
@@ -55,8 +60,12 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
           savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
           apiClient: new IndexPatternsApiServer(),
           fieldFormats: formats,
-          onError: (error) => {},
-          onNotification: () => {},
+          onError: (error) => {
+            logger.error(error);
+          },
+          onNotification: ({ title, text }) => {
+            logger.warn(`${title} : ${text}`);
+          },
         });
       },
     };
