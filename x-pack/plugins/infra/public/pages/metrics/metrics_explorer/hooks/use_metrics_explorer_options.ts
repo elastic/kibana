@@ -42,6 +42,7 @@ export interface MetricsExplorerOptions {
   aggregation: MetricsExplorerAggregation;
   forceInterval?: boolean;
   dropLastBucket?: boolean;
+  source?: string;
 }
 
 export interface MetricsExplorerTimeOptions {
@@ -83,6 +84,7 @@ export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
 export const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   aggregation: 'avg',
   metrics: DEFAULT_METRICS,
+  source: 'default',
 };
 
 export const DEFAULT_METRICS_EXPLORER_VIEW_STATE = {

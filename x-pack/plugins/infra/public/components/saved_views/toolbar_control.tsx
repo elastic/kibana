@@ -166,8 +166,8 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
                   <EuiDescriptionListDescription>
                     {currentView
                       ? currentView.name
-                      : i18n.translate('xpack.infra.savedView.defaultView', {
-                          defaultMessage: 'Default view',
+                      : i18n.translate('xpack.infra.savedView.unknownView', {
+                          defaultMessage: 'Unknown',
                         })}
                   </EuiDescriptionListDescription>
                 </EuiDescriptionList>
@@ -190,6 +190,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             <EuiListGroupItem
               iconType={'refresh'}
               onClick={openUpdateModal}
+              disabled={!currentView || currentView.id === '0'}
               label={i18n.translate('xpack.infra.savedView.updateView', {
                 defaultMessage: 'Update view',
               })}

@@ -39,8 +39,9 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleRefresh,
     handleLoadMore,
     onViewStateChange,
-  } = useMetricsExplorerState(source, derivedIndexPattern);
-  const { currentView } = useSavedViewContext();
+    loadData,
+  } = useMetricsExplorerState(source, derivedIndexPattern, false);
+  const { currentView, shouldLoadDefault } = useSavedViewContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
@@ -50,6 +51,13 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
       onViewStateChange(currentView);
     }
   }, [currentView, onViewStateChange]);
+
+  useEffect(() => {
+    if (currentView != null || !shouldLoadDefault) {
+      // load metrics explorer data after default view loaded, unless we're not loading a view
+      loadData();
+    }
+  }, [loadData, currentView, shouldLoadDefault]);
 
   return (
     <EuiErrorBoundary>

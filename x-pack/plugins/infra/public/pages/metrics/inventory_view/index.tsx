@@ -25,7 +25,7 @@ import { Layout } from './components/layout';
 import { useLinkProps } from '../../../hooks/use_link_props';
 import { SavedView } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
-import { useHistory } from '../../../utils/history_context';
+import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -39,10 +39,7 @@ export const SnapshotPage = () => {
   } = useContext(Source.Context);
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
-
-  const history = useHistory();
-  const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
-  const queryString = history?.location ? getQueryStringFromLocation(history.location) : '';
+  const { source: optionsSource } = useWaffleOptionsContext();
 
   const tutorialLinkProps = useLinkProps({
     app: 'home',
@@ -68,7 +65,7 @@ export const SnapshotPage = () => {
           <>
             <FilterBar />
             <SavedView.Provider
-              shouldLoadDefault={!queryString}
+              shouldLoadDefault={optionsSource === 'default'}
               viewType={'inventory-view'}
               defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
             >

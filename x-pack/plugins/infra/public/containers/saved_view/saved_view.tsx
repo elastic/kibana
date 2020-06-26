@@ -198,7 +198,7 @@ export const useSavedView = (props: Props) => {
   const setDefault = useCallback(() => {
     setCurrentView({
       name: i18n.translate('xpack.infra.savedView.defaultViewNameHosts', {
-        defaultMessage: 'Hosts',
+        defaultMessage: 'Default view',
       }),
       id: '0',
       isDefault: !defaultViewId || defaultViewId === '0', // If there is no default view then hosts is the default
@@ -209,11 +209,11 @@ export const useSavedView = (props: Props) => {
   useEffect(() => {
     const shouldLoadDefault = props.shouldLoadDefault;
 
-    if (loadingDefaultView || currentView) {
+    if (loadingDefaultView || currentView || !shouldLoadDefault) {
       return;
     }
 
-    if (shouldLoadDefault && !currentView && defaultViewId !== '0') {
+    if (defaultViewId !== '0') {
       loadDefaultView();
     } else {
       setDefault();
@@ -242,6 +242,7 @@ export const useSavedView = (props: Props) => {
     errorOnUpdate,
     errorOnFind,
     errorOnCreate: createError,
+    shouldLoadDefault: props.shouldLoadDefault,
     makeDefault,
     deleteView,
     loadingDefaultView,

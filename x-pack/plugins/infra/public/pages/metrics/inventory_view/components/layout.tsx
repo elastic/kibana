@@ -30,7 +30,7 @@ import { SavedViewsToolbarControls } from '../../../../components/saved_views/to
 
 export const Layout = () => {
   const { sourceId, source } = useSourceContext();
-  const { currentView } = useSavedViewContext();
+  const { currentView, shouldLoadDefault } = useSavedViewContext();
   const {
     metric,
     groupBy,
@@ -90,11 +90,11 @@ export const Layout = () => {
   }, [currentView, onViewChange]);
 
   useEffect(() => {
-    // load snapshot data after default view loaded
-    if (currentView != null) {
+    // load snapshot data after default view loaded, unless we're not loading a view
+    if (currentView != null || !shouldLoadDefault) {
       reload();
     }
-  }, [reload, currentView]);
+  }, [reload, currentView, shouldLoadDefault]);
 
   return (
     <>
