@@ -84,8 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
         });
 
-        it('displays the exclude fields selection', async () => {
-          await ml.dataFrameAnalyticsCreation.assertExcludeFieldsSelectionExists();
+        it('displays the include fields selection', async () => {
+          await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
         });
 
         it('continues to the additional options step', async () => {

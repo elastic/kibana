@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, memo, useEffect, useState } from 'react';
+import React, { FC, Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 // @ts-ignore no declaration
 import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
@@ -71,7 +71,7 @@ const columns = [
 
 const checkboxDisabledCheck = (item: FieldSelectionItem) => item.is_required === true;
 
-export const MemoizedAnalysisFieldsTable: FC<{
+export const AnalysisFieldsTable: FC<{
   includes: string[];
   loadingItems: boolean;
   setFormState: React.Dispatch<React.SetStateAction<any>>;
@@ -82,7 +82,7 @@ export const MemoizedAnalysisFieldsTable: FC<{
 
   useEffect(() => {
     if (includes.length === 0 && tableItems.length > 0) {
-      const includedFields = [];
+      const includedFields: string[] = [];
       tableItems.forEach((field) => {
         if (field.is_included === true) {
           includedFields.push(field.name);
@@ -183,7 +183,7 @@ export const MemoizedAnalysisFieldsTable: FC<{
         </EuiCallOut>
       )}
       {tableItems.length > 0 && (
-        <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardincludesSelect">
+        <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardIncludesSelect">
           <CustomSelectionTable
             currentPage={currentPageIndex}
             data-test-subj="mlAnalyticsCreationAnalysisFieldsTable"

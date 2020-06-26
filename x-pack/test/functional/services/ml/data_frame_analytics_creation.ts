@@ -128,13 +128,13 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreationDataGrid loaded', { timeout: 5000 });
     },
 
-    async assertExcludeFieldsSelectionExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardExcludesSelect', { timeout: 5000 });
+    async assertIncludeFieldsSelectionExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect', { timeout: 5000 });
     },
 
     // async assertExcludedFieldsSelection(expectedSelection: string[]) {
     //   const actualSelection = await comboBox.getComboBoxSelectedOptions(
-    //     'mlAnalyticsCreateJobWizardExcludesSelect'
+    //     'mlAnalyticsCreateJobWizardIncludesSelect'
     //   );
     //   expect(actualSelection).to.eql(
     //     expectedSelection,
@@ -397,7 +397,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await this.assertTrainingPercentValue(String(job.analysis[jobType].training_percent));
       }
       await this.assertSourceDataPreviewExists();
-      await this.assertExcludeFieldsSelectionExists();
+      await this.assertIncludeFieldsSelectionExists();
       // await this.assertExcludedFieldsSelection(job.analyzed_fields.excludes);
     },
 

@@ -48,7 +48,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const [fetchingAdvancedParamErrors, setFetchingAdvancedParamErrors] = useState<boolean>(false);
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
-  const { estimatedModelMemoryLimit, form, isJobCreated } = state;
+  const { form, isJobCreated } = state;
   const {
     computeFeatureInfluence,
     eta,
