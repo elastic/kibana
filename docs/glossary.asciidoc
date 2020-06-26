@@ -312,7 +312,7 @@ query element or visualization, such as a chart, table, or list.
 [[glossary-query-bar]] query bar ::
 // tag::query-bar-def[]
 The text field where you enter a query expression to
-retrieve the data you want to interact with.
+retrieve the data you want to interact with in {kib}.
 // end::query-bar-def[]
 
 [[glossary-query-profiler]] Query Profiler ::
