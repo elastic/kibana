@@ -8,6 +8,7 @@ exports[`should render with fields 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
+    helpText="Name of the target data layer in the tile"
     label="Layer name"
     labelType="label"
   >
@@ -22,6 +23,7 @@ exports[`should render with fields 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
+    helpText="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
     label="Available levels"
     labelType="label"
   >
@@ -52,6 +54,7 @@ exports[`should render with fields 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
+    helpText="Fields which are available in the tile for the layer. These can be used for tooltips and dynamic styling."
     label="Fields"
     labelType="label"
   >
@@ -86,6 +89,7 @@ exports[`should render without fields 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
+    helpText="Name of the target data layer in the tile"
     label="Layer name"
     labelType="label"
   >
@@ -100,6 +104,7 @@ exports[`should render without fields 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
+    helpText="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
     label="Available levels"
     labelType="label"
   >

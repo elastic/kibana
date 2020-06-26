@@ -7,10 +7,10 @@
 
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonEmpty,
   EuiSuperSelect,
   EuiFieldText,
   EuiSpacer,
@@ -199,9 +199,11 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
       <Fragment>
         {this._renderFieldConfig()}
         <EuiSpacer size={'xs'} />
-        <EuiButton fill isDisabled={false} onClick={this._addField} size="s">
-          {'Add field'}
-        </EuiButton>
+        <EuiButtonEmpty onClick={this._addField} size="xs" iconType="plusInCircleFilled">
+          {i18n.translate('xpack.maps.mvtSource.addFieldLabel', {
+            defaultMessage: 'Add',
+          })}
+        </EuiButtonEmpty>
       </Fragment>
     );
   }

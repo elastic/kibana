@@ -185,14 +185,13 @@ exports[`should render error for dupes 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <EuiButton
-    fill={true}
-    isDisabled={false}
+  <EuiButtonEmpty
+    iconType="plusInCircleFilled"
     onClick={[Function]}
-    size="s"
+    size="xs"
   >
-    Add field
-  </EuiButton>
+    Add
+  </EuiButtonEmpty>
 </Fragment>
 `;
 
@@ -381,14 +380,13 @@ exports[`should render error for empty name 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <EuiButton
-    fill={true}
-    isDisabled={false}
+  <EuiButtonEmpty
+    iconType="plusInCircleFilled"
     onClick={[Function]}
-    size="s"
+    size="xs"
   >
-    Add field
-  </EuiButton>
+    Add
+  </EuiButtonEmpty>
 </Fragment>
 `;
 
@@ -577,13 +575,12 @@ exports[`should render field editor 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <EuiButton
-    fill={true}
-    isDisabled={false}
+  <EuiButtonEmpty
+    iconType="plusInCircleFilled"
     onClick={[Function]}
-    size="s"
+    size="xs"
   >
-    Add field
-  </EuiButton>
+    Add
+  </EuiButtonEmpty>
 </Fragment>
 `;

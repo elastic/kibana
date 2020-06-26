@@ -132,6 +132,13 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
         label={i18n.translate('xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage', {
           defaultMessage: 'Fields',
         })}
+        helpText={i18n.translate(
+          'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsHelpMessage',
+          {
+            defaultMessage:
+              'Fields which are available in the tile for the layer. These can be used for tooltips and dynamic styling.',
+          }
+        )}
       >
         <MVTFieldConfigEditor
           fields={this.state.currentFields.slice()}
@@ -149,6 +156,12 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
               defaultMessage: 'Layer name',
             }
           )}
+          helpText={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.layerNameHelpMessage',
+            {
+              defaultMessage: 'Name of the target data layer in the tile',
+            }
+          )}
         >
           <EuiFieldText
             value={this.state.currentLayerName}
@@ -160,6 +173,13 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
             'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeTopMessage',
             {
               defaultMessage: 'Available levels',
+            }
+          )}
+          helpText={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeHelpMessage',
+            {
+              defaultMessage:
+                'Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa).',
             }
           )}
         >

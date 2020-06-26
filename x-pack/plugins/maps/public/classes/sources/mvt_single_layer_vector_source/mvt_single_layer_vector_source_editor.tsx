@@ -80,8 +80,21 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
           label={i18n.translate('xpack.maps.source.MVTSingleLayerVectorSourceEditor.urlMessage', {
             defaultMessage: 'Url',
           })}
+          helpText={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.urlHelpMessage',
+            {
+              defaultMessage: 'URL of the .mvt vector tile service. e.g. {url}',
+              values: {
+                url: 'http://company.com/{z}/{x}/{y}.pbf',
+              },
+            }
+          )}
         >
-          <EuiFieldText value={this.state.urlTemplate} onChange={this._handleUrlTemplateChange} />
+          <EuiFieldText
+            value={this.state.urlTemplate}
+            onChange={this._handleUrlTemplateChange}
+            compressed
+          />
         </EuiFormRow>
 
         <MVTSingleLayerSourceSettings
