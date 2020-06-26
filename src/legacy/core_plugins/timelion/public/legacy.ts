@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { npSetup } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
 import { TimelionPluginSetupDependencies } from './plugin';
 import { LegacyDependenciesPlugin } from './shim';
@@ -32,4 +32,4 @@ const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
 const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
-export const start = pluginInstance.start();
+export const start = pluginInstance.start(npStart.core, npStart.plugins);
