@@ -110,6 +110,10 @@
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
+|  [isFilter](./kibana-plugin-plugins-data-public.isfilter.md) |  |
+|  [isFilters](./kibana-plugin-plugins-data-public.isfilters.md) |  |
+|  [isQuery](./kibana-plugin-plugins-data-public.isquery.md) |  |
+|  [isTimeRange](./kibana-plugin-plugins-data-public.istimerange.md) |  |
 |  [parseSearchSourceJSON](./kibana-plugin-plugins-data-public.parsesearchsourcejson.md) |  |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
 |  [search](./kibana-plugin-plugins-data-public.search.md) |  |
