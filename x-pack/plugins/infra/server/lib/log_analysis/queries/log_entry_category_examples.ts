@@ -44,17 +44,29 @@ export const createLogEntryCategoryExamplesQuery = (
     },
     sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
   },
-  _source: ['event.dataset', 'message'],
+  _source: ['event.dataset', 'message', 'container.id', 'host.name', 'log.file.path'],
   index: indices,
   size: exampleCount,
 });
 
 export const logEntryCategoryExampleHitRT = rt.type({
+  _id: rt.string,
   _source: rt.partial({
     event: rt.partial({
       dataset: rt.string,
     }),
     message: rt.string,
+    container: rt.partial({
+      id: rt.string,
+    }),
+    host: rt.partial({
+      name: rt.string,
+    }),
+    log: rt.partial({
+      file: rt.partial({
+        path: rt.string,
+      }),
+    }),
   }),
   sort: rt.tuple([rt.number, rt.number]),
 });

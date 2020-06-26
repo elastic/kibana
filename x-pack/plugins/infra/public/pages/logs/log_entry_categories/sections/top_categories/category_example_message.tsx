@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useMemo, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { encode } from 'rison-node';
 import moment from 'moment';
 
+import { LogEntry, LogEntryContext } from '../../../../../../common/http_api';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import {
   getFriendlyNameForPartitionId,
   partitionField,
 } from '../../../../../../common/log_analysis';
+import { ViewLogInContext } from '../../../../../containers/logs/view_log_in_context';
 import {
   LogEntryColumn,
   LogEntryFieldColumn,
@@ -36,7 +37,9 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   timeRange: TimeRange;
   timestamp: number;
   tiebreaker: number;
-}> = ({ id, dataset, message, timestamp, timeRange, tiebreaker }) => {
+  context: LogEntryContext;
+}> = ({ id, dataset, message, timestamp, timeRange, tiebreaker, context }) => {
+  const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
   // the dataset must be encoded for the field column and the empty value must
   // be turned into a user-friendly value
   const encodedDatasetFieldValue = useMemo(
@@ -122,7 +125,16 @@ export const CategoryExampleMessage: React.FunctionComponent<{
                 label: i18n.translate('xpack.infra.logs.categoryExample.viewInContextText', {
                   defaultMessage: 'View in context',
                 }),
-                onClick: () => {},
+                onClick: () => {
+                  const logEntry: LogEntry = {
+                    id,
+                    context,
+                    cursor: { time: timestamp, tiebreaker },
+                    columns: [],
+                  };
+
+                  setContextEntry(logEntry);
+                },
               },
             ]}
           />

@@ -56,6 +56,7 @@ export const CategoryDetailsRow: React.FunctionComponent<{
             timeRange={timeRange}
             timestamp={categoryExample.timestamp}
             tiebreaker={categoryExample.tiebreaker}
+            context={categoryExample.context}
           />
         ))
       )}

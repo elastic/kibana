@@ -513,6 +513,7 @@ async function fetchLogEntryCategoryExamples(
       message: hit._source.message ?? '',
       timestamp: hit.sort[0],
       tiebreaker: hit.sort[1],
+      context: getContextFromSource(hit._source),
     })),
     timing: {
       spans: [esSearchSpan],
@@ -521,6 +522,20 @@ async function fetchLogEntryCategoryExamples(
 }
 
 const parseCategoryId = (rawCategoryId: string) => parseInt(rawCategoryId, 10);
+
+const getContextFromSource = (source: any) => {
+  const containerId = source.container?.id;
+  const hostName = source.host?.name;
+  const logFilePath = source.log?.file?.path;
+
+  if (typeof containerId === 'string') {
+    return { 'container.id': containerId };
+  }
+
+  if (typeof hostName === 'string' && typeof logFilePath === 'string') {
+    return { 'host.name': hostName, 'log.file.path': logFilePath };
+  }
+};
 
 interface HistogramParameters {
   id: string;
