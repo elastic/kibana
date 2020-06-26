@@ -63,6 +63,7 @@ export const AppRouter: FunctionComponent<Props> = ({
             <Route
               key={mounter.appRoute}
               path={mounter.appRoute}
+              exact={mounter.exactRoute}
               render={({ match: { url } }) => (
                 <AppContainer
                   appPath={url}
