@@ -41,7 +41,7 @@ const getCoreMock = () => {
       logger: ({
         error: jest.fn(),
       } as unknown) as Logger,
-      plugins: { licensing: {} as LicensingPluginStart },
+      plugins: {},
     },
   };
 };
