@@ -16,49 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import React, { useCallback, useMemo, useState, useContext, ReactNode } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import './discover_grid.scss';
 import { i18n } from '@kbn/i18n';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiIcon,
   EuiScreenReaderOnly,
-  EuiCheckbox,
   htmlIdGenerator,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getDefaultSort } from '../../angular/doc_table/lib/get_default_sort';
-import { CellPopover } from './discover_grid_popover';
+import { DiscoverGridPopover } from './discover_grid_popover';
 import {
-  getSchemaDetectors,
   getEuiGridColumns,
   getPopoverContents,
+  getSchemaDetectors,
   getVisibleColumns,
 } from './discover_grid_helpers';
-import { DiscoverGridFlyoutAdvancedGrid } from './discover_grid_flyout_advanced_grid';
+import { DiscoverGridFlyoutSelection } from './discover_grid_flyout_selection';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
+import { DiscoverGridValueWithFilter } from './discover_value_with_filter';
+import { DiscoverGridToolbarSelection } from './discover_grid_toolbar_selection';
+import { DiscoverGridContext } from './discover_grid_context';
+import { DiscoverGridSelectButton } from './discover_grid_select_button';
+import { ViewButton } from './discover_grid_view_button';
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
 interface SortObj {
   id: string;
   direction: Direction;
-}
-interface GridContext {
-  viewed: number;
-  setViewed: (id: number) => void;
-  selected: number[];
-  setSelected: (ids: number[]) => void;
-  showSelected: boolean;
-  setShowSelected: (value: boolean) => void;
 }
 
 interface Props {
@@ -79,27 +69,13 @@ interface Props {
   onSetColumns: (columns: string[]) => void;
 }
 
-const Selection = () => {
-  const { selected, showSelected, setShowSelected } = useContext<GridContext>(DiscoverGridContext);
-  return (
-    <EuiButtonEmpty
-      size="xs"
-      iconType="arrowDown"
-      color="primary"
-      className="euiDataGrid__controlBtn"
-      onClick={() => setShowSelected(!showSelected)}
-    >
-      {selected.length} {selected.length === 1 ? 'hit' : 'hits'} selected
-    </EuiButtonEmpty>
-  );
-};
 const toolbarVisibility = {
   showColumnSelector: {
     allowHide: false,
     allowReorder: true,
   },
   showStyleSelector: false,
-  additionalControls: <Selection />,
+  additionalControls: <DiscoverGridToolbarSelection />,
 };
 const gridStyle = {
   border: 'horizontal',
@@ -108,140 +84,6 @@ const gridStyle = {
 };
 const pageSizeArr = [25, 50, 100, 500];
 const defaultPageSize = 50;
-
-const DiscoverGridContext = React.createContext<GridContext>({
-  viewed: -1,
-  setViewed: () => void 0,
-  selected: [],
-  setSelected: () => void 0,
-  showSelected: false,
-  setShowSelected: () => void 0,
-});
-
-export const ViewButton = ({ rowIndex }: { rowIndex: number }) => {
-  const { viewed, setViewed } = useContext<GridContext>(DiscoverGridContext);
-
-  return (
-    <button
-      aria-label={i18n.translate('discover.grid.viewDoc', {
-        defaultMessage: 'Toggle dialog with details',
-      })}
-      onClick={() => setViewed(rowIndex)}
-      className="dscTable__buttonToggle"
-    >
-      <EuiIcon size="s" type={viewed === rowIndex ? 'eyeClosed' : 'eye'} />
-    </button>
-  );
-};
-
-export const SelectButton = ({ col, rows }: { col: any; rows: ElasticSearchHit[] }) => {
-  const { selected, setSelected } = useContext<GridContext>(DiscoverGridContext);
-  const rowIndex = col.rowIndex;
-  const isChecked = selected.includes(rowIndex);
-
-  return (
-    <EuiCheckbox
-      id={`${rowIndex}`}
-      aria-label={`Select row ${rowIndex}, ${rows[rowIndex]._id}`}
-      checked={isChecked}
-      onChange={(e) => {
-        if (e.target.checked) {
-          setSelected([...selected, rowIndex]);
-        } else {
-          setSelected(selected.filter((idx: number) => idx !== rowIndex));
-        }
-      }}
-    />
-  );
-};
-
-const ValueWithFilter = ({
-  value,
-  columnId,
-  row,
-  indexPattern,
-  onFilter,
-}: {
-  value: ReactNode;
-  columnId: string;
-  row: ElasticSearchHit;
-  indexPattern: IndexPattern;
-  onFilter: DocViewFilterFn;
-}) => {
-  const [hover, setHover] = useState(false);
-  const createFilter = (type: '-' | '+') => {
-    return onFilter(
-      indexPattern.fields.getByName(columnId),
-      indexPattern.flattenHit(row)[columnId],
-      type
-    );
-  };
-  if (hover) {
-    return (
-      <EuiFlexGroup
-        direction={'row'}
-        onMouseLeave={() => setHover(false)}
-        onBlur={() => setHover(false)}
-        gutterSize="none"
-        alignItems="center"
-        responsive={false}
-        className="eui-textTruncate"
-      >
-        <EuiFlexItem className="eui-textTruncate">{value}</EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: '40px' }}>
-          <div>
-            <EuiButtonIcon
-              iconSize="s"
-              iconType="magnifyWithPlus"
-              aria-label={i18n.translate('discover.grid.ariaFilterOn', {
-                defaultMessage: 'Filter on {value}',
-                values: { value: '' },
-              })}
-              onClick={() => createFilter('+')}
-              style={{
-                padding: 0,
-                minHeight: 'auto',
-                minWidth: 'auto',
-                paddingRight: 2,
-                paddingLeft: 2,
-                paddingTop: 0,
-                paddingBottom: 0,
-              }}
-            />
-            <EuiButtonIcon
-              iconSize="s"
-              iconType="magnifyWithMinus"
-              aria-label={i18n.translate('discover.grid.ariaFilterOn', {
-                defaultMessage: 'Filter out {value}',
-                values: { value: '' },
-              })}
-              onClick={() => createFilter('-')}
-              style={{
-                padding: 0,
-                minHeight: 'auto',
-                minWidth: 'auto',
-                paddingRight: 2,
-                paddingLeft: 2,
-                paddingTop: 0,
-                paddingBottom: 0,
-              }}
-            />
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  } else {
-    return (
-      <div
-        className="eui-textTruncate"
-        onMouseOver={() => setHover(true)}
-        onFocus={() => setHover(true)}
-      >
-        {value}
-      </div>
-    );
-  }
-};
 
 export const EuiDataGridMemoized = React.memo((props: any) => <EuiDataGrid {...props} />);
 
@@ -338,7 +180,7 @@ export const DiscoverGrid = React.memo(
           };
 
           return (
-            <CellPopover
+            <DiscoverGridPopover
               value={value}
               onPositiveFilterClick={() => createFilter(columnId, '+')}
               onNegativeFilterClick={() => createFilter(columnId, '-')}
@@ -346,7 +188,7 @@ export const DiscoverGrid = React.memo(
           );
         } else if (indexPattern.fields.getByName(columnId)?.filterable) {
           return (
-            <ValueWithFilter
+            <DiscoverGridValueWithFilter
               value={value}
               columnId={columnId}
               indexPattern={indexPattern}
@@ -402,7 +244,7 @@ export const DiscoverGrid = React.memo(
               </span>
             </EuiScreenReaderOnly>
           ),
-          rowCellRender: (col: number) => <SelectButton col={col} rows={rows} />,
+          rowCellRender: (col: number) => <DiscoverGridSelectButton col={col} rows={rows} />,
         },
         {
           id: 'openDetails',
@@ -481,7 +323,6 @@ export const DiscoverGrid = React.memo(
             <DiscoverGridFlyout
               indexPattern={indexPattern}
               getContextAppHref={getContextAppHref}
-              rows={rows}
               hit={rows[viewed]}
               columns={columns}
               onFilter={onFilter}
@@ -493,14 +334,10 @@ export const DiscoverGrid = React.memo(
             />
           )}
           {showSelected && selected.length > 0 && (
-            <DiscoverGridFlyoutAdvancedGrid
+            <DiscoverGridFlyoutSelection
               indexPattern={indexPattern}
               rows={rows}
               selected={selected}
-              columns={columns}
-              onFilter={onFilter}
-              onRemoveColumn={onRemoveColumn}
-              onAddColumn={onAddColumn}
               onClose={() => setShowSelected(false)}
             />
           )}

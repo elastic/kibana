@@ -26,7 +26,7 @@ import {
   useRenderToText,
 } from '@elastic/eui';
 
-export function CellPopover({
+export function DiscoverGridPopover({
   value,
   onPositiveFilterClick,
   onNegativeFilterClick,
