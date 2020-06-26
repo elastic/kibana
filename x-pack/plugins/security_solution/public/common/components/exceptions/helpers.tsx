@@ -19,6 +19,7 @@ import {
   OperatorTypeEnum,
   entriesNested,
   entriesExists,
+  entriesList,
 } from '../../../lists_plugin_deps';
 
 /**
@@ -87,6 +88,16 @@ export const getFormattedEntries = (entries: EntriesArray): FormattedEntry[] => 
   return formattedEntries.flat();
 };
 
+export const getEntryValue = (entry: Entry): string | string[] | null => {
+  if (entriesList.is(entry)) {
+    return entry.list.id;
+  } else if (entriesExists.is(entry)) {
+    return null;
+  } else {
+    return entry.value;
+  }
+};
+
 /**
  * Helper method for `getFormattedEntries`
  */
@@ -100,7 +111,7 @@ export const formatEntry = ({
   item: Entry;
 }): FormattedEntry => {
   const operator = getExceptionOperatorSelect(item);
-  const value = !entriesExists.is(item) ? item.value : null;
+  const value = getEntryValue(item);
 
   return {
     fieldName: isNested ? `${parent}.${item.field}` : item.field,

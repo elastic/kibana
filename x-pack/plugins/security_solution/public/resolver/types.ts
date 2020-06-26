@@ -5,7 +5,7 @@
  */
 
 import { Store } from 'redux';
-
+import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
 import {
@@ -143,13 +143,44 @@ export type CameraState = {
 );
 
 /**
+ * Wrappers around our internal types that make them compatible with `rbush`.
+ */
+export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
+
+/**
+ * The entity stored in rbush for resolver edge lines.
+ */
+export interface IndexedEdgeLineSegment extends BBox {
+  type: 'edgeLine';
+  entity: EdgeLineSegment;
+}
+
+/**
+ * The entity store in rbush for resolver process nodes.
+ */
+export interface IndexedProcessNode extends BBox {
+  type: 'processNode';
+  entity: ResolverEvent;
+  position: Vector2;
+}
+
+/**
+ * A type containing all things to actually be rendered to the DOM.
+ */
+export interface VisibleEntites {
+  processNodePositions: ProcessPositions;
+  connectingEdgeLineSegments: EdgeLineSegment[];
+}
+
+/**
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {
   readonly results: readonly ResolverEvent[];
-  readonly relatedEventsStats: Map<string, ResolverNodeStats>;
+  readonly relatedEventsStats: Readonly<Map<string, ResolverNodeStats>>;
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
   readonly relatedEventsReady: Map<string, boolean>;
+  readonly lineageLimits: Readonly<{ children: string | null; ancestors: string | null }>;
   isLoading: boolean;
   hasError: boolean;
 }
@@ -286,6 +317,8 @@ export interface DurationDetails {
  */
 export interface EdgeLineMetadata {
   elapsedTime?: DurationDetails;
+  // A string of the two joined process nodes concatted together.
+  uniqueId: string;
 }
 /**
  * A tuple of 2 vector2 points forming a polyline. Used to connect process nodes in the graph.
@@ -297,7 +330,7 @@ export type EdgeLinePoints = Vector2[];
  */
 export interface EdgeLineSegment {
   points: EdgeLinePoints;
-  metadata?: EdgeLineMetadata;
+  metadata: EdgeLineMetadata;
 }
 
 /**
