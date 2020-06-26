@@ -219,8 +219,7 @@ function buildActiveMigrations(
       return {
         ...migrations,
         [type.name]: {
-          // @ts-ignore
-          latestVersion: _.last(transforms).version,
+          latestVersion: (_.last(transforms) as Record<string, any>).version,
           transforms,
         },
       };
