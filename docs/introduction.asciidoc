@@ -19,9 +19,6 @@ and more &mdash; all from the convenience of a {kib} UI.
 * **A centralized hub for Elastic's solutions.** From log analytics to
 document discovery to SIEM, {kib} is the portal for accessing these and other capabilities.
 
-[role="screenshot"]
-image::images/intro-kibana.png[]
-
 [float]
 [[get-data-into-kibana]]
 === Getting data into {kib}
@@ -33,41 +30,35 @@ From the home page, {kib} provides these options for getting data in:
 
 * Set up a data flow to Elasticsearch using our built-in tutorials.
 (If a tutorial doesn’t exist for your data, go to the
-{beats-ref}/beats-reference.html[Beats overview] to learn about other data shippers
+Beats overview to learn about other data shippers
 in the {beats} family.)
-* <<add-sample-data, Add a sample data set>> and take {kib} for a test drive without loading data yourself.
+* Add a sample data set and take {kib} for a test drive without loading data yourself.
 * Import static data using the
 https://www.elastic.co/blog/importing-csv-and-log-data-into-elasticsearch-with-file-data-visualizer[file upload feature].
 * Index your data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
  or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
-+
-[role="screenshot"]
-image::images/intro-data-tutorial.png[Ways to get data in from the home page]
 
 
 {kib} uses an
-<<index-patterns, index pattern>> to tell it which {es} indices to explore.
+index pattern to tell it which {es} indices to explore.
 If you add sample data or run a built-in tutorial, you get an index pattern for free,
 and are good to start exploring. If you load your own data, you can create
-an index pattern in <<management, Management>>.
+an index pattern in Management.
 
 [float]
 [[explore-and-query]]
 === Explore & query
 
-Ready to dive into your data? With <<discover, Discover>>, you can explore your data and
+Ready to dive into your data? With Discover, you can explore your data and
 search for hidden insights and relationships. Ask your questions, and then
 narrow the results to just the data you want.
-
-[role="screenshot"]
-image::images/intro-discover.png[]
 
 [float]
 [[visualize-and-analyze]]
 === Visualize & analyze
 
 A visualization is worth a thousand log lines, and {kib} provides
-many options for showcasing your data. Use <<lens, Lens>>,
+many options for showcasing your data. Use Lens,
 our drag-and-drop interface,
 to rapidly build
 charts, tables, metrics, and more. If there
@@ -75,30 +66,27 @@ is a better visualization for your data, *Lens* suggests it, allowing for quick
 switching between visualization types.
 
 Once your visualizations are just the way you want,
-use <<dashboard, Dashboard>> to collect them in one place. A dashboard provides
+use Dashboard to collect them in one place. A dashboard provides
 insights into your data from multiple perspectives.
-
-[role="screenshot"]
-image::images/intro-dashboard.png[]
 
 {kib} also offers these visualization features:
 
-* <<visualize, Visualize>> allows you to display your data in
+* Visualize allows you to display your data in
 line charts, bar graphs, pie charts, histograms, and tables
 (just to name a few). It's also home to Lens, the drag-and-drop interface.
 Visualize supports the ability to add interactive
 controls to your dashboard, and filter dashboard content in real time.
 
-* <<canvas, Canvas>> gives you the ability to present your data in a
+* Canvas gives you the ability to present your data in a
 visually compelling, pixel-perfect report. Give your data the “wow” factor
 needed to impress your CEO or to captivate people with a big-screen display.
 
-* <<maps, Maps>> enables you to ask (and answer) meaningful
+* Maps enables you to ask (and answer) meaningful
 questions of your location-based data. Maps supports multiple
 layers and data sources, mapping of individual geo points and shapes,
 and dynamic client-side styling.
 
-* <<TSVB, TSVB>> allows you to combine
+* TSVB allows you to combine
 an infinite number of aggregations to display complex data in a meaningful way.
 With TSVB, you can analyze multiple index patterns and customize
 every aspect of your visualization. Choose your own date format and color
@@ -110,15 +98,12 @@ top N, gauge, and markdown.
 === Organize & secure
 
 Want to share Kibana’s goodness with other people or teams? You can do so with
-<<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboards, and indices.
+Spaces, built for organizing your visualizations, dashboards, and indices.
 Think of a space as its own mini {kib} installation &mdash; it’s isolated from
 all other spaces, so you can tailor it to your specific needs without impacting others.
 
 You can even choose which features to enable within each space. Don’t need
 Machine learning in your “Executive” space? Simply turn it off.
-
-[role="screenshot"]
-image::images/intro-spaces.jpg[]
 
 You can take this all one step further with Kibana’s security features, and
 control which users have access to each space. {kib} allows for fine-grained
@@ -129,13 +114,10 @@ dashboards in one space, but full access to all of Kibana’s features in anothe
 [[manage-all-things-stack]]
 === Manage all things Elastic Stack
 
-<<management, Management>> provides guided processes for managing all
+Management provides guided processes for managing all
 things Elastic Stack &mdash; indices, clusters, licenses, UI settings, index patterns,
 and more. Want to update your {es} indices? Set user roles and privileges?
 Turn on dark mode? Kibana has UIs for all that.
-
-[role="screenshot"]
-image::images/intro-management.png[]
 
 [float]
 [[extend-your-use-case]]
@@ -147,9 +129,6 @@ monitor performance, and address your business needs. Get alerted if a key
 metric spikes. Detect anomalous behavior or forecast future spikes. Root out
 bottlenecks in your application code. Kibana doesn’t limit or dictate how you explore your data.
 
-[role="screenshot"]
-image::siem/images/detections-ui.png[]
-
 [float]
 [[try-kibana]]
 === Give {kib} a try
@@ -158,8 +137,8 @@ There is no faster way to try out {kib} than with our hosted {es} Service.
 https://www.elastic.co/cloud/elasticsearch-service/signup[Sign up for a free trial]
 and start exploring data in minutes.
 
-You can also <<install, install {kib} on your own>> &mdash; no code, no additional
+You can also install {kib} on your own &mdash; no code, no additional
 infrastructure required.
 
-Our <<tutorial-build-dashboard, Getting Started>> and in-product guidance can
+Our Getting Started and in-product guidance can
 help you get up and running, faster. Use our Help menu if you have questions or feedback.

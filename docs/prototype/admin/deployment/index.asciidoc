@@ -1,0 +1,29 @@
+[[deployment]]
+=== Deployment
+
+Something about deploying {kib}.
+
+[[deployment-options]]
+==== Deployment options
+
+Something about all of the {kib} deployment options, including how to use {kib} in a production environment. 
+
+[[configure-the-settings]]
+==== Configure the settings
+
+Something about all the configurable settings.
+
+[[configure-the-cloud-settings]]
+==== Configure the Cloud settings
+
+Something about the configurable Cloud settings.
+
+[[start-kibana]]
+==== Start {kib}
+
+Something about starting {kib}. At the end, add content for stopping {kib}.
+
+[[log-on-to-elastic-admin]]
+==== Log on to Elastic
+
+Something about all of the options for logging on to Elastic.

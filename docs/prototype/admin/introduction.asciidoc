@@ -1,0 +1,4 @@
+[[admin-introduction]]
+== Admin Guide
+
+This is the introduction to the {kib} Admin Guide.

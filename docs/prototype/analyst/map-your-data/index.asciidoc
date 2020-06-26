@@ -1,0 +1,93 @@
+[[map]]
+=== Map your geographic data
+
+Something about Maps.
+
+[[map-tutorial]]
+==== Tutorial
+
+Something about the Maps tutorial.
+
+[[work-with-layers]]
+==== Work with layers
+
+Something about working with layers.
+
+[float]
+[[heat-map-layer]]
+===== Heat map layer
+
+Something about heat map layers.
+
+[float]
+[[tile-layer]]
+===== Tile layer
+
+Something about tile layers.
+
+[float]
+[[vector-layer]]
+===== Vector layer
+
+Something about vector layers.
+
+[float]
+[[vector-styling]]
+===== Vector styling
+
+Something about vector styling.
+
+[[plot-big-data]]
+==== Plot big data
+
+Something about plotting bit data.
+
+[float]
+[[grid-aggregation]]
+===== Grid aggregation
+
+Something about grid aggregation.
+
+[float]
+[[top-hits-per-entity]]
+===== Top hits per entity
+
+Something about top hits per entity.
+
+[float]
+[[point-to-point]]
+===== Point to point
+
+Something about point to point.
+
+[float]
+[[term-join]]
+===== Term join
+
+Something about term join.
+
+[[search-geographic-data]]
+==== Search geographic data
+
+Something about searching geographic data.
+
+[[connect-to-elastic-maps-services]]
+==== Connect to Elastic Maps service
+
+Something about connecting to Elastic Maps service.
+
+[[upload-geojson-data]]
+==== Upload GeoJSON data
+
+Something about uploading GeoJason data.
+
+[float]
+[[tutorial-index-geojson-ata]]
+===== Tutorial: Index GeoJSON data
+
+Something about learning how to index GeoJSON data.
+
+[[troubleshooting]]
+==== Troubleshooting
+
+Something about troubleshooting maps.

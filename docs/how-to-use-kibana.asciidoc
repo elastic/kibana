@@ -1,0 +1,35 @@
+[[how-to-use-kibana]]
+== How to use {kib}
+
+Something about how to use {kib}.
+
+[float]
+[[kibana-users]]
+=== {kib} users
+
+Describe the user (analyst and admin/enterprise & small company)
+
+
+[float]
+[[data-types]]
+=== Data types
+
+Describe types of data and what you might be searching for
+
+[float]
+[[global-ui-options]]
+=== Describe {kib}
+
+Describe Kibana--chrome, search bar, flyout, common work scenarios (table views, delete)
+
+[float]
+[[data-options]]
+=== Data options
+
+Explain what users need to know about data  (add data, index pattern, search, set filter)
+
+[float]
+[[apps]]
+=== Elastic apps
+
+Explain what you can do with each app

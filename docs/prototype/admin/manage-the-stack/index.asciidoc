@@ -1,0 +1,39 @@
+[[manage-the-stack]]
+=== Manage the Stack
+
+Something about managing the Stack.
+
+[[cross-cluster-replication]]
+==== Cross-cluster replication
+
+Something about cross-cluster replication.
+
+[[index-lifecycle-policies]]
+==== Index lifecycle policies
+
+Something about index lifecycle policies. 
+
+[[index-management]]
+==== Index management
+
+Something about index management.
+
+[[remote-clusters]]
+==== Remote clusters
+
+Something about remote clusters.
+
+[[rollup-jobs]]
+==== Rollup jobs
+
+Something about rollup jobs.
+
+[[snapshot-and-restore]]
+==== Snapshot and restore
+
+Something about snapshot and restore.
+
+[[watcher]]
+==== Watcher
+
+Something about Watcher.

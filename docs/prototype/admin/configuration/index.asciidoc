@@ -1,0 +1,29 @@
+[[configuration]]
+=== Configuration
+
+Something about configuring {kib}.
+
+[[configure-monitoring]]
+==== Configure monitoring
+
+Something about configuring monitoring.
+
+[[conifgure-security]]
+==== Configure security
+
+Something about all the configurable security settings.
+
+[[check-health-of-cluster]]
+==== Check the health of the cluster
+
+Something about checking the health of the cluster.
+
+[[add-data]]
+==== Add data
+
+Something about adding data.
+
+[[define-the-index-pattern]]
+==== Define the index pattern
+
+Something about defining the index pattern.

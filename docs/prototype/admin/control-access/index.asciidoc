@@ -1,0 +1,44 @@
+[[control-access]]
+=== Control access
+
+Something about controlling access.
+
+[[organize-data-in-spaces]]
+==== Organize data in Spaces
+
+Something about organizing data in Spaces.
+
+[[role-based-access-control]]
+==== Role-based access control
+
+Something about role-based access control.
+
+[[grant-access-to-kibana]]
+===== Grant access to {kib}
+
+Something about granting access to {kib}.
+
+[[role-management]]
+===== Role management
+
+Something about role management.
+
+[[tutorial-role-based-access-control]]
+====== Tutorial: Role-based access control
+
+Something about learning how to configure role-based access control.
+
+[[privileges]]
+===== Privileges
+
+Something about privileges.
+
+[[api-keys]]
+===== API keys
+
+Something about API keys.
+
+[[role-mappings]]
+===== Role mappings
+
+Something about role mappings.

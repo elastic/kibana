@@ -1,0 +1,20 @@
+[[quickstart]]
+=== Quickstart
+
+Something about quickly starting with {kib}.
+
+[[log-on-to-elastic]]
+==== Log on to Elastic
+
+Something about logging on to Elastic.
+
+[[discover-your-data]]
+==== Discover your data
+
+Something about discovering your data.
+
+[[visualize-your-data]]
+==== Visualize your data
+
+Something about visualizing your data.
+

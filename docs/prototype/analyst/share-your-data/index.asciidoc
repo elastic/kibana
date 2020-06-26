@@ -1,0 +1,29 @@
+[[share]]
+=== Share your findings
+
+Something about sharing what you found in your data.
+
+Should include report options, including:
+
+* Embed
+* URL
+
+[[configure-the-report-options]]
+==== Configure the report options
+
+Something about the configuring the report options, including security.
+
+[[generate-reports]]
+==== Generate reports
+
+Something about generating reports.
+
+[[automate-reports]]
+==== Automate reports
+
+Something about automating reports.
+
+[[report-integration]]
+===== Report integration
+
+Something about report integration.

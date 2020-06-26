@@ -1,0 +1,15 @@
+[[set-up]]
+=== Set up
+
+Something about set up.
+
+[[download-kibana]]
+==== Download {kib}
+
+Something about downloading {kib}.
+
+[float]
+[[install-kibana]]
+==== Install {kib}
+
+Something about install {kib}.

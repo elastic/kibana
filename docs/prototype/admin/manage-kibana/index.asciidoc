@@ -1,0 +1,24 @@
+[[manage-kibana]]
+=== Manage {kib}
+
+Something about managing {kib}.
+
+[[manage-subscriptions]]
+==== Subscriptions
+
+Something about managing subscriptions.
+
+[[upgrade-kibana]]
+==== Upgrade {kib}
+
+Something about upgrading {kib}.
+
+[[advanced-settings]]
+==== Advanced settings
+
+Something about advanced settings.
+
+[[saved-ojects]]
+==== Saved ojbects
+
+Something about saved objects.

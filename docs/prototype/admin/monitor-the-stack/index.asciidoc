@@ -1,0 +1,29 @@
+[[monitor-the-stack]]
+=== Monitor the Stack
+
+Something about monitoring the Stack.
+
+[[beats-metrics]]
+==== Beats metrics
+
+Something about Beats metrics.
+
+[[cluster-alerts]]
+==== Cluster alerts
+
+Something about cluster alerts. 
+
+[[elasticsearch-metrics]]
+==== {es} metrics
+
+Something about {es} metrics.
+
+[[kibana-metrics]]
+==== {kib} metrics
+
+Something about {kib} metrics.
+
+[[logstash-metrics]]
+==== Logstash metrics
+
+Something about Logstash metrics.

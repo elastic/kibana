@@ -1,0 +1,77 @@
+[[alert]]
+=== Alert and take action
+
+Something about alerts and taking action.
+
+
+[[how-alerts-work]]
+==== How alerts work
+
+Something about how alerts work.
+
+[[define-an-alert]]
+==== Define an alert
+
+Something about defining an alert.
+
+[[action-and-connector-types]]
+==== Action and connector types
+
+Something about action and connector types.
+
+[float]
+[[email]]
+===== Email
+
+Something about email.
+
+[float]
+[[index]]
+===== Index
+
+Something about index.
+
+[float]
+[[pagerduty]]
+===== PagerDuty
+
+Something about PagerDuty.
+
+[float]
+[[server-log]]
+===== Server log
+
+Something about server log.
+
+[float]
+[[slack]]
+===== Slack
+
+Something about Slack.
+
+[float]
+[[webhook]]
+===== Webhook
+
+Something about Webhook.
+
+[float]
+[[preconfigured-action-and-connector-types]]
+===== Preconfigured action and connector types
+
+Something about preconfigured action and connector types.
+
+[[alert-types]]
+==== Alert types
+
+Something about alert types.
+
+[[manage-alerts]]
+==== Manage alerts
+
+Something about managing alerts.
+
+[[scale-and-performance]]
+==== Scale and performance
+
+Something about scale and performance.

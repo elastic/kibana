@@ -1,0 +1,37 @@
+[[discover]]
+=== Discover your data
+
+Something about Discover.
+
+[[search]]
+==== Search
+
+Something about Search.
+
+[float]
+[[kibana-query-language]]
+===== {kib} query language
+
+Something about {kib} query language.
+
+[float]
+[[lucene-query-language]]
+===== Lucene query language
+
+Something about Lucene query language.
+
+[float]
+[[save-searches-and-queries]]
+===== Save searches and queries
+
+Something about Save searches and queries.
+
+[[filter-search-results]]
+==== Filter search results
+
+Something about filtering search results.
+
+[[view-document-data]]
+==== View document data
+
+Something about viewing document data.

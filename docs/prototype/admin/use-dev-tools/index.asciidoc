@@ -1,0 +1,27 @@
+[[use-the-development-tools]]
+=== Use the development tools
+
+Something about using the development tools.
+
+[[interact-with-elasticsearch-apis]]
+==== Interact with {es} APIs
+
+Something about interacting with {es} APIs.
+
+[float]
+[[profile-search-queries]]
+==== Profile search queries
+
+Something about profile search queries.
+
+[float]
+[[debug-grok-patterns]]
+==== Debug grok patterns
+
+Something about debugging grok patterns.
+
+[float]
+[[debug-painless-scripts]]
+==== Debug Painless scripts
+
+Something about debugging Painless scripts.

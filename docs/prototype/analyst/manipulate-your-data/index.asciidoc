@@ -1,0 +1,43 @@
+[[manipulate]]
+=== Manipulate your data
+
+Something about manipulating your data.
+
+[[transforms]]
+==== Transforms
+
+Something about transforms.
+
+[[field-formatters]]
+==== Field formatters
+
+Something about field formatters.
+
+[float]
+[[strings]]
+===== Strings
+
+Something about strings.
+
+[float]
+[[dates]]
+===== Dates
+
+Something about dates.
+
+[float]
+[[geopoints]]
+===== Geopoints
+
+Something about geopoints.
+
+[float]
+[[numeric]]
+===== Numeric
+
+Something about numeric.
+
+[[run-time-fields]]
+==== Run-time fields
+
+Something about fields that are not indexed.

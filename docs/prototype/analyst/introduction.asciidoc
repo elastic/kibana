@@ -1,0 +1,5 @@
+[[analyst-introduction]]
+== Analyst Guide
+
+This is the introduction to the {kib} Analyst Guide.
+

@@ -1,0 +1,5 @@
+include::{kib-repo-dir}/user/api.asciidoc[]
+
+include::{kib-repo-dir}/migration.asciidoc[]
+
+include::{kib-repo-dir}/CHANGELOG.asciidoc[]

@@ -16,16 +16,51 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 
 include::{docs-root}/shared/attributes.asciidoc[]
 
-include::user/index.asciidoc[]
-
+include::introduction.asciidoc[]
+include::whats-new.asciidoc[]
+include::how-to-use-kibana.asciidoc[]
 include::accessibility.asciidoc[]
 
-include::limitations.asciidoc[]
+// Analyst Guide
 
-include::migration.asciidoc[]
+include::{kib-repo-dir}/prototype/analyst/introduction.asciidoc[]
 
-include::CHANGELOG.asciidoc[]
+include::{kib-repo-dir}/prototype/analyst/quickstart/index.asciidoc[]
 
-include::developer/index.asciidoc[]
+include::{kib-repo-dir}/prototype/analyst/discover-your-data/index.asciidoc[]
 
-include::redirects.asciidoc[]
+include::{kib-repo-dir}/prototype/analyst/visualize-your-data/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/analyst/present-your-data/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/analyst/share-your-data/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/analyst/alert-and-take-action/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/analyst/model-your-data/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/analyst/map-your-data/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/analyst/view-relationships/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/analyst/manipulate-your-data/index.asciidoc[]
+
+// Admin Guide
+
+include::{kib-repo-dir}/prototype/admin/introduction.asciidoc[]
+
+include::{kib-repo-dir}/prototype/admin/set-up/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/admin/deployment/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/admin/configuration/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/admin/control-access/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/admin/manage-the-stack/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/admin/monitor-the-stack/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/admin/manage-kibana/index.asciidoc[]
+
+include::{kib-repo-dir}/prototype/admin/use-dev-tools/index.asciidoc[]
