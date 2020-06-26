@@ -21,7 +21,6 @@ export function handleTree(
       params: { id },
       query: {
         children,
-        generations,
         ancestors,
         events,
         alerts,
@@ -37,7 +36,7 @@ export function handleTree(
       const fetcher = new Fetcher(client, id, eventsIndexPattern, alertsIndexPattern, endpointID);
 
       const [childrenNodes, ancestry, relatedEvents, relatedAlerts] = await Promise.all([
-        fetcher.children(children, generations, afterChild),
+        fetcher.children(children, afterChild),
         fetcher.ancestors(ancestors),
         fetcher.events(events, afterEvent),
         fetcher.alerts(alerts, afterAlert),
