@@ -51,6 +51,22 @@ function getProviderOptions(server) {
 }
 
 /**
+* Prepares options object that is specific only to an authentication provider.
+* @param {Hapi.Server} server HapiJS Server instance.
+* @param {string} providerType the type of the provider to get the options for.
+ * @returns {Object | undefined}
+*/
+function getProviderSpecificOptions(
+  server,
+  providerType
+) {
+  // We can't use `config.has` here as it doesn't currently work with Joi's "alternatives" syntax
+  // which is used for the `authc` schema.
+  const authc = server.config().get(`xpack.security.authc`);
+  return authc && authc.hasOwnProperty(providerType) ? authc[providerType] : undefined;
+}
+
+/**
  * Authenticator is responsible for authentication of the request using chain of
  * authentication providers. The chain is essentially a prioritized list of configured
  * providers (typically of various types). The order of the list determines the order in
@@ -117,7 +133,10 @@ class Authenticator {
 
     this._providers = new Map(
       authProviders.map(
-        (providerType) => [providerType, this._instantiateProvider(providerType, providerOptions)]
+        (providerType) => {
+          const providerSpecificOptions = getProviderSpecificOptions(server, providerType);
+          return [providerType, this._instantiateProvider(providerType, providerOptions, providerSpecificOptions)];
+        }
       )
     );
   }
@@ -226,16 +245,17 @@ class Authenticator {
    * Instantiates authentication provider based on the provider key from config.
    * @param {string} providerType Provider type key.
    * @param {Object} options Options to pass to provider's constructor.
+   * @params {Object} providerSpecificOptions Optional provider specific options.
    * @returns {Object} Authentication provider instance.
    * @private
    */
-  _instantiateProvider(providerType, options) {
+  _instantiateProvider(providerType, options, providerSpecificOptions) {
     const ProviderClassName = providerMap.get(providerType);
     if (!ProviderClassName) {
       throw new Error(`Unsupported authentication provider name: ${providerType}.`);
     }
 
-    return new ProviderClassName(options);
+    return new ProviderClassName(options, providerSpecificOptions);
   }
 
   /**

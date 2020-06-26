@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
+import { isInternalURL } from '../../is_internal_url';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -61,11 +62,21 @@ export class SAMLAuthenticationProvider {
   _options = null;
 
   /**
+   * Indicates if we should treat non-empty `RelayState` as a deep link in Kibana we should redirect
+   * user to after successful IdP initiated login. `RelayState` is ignored for SP initiated login.
+   * @type {boolean}
+   * @private
+   */
+  _useRelayStateDeepLink;
+
+  /**
    * Instantiates SAMLAuthenticationProvider.
    * @param {ProviderOptions} options Provider options object.
+   * @param {Object} samlOptions SAML provider specific options.
    */
-  constructor(options) {
+  constructor(options, samlOptions) {
     this._options = options;
+    this._useRelayStateDeepLink = !!(samlOptions && samlOptions.useRelayStateDeepLink);
   }
 
   /**
@@ -186,11 +197,11 @@ export class SAMLAuthenticationProvider {
     }
 
     // When we don't have state and hence request id we assume that SAMLResponse came from the IdP initiated login.
-    if (stateRequestId) {
-      this._options.log(['debug', 'security', 'saml'], 'Authentication has been previously initiated by Kibana.');
-    } else {
-      this._options.log(['debug', 'security', 'saml'], 'Authentication has been initiated by Identity Provider.');
-    }
+    const isIdPInitiatedLogin = !stateRequestId;
+    this._options.log(['debug', 'security', 'saml'], !isIdPInitiatedLogin
+      ? 'Authentication has been previously initiated by Kibana.'
+      : 'Authentication has been initiated by Identity Provider.'
+    );
 
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
@@ -205,8 +216,29 @@ export class SAMLAuthenticationProvider {
 
       this._options.log(['debug', 'security', 'saml'], 'Request has been authenticated via SAML response.');
 
+      // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
+      // depending on the configuration we may need to redirect user to this URL.
+      let redirectURLFromRelayState;
+      const relayState = request.payload.RelayState;
+      if (isIdPInitiatedLogin && relayState) {
+        if (!this._useRelayStateDeepLink) {
+          this._options.log(['debug', 'security', 'saml'],
+            `"RelayState" is provided, but deep links support is not enabled.`
+          );
+        } else if (!isInternalURL(relayState, this._options.basePath)) {
+          this._options.log(['debug', 'security', 'saml'],
+            `"RelayState" is provided, but it is not a valid Kibana internal URL.`
+          );
+        } else {
+          this._options.log(['debug', 'security', 'saml'],
+            `User will be redirected to the Kibana internal URL specified in "RelayState".`
+          );
+          redirectURLFromRelayState = relayState;
+        }
+      }
+
       return AuthenticationResult.redirectTo(
-        stateRedirectURL || `${this._options.basePath}/`,
+        redirectURLFromRelayState || stateRedirectURL || `${this._options.basePath}/`,
         { accessToken, refreshToken }
       );
     } catch (err) {

@@ -108,6 +108,38 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.state).to.eql({ accessToken: 'some-token', refreshToken: 'some-refresh-token' });
     });
 
+    it('gets token and redirects user to the requested URL if SAML Response is valid ignoring Relay State.', async () => {
+      const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
+
+      callWithInternalUser
+        .withArgs('shield.samlAuthenticate')
+        .returns(Promise.resolve({ access_token: 'some-token', refresh_token: 'some-refresh-token' }));
+
+      provider = new SAMLAuthenticationProvider({
+        client: { callWithRequest, callWithInternalUser },
+        log() {},
+        protocol: 'test-protocol',
+        hostname: 'test-hostname',
+        port: 1234,
+        basePath: '/test-base-path'
+      }, { useRelayStateDeepLink: true });
+
+      const authenticationResult = await provider.authenticate(request, {
+        requestId: 'some-request-id',
+        nextURL: '/test-base-path/some-path'
+      });
+
+      sinon.assert.calledWithExactly(
+        callWithInternalUser,
+        'shield.samlAuthenticate',
+        { body: { ids: ['some-request-id'], content: 'saml-response-xml' } }
+      );
+
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/test-base-path/some-path');
+      expect(authenticationResult.state).to.eql({ accessToken: 'some-token', refreshToken: 'some-refresh-token' });
+    });
+
     it('fails if SAML Response payload is presented but state does not contain SAML Request token.', async () => {
       const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
 
@@ -161,6 +193,112 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.state).to.eql({
         accessToken: 'idp-initiated-login-token',
         refreshToken: 'idp-initiated-login-refresh-token'
+      });
+    });
+
+    describe('IdP initiated login', () => {
+      beforeEach(() => {
+        provider = new SAMLAuthenticationProvider({
+          client: { callWithRequest, callWithInternalUser },
+          log() {},
+          protocol: 'test-protocol',
+          hostname: 'test-hostname',
+          port: 1234,
+          basePath: '/test-base-path'
+        }, { useRelayStateDeepLink: true });
+
+        callWithInternalUser
+          .withArgs('shield.samlAuthenticate')
+          .returns(Promise.resolve({ access_token: 'some-token', refresh_token: 'some-refresh-token' }));
+      });
+
+      it('redirects to the home page if `useRelayStateDeepLink` is set to `false`.', async () => {
+        provider = new SAMLAuthenticationProvider({
+          client: { callWithRequest, callWithInternalUser },
+          log() {},
+          protocol: 'test-protocol',
+          hostname: 'test-hostname',
+          port: 1234,
+          basePath: '/test-base-path'
+        }, { useRelayStateDeepLink: false });
+
+        const authenticationResult = await provider.authenticate(
+          requestFixture({ payload: { SAMLResponse: 'saml-response-xml', RelayState: '/test-base-path/app/some-app#some-deep-link' } })
+        );
+
+        sinon.assert.calledWithExactly(
+          callWithInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        expect(authenticationResult.redirected()).to.be(true);
+        expect(authenticationResult.redirectURL).to.be('/test-base-path/');
+        expect(authenticationResult.state).to.eql({ accessToken: 'some-token', refreshToken: 'some-refresh-token' });
+      });
+
+      it('redirects to the home page if `RelayState` is not specified.', async () => {
+        const authenticationResult = await provider.authenticate(
+          requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } })
+        );
+
+        sinon.assert.calledWithExactly(
+          callWithInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        expect(authenticationResult.redirected()).to.be(true);
+        expect(authenticationResult.redirectURL).to.be('/test-base-path/');
+        expect(authenticationResult.state).to.eql({ accessToken: 'some-token', refreshToken: 'some-refresh-token' });
+      });
+
+      it('redirects to the home page if `RelayState` includes external URL', async () => {
+        const authenticationResult = await provider.authenticate(
+          requestFixture({ payload: { SAMLResponse: 'saml-response-xml', RelayState: 'https://evil.com/test-base-path/app/some-app#some-deep-link' } })
+        );
+
+        sinon.assert.calledWithExactly(
+          callWithInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        expect(authenticationResult.redirected()).to.be(true);
+        expect(authenticationResult.redirectURL).to.be('/test-base-path/');
+        expect(authenticationResult.state).to.eql({ accessToken: 'some-token', refreshToken: 'some-refresh-token' });
+      });
+
+      it('redirects to the home page if `RelayState` includes URL that starts with double slashes', async () => {
+        const authenticationResult = await provider.authenticate(
+          requestFixture({ payload: { SAMLResponse: 'saml-response-xml', RelayState: '//test-base-path/app/some-app#some-deep-link' } })
+        );
+
+        sinon.assert.calledWithExactly(
+          callWithInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        expect(authenticationResult.redirected()).to.be(true);
+        expect(authenticationResult.redirectURL).to.be('/test-base-path/');
+        expect(authenticationResult.state).to.eql({ accessToken: 'some-token', refreshToken: 'some-refresh-token' });
+      });
+
+      it('redirects to the URL from the relay state.', async () => {
+        const authenticationResult = await provider.authenticate(
+          requestFixture({ payload: { SAMLResponse: 'saml-response-xml', RelayState: '/test-base-path/app/some-app#some-deep-link' } })
+        );
+
+        sinon.assert.calledWithExactly(
+          callWithInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        expect(authenticationResult.redirected()).to.be(true);
+        expect(authenticationResult.redirectURL).to.be('/test-base-path/app/some-app#some-deep-link');
+        expect(authenticationResult.state).to.eql({ accessToken: 'some-token', refreshToken: 'some-refresh-token' });
       });
     });
 

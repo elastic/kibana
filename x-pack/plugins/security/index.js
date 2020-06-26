@@ -5,6 +5,7 @@
  */
 
 import { resolve } from 'path';
+import { has } from 'lodash';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
@@ -45,6 +46,12 @@ export const security = (kibana) => new kibana.Plugin({
         hostname: Joi.string().hostname(),
         port: Joi.number().integer().min(0).max(65535)
       }).default(),
+      authc: Joi.object({})
+        .when('authProviders', {
+          is: Joi.array().items(Joi.string().valid('saml').required(), Joi.string()),
+          then: Joi.object({ saml: Joi.object({ useRelayStateDeepLink: Joi.boolean().default(false) }) }).default(),
+          otherwise: Joi.any().forbidden(),
+        }),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true)
@@ -54,6 +61,16 @@ export const security = (kibana) => new kibana.Plugin({
         enabled: Joi.boolean().default(false)
       }).default(),
     }).default();
+  },
+
+  deprecations() {
+    return [
+      (settings, log) => {
+        if (has(settings, 'authc.saml.useRelayStateDeepLink')) {
+          log('Config key "authc.saml.useRelayStateDeepLink" is deprecated and will be removed in the next major version.');
+        }
+      }
+    ];
   },
 
   uiExports: {
