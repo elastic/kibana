@@ -13,15 +13,19 @@ module.exports = {
       "2": "0.07 sec",
       "3": "0.01 sec"
     },
-    "Page load distribution": {
+    "Page load distribution percentiles": {
       "1": "50th",
       "2": "75th",
       "3": "90th",
-      "4": "95th",
-      "5": "Overall",
-      "6": "15 ",
-      "7": "0.07 sec",
-      "8": "0.01 sec"
+      "4": "95th"
+    },
+    "Rum page filters": {
+      "1": "15 ",
+      "2": "0.07 sec",
+      "3": "0.01 sec"
+    },
+    "Page load distribution chart legends": {
+      "1": "Overall"
     }
   }
 }
