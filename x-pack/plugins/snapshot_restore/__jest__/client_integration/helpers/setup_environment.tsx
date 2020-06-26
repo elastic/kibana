@@ -64,7 +64,7 @@ export const setupEnvironment = () => {
   };
 };
 
-window.Worker = function Worker() {
+(window as any).Worker = function Worker() {
   this.postMessage = () => {};
   this.terminate = () => {};
 };
