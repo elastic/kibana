@@ -412,7 +412,7 @@ Refer to {kibana-ref}/timelion.html[Timelion].
 
 [[glossary-time-series-data]] time series data ::
 // tag::time-series-data-def[]
-A series of data indexed in time order.
+Timestamped data such as logs, metrics, and events that is indexed on an ongoing basis.
 // end::time-series-data-def[]
 
 
