@@ -98,7 +98,6 @@ export const NoteCards = React.memo<Props>(
               onCancelAddNote={toggleShowAddNote}
               updateNewNote={setNewNote}
               updateNote={updateNote}
-              status={status}
             />
           </AddNoteContainer>
         ) : null}
