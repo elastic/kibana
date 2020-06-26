@@ -40,7 +40,7 @@ describe('webhook connector validation', () => {
       isPreconfigured: false,
       config: {
         method: 'PUT',
-        url: 'http:\\test',
+        url: 'http://test.com',
         headers: { 'content-type': 'text' },
       },
     } as WebhookActionConnector;

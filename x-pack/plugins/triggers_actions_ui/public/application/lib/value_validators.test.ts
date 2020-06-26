@@ -86,6 +86,6 @@ describe('isUrlInvalid', () => {
   });
 
   test('verifies valid url', () => {
-    expect(isUrlInvalid('https://www.elastic.co/')).toBeFalsy();
+    expect(isUrlInvalid('https://www.elastic.co')).toBeFalsy();
   });
 });
