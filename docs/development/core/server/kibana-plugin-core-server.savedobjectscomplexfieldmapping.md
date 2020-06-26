@@ -6,6 +6,8 @@
 
 See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation.
 
+Note: this type intentially doesn't include a type definition for defining the `dynamic` mapping parameter. Saved Object fields should always inherit the `dynamic: 'strict'` paramater. If you are unsure of the shape of your data use `type: 'object', enabled: false` instead.
+
 <b>Signature:</b>
 
 ```typescript
@@ -16,7 +18,6 @@ export interface SavedObjectsComplexFieldMapping
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [dynamic](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.dynamic.md) | <code>string</code> |  |
 |  [properties](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.properties.md) | <code>SavedObjectsMappingProperties</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.type.md) | <code>string</code> |  |
 
