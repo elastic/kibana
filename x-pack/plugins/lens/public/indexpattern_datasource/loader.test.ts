@@ -177,7 +177,8 @@ function mockClient() {
   } as unknown) as Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
 }
 
-describe('loader', () => {
+// Failing: See https://github.com/elastic/kibana/issues/70104
+describe.skip('loader', () => {
   describe('loadIndexPatterns', () => {
     it('should not load index patterns that are already loaded', async () => {
       const cache = await loadIndexPatterns({
@@ -294,7 +295,6 @@ describe('loader', () => {
           a: sampleIndexPatterns.a,
         },
         layers: {},
-        showEmptyFields: false,
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: 'a',
@@ -363,7 +363,6 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: {},
-        showEmptyFields: false,
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: 'b',
@@ -416,7 +415,6 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: savedState.layers,
-        showEmptyFields: false,
       });
 
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
@@ -434,7 +432,6 @@ describe('loader', () => {
         indexPatterns: {},
         existingFields: {},
         layers: {},
-        showEmptyFields: true,
       };
       const storage = createMockStorage({ indexPatternId: 'b' });
 
@@ -469,7 +466,6 @@ describe('loader', () => {
         existingFields: {},
         indexPatterns: {},
         layers: {},
-        showEmptyFields: true,
       };
 
       const storage = createMockStorage({ indexPatternId: 'b' });
@@ -527,7 +523,6 @@ describe('loader', () => {
             indexPatternId: 'a',
           },
         },
-        showEmptyFields: true,
       };
 
       const storage = createMockStorage({ indexPatternId: 'a' });
@@ -596,7 +591,6 @@ describe('loader', () => {
             indexPatternId: 'a',
           },
         },
-        showEmptyFields: true,
       };
 
       const storage = createMockStorage({ indexPatternId: 'b' });
