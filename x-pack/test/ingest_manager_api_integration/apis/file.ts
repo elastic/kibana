@@ -14,16 +14,19 @@ export default function ({ getService }: FtrProviderContext) {
 
   const server = dockerServers.get('registry');
   describe('package file', () => {
-    // it('fetches a .png screenshot image', async () => {
-    //   const supertest = getService('supertest');
-    //   await supertest
-    //     .get(
-    //       '/api/ingest_manager/epm/packages/auditd/2.0.4/img/screenshots/auditbeat-file-integrity-dashboard.png'
-    //     )
-    //     .set('kbn-xsrf', 'xxx')
-    //     .expect('Content-Type', 'image/png')
-    //     .expect(200);
-    // });
+    it('fetches a .png screenshot image', async function () {
+      if (server.enabled) {
+        await supertest
+          .get(
+            '/api/ingest_manager/epm/packages/filetest/0.1.0/img/screenshots/metricbeat_dashboard.png'
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect('Content-Type', 'image/png')
+          .expect(200);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
 
     it('fetches an .svg icon image', async function () {
       if (server.enabled) {
@@ -37,66 +40,57 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    // it('fetches an auditbeat .conf rule file', async () => {
-    //   const supertest = getService('supertest');
-    //   await supertest
-    //     .get(
-    //       '/api/ingest_manager/epm/packages/auditd/2.0.4/auditbeat/rules/sample-rules-linux-32bit.conf'
-    //     )
-    //     .set('kbn-xsrf', 'xxx')
-    //     .expect('Content-Type', 'application/json; charset=utf-8')
-    //     .expect(200);
-    // });
+    it('fetches a .json kibana visualization file', async function () {
+      if (server.enabled) {
+        await supertest
+          .get(
+            '/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/visualization/sample_visualization.json'
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
 
-    // it('fetches an auditbeat .yml config file', async () => {
-    //   const supertest = getService('supertest');
-    //   await supertest
-    //     .get('/api/ingest_manager/epm/packages/auditd/2.0.4/auditbeat/config/config.yml')
-    //     .set('kbn-xsrf', 'xxx')
-    //     .expect('Content-Type', 'text/yaml; charset=UTF-8')
-    //     .expect(200);
-    // });
+    it('fetches a .json kibana dashboard file', async function () {
+      if (server.enabled) {
+        await supertest
+          .get(
+            '/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/dashboard/sample_dashboard.json'
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
 
-    // it('fetches a .json kibana visualization file', async () => {
-    //   const supertest = getService('supertest');
-    //   await supertest
-    //     .get(
-    //       '/api/ingest_manager/epm/packages/auditd/2.0.4/kibana/visualization/b21e0c70-c252-11e7-8692-232bd1143e8a-ecs.json'
-    //     )
-    //     .set('kbn-xsrf', 'xxx')
-    //     .expect('Content-Type', 'application/json; charset=utf-8')
-    //     .expect(200);
-    // });
-
-    // it('fetches a .json kibana dashboard file', async () => {
-    //   const supertest = getService('supertest');
-    //   await supertest
-    //     .get(
-    //       '/api/ingest_manager/epm/packages/auditd/2.0.4/kibana/dashboard/7de391b0-c1ca-11e7-8995-936807a28b16-ecs.json'
-    //     )
-    //     .set('kbn-xsrf', 'xxx')
-    //     .expect('Content-Type', 'application/json; charset=utf-8')
-    //     .expect(200);
-    // });
-
-    // it('fetches an .json index pattern file', async () => {
-    //   const supertest = getService('supertest');
-    //   await supertest
-    //     .get('/api/ingest_manager/epm/packages/auditd/2.0.4/kibana/index-pattern/auditbeat-*.json')
-    //     .set('kbn-xsrf', 'xxx')
-    //     .expect('Content-Type', 'application/json; charset=utf-8')
-    //     .expect(200);
-    // });
-
-    // it('fetches a .json search file', async () => {
-    //   const supertest = getService('supertest');
-    //   await supertest
-    //     .get(
-    //       '/api/ingest_manager/epm/packages/auditd/2.0.4/kibana/search/0f10c430-c1c3-11e7-8995-936807a28b16-ecs.json'
-    //     )
-    //     .set('kbn-xsrf', 'xxx')
-    //     .expect('Content-Type', 'application/json; charset=utf-8')
-    //     .expect(200);
-    // });
+    it('fetches a .json search file', async function () {
+      if (server.enabled) {
+        await supertest
+          .get('/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/search/sample_search.json')
+          .set('kbn-xsrf', 'xxx')
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
   });
+
+  // Disabled for now as we don't serve prebuilt index patterns in current packages.
+  // it('fetches an .json index pattern file', async function () {
+  //   if (server.enabled) {
+  //     await supertest
+  //       .get('/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/index-pattern/sample-*.json')
+  //       .set('kbn-xsrf', 'xxx')
+  //       .expect('Content-Type', 'application/json; charset=utf-8')
+  //       .expect(200);
+  //   } else {
+  //     warnAndSkipTest(this, log);
+  //   }
+  // });
 }
