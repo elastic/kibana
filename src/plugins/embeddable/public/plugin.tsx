@@ -84,6 +84,13 @@ export interface EmbeddableStart {
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
+  getAttributeService: <
+    A,
+    V extends EmbeddableInput & { attributes: A },
+    R extends SavedObjectEmbeddableInput
+  >(
+    type: string
+  ) => AttributeService<A, V, R>;
 
   /**
    * Given {@link ChartActionContext} returns a list of `data` plugin {@link Filter} entries.
