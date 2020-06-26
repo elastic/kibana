@@ -11,14 +11,21 @@ export default function upgradeAssistantFunctionalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['upgradeAssistant']);
+  const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
+  const security = getService('security');
 
-  describe('Upgrade Checkup', function () {
+  describe.only('Upgrade Checkup', function () {
     this.tags('includeFirefox');
-    before(async () => await esArchiver.load('empty_kibana'));
+
+    before(async () => {
+    await esArchiver.load('empty_kibana')
+    await security.testUser.setRoles(['global_upgrade_assistant_role']);
+    });
+
     after(async () => {
       await PageObjects.upgradeAssistant.expectTelemetryHasFinish();
       await esArchiver.unload('empty_kibana');
+      await security.testUser.restoreDefaults();
     });
 
     it('allows user to navigate to upgrade checkup', async () => {
@@ -28,6 +35,7 @@ export default function upgradeAssistantFunctionalTests({
 
     it('allows user to toggle deprecation logging', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
+      await PageObjects.common.sleep(5000);
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
       await PageObjects.upgradeAssistant.toggleDeprecationLogging();
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('Off');
