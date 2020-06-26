@@ -84,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
+          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
         it('should load the home page', async () => {

@@ -61,10 +61,6 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     describe(`${testData.suiteTitle}`, function () {
-      after(async () => {
-        // await transform.api.deleteIndices(<CLONE_DEST_INDEX>);
-      });
-
       it('should load the home page', async () => {
         await transform.navigation.navigateTo();
         await transform.management.assertTransformListPageExists();
