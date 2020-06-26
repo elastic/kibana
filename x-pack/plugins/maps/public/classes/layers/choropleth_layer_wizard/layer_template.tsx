@@ -37,15 +37,15 @@ export enum BOUNDARIES_SOURCE {
 
 const BOUNDARIES_OPTIONS = [
   {
-    id: BOUNDARIES_SOURCE.ELASTICSEARCH,
-    label: i18n.translate('xpack.maps.choropleth.boundaries.elasticsearch', {
-      defaultMessage: 'Points, lines, and polygons from Elasticsearch',
-    }),
-  },
-  {
     id: BOUNDARIES_SOURCE.EMS,
     label: i18n.translate('xpack.maps.choropleth.boundaries.ems', {
       defaultMessage: 'Administrative boundaries from Elastic Maps Service',
+    }),
+  },
+  {
+    id: BOUNDARIES_SOURCE.ELASTICSEARCH,
+    label: i18n.translate('xpack.maps.choropleth.boundaries.elasticsearch', {
+      defaultMessage: 'Points, lines, and polygons from Elasticsearch',
     }),
   },
 ];
@@ -58,7 +58,8 @@ interface State {
   leftGeoFields: IFieldType[];
   leftJoinFields: IFieldType[];
   leftGeoField: string | null;
-  leftJoinField: string | null;
+  leftEmsJoinField: string | null;
+  leftElasticsearchJoinField: string | null;
   rightIndexPatternId: string | null;
   rightIndexPatternTitle: string | null;
   rightTermsFields: IFieldType[];
@@ -76,7 +77,8 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     leftGeoFields: [],
     leftJoinFields: [],
     leftGeoField: null,
-    leftJoinField: null,
+    leftEmsJoinField: null,
+    leftElasticsearchJoinField: null,
     rightIndexPatternId: null,
     rightIndexPatternTitle: null,
     rightTermsFields: [],
@@ -137,7 +139,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     this.setState(
       {
         leftEmsFields,
-        leftJoinField: leftEmsFields.length ? leftEmsFields[0].value : null,
+        leftEmsJoinField: leftEmsFields.length ? leftEmsFields[0].value : null,
       },
       this._previewLayer
     );
@@ -145,7 +147,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
   _onLeftSourceChange = (optionId: string) => {
     this.setState(
-      { leftSource: optionId as BOUNDARIES_SOURCE, leftJoinField: null, rightJoinField: null },
+      { leftSource: optionId as BOUNDARIES_SOURCE, rightJoinField: null },
       this._previewLayer
     );
   };
@@ -157,7 +159,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
         leftGeoFields: getGeoFields(indexPattern.fields),
         leftJoinFields: getSourceFields(indexPattern.fields),
         leftGeoField: null,
-        leftJoinField: null,
+        leftElasticsearchJoinField: null,
         rightJoinField: null,
       },
       () => {
@@ -181,11 +183,11 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     if (!joinField) {
       return;
     }
-    this.setState({ leftJoinField: joinField }, this._previewLayer);
+    this.setState({ leftElasticsearchJoinField: joinField }, this._previewLayer);
   };
 
   _onLeftEmsFileChange = (emFileId: string) => {
-    this.setState({ leftEmsFileId: emFileId, leftJoinField: null, rightJoinField: null }, () => {
+    this.setState({ leftEmsFileId: emFileId, leftEmsJoinField: null, rightJoinField: null }, () => {
       this._previewLayer();
       this._loadEmsFileFields();
     });
@@ -196,7 +198,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
       return;
     }
 
-    this.setState({ leftJoinField: selectedOptions[0].value! }, this._previewLayer);
+    this.setState({ leftEmsJoinField: selectedOptions[0].value! }, this._previewLayer);
   };
 
   _onRightIndexPatternChange = (indexPatternId: string) => {
@@ -226,10 +228,12 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   _isLeftConfigComplete() {
     if (this.state.leftSource === BOUNDARIES_SOURCE.ELASTICSEARCH) {
       return (
-        !!this.state.leftIndexPattern && !!this.state.leftGeoField && !!this.state.leftJoinField
+        !!this.state.leftIndexPattern &&
+        !!this.state.leftGeoField &&
+        !!this.state.leftElasticsearchJoinField
       );
     } else {
-      return !!this.state.leftEmsFileId && !!this.state.leftJoinField;
+      return !!this.state.leftEmsFileId && !!this.state.leftEmsJoinField;
     }
   }
 
@@ -249,14 +253,14 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
             // @ts-expect-error - avoid wrong "Property 'id' does not exist on type 'never'." compile error
             leftIndexPatternId: this.state.leftIndexPattern!.id,
             leftGeoField: this.state.leftGeoField!,
-            leftJoinField: this.state.leftJoinField!,
+            leftJoinField: this.state.leftElasticsearchJoinField!,
             rightIndexPatternId: this.state.rightIndexPatternId!,
             rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
           })
         : createEmsChoroplethLayerDescriptor({
             leftEmsFileId: this.state.leftEmsFileId!,
-            leftEmsField: this.state.leftJoinField!,
+            leftEmsField: this.state.leftEmsJoinField!,
             rightIndexPatternId: this.state.rightIndexPatternId!,
             rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
@@ -299,7 +303,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
               placeholder={i18n.translate('xpack.maps.choropleth.joinFieldPlaceholder', {
                 defaultMessage: 'Select field',
               })}
-              value={this.state.leftJoinField}
+              value={this.state.leftElasticsearchJoinField}
               onChange={this._onLeftJoinFieldSelect}
               fields={this.state.leftJoinFields}
               isClearable={false}
@@ -322,10 +326,10 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
       let emsFieldSelect;
       if (this.state.leftEmsFields.length) {
         let selectedOption;
-        if (this.state.leftJoinField) {
+        if (this.state.leftEmsJoinField) {
           selectedOption = this.state.leftEmsFields.find(
             (option: EuiComboBoxOptionOption<string>) => {
-              return this.state.leftJoinField === option.value;
+              return this.state.leftEmsJoinField === option.value;
             }
           );
         }
