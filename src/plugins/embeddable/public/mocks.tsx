@@ -79,9 +79,9 @@ export const createEmbeddablePanelMock = ({
 
 export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTransfer> => {
   return {
-    getIncomingOriginatingApp: jest.fn(),
+    getIncomingEditorState: jest.fn(),
     getIncomingEmbeddablePackage: jest.fn(),
-    navigateToWithOriginatingApp: jest.fn(),
+    navigateToEditor: jest.fn(),
     navigateToWithEmbeddablePackage: jest.fn(),
   };
 };
