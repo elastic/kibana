@@ -6,7 +6,7 @@
 
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiText, EuiTitle, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
@@ -58,23 +58,19 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
                     defaultMessage="You can make changes to the Policy Configuration in the Security app. Fleet will deploy changes to your agents whenever your Policy changes."
                   />
                   <EuiSpacer />
-                  <EuiButton>
-                    <LinkToApp
-                      data-test-subj="editLinkToPolicyDetails"
-                      appId="securitySolution:management"
-                      className="editLinkToPolicyDetails"
-                      appPath={policyUrl}
-                      // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
-                      href={`${services.application.getUrlForApp(
-                        'securitySolution:management'
-                      )}${policyUrl}`}
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.ingestManager.editDatasource.configurePolicyLink"
-                        defaultMessage="Configure Policy"
-                      />
-                    </LinkToApp>
-                  </EuiButton>
+                  <LinkToApp
+                    data-test-subj="editLinkToPolicyDetails"
+                    asButton={true}
+                    appId="securitySolution:management"
+                    className="editLinkToPolicyDetails"
+                    appPath={policyUrl}
+                    // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.ingestManager.editDatasource.configurePolicyLink"
+                      defaultMessage="Configure Policy"
+                    />
+                  </LinkToApp>
                 </>
               ) : (
                 <FormattedMessage
