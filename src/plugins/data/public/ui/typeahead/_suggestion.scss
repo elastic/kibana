@@ -16,7 +16,7 @@ $kbnTypeaheadTypes: (
     color: $euiTextColor;
     background-color: $euiColorEmptyShade;
     position: absolute;
-    top: -1px;
+    top: -2px;
     z-index: $euiZContentMenu;
     width: 100%;
     border-bottom-left-radius: $euiBorderRadius;
@@ -55,7 +55,6 @@ $kbnTypeaheadTypes: (
 
     .kbnTypeahead__item.active {
       background-color: $euiColorLightestShade;
-
 
       .kbnSuggestionItem__callout {
         background: $euiColorEmptyShade;
@@ -130,7 +129,6 @@ $kbnTypeaheadTypes: (
   align-items: center;
 }
 
-
 .kbnSuggestionItem__text {
   flex-grow: 0; /* 2 */
   flex-basis: auto; /* 2 */
@@ -142,16 +140,15 @@ $kbnTypeaheadTypes: (
   color: $euiTextColor;
 }
 
-
 .kbnSuggestionItem__description {
   color: $euiColorDarkShade;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-left: $euiSizeXL;
-  
+
   &:empty {
     flex-grow: 0;
-    margin-left:0;
+    margin-left: 0;
   }
 }
 

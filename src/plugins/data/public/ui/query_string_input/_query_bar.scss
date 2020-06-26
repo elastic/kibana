@@ -1,3 +1,34 @@
+.kbnQueryBar__wrap {
+  max-width: 100%;
+  z-index: $euiZContentMenu;
+}
+
+.kbnQueryBar__textarea {
+  z-index: $euiZContentMenu;
+  resize: none !important; // When in the group, it will autosize
+  height: $euiSizeXXL;
+  padding-top: $euiSizeS + 1px !important;
+  transform: translateY(-2px);
+  padding: $euiSizeS - 1px; // Accounts for the border from the control group
+
+  &:not(:focus) {
+    @include euiYScrollWithShadows;
+    white-space: nowrap;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    border: none;
+    box-shadow: none;
+  }
+
+  // When focused, let it scroll
+  &:focus {
+    overflow-x: auto;
+    overflow-y: auto;
+    width: calc(100% + 1px); // To overtake the group's fake border
+    white-space: normal;
+  }
+}
+
 @include euiBreakpoint('xs', 's') {
   .kbnQueryBar--withDatePicker {
     > :first-child {
