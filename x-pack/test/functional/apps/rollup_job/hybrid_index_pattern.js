@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings']);
 
-  describe('hybrid index pattern', function () {
+  describe.only('hybrid index pattern', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `hybrid-index-pattern-test-rollup-job-${Date.now()}`;
@@ -81,10 +81,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.createIndexPattern(rollupIndexPatternName, '@timestamp', false);
 
       await PageObjects.settings.clickKibanaIndexPatterns();
-      const indexPattern = (await PageObjects.settings.getIndexPatternList()).pop();
-      const indexPatternText = await indexPattern.getVisibleText();
-      expect(indexPatternText).to.contain(rollupIndexPatternName);
-      expect(indexPatternText).to.contain('Rollup');
+      const indexPatternNames = await PageObjects.settings.getAllIndexPatternNames();
+      const filteredIndex = indexPatternNames.filter(
+        (i) => i.includes(rollupIndexPatternName) && i.includes('Rollup')
+      );
+      expect(filteredIndex.length).to.be(1);
     });
 
     after(async () => {
