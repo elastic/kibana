@@ -3,7 +3,7 @@ server:
   port: 8274
 logging:
   loggers:
-    - context: root
+    root:
       appenders:
         - console
       level: debug
