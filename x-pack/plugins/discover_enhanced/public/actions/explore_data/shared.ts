@@ -20,5 +20,5 @@ export const getIndexPatterns = (embeddable?: IEmbeddable): string[] => {
   return isOutputWithIndexPatterns(output) ? output.indexPatterns.map(({ id }) => id) : [];
 };
 
-export const hasExactlyOneIndexPattern = (embeddable?: IEmbeddable): string[] =>
+export const hasExactlyOneIndexPattern = (embeddable?: IEmbeddable): boolean =>
   getIndexPatterns(embeddable).length === 1;

@@ -125,9 +125,16 @@ describe('"Explore underlying data" panel action', () => {
       expect(isCompatible).toBe(false);
     });
 
-    test('returns false if embeddable is not Visualize embeddable', async () => {
-      const { action, embeddable, context } = setup();
-      (embeddable as any).type = 'NOT_VISUALIZE_EMBEDDABLE';
+    test('returns false if embeddable has more than one index pattern', async () => {
+      const { action, output, context } = setup();
+      output.indexPatterns = [
+        {
+          id: 'index-ptr-foo',
+        },
+        {
+          id: 'index-ptr-bar',
+        },
+      ];
 
       const isCompatible = await action.isCompatible(context);
 
