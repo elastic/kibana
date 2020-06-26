@@ -127,6 +127,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
     }
 
     async getRowTitles() {
+      await this.waitTableIsLoaded();
       const table = await testSubjects.find('savedObjectsTable');
       const $ = await table.parseDomContent();
       return $.findTestSubjects('savedObjectsTableRowTitle')
