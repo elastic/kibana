@@ -49,7 +49,9 @@ export interface NodesFeatureUsageResponse {
 
 export type NodesUsageFetcher = (callCluster: APICaller) => Promise<NodesFeatureUsageResponse>;
 
-export type NodesUsageGetter = (callCluster: APICaller) => Promise<{ nodes: NodeObj[] }>;
+export type NodesUsageGetter = (
+  callCluster: APICaller
+) => Promise<{ nodes: NodeObj[] | Array<{}> }>;
 /**
  * Get the nodes usage data from the connected cluster.
  *
@@ -75,9 +77,12 @@ export async function fetchNodesUsage<NodesUsageFetcher>(callCluster: APICaller)
  */
 export const getNodesUsage: NodesUsageGetter = async (callCluster) => {
   const result = await fetchNodesUsage<NodesUsageFetcher>(callCluster);
-  const transformedNodes = Object.entries(result.nodes).map(([key, value]) => ({
-    ...(value as NodeObj),
-    node_id: key,
-  }));
+  let transformedNodes = [{}];
+  if (result && result.nodes) {
+    transformedNodes = Object.entries(result.nodes).map(([key, value]) => ({
+      ...(value as NodeObj),
+      node_id: key,
+    }));
+  }
   return { nodes: transformedNodes };
 };
