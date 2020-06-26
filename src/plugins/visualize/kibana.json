@@ -9,7 +9,8 @@
     "navigation",
     "savedObjects",
     "visualizations",
-    "dashboard"
+    "dashboard",
+    "embeddable"
   ],
   "optionalPlugins": ["home", "share"]
 }

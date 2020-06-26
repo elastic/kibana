@@ -62,6 +62,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
 }) => {
   const {
     colors: { danger, gray },
+    chartTheme,
   } = useContext(UptimeThemeContext);
 
   let content: JSX.Element | undefined;
@@ -125,6 +126,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             }}
             showLegend={false}
             onBrushEnd={onBrushEnd}
+            {...chartTheme}
           />
           <Axis
             id={i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {

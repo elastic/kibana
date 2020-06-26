@@ -56,6 +56,7 @@ export const MonitorBarSeriesComponent: React.FC<Props> = ({
 }) => {
   const {
     colors: { danger },
+    chartTheme,
   } = useContext(UptimeThemeContext);
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
@@ -72,7 +73,7 @@ export const MonitorBarSeriesComponent: React.FC<Props> = ({
   return seriesHasDownValues(histogramSeries) ? (
     <div style={{ height: 50, width: '100%', maxWidth: '1200px', marginRight: 15 }}>
       <Chart>
-        <Settings xDomain={{ min: from, max: to }} onBrushEnd={onBrushEnd} />
+        <Settings xDomain={{ min: from, max: to }} onBrushEnd={onBrushEnd} {...chartTheme} />
         <Axis
           hide
           id="bottom"

@@ -215,7 +215,7 @@ describe('Exception helpers', () => {
           fieldName: 'host.name',
           isNested: false,
           operator: 'is in list',
-          value: ['some host name'],
+          value: 'some-list-id',
         },
         {
           fieldName: 'host.name',
@@ -238,8 +238,8 @@ describe('Exception helpers', () => {
         {
           fieldName: 'host.name.host.name',
           isNested: true,
-          operator: 'exists',
-          value: null,
+          operator: 'is',
+          value: 'some host name',
         },
       ];
       expect(result).toEqual(expected);

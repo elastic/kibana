@@ -475,3 +475,12 @@ export const mockGlobIndexPattern: IndexPatternSavedObject = {
     title: '*',
   },
 };
+
+export const mockCCSGlobIndexPattern: IndexPatternSavedObject = {
+  id: '*:*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: '*:*',
+  },
+};
