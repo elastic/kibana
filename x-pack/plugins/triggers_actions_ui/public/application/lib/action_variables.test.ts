@@ -184,6 +184,7 @@ function getAlertType(actionVariables: ActionVariables): AlertType {
     actionVariables,
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    authorizedConsumers: [],
     producer: ALERTS_FEATURE_ID,
   };
 }

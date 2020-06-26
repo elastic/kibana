@@ -122,12 +122,12 @@ export const AlertForm = ({
     (async () => {
       try {
         const alertTypes = await loadAlertTypes({ http });
-        const index: AlertTypeIndex = {};
+        const index: AlertTypeIndex = new Map();
         for (const alertTypeItem of alertTypes) {
-          index[alertTypeItem.id] = alertTypeItem;
+          index.set(alertTypeItem.id, alertTypeItem);
         }
-        if (alert.alertTypeId && index[alert.alertTypeId]) {
-          setDefaultActionGroupId(index[alert.alertTypeId].defaultActionGroupId);
+        if (alert.alertTypeId && index.has(alert.alertTypeId)) {
+          setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
         setAlertTypesIndex(index);
       } catch (e) {
@@ -168,21 +168,23 @@ export const AlertForm = ({
     ? alertTypeModel.alertParamsExpression
     : null;
 
-  const alertTypeRegistryList =
-    alert.consumer === ALERTS_FEATURE_ID
-      ? alertTypeRegistry
-          .list()
-          .filter(
-            (alertTypeRegistryItem: AlertTypeModel) => !alertTypeRegistryItem.requiresAppContext
-          )
-      : alertTypeRegistry
-          .list()
-          .filter(
-            (alertTypeRegistryItem: AlertTypeModel) =>
-              alertTypesIndex &&
-              alertTypesIndex[alertTypeRegistryItem.id] &&
-              alertTypesIndex[alertTypeRegistryItem.id].producer === alert.consumer
-          );
+  const alertTypeRegistryList = alertTypesIndex
+    ? alertTypeRegistry
+        .list()
+        .filter(
+          (alertTypeRegistryItem: AlertTypeModel) =>
+            alertTypesIndex.has(alertTypeRegistryItem.id) &&
+            alertTypesIndex
+              .get(alertTypeRegistryItem.id)!
+              .authorizedConsumers.includes(alert.consumer)
+        )
+        .filter((alertTypeRegistryItem: AlertTypeModel) =>
+          alert.consumer === ALERTS_FEATURE_ID
+            ? !alertTypeRegistryItem.requiresAppContext
+            : alertTypesIndex.get(alertTypeRegistryItem.id)!.producer === alert.consumer
+        )
+    : [];
+
   const alertTypeNodes = alertTypeRegistryList.map(function (item, index) {
     return (
       <EuiKeyPadMenuItem
@@ -193,8 +195,8 @@ export const AlertForm = ({
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
           setAlertProperty('params', {});
-          if (alertTypesIndex && alertTypesIndex[item.id]) {
-            setDefaultActionGroupId(alertTypesIndex[item.id].defaultActionGroupId);
+          if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+            setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
           }
         }}
       >
@@ -263,8 +265,8 @@ export const AlertForm = ({
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
-            alertTypesIndex && alertTypesIndex[alert.alertTypeId]
-              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(
+            alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
+              ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).map(
                   (av) => av.name
                 )
               : undefined

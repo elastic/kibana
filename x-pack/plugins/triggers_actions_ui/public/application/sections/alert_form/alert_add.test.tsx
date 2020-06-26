@@ -19,6 +19,10 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { ReactWrapper } from 'enzyme';
 import { AppContextProvider } from '../../app_context';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+jest.mock('../../lib/alert_api', () => ({
+  loadAlertTypes: jest.fn(),
+  health: jest.fn((async) => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
+}));
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -44,6 +48,27 @@ describe('alert_add', () => {
 
   async function setup() {
     const mocks = coreMock.createSetup();
+    const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+    const alertTypes = [
+      {
+        id: 'my-alert-type',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: [ALERTS_FEATURE_ID, 'test'],
+        actionVariables: {
+          context: [],
+          state: [],
+        },
+      },
+    ];
+    loadAlertTypes.mockResolvedValue(alertTypes);
     const [
       {
         application: { capabilities },

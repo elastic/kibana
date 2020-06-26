@@ -19,7 +19,7 @@ export { Alert, AlertAction, AlertTaskState, RawAlertInstance, AlertingFramework
 export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
-export type AlertTypeIndex = Record<string, AlertType>;
+export type AlertTypeIndex = Map<string, AlertType>;
 export type ActionTypeRegistryContract<ActionConnector = any, ActionParams = any> = PublicMethodsOf<
   TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>
 >;
@@ -99,6 +99,7 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
+  authorizedConsumers: string[];
   producer: string;
 }
 

@@ -22,6 +22,10 @@ jest.mock('../../lib/alert_api', () => ({
 }));
 
 describe('alert_form', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   let deps: any;
   const alertType = {
     id: 'my-alert-type',
@@ -65,6 +69,23 @@ describe('alert_form', () => {
 
     async function setup() {
       const mocks = coreMock.createSetup();
+      const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+      const alertTypes = [
+        {
+          id: 'my-alert-type',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          defaultActionGroupId: 'testActionGroup',
+          producer: ALERTS_FEATURE_ID,
+          authorizedConsumers: [ALERTS_FEATURE_ID, 'test'],
+        },
+      ];
+      loadAlertTypes.mockResolvedValue(alertTypes);
       const [
         {
           application: { capabilities },
@@ -170,6 +191,7 @@ describe('alert_form', () => {
           ],
           defaultActionGroupId: 'testActionGroup',
           producer: ALERTS_FEATURE_ID,
+          authorizedConsumers: [ALERTS_FEATURE_ID, 'test'],
         },
         {
           id: 'same-consumer-producer-alert-type',
@@ -182,6 +204,7 @@ describe('alert_form', () => {
           ],
           defaultActionGroupId: 'testActionGroup',
           producer: 'test',
+          authorizedConsumers: [ALERTS_FEATURE_ID, 'test'],
         },
       ]);
       const mocks = coreMock.createSetup();

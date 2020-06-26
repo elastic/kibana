@@ -92,6 +92,7 @@ describe('alert_details', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     expect(
@@ -130,6 +131,7 @@ describe('alert_details', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     expect(
@@ -159,6 +161,7 @@ describe('alert_details', () => {
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: [ALERTS_FEATURE_ID],
       };
 
       const actionTypes: ActionType[] = [
@@ -212,6 +215,7 @@ describe('alert_details', () => {
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: [ALERTS_FEATURE_ID],
       };
       const actionTypes: ActionType[] = [
         {
@@ -270,6 +274,7 @@ describe('alert_details', () => {
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: [ALERTS_FEATURE_ID],
       };
 
       expect(
@@ -289,6 +294,7 @@ describe('alert_details', () => {
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: [ALERTS_FEATURE_ID],
       };
 
       expect(
@@ -317,6 +323,7 @@ describe('disable button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     const enableButton = shallow(
@@ -344,6 +351,7 @@ describe('disable button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     const enableButton = shallow(
@@ -371,6 +379,7 @@ describe('disable button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     const disableAlert = jest.fn();
@@ -407,6 +416,7 @@ describe('disable button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     const enableAlert = jest.fn();
@@ -446,6 +456,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     const enableButton = shallow(
@@ -474,6 +485,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     const enableButton = shallow(
@@ -502,6 +514,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     const muteAlert = jest.fn();
@@ -539,6 +552,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     const unmuteAlert = jest.fn();
@@ -576,6 +590,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
+      authorizedConsumers: [ALERTS_FEATURE_ID],
     };
 
     const enableButton = shallow(

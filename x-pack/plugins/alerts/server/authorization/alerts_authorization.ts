@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { pluck, mapValues, remove } from 'lodash';
+import { pluck, mapValues, remove, omit, isUndefined } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { ALERTS_FEATURE_ID } from '../../common';
 import { AlertTypeRegistry } from '../types';
@@ -52,63 +52,67 @@ export class AlertsAuthorization {
     const { authorization } = this;
     if (authorization) {
       const alertType = this.alertTypeRegistry.get(alertTypeId);
-      const requiredPrivilegesByScope = {
-        consumer: authorization.actions.alerting.get(alertTypeId, consumer, operation),
-        producer: authorization.actions.alerting.get(alertTypeId, alertType.producer, operation),
-      };
 
       // We special case the Alerts Management `consumer` as we don't want to have to
       // manually authorize each alert type in the management UI
       const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
+      // We special case the Alerts Management `prodcuer` as all users are authorized
+      // to use built-in alert types by definition
+      const shouldAuthorizeProducer =
+        alertType.producer !== ALERTS_FEATURE_ID && alertType.producer !== consumer;
 
-      const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, username, privileges } = await checkPrivileges(
-        shouldAuthorizeConsumer && consumer !== alertType.producer
-          ? [
-              // check for access at consumer level
-              requiredPrivilegesByScope.consumer,
-              // check for access at producer level
-              requiredPrivilegesByScope.producer,
-            ]
-          : [
-              // skip consumer privilege checks under `alerts` as all alert types can
-              // be created under `alerts` if you have producer level privileges
-              requiredPrivilegesByScope.producer,
-            ]
-      );
-
-      if (hasAllRequested) {
-        this.auditLogger.alertsAuthorizationSuccess(
-          username,
-          alertTypeId,
-          ScopeType.Consumer,
-          consumer,
-          operation
-        );
-      } else {
-        const authorizedPrivileges = pluck(
-          privileges.filter((privilege) => privilege.authorized),
-          'privilege'
-        );
-        const unauthorizedScopes = mapValues(
-          requiredPrivilegesByScope,
-          (privilege) => !authorizedPrivileges.includes(privilege)
+      if (shouldAuthorizeConsumer || shouldAuthorizeProducer) {
+        const requiredPrivilegesByScope = omit(
+          {
+            consumer: shouldAuthorizeConsumer
+              ? authorization.actions.alerting.get(alertTypeId, consumer, operation)
+              : undefined,
+            producer: shouldAuthorizeProducer
+              ? authorization.actions.alerting.get(alertTypeId, alertType.producer, operation)
+              : undefined,
+          },
+          isUndefined
         );
 
-        const [unauthorizedScopeType, unauthorizedScope] =
-          shouldAuthorizeConsumer && unauthorizedScopes.consumer
-            ? [ScopeType.Consumer, consumer]
-            : [ScopeType.Producer, alertType.producer];
+        const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+        const { hasAllRequested, username, privileges } = await checkPrivileges(
+          Object.values(requiredPrivilegesByScope)
+        );
 
-        throw Boom.forbidden(
-          this.auditLogger.alertsAuthorizationFailure(
+        if (hasAllRequested) {
+          this.auditLogger.alertsAuthorizationSuccess(
             username,
             alertTypeId,
-            unauthorizedScopeType,
-            unauthorizedScope,
+            ScopeType.Consumer,
+            consumer,
             operation
-          )
-        );
+          );
+        } else {
+          const authorizedPrivileges = pluck(
+            privileges.filter((privilege) => privilege.authorized),
+            'privilege'
+          );
+
+          const unauthorizedScopes = mapValues(
+            requiredPrivilegesByScope,
+            (privilege) => !authorizedPrivileges.includes(privilege)
+          );
+
+          const [unauthorizedScopeType, unauthorizedScope] =
+            shouldAuthorizeConsumer && unauthorizedScopes.consumer
+              ? [ScopeType.Consumer, consumer]
+              : [ScopeType.Producer, alertType.producer];
+
+          throw Boom.forbidden(
+            this.auditLogger.alertsAuthorizationFailure(
+              username,
+              alertTypeId,
+              unauthorizedScopeType,
+              unauthorizedScope,
+              operation
+            )
+          );
+        }
       }
     }
   }
@@ -204,13 +208,13 @@ export class AlertsAuthorization {
         );
       })
       .map((feature) => feature.id);
+
+    const allPossibleConsumers = [ALERTS_FEATURE_ID, ...featuresIds];
+
     if (!this.authorization) {
       return {
         hasAllRequested: true,
-        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(alertTypes, [
-          ALERTS_FEATURE_ID,
-          ...featuresIds,
-        ]),
+        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(alertTypes, allPossibleConsumers),
       };
     } else {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
@@ -218,18 +222,28 @@ export class AlertsAuthorization {
       );
 
       // add an empty `authorizedConsumers` array on each alertType
-      const alertTypesWithAutherization = this.augmentWithAuthorizedConsumers(alertTypes);
+      const alertTypesWithAutherization = this.augmentWithAuthorizedConsumers(alertTypes, []);
+      const preAuthorizedAlertTypes = new Set<RegistryAlertTypeWithAuth>();
 
       // map from privilege to alertType which we can refer back to when analyzing the result
       // of checkPrivileges
-      const privilegeToAlertType = new Map<string, [RegistryAlertTypeWithAuth, string]>();
+      const privilegeToAlertType = new Map<string, [RegistryAlertTypeWithAuth, string[]]>();
       // as we can't ask ES for the user's individual privileges we need to ask for each feature
       // and alertType in the system whether this user has this privilege
       for (const alertType of alertTypesWithAutherization) {
+        if (alertType.producer === ALERTS_FEATURE_ID) {
+          alertType.authorizedConsumers.push(ALERTS_FEATURE_ID);
+          preAuthorizedAlertTypes.add(alertType);
+        }
+
         for (const feature of featuresIds) {
           privilegeToAlertType.set(
             this.authorization!.actions.alerting.get(alertType.id, feature, operation),
-            [alertType, feature]
+            [
+              alertType,
+              // granting privileges under the producer automatically authorized the Alerts Management UI as well
+              alertType.producer === feature ? [ALERTS_FEATURE_ID, feature] : [feature],
+            ]
           );
         }
       }
@@ -243,28 +257,28 @@ export class AlertsAuthorization {
         hasAllRequested,
         authorizedAlertTypes: hasAllRequested
           ? // has access to all features
-            this.augmentWithAuthorizedConsumers(alertTypes, [ALERTS_FEATURE_ID, ...featuresIds])
+            this.augmentWithAuthorizedConsumers(alertTypes, allPossibleConsumers)
           : // only has some of the required privileges
             privileges.reduce((authorizedAlertTypes, { authorized, privilege }) => {
               if (authorized && privilegeToAlertType.has(privilege)) {
-                const [alertType, consumer] = privilegeToAlertType.get(privilege)!;
-                alertType.authorizedConsumers.push(consumer);
+                const [alertType, consumers] = privilegeToAlertType.get(privilege)!;
+                alertType.authorizedConsumers.push(...consumers);
                 authorizedAlertTypes.add(alertType);
               }
               return authorizedAlertTypes;
-            }, new Set<RegistryAlertTypeWithAuth>()),
+            }, preAuthorizedAlertTypes),
       };
     }
   }
 
   private augmentWithAuthorizedConsumers(
     alertTypes: Set<RegistryAlertType>,
-    authorizedConsumers?: string[]
+    authorizedConsumers: string[]
   ): Set<RegistryAlertTypeWithAuth> {
     return new Set(
       Array.from(alertTypes).map((alertType) => ({
         ...alertType,
-        authorizedConsumers: authorizedConsumers ?? [ALERTS_FEATURE_ID],
+        authorizedConsumers: [...authorizedConsumers],
       }))
     );
   }

@@ -80,7 +80,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [alertTypesState, setAlertTypesState] = useState<AlertTypeState>({
     isLoading: false,
     isInitialized: false,
-    data: {},
+    data: new Map(),
   });
   const [alertsState, setAlertsState] = useState<AlertState>({
     isLoading: false,
@@ -99,9 +99,9 @@ export const AlertsList: React.FunctionComponent = () => {
       try {
         setAlertTypesState({ ...alertTypesState, isLoading: true });
         const alertTypes = await loadAlertTypes({ http });
-        const index: AlertTypeIndex = {};
+        const index: AlertTypeIndex = new Map();
         for (const alertType of alertTypes) {
-          index[alertType.id] = alertType;
+          index.set(alertType.id, alertType);
         }
         setAlertTypesState({ isLoading: false, data: index, isInitialized: true });
       } catch (e) {
@@ -458,6 +458,6 @@ function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIn
     ...alert,
     actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
-    alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
+    alertType: alertTypesIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
   }));
 }

@@ -9,6 +9,7 @@ import { omit } from 'lodash';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { ALERTS_FEATURE_ID, AlertType } from '../../../../../plugins/alerts/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function listAlertTypes({ getService }: FtrProviderContext) {
@@ -57,7 +58,11 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.body).to.eql([]);
+              // users with no privileges should only have access to
+              // built-in types
+              response.body.forEach((alertType: AlertType) => {
+                expect(alertType.producer).to.equal(ALERTS_FEATURE_ID);
+              });
               break;
             case 'space_1_all at space1':
               expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
