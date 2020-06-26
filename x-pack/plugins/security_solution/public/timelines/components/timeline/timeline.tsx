@@ -7,6 +7,7 @@
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
@@ -16,6 +17,7 @@ import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode, EventType } from '../../../timelines/store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
+import { getInvestigateInResolverAction } from './body/helpers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
@@ -88,6 +90,7 @@ export interface Props {
   end: number;
   eventType?: EventType;
   filters: Filter[];
+  graphEventId?: string;
   id: string;
   indexPattern: IIndexPattern;
   indexToAdd: string[];
@@ -119,6 +122,7 @@ export const TimelineComponent: React.FC<Props> = ({
   end,
   eventType,
   filters,
+  graphEventId,
   id,
   indexPattern,
   indexToAdd,
@@ -141,6 +145,7 @@ export const TimelineComponent: React.FC<Props> = ({
   toggleColumn,
   usersViewing,
 }) => {
+  const dispatch = useDispatch();
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
   const combinedQueries = combineQueries({
@@ -168,9 +173,14 @@ export const TimelineComponent: React.FC<Props> = ({
     initializeTimeline,
     setIsTimelineLoading,
     setTimelineFilterManager,
+    setTimelineRowActions,
   } = useManageTimeline();
   useEffect(() => {
     initializeTimeline({ id, indexToAdd });
+    setTimelineRowActions({
+      id,
+      timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId: id })],
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
@@ -197,6 +207,7 @@ export const TimelineComponent: React.FC<Props> = ({
             indexPattern={indexPattern}
             dataProviders={dataProviders}
             filterManager={filterManager}
+            graphEventId={graphEventId}
             onDataProviderEdited={onDataProviderEdited}
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}

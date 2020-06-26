@@ -55,6 +55,8 @@ export interface TimelineModel {
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
   filters?: Filter[];
+  /** When non-empty, display a graph view for this event */
+  graphEventId?: string;
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
@@ -129,6 +131,7 @@ export type SubsetTimelineModel = Readonly<
     | 'description'
     | 'eventType'
     | 'eventIdToNoteIds'
+    | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
     | 'isFavorite'
@@ -165,4 +168,5 @@ export type SubsetTimelineModel = Readonly<
 export interface TimelineUrl {
   id: string;
   isOpen: boolean;
+  graphEventId?: string;
 }
