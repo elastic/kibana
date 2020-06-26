@@ -141,7 +141,7 @@ describe('test alerts route', () => {
     const soFindResp: SavedObject<unknown> = {
       ...mockArtifact,
     };
-    mockSavedObjectClient.get.mockImplementationOnce(() => Promise.resolve(soFindResp));
+    ingestSavedObjectClient.get.mockImplementationOnce(() => Promise.resolve(soFindResp));
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/allowlist/download')
@@ -180,7 +180,7 @@ describe('test alerts route', () => {
       },
     });
 
-    mockSavedObjectClient.get.mockImplementationOnce(() =>
+    ingestSavedObjectClient.get.mockImplementationOnce(() =>
       // eslint-disable-next-line prefer-promise-reject-errors
       Promise.reject({ output: { statusCode: 404 } })
     );
@@ -236,7 +236,7 @@ describe('test alerts route', () => {
     );
     expect(mockResponse.ok).toBeCalled();
     // The saved objects client should be bypassed as the cache will contain the download
-    expect(mockSavedObjectClient.get.mock.calls.length).toEqual(0);
+    expect(ingestSavedObjectClient.get.mock.calls.length).toEqual(0);
   });
 
   it('should respond with a 401 if a valid API Token is not supplied', async () => {
