@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './explore_data_context_menu_action';
+export { OnXJsonEditorUpdateHandler, XJsonEditor } from './xjson_editor';
