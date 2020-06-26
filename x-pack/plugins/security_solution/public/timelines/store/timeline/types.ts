@@ -25,6 +25,7 @@ export interface TimelineById {
 }
 
 export interface InsertTimeline {
+  graphEventId?: string;
   timelineId: string;
   timelineSavedObjectId: string | null;
   timelineTitle: string;

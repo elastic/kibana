@@ -9,6 +9,7 @@ import React from 'react';
 import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
+import { showGraphView } from '../body/helpers';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
 import {
@@ -30,6 +31,7 @@ interface Props {
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
   filterManager: FilterManager;
+  graphEventId?: string;
   id: string;
   indexPattern: IIndexPattern;
   onDataProviderEdited: OnDataProviderEdited;
@@ -47,6 +49,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   indexPattern,
   dataProviders,
   filterManager,
+  graphEventId,
   onDataProviderEdited,
   onDataProviderRemoved,
   onToggleDataProviderEnabled,
@@ -74,24 +77,26 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    {show && (
-      <DataProviders
-        browserFields={browserFields}
-        id={id}
-        dataProviders={dataProviders}
-        onDataProviderEdited={onDataProviderEdited}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-      />
-    )}
+    {show && !showGraphView(graphEventId) && (
+      <>
+        <DataProviders
+          browserFields={browserFields}
+          id={id}
+          dataProviders={dataProviders}
+          onDataProviderEdited={onDataProviderEdited}
+          onDataProviderRemoved={onDataProviderRemoved}
+          onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+          onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+        />
 
-    <StatefulSearchOrFilter
-      browserFields={browserFields}
-      filterManager={filterManager}
-      indexPattern={indexPattern}
-      timelineId={id}
-    />
+        <StatefulSearchOrFilter
+          browserFields={browserFields}
+          filterManager={filterManager}
+          indexPattern={indexPattern}
+          timelineId={id}
+        />
+      </>
+    )}
   </>
 );
 
@@ -103,6 +108,7 @@ export const TimelineHeader = React.memo(
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.filterManager === nextProps.filterManager &&
+    prevProps.graphEventId === nextProps.graphEventId &&
     prevProps.onDataProviderEdited === nextProps.onDataProviderEdited &&
     prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
     prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&

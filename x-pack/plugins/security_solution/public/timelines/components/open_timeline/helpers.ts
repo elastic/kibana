@@ -212,6 +212,7 @@ export const formatTimelineResultToModel = (
 export interface QueryTimelineById<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
+  graphEventId?: string;
   timelineId: string;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
@@ -228,6 +229,7 @@ export interface QueryTimelineById<TCache> {
 export const queryTimelineById = <TCache>({
   apolloClient,
   duplicate = false,
+  graphEventId = '',
   timelineId,
   onOpenTimeline,
   openTimeline = true,
@@ -260,6 +262,7 @@ export const queryTimelineById = <TCache>({
             notes,
             timeline: {
               ...timeline,
+              graphEventId,
               show: openTimeline,
             },
             to: getOr(to, 'dateRange.end', timeline),

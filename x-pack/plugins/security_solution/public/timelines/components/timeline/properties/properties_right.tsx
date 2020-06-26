@@ -68,6 +68,7 @@ interface PropertiesRightComponentProps {
   associateNote: AssociateNote;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
+  graphEventId?: string;
   isDataInTimeline: boolean;
   noteIds: string[];
   onButtonClick: () => void;
@@ -95,6 +96,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   associateNote,
   description,
   getNotesByIds,
+  graphEventId,
   isDataInTimeline,
   noteIds,
   onButtonClick,
@@ -168,6 +170,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
 
               <EuiFlexItem grow={false}>
                 <NewCase
+                  graphEventId={graphEventId}
                   onClosePopover={onClosePopover}
                   timelineId={timelineId}
                   timelineTitle={title}

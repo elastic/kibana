@@ -18,7 +18,6 @@ import {
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
-import { SecurityPageName } from '../../../../app/types';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 export { nextTick } from '../../../../../../../test_utils';
 
@@ -26,12 +25,13 @@ import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../common/components/link_to');
 
+const mockNavigateToApp = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
 
   return {
     ...original,
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: () => ({
       services: {
         application: {
           capabilities: {
@@ -39,7 +39,7 @@ jest.mock('../../../../common/lib/kibana', () => {
               crud: true,
             },
           },
-          navigateToApp: jest.fn(),
+          navigateToApp: mockNavigateToApp,
         },
       },
     }),
@@ -64,7 +64,6 @@ jest.mock('react-redux', () => {
     useSelector: jest.fn().mockReturnValue({ savedObjectId: '1', urlState: {} }),
   };
 });
-const mockHistoryPush = jest.fn();
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -72,7 +71,7 @@ jest.mock('react-router-dom', () => {
   return {
     ...original,
     useHistory: () => ({
-      push: mockHistoryPush,
+      push: jest.fn(),
     }),
   };
 });
@@ -370,8 +369,7 @@ describe('Properties', () => {
     );
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
     wrapper.find('[data-test-subj="attach-timeline-case"]').first().simulate('click');
-
-    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SecurityPageName.case}/create` });
+    expect(mockNavigateToApp).toBeCalledWith('securitySolution:case', { path: '/create' });
     expect(mockDispatch).toBeCalledWith(
       setInsertTimeline({
         timelineId: defaultProps.timelineId,

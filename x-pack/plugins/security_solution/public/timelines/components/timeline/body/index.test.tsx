@@ -73,6 +73,7 @@ describe('Body', () => {
     pinnedEventIds: {},
     rowRenderers,
     selectedEventIds: {},
+    show: true,
     sort: mockSort,
     showCheckboxes: false,
     toggleColumn: jest.fn(),

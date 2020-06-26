@@ -769,6 +769,8 @@ export interface Ecs {
 
   _index?: Maybe<string>;
 
+  agent?: Maybe<AgentEcsField>;
+
   auditd?: Maybe<AuditdEcsFields>;
 
   destination?: Maybe<DestinationEcsFields>;
@@ -814,6 +816,10 @@ export interface Ecs {
   file?: Maybe<FileFields>;
 
   system?: Maybe<SystemEcsField>;
+}
+
+export interface AgentEcsField {
+  type?: Maybe<string[]>;
 }
 
 export interface AuditdEcsFields {
@@ -1270,6 +1276,8 @@ export interface ProcessEcsFields {
   ppid?: Maybe<number[]>;
 
   args?: Maybe<string[]>;
+
+  entity_id?: Maybe<string[]>;
 
   executable?: Maybe<string[]>;
 
@@ -4637,6 +4645,8 @@ export namespace GetTimelineQuery {
 
     event: Maybe<Event>;
 
+    agent: Maybe<Agent>;
+
     auditd: Maybe<Auditd>;
 
     file: Maybe<File>;
@@ -4758,6 +4768,12 @@ export namespace GetTimelineQuery {
     start: Maybe<string[]>;
 
     timezone: Maybe<string[]>;
+
+    type: Maybe<string[]>;
+  };
+
+  export type Agent = {
+    __typename?: 'AgentEcsField';
 
     type: Maybe<string[]>;
   };
@@ -5186,6 +5202,8 @@ export namespace GetTimelineQuery {
     ppid: Maybe<number[]>;
 
     args: Maybe<string[]>;
+
+    entity_id: Maybe<string[]>;
 
     executable: Maybe<string[]>;
 

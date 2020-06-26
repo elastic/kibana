@@ -73,6 +73,7 @@ describe('StatefulTimeline', () => {
       eventType: 'raw',
       end: endDate,
       filters: [],
+      graphEventId: undefined,
       id: 'foo',
       isLive: false,
       isTimelineExists: false,
