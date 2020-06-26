@@ -1346,7 +1346,7 @@ export class SavedObjectsRepository {
   // method transparently to the specified namespace.
   private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
-    return omit(savedObject, 'namespace') as SavedObject<any>;
+    return omit(savedObject, 'namespace') as SavedObject<T>;
   }
 
   /**

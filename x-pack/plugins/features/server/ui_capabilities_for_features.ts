@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { Feature } from '../common/feature';
 
-const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'];
+const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'] as const;
 
 interface FeatureCapabilities {
   [featureId: string]: Record<string, boolean>;
@@ -67,10 +67,7 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
 
 function buildCapabilities(...allFeatureCapabilities: FeatureCapabilities[]): UICapabilities {
   return allFeatureCapabilities.reduce<UICapabilities>((acc, capabilities) => {
-    const mergableCapabilities: UICapabilities = _.omit(
-      capabilities,
-      ...ELIGIBLE_FLAT_MERGE_KEYS
-    ) as UICapabilities;
+    const mergableCapabilities = _.omit(capabilities, ...ELIGIBLE_FLAT_MERGE_KEYS);
 
     const mergedFeatureCapabilities = {
       ...mergableCapabilities,

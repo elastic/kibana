@@ -219,7 +219,7 @@ function buildActiveMigrations(
       return {
         ...migrations,
         [type.name]: {
-          latestVersion: (_.last(transforms) as Record<string, any>).version,
+          latestVersion: _.last(transforms)!.version,
           transforms,
         },
       };

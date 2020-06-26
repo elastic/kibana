@@ -91,10 +91,7 @@ describe('PluginsService', () => {
       context: contextServiceMock.createSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),
-      injectedMetadata: pick(
-        injectedMetadataServiceMock.createStartContract(),
-        'getInjectedVar'
-      ) as any,
+      injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
     };
@@ -102,6 +99,7 @@ describe('PluginsService', () => {
       ...mockSetupDeps,
       application: expect.any(Object),
       getStartServices: expect.any(Function),
+      injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
     };
     mockStartDeps = {
       application: applicationServiceMock.createInternalStartContract(),
@@ -109,10 +107,7 @@ describe('PluginsService', () => {
       http: httpServiceMock.createStartContract(),
       chrome: chromeServiceMock.createStartContract(),
       i18n: i18nServiceMock.createStartContract(),
-      injectedMetadata: pick(
-        injectedMetadataServiceMock.createStartContract(),
-        'getInjectedVar'
-      ) as any,
+      injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createStartContract(),
       overlays: overlayServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
@@ -123,6 +118,7 @@ describe('PluginsService', () => {
       ...mockStartDeps,
       application: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
+      injectedMetadata: pick(mockStartDeps.injectedMetadata, 'getInjectedVar'),
     };
 
     // Reset these for each test.
