@@ -432,8 +432,9 @@ export class DashboardAppController {
               .getIncomingEmbeddablePackage({ keysToRemoveAfterFetch: ['id', 'type', 'input'] });
             if (incomingState) {
               if ('id' in incomingState) {
-                container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
+                container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
                   savedObjectId: incomingState.id,
+                  id: incomingState.embeddableIdToReplace,
                 });
               } else if ('input' in incomingState) {
                 container.addOrUpdateEmbeddable<EmbeddableInput>(

@@ -56,7 +56,8 @@ export async function mountApp(
     id?: string,
     documentByValue?: Document,
     returnToOrigin?: boolean,
-    newlyCreated?: boolean
+    newlyCreated?: boolean,
+    embeddableIdToReplace?: string
   ) => {
     if (!id && !embeddableEditorIncomingState?.byValueMode) {
       routeProps.history.push('/');
@@ -64,12 +65,11 @@ export async function mountApp(
       routeProps.history.push(`/edit/${id}`);
     } else if (!!embeddableEditorIncomingState?.originatingApp && returnToOrigin) {
       routeProps.history.push(`/edit/${id}`);
-
       if (newlyCreated && id) {
         stateTransfer.navigateToWithEmbeddablePackage(
           embeddableEditorIncomingState?.originatingApp,
           {
-            state: { id, type: LENS_EMBEDDABLE_TYPE },
+            state: { id, type: LENS_EMBEDDABLE_TYPE, embeddableIdToReplace },
           }
         );
       } else if (documentByValue) {
@@ -101,8 +101,15 @@ export async function mountApp(
         storage={new Storage(localStorage)}
         docId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-        redirectTo={(id, documentByValue, returnToOrigin, newlyCreated) =>
-          redirectTo(routeProps, id, documentByValue, returnToOrigin, newlyCreated)
+        redirectTo={(id, documentByValue, returnToOrigin, newlyCreated, embeddableIdToReplace) =>
+          redirectTo(
+            routeProps,
+            id,
+            documentByValue,
+            returnToOrigin,
+            newlyCreated,
+            embeddableIdToReplace
+          )
         }
         embeddableEditorIncomingState={embeddableEditorIncomingState}
         onAppLeave={params.onAppLeave}

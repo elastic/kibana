@@ -40,6 +40,7 @@ export function isEmbeddableEditorState(state: unknown): state is EmbeddableEdit
 export interface EmbeddablePackageByReferenceState {
   type: string;
   id: string;
+  embeddableIdToReplace?: string;
 }
 
 /**

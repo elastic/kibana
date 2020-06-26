@@ -70,7 +70,8 @@ interface LensAppProps {
     id?: string,
     documentByValue?: Document,
     returnToOrigin?: boolean,
-    newlyCreated?: boolean
+    newlyCreated?: boolean,
+    embeddableIdToReplace?: string
   ) => void;
   embeddableEditorIncomingState?: EmbeddableEditorState;
   onAppLeave: AppMountParameters['onAppLeave'];
@@ -279,7 +280,8 @@ export function App({
       returnToOrigin: boolean;
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
-    }
+    },
+    saveToLibrary: boolean = false
   ) => {
     if (!lastKnownDoc) {
       return;
@@ -306,9 +308,12 @@ export function App({
       title: saveProps.newTitle,
     };
 
-    const newlyCreated: boolean = saveProps.newCopyOnSave || !lastKnownDoc?.id;
+    const newlyCreated: boolean =
+      saveProps.newCopyOnSave ||
+      !lastKnownDoc?.id ||
+      (saveToLibrary && !!embeddableEditorIncomingState?.byValueMode);
 
-    if (embeddableEditorIncomingState?.byValueMode) {
+    if (embeddableEditorIncomingState?.byValueMode && !saveToLibrary) {
       redirectTo(doc.id, doc, saveProps.returnToOrigin, newlyCreated);
     } else {
       await checkForDuplicateTitle(
@@ -330,6 +335,10 @@ export function App({
         }
       );
 
+      const embeddableId = doc.id;
+      if (saveToLibrary && embeddableEditorIncomingState?.byValueMode) {
+        delete doc.id;
+      }
       docStorage
         .save(doc)
         .then(({ id }) => {
@@ -342,7 +351,11 @@ export function App({
             lastKnownDoc: newDoc,
           }));
           if (docId !== id || saveProps.returnToOrigin) {
-            redirectTo(id, undefined, saveProps.returnToOrigin, newlyCreated);
+            const idToReplace =
+              saveToLibrary && embeddableEditorIncomingState?.byValueMode
+                ? embeddableId
+                : undefined;
+            redirectTo(id, undefined, saveProps.returnToOrigin, newlyCreated, idToReplace);
           }
         })
         .catch((e) => {
@@ -540,10 +553,10 @@ export function App({
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
             originatingApp={embeddableEditorIncomingState?.originatingApp}
-            onSave={(props) => runSave(props)}
+            onSave={(props) => runSave(props, true)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
-              id: lastKnownDoc.id,
+              id: embeddableEditorIncomingState?.byValueMode ? undefined : lastKnownDoc.id,
               title: lastKnownDoc.title || '',
               description: lastKnownDoc.description || '',
             }}
