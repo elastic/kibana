@@ -3,129 +3,39 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { ObservabilityApp } from '../../../typings/common';
+import { getDataHandler } from '../../data_handler';
+import { useFetcher } from '../../hooks/use_fetcher';
 
-import {
-  EuiButton,
-  EuiCard,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiImage,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useEffect, useContext } from 'react';
-import styled, { ThemeContext } from 'styled-components';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { appsSection } from './section';
-import { WithHeaderLayout } from '../../components/app/layout/with_header';
-
-const EuiCardWithoutPadding = styled(EuiCard)`
-  padding: 0;
-`;
+const fetchData = async (): Promise<Record<ObservabilityApp, boolean | undefined>> => {
+  const apmPromise = getDataHandler('apm')?.hasData();
+  const uptimePromise = getDataHandler('uptime')?.hasData();
+  const logsPromise = getDataHandler('infra_logs')?.hasData();
+  const metricsPromise = getDataHandler('infra_metrics')?.hasData();
+  const [apm, uptime, logs, metrics] = await Promise.all([
+    apmPromise,
+    uptimePromise,
+    logsPromise,
+    metricsPromise,
+  ]);
+  return { apm, uptime, infra_logs: logs, infra_metrics: metrics };
+};
 
 export const Home = () => {
-  const { core } = usePluginContext();
-  const theme = useContext(ThemeContext);
+  const history = useHistory();
+  const { data = {} } = useFetcher(fetchData, []);
 
-  useEffect(() => {
-    core.chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('xpack.observability.home.breadcrumb.observability', {
-          defaultMessage: 'Observability',
-        }),
-      },
-      {
-        text: i18n.translate('xpack.observability.home.breadcrumb.gettingStarted', {
-          defaultMessage: 'Getting started',
-        }),
-      },
-    ]);
-  }, [core]);
+  const values = Object.values(data);
+  const hasSomeData = values.length ? values.some((hasData) => hasData) : null;
 
-  return (
-    <WithHeaderLayout
-      restrictWidth={1200}
-      headerColor={theme.eui.euiPageBackgroundColor}
-      bodyColor={theme.eui.euiColorEmptyShade}
-    >
-      <EuiFlexGroup direction="column">
-        {/* title and description */}
-        <EuiFlexItem style={{ maxWidth: '50%' }}>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.observability.home.sectionTitle', {
-                defaultMessage: 'Unified visibility across your entire ecosystem',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.observability.home.sectionsubtitle', {
-              defaultMessage:
-                'Monitor, analyze, and react to events happening anywhere in your environment by bringing logs, metrics, and traces together at scale in a single stack.',
-            })}
-          </EuiText>
-        </EuiFlexItem>
+  if (hasSomeData === true) {
+    history.push({ pathname: '/overview', state: { hasData: data } });
+  }
+  if (hasSomeData === false) {
+    history.push({ pathname: '/start' });
+  }
 
-        {/* Apps sections */}
-        <EuiFlexItem>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGrid columns={2}>
-                {appsSection.map((app) => (
-                  <EuiFlexItem key={app.id}>
-                    <EuiCardWithoutPadding
-                      display="plain"
-                      layout="horizontal"
-                      icon={<EuiIcon size="l" type={app.icon} />}
-                      title={
-                        <EuiTitle size="xs" className="title">
-                          <h3>{app.title}</h3>
-                        </EuiTitle>
-                      }
-                      description={app.description}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGrid>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiImage
-                size="xl"
-                alt="observability overview image"
-                url={core.http.basePath.prepend(
-                  '/plugins/observability/assets/observability_overview.png'
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiSpacer size="xxl" />
-
-        {/* Get started button */}
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                iconType="sortRight"
-                iconSide="right"
-                href={core.http.basePath.prepend('/app/home#/tutorial_directory/logging')}
-              >
-                {i18n.translate('xpack.observability.home.getStatedButton', {
-                  defaultMessage: 'Get started',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </WithHeaderLayout>
-  );
+  return <></>;
 };

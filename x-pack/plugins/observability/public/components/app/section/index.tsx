@@ -6,21 +6,24 @@
 import { EuiAccordion, EuiButtonEmpty, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 interface Props {
   title: string;
+  subtitle: string;
   appLink?: string;
   children: React.ReactNode;
 }
 
-export const SectionContainer = ({ title, appLink, children }: Props) => {
+export const SectionContainer = ({ title, appLink, children, subtitle }: Props) => {
   return (
     <EuiAccordion
       initialIsOpen
       id={title}
       buttonContentClassName="accordion-button"
       buttonContent={
-        <EuiTitle size="xs">
+        <EuiTitle size="m">
           <h5>{title}</h5>
         </EuiTitle>
       }
@@ -32,7 +35,13 @@ export const SectionContainer = ({ title, appLink, children }: Props) => {
         </EuiButtonEmpty>
       }
     >
-      <EuiPanel>{children}</EuiPanel>
+      <EuiPanel hasShadow>
+        <EuiText size="m">
+          <h3>{subtitle}</h3>
+        </EuiText>
+        <EuiSpacer size="s" />
+        {children}
+      </EuiPanel>
     </EuiAccordion>
   );
 };

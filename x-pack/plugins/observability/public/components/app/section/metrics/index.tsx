@@ -7,6 +7,8 @@ import { AreaSeries, Chart, DARK_THEME, LIGHT_THEME, ScaleType, Settings } from 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiStat } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { SectionContainer } from '../';
 import { MetricsFetchDataResponse, Series } from '../../../../typings/fetch_data_response';
 import { formatStatValue } from '../../../../utils/format_stat_value';
@@ -21,7 +23,13 @@ export const MetricsSection = ({ data }: Props) => {
   }
 
   return (
-    <SectionContainer title={data.title} appLink={data.appLink}>
+    <SectionContainer
+      title={data.title}
+      subtitle={i18n.translate('xpack.observability.overview.chart.metrics.subtitle', {
+        defaultMessage: 'Summary',
+      })}
+      appLink={data.appLink}
+    >
       <EuiFlexGroup>
         {Object.keys(data.stats).map((key) => {
           const statKey = key as keyof MetricsFetchDataResponse['stats'];
@@ -33,12 +41,15 @@ export const MetricsSection = ({ data }: Props) => {
           const chart = serie ? (
             <AreaChart serie={serie} />
           ) : (
-            <EuiProgress value={value} max={100} />
+            <>
+              <EuiSpacer size="s" />
+              <EuiProgress value={stat.value} max={1} />
+            </>
           );
 
           return (
             <EuiFlexItem key={key}>
-              <EuiStat title={value} description={stat.label}>
+              <EuiStat title={value} description={stat.label} titleSize="m">
                 {statKey !== 'hosts' && chart}
               </EuiStat>
             </EuiFlexItem>

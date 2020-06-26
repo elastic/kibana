@@ -12,12 +12,15 @@ import {
   LIGHT_THEME,
   niceTimeFormatter,
   Settings,
+  ScaleType,
+  Position,
 } from '@elastic/charts';
 import d3 from 'd3';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { SectionContainer } from '../';
 import { ApmFetchDataResponse } from '../../../../typings/fetch_data_response';
@@ -44,18 +47,24 @@ export const APMSection = ({ data }: Props) => {
 
   const getSerieColor = (color?: string) => {
     if (color) {
-      return theme.eui[color];
+      return color;
     }
   };
 
   return (
-    <SectionContainer title={data.title} appLink={data.appLink}>
+    <SectionContainer
+      title={data.title}
+      subtitle={i18n.translate('xpack.observability.overview.chart.apm.subtitle', {
+        defaultMessage: 'Summary',
+      })}
+      appLink={data.appLink}
+    >
       <EuiFlexGroup>
         {Object.keys(data.stats).map((key) => {
           const stat = data.stats[key as keyof ApmFetchDataResponse['stats']];
           return (
             <EuiFlexItem key={key} grow={false}>
-              <EuiStat title={formatStatValue(stat)} description={stat.label} />
+              <EuiStat title={formatStatValue(stat)} description={stat.label} titleSize="m" />
             </EuiFlexItem>
           );
         })}
@@ -76,22 +85,21 @@ export const APMSection = ({ data }: Props) => {
               id="transactions"
               name="Transactions"
               data={transactionSeries.coordinates}
-              xScaleType="time"
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
               xAccessor={'x'}
               yAccessors={['y']}
               color={getSerieColor(transactionSeries.color)}
-              groupId="transactions"
             />
             <Axis
-              id="left-axis"
-              position="left"
+              id="y-axis"
+              position={Position.Left}
               showGridLines
-              groupId="transactions"
               tickFormat={(d) => numeral(d).format('0a')}
             />
+            <Axis id="x-axis" position={Position.Bottom} tickFormat={formatter} />
           </>
         )}
-        <Axis id="bottom-axis" position="bottom" tickFormat={formatter} showGridLines />
       </Chart>
     </SectionContainer>
   );

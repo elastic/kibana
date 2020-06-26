@@ -4,27 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useContext } from 'react';
-import d3 from 'd3';
 import {
-  Chart,
-  Settings,
-  BarSeries,
   Axis,
-  Position,
+  BarSeries,
+  Chart,
   DARK_THEME,
   LIGHT_THEME,
-  ScaleType,
   niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
 } from '@elastic/charts';
-import { ThemeContext } from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiStat } from '@elastic/eui';
-import { formatStatValue } from '../../../../utils/format_stat_value';
+import d3 from 'd3';
+import React, { Fragment, useContext } from 'react';
+import { ThemeContext } from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { SectionContainer } from '../';
 import { UptimeFetchDataResponse } from '../../../../typings/fetch_data_response';
+import { formatStatValue } from '../../../../utils/format_stat_value';
 
 interface Props {
   data?: UptimeFetchDataResponse;
@@ -53,13 +52,19 @@ export const UptimeSection = ({ data }: Props) => {
   };
 
   return (
-    <SectionContainer title={data.title} appLink={data.appLink}>
+    <SectionContainer
+      title={data.title}
+      subtitle={i18n.translate('xpack.observability.overview.chart.uptime.subtitle', {
+        defaultMessage: 'Summary',
+      })}
+      appLink={data.appLink}
+    >
       <EuiFlexGroup>
         {Object.keys(data.stats).map((key) => {
           const stat = data.stats[key as keyof UptimeFetchDataResponse['stats']];
           return (
             <EuiFlexItem key={key} grow={false}>
-              <EuiStat title={formatStatValue(stat)} description={stat.label} />
+              <EuiStat title={formatStatValue(stat)} description={stat.label} titleSize="m" />
             </EuiFlexItem>
           );
         })}
@@ -74,18 +79,24 @@ export const UptimeSection = ({ data }: Props) => {
           legendPosition="bottom"
           xDomain={{ min, max }}
         />
-        {Object.values(data.series).map((serie) => {
+        {Object.keys(data.series).map((key) => {
+          const serie = data.series[key as keyof UptimeFetchDataResponse['series']];
+          const chartData = serie.coordinates.map((coordinate) => ({
+            ...coordinate,
+            g: serie.label,
+          }));
           return (
-            <Fragment key={serie.label}>
+            <Fragment key={key}>
               <BarSeries
-                id={serie.label}
+                id={key}
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor={'x'}
                 yAccessors={['y']}
                 color={getSerieColor(serie.color)}
                 stackAccessors={['x']}
-                data={serie.coordinates}
+                splitSeriesAccessors={['g']}
+                data={chartData}
               />
               <Axis
                 id="x-axis"
@@ -98,7 +109,7 @@ export const UptimeSection = ({ data }: Props) => {
                 id="y-axis"
                 showGridLines
                 position={Position.Left}
-                tickFormat={(d: any) => numeral(d).format('0a')}
+                tickFormat={(x: any) => numeral(x).format('0a')}
               />
             </Fragment>
           );

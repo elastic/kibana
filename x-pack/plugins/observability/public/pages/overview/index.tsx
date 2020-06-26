@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import moment from 'moment';
+import { useLocation } from 'react-router-dom';
+import { ObservabilityApp } from '../../../typings/common';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { APMSection } from '../../components/app/section/apm';
@@ -27,7 +28,13 @@ interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
+interface LocationState {
+  hasData: Record<ObservabilityApp, boolean | undefined>;
+}
+
 export const Overview = ({ routeParams }: Props) => {
+  const { state } = useLocation<LocationState>();
+
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
 
@@ -43,31 +50,21 @@ export const Overview = ({ routeParams }: Props) => {
         minInterval: 'auto',
       });
       const params = { startTime, endTime, bucketSize: intervalString };
-      const apmDataPromise = getDataHandler('apm')?.fetchData(params);
-      const logsDataPromise = getDataHandler('infra_logs')?.fetchData(params);
-      const metricsDataPromise = getDataHandler('infra_metrics')?.fetchData(params);
-      const uptimeDataPromise = getDataHandler('uptime')?.fetchData(params);
+      const apmDataPromise = state.hasData.apm && getDataHandler('apm')?.fetchData(params);
+      const logsDataPromise =
+        state.hasData.infra_logs && getDataHandler('infra_logs')?.fetchData(params);
+      const metricsDataPromise =
+        state.hasData.infra_metrics && getDataHandler('infra_metrics')?.fetchData(params);
+      const uptimeDataPromise = state.hasData.uptime && getDataHandler('uptime')?.fetchData(params);
 
+      // TODO: caue fix it
       return Promise.all([apmDataPromise, logsDataPromise, metricsDataPromise, uptimeDataPromise]);
     }
   }, [rangeFrom, rangeTo]);
 
   const [apmData, logsData, metricsData, uptimeData] = data;
 
-  const emptySections = appsSection.filter((app) => {
-    switch (app.id) {
-      case 'apm':
-        return isEmpty(apmData);
-      case 'infra_logs':
-        return isEmpty(logsData);
-      case 'infra_metrics':
-        return isEmpty(metricsData);
-      case 'uptime':
-        return isEmpty(uptimeData);
-      default:
-        return true;
-    }
-  });
+  const emptySections = appsSection.filter(({ id }) => !state.hasData[id]);
 
   return (
     <WithHeaderLayout

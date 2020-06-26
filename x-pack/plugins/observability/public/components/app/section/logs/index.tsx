@@ -23,6 +23,7 @@ import numeral from '@elastic/numeral';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiStat } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { SectionContainer } from '../';
 import { LogsFetchDataResponse } from '../../../../typings/fetch_data_response';
@@ -56,13 +57,19 @@ export const LogsSection = ({ data }: Props) => {
   };
 
   return (
-    <SectionContainer title={data.title} appLink={data.appLink}>
+    <SectionContainer
+      title={data.title}
+      subtitle={i18n.translate('xpack.observability.overview.chart.logs.subtitle', {
+        defaultMessage: 'Logs rate',
+      })}
+      appLink={data.appLink}
+    >
       <EuiFlexGroup>
         {Object.keys(data.stats).map((key) => {
           const stat = data.stats[key as keyof LogsFetchDataResponse['stats']];
           return (
             <EuiFlexItem key={key} grow={false}>
-              <EuiStat title={formatStatValue(stat)} description={stat.label} />
+              <EuiStat title={formatStatValue(stat)} description={stat.label} titleSize="m" />
             </EuiFlexItem>
           );
         })}
@@ -86,7 +93,7 @@ export const LogsSection = ({ data }: Props) => {
           return (
             <Fragment key={key}>
               <BarSeries
-                id={serie.label}
+                id={key}
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor={'x'}

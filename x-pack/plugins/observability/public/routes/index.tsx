@@ -5,8 +5,9 @@
  */
 import React from 'react';
 import * as t from 'io-ts';
-import { Home } from '../pages/home';
+import { Start } from '../pages/start';
 import { Overview } from '../pages/overview';
+import { Home } from '../pages/home';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -22,6 +23,12 @@ export const routes = {
   '/': {
     handler: () => {
       return <Home />;
+    },
+    params: {},
+  },
+  '/start': {
+    handler: () => {
+      return <Start />;
     },
     params: {},
   },
