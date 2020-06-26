@@ -42,9 +42,11 @@ export type GetLogEntryCategoryExamplesRequestPayload = rt.TypeOf<
  */
 
 const logEntryCategoryExampleRT = rt.type({
+  id: rt.string,
   dataset: rt.string,
   message: rt.string,
   timestamp: rt.number,
+  tiebreaker: rt.number,
 });
 
 export type LogEntryCategoryExample = rt.TypeOf<typeof logEntryCategoryExampleRT>;

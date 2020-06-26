@@ -7,8 +7,14 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { encode } from 'rison-node';
+import moment from 'moment';
 
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/http_api/shared';
+import {
+  getFriendlyNameForPartitionId,
+  partitionField,
+} from '../../../../../../common/log_analysis';
 import {
   LogEntryColumn,
   LogEntryFieldColumn,
@@ -18,17 +24,19 @@ import {
 } from '../../../../../components/logging/log_text_stream';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
+import { useLinkProps } from '../../../../../hooks/use_link_props';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
 
 export const CategoryExampleMessage: React.FunctionComponent<{
+  id: string;
   dataset: string;
   message: string;
+  timeRange: TimeRange;
   timestamp: number;
-}> = ({ dataset, message, timestamp }) => {
-  const history = useHistory();
-
+  tiebreaker: number;
+}> = ({ id, dataset, message, timestamp, timeRange, tiebreaker }) => {
   // the dataset must be encoded for the field column and the empty value must
   // be turned into a user-friendly value
   const encodedDatasetFieldValue = useMemo(
@@ -43,6 +51,26 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const openMenu = useCallback(() => setIsMenuOpen(true), []);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
+  const viewInStreamLinkProps = useLinkProps({
+    app: 'logs',
+    pathname: 'stream',
+    search: {
+      logPosition: encode({
+        end: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        position: { tiebreaker, time: timestamp },
+        start: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        streamLive: false,
+      }),
+      flyoutOptions: encode({
+        surroundingLogsId: id,
+      }),
+      logFilter: encode({
+        expression: `${partitionField}: ${dataset}`,
+        kind: 'kuery',
+      }),
+    },
+  });
 
   return (
     <LogEntryRowWrapper
@@ -88,10 +116,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
                 label: i18n.translate('xpack.infra.logs.categoryExample.viewInStreamText', {
                   defaultMessage: 'View in stream',
                 }),
-                onClick: () => {
-                  // FIXME
-                  history.push(`/link-to?time=${timestamp}`);
-                },
+                onClick: viewInStreamLinkProps.onClick!,
               },
               {
                 label: i18n.translate('xpack.infra.logs.categoryExample.viewInContextText', {
