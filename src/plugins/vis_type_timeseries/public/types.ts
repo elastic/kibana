@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import uiRoutes from 'ui/routes';
-import template from './testbed.html';
+import React from 'react';
+import { EuiDraggable } from '@elastic/eui';
 
-uiRoutes.when('/testbed', {
-  template: template,
-  controllerAs: 'testbed',
-  controller: class TestbedController {
-    constructor() {}
-  },
-});
+type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
+type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: any[]) => any
+  ? FirstArgument
+  : never;
+export type DragHandleProps = FirstArgumentOf<
+  Exclude<PropsOf<typeof EuiDraggable>['children'], React.ReactElement>
+>['dragHandleProps'];

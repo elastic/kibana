@@ -17,15 +17,33 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { HTMLAttributes } from 'react';
+// @ts-ignore
 import { aggToComponent } from '../lib/agg_to_component';
+// @ts-ignore
+import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
+import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../common/types';
+import { DragHandleProps } from '../../../types';
+import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
+import { IFieldType } from '../../../../../data/common/index_patterns/fields';
 
-import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+interface AggProps extends HTMLAttributes<HTMLElement> {
+  disableDelete: boolean;
+  fields: IFieldType[];
+  model: MetricsItemsSchema;
+  panel: PanelSchema;
+  series: SeriesItemsSchema;
+  siblings: MetricsItemsSchema[];
+  uiRestrictions: TimeseriesUIRestrictions;
+  dragHandleProps: DragHandleProps;
+  onAdd: () => void;
+  onChange: () => void;
+  onDelete: () => void;
+}
 
-export function Agg(props) {
+export function Agg(props: AggProps) {
   const { model, uiRestrictions } = props;
 
   let Component = aggToComponent[model.type];
@@ -59,17 +77,3 @@ export function Agg(props) {
     </div>
   );
 }
-
-Agg.propTypes = {
-  disableDelete: PropTypes.bool,
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onAdd: PropTypes.func,
-  onChange: PropTypes.func,
-  onDelete: PropTypes.func,
-  panel: PropTypes.object,
-  series: PropTypes.object,
-  siblings: PropTypes.array,
-  uiRestrictions: PropTypes.object,
-  dragHandleProps: PropTypes.object,
-};

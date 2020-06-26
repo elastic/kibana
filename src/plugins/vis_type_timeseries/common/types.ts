@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
-import { TestbedPlugin, TestbedPluginSetup, TestbedPluginStart } from './plugin';
+import { TypeOf } from '@kbn/config-schema';
+import { metricsItems, panel, seriesItems } from './vis_schema';
 
-export const plugin: PluginInitializer<TestbedPluginSetup, TestbedPluginStart> = (
-  initializerContext: PluginInitializerContext
-) => new TestbedPlugin(initializerContext);
+export type SeriesItemsSchema = TypeOf<typeof seriesItems>;
+export type MetricsItemsSchema = TypeOf<typeof metricsItems>;
+export type PanelSchema = TypeOf<typeof panel>;

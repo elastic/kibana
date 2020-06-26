@@ -17,12 +17,23 @@
  * under the License.
  */
 
-import { AggRow } from './agg_row';
 import React from 'react';
 import { EuiCode, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AggRow } from './agg_row';
+import { MetricsItemsSchema } from '../../../../common/types';
+import { DragHandleProps } from '../../../types';
 
-export function UnsupportedAgg(props) {
+interface TemporaryUnsupportedAggProps {
+  disableDelete: boolean;
+  model: MetricsItemsSchema;
+  siblings: MetricsItemsSchema[];
+  dragHandleProps: DragHandleProps;
+  onAdd: () => void;
+  onDelete: () => void;
+}
+
+export function TemporaryUnsupportedAgg(props: TemporaryUnsupportedAggProps) {
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -35,8 +46,8 @@ export function UnsupportedAgg(props) {
       <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
         <span>
           <FormattedMessage
-            id="visTypeTimeseries.unsupportedAgg.aggIsNotSupportedDescription"
-            defaultMessage="The {modelType} aggregation is no longer supported."
+            id="visTypeTimeseries.unsupportedAgg.aggIsTemporaryUnsupportedDescription"
+            defaultMessage="The {modelType} aggregation is currently unsupported."
             values={{ modelType: <EuiCode>{props.model.type}</EuiCode> }}
           />
         </span>

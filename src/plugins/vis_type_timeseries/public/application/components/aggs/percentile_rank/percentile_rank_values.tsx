@@ -16,34 +16,49 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import PropTypes from 'prop-types';
 import React from 'react';
 import { last } from 'lodash';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { MultiValueRow } from './multi_value_row';
 
-export const PercentileRankValues = (props) => {
+interface PercentileRankValuesProps {
+  model: Array<string | null>;
+  disableDelete: boolean;
+  disableAdd: boolean;
+  showOnlyLastRow: boolean;
+  onChange: (values: any[]) => void;
+}
+
+export const PercentileRankValues = (props: PercentileRankValuesProps) => {
   const model = props.model || [];
   const { onChange, disableAdd, disableDelete, showOnlyLastRow } = props;
 
-  const onChangeValue = ({ value, id }) => {
+  const onChangeValue = ({ value, id }: { value: string; id: number }) => {
     model[id] = value;
 
     onChange(model);
   };
-  const onDeleteValue = ({ id }) =>
+  const onDeleteValue = ({ id }: { id: number }) =>
     onChange(model.filter((item, currentIndex) => id !== currentIndex));
   const onAddValue = () => onChange([...model, '']);
 
-  const renderRow = ({ rowModel, disableDelete, disableAdd }) => (
+  const renderRow = ({
+    rowModel,
+    disableDeleteRow,
+    disableAddRow,
+  }: {
+    rowModel: { id: number; value: string };
+    disableDeleteRow: boolean;
+    disableAddRow: boolean;
+  }) => (
     <MultiValueRow
       key={`percentileRankValue__item${rowModel.id}`}
       onAdd={onAddValue}
       onChange={onChangeValue}
       onDelete={onDeleteValue}
-      disableDelete={disableDelete}
-      disableAdd={disableAdd}
+      disableDelete={disableDeleteRow}
+      disableAdd={disableAddRow}
       model={rowModel}
     />
   );
@@ -54,10 +69,10 @@ export const PercentileRankValues = (props) => {
         renderRow({
           rowModel: {
             id: model.length - 1,
-            value: last(model),
+            value: last(model) || '',
           },
-          disableAdd: true,
-          disableDelete: true,
+          disableAddRow: true,
+          disableDeleteRow: true,
         })}
 
       {!showOnlyLastRow &&
@@ -65,20 +80,12 @@ export const PercentileRankValues = (props) => {
           renderRow({
             rowModel: {
               id,
-              value,
+              value: value || '',
             },
-            disableAdd,
-            disableDelete: disableDelete || array.length < 2,
+            disableAddRow: disableAdd,
+            disableDeleteRow: disableDelete || array.length < 2,
           })
         )}
     </EuiFlexGroup>
   );
-};
-
-PercentileRankValues.propTypes = {
-  model: PropTypes.array,
-  onChange: PropTypes.func,
-  disableDelete: PropTypes.bool,
-  disableAdd: PropTypes.bool,
-  showOnlyLastRow: PropTypes.bool,
 };
