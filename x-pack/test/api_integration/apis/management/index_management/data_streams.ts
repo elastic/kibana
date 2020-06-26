@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     await es.dataManagement.saveComposableIndexTemplate({
       name,
       body: {
-        // We need to match the names of backing indices with this template
+        // We need to match the names of backing indices with this template.
         index_patterns: [name + '*'],
         template: {
           mappings: {
@@ -50,7 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   const deleteDataStream = async (name: string) => {
     await es.dataManagement.deleteDataStream({ name });
-
     await deleteComposableIndexTemplate(name);
   };
 
