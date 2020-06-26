@@ -69,21 +69,18 @@ describe('useImportList', () => {
     expect(result.current.result).toEqual(getListResponseMock());
   });
 
-  it('start rejects and error is populated if importList rejects', async () => {
-    expect.assertions(3);
+  it('error is populated if importList rejects', async () => {
     const fileMock = ('my file' as unknown) as File;
     (Api.importList as jest.Mock).mockRejectedValue(new Error('whoops'));
     const { result, waitForNextUpdate } = renderHook(() => useImportList());
 
     act(() => {
-      result.current
-        .start({
-          file: fileMock,
-          http: httpMock,
-          listId: 'my_list_id',
-          type: 'keyword',
-        })
-        .catch((e) => expect(e).toEqual(new Error('whoops')));
+      result.current.start({
+        file: fileMock,
+        http: httpMock,
+        listId: 'my_list_id',
+        type: 'keyword',
+      });
     });
 
     await waitForNextUpdate();

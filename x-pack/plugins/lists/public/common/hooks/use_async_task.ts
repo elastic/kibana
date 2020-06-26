@@ -14,7 +14,7 @@ export type UseAsyncTask = <Result, Params extends unknown>(
 ) => AsyncTask<Result, Params>;
 
 export interface AsyncTask<Result, Params extends unknown> {
-  start: (params: Params) => Promise<Result>;
+  start: (params: Params) => void;
   abort: () => void;
   loading: boolean;
   error: Error | undefined;
@@ -39,11 +39,7 @@ export const useAsyncTask: UseAsyncTask = (task) => {
   const start = useCallback(
     (args) => {
       ctrl.current = new AbortController();
-
-      return initiator(ctrl.current, args).then((result) =>
-        // convert resolved error to rejection: https://github.com/streamich/react-use/issues/981
-        result instanceof Error ? Promise.reject(result) : result
-      );
+      initiator(ctrl.current, args);
     },
     [initiator]
   );

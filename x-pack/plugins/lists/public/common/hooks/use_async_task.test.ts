@@ -57,15 +57,16 @@ describe('useAsyncTask', () => {
     await waitForNextUpdate();
 
     expect(result.current.result).toEqual('resolved value');
+    expect(result.current.error).toBeUndefined();
   });
 
-  it('start rejects and error is populated if task rejects', async () => {
+  it('populates error if task rejects', async () => {
     expect.assertions(3);
     task.mockRejectedValue(new Error('whoops'));
     const { result, waitForNextUpdate } = renderHook(() => useAsyncTask(task));
 
     act(() => {
-      result.current.start({}).catch((e) => expect(e).toEqual(new Error('whoops')));
+      result.current.start({});
     });
     await waitForNextUpdate();
 
