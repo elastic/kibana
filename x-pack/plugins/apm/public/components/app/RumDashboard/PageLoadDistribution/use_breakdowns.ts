@@ -21,7 +21,7 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
 
   const { min: minP, max: maxP } = percentileRange ?? {};
 
-  const { data, status } = useFetcher(
+  return useFetcher(
     (callApmApi) => {
       if (start && end && field && value) {
         return callApmApi({
@@ -45,5 +45,4 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
     },
     [end, start, uiFilters, field, value, minP, maxP]
   );
-  return { data, loading: status !== 'success' };
 };

@@ -22,15 +22,15 @@ export const BreakdownSeries: FC<Props> = ({
   percentileRange,
   onLoadingChange,
 }) => {
-  const { data, loading } = useBreakdowns({
+  const { data, status } = useBreakdowns({
     field,
     value,
     percentileRange,
   });
 
   useEffect(() => {
-    onLoadingChange(loading);
-  }, [loading, onLoadingChange]);
+    onLoadingChange(status !== 'success');
+  }, [status, onLoadingChange]);
 
   return (
     <>
