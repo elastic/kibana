@@ -100,7 +100,7 @@ export class Manifest {
 
   public toEndpointFormat(): ManifestSchema {
     const manifestObj: ManifestSchema = {
-      manifestVersion: this.version,
+      manifestVersion: this.version ?? 'baseline',
       schemaVersion: this.schemaVersion,
       artifacts: {},
     };

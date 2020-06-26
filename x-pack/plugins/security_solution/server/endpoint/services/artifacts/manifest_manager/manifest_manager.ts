@@ -7,6 +7,7 @@
 import { Logger, SavedObjectsClient } from '../../../../../../../../src/core/server';
 import { DatasourceServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
+import { NewPolicyData } from '../../../../../common/endpoint/types';
 import {
   ArtifactConstants,
   ManifestConstants,
@@ -107,20 +108,11 @@ export class ManifestManager {
   public async refresh(opts?: ManifestRefreshOpts): Promise<NewManifestState | null> {
     let oldManifest: Manifest;
 
-    /*
-      const result = await this.datasourceService.list(
-        this.savedObjectsClient,
-        { kuery: 'ingest-datasourcese.package.name:endpoint' },
-      );
-      console.log(result);
-      console.log(JSON.stringify(result));
-      */
-
     // Get the last-dispatched manifest
     oldManifest = await this.getLastDispatchedManifest(ManifestConstants.SCHEMA_VERSION);
     // console.log(oldManifest);
 
-    if (oldManifest === null && opts.initialize) {
+    if (oldManifest === null && opts !== undefined && opts.initialize) {
       oldManifest = new Manifest(new Date(), ManifestConstants.SCHEMA_VERSION); // create empty manifest
     } else if (oldManifest == null) {
       this.logger.debug('Manifest does not exist yet. Waiting...');
@@ -175,32 +167,41 @@ export class ManifestManager {
 
     if (manifestState.diffs.length > 0) {
       this.logger.info(`Dispatching new manifest with diffs: ${manifestState.diffs}`);
-      const result = await this.datasourceService.list(this.savedObjectsClient, {
-        kuery: 'ingest-datasources.package.name:endpoint',
-      });
-      this.logger.debug(result);
-      //
-      // Datasource:
-      //
-      // { name: 'endpoint-1',
-      // description: '',
-      // config_id: 'c7fe80d0-b677-11ea-8bb2-09d7226f2862',
-      // enabled: true,
-      // output_id: '',
-      // inputs:
-      // [ { type: 'endpoint', enabled: true, streams: [], config: [Object] } ],
-      // namespace: 'default',
-      // package:
-      // { name: 'endpoint', title: 'Elastic Endpoint', version: '0.5.0' } }
-      //
-      // TODO: write to config
-      // await this.datasourceService.get('the-datasource-id');
-      // OR
-      // await this.datasourceService.list('the-datasource-by-config_id');
-      // THEN
-      // await this.datasourceService.update(...args);
-      //
-      return true;
+
+      let paging = true;
+      let success = true;
+
+      while (paging) {
+        const { items, total, page } = await this.datasourceService.list(this.savedObjectsClient, {
+          kuery: 'ingest-datasources.package.name:endpoint',
+        });
+
+        items.forEach(async (datasource) => {
+          const { id, revision, updated_at, updated_by, ...newDatasource } = datasource;
+
+          if (newDatasource.inputs.length > 0) {
+            newDatasource.inputs[0].config.artifact_manifest = manifestState.manifest.toEndpointFormat();
+
+            this.datasourceService
+              .update(this.savedObjectsClient, id, newDatasource)
+              .then((response) => {
+                this.logger.debug(`Updated datasource ${id}`);
+              })
+              .catch((err) => {
+                success = false;
+                this.logger.debug(`Error updating datasource ${id}`);
+                this.logger.error(err);
+              });
+          } else {
+            success = false;
+            this.logger.debug(`Datasource ${id} has no inputs.`);
+          }
+        }, this);
+
+        paging = page * items.length < total;
+      }
+
+      return success;
     } else {
       this.logger.debug('No manifest diffs [no-op]');
     }
@@ -220,8 +221,12 @@ export class ManifestManager {
     if (manifestState.manifest.getVersion() === undefined) {
       await manifestClient.createManifest(manifestState.manifest.toSavedObject());
     } else {
+      const version = manifestState.manifest.getVersion();
+      if (version === 'baseline') {
+        throw new Error('Updating existing manifest with baseline version. Bad state.');
+      }
       await manifestClient.updateManifest(manifestState.manifest.toSavedObject(), {
-        version: manifestState.manifest.getVersion(),
+        version,
       });
     }
 

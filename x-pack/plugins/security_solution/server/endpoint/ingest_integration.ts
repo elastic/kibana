@@ -39,7 +39,9 @@ export const getDatasourceCreateCallback = (
               enabled: true,
               streams: [],
               config: {
-                artifact_manifest: manifestState.manifest.toEndpointFormat(),
+                artifact_manifest: {
+                  value: manifestState.manifest.toEndpointFormat(),
+                },
                 policy: {
                   value: policyConfigFactory(),
                 },

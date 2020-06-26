@@ -63,6 +63,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       if (manifestState !== null) {
         if (await manifestManager.dispatch(manifestState)) {
           await manifestManager.commit(manifestState);
+          logger.debug(`Committed manifest ${manifestState.manifest.getVersion()}`);
         }
       }
     } catch (err) {
