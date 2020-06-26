@@ -22,15 +22,19 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
     },
     encoding: {
       type: 'keyword',
+      index: false,
     },
     created: {
       type: 'date',
+      index: false,
     },
     body: {
       type: 'binary',
+      index: false,
     },
     size: {
       type: 'long',
+      index: false,
     },
   },
 };
@@ -39,10 +43,12 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
     created: {
       type: 'date',
+      index: false,
     },
     // array of doc ids
     ids: {
       type: 'keyword',
+      index: false,
     },
   },
 };
