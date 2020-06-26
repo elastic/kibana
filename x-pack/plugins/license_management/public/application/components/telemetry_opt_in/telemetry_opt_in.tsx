@@ -5,13 +5,19 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiLink, EuiCheckbox, EuiSpacer, EuiText, EuiTitle, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  OptInExampleFlyout,
-  PRIVACY_STATEMENT_URL,
-  TelemetryPluginSetup,
-} from '../../lib/telemetry';
+  EuiLink,
+  EuiCheckbox,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiPopover,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { TelemetryPluginStart } from '../../lib/telemetry';
+
+const OptInExampleFlyout = React.lazy(() => import('./opt_in_example_flyout'));
 
 interface State {
   showMoreTelemetryInfo: boolean;
@@ -22,7 +28,7 @@ interface Props {
   onOptInChange: (isOptingInToTelemetry: boolean) => void;
   isOptingInToTelemetry: boolean;
   isStartTrial: boolean;
-  telemetry: TelemetryPluginSetup;
+  telemetry: TelemetryPluginStart;
 }
 
 export class TelemetryOptIn extends React.Component<Props, State> {
@@ -54,11 +60,15 @@ export class TelemetryOptIn extends React.Component<Props, State> {
 
     let example = null;
     if (showExample) {
+      // Using React.Suspense and lazy loading here to avoid crashing the plugin when importing
+      // OptInExampleFlyout but telemetryManagementSection is disabled
       example = (
-        <OptInExampleFlyout
-          onClose={() => this.setState({ showExample: false })}
-          fetchExample={telemetry.telemetryService.fetchExample}
-        />
+        <React.Suspense fallback={<EuiLoadingSpinner />}>
+          <OptInExampleFlyout
+            onClose={() => this.setState({ showExample: false })}
+            fetchExample={telemetry.telemetryService.fetchExample}
+          />
+        </React.Suspense>
       );
     }
 
@@ -116,7 +126,10 @@ export class TelemetryOptIn extends React.Component<Props, State> {
                   </EuiLink>
                 ),
                 telemetryPrivacyStatementLink: (
-                  <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                  <EuiLink
+                    href={telemetry.telemetryConstants.getPrivacyStatementUrl()}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
                       defaultMessage="telemetry privacy statement"
