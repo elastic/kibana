@@ -47,6 +47,7 @@ export async function mountManagementSection(
     },
     services,
     history,
+    setBreadcrumbs,
   };
 
   return renderApp(element, { core, dependencies: appDependencies });

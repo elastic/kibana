@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -25,7 +25,7 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { api } = useComponentTemplatesContext();
+  const { api, breadcrumbs } = useComponentTemplatesContext();
 
   const onSave = async (componentTemplate: ComponentTemplateDeserialized) => {
     const { name } = componentTemplate;
@@ -49,10 +49,9 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
     setSaveError(null);
   };
 
-  // TODO implement breadcrumb
-  // useEffect(() => {
-  //   breadcrumbService.setBreadcrumbs('templateCreate');
-  // }, []);
+  useEffect(() => {
+    breadcrumbs.setCreateBreadcrumbs();
+  }, [breadcrumbs]);
 
   return (
     <EuiPageBody>

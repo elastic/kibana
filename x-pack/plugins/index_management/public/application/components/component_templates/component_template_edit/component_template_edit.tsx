@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
@@ -21,17 +21,16 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { api } = useComponentTemplatesContext();
+  const { api, breadcrumbs } = useComponentTemplatesContext();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(name);
 
-  // TODO breadcrumbs
-  // useEffect(() => {
-  //   breadcrumbService.setBreadcrumbs('templateEdit');
-  // }, []);
+  useEffect(() => {
+    breadcrumbs.setEditBreadcrumbs();
+  }, [breadcrumbs]);
 
   const onSave = async (updatedComponentTemplate: ComponentTemplateDeserialized) => {
     setIsSaving(true);
