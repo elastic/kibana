@@ -57,7 +57,12 @@ storiesOf('app/ServiceMap/Popover', module)
     },
     {
       info: {
-        propTablesExclude: [CytoscapeContext.Provider, EuiThemeProvider],
+        propTablesExclude: [
+          CytoscapeContext.Provider,
+          MockApmPluginContextWrapper,
+          MockUrlParamsContextProvider,
+          EuiThemeProvider,
+        ],
         source: false,
       },
     }
