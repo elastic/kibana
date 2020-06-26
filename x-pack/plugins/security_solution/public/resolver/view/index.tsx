@@ -19,6 +19,7 @@ import { SymbolDefinitions, useResolverTheme } from './assets';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
 import * as eventModel from '../../../common/endpoint/models/event';
+import { LineageLimitWarning } from './limit_warnings';
 
 interface StyledResolver {
   backgroundColor: string;
@@ -65,6 +66,30 @@ const StyledResolverContainer = styled.div`
   display: flex;
   flex-grow: 1;
   contain: layout;
+`;
+
+const StyledLineageLimitWarning = styled(LineageLimitWarning)`
+  position: absolute;
+  right: 0;
+  bottom: 5px;
+
+  flex-flow: row wrap;
+  display: block;
+  align-items: baseline;
+  max-width: 19em;
+
+  & .euiCallOutHeader {
+    display: inline;
+    margin-right: 0.5em;
+  }
+
+  & .euiText {
+    display: inline;
+  }
+
+  & .euiText p {
+    display: inline;
+  }
 `;
 
 export const Resolver = React.memo(function Resolver({
@@ -149,6 +174,7 @@ export const Resolver = React.memo(function Resolver({
               />
             );
           })}
+          <StyledLineageLimitWarning />
         </StyledResolverContainer>
       )}
       <StyledPanel />
