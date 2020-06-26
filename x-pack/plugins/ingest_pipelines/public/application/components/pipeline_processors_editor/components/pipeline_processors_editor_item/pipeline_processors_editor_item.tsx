@@ -101,6 +101,36 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   <b>{processor.type}</b>
                 </EuiText>
               </EuiFlexItem>
+              <EuiFlexItem className={inlineTextInputContainerClasses} grow={false}>
+                <InlineTextInput
+                  disabled={isDisabled}
+                  onChange={(nextDescription) => {
+                    let nextOptions: Record<string, any>;
+                    if (!nextDescription) {
+                      const { description: __, ...restOptions } = processor.options;
+                      nextOptions = restOptions;
+                    } else {
+                      nextOptions = {
+                        ...processor.options,
+                        description: nextDescription,
+                      };
+                    }
+                    processorsDispatch({
+                      type: 'updateProcessor',
+                      payload: {
+                        processor: {
+                          ...processor,
+                          options: nextOptions,
+                        },
+                        selector,
+                      },
+                    });
+                  }}
+                  ariaLabel={editorItemMessages.processorTypeLabel({ type: processor.type })}
+                  text={description}
+                  placeholder={editorItemMessages.descriptionPlaceholder}
+                />
+              </EuiFlexItem>
               <EuiFlexItem className={actionElementClasses} grow={false}>
                 {!isInMoveMode && (
                   <EuiToolTip content={editorItemMessages.editButtonLabel}>
@@ -132,36 +162,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                     />
                   </EuiToolTip>
                 )}
-              </EuiFlexItem>
-              <EuiFlexItem className={inlineTextInputContainerClasses} grow={false}>
-                <InlineTextInput
-                  disabled={isDisabled}
-                  onChange={(nextDescription) => {
-                    let nextOptions: Record<string, any>;
-                    if (!nextDescription) {
-                      const { description: __, ...restOptions } = processor.options;
-                      nextOptions = restOptions;
-                    } else {
-                      nextOptions = {
-                        ...processor.options,
-                        description: nextDescription,
-                      };
-                    }
-                    processorsDispatch({
-                      type: 'updateProcessor',
-                      payload: {
-                        processor: {
-                          ...processor,
-                          options: nextOptions,
-                        },
-                        selector,
-                      },
-                    });
-                  }}
-                  ariaLabel={editorItemMessages.processorTypeLabel({ type: processor.type })}
-                  text={description}
-                  placeholder={editorItemMessages.descriptionPlaceholder}
-                />
               </EuiFlexItem>
               <EuiFlexItem grow={false} className={cancelMoveButtonClasses}>
                 <EuiButton data-test-subj="cancelMoveItemButton" size="s" onClick={onCancelMove}>
