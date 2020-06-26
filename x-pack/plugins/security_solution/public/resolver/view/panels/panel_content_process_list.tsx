@@ -28,8 +28,12 @@ import { ResolverEvent } from '../../../../common/endpoint/types';
  */
 export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   pushToQueryParams,
+  isProcessTerminated,
+  isProcessOrigin,
 }: {
-  pushToQueryParams: (arg0: CrumbInfo) => unknown;
+  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
+  isProcessTerminated: boolean;
+  isProcessOrigin: boolean;
 }) {
   interface ProcessTableView {
     name: string;
@@ -82,7 +86,10 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
                 pushToQueryParams({ crumbId: event.entityId(item.event), crumbEvent: '' });
               }}
             >
-              <CubeForProcess processEvent={item.event} />
+              <CubeForProcess
+                isProcessTerminated={isProcessTerminated}
+                isProcessOrigin={isProcessOrigin}
+              />
               {name}
             </EuiButtonEmpty>
           );
@@ -114,7 +121,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
         },
       },
     ],
-    [pushToQueryParams, handleBringIntoViewClick]
+    [pushToQueryParams, handleBringIntoViewClick, isProcessOrigin, isProcessTerminated]
   );
 
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
