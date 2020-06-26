@@ -31,7 +31,6 @@ import { registerEmbeddables } from './embeddables';
 import { UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { setLicenseCache } from './application/license';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -68,52 +67,29 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const kibanaVersion = this.initializerContext.env.packageInfo.version;
         const { renderApp } = await import('./application/app');
-
-        // Creates a mutable object containing
-        // a boilerplate callback function which
-        // we'll update with the real callback once
-        // the license listener mounts the app.
-        const returnRef = { callback: () => {} };
-
-        // We pass the code to mount the app as a `postInitFunctions`
-        // callback to setLicenseCache/MlLicense.setup() so we make
-        // sure the app gets mounted only after we received the
-        // license information.
-        const mlLicense = setLicenseCache(pluginsSetup.licensing, [
-          () => {
-            returnRef.callback = renderApp(
-              coreStart,
-              {
-                data: pluginsStart.data,
-                share: pluginsStart.share,
-                kibanaLegacy: pluginsStart.kibanaLegacy,
-                security: pluginsSetup.security,
-                licensing: pluginsSetup.licensing,
-                management: pluginsSetup.management,
-                usageCollection: pluginsSetup.usageCollection,
-                licenseManagement: pluginsSetup.licenseManagement,
-                home: pluginsSetup.home,
-                embeddable: pluginsSetup.embeddable,
-                uiActions: pluginsSetup.uiActions,
-                kibanaVersion,
-              },
-              {
-                element: params.element,
-                appBasePath: params.appBasePath,
-                onAppLeave: params.onAppLeave,
-                history: params.history,
-              }
-            );
+        return renderApp(
+          coreStart,
+          {
+            data: pluginsStart.data,
+            share: pluginsStart.share,
+            kibanaLegacy: pluginsStart.kibanaLegacy,
+            security: pluginsSetup.security,
+            licensing: pluginsSetup.licensing,
+            management: pluginsSetup.management,
+            usageCollection: pluginsSetup.usageCollection,
+            licenseManagement: pluginsSetup.licenseManagement,
+            home: pluginsSetup.home,
+            embeddable: pluginsSetup.embeddable,
+            uiActions: pluginsSetup.uiActions,
+            kibanaVersion,
           },
-        ]);
-
-        // Finally we return the unmount callback which includes
-        // unsubscribing from the license listener as well as
-        // the overall unmount callback from renderApp().
-        return () => {
-          mlLicense.unsubscribe();
-          returnRef.callback();
-        };
+          {
+            element: params.element,
+            appBasePath: params.appBasePath,
+            onAppLeave: params.onAppLeave,
+            history: params.history,
+          }
+        );
       },
     });
 
