@@ -60,7 +60,7 @@ import {
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
-import { MetricsServiceSetup } from './metrics';
+import { MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import {
   LoggingServiceSetup,
@@ -403,8 +403,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   };
   /** {@link LoggingServiceSetup} */
   logging: LoggingServiceSetup;
-  /** {@link MetricsServiceSetup} */
-  metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */
@@ -442,6 +440,8 @@ export interface CoreStart {
   elasticsearch: ElasticsearchServiceStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
+  /** {@link MetricsServiceStart} */
+  metrics: MetricsServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
