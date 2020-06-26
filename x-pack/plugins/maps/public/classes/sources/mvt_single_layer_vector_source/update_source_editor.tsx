@@ -12,7 +12,6 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 import { MVTField } from '../../fields/mvt_field';
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
 import { MVTSettings, MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
-import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
 
 export interface Props {
@@ -39,6 +38,9 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _renderSourceSettingsCard() {
+    const fieldDescriptors = this.props.source.getMVTFields().map((field: MVTField) => {
+      return field.getMVTFieldDescriptor();
+    });
     return (
       <Fragment>
         <EuiPanel>
@@ -54,7 +56,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <MVTSingleLayerSourceSettings
             handleChange={this._handleChange}
             layerName={this.props.source.getLayerName() || ''}
-            fields={this.props.source.getFieldDescriptors()}
+            fields={fieldDescriptors}
             minSourceZoom={this.props.source.getMinZoom()}
             maxSourceZoom={this.props.source.getMaxZoom()}
             includeFields={true}
@@ -84,7 +86,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <TooltipSelector
             tooltipFields={this.props.tooltipFields} // selected fields in the tooltip
             onChange={this._onTooltipPropertiesSelect}
-            fields={this.props.source.getFieldDescriptors()} // all the fields in the source
+            fields={this.props.source.getMVTFields()} // all the fields in the source
           />
         </EuiPanel>
 

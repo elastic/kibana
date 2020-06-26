@@ -89,8 +89,8 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
     const minZoom = parseInt(e[0] as string, 10);
     const maxZoom = parseInt(e[1] as string, 10);
     if (
-      this.state.currentSettings.fields.minSourceZoom === minZoom &&
-      this.state.currentSettings.fields.maxSourceZoom === maxZoom
+      this.state.currentSettings.minSourceZoom === minZoom &&
+      this.state.currentSettings.maxSourceZoom === maxZoom
     ) {
       return;
     }

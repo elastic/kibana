@@ -62,7 +62,7 @@ interface State {
 }
 
 export class MVTFieldConfigEditor extends Component<Props, State> {
-  state = {
+  state: State = {
     currentFields: [],
     previousFields: [],
   };
@@ -78,7 +78,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   }
 
   _notifyChange = _.debounce(() => {
-    const invalid = this.state.currentFields.some((field) => {
+    const invalid = this.state.currentFields.some((field: MVTFieldDescriptor) => {
       return field.name === '';
     });
 
@@ -87,7 +87,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
     }
   });
 
-  _fieldChange(newFields) {
+  _fieldChange(newFields: MVTFieldDescriptor[]) {
     this.setState(
       {
         currentFields: newFields,
@@ -97,13 +97,13 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   }
 
   _removeField(index: number) {
-    const newFields = this.state.currentFields.slice();
+    const newFields: MVTFieldDescriptor[] = this.state.currentFields.slice();
     newFields.splice(index, 1);
     this._fieldChange(newFields);
   }
 
   _addField = () => {
-    const newFields = this.state.currentFields.slice();
+    const newFields: MVTFieldDescriptor[] = this.state.currentFields.slice();
     newFields.push({
       type: MVTFieldType.STRING,
       name: '',

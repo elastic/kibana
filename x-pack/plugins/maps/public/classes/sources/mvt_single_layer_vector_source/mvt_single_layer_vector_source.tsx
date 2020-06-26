@@ -93,8 +93,15 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     });
   }
 
-  getFieldDescriptors(): MVTFieldDescriptor[] {
-    return this._descriptor.fields;
+  getMVTFields(): MVTField[] {
+    return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
+      return new MVTField({
+        fieldName: field.name,
+        type: field.type,
+        source: this,
+        origin: FIELD_ORIGIN.SOURCE,
+      });
+    });
   }
 
   getFieldByName(fieldName: string): MVTField | null {
@@ -130,14 +137,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   async getFields(): Promise<MVTField[]> {
-    return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
-      return new MVTField({
-        fieldName: field.name,
-        type: field.type,
-        source: this,
-        origin: FIELD_ORIGIN.SOURCE,
-      });
-    });
+    return this.getMVTFields();
   }
 
   getLayerName(): string {
