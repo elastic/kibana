@@ -15,6 +15,7 @@ import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
 import { OnRowSelected } from '../../events';
 import { Ecs } from '../../../../../graphql/types';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 
 export interface TimelineRowActionOnClick {
   eventId: string;
@@ -27,7 +28,7 @@ export interface TimelineRowAction {
   displayType: 'icon' | 'contextMenu';
   iconType?: string;
   id: string;
-  isActionDisabled?: boolean;
+  isActionDisabled?: (ecsData?: Ecs) => boolean;
   onClick: ({ eventId, ecsData }: TimelineRowActionOnClick) => void;
   content: string | JSX.Element;
   width?: number;
@@ -83,24 +84,9 @@ export const Actions = React.memo<Props>(
       actionsColumnWidth={actionsColumnWidth}
       data-test-subj="event-actions-container"
     >
-      <EventsTd>
-        <EventsTdContent textAlign="center">
-          {loading && <EventsLoading />}
-
-          {!loading && (
-            <EuiButtonIcon
-              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-              data-test-subj="expand-event"
-              iconType={expanded ? 'arrowDown' : 'arrowRight'}
-              id={eventId}
-              onClick={onEventToggled}
-            />
-          )}
-        </EventsTdContent>
-      </EventsTd>
       {showCheckboxes && (
         <EventsTd data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center">
+          <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
             {loadingEventIds.includes(eventId) ? (
               <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
             ) : (
@@ -120,12 +106,28 @@ export const Actions = React.memo<Props>(
         </EventsTd>
       )}
 
+      <EventsTd>
+        <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          {loading && <EventsLoading />}
+
+          {!loading && (
+            <EuiButtonIcon
+              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+              data-test-subj="expand-event"
+              iconType={expanded ? 'arrowDown' : 'arrowRight'}
+              id={eventId}
+              onClick={onEventToggled}
+            />
+          )}
+        </EventsTdContent>
+      </EventsTd>
+
       <>{additionalActions}</>
 
       {!isEventViewer && (
         <>
           <EventsTd>
-            <EventsTdContent textAlign="center">
+            <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
               <EuiToolTip
                 data-test-subj="timeline-action-pin-tool-tip"
                 content={getPinTooltip({
@@ -144,7 +146,7 @@ export const Actions = React.memo<Props>(
           </EventsTd>
 
           <EventsTd>
-            <EventsTdContent textAlign="center">
+            <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
               <NotesButton
                 animate={false}
                 associateNote={associateNote}
