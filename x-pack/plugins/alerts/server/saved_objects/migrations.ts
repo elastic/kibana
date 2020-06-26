@@ -28,6 +28,7 @@ function changeAlertingConsumer(
 ): SavedObjectMigrationFn<RawAlert, RawAlert> {
   const consumerMigration = new Map<string, string>();
   consumerMigration.set('alerting', 'alerts');
+  consumerMigration.set('metrics', 'infrastructure');
 
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
