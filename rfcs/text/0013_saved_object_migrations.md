@@ -259,8 +259,9 @@ To rollback to a previous version of Kibana with a snapshot
 3. Start the rollback Kibana nodes. All running Kibana nodes should be on the same rollback version, have the same plugins enabled and use the same configuration.
 
 To rollback to a previous version of Kibana without a snapshot:
+(Assumes the migration to 7.11.0 failed)
 1. Shutdown all Kibana nodes.
-2. Remove the index created by the failed Kibana migration by using the version-specific alias e.g. `DELETE /.kibana_7.10.0` 
+2. Remove the index created by the failed Kibana migration by using the version-specific alias e.g. `DELETE /.kibana_7.11.0` 
 3. Identify the rollback index:
    1. If rolling back to a Kibana version < 7.10.0 use `.kibana`
    2. If rolling back to a Kibana version >= 7.10.0 use the version alias of the Kibana version you wish to rollback to e.g. `.kibana_7.10.0`
@@ -688,4 +689,9 @@ to enumarate some scenarios and their worst case impact:
    for writing migration functions. 
 
 # 7. Unresolved questions
-1. How do we want to deal with orphan data as described in (4.2.1.4) "Handling documents that belong to a disabled plugin"
+1. When cloning an index we can only ever add new fields to the mappings. When
+   a saved object type or specific field is removed, the mappings will remain
+   until we re-index. Is it sufficient to only re-index every major? How do we
+   track the field count as it grows over every upgrade?
+2. More generally, how do we deal with the growing field count approaching the
+   default limit of 1000?
