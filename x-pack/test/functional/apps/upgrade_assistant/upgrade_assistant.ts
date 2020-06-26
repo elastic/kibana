@@ -11,15 +11,15 @@ export default function upgradeAssistantFunctionalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
+  const PageObjects = getPageObjects(['upgradeAssistant']);
   const security = getService('security');
 
-  describe.only('Upgrade Checkup', function () {
+  describe('Upgrade Checkup', function () {
     this.tags('includeFirefox');
 
     before(async () => {
-    await esArchiver.load('empty_kibana')
-    await security.testUser.setRoles(['global_upgrade_assistant_role']);
+      await esArchiver.load('empty_kibana');
+      await security.testUser.setRoles(['global_upgrade_assistant_role']);
     });
 
     after(async () => {
@@ -35,10 +35,11 @@ export default function upgradeAssistantFunctionalTests({
 
     it('allows user to toggle deprecation logging', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
-      await PageObjects.common.sleep(5000);
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
       await PageObjects.upgradeAssistant.toggleDeprecationLogging();
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('Off');
+      await PageObjects.upgradeAssistant.toggleDeprecationLogging();
+      await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
     });
 
     it('allows user to open cluster tab', async () => {
