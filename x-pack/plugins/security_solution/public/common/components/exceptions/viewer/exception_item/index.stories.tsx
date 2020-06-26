@@ -11,7 +11,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionItem } from './';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getCommentsMock } from '../../../../../../../lists/common/schemas/types/comments.mock';
+import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comments.mock';
 
 addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
@@ -68,7 +68,7 @@ storiesOf('Components|ExceptionItem', module)
     const payload = getExceptionListItemSchemaMock();
     payload._tags = [];
     payload.description = '';
-    payload.comments = getCommentsMock();
+    payload.comments = getCommentsArrayMock();
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
@@ -106,7 +106,7 @@ storiesOf('Components|ExceptionItem', module)
   })
   .add('with everything', () => {
     const payload = getExceptionListItemSchemaMock();
-    payload.comments = getCommentsMock();
+    payload.comments = getCommentsArrayMock();
     return (
       <ExceptionItem
         loadingItemIds={[]}
