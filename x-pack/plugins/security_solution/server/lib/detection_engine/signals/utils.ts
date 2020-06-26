@@ -7,8 +7,124 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
-import { parseDuration } from '../../../../../alerts/server';
+import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { AlertServices, parseDuration } from '../../../../../alerts/server';
+import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
+import { EntriesArray, ExceptionListItemSchema } from '../../../../../lists/common/schemas';
+import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
+import { hasListsFeature } from '../feature_flags';
 import { BulkResponse, BulkResponseErrorAggregation } from './types';
+
+interface SortExceptionsReturn {
+  exceptionsWithValueLists: ExceptionListItemSchema[];
+  exceptionsWithoutValueLists: ExceptionListItemSchema[];
+}
+
+export const getListsClient = async ({
+  lists,
+  spaceId,
+  updatedByUser,
+  services,
+  savedObjectClient,
+}: {
+  lists: ListPluginSetup | undefined;
+  spaceId: string;
+  updatedByUser: string | null;
+  services: AlertServices;
+  savedObjectClient: SavedObjectsClientContract;
+}): Promise<{
+  listClient: ListClient | undefined;
+  exceptionsClient: ExceptionListClient | undefined;
+}> => {
+  // TODO Remove check once feature is no longer behind flag
+  if (hasListsFeature()) {
+    if (lists == null) {
+      throw new Error('lists plugin unavailable during rule execution');
+    }
+
+    const listClient = await lists.getListClient(
+      services.callCluster,
+      spaceId,
+      updatedByUser ?? 'elastic'
+    );
+    const exceptionsClient = await lists.getExceptionListClient(
+      savedObjectClient,
+      updatedByUser ?? 'elastic'
+    );
+
+    return { listClient, exceptionsClient };
+  } else {
+    return { listClient: undefined, exceptionsClient: undefined };
+  }
+};
+
+export const hasLargeValueList = (entries: EntriesArray): boolean => {
+  const found = entries.filter(({ type }) => type === 'list');
+  return found.length > 0;
+};
+
+export const getExceptions = async ({
+  client,
+  lists,
+}: {
+  client: ExceptionListClient | undefined;
+  lists: ListArrayOrUndefined;
+}): Promise<ExceptionListItemSchema[] | undefined> => {
+  // TODO Remove check once feature is no longer behind flag
+  if (hasListsFeature()) {
+    if (client == null) {
+      throw new Error('lists plugin unavailable during rule execution');
+    }
+
+    if (lists != null) {
+      try {
+        // Gather all exception items of all exception lists linked to rule
+        const exceptions = await Promise.all(
+          lists
+            .map(async (list) => {
+              const { id, namespace_type: namespaceType } = list;
+              const items = await client.findExceptionListItem({
+                listId: id,
+                namespaceType,
+                page: 1,
+                perPage: 5000,
+                filter: undefined,
+                sortOrder: undefined,
+                sortField: undefined,
+              });
+              return items != null ? items.data : [];
+            })
+            .flat()
+        );
+        return exceptions.flat();
+      } catch {
+        return [];
+      }
+    }
+  }
+};
+
+export const sortExceptionItems = (exceptions: ExceptionListItemSchema[]): SortExceptionsReturn => {
+  return exceptions.reduce<SortExceptionsReturn>(
+    (acc, exception) => {
+      const { entries } = exception;
+      const { exceptionsWithValueLists, exceptionsWithoutValueLists } = acc;
+
+      if (hasLargeValueList(entries)) {
+        return {
+          exceptionsWithValueLists: [...exceptionsWithValueLists, { ...exception }],
+          exceptionsWithoutValueLists,
+        };
+      } else {
+        return {
+          exceptionsWithValueLists,
+          exceptionsWithoutValueLists: [...exceptionsWithoutValueLists, { ...exception }],
+        };
+      }
+    },
+    { exceptionsWithValueLists: [], exceptionsWithoutValueLists: [] }
+  );
+};
 
 export const generateId = (
   docIndex: string,
