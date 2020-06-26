@@ -70,7 +70,7 @@ export {
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
   EmbeddableStateTransfer,
-  EmbeddableOriginatingAppState,
+  EmbeddableEditorState,
   EmbeddablePackageState,
   EmbeddableRenderer,
   EmbeddableRendererProps,
