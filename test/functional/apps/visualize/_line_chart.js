@@ -290,34 +290,67 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
       });
 
-      it('should have an error if bucket is not selected', async () => {
-        await PageObjects.visEditor.clickMetricEditor();
-        log.debug('Metrics agg = Serial diff');
-        await PageObjects.visEditor.selectAggregation('Serial diff', 'metrics');
-        await testSubjects.existOrFail('bucketsError');
+      describe('parent pipeline', () => {
+        it('should have an error if bucket is not selected', async () => {
+          await PageObjects.visEditor.clickMetricEditor();
+          log.debug('Metrics agg = Serial diff');
+          await PageObjects.visEditor.selectAggregation('Serial diff', 'metrics');
+          await testSubjects.existOrFail('bucketsError');
+        });
+
+        it('should apply with selected bucket', async () => {
+          log.debug('Bucket = X-axis');
+          await PageObjects.visEditor.clickBucket('X-axis');
+          log.debug('Aggregation = Date Histogram');
+          await PageObjects.visEditor.selectAggregation('Date Histogram');
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Serial Diff of Count');
+        });
+
+        it('should change y-axis label to custom', async () => {
+          log.debug('set custom label of y-axis to "Custom"');
+          await PageObjects.visEditor.setCustomLabel('Custom', 1);
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Custom');
+        });
+
+        it('should have advanced accordion and json input', async () => {
+          await testSubjects.click('advancedParams-1');
+          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+        });
       });
 
-      it('should apply with selected bucket', async () => {
-        log.debug('Bucket = X-axis');
-        await PageObjects.visEditor.clickBucket('X-axis');
-        log.debug('Aggregation = Date Histogram');
-        await PageObjects.visEditor.selectAggregation('Date Histogram');
-        await PageObjects.visEditor.clickGo();
-        const title = await PageObjects.visChart.getYAxisTitle();
-        expect(title).to.be('Serial Diff of Count');
-      });
+      describe('sibling pipeline', () => {
+        it('should apply with selected bucket', async () => {
+          log.debug('Metrics agg = Average Bucket');
+          await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Overall Average of Count');
+        });
 
-      it('should change y-axis label to custom', async () => {
-        log.debug('set custom label of y-axis to "test"');
-        await PageObjects.visEditor.setCustomLabel('test', 1);
-        await PageObjects.visEditor.clickGo();
-        const title = await PageObjects.visChart.getYAxisTitle();
-        expect(title).to.be('test');
-      });
+        it('should change sub metric custom label and calculate y-axis title', async () => {
+          log.debug('set custom label of sub metric to "Cats"');
+          await PageObjects.visEditor.setCustomLabel('Cats', '1-metric');
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Overall Average of Cats');
+        });
 
-      it('should have advanced accordion and json input', async () => {
-        await testSubjects.click('advancedParams-1');
-        await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+        it('should outer custom label', async () => {
+          log.debug('set custom label to "Custom"');
+          await PageObjects.visEditor.setCustomLabel('Custom', 1);
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Custom');
+        });
+
+        it('should have advanced accordion and json input', async () => {
+          await testSubjects.click('advancedParams-1');
+          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+        });
       });
     });
   });
