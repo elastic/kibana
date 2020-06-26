@@ -119,7 +119,11 @@ export const IndicesField: FunctionComponent<Props> = ({
 
   // State for custom patterns
   const [indexPatterns, setIndexPatterns] = useState<string[]>(() =>
-    typeof config.indices === 'string' ? (config.indices as string).split(',') : []
+    typeof config.indices === 'string'
+      ? (config.indices as string).split(',')
+      : Array.isArray(config.indices)
+      ? config.indices
+      : []
   );
 
   const indicesSwitch = (
@@ -202,7 +206,7 @@ export const IndicesField: FunctionComponent<Props> = ({
                       <EuiFlexItem grow={false}>
                         <FormattedMessage
                           id="xpack.snapshotRestore.policyForm.stepSettings.selectIndicesLabel"
-                          defaultMessage="Select indices"
+                          defaultMessage="Select indices or data streams"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
