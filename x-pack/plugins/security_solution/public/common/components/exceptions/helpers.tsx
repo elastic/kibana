@@ -10,15 +10,17 @@ import { capitalize } from 'lodash';
 import moment from 'moment';
 
 import * as i18n from './translations';
-import { FormattedEntry, OperatorOption, DescriptionListItem, Comment } from './types';
+import { FormattedEntry, OperatorOption, DescriptionListItem } from './types';
 import { EXCEPTION_OPERATORS, isOperator } from './operators';
 import {
+  CommentsArray,
   Entry,
   EntriesArray,
   ExceptionListItemSchema,
   OperatorTypeEnum,
   entriesNested,
   entriesExists,
+  entriesList,
 } from '../../../lists_plugin_deps';
 
 /**
@@ -87,6 +89,16 @@ export const getFormattedEntries = (entries: EntriesArray): FormattedEntry[] => 
   return formattedEntries.flat();
 };
 
+export const getEntryValue = (entry: Entry): string | string[] | null => {
+  if (entriesList.is(entry)) {
+    return entry.list.id;
+  } else if (entriesExists.is(entry)) {
+    return null;
+  } else {
+    return entry.value;
+  }
+};
+
 /**
  * Helper method for `getFormattedEntries`
  */
@@ -100,7 +112,7 @@ export const formatEntry = ({
   item: Entry;
 }): FormattedEntry => {
   const operator = getExceptionOperatorSelect(item);
-  const value = !entriesExists.is(item) ? item.value : null;
+  const value = getEntryValue(item);
 
   return {
     fieldName: isNested ? `${parent}.${item.field}` : item.field,
@@ -172,7 +184,7 @@ export const getDescriptionListContent = (
  *
  * @param comments ExceptionItem.comments
  */
-export const getFormattedComments = (comments: Comment[]): EuiCommentProps[] =>
+export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[] =>
   comments.map((comment) => ({
     username: comment.created_by,
     timestamp: moment(comment.created_at).format('on MMM Do YYYY @ HH:mm:ss'),

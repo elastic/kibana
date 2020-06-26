@@ -17,6 +17,7 @@ import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mock
 import uuid from 'uuid';
 import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
 import { listMock } from '../../../../../lists/server/mocks';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
@@ -94,22 +95,23 @@ describe('searchAfterAndBulkCreate', () => {
           },
         ],
       });
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
+
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       listClient,
-      exceptionsList: [
-        {
-          field: 'source.ip',
-          values_operator: 'included',
-          values_type: 'list',
-          values: [
-            {
-              id: 'ci-badguys.txt',
-              name: 'ip',
-            },
-          ],
-        },
-      ],
+      exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
@@ -168,22 +170,22 @@ describe('searchAfterAndBulkCreate', () => {
           },
         ],
       });
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       listClient,
-      exceptionsList: [
-        {
-          field: 'source.ip',
-          values_operator: 'included',
-          values_type: 'list',
-          values: [
-            {
-              id: 'ci-badguys.txt',
-              name: 'ip',
-            },
-          ],
-        },
-      ],
+      exceptionsList: [exceptionItem],
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
@@ -254,7 +256,7 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       listClient,
-      exceptionsList: undefined,
+      exceptionsList: [],
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
@@ -281,25 +283,25 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('if unsuccessful first bulk create', async () => {
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
     const sampleParams = sampleRuleAlertParams(10);
     mockService.callCluster
       .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
       .mockRejectedValue(new Error('bulk failed')); // Added this recently
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
-      exceptionsList: [
-        {
-          field: 'source.ip',
-          values_operator: 'included',
-          values_type: 'list',
-          values: [
-            {
-              id: 'ci-badguys.txt',
-              name: 'ip',
-            },
-          ],
-        },
-      ],
+      exceptionsList: [exceptionItem],
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -327,6 +329,18 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success with 0 total hits', async () => {
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockResolvedValueOnce(sampleEmptyDocSearchResults());
     listClient.getListItemByValues = jest.fn(({ value }) =>
@@ -339,19 +353,7 @@ describe('searchAfterAndBulkCreate', () => {
     );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
-      exceptionsList: [
-        {
-          field: 'source.ip',
-          values_operator: 'included',
-          values_type: 'list',
-          values: [
-            {
-              id: 'ci-badguys.txt',
-              name: 'ip',
-            },
-          ],
-        },
-      ],
+      exceptionsList: [exceptionItem],
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -405,21 +407,21 @@ describe('searchAfterAndBulkCreate', () => {
         }))
       )
     );
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
-      exceptionsList: [
-        {
-          field: 'source.ip',
-          values_operator: 'included',
-          values_type: 'list',
-          values: [
-            {
-              id: 'ci-badguys.txt',
-              name: 'ip',
-            },
-          ],
-        },
-      ],
+      exceptionsList: [exceptionItem],
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
