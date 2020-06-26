@@ -1712,6 +1712,198 @@
                       },
                       "success": true
                     }
+                  },
+                  "required-package": {
+                    "value": {
+                      "response": {
+                        "format_version": "1.0.0",
+                        "name": "endpoint",
+                        "title": "Elastic Endpoint",
+                        "version": "0.3.0",
+                        "readme": "/package/endpoint/0.3.0/docs/README.md",
+                        "license": "basic",
+                        "description": "This is the Elastic Endpoint package.",
+                        "type": "solution",
+                        "categories": [
+                          "security"
+                        ],
+                        "release": "beta",
+                        "requirement": {
+                          "kibana": {
+                            "versions": ">7.4.0"
+                          }
+                        },
+                        "icons": [
+                          {
+                            "src": "/package/endpoint/0.3.0/img/logo-endpoint-64-color.svg",
+                            "size": "16x16",
+                            "type": "image/svg+xml"
+                          }
+                        ],
+                        "assets": {
+                          "kibana": {
+                            "dashboard": [
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "dashboard",
+                                "file": "826759f0-7074-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/dashboard/826759f0-7074-11ea-9bc8-6b38f4d29a16.json"
+                              }
+                            ],
+                            "map": [
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "map",
+                                "file": "a3a3bd10-706b-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/map/a3a3bd10-706b-11ea-9bc8-6b38f4d29a16.json"
+                              }
+                            ],
+                            "visualization": [
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "visualization",
+                                "file": "1cfceda0-728b-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/visualization/1cfceda0-728b-11ea-9bc8-6b38f4d29a16.json"
+                              },
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "visualization",
+                                "file": "1e525190-7074-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/visualization/1e525190-7074-11ea-9bc8-6b38f4d29a16.json"
+                              },
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "visualization",
+                                "file": "55387750-729c-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/visualization/55387750-729c-11ea-9bc8-6b38f4d29a16.json"
+                              },
+                              {
+                                "pkgkey": "endpoint-0.3.0",
+                                "service": "kibana",
+                                "type": "visualization",
+                                "file": "92b1edc0-706a-11ea-9bc8-6b38f4d29a16.json",
+                                "path": "endpoint-0.3.0/kibana/visualization/92b1edc0-706a-11ea-9bc8-6b38f4d29a16.json"
+                              }
+                            ]
+                          }
+                        },
+                        "datasets": [
+                          {
+                            "id": "endpoint",
+                            "title": "Endpoint Events",
+                            "release": "experimental",
+                            "type": "events",
+                            "package": "endpoint",
+                            "path": "events"
+                          },
+                          {
+                            "id": "endpoint.metadata",
+                            "title": "Endpoint Metadata",
+                            "release": "experimental",
+                            "type": "metrics",
+                            "package": "endpoint",
+                            "path": "metadata"
+                          },
+                          {
+                            "id": "endpoint.policy",
+                            "title": "Endpoint Policy Response",
+                            "release": "experimental",
+                            "type": "metrics",
+                            "package": "endpoint",
+                            "path": "policy"
+                          },
+                          {
+                            "id": "endpoint.telemetry",
+                            "title": "Endpoint Telemetry",
+                            "release": "experimental",
+                            "type": "metrics",
+                            "package": "endpoint",
+                            "path": "telemetry"
+                          }
+                        ],
+                        "datasources": [
+                          {
+                            "name": "endpoint",
+                            "title": "Endpoint data source",
+                            "description": "Interact with the endpoint.",
+                            "inputs": null,
+                            "multiple": false
+                          }
+                        ],
+                        "download": "/epr/endpoint/endpoint-0.3.0.tar.gz",
+                        "path": "/package/endpoint/0.3.0",
+                        "latestVersion": "0.3.0",
+                        "removable": false,
+                        "status": "installed",
+                        "savedObject": {
+                          "id": "endpoint",
+                          "type": "epm-packages",
+                          "updated_at": "2020-06-23T21:44:59.319Z",
+                          "version": "Wzk4LDFd",
+                          "attributes": {
+                            "installed": [
+                              {
+                                "id": "826759f0-7074-11ea-9bc8-6b38f4d29a16",
+                                "type": "dashboard"
+                              },
+                              {
+                                "id": "1cfceda0-728b-11ea-9bc8-6b38f4d29a16",
+                                "type": "visualization"
+                              },
+                              {
+                                "id": "1e525190-7074-11ea-9bc8-6b38f4d29a16",
+                                "type": "visualization"
+                              },
+                              {
+                                "id": "55387750-729c-11ea-9bc8-6b38f4d29a16",
+                                "type": "visualization"
+                              },
+                              {
+                                "id": "92b1edc0-706a-11ea-9bc8-6b38f4d29a16",
+                                "type": "visualization"
+                              },
+                              {
+                                "id": "a3a3bd10-706b-11ea-9bc8-6b38f4d29a16",
+                                "type": "map"
+                              },
+                              {
+                                "id": "events-endpoint",
+                                "type": "index-template"
+                              },
+                              {
+                                "id": "metrics-endpoint.metadata",
+                                "type": "index-template"
+                              },
+                              {
+                                "id": "metrics-endpoint.policy",
+                                "type": "index-template"
+                              },
+                              {
+                                "id": "metrics-endpoint.telemetry",
+                                "type": "index-template"
+                              }
+                            ],
+                            "es_index_patterns": {
+                              "events": "events-endpoint-*",
+                              "metadata": "metrics-endpoint.metadata-*",
+                              "policy": "metrics-endpoint.policy-*",
+                              "telemetry": "metrics-endpoint.telemetry-*"
+                            },
+                            "name": "endpoint",
+                            "version": "0.3.0",
+                            "internal": false,
+                            "removable": false
+                          },
+                          "references": []
+                        }
+                      },
+                      "success": true
+                    }
                   }
                 }
               }
@@ -3822,6 +4014,9 @@
           },
           "path": {
             "type": "string"
+          },
+          "removable": {
+            "type": "boolean"
           }
         },
         "required": [
