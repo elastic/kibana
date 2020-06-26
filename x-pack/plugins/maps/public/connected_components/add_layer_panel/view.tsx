@@ -95,7 +95,7 @@ export class AddLayerPanel extends Component<Props, State> {
         const nextIndex = prevState.currentStepIndex + 1;
         return {
           currentStepIndex: nextIndex,
-          currentStep: this.state.layerSteps![nextIndex],
+          currentStep: prevState.layerSteps![nextIndex],
           isNextStepBtnEnabled: false,
           isStepLoading: false,
         };
