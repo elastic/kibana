@@ -12,6 +12,7 @@ import { defaultRequestParameters } from './common';
 export const createLogEntryCategoryExamplesQuery = (
   indices: string,
   timestampField: string,
+  tiebreakerField: string,
   startTime: number,
   endTime: number,
   categoryQuery: string,
@@ -41,13 +42,7 @@ export const createLogEntryCategoryExamplesQuery = (
         ],
       },
     },
-    sort: [
-      {
-        [timestampField]: {
-          order: 'asc',
-        },
-      },
-    ],
+    sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
   },
   _source: ['event.dataset', 'message'],
   index: indices,
@@ -61,7 +56,7 @@ export const logEntryCategoryExampleHitRT = rt.type({
     }),
     message: rt.string,
   }),
-  sort: rt.tuple([rt.number]),
+  sort: rt.tuple([rt.number, rt.number]),
 });
 
 export type LogEntryCategoryExampleHit = rt.TypeOf<typeof logEntryCategoryExampleHitRT>;

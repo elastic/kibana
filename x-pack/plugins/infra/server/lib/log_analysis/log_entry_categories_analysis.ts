@@ -43,6 +43,7 @@ import {
   createTopLogEntryCategoriesQuery,
   topLogEntryCategoriesResponseRT,
 } from './queries/top_log_entry_categories';
+import { InfraSource } from '../sources';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -197,7 +198,8 @@ export async function getLogEntryCategoryExamples(
   startTime: number,
   endTime: number,
   categoryId: number,
-  exampleCount: number
+  exampleCount: number,
+  sourceConfiguration: InfraSource
 ) {
   const finalizeLogEntryCategoryExamplesSpan = startTracingSpan('get category example log entries');
 
@@ -215,6 +217,7 @@ export async function getLogEntryCategoryExamples(
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
+  const tiebreakerField = sourceConfiguration.configuration.fields.tiebreaker;
 
   if (indices == null || timestampField == null) {
     throw new InsufficientLogAnalysisMlJobConfigurationError(
@@ -239,6 +242,7 @@ export async function getLogEntryCategoryExamples(
     context,
     indices,
     timestampField,
+    tiebreakerField,
     startTime,
     endTime,
     category._source.terms,
@@ -475,6 +479,7 @@ async function fetchLogEntryCategoryExamples(
   requestContext: { core: { elasticsearch: { legacy: { client: IScopedClusterClient } } } },
   indices: string,
   timestampField: string,
+  tiebreakerField: string,
   startTime: number,
   endTime: number,
   categoryQuery: string,
@@ -490,6 +495,7 @@ async function fetchLogEntryCategoryExamples(
       createLogEntryCategoryExamplesQuery(
         indices,
         timestampField,
+        tiebreakerField,
         startTime,
         endTime,
         categoryQuery,
@@ -502,9 +508,11 @@ async function fetchLogEntryCategoryExamples(
 
   return {
     examples: hits.map((hit) => ({
+      id: hit._id,
       dataset: hit._source.event?.dataset ?? '',
       message: hit._source.message ?? '',
       timestamp: hit.sort[0],
+      tiebreaker: hit.sort[1],
     })),
     timing: {
       spans: [esSearchSpan],
