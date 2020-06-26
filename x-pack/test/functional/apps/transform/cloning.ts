@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
-          // await transform.api.deleteIndices(<CLONE_DEST_INDEX>);
+          await transform.api.deleteIndices(testData.destinationIndex);
         });
 
         it('should load the home page', async () => {
