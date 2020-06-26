@@ -24,7 +24,7 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { IEmbeddable, EmbeddableOriginatingAppState, EmbeddableStateTransfer } from '../..';
+import { IEmbeddable, EmbeddableEditorState, EmbeddableStateTransfer } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -35,7 +35,7 @@ interface ActionContext {
 interface NavigationContext {
   app: string;
   path: string;
-  state?: EmbeddableOriginatingAppState;
+  state?: EmbeddableEditorState;
 }
 
 export class EditPanelAction implements Action<ActionContext> {
@@ -88,7 +88,7 @@ export class EditPanelAction implements Action<ActionContext> {
     const appTarget = this.getAppTarget(context);
     if (appTarget) {
       if (this.stateTransfer && appTarget.state) {
-        await this.stateTransfer.navigateToWithOriginatingApp(appTarget.app, {
+        await this.stateTransfer.navigateToEditor(appTarget.app, {
           path: appTarget.path,
           state: appTarget.state,
         });
