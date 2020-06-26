@@ -86,7 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should show the edit flyout', async () => {
-        await transform.editFlyout.openTransformEditFlyout();
+        await transform.table.clickTransformRowAction('Edit');
+        await transform.editFlyout.assertTransformEditFlyoutExists();
       });
 
       it('should update the transform description', async () => {
