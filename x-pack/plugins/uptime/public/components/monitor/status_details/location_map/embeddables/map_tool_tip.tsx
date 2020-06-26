@@ -21,9 +21,9 @@ import { AppState } from '../../../../../state';
 import { monitorLocationsSelector } from '../../../../../state/selectors';
 import { useMonitorId } from '../../../../../hooks';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
-import { RenderTooltipContentParams } from '../../../../../../../../legacy/plugins/maps/public';
 import { formatAvailabilityValue } from '../../availability_reporting/availability_reporting';
 import { LastCheckLabel } from '../../translations';
+import { RenderTooltipContentParams } from '../../../../../../../maps/public/classes';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 

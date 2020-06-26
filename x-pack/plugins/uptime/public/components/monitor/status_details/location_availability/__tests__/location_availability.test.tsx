@@ -11,6 +11,7 @@ import { MonitorLocations } from '../../../../../../common/runtime_types';
 import { LocationMissingWarning } from '../../location_map/location_missing';
 
 class LocalStorageMock {
+  store: Record<string, string>;
   constructor() {
     this.store = { 'xpack.uptime.detailPage.selectedView': 'list' };
   }
@@ -19,15 +20,15 @@ class LocalStorageMock {
     this.store = {};
   }
 
-  getItem(key) {
+  getItem(key: string) {
     return this.store[key] || null;
   }
 
-  setItem(key, value) {
+  setItem(key: string, value: string) {
     this.store[key] = value.toString();
   }
 
-  removeItem(key) {
+  removeItem(key: string) {
     delete this.store[key];
   }
 }
@@ -40,6 +41,7 @@ describe('LocationAvailability component', () => {
     // @ts-ignore replacing a call to localStorage we use for monitor list size
     global.localStorage = new LocalStorageMock();
 
+    // @ts-ignore replacing a call to localStorage we use for monitor list size
     global.localStorage.setItem('xpack.uptime.detailPage.selectedView', 'list');
 
     monitorLocations = {
@@ -78,7 +80,9 @@ describe('LocationAvailability component', () => {
   });
 
   it('shows warning if geo information is missing', () => {
+    // @ts-ignore replacing a call to localStorage we use for monitor list size
     global.localStorage.setItem('xpack.uptime.detailPage.selectedView', 'map');
+
     monitorLocations = {
       monitorId: 'wapo',
       up_history: 8,
