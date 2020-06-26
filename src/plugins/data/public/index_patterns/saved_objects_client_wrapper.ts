@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit, map } from 'lodash';
+import { omit } from 'lodash';
 import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
 import {
   SavedObjectsClientCommon,
@@ -41,7 +41,8 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
   async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
     const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
-    return map<SimpleSavedObject<T>, SavedObject<T>>(response, simpleSavedObjectToSavedObject);
+    // return map<SimpleSavedObject<T>, SavedObject<T>>(response, simpleSavedObjectToSavedObject);
+    return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
   }
 
   async get<T = unknown>(type: string, id: string) {

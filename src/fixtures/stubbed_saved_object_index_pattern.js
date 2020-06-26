@@ -18,12 +18,12 @@
  */
 
 import stubbedLogstashFields from './logstash_fields';
-import { SimpleSavedObject } from '../core/public';
+//import { SimpleSavedObject } from '../core/public';
 
 const mockLogstashFields = stubbedLogstashFields();
 
 export function stubbedSavedObjectIndexPattern(id) {
-  return new SimpleSavedObject(undefined, {
+  return {
     id,
     type: 'index-pattern',
     attributes: {
@@ -32,5 +32,5 @@ export function stubbedSavedObjectIndexPattern(id) {
       fields: mockLogstashFields,
     },
     version: 2,
-  });
+  };
 }

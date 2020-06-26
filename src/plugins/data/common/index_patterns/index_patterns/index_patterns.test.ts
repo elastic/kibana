@@ -19,9 +19,13 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { IndexPatternsService } from './index_patterns';
-import { SavedObjectsClientContract, SavedObjectsFindResponsePublic } from 'kibana/public';
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { UiSettingsCommon, IIndexPatternsApiClient, SavedObjectsClientCommon } from '../types';
+import {
+  UiSettingsCommon,
+  IIndexPatternsApiClient,
+  SavedObjectsClientCommon,
+  SavedObject,
+} from '../types';
 
 const fieldFormats = fieldFormatsMock;
 
@@ -39,15 +43,15 @@ jest.mock('./index_pattern', () => {
 
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
-  let savedObjectsClient: SavedObjectsClientContract;
+  let savedObjectsClient: SavedObjectsClientCommon;
 
   beforeEach(() => {
-    savedObjectsClient = {} as SavedObjectsClientContract;
+    savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
       () =>
-        Promise.resolve({
-          savedObjects: [{ id: 'id', attributes: { title: 'title' } }],
-        }) as Promise<SavedObjectsFindResponsePublic<any>>
+        Promise.resolve([{ id: 'id', attributes: { title: 'title' } }]) as Promise<
+          Array<SavedObject<any>>
+        >
     );
 
     indexPatterns = new IndexPatternsService({
