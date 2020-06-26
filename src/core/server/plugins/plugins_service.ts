@@ -239,17 +239,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
-      const { enabled: shouldEnablePlugin, missingDependencies } = this.shouldEnablePlugin(
-        pluginName,
-        pluginEnableStatuses
-      );
+      const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
 
-      if (shouldEnablePlugin) {
+      if (pluginEnablement.enabled) {
         this.pluginsSystem.addPlugin(plugin);
       } else if (isEnabled) {
         this.log.info(
           `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing or disabled: ${JSON.stringify(
-            missingDependencies
+            pluginEnablement.missingDependencies
           )}`
         );
       } else {
@@ -264,7 +261,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     pluginName: PluginName,
     pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
     parents: PluginName[] = []
-  ): { enabled: boolean; missingDependencies: string[] } {
+  ): { enabled: true } | { enabled: false; missingDependencies: string[] } {
     const pluginInfo = pluginEnableStatuses.get(pluginName);
 
     if (pluginInfo === undefined || !pluginInfo.isEnabled) {
@@ -282,8 +279,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
             .enabled
       );
 
+    if (missingDependencies.length === 0) {
+      return {
+        enabled: true,
+      };
+    }
+
     return {
-      enabled: missingDependencies.length === 0,
+      enabled: false,
       missingDependencies,
     };
   }
