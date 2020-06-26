@@ -77,7 +77,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
         // We pass the code to mount the app as a `postInitFunctions`
         // callback to setLicenseCache/MlLicense.setup() so we make
-        // sure the app get mounted only after we received the
+        // sure the app gets mounted only after we received the
         // license information.
         const mlLicense = setLicenseCache(pluginsSetup.licensing, [
           () => {
