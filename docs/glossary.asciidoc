@@ -362,7 +362,7 @@ A Canvas workpad that can be embedded outside of Kibana
 // tag::space-def[]
 A place for organizing <<glossary-dashboard,dashboards>>,
 <<glossary-visualization,visualizations>>, and other <<glossary-saved-object,saved objects>> by category.
-For example, a space might be based on a team, use case, or individual.
+For example, you might have different spaces for each team, use case, or individual.
 // end::space-def[]
 
 [[glossary-feature-space]] Spaces ::
