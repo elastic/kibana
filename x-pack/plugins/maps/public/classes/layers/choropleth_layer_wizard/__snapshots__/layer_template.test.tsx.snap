@@ -31,12 +31,12 @@ exports[`should render EMS UI when left source is BOUNDARIES_SOURCE.EMS 1`] = `
         options={
           Array [
             Object {
-              "id": "ELASTICSEARCH",
-              "label": "Points, lines, and polygons from Elasticsearch",
-            },
-            Object {
               "id": "EMS",
               "label": "Administrative boundaries from Elastic Maps Service",
+            },
+            Object {
+              "id": "ELASTICSEARCH",
+              "label": "Points, lines, and polygons from Elasticsearch",
             },
           ]
         }
@@ -84,12 +84,12 @@ exports[`should render elasticsearch UI when left source is BOUNDARIES_SOURCE.EL
         options={
           Array [
             Object {
-              "id": "ELASTICSEARCH",
-              "label": "Points, lines, and polygons from Elasticsearch",
-            },
-            Object {
               "id": "EMS",
               "label": "Administrative boundaries from Elastic Maps Service",
+            },
+            Object {
+              "id": "ELASTICSEARCH",
+              "label": "Points, lines, and polygons from Elasticsearch",
             },
           ]
         }
