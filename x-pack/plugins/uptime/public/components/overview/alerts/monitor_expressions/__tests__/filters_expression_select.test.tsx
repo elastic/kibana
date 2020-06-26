@@ -12,16 +12,20 @@ describe('filters expression select component', () => {
   it('is empty when no filters available', () => {
     const component = shallowWithIntl(
       <FiltersExpressionsSelect
-        alertParams={{}}
         newFilters={[]}
         onRemoveFilter={jest.fn()}
         filters={{
-          locations: [],
-          ports: [],
-          schemes: [],
+          'observer.geo.name': [],
+          'url.port': [],
+          'monitor.type': [],
           tags: [],
         }}
-        setAlertParams={jest.fn()}
+        selectedFilters={{
+          'observer.geo.name': [],
+          'url.port': [],
+          'monitor.type': [],
+          tags: [],
+        }}
         setUpdatedFieldValues={jest.fn()}
       />
     );
@@ -37,16 +41,20 @@ describe('filters expression select component', () => {
   it('contains provided new filter values', () => {
     const component = shallowWithIntl(
       <FiltersExpressionsSelect
-        alertParams={{}}
         newFilters={['observer.geo.name']}
         onRemoveFilter={jest.fn()}
         filters={{
+          'observer.geo.name': [],
+          'url.port': [],
+          'monitor.type': [],
           tags: [],
-          ports: [],
-          schemes: [],
-          locations: [],
         }}
-        setAlertParams={jest.fn()}
+        selectedFilters={{
+          'observer.geo.name': [],
+          'url.port': [],
+          'monitor.type': [],
+          tags: [],
+        }}
         setUpdatedFieldValues={jest.fn()}
       />
     );
@@ -103,16 +111,20 @@ describe('filters expression select component', () => {
   it('contains provided selected filter values', () => {
     const component = shallowWithIntl(
       <FiltersExpressionsSelect
-        alertParams={{}}
         newFilters={['tags']}
         onRemoveFilter={jest.fn()}
         filters={{
+          'observer.geo.name': [],
+          'url.port': [],
+          'monitor.type': [],
           tags: ['foo', 'bar'],
-          ports: [],
-          schemes: [],
-          locations: [],
         }}
-        setAlertParams={jest.fn()}
+        selectedFilters={{
+          'observer.geo.name': [],
+          'url.port': [],
+          'monitor.type': [],
+          tags: [],
+        }}
         setUpdatedFieldValues={jest.fn()}
       />
     );

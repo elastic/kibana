@@ -4,54 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { parseFiltersMap } from './parse_filter_map';
-import { fetchOverviewFilters } from '../../../state/actions';
+import React from 'react';
 import { FilterGroupComponent } from './index';
-import { UptimeRefreshContext } from '../../../contexts';
-import { esKuerySelector, overviewFiltersSelector, uiSelector } from '../../../state/selectors';
+import { useOverviewFilters } from '../../../hooks/use_overview_filters';
+import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 
-interface Props {
-  esFilters?: string;
-}
+export const FilterGroup: React.FC = () => {
+  const { filters, loading } = useOverviewFilters();
+  const [selectedFilters, updateSelectedFilters] = useSelectedFilters();
 
-export const FilterGroup: React.FC<Props> = ({ esFilters }: Props) => {
-  const { lastRefresh } = useContext(UptimeRefreshContext);
-
-  const { filters: overviewFilters, loading } = useSelector(overviewFiltersSelector);
-  const {
-    dateRange: { from: dateRangeStart, to: dateRangeEnd },
-    selectedFilters,
-    statusFilter,
-  } = useSelector(uiSelector);
-  const esKuery = useSelector(esKuerySelector);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const filterSelections = parseFiltersMap(selectedFilters);
-    dispatch(
-      fetchOverviewFilters({
-        dateRangeStart,
-        dateRangeEnd,
-        locations: filterSelections.locations ?? [],
-        ports: filterSelections.ports ?? [],
-        schemes: filterSelections.schemes ?? [],
-        search: esKuery,
-        statusFilter,
-        tags: filterSelections.tags ?? [],
-      })
-    );
-  }, [
-    lastRefresh,
-    dateRangeStart,
-    dateRangeEnd,
-    esKuery,
-    esFilters,
-    selectedFilters,
-    statusFilter,
-    dispatch,
-  ]);
-
-  return <FilterGroupComponent overviewFilters={overviewFilters} loading={loading} />;
+  return (
+    <FilterGroupComponent
+      overviewFilters={filters}
+      loading={loading}
+      selectedFilters={selectedFilters}
+      updateSelectedFilters={updateSelectedFilters}
+    />
+  );
 };

@@ -11,49 +11,43 @@ import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels } from './translations';
 import { FilterExpressionsSelectProps } from './filters_expression_select_container';
 import { OverviewFiltersState } from '../../../../state/reducers/overview_filters';
+import { FilterMap } from '../../../../../common/types';
 
-type FilterFieldUpdate = (updateTarget: { fieldName: string; values: string[] }) => void;
+type FilterFieldUpdate = (updatedSelection: FilterMap) => void;
 
 interface OwnProps {
+  selectedFilters: FilterMap;
   setUpdatedFieldValues: FilterFieldUpdate;
 }
 
 type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'> & OwnProps;
 
 export const FiltersExpressionsSelect: React.FC<Props> = ({
-  alertParams,
   filters: overviewFilters,
   newFilters,
   onRemoveFilter,
-  setAlertParams,
+  selectedFilters,
   setUpdatedFieldValues,
 }) => {
-  const { tags, ports, schemes, locations } = overviewFilters;
-  const selectedPorts = alertParams?.filters?.['url.port'] ?? [];
-  const selectedLocations = alertParams?.filters?.['observer.geo.name'] ?? [];
-  const selectedSchemes = alertParams?.filters?.['monitor.type'] ?? [];
-  const selectedTags = alertParams?.filters?.tags ?? [];
+  const {
+    'monitor.type': selectedSchemes,
+    'observer.geo.name': selectedLocations,
+    tags: selectedTags,
+    'url.port': selectedPorts,
+  } = selectedFilters;
+
+  const {
+    'monitor.type': schemes,
+    'observer.geo.name': locations,
+    tags,
+    'url.port': ports,
+  } = overviewFilters;
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
-    // the `filters` field is no longer a string
-    if (alertParams.filters && typeof alertParams.filters !== 'string') {
-      setAlertParams('filters', { ...alertParams.filters, [fieldName]: values });
-    } else {
-      setAlertParams(
-        'filters',
-        Object.assign(
-          {},
-          {
-            tags: [],
-            'url.port': [],
-            'observer.geo.name': [],
-            'monitor.type': [],
-          },
-          { [fieldName]: values }
-        )
-      );
-    }
-    setUpdatedFieldValues({ fieldName, values });
+    setUpdatedFieldValues({
+      ...selectedFilters,
+      [fieldName]: values,
+    });
   };
 
   const monitorFilters = [

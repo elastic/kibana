@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
@@ -38,17 +38,13 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 interface Props {
   'aria-label': string;
   autocomplete: DataPublicPluginSetup['autocomplete'];
-  defaultKuery?: string;
   'data-test-subj': string;
-  updateDefaultKuery?: (value: string) => void;
 }
 
 export function KueryBar({
   'aria-label': ariaLabel,
   autocomplete: autocompleteService,
-  defaultKuery,
   'data-test-subj': dataTestSubj,
-  updateDefaultKuery,
 }: Props) {
   const { loading, index_pattern: indexPattern } = useIndexPattern();
   const { searchText: kuery, updateSearchText } = useSearchText();
@@ -62,20 +58,6 @@ export function KueryBar({
   let currentRequestCheck: string;
 
   const { dateRange } = useSelector(uiSelector);
-
-  useEffect(() => {
-    updateSearchText(kuery);
-  }, [kuery, updateSearchText]);
-
-  useEffect(() => {
-    if (updateDefaultKuery && kuery) {
-      updateDefaultKuery(kuery);
-    } else if (defaultKuery && updateDefaultKuery) {
-      updateDefaultKuery(defaultKuery);
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const indexPatternMissing = loading && !indexPattern;
 
@@ -129,15 +111,12 @@ export function KueryBar({
       return;
     }
 
+    updateSearchText(inputValue.trim());
+
     try {
       const res = convertKueryToEsQuery(inputValue, indexPattern);
       if (!res) {
         return;
-      }
-
-      updateSearchText(inputValue.trim());
-      if (updateDefaultKuery) {
-        updateDefaultKuery(inputValue);
       }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
@@ -155,7 +134,7 @@ export function KueryBar({
         data-test-subj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions || loading}
-        initialValue={defaultKuery || kuery}
+        initialValue={kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions.slice(0, suggestionLimit)}

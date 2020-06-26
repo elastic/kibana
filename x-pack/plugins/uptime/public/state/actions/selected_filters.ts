@@ -7,9 +7,9 @@
 import { createAction } from 'redux-actions';
 
 export interface SelectedFilters {
-  locations: string[];
-  ports: number[];
-  schemes: string[];
+  'observer.geo.name': string[];
+  'url.port': number[];
+  'monitor.type': string[];
   tags: string[];
 }
 

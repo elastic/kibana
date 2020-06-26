@@ -151,8 +151,8 @@ export const genFilterString = async (
   if (!filtersExist && !search) return undefined;
 
   let filterString: string | undefined;
-  if (filtersExist) {
-    filterString = stringifyKueries(new Map(Object.entries(filters ?? {})));
+  if (filtersExist && filters) {
+    filterString = stringifyKueries(filters);
   }
 
   let combinedString: string | undefined;

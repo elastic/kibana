@@ -4,34 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface FilterField {
-  name: string;
-  fieldName: string;
-}
-
-/**
- * These are the only filter fields we are looking to catch at the moment.
- * If your code needs to support custom fields, introduce a second parameter to
- * `parseFiltersMap` to take a list of FilterField objects.
- */
-const filterAllowList: FilterField[] = [
-  { name: 'ports', fieldName: 'url.port' },
-  { name: 'locations', fieldName: 'observer.geo.name' },
-  { name: 'tags', fieldName: 'tags' },
-  { name: 'schemes', fieldName: 'monitor.type' },
-];
+import { FilterMap, FilterName } from '../../../../common/types';
+import { FILTER_ALLOW_LIST } from '../../../../common/constants';
 
 export const parseFiltersMap = (filterMapString: string) => {
+  const filterMap: FilterMap = {
+    'observer.geo.name': [],
+    'url.port': [],
+    'monitor.type': [],
+    tags: [],
+  };
   if (!filterMapString) {
-    return {};
+    return filterMap;
   }
-  const filterSlices: { [key: string]: any } = {};
   try {
-    const map = new Map<string, string[]>(JSON.parse(filterMapString));
-    filterAllowList.forEach(({ name, fieldName }) => {
-      filterSlices[name] = map.get(fieldName) ?? [];
-    });
-    return filterSlices;
+    const parsed: any = JSON.parse(filterMapString);
+    if (Array.isArray(parsed)) {
+      const map = new Map<FilterName, string[]>(parsed);
+      FILTER_ALLOW_LIST.forEach(({ fieldName }) => {
+        filterMap[fieldName] = map.get(fieldName) ?? [];
+      });
+    } else if (typeof parsed === 'object') {
+      FILTER_ALLOW_LIST.forEach(({ fieldName }) => {
+        filterMap[fieldName] = parsed[fieldName] ?? [];
+      });
+    }
+    return filterMap;
   } catch {
     throw new Error('Unable to parse invalid filter string');
   }

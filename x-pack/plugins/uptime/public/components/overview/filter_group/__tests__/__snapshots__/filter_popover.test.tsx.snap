@@ -7,7 +7,7 @@ exports[`FilterPopover component does not show item list when loading 1`] = `
     <UptimeFilterButton
       isSelected={true}
       numActiveFilters={2}
-      numFilters={0}
+      numFilters={4}
       onClick={[Function]}
       title="bar"
     />
@@ -26,7 +26,7 @@ exports[`FilterPopover component does not show item list when loading 1`] = `
   <EuiPopoverTitle>
     <EuiFieldSearch
       compressed={false}
-      disabled={true}
+      disabled={false}
       fullWidth={false}
       incremental={true}
       isClearable={true}
@@ -45,7 +45,7 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
     <UptimeFilterButton
       isSelected={true}
       numActiveFilters={2}
-      numFilters={0}
+      numFilters={4}
       onClick={[Function]}
       title="bar"
     />
@@ -64,7 +64,7 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
   <EuiPopoverTitle>
     <EuiFieldSearch
       compressed={false}
-      disabled={true}
+      disabled={false}
       fullWidth={false}
       incremental={true}
       isClearable={true}
@@ -73,10 +73,44 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
       placeholder="Search bar"
     />
   </EuiPopoverTitle>
+  <EuiFilterSelectItem
+    checked="on"
+    data-test-subj="filter-popover-item_first"
+    key="first"
+    onClick={[Function]}
+    showIcons={true}
+  >
+    first
+  </EuiFilterSelectItem>
+  <EuiFilterSelectItem
+    data-test-subj="filter-popover-item_second"
+    key="second"
+    onClick={[Function]}
+    showIcons={true}
+  >
+    second
+  </EuiFilterSelectItem>
+  <EuiFilterSelectItem
+    checked="on"
+    data-test-subj="filter-popover-item_third"
+    key="third"
+    onClick={[Function]}
+    showIcons={true}
+  >
+    third
+  </EuiFilterSelectItem>
+  <EuiFilterSelectItem
+    data-test-subj="filter-popover-item_fourth"
+    key="fourth"
+    onClick={[Function]}
+    showIcons={true}
+  >
+    fourth
+  </EuiFilterSelectItem>
 </EuiPopover>
 `;
 
-exports[`FilterPopover component returns selected items on popover close 1`] = `
+exports[`FilterPopover component selects a new item 2`] = `
 <div
   intl="[object Object]"
 >
@@ -116,10 +150,10 @@ exports[`FilterPopover component returns selected items on popover close 1`] = `
               bar
             </span>
             <span
-              aria-label="1 active filters"
+              aria-label="2 active filters"
               class="euiNotificationBadge euiNotificationBadge--medium euiFilterButton__notification"
             >
-              1
+              2
             </span>
           </span>
         </span>

@@ -5,10 +5,9 @@
  */
 
 import { EuiFieldSearch, EuiFilterSelectItem, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { UptimeFilterButton } from './uptime_filter_button';
-import { toggleSelectedItems } from './toggle_selected_item';
 import { LocationLink } from '../monitor_list';
 
 export interface FilterPopoverProps {
@@ -25,8 +24,25 @@ export interface FilterPopoverProps {
   setForceOpen?: (val: boolean) => void;
 }
 
-const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>
-  selectedItems.find((selected) => selected === item) ? 'on' : undefined;
+const updateFiltersCallback = (
+  fieldName: string,
+  selectedItems: string[],
+  newSelections: string[],
+  deletions: string[],
+  setNewSelections: (list: string[]) => void,
+  setDeletions: (list: string[]) => void,
+  onFilterFieldChange: (fieldName: string, values: string[]) => void
+) => {
+  const updatedSelections = [...selectedItems, ...newSelections].filter(
+    (item) => !deletions.includes(item)
+  );
+  // compare the update list to the existing store before calling the API and re-rendering the UI
+  if (JSON.stringify(updatedSelections.sort()) !== JSON.stringify(selectedItems.sort())) {
+    onFilterFieldChange(fieldName, updatedSelections);
+  }
+  setNewSelections([]);
+  setDeletions([]);
+};
 
 export const FilterPopover = ({
   fieldName,
@@ -42,41 +58,41 @@ export const FilterPopover = ({
   setForceOpen,
 }: FilterPopoverProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [itemsToDisplay, setItemsToDisplay] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [tempSelectedItems, setTempSelectedItems] = useState<string[]>(selectedItems);
 
-  const [items, setItems] = useState<string[]>([]);
-
-  useEffect(() => {
-    // Merge incoming items with selected items, to enable deselection
-
-    const mItems = selectedItems.concat(allItems ?? []);
-    const newItems = mItems.filter((item, index) => mItems.indexOf(item) === index);
-    setItems(newItems);
-  }, [allItems, selectedItems]);
-
-  useEffect(() => {
-    if (searchQuery !== '') {
-      const toDisplay = items.filter((item) => item.indexOf(searchQuery) >= 0);
-      setItemsToDisplay(toDisplay);
-    } else {
-      setItemsToDisplay(items);
-    }
-  }, [searchQuery, items]);
-
+  /**
+   * While the popover is open we store temporary lists of updates. If an item is
+   * not selected in the store, we add/remove it from new selections. If it is
+   * selected in the store, we add/remove it from a list of items to delete.
+   *
+   * In `updateFiltersCallback`, we compile a new list for the store, and clear
+   * these temp items. If the new list doesn't match what's already in the store,
+   * we update the store.
+   */
+  const [newSelections, setNewSelections] = useState<string[]>([]);
+  const [deletions, setDeletions] = useState<string[]>([]);
   return (
     <EuiPopover
       button={
         btnContent ?? (
           <UptimeFilterButton
             isDisabled={disabled && selectedItems.length === 0}
-            isSelected={tempSelectedItems.length > 0}
-            numFilters={items.length}
-            numActiveFilters={tempSelectedItems.length}
+            isSelected={selectedItems.length > 0}
+            numFilters={allItems.length}
+            numActiveFilters={selectedItems.length}
             onClick={() => {
+              if (isOpen) {
+                updateFiltersCallback(
+                  fieldName,
+                  selectedItems,
+                  newSelections,
+                  deletions,
+                  setNewSelections,
+                  setDeletions,
+                  onFilterFieldChange
+                );
+              }
               setIsOpen(!isOpen);
-              onFilterFieldChange(fieldName, tempSelectedItems);
             }}
             title={title}
           />
@@ -84,7 +100,15 @@ export const FilterPopover = ({
       }
       closePopover={() => {
         setIsOpen(false);
-        onFilterFieldChange(fieldName, tempSelectedItems);
+        updateFiltersCallback(
+          fieldName,
+          selectedItems,
+          newSelections,
+          deletions,
+          setNewSelections,
+          setDeletions,
+          onFilterFieldChange
+        );
         if (setForceOpen) {
           setForceOpen(false);
         }
@@ -99,7 +123,7 @@ export const FilterPopover = ({
       <EuiPopoverTitle>
         <EuiFieldSearch
           incremental={true}
-          disabled={items.length === 0}
+          disabled={allItems.length === 0}
           onSearch={(query) => setSearchQuery(query)}
           placeholder={
             loading
@@ -116,17 +140,37 @@ export const FilterPopover = ({
         />
       </EuiPopoverTitle>
       {!loading &&
-        itemsToDisplay.map((item) => (
-          <EuiFilterSelectItem
-            checked={isItemSelected(tempSelectedItems, item)}
-            data-test-subj={`filter-popover-item_${item}`}
-            key={item}
-            onClick={() => toggleSelectedItems(item, tempSelectedItems, setTempSelectedItems)}
-          >
-            {item}
-          </EuiFilterSelectItem>
-        ))}
-      {id === 'location' && items.length === 0 && <LocationLink />}
+        (searchQuery ? allItems.filter((item) => item.includes(searchQuery)) : allItems).map(
+          (item) => (
+            <EuiFilterSelectItem
+              checked={
+                selectedItems.concat(newSelections).includes(item) && !deletions.includes(item)
+                  ? 'on'
+                  : undefined
+              }
+              data-test-subj={`filter-popover-item_${item}`}
+              key={item}
+              onClick={() => {
+                // item not globally selected, or locally selected
+                if (!newSelections.includes(item) && !selectedItems.includes(item)) {
+                  setNewSelections([...newSelections, item]);
+                  // item locally selected, deselect
+                } else if (newSelections.includes(item)) {
+                  setNewSelections(newSelections.filter((selection) => selection !== item));
+                  // item globally selected, locally mark to delete
+                } else if (selectedItems.includes(item) && !deletions.includes(item)) {
+                  setDeletions([...deletions, item]);
+                  // item locally marked for deletion, unmark
+                } else if (deletions.includes(item)) {
+                  setDeletions(deletions.filter((selection) => selection !== item));
+                }
+              }}
+            >
+              {item}
+            </EuiFilterSelectItem>
+          )
+        )}
+      {id === 'location' && allItems.length === 0 && <LocationLink />}
     </EuiPopover>
   );
 };

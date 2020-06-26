@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAlertFlyoutVisible } from '../../../../state/actions';
 import { UptimeAlertsFlyoutWrapperComponent } from '../uptime_alerts_flyout_wrapper';
@@ -12,9 +12,12 @@ import { selectAlertFlyoutVisibility, selectAlertFlyoutType } from '../../../../
 
 export const UptimeAlertsFlyoutWrapper: React.FC = () => {
   const dispatch = useDispatch();
-  const setAddFlyoutVisibility = (value: React.SetStateAction<boolean>) =>
-    // @ts-ignore the value here is a boolean, and it works with the action creator function
-    dispatch(setAlertFlyoutVisible(value));
+  const setAddFlyoutVisibility = useCallback(
+    (value: React.SetStateAction<boolean>) =>
+      // @ts-ignore the value here is a boolean, and it works with the action creator function
+      dispatch(setAlertFlyoutVisible(value)),
+    [dispatch]
+  );
 
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const alertTypeId = useSelector(selectAlertFlyoutType);

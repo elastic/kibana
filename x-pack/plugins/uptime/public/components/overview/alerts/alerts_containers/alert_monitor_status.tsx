@@ -4,27 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { isRight } from 'fp-ts/lib/Either';
 import {
   selectMonitorStatusAlert,
-  overviewFiltersSelector,
   snapshotDataSelector,
   esKuerySelector,
-  selectedFiltersSelector,
+  uiSelector,
 } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
 import {
-  fetchOverviewFilters,
   setSearchTextAction,
   setEsKueryString,
   getSnapshotCountAction,
+  setUiState,
 } from '../../../../state/actions';
 import { AtomicStatusCheckParamsType } from '../../../../../common/runtime_types';
 import { useIndexPattern } from '../../kuery_bar/use_index_pattern';
 import { useUpdateKueryString } from '../../../../hooks';
+import { useOverviewFilters } from '../../../../hooks/use_overview_filters';
+import { useSelectedFilters } from '../../../../hooks/use_selected_filters';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   alertParams: { [key: string]: any };
@@ -47,26 +49,35 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   alertParams,
 }) => {
   const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(
-      fetchOverviewFilters({
-        dateRangeStart: 'now-24h',
-        dateRangeEnd: 'now',
-        locations: alertParams.filters?.['observer.geo.name'] ?? [],
-        ports: alertParams.filters?.['url.port'] ?? [],
-        tags: alertParams.filters?.tags ?? [],
-        schemes: alertParams.filters?.['monitor.type'] ?? [],
-      })
-    );
-  }, [alertParams, dispatch]);
+  const [selectedFilters, updateSelectedFilters] = useSelectedFilters();
+  const ui = useSelector(uiSelector);
 
-  const overviewFilters = useSelector(overviewFiltersSelector);
-  const { locations } = useSelector(selectMonitorStatusAlert);
   useEffect(() => {
+    if (alertParams.filters && typeof alertParams.filters !== 'string') {
+      updateSelectedFilters({
+        'observer.geo.name': alertParams.filters?.['observer.geo.name'] ?? [],
+        'url.port': alertParams.filters?.['url.port'] ?? [],
+        tags: alertParams.filters?.tags ?? [],
+        'monitor.type': alertParams.filters?.['monitor.type'] ?? [],
+      });
+    }
     if (alertParams.search) {
       dispatch(setSearchTextAction(alertParams.search));
     }
-  }, [alertParams, dispatch]);
+    // this effect should only run once per mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setAlertParams('filters', selectedFilters);
+  }, [setAlertParams, selectedFilters]);
+
+  useEffect(() => {
+    setAlertParams('search', ui.searchText);
+  }, [setAlertParams, ui.searchText]);
+
+  const overviewFilters = useOverviewFilters();
+  const { locations } = useSelector(selectMonitorStatusAlert);
 
   const { index_pattern: indexPattern } = useIndexPattern();
 
@@ -87,27 +98,34 @@ export const AlertMonitorStatus: React.FC<Props> = ({
     () => !isRight(AtomicStatusCheckParamsType.decode(alertParams)),
     [alertParams]
   );
-  useEffect(() => {
-    dispatch(
-      getSnapshotCountAction({ dateRangeStart: 'now-24h', dateRangeEnd: 'now', filters: esKuery })
-    );
-  }, [dispatch, esKuery]);
+  const {
+    services: {
+      application: { currentAppId$ },
+    },
+  } = useKibana();
 
-  const selectedFilters = useSelector(selectedFiltersSelector);
+  const [currentApp, setCurrentApp] = useState<string>();
   useEffect(() => {
-    if (!alertParams.filters && selectedFilters !== null) {
-      setAlertParams('filters', {
-        // @ts-ignore
-        'url.port': selectedFilters?.ports ?? [],
-        // @ts-ignore
-        'observer.geo.name': selectedFilters?.locations ?? [],
-        // @ts-ignore
-        'monitor.type': selectedFilters?.schemes ?? [],
-        // @ts-ignore
-        tags: selectedFilters?.tags ?? [],
-      });
+    const subscription = currentAppId$.subscribe(setCurrentApp);
+    return () => subscription.unsubscribe();
+  }, [currentAppId$, setCurrentApp]);
+
+  useEffect(() => {
+    if (currentApp !== 'uptime') {
+      dispatch(setUiState({ dateRange: { from: 'now-24h', to: 'now' } }));
     }
-  }, [alertParams, setAlertParams, selectedFilters]);
+  }, [dispatch, currentApp]);
+  useEffect(() => {
+    if (currentApp !== 'uptime') {
+      dispatch(
+        getSnapshotCountAction({
+          dateRangeStart: ui.dateRange.from,
+          dateRangeEnd: ui.dateRange.to,
+          filters: esKuery,
+        })
+      );
+    }
+  }, [currentApp, dispatch, esKuery, ui.dateRange.from, ui.dateRange.to]);
 
   return (
     <AlertMonitorStatusComponent
@@ -118,6 +136,7 @@ export const AlertMonitorStatus: React.FC<Props> = ({
       isOldAlert={isOldAlert}
       locations={locations}
       numTimes={numTimes}
+      selectedFilters={selectedFilters}
       setAlertParams={setAlertParams}
       snapshotCount={count.total}
       snapshotLoading={loading}

@@ -11,9 +11,7 @@ import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 
 describe('AddFilterButton component', () => {
   it('provides all filter choices', () => {
-    const component = shallowWithIntl(
-      <AddFilterButton newFilters={[]} onNewFilter={jest.fn()} alertFilters={{}} />
-    );
+    const component = shallowWithIntl(<AddFilterButton newFilters={[]} onNewFilter={jest.fn()} />);
     expect(component).toMatchInlineSnapshot(`
       <EuiPopover
         anchorPosition="downLeft"
@@ -46,16 +44,16 @@ describe('AddFilterButton component', () => {
                 Location
               </EuiContextMenuItem>,
               <EuiContextMenuItem
-                data-test-subj="uptimeAlertAddFilter.tags"
-                onClick={[Function]}
-              >
-                Tag
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
                 data-test-subj="uptimeAlertAddFilter.url.port"
                 onClick={[Function]}
               >
                 Port
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                data-test-subj="uptimeAlertAddFilter.tags"
+                onClick={[Function]}
+              >
+                Tag
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 data-test-subj="uptimeAlertAddFilter.monitor.type"
@@ -72,11 +70,7 @@ describe('AddFilterButton component', () => {
 
   it('excludes filters that already have selected values', () => {
     const component = shallowWithIntl(
-      <AddFilterButton
-        newFilters={['observer.geo.name', 'tags']}
-        alertFilters={{ 'url.port': ['443', '80'] }}
-        onNewFilter={jest.fn()}
-      />
+      <AddFilterButton newFilters={['observer.geo.name', 'tags']} onNewFilter={jest.fn()} />
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiPopover
@@ -104,6 +98,12 @@ describe('AddFilterButton component', () => {
           items={
             Array [
               <EuiContextMenuItem
+                data-test-subj="uptimeAlertAddFilter.url.port"
+                onClick={[Function]}
+              >
+                Port
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
                 data-test-subj="uptimeAlertAddFilter.monitor.type"
                 onClick={[Function]}
               >
@@ -119,13 +119,7 @@ describe('AddFilterButton component', () => {
   it('popover is disabled if no values are available', () => {
     const component = shallowWithIntl(
       <AddFilterButton
-        newFilters={[]}
-        alertFilters={{
-          'observer.geo.name': ['fairbanks'],
-          tags: ['foo'],
-          'url.port': ['80'],
-          'monitor.type': ['http'],
-        }}
+        newFilters={['observer.geo.name', 'monitor.type', 'tags', 'url.port']}
         onNewFilter={jest.fn()}
       />
     );
@@ -161,7 +155,7 @@ describe('AddFilterButton component', () => {
   it('filter select', () => {
     const mockOnNewFilter = jest.fn();
     const component = mountWithIntl(
-      <AddFilterButton newFilters={[]} alertFilters={{}} onNewFilter={mockOnNewFilter} />
+      <AddFilterButton newFilters={[]} onNewFilter={mockOnNewFilter} />
     );
     component.find(EuiButtonEmpty).simulate('click', { target: { value: '0' } });
     component

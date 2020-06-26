@@ -74,7 +74,7 @@ export const selectAlertFlyoutType = ({ ui: { alertFlyoutType } }: AppState) => 
 export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: AppState) => ({
   filters: ui.esKuery,
   indexPattern: indexPattern.index_pattern,
-  locations: overviewFilters.filters.locations,
+  locations: overviewFilters.filters['observer.geo.name'],
 });
 
 export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.indexStatus;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OverviewFilters } from '../../../common/runtime_types';
+import { OverviewFiltersByFieldName } from '../../../common/runtime_types/overview_filters/overview_filters';
 import {
   FETCH_OVERVIEW_FILTERS,
   FETCH_OVERVIEW_FILTERS_FAIL,
@@ -14,16 +14,16 @@ import {
 } from '../actions';
 
 export interface OverviewFiltersState {
-  filters: OverviewFilters;
+  filters: OverviewFiltersByFieldName;
   errors: Error[];
   loading: boolean;
 }
 
 const initialState: OverviewFiltersState = {
   filters: {
-    locations: [],
-    ports: [],
-    schemes: [],
+    'observer.geo.name': [],
+    'url.port': [],
+    'monitor.type': [],
     tags: [],
   },
   errors: [],

@@ -6,21 +6,13 @@
 
 import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
+import { parseFiltersMap } from '../components/overview/filter_group/parse_filter_map';
 
 const getKueryString = (urlFilters: string): string => {
-  let kueryString = '';
-  // We are using try/catch here because this is user entered value
-  // and JSON.parse and stringifyKueries can have hard time parsing
-  // all possible scenarios, we can safely ignore if we can't parse them
-  try {
-    if (urlFilters !== '') {
-      const filterMap = new Map<string, Array<string | number>>(JSON.parse(urlFilters));
-      kueryString = stringifyKueries(filterMap);
-    }
-  } catch {
-    kueryString = '';
-  }
-  return kueryString;
+  if (!urlFilters) return '';
+
+  const filterMap = parseFiltersMap(urlFilters);
+  return stringifyKueries(filterMap);
 };
 
 export const useUpdateKueryString = (

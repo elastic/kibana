@@ -25,6 +25,7 @@ describe('alert monitor status component', () => {
       hasFilters: false,
       isOldAlert: true,
       locations: [],
+      selectedFilters: {},
       snapshotCount: 0,
       snapshotLoading: false,
       numTimes: 14,
@@ -51,8 +52,6 @@ describe('alert monitor status component', () => {
               }
             }
             data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
-            defaultKuery="monitor.id: foo"
-            updateDefaultKuery={[Function]}
           />
           <EuiSpacer
             size="s"
@@ -74,17 +73,8 @@ describe('alert monitor status component', () => {
             size="xs"
           />
           <FiltersExpressionSelectContainer
-            alertParams={
-              Object {
-                "numTimes": 3,
-                "search": "monitor.id: foo",
-                "timerangeCount": 21,
-                "timerangeUnit": "h",
-              }
-            }
             newFilters={Array []}
             onRemoveFilter={[Function]}
-            setAlertParams={[MockFunction]}
           />
           <EuiSpacer
             size="xs"

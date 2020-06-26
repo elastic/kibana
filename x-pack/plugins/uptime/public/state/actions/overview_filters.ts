@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OverviewFilters } from '../../../common/runtime_types';
+import { OverviewFiltersByFieldName } from '../../../common/runtime_types/overview_filters/overview_filters';
 
 export const FETCH_OVERVIEW_FILTERS = 'FETCH_OVERVIEW_FILTERS';
 export const FETCH_OVERVIEW_FILTERS_FAIL = 'FETCH_OVERVIEW_FILTERS_FAIL';
@@ -29,7 +29,7 @@ interface GetOverviewFiltersFetchAction {
 
 interface GetOverviewFiltersSuccessAction {
   type: typeof FETCH_OVERVIEW_FILTERS_SUCCESS;
-  payload: OverviewFilters;
+  payload: OverviewFiltersByFieldName;
 }
 
 interface GetOverviewFiltersFailAction {
@@ -39,7 +39,7 @@ interface GetOverviewFiltersFailAction {
 
 interface SetOverviewFiltersAction {
   type: typeof SET_OVERVIEW_FILTERS;
-  payload: OverviewFilters;
+  payload: OverviewFiltersByFieldName;
 }
 
 export type OverviewFiltersAction =
@@ -61,13 +61,15 @@ export const fetchOverviewFiltersFail = (error: Error): GetOverviewFiltersFailAc
 });
 
 export const fetchOverviewFiltersSuccess = (
-  filters: OverviewFilters
+  filters: OverviewFiltersByFieldName
 ): GetOverviewFiltersSuccessAction => ({
   type: FETCH_OVERVIEW_FILTERS_SUCCESS,
   payload: filters,
 });
 
-export const setOverviewFilters = (filters: OverviewFilters): SetOverviewFiltersAction => ({
+export const setOverviewFilters = (
+  filters: OverviewFiltersByFieldName
+): SetOverviewFiltersAction => ({
   type: SET_OVERVIEW_FILTERS,
   payload: filters,
 });

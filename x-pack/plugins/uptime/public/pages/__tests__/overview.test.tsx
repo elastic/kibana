@@ -93,6 +93,8 @@ describe('MonitorPage', () => {
       shallowWithRouter(
         <OverviewPageComponent
           indexPattern={indexPattern}
+          selectedFilters={''}
+          searchText={''}
           setEsKueryFilters={jest.fn()}
           loading={false}
         />

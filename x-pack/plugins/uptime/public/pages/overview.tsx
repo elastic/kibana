@@ -23,6 +23,8 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 interface Props {
   loading: boolean;
   indexPattern: IIndexPattern | null;
+  selectedFilters: string;
+  searchText: string;
   setEsKueryFilters: (esFilters: string) => void;
 }
 
@@ -39,10 +41,8 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
 `;
 
 export const OverviewPageComponent = React.memo(
-  ({ indexPattern, setEsKueryFilters, loading }: Props) => {
+  ({ indexPattern, setEsKueryFilters, loading, searchText, selectedFilters }: Props) => {
     const params = useGetUrlParams();
-    const { search, filters: urlFilters } = params;
-
     const {
       services: {
         data: { autocomplete },
@@ -52,7 +52,7 @@ export const OverviewPageComponent = React.memo(
     useTrackPageview({ app: 'uptime', path: 'overview' });
     useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
-    const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
+    const [esFilters, error] = useUpdateKueryString(indexPattern, searchText, selectedFilters);
 
     useEffect(() => {
       setEsKueryFilters(esFilters ?? '');
@@ -82,7 +82,7 @@ export const OverviewPageComponent = React.memo(
               />
             </EuiFlexItem>
             <EuiFlexItemStyled grow={true}>
-              <FilterGroup esFilters={esFilters} />
+              <FilterGroup />
             </EuiFlexItemStyled>
             {error && !loading && <ParsingErrorCallout error={error} />}
           </EuiFlexGroup>

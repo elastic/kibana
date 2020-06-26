@@ -4,26 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { FiltersExpressionsSelect } from './filters_expression_select';
 import { overviewFiltersSelector } from '../../../../state/selectors';
-import { useFilterUpdate } from '../../../../hooks/use_filter_update';
+import { useSelectedFilters } from '../../../../hooks/use_selected_filters';
 
 export interface FilterExpressionsSelectProps {
-  alertParams: { [key: string]: any };
   newFilters: string[];
   onRemoveFilter: (val: string) => void;
-  setAlertParams: (key: string, value: any) => void;
 }
 
 export const FiltersExpressionSelectContainer: React.FC<FilterExpressionsSelectProps> = (props) => {
-  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
-    fieldName: string;
-    values: string[];
-  }>({ fieldName: '', values: [] });
-
-  useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
+  const [selectedFilters, updateSelectedFilters] = useSelectedFilters();
 
   const overviewFilters = useSelector(overviewFiltersSelector);
 
@@ -31,7 +24,8 @@ export const FiltersExpressionSelectContainer: React.FC<FilterExpressionsSelectP
     <FiltersExpressionsSelect
       {...overviewFilters}
       {...props}
-      setUpdatedFieldValues={setUpdatedFieldValues}
+      selectedFilters={selectedFilters}
+      setUpdatedFieldValues={updateSelectedFilters}
     />
   );
 };

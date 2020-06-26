@@ -2,18 +2,18 @@
 
 exports[`parseFiltersMap provides values from valid filter string 1`] = `
 Object {
-  "locations": Array [
-    "us-east-2",
-  ],
-  "ports": Array [
-    "5601",
-    "80",
-  ],
-  "schemes": Array [
+  "monitor.type": Array [
     "http",
     "tcp",
   ],
+  "observer.geo.name": Array [
+    "us-east-2",
+  ],
   "tags": Array [],
+  "url.port": Array [
+    "5601",
+    "80",
+  ],
 }
 `;
 

@@ -146,22 +146,8 @@ exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
             "calls": Array [
               Array [],
               Array [],
-              Array [],
-              Array [],
             ],
             "results": Array [
-              Object {
-                "type": "return",
-                "value": Object {
-                  "selectedFilters": null,
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "selectedFilters": null,
-                },
-              },
               Object {
                 "type": "return",
                 "value": Object {
@@ -182,15 +168,8 @@ exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
               Array [
                 [Function],
               ],
-              Array [
-                [Function],
-              ],
             ],
             "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
               Object {
                 "type": "return",
                 "value": undefined,
@@ -375,22 +354,8 @@ exports[`useUrlParams gets the expected values using the context 1`] = `
             "calls": Array [
               Array [],
               Array [],
-              Array [],
-              Array [],
             ],
             "results": Array [
-              Object {
-                "type": "return",
-                "value": Object {
-                  "selectedFilters": null,
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "selectedFilters": null,
-                },
-              },
               Object {
                 "type": "return",
                 "value": Object {
@@ -411,15 +376,8 @@ exports[`useUrlParams gets the expected values using the context 1`] = `
               Array [
                 [Function],
               ],
-              Array [
-                [Function],
-              ],
             ],
             "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
               Object {
                 "type": "return",
                 "value": undefined,

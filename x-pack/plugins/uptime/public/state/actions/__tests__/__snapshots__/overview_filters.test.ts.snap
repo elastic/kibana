@@ -37,23 +37,23 @@ Object {
 exports[`overview filters action creators creates a success action 1`] = `
 Object {
   "payload": Object {
-    "locations": Array [
+    "monitor.type": Array [
+      "http",
+      "tcp",
+    ],
+    "observer.geo.name": Array [
       "fairbanks",
       "tokyo",
       "london",
-    ],
-    "ports": Array [
-      80,
-      443,
-    ],
-    "schemes": Array [
-      "http",
-      "tcp",
     ],
     "tags": Array [
       "api",
       "dev",
       "prod",
+    ],
+    "url.port": Array [
+      80,
+      443,
     ],
   },
   "type": "FETCH_OVERVIEW_FILTERS_SUCCESS",

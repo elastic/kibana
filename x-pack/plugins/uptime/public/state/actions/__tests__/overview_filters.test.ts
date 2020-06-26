@@ -29,9 +29,9 @@ describe('overview filters action creators', () => {
   it('creates a success action', () => {
     expect(
       fetchOverviewFiltersSuccess({
-        locations: ['fairbanks', 'tokyo', 'london'],
-        ports: [80, 443],
-        schemes: ['http', 'tcp'],
+        'observer.geo.name': ['fairbanks', 'tokyo', 'london'],
+        'url.port': [80, 443],
+        'monitor.type': ['http', 'tcp'],
         tags: ['api', 'dev', 'prod'],
       })
     ).toMatchSnapshot();

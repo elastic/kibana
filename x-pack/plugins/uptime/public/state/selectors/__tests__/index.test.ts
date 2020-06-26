@@ -12,9 +12,9 @@ describe('state selectors', () => {
   const state: AppState = {
     overviewFilters: {
       filters: {
-        locations: [],
-        ports: [],
-        schemes: [],
+        'observer.geo.name': [],
+        'url.port': [],
+        'monitor.type': [],
         tags: [],
       },
       errors: [],

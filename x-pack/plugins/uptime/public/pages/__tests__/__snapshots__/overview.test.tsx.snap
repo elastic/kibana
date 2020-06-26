@@ -150,6 +150,8 @@ exports[`MonitorPage shallow renders expected elements for valid props 1`] = `
       }
     }
     loading={false}
+    searchText=""
+    selectedFilters=""
     setEsKueryFilters={[MockFunction]}
   />
 </ContextProvider>

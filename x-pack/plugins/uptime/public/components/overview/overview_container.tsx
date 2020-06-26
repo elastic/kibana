@@ -7,7 +7,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useCallback } from 'react';
 import { OverviewPageComponent } from '../../pages/overview';
-import { selectIndexPattern } from '../../state/selectors';
+import { selectIndexPattern, uiSelector } from '../../state/selectors';
 import { setEsKueryString } from '../../state/actions';
 
 export const OverviewPage: React.FC = (props) => {
@@ -17,6 +17,7 @@ export const OverviewPage: React.FC = (props) => {
     (esFilters: string) => dispatch(setEsKueryString(esFilters)),
     [dispatch]
   );
+  const { selectedFilters, searchText } = useSelector(uiSelector);
   const { index_pattern: indexPattern, loading } = useSelector(selectIndexPattern);
 
   return (
@@ -24,6 +25,8 @@ export const OverviewPage: React.FC = (props) => {
       setEsKueryFilters={setEsKueryFilters}
       indexPattern={indexPattern}
       loading={loading}
+      searchText={searchText}
+      selectedFilters={selectedFilters}
       {...props}
     />
   );

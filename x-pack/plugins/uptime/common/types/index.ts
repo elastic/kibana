@@ -27,3 +27,12 @@ export interface MonitorDurationResult {
 export interface MonitorIdParam {
   monitorId: string;
 }
+
+export type FilterName = 'url.port' | 'observer.geo.name' | 'tags' | 'monitor.type';
+
+export type FilterMap = { [fieldName in FilterName]: string[] };
+
+export interface FilterField {
+  name: string;
+  fieldName: FilterName;
+}

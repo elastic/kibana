@@ -4,41 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
-import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { filterLabels } from './translations';
-import { useFilterUpdate } from '../../../hooks/use_filter_update';
+import { OverviewFiltersByFieldName } from '../../../../common/runtime_types/overview_filters/overview_filters';
+import { FilterMap } from '../../../../common/types';
 
-interface PresentationalComponentProps {
+interface Props {
   loading: boolean;
-  overviewFilters: OverviewFilters;
+  overviewFilters: OverviewFiltersByFieldName;
+  selectedFilters: FilterMap;
+  updateSelectedFilters: (nextMap: FilterMap) => void;
 }
 
 const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;
 `;
 
-export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
+export const FilterGroupComponent: React.FC<Props> = ({
   overviewFilters,
+  selectedFilters,
+  updateSelectedFilters,
   loading,
 }) => {
-  const { locations, ports, schemes, tags } = overviewFilters;
+  const {
+    'observer.geo.name': locations,
+    'url.port': ports,
+    'monitor.type': schemes,
+    tags,
+  } = overviewFilters;
 
-  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
-    fieldName: string;
-    values: string[];
-  }>({ fieldName: '', values: [] });
-
-  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useFilterUpdate(
-    updatedFieldValues.fieldName,
-    updatedFieldValues.values
-  );
+  const {
+    'observer.geo.name': selectedLocations,
+    'url.port': selectedPorts,
+    'monitor.type': selectedSchemes,
+    tags: selectedTags,
+  } = selectedFilters;
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
-    setUpdatedFieldValues({ fieldName, values });
+    updateSelectedFilters({ ...selectedFilters, [fieldName]: values });
   };
 
   const filterPopoverProps: FilterPopoverProps[] = [

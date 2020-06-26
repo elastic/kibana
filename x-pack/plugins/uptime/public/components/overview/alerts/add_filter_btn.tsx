@@ -11,13 +11,10 @@ import * as labels from './translations';
 interface Props {
   newFilters: string[];
   onNewFilter: (val: string) => void;
-  alertFilters: { [key: string]: string[] };
 }
 
-export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, alertFilters }) => {
+export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) => {
   const [isPopoverOpen, setPopover] = useState(false);
-
-  const getSelectedItems = (fieldName: string) => alertFilters?.[fieldName] ?? [];
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -31,13 +28,13 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, aler
 
   const allFilters = [
     { id: 'observer.geo.name', label: labels.LOCATION },
-    { id: 'tags', label: labels.TAG },
     { id: 'url.port', label: labels.PORT },
+    { id: 'tags', label: labels.TAG },
     { id: 'monitor.type', label: labels.TYPE },
   ];
 
   allFilters.forEach((filter) => {
-    if (getSelectedItems(filter.id)?.length === 0 && !newFilters.includes(filter.id)) {
+    if (!newFilters.includes(filter.id)) {
       items.push(
         <EuiContextMenuItem
           data-test-subj={'uptimeAlertAddFilter.' + filter.id}

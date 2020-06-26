@@ -14,17 +14,22 @@ describe('FilterPopover component', () => {
   let props: FilterPopoverProps;
   let setState: jest.Mock<any, any>;
   let useStateSpy: jest.SpyInstance;
+  let mockOnFilterFieldChange: jest.Mock<any, any>;
 
   beforeEach(() => {
+    mockOnFilterFieldChange = jest.fn();
     props = {
       fieldName: 'foo',
       id: 'test',
       loading: false,
       items: ['first', 'second', 'third', 'fourth'],
-      onFilterFieldChange: jest.fn(),
+      onFilterFieldChange: mockOnFilterFieldChange,
       selectedItems: ['first', 'third'],
       title: 'bar',
     };
+    mockOnFilterFieldChange.mockImplementation((_key: string, value: string[]) => {
+      props.selectedItems = value;
+    });
     setState = jest.fn();
     useStateSpy = jest.spyOn(React, 'useState');
     useStateSpy.mockImplementation((initialValue) => [initialValue, setState]);
@@ -52,7 +57,7 @@ describe('FilterPopover component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('returns selected items on popover close', () => {
+  it('selects a new item', () => {
     const wrapper = mountWithIntl(
       <div>
         <div id="foo">Some text</div>
@@ -63,8 +68,96 @@ describe('FilterPopover component', () => {
     wrapper.find(UptimeFilterButton).simulate('click');
     expect(wrapper.find(EuiFilterSelectItem)).toHaveLength(props.items.length);
     wrapper.find(EuiFilterSelectItem).at(1).simulate('click');
-    wrapper.find('#foo').simulate('click');
+    wrapper.find(UptimeFilterButton).simulate('click');
     const rendered = wrapper.render();
+    expect(props.onFilterFieldChange).toHaveBeenCalled();
+    expect(mockOnFilterFieldChange.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "foo",
+          Array [
+            "first",
+            "second",
+            "third",
+          ],
+        ],
+      ]
+    `);
     expect(rendered).toMatchSnapshot();
+  });
+
+  it('selects and deselects a new item', () => {
+    const wrapper = mountWithIntl(
+      <div>
+        <div id="foo">Some text</div>
+        <FilterPopover {...props} />
+      </div>
+    );
+    expect(wrapper.find(UptimeFilterButton)).toHaveLength(1);
+    wrapper.find(UptimeFilterButton).simulate('click');
+    expect(wrapper.find(EuiFilterSelectItem)).toHaveLength(props.items.length);
+    wrapper.find(EuiFilterSelectItem).at(1).simulate('click');
+    wrapper.find(EuiFilterSelectItem).at(1).simulate('click');
+    wrapper.find(UptimeFilterButton).simulate('click');
+    expect(props.onFilterFieldChange).not.toHaveBeenCalled();
+    expect(props.selectedItems).toMatchInlineSnapshot(`
+      Array [
+        "first",
+        "third",
+      ]
+    `);
+  });
+
+  it('removes a selected item', () => {
+    const wrapper = mountWithIntl(
+      <div>
+        <div id="foo">Some text</div>
+        <FilterPopover {...props} />
+      </div>
+    );
+    expect(wrapper.find(UptimeFilterButton)).toHaveLength(1);
+    wrapper.find(UptimeFilterButton).simulate('click');
+    expect(wrapper.find(EuiFilterSelectItem)).toHaveLength(props.items.length);
+    wrapper.find(EuiFilterSelectItem).at(0).simulate('click');
+    wrapper.find(UptimeFilterButton).simulate('click');
+    expect(props.onFilterFieldChange).toHaveBeenCalledTimes(1);
+    expect(mockOnFilterFieldChange.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "foo",
+          Array [
+            "third",
+          ],
+        ],
+      ]
+    `);
+    expect(props.selectedItems).toMatchInlineSnapshot(`
+      Array [
+        "third",
+      ]
+    `);
+  });
+
+  it('removes and re-adds a selected item', () => {
+    const wrapper = mountWithIntl(
+      <div>
+        <div id="foo">Some text</div>
+        <FilterPopover {...props} />
+      </div>
+    );
+    expect(wrapper.find(UptimeFilterButton)).toHaveLength(1);
+    wrapper.find(UptimeFilterButton).simulate('click');
+    expect(wrapper.find(EuiFilterSelectItem)).toHaveLength(props.items.length);
+    wrapper.find(EuiFilterSelectItem).at(0).simulate('click');
+    wrapper.find(EuiFilterSelectItem).at(0).simulate('click');
+    wrapper.find(UptimeFilterButton).simulate('click');
+    // component should not call API when there is not change delta
+    expect(props.onFilterFieldChange).not.toHaveBeenCalled();
+    expect(props.selectedItems).toMatchInlineSnapshot(`
+      Array [
+        "first",
+        "third",
+      ]
+    `);
   });
 });

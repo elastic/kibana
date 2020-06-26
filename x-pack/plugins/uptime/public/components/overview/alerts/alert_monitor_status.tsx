@@ -25,6 +25,7 @@ export interface AlertMonitorStatusProps {
   hasFilters: boolean;
   isOldAlert: boolean;
   locations: string[];
+  selectedFilters: { [key: string]: string[] };
   snapshotCount: number;
   snapshotLoading: boolean;
   numTimes: number;
@@ -41,13 +42,13 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
     hasFilters,
     isOldAlert,
     setAlertParams,
+    selectedFilters,
     snapshotCount,
     snapshotLoading,
   } = props;
 
-  const alertFilters = alertParams?.filters ?? {};
   const [newFilters, setNewFilters] = useState<string[]>(
-    Object.keys(alertFilters).filter((f) => alertFilters[f].length)
+    Object.keys(selectedFilters).filter((f) => selectedFilters[f].length)
   );
 
   return (
@@ -59,8 +60,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
       <KueryBar
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
         autocomplete={props.autocomplete}
-        defaultKuery={alertParams.search}
-        updateDefaultKuery={(value: string) => setAlertParams('search', value)}
         data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
       />
 
@@ -83,20 +82,17 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
       <EuiSpacer size="xs" />
 
       <FiltersExpressionSelectContainer
-        alertParams={alertParams}
         newFilters={newFilters}
         onRemoveFilter={(removeFilter: string) => {
           if (newFilters.includes(removeFilter)) {
             setNewFilters(newFilters.filter((item) => item !== removeFilter));
           }
         }}
-        setAlertParams={setAlertParams}
       />
 
       <EuiSpacer size="xs" />
 
       <AddFilterButton
-        alertFilters={alertParams.filters}
         newFilters={newFilters}
         onNewFilter={(newFilter) => {
           setNewFilters([...newFilters, newFilter]);

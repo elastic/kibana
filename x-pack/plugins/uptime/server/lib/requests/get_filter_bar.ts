@@ -5,8 +5,10 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { OverviewFilters } from '../../../common/runtime_types';
 import { generateFilterAggs } from './generate_filter_aggs';
+import { OverviewFiltersByFieldName } from '../../../common/runtime_types/overview_filters/overview_filters';
+import { FILTER_ALLOW_LIST } from '../../../common/constants';
+import { FilterName } from '../../../common/types';
 
 export interface GetFilterBarParams {
   /** @param dateRangeStart timestamp bounds */
@@ -45,33 +47,33 @@ export const combineRangeWithFilters = (
   return filters;
 };
 
-type SupportedFields = 'locations' | 'ports' | 'schemes' | 'tags';
-
 export const extractFilterAggsResults = (
-  responseAggregations: Record<string, any>,
-  keys: SupportedFields[]
-): OverviewFilters => {
-  const values: OverviewFilters = {
-    locations: [],
-    ports: [],
-    schemes: [],
+  responseAggregations: Record<string, any>
+): OverviewFiltersByFieldName => {
+  const values: OverviewFiltersByFieldName = {
+    'observer.geo.name': [],
+    'url.port': [],
+    'monitor.type': [],
     tags: [],
   };
-  keys.forEach((key) => {
-    const buckets = responseAggregations?.[key]?.term?.buckets ?? [];
-    values[key] = buckets.map((item: { key: string | number }) => item.key);
-  });
+  Object.keys(responseAggregations)
+    .filter((key) => FILTER_ALLOW_LIST.some(({ name }) => name === key))
+    .forEach((key) => {
+      const buckets: Array<{ key: string & number }> =
+        responseAggregations?.[key]?.term?.buckets ?? [];
+      const fieldName: FilterName | undefined = FILTER_ALLOW_LIST.find(({ name }) => key === name)
+        ?.fieldName;
+      if (fieldName) {
+        values[fieldName] = buckets.map(({ key: bucketKey }) => bucketKey);
+      }
+    });
   return values;
 };
 
-export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters> = async ({
-  callES,
-  dynamicSettings,
-  dateRangeStart,
-  dateRangeEnd,
-  search,
-  filterOptions,
-}) => {
+export const getFilterBar: UMElasticsearchQueryFn<
+  GetFilterBarParams,
+  OverviewFiltersByFieldName
+> = async ({ callES, dynamicSettings, dateRangeStart, dateRangeEnd, search, filterOptions }) => {
   const aggs = generateFilterAggs(
     [
       { aggName: 'locations', filterName: 'locations', field: 'observer.geo.name' },
@@ -94,5 +96,5 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
   };
 
   const { aggregations } = await callES('search', params);
-  return extractFilterAggsResults(aggregations, ['tags', 'locations', 'ports', 'schemes']);
+  return extractFilterAggsResults(aggregations);
 };

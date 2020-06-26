@@ -32,7 +32,7 @@ export class Typeahead extends Component {
   };
 
   static getDerivedStateFromProps(props, state) {
-    if (state.inputIsPristine && props.initialValue) {
+    if (state.inputIsPristine && (props.initialValue || props.initialValue === '')) {
       return {
         value: props.initialValue,
       };

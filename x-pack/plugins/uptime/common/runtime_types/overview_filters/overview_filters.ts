@@ -14,3 +14,12 @@ export const OverviewFiltersType = t.type({
 });
 
 export type OverviewFilters = t.TypeOf<typeof OverviewFiltersType>;
+
+export const OverviewFiltersByFieldNameType = t.type({
+  'observer.geo.name': t.array(t.string),
+  'url.port': t.array(t.number),
+  'monitor.type': t.array(t.string),
+  tags: t.array(t.string),
+});
+
+export type OverviewFiltersByFieldName = t.TypeOf<typeof OverviewFiltersByFieldNameType>;
