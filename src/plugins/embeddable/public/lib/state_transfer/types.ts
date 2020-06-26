@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { EmbeddableInput } from '..';
 
 /**
@@ -31,6 +32,7 @@ export interface EmbeddableEditorState {
 export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {
   return ensureFieldOfTypeExists('originatingApp', state, 'string');
 }
+
 /**
  * Represents a state package that contains all fields necessary to create an embeddable by reference in a container.
  * @public
