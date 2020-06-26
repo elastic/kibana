@@ -127,14 +127,14 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertQueryValue('');
         });
 
-        it('should show the group-by configuration', async () => {
+        it('should show the pre-filled group-by configuration', async () => {
           await transform.wizard.assertGroupByEntryExists(
             testData.expected.groupBy.index,
             testData.expected.groupBy.label
           );
         });
 
-        it('should show the aggs configuration', async () => {
+        it('should show the pre-filled aggs configuration', async () => {
           await transform.wizard.assertAggregationEntryExists(
             testData.expected.aggs.index,
             testData.expected.aggs.label
