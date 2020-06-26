@@ -82,7 +82,6 @@ export interface SavedObjectsClientCommon {
     id: string,
     attributes: Record<string, any>,
     options: Record<string, any>
-    //  ) => Promise<Pick<SavedObject, 'attributes' | 'references'>>;
   ) => Promise<SavedObject>;
   create: (
     type: string,

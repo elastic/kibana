@@ -17,15 +17,6 @@
  * under the License.
  */
 
-// import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
-/*
-import {
-  SavedObjectsClientCommon,
-  SavedObjectsClientCommonFindArgs,
-  SavedObjectCommon,
-} from '../../common/index_patterns';
-*/
-
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
@@ -44,8 +35,6 @@ import {
   FieldSpec,
   IndexPatternSpec,
 } from '../types';
-// import { getIndexPatternFieldListCreator, CreateIndexPatternFieldList, Field } from '../fields';
-// import { IndexPatternSpec, FieldSpec } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 
@@ -204,7 +193,7 @@ export class IndexPatternsService {
   async specToIndexPattern(spec: IndexPatternSpec) {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const uiSettingsValues = await this.config.getAll(); // could map to values
+    const uiSettingsValues = await this.config.getAll();
 
     const indexPattern = new IndexPattern(spec.id, {
       getConfig: (cfg: any) => this.config.get(cfg),
@@ -224,7 +213,7 @@ export class IndexPatternsService {
   async make(id?: string): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const uiSettingsValues = await this.config.getAll(); // could map to values
+    const uiSettingsValues = await this.config.getAll();
 
     const indexPattern = new IndexPattern(id, {
       getConfig: (cfg: any) => this.config.get(cfg),

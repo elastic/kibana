@@ -19,11 +19,10 @@
 
 import { omit, map } from 'lodash';
 import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
-// eslint-disable-next-line
-import { SavedObject } from 'src/core/server';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
+  SavedObject,
 } from '../../common/index_patterns';
 
 type SOClient = Pick<SavedObjectsClient, 'find' | 'get' | 'update' | 'create' | 'delete'>;
