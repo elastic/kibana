@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LogEntryColumn, LogEntryColumnWidths, useColumnWidths } from './log_entry_column';
+export {
+  LogEntryColumn,
+  LogEntryColumnWidths,
+  useColumnWidths,
+  iconColumnId,
+} from './log_entry_column';
 export { LogEntryFieldColumn } from './log_entry_field_column';
 export { LogEntryMessageColumn } from './log_entry_message_column';
 export { LogEntryRowWrapper } from './log_entry_row';

@@ -13,7 +13,7 @@ import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryContextMenuItem {
   label: string;
-  onClick: (e) => void;
+  onClick: (e: React.MouseEvent) => void;
 }
 
 interface LogEntryContextMenuProps {
@@ -40,7 +40,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
 }) => {
   const closeMenuAndCall = useMemo(() => {
     return (callback: LogEntryContextMenuItem['onClick']) => {
-      return (e) => {
+      return (e: React.MouseEvent) => {
         onClose();
         callback(e);
       };

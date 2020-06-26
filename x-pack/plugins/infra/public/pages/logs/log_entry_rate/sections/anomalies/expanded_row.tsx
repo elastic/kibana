@@ -15,7 +15,8 @@ import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
 import { useLogEntryRateExamples } from '../../use_log_entry_rate_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { bucketSpan } from '../../../../../../common/log_analysis/job_parameters';
-import { LogEntryRateExampleMessage } from './log_entry_example';
+import { LogEntryRateExampleMessage, LogEntryRateExampleMessageHeaders } from './log_entry_example';
+import { euiStyled } from '../../../../../../../observability/public';
 
 const EXAMPLE_COUNT = 5;
 
@@ -51,7 +52,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
 
   return (
     <>
-      <EuiFlexGroup direction="column">
+      <ExpandedContentWrapper direction="column">
         <EuiFlexItem>
           <EuiTitle size="s">
             <h3>{examplesTitle}</h3>
@@ -63,26 +64,37 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             exampleCount={EXAMPLE_COUNT}
             onReload={getLogEntryRateExamples}
           >
-            {logEntryRateExamples.map((example, exampleIndex) => (
-              <LogEntryRateExampleMessage
-                key={exampleIndex}
-                id={example.id}
-                dataset={example.dataset}
-                message={example.message}
-                timestamp={example.timestamp}
-                tiebreaker={example.tiebreaker}
-                timeRange={timeRange}
-                jobId={jobId}
-              />
-            ))}
+            {logEntryRateExamples.length > 0 ? (
+              <>
+                <LogEntryRateExampleMessageHeaders dateTime={logEntryRateExamples[0].timestamp} />
+                {logEntryRateExamples.map((example, exampleIndex) => (
+                  <LogEntryRateExampleMessage
+                    key={exampleIndex}
+                    id={example.id}
+                    dataset={example.dataset}
+                    message={example.message}
+                    timestamp={example.timestamp}
+                    tiebreaker={example.tiebreaker}
+                    timeRange={timeRange}
+                    jobId={jobId}
+                  />
+                ))}
+              </>
+            ) : null}
           </LogEntryExampleMessages>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiStat
-                title={numeral(anomaly.typicalLogEntryRate).format('0.00a')}
-                titleSize="m"
+                titleSize="s"
+                title={`${numeral(anomaly.typicalLogEntryRate).format('0.00a')} ${i18n.translate(
+                  'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateTitle',
+                  {
+                    defaultMessage: '{typicalCount, plural, one {message} other {messages}}',
+                    values: { typicalCount: anomaly.typicalLogEntryRate },
+                  }
+                )}`}
                 description={i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateDescription',
                   {
@@ -93,8 +105,14 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiStat
-                title={numeral(anomaly.actualLogEntryRate).format('0.00a')}
-                titleSize="m"
+                titleSize="s"
+                title={`${numeral(anomaly.actualLogEntryRate).format('0.00a')} ${i18n.translate(
+                  'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateTitle',
+                  {
+                    defaultMessage: '{actualCount, plural, one {message} other {messages}}',
+                    values: { actualCount: anomaly.actualLogEntryRate },
+                  }
+                )}`}
                 description={i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateDescription',
                   {
@@ -105,7 +123,11 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </ExpandedContentWrapper>
     </>
   );
 };
+
+const ExpandedContentWrapper = euiStyled(EuiFlexGroup)`
+  overflow: hidden;
+`;

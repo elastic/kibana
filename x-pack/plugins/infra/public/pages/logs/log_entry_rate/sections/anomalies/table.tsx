@@ -9,7 +9,6 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useSet } from 'react-use';
-import { euiStyled } from '../../../../../../../observability/public';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   formatAnomalyScore,
@@ -185,6 +184,7 @@ export const AnomaliesTable: React.FunctionComponent<{
         sortable: true,
         truncateText: true,
         dataType: 'number' as const,
+        width: '130px',
         render: (anomalyScore: number) => <AnomalySeverityIndicator anomalyScore={anomalyScore} />,
       },
       {
@@ -198,6 +198,7 @@ export const AnomaliesTable: React.FunctionComponent<{
         name: datasetColumnName,
         sortable: true,
         truncateText: true,
+        width: '200px',
       },
       {
         align: RIGHT_ALIGNMENT,
@@ -217,7 +218,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
 
   return (
-    <StyledEuiBasicTable
+    <EuiBasicTable
       items={pageOfItems}
       itemId="id"
       itemIdToExpandedRowMap={expandedDatasetRowContents}
@@ -230,9 +231,3 @@ export const AnomaliesTable: React.FunctionComponent<{
     />
   );
 };
-
-const StyledEuiBasicTable: typeof EuiBasicTable = euiStyled(EuiBasicTable as any)`
-  & .euiTable {
-    table-layout: auto;
-  }
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any

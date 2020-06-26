@@ -8,6 +8,7 @@ import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
 import { encode } from 'rison-node';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '../../../../../../../observability/public';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {
   LogEntryColumn,
@@ -16,16 +17,28 @@ import {
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
   LogEntryContextMenu,
+  LogEntryColumnWidths,
+  iconColumnId,
 } from '../../../../../components/logging/log_text_stream';
-import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
+import {
+  LogColumnHeadersWrapper,
+  LogColumnHeader,
+} from '../../../../../components/logging/log_text_stream/column_headers';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { getEntitySpecificSingleMetricViewerLink } from '../../../../../components/logging/log_analysis_results/analyze_in_ml_button';
 import { LogEntryRateExample } from '../../../../../../common/http_api/log_analysis/results';
+import {
+  LogColumnConfiguration,
+  isTimestampLogColumnConfiguration,
+  isFieldLogColumnConfiguration,
+  isMessageLogColumnConfiguration,
+} from '../../../../../utils/source_configuration';
+import { localizedDate } from '../../../../../../common/formatters/datetime';
 
 export const exampleMessageScale = 'medium' as const;
-export const exampleTimestampFormat = 'dateTime' as const;
+export const exampleTimestampFormat = 'time' as const;
 
 const MENU_LABEL = i18n.translate('xpack.infra.logAnomalies.logEntryExamplesMenuLabel', {
   defaultMessage: 'View actions for log entry',
@@ -100,6 +113,10 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
   );
 
   const menuItems = useMemo(() => {
+    if (!viewInStreamLinkProps.onClick || !viewAnomalyInMachineLearningLinkProps.onClick) {
+      return undefined;
+    }
+
     return [
       {
         label: VIEW_IN_STREAM_LABEL,
@@ -147,9 +164,9 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
       </LogEntryColumn>
       <LogEntryColumn
         key="logColumn iconLogColumn iconLogColumn:details"
-        {...columnWidths[contextMenuColumnId]}
+        {...columnWidths[iconColumnId]}
       >
-        {isHovered || isMenuOpen ? (
+        {(isHovered || isMenuOpen) && menuItems ? (
           <LogEntryContextMenu
             aria-label={MENU_LABEL}
             isOpen={isMenuOpen}
@@ -167,18 +184,17 @@ const noHighlights: never[] = [];
 const timestampColumnId = 'log-entry-example-timestamp-column' as const;
 const messageColumnId = 'log-entry-examples-message-column' as const;
 const datasetColumnId = 'log-entry-examples-dataset-column' as const;
-const contextMenuColumnId = 'log-entry-examples-context-menu-column' as const;
 
 const DETAIL_FLYOUT_ICON_MIN_WIDTH = 32;
 const COLUMN_PADDING = 8;
 
 // TODO: Tweak these widths for log entry rate instead of categories
-const columnWidths = {
+export const columnWidths: LogEntryColumnWidths = {
   [timestampColumnId]: {
     growWeight: 0,
     shrinkWeight: 0,
-    // w_count + w_trend - w_padding = 120 px + 220 px - 8 px
-    baseWidth: '332px',
+    // w_score - w_padding = 130 px  - 8 px
+    baseWidth: '122px',
   },
   [messageColumnId]: {
     growWeight: 1,
@@ -188,10 +204,10 @@ const columnWidths = {
   [datasetColumnId]: {
     growWeight: 0,
     shrinkWeight: 0,
-    // w_dataset + w_max_anomaly + w_expand - w_padding = 200 px + 160 px + 40 px + 40 px - 8 px
-    baseWidth: '432px',
+    // w_dataset + w_expand - w_padding = 200 px + 160 px + 40 px + 40 px - 8 px
+    baseWidth: '250px',
   },
-  [contextMenuColumnId]: {
+  [iconColumnId]: {
     growWeight: 0,
     shrinkWeight: 0,
     baseWidth: `${DETAIL_FLYOUT_ICON_MIN_WIDTH + 2 * COLUMN_PADDING}px`,
@@ -216,3 +232,50 @@ export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
     },
   },
 ];
+
+export const LogEntryRateExampleMessageHeaders: React.FunctionComponent<{
+  dateTime: number;
+}> = ({ dateTime }) => {
+  return (
+    <LogEntryRateExampleMessageHeadersWrapper>
+      {exampleMessageColumnConfigurations.map((columnConfiguration) => {
+        if (isTimestampLogColumnConfiguration(columnConfiguration)) {
+          return (
+            <LogColumnHeader
+              key={columnConfiguration.timestampColumn.id}
+              columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
+              data-test-subj="logColumnHeader timestampLogColumnHeader"
+            >
+              {localizedDate(dateTime)}
+            </LogColumnHeader>
+          );
+        } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
+          return (
+            <LogColumnHeader
+              columnWidth={columnWidths[columnConfiguration.messageColumn.id]}
+              data-test-subj="logColumnHeader messageLogColumnHeader"
+              key={columnConfiguration.messageColumn.id}
+            >
+              Message
+            </LogColumnHeader>
+          );
+        } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
+          return (
+            <LogColumnHeader
+              columnWidth={columnWidths[columnConfiguration.fieldColumn.id]}
+              data-test-subj="logColumnHeader fieldLogColumnHeader"
+              key={columnConfiguration.fieldColumn.id}
+            >
+              {columnConfiguration.fieldColumn.field}
+            </LogColumnHeader>
+          );
+        }
+      })}
+    </LogEntryRateExampleMessageHeadersWrapper>
+  );
+};
+
+const LogEntryRateExampleMessageHeadersWrapper = euiStyled(LogColumnHeadersWrapper)`
+  border-bottom: none;
+  box-shadow: none;
+`;
