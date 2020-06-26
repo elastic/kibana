@@ -55,8 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Data streams', function () {
-    // Unskip once ES snapshot has been promoted that updates the data stream response
-    describe.skip('Get', () => {
+    describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
       before(async () => await createDataStream(testDataStreamName));
