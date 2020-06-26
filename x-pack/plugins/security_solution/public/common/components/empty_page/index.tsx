@@ -23,6 +23,10 @@ interface EmptyPageProps {
   actionSecondaryLabel?: string;
   actionSecondaryTarget?: string;
   actionSecondaryUrl?: string;
+  actionTertiaryIcon?: IconType;
+  actionTertiaryLabel?: string;
+  actionTertiaryTarget?: string;
+  actionTertiaryUrl?: string;
   'data-test-subj'?: string;
   message?: string;
   title: string;
@@ -38,6 +42,10 @@ export const EmptyPage = React.memo<EmptyPageProps>(
     actionSecondaryLabel,
     actionSecondaryTarget,
     actionSecondaryUrl,
+    actionTertiaryIcon,
+    actionTertiaryLabel,
+    actionTertiaryTarget,
+    actionTertiaryUrl,
     message,
     title,
     ...rest
@@ -67,6 +75,18 @@ export const EmptyPage = React.memo<EmptyPageProps>(
                 target={actionSecondaryTarget}
               >
                 {actionSecondaryLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+
+          {actionTertiaryLabel && actionTertiaryUrl && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={actionTertiaryUrl}
+                iconType={actionTertiaryIcon}
+                target={actionTertiaryTarget}
+              >
+                {actionTertiaryLabel}
               </EuiButton>
             </EuiFlexItem>
           )}

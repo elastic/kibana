@@ -24,6 +24,9 @@ const OverviewEmptyComponent: React.FC = () => {
       actionSecondaryLabel={i18nCommon.EMPTY_ACTION_SECONDARY}
       actionSecondaryTarget="_blank"
       actionSecondaryUrl={docLinks.links.siem.gettingStarted}
+      actionTertiaryIcon="glasses"
+      actionTertiaryLabel={i18nCommon.EMPTY_ACTION_SECONDARY}
+      actionTertiaryUrl={`${basePath}${ADD_DATA_PATH}`}
       data-test-subj="empty-page"
       message={i18nCommon.EMPTY_MESSAGE}
       title={i18nCommon.EMPTY_TITLE}
