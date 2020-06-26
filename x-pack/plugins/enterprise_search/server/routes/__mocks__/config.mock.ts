@@ -7,5 +7,5 @@
 export const mockConfig = {
   enabled: true,
   host: 'http://localhost:3002',
-  accessCheckTimeout: 200,
+  accessCheckTimeout: 600,
 };
