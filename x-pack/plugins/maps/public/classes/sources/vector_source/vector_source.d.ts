@@ -16,7 +16,7 @@ import {
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
@@ -68,7 +68,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getSyncMeta(): VectorSourceSyncMeta;
-  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]>;
+  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   canFormatFeatureProperties(): boolean;
   getApplyGlobalQuery(): boolean;
   getFieldNames(): string[];
