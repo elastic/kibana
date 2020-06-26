@@ -9005,8 +9005,6 @@
     "xpack.maps.layerPanel.filterEditor.emptyState.description": "添加筛选以缩小图层数据范围。",
     "xpack.maps.layerPanel.filterEditor.queryBarSubmitButtonLabel": "设置筛选",
     "xpack.maps.layerPanel.filterEditor.title": "筛选",
-    "xpack.maps.layerPanel.fitToBoundsAriaLabel": "适应边界",
-    "xpack.maps.layerPanel.fitToBoundsButtonLabel": "适应",
     "xpack.maps.layerPanel.footer.cancelButtonLabel": "取消",
     "xpack.maps.layerPanel.footer.closeButtonLabel": "关闭",
     "xpack.maps.layerPanel.footer.removeLayerButtonLabel": "移除图层",

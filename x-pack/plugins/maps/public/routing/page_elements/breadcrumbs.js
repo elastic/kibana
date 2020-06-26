@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { getCoreChrome } from '../../kibana_services';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { MAP_PATH } from '../../../common/constants';
 import _ from 'lodash';
 import { getLayerListRaw } from '../../selectors/map_selectors';
 import { copyPersistentState } from '../../reducers/util';
@@ -31,7 +31,7 @@ function hasUnsavedChanges(savedMap, initialLayerListConfig) {
 }
 
 export const updateBreadcrumbs = (savedMap, initialLayerListConfig, currentPath = '') => {
-  const isOnMapNow = currentPath.startsWith(`/${MAP_SAVED_OBJECT_TYPE}`);
+  const isOnMapNow = currentPath.startsWith(`/${MAP_PATH}`);
   const breadCrumbs = isOnMapNow
     ? [
         {
