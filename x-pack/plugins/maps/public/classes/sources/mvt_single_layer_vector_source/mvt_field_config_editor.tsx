@@ -14,6 +14,7 @@ import {
   EuiSuperSelect,
   EuiFieldText,
   EuiSpacer,
+  EuiHighlight,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
@@ -21,34 +22,44 @@ import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
 import { MVTFieldType } from '../../../../common/constants';
 
+function makeOption({
+  value,
+  icon,
+  message,
+}: {
+  value: MVTFieldType;
+  icon: string;
+  message: string;
+}) {
+  return {
+    value,
+    inputDisplay: (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={null}>
+          <FieldIcon type={icon} fill="none" />
+        </EuiFlexItem>
+        <EuiFlexItem>{message}</EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  };
+}
+
 const FIELD_TYPE_OPTIONS = [
   {
     value: MVTFieldType.STRING,
-    inputDisplay: (
-      <span>
-        <FieldIcon type={'string'} />
-        <span>
-          {i18n.translate('xpack.maps.mvtSource.stringFieldLabel', {
-            defaultMessage: 'string',
-          })}
-        </span>
-      </span>
-    ),
+    icon: 'string',
+    message: i18n.translate('xpack.maps.mvtSource.stringFieldLabel', {
+      defaultMessage: 'string',
+    }),
   },
   {
     value: MVTFieldType.NUMBER,
-    inputDisplay: (
-      <span>
-        <FieldIcon type={'number'} />
-        <span>
-          {i18n.translate('xpack.maps.mvtSource.numberFieldLabel', {
-            defaultMessage: 'number',
-          })}
-        </span>
-      </span>
-    ),
+    icon: 'number',
+    message: i18n.translate('xpack.maps.mvtSource.numberFieldLabel', {
+      defaultMessage: 'number',
+    }),
   },
-];
+].map(makeOption);
 
 export interface Props {
   fields: MVTFieldDescriptor[];
@@ -200,11 +211,15 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
       <Fragment>
         {this._renderFieldConfig()}
         <EuiSpacer size={'xs'} />
-        <EuiButtonEmpty onClick={this._addField} size="xs" iconType="plusInCircleFilled">
-          {i18n.translate('xpack.maps.mvtSource.addFieldLabel', {
-            defaultMessage: 'Add',
-          })}
-        </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent="spaceAround" alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={this._addField} size="xs" iconType="plusInCircleFilled">
+              {i18n.translate('xpack.maps.mvtSource.addFieldLabel', {
+                defaultMessage: 'Add',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </Fragment>
     );
   }

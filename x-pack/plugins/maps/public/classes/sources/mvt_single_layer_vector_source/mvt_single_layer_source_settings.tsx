@@ -127,25 +127,32 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
   };
 
   render() {
-    const fieldEditor = this.props.includeFields ? (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage', {
-          defaultMessage: 'Fields',
-        })}
-        helpText={i18n.translate(
-          'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsHelpMessage',
-          {
-            defaultMessage:
-              'Fields which are available in the tile for the layer. These can be used for tooltips and dynamic styling.',
-          }
-        )}
-      >
-        <MVTFieldConfigEditor
-          fields={this.state.currentFields.slice()}
-          onChange={this._handleFieldChange}
-        />
-      </EuiFormRow>
-    ) : null;
+    const fieldEditor =
+      this.props.includeFields && this.state.currentLayerName !== '' ? (
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage',
+            {
+              defaultMessage: 'Fields',
+            }
+          )}
+          helpText={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsHelpMessage',
+            {
+              defaultMessage:
+                'Fields which are available in the `{layer}` layer. These can be used for tooltips and dynamic styling.',
+              values: {
+                layer: this.state.currentLayerName,
+              },
+            }
+          )}
+        >
+          <MVTFieldConfigEditor
+            fields={this.state.currentFields.slice()}
+            onChange={this._handleFieldChange}
+          />
+        </EuiFormRow>
+      ) : null;
 
     return (
       <Fragment>
@@ -166,6 +173,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
           <EuiFieldText
             value={this.state.currentLayerName}
             onChange={this._handleLayerNameInputChange}
+            isInvalid={this.state.currentLayerName === ''}
           />
         </EuiFormRow>
         <EuiFormRow

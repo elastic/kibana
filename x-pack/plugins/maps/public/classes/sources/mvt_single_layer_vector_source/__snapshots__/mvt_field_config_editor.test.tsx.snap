@@ -35,25 +35,41 @@ exports[`should render error for dupes 1`] = `
         options={
           Array [
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="string"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   string
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "String",
             },
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="number"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   number
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "Number",
             },
           ]
@@ -95,25 +111,41 @@ exports[`should render error for dupes 1`] = `
         options={
           Array [
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="string"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   string
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "String",
             },
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="number"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   number
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "Number",
             },
           ]
@@ -155,25 +187,41 @@ exports[`should render error for dupes 1`] = `
         options={
           Array [
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="string"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   string
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "String",
             },
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="number"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   number
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "Number",
             },
           ]
@@ -185,13 +233,23 @@ exports[`should render error for dupes 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <EuiButtonEmpty
-    iconType="plusInCircleFilled"
-    onClick={[Function]}
-    size="xs"
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    justifyContent="spaceAround"
   >
-    Add
-  </EuiButtonEmpty>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        Add
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Fragment>
 `;
 
@@ -230,25 +288,41 @@ exports[`should render error for empty name 1`] = `
         options={
           Array [
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="string"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   string
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "String",
             },
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="number"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   number
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "Number",
             },
           ]
@@ -290,25 +364,41 @@ exports[`should render error for empty name 1`] = `
         options={
           Array [
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="string"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   string
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "String",
             },
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="number"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   number
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "Number",
             },
           ]
@@ -350,25 +440,41 @@ exports[`should render error for empty name 1`] = `
         options={
           Array [
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="string"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   string
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "String",
             },
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="number"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   number
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "Number",
             },
           ]
@@ -380,13 +486,23 @@ exports[`should render error for empty name 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <EuiButtonEmpty
-    iconType="plusInCircleFilled"
-    onClick={[Function]}
-    size="xs"
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    justifyContent="spaceAround"
   >
-    Add
-  </EuiButtonEmpty>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        Add
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Fragment>
 `;
 
@@ -425,25 +541,41 @@ exports[`should render field editor 1`] = `
         options={
           Array [
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="string"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   string
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "String",
             },
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="number"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   number
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "Number",
             },
           ]
@@ -485,25 +617,41 @@ exports[`should render field editor 1`] = `
         options={
           Array [
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="string"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   string
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "String",
             },
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="number"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   number
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "Number",
             },
           ]
@@ -545,25 +693,41 @@ exports[`should render field editor 1`] = `
         options={
           Array [
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="string"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   string
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "String",
             },
             Object {
-              "inputDisplay": <span>
-                <FieldIcon
-                  type="number"
-                />
-                <span>
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   number
-                </span>
-              </span>,
+                </EuiFlexItem>
+              </EuiFlexGroup>,
               "value": "Number",
             },
           ]
@@ -575,12 +739,22 @@ exports[`should render field editor 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <EuiButtonEmpty
-    iconType="plusInCircleFilled"
-    onClick={[Function]}
-    size="xs"
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    justifyContent="spaceAround"
   >
-    Add
-  </EuiButtonEmpty>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        Add
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Fragment>
 `;
