@@ -7,8 +7,6 @@
 import './datapanel.scss';
 import React, { memo, useCallback } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   EuiNotificationBadge,
   EuiSpacer,
@@ -83,11 +81,7 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
             {fieldsCount}
           </EuiNotificationBadge>
         ) : (
-          <EuiFlexGroup justifyContent="spaceAround">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiLoadingSpinner size="m" />
         )
       }
     >
