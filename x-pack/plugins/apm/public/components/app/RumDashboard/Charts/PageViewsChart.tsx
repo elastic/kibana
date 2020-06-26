@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import numeral from '@elastic/numeral';
 import {
   Axis,
   BarSeries,
@@ -25,7 +26,6 @@ import {
 import moment from 'moment';
 import { Position } from '@elastic/charts/dist/utils/commons';
 import { I18LABELS } from '../translations';
-import { formatBigValue } from '../ClientMetrics';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ChartWrapper } from '../ChartWrapper';
@@ -102,7 +102,7 @@ export function PageViewsChart({ data, loading }: Props) {
             id="page_views"
             title={I18LABELS.pageViews}
             position={Position.Left}
-            tickFormat={(d) => formatBigValue(Number(d))}
+            tickFormat={(d) => numeral(d).format('0.0 a')}
           />
           <BarSeries
             id={I18LABELS.pageViews}

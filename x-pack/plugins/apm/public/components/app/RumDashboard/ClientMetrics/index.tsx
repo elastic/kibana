@@ -4,20 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
+import numeral from '@elastic/numeral';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { I18LABELS } from '../translations';
-
-export const formatBigValue = (val?: number | null): string => {
-  if (val && val >= 1000) {
-    const result = val / 1000;
-
-    return Math.round(result) + 'k';
-  }
-  return val + '';
-};
 
 const ClFlexGroup = styled(EuiFlexGroup)`
   flex-direction: row;
@@ -69,7 +61,11 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatBigValue(data?.pageViews?.value) ?? '-'}
+          title={
+            <EuiToolTip content={data?.pageViews?.value}>
+              <> {numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>
+            </EuiToolTip>
+          }
           description={I18LABELS.pageViews}
           isLoading={status !== 'success'}
         />

@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import numeral from '@elastic/numeral';
 import {
   Axis,
   BrushEndListener,
@@ -110,7 +111,7 @@ export function PageLoadDistChart({
             id="left"
             title={I18LABELS.percPageLoaded}
             position={Position.Left}
-            tickFormat={(d) => Number(d).toFixed(1) + ' %'}
+            tickFormat={(d) => numeral(d).format('0.0') + '%'}
           />
           <LineSeries
             id={'PagesPercentage'}

@@ -64,10 +64,6 @@ export const PageLoadDistribution = () => {
     setPercentileRange({ min: min * 1000, max: max * 1000 });
   };
 
-  const onBreakdownChange = (values: BreakdownItem[]) => {
-    setBreakdowns(values);
-  };
-
   return (
     <div data-cy="pageLoadDist">
       <EuiFlexGroup responsive={false}>
@@ -94,7 +90,7 @@ export const PageLoadDistribution = () => {
           <BreakdownFilter
             id={'pageLoad'}
             selectedBreakdowns={breakdowns}
-            onBreakdownChange={onBreakdownChange}
+            onBreakdownChange={setBreakdowns}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
