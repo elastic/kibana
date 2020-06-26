@@ -49,7 +49,7 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
     };
 
     if (embeddable) {
-      state.indexPatternId = shared.getIndexPattern(embeddable) || undefined;
+      state.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
 
       const input = embeddable.getInput();
 

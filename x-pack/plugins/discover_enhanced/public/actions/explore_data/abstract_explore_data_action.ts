@@ -43,14 +43,13 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
   public async isCompatible({ embeddable }: Context): Promise<boolean> {
     if (!embeddable) return false;
     if (!this.params.start().plugins.discover.urlGenerator) return false;
-    if (!shared.isVisualizeEmbeddable(embeddable)) return false;
-    if (!shared.getIndexPattern(embeddable)) return false;
+    if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
     return true;
   }
 
   public async execute(context: Context): Promise<void> {
-    if (!shared.isVisualizeEmbeddable(context.embeddable)) return;
+    if (!shared.hasExactlyOneIndexPattern(context.embeddable)) return;
 
     const { core } = this.params.start();
     const { appName, appPath } = await this.getUrl(context);
@@ -63,7 +62,7 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
   public async getHref(context: Context): Promise<string> {
     const { embeddable } = context;
 
-    if (!shared.isVisualizeEmbeddable(embeddable)) {
+    if (!shared.hasExactlyOneIndexPattern(embeddable)) {
       throw new Error(`Embeddable not supported for "${this.getDisplayName(context)}" action.`);
     }
 
