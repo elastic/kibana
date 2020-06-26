@@ -59,6 +59,9 @@ function loadStories() {
   // Find all files ending in *.examples.ts
   const req = require.context('./..', true, /.(stories|examples).tsx$/);
   req.keys().forEach(filename => req(filename));
+
+  // Import Canvas CSS
+  require('../public/style/index.scss')
 }
 
 // Set up the Storybook environment with custom settings.
