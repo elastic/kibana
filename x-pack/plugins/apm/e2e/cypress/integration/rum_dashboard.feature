@@ -20,4 +20,4 @@ Feature: RUM Dashboard
     Given a user click the filter
     When the user select the filter
     And user applies the selected filter
-    Then it should filters the client metrics
+    Then it filters the client metrics

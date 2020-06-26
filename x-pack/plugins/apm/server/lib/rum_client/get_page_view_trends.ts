@@ -28,10 +28,11 @@ export async function getPageViewTrends({
   if (breakdowns) {
     const breakdownList: BreakdownItem[] = JSON.parse(breakdowns);
     breakdownList.forEach(({ name, type, fieldName }) => {
-      breakdownAggs[type + '__' + name] = {
+      breakdownAggs[name] = {
         terms: {
           field: fieldName,
           size: 9,
+          missing: 'Other',
         },
       };
     });
@@ -72,7 +73,11 @@ export async function getPageViewTrends({
       const categoryBuckets = (bucket[bKey] as any).buckets;
       categoryBuckets.forEach(
         ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
-          res['category__' + key] = docCount;
+          if (key === 'Other') {
+            res[key + `(${bKey})`] = docCount;
+          } else {
+            res[key] = docCount;
+          }
         }
       );
     });

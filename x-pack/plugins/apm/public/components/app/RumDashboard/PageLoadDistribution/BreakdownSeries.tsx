@@ -6,13 +6,13 @@
 
 import React, { FC, useEffect } from 'react';
 import { CurveType, LineSeries, ScaleType } from '@elastic/charts';
-import { PercentileR } from './index';
+import { PercentileRange } from './index';
 import { useBreakdowns } from './use_breakdowns';
 
 interface Props {
   field: string;
   value: string;
-  percentileRange: PercentileR;
+  percentileRange: PercentileRange;
   onLoadingChange: (loading: boolean) => void;
 }
 

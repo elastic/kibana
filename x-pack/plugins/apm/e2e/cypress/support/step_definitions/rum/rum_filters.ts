@@ -24,7 +24,7 @@ Then(`user applies the selected filter`, () => {
   cy.get('[data-cy=applyFilter]').click();
 });
 
-Then(`it should filters the client metrics`, () => {
+Then(`it filters the client metrics`, () => {
   const clientMetrics = '[data-cy=client-metrics] .euiStat__title';
 
   // wait for all loading to finish

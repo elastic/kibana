@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { PageViewsLabel } from '../translations';
+import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
@@ -52,7 +52,7 @@ export const PageViewsTrend = () => {
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h3>{PageViewsLabel}</h3>
+            <h3>{I18LABELS.pageViews}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

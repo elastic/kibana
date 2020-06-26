@@ -24,10 +24,9 @@ export const getBreakdownField = (breakdown: string) => {
       return CLIENT_GEO_COUNTRY_ISO_CODE;
     case 'Device':
       return USER_AGENT_DEVICE;
-    case 'Browser':
-      return USER_AGENT_NAME;
     case 'OS':
       return USER_AGENT_OS;
+    case 'Browser':
     default:
       return USER_AGENT_NAME;
   }

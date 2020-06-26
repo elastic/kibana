@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @flow
 import * as React from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { BackEndLabel, FrontEndLabel, PageViewsLabel } from '../translations';
+import { I18LABELS } from '../translations';
 
 export const formatBigValue = (val?: number | null): string => {
   if (val && val >= 1000) {
@@ -28,7 +27,7 @@ const ClFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
-export const ClientMetrics = () => {
+export function ClientMetrics() {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end } = urlParams;
@@ -55,7 +54,7 @@ export const ClientMetrics = () => {
         <EuiStat
           titleSize="s"
           title={(data?.backEnd?.value?.toFixed(2) ?? '-') + ' sec'}
-          description={BackEndLabel}
+          description={I18LABELS.backEnd}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
@@ -63,7 +62,7 @@ export const ClientMetrics = () => {
         <EuiStat
           titleSize="s"
           title={(data?.frontEnd?.value?.toFixed(2) ?? '-') + ' sec'}
-          description={FrontEndLabel}
+          description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
@@ -71,10 +70,10 @@ export const ClientMetrics = () => {
         <EuiStat
           titleSize="s"
           title={formatBigValue(data?.pageViews?.value) ?? '-'}
-          description={PageViewsLabel}
+          description={I18LABELS.pageViews}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
     </ClFlexGroup>
   );
-};
+}

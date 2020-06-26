@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Axis,
   BrushEndListener,
@@ -25,13 +25,9 @@ import {
 import { Position } from '@elastic/charts/dist/utils/commons';
 import styled from 'styled-components';
 import { PercentileAnnotations } from '../PageLoadDistribution/PercentileAnnotations';
-import {
-  OverallLabel,
-  PageLoadTimeLabel,
-  PercPageLoadedLabel,
-} from '../translations';
+import { I18LABELS } from '../translations';
 import { ChartWrapper } from '../ChartWrapper';
-import { PercentileR } from '../PageLoadDistribution';
+import { PercentileRange } from '../PageLoadDistribution';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { BreakdownSeries } from '../PageLoadDistribution/BreakdownSeries';
@@ -47,7 +43,7 @@ interface Props {
   onPercentileChange: (min: number, max: number) => void;
   data?: PageLoadData | null;
   breakdowns: BreakdownItem[];
-  percentileRange: PercentileR;
+  percentileRange: PercentileRange;
   loading: boolean;
 }
 
@@ -57,13 +53,13 @@ const PageLoadChart = styled(Chart)`
   }
 `;
 
-export const PageLoadDistChart: FC<Props> = ({
+export function PageLoadDistChart({
   onPercentileChange,
   data,
   breakdowns,
   loading,
   percentileRange,
-}) => {
+}: Props) {
   const [breakdownLoading, setBreakdownLoading] = useState(false);
   const onBrushEnd: BrushEndListener = ({ x }) => {
     if (!x) {
@@ -76,7 +72,9 @@ export const PageLoadDistChart: FC<Props> = ({
   const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
     return (
       <div>
-        <p>{tooltip.value} seconds</p>
+        <p>
+          {tooltip.value} {I18LABELS.seconds}
+        </p>
       </div>
     );
   };
@@ -105,18 +103,18 @@ export const PageLoadDistChart: FC<Props> = ({
           <PercentileAnnotations percentiles={data?.percentiles} />
           <Axis
             id="bottom"
-            title={PageLoadTimeLabel}
+            title={I18LABELS.pageLoadTime}
             position={Position.Bottom}
           />
           <Axis
             id="left"
-            title={PercPageLoadedLabel}
+            title={I18LABELS.percPageLoaded}
             position={Position.Left}
             tickFormat={(d) => Number(d).toFixed(1) + ' %'}
           />
           <LineSeries
             id={'PagesPercentage'}
-            name={OverallLabel}
+            name={I18LABELS.overall}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
@@ -137,4 +135,4 @@ export const PageLoadDistChart: FC<Props> = ({
       )}
     </ChartWrapper>
   );
-};
+}

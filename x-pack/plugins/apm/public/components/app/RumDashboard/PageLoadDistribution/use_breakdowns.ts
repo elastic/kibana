@@ -6,10 +6,10 @@
 
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { PercentileR } from './index';
+import { PercentileRange } from './index';
 
 interface Props {
-  percentileRange?: PercentileR;
+  percentileRange?: PercentileRange;
   field: string;
   value: string;
 }

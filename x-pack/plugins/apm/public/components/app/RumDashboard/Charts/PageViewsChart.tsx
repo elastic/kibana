@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import {
   Axis,
   BarSeries,
@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 import moment from 'moment';
 import { Position } from '@elastic/charts/dist/utils/commons';
-import { DateTimeLabel, OverallLabel, PageViewsLabel } from '../translations';
+import { I18LABELS } from '../translations';
 import { formatBigValue } from '../ClientMetrics';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
@@ -36,7 +36,7 @@ interface Props {
   loading: boolean;
 }
 
-export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
+export function PageViewsChart({ data, loading }: Props) {
   const formatter = timeFormatter(niceTimeFormatByDay(2));
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
@@ -58,18 +58,22 @@ export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
     });
   };
 
-  let breakdownAccessors: string[] = [];
+  let breakdownAccessors: Set<string> = new Set();
   if (data && data.length > 0) {
-    const allKeys = Object.keys(data[0]);
-    breakdownAccessors = allKeys.filter((key) => key !== 'x');
+    data.forEach((item) => {
+      breakdownAccessors = new Set([
+        ...Array.from(breakdownAccessors),
+        ...Object.keys(item).filter((key) => key !== 'x'),
+      ]);
+    });
   }
 
   const customSeriesNaming: SeriesNameFn = ({ yAccessor }) => {
     if (yAccessor === 'y') {
-      return OverallLabel;
+      return I18LABELS.overall;
     }
 
-    return yAccessor.toString().split?.('__')[1];
+    return yAccessor;
   };
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
@@ -91,21 +95,21 @@ export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
           <Axis
             id="date_time"
             position={Position.Bottom}
-            title={DateTimeLabel}
+            title={I18LABELS.dateTime}
             tickFormat={formatter}
           />
           <Axis
             id="page_views"
-            title={PageViewsLabel}
+            title={I18LABELS.pageViews}
             position={Position.Left}
             tickFormat={(d) => formatBigValue(Number(d))}
           />
           <BarSeries
-            id={PageViewsLabel}
+            id={I18LABELS.pageViews}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
-            yAccessors={breakdownAccessors}
+            yAccessors={Array.from(breakdownAccessors)}
             data={data ?? []}
             name={customSeriesNaming}
           />
@@ -113,4 +117,4 @@ export const PageViewsChart: FC<Props> = ({ data, loading }: Props) => {
       )}
     </ChartWrapper>
   );
-};
+}

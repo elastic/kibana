@@ -14,12 +14,12 @@ import {
 } from '@elastic/eui';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { PageLoadDistLabel, ResetZoomLabel } from '../translations';
+import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 
-export interface PercentileR {
+export interface PercentileRange {
   min?: number | null;
   max?: number | null;
 }
@@ -29,7 +29,7 @@ export const PageLoadDistribution = () => {
 
   const { start, end } = urlParams;
 
-  const [percentileRange, setPercentileRange] = useState<PercentileR>({
+  const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
     max: null,
   });
@@ -73,7 +73,7 @@ export const PageLoadDistribution = () => {
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h3>{PageLoadDistLabel}</h3>
+            <h3>{I18LABELS.pageLoadDistribution}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -87,7 +87,7 @@ export const PageLoadDistribution = () => {
               percentileRange.min === null && percentileRange.max === null
             }
           >
-            {ResetZoomLabel}
+            {I18LABELS.resetZoom}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -167,7 +167,6 @@ const createApmApi = () => {
     .add(rumPageLoadDistributionRoute)
     .add(rumPageLoadDistBreakdownRoute)
     .add(rumClientMetricsRoute)
-    .add(rumClientMetricsRoute)
 
     // Observability dashboard
     .add(observabilityDashboardHasDataRoute)

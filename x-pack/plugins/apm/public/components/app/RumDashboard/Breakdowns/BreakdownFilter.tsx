@@ -25,40 +25,44 @@ export const BreakdownFilter = ({
   selectedBreakdowns,
   onBreakdownChange,
 }: Props) => {
-  const onChange = (selValues: BreakdownItem[]) => {
-    onBreakdownChange(selValues);
-  };
-
   const categories: BreakdownItem[] = [
     {
       name: 'Browser',
       type: 'category',
       count: 0,
-      selected: !!selectedBreakdowns.find(({ name }) => name === 'Browser'),
+      selected: selectedBreakdowns.some(({ name }) => name === 'Browser'),
       fieldName: USER_AGENT_NAME,
     },
     {
       name: 'OS',
       type: 'category',
       count: 0,
-      selected: !!selectedBreakdowns.find(({ name }) => name === 'OS'),
+      selected: selectedBreakdowns.some(({ name }) => name === 'OS'),
       fieldName: USER_AGENT_OS,
     },
     {
       name: 'Device',
       type: 'category',
       count: 0,
-      selected: !!selectedBreakdowns.find(({ name }) => name === 'Device'),
+      selected: selectedBreakdowns.some(({ name }) => name === 'Device'),
       fieldName: USER_AGENT_DEVICE,
     },
     {
       name: 'Location',
       type: 'category',
       count: 0,
-      selected: !!selectedBreakdowns.find(({ name }) => name === 'Location'),
+      selected: selectedBreakdowns.some(({ name }) => name === 'Location'),
       fieldName: CLIENT_GEO_COUNTRY_ISO_CODE,
     },
   ];
 
-  return <BreakdownGroup id={id} items={categories} onChange={onChange} />;
+  return (
+    <BreakdownGroup
+      id={id}
+      items={categories}
+      onChange={(selValues: BreakdownItem[]) => {
+        onBreakdownChange(selValues);
+      }}
+    />
+  );
 };
