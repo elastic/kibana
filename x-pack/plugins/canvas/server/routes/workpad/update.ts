@@ -7,6 +7,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { KibanaResponseFactory, SavedObjectsClientContract } from 'src/core/server';
+import { CanvasWorkpad } from '../../../types';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,
@@ -32,7 +33,7 @@ const workpadUpdateHandler = async (
 ) => {
   const now = new Date().toISOString();
 
-  const workpadObject = (await savedObjectsClient.get(CANVAS_TYPE, id)) as any;
+  const workpadObject = await savedObjectsClient.get<CanvasWorkpad>(CANVAS_TYPE, id);
   await savedObjectsClient.create(
     CANVAS_TYPE,
     {

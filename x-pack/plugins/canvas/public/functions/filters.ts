@@ -36,8 +36,8 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
 
   return allFilters.filter((filter: string) => {
     const ast = fromExpression(filter);
-    const expGroups = get(ast, 'chain[0].arguments.filterGroup', []) as any;
-    return expGroups.length > 0 && expGroups.every((expGroup: any) => groups.includes(expGroup));
+    const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
+    return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));
   });
 }
 

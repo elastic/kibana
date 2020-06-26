@@ -12,7 +12,7 @@ import { prepend } from '../../lib/modify_path';
 import { State } from '../../../types';
 
 export function getArgs(state: State) {
-  return get(state, ['transient', 'resolvedArgs']) as any;
+  return get(state, ['transient', 'resolvedArgs']);
 }
 
 export function getArg(state: State, path: any[]) {

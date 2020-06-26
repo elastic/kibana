@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore Untyped Elastic library
+// @ts-expect-error Untyped Elastic library
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit, uniqBy } from 'lodash';
 import moment from 'moment';
