@@ -24,6 +24,7 @@ const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
 const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
   defaultMessage: 'Add layer',
 });
+const SELECT_WIZARD_LABEL = ADD_LAYER_STEP_LABEL;
 
 interface Props {
   addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => void;
@@ -35,6 +36,7 @@ interface Props {
 
 interface State {
   currentStepIndex: number;
+  currentStep: { id: string; label: string } | null;
   layerSteps: Array<{ id: string; label: string }> | null;
   layerWizard: LayerWizard | null;
   isNextStepBtnEnabled: boolean;
@@ -43,6 +45,7 @@ interface State {
 
 const INITIAL_STATE: State = {
   currentStepIndex: 0,
+  currentStep: null,
   layerSteps: null,
   layerWizard: null,
   isNextStepBtnEnabled: false,
@@ -59,21 +62,23 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   _clearLayerWizard = () => {
-    this.setState({ ...INITIAL_STATE });
+    this.setState(INITIAL_STATE);
     this.props.addPreviewLayers([]);
   };
 
   _onWizardSelect = (layerWizard: LayerWizard) => {
+    const layerSteps = [
+      ...(layerWizard.prerequisiteSteps ? layerWizard.prerequisiteSteps : []),
+      {
+        id: ADD_LAYER_STEP_ID,
+        label: ADD_LAYER_STEP_LABEL,
+      },
+    ];
     this.setState({
       ...INITIAL_STATE,
       layerWizard,
-      layerSteps: [
-        ...(layerWizard.prerequisiteSteps ? layerWizard.prerequisiteSteps : []),
-        {
-          id: ADD_LAYER_STEP_ID,
-          label: ADD_LAYER_STEP_LABEL,
-        },
-      ],
+      layerSteps,
+      currentStep: layerSteps[0],
     });
   };
 
@@ -87,18 +92,16 @@ export class AddLayerPanel extends Component<Props, State> {
       this.props.promotePreviewLayers();
     } else {
       this.setState((prevState) => {
+        const nextIndex = prevState.currentStepIndex + 1;
         return {
-          currentStepIndex: prevState.currentStepIndex + 1,
+          currentStepIndex: nextIndex,
+          currentStep: this.state.layerSteps![nextIndex],
           isNextStepBtnEnabled: false,
           isStepLoading: false,
         };
       });
     }
   };
-
-  _getCurrentStep() {
-    return this.state.layerSteps ? this.state.layerSteps[this.state.currentStepIndex] : null;
-  }
 
   _enableNextBtn = () => {
     this.setState({ isNextStepBtnEnabled: true });
@@ -117,14 +120,13 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   _renderNextButton() {
-    const currentStep = this._getCurrentStep();
-    if (!currentStep) {
+    if (!this.state.currentStep) {
       return null;
     }
 
     let isDisabled = !this.state.isNextStepBtnEnabled;
     let isLoading = this.state.isStepLoading;
-    if (currentStep.id === ADD_LAYER_STEP_ID) {
+    if (this.state.currentStep.id === ADD_LAYER_STEP_ID) {
       isDisabled = !this.props.hasPreviewLayers;
       isLoading = this.props.isLoadingPreviewLayers;
     } else {
@@ -143,19 +145,18 @@ export class AddLayerPanel extends Component<Props, State> {
           onClick={this._onNext}
           fill
         >
-          {currentStep.label}
+          {this.state.currentStep.label}
         </EuiButton>
       </EuiFlexItem>
     );
   }
 
   render() {
-    const currentStep = this._getCurrentStep();
     return (
       <>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>{currentStep ? currentStep.label : ADD_LAYER_STEP_LABEL}</h2>
+            <h2>{this.state.currentStep ? this.state.currentStep.label : SELECT_WIZARD_LABEL}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
@@ -165,7 +166,7 @@ export class AddLayerPanel extends Component<Props, State> {
           onWizardSelect={this._onWizardSelect}
           previewLayers={this._previewLayers}
           showBackButton={!this.state.isStepLoading}
-          currentStepId={currentStep ? currentStep.id : null}
+          currentStepId={this.state.currentStep ? this.state.currentStep.id : null}
           enableNextBtn={this._enableNextBtn}
           disableNextBtn={this._disableNextBtn}
           startStepLoading={this._startStepLoading}
