@@ -18,6 +18,7 @@ import {
   getUpdateRulesSchemaDecodedMock,
 } from './update_rules_schema.mock';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
+import { getListArrayMock } from '../types/lists.mock';
 
 describe('update rules schema', () => {
   test('empty objects do not validate', () => {
@@ -1377,14 +1378,182 @@ describe('update rules schema', () => {
     });
   });
 
-  // TODO: The exception_list tests are skipped and empty until we re-integrate it from the lists plugin
-  describe.skip('exception_list', () => {
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and exceptions_list] does validate', () => {});
+  describe('exception_list', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and exceptions_list] does validate', () => {
+      const payload: UpdateRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        filters: [],
+        note: '# some markdown',
+        exceptions_list: getListArrayMock(),
+      };
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {});
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: UpdateRulesSchemaDecoded = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        filters: [],
+        exceptions_list: [
+          {
+            id: 'some_uuid',
+            namespace_type: 'single',
+          },
+          {
+            id: 'some_uuid',
+            namespace_type: 'agnostic',
+          },
+        ],
+      };
+      expect(message.schema).toEqual(expected);
+    });
 
-    test('rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid exceptions_list] does NOT validate', () => {});
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
+      const payload: UpdateRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        filters: [],
+        note: '# some markdown',
+        exceptions_list: [],
+      };
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {});
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: UpdateRulesSchemaDecoded = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        filters: [],
+        exceptions_list: [],
+      };
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
+      const payload: Omit<UpdateRulesSchema, 'exceptions_list'> & {
+        exceptions_list: Array<{ id: string; namespace_type: string }>;
+      } = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        filters: [],
+        note: '# some markdown',
+        exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
+      };
+
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
+      const payload: UpdateRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        filters: [],
+        note: '# some markdown',
+      };
+
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: UpdateRulesSchemaDecoded = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        exceptions_list: [],
+        filters: [],
+      };
+      expect(message.schema).toEqual(expected);
+    });
   });
 });
