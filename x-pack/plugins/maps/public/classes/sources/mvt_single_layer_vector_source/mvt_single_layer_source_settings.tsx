@@ -22,8 +22,14 @@ export type MVTSettings = {
 };
 
 export interface State {
-  currentSettings: MVTSettings;
-  prevSettings: MVTSettings;
+  currentLayerName: 'string';
+  currentMinSourceZoom: number;
+  currentMaxSourceZoom: number;
+  currentFields: MVTFieldDescriptor[];
+  previousLayerName: 'string';
+  previousMinSourceZoom: number;
+  previousMaxSourceZoom: number;
+  previousFields: MVTFieldDescriptor[];
 }
 
 export interface Props {
@@ -44,64 +50,69 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
       maxSourceZoom: nextProps.maxSourceZoom,
     };
 
-    if (prevState && _.isEqual(newSettings, prevState.prevSettings)) {
+    const previous = prevState
+      ? {
+          layerName: prevState.previousLayerName,
+          fields: prevState.previousFields,
+          minSourceZoom: prevState.previousMinSourceZoom,
+          maxSourceZoom: prevState.previousMaxSourceZoom,
+        }
+      : null;
+
+    if (_.isEqual(previous, newSettings)) {
       return null;
     }
 
+    const clonedFields = _.cloneDeep(nextProps.fields);
     return {
-      prevSettings: newSettings,
-      currentSettings: newSettings,
+      currentLayerName: nextProps.layerName,
+      currentMinSourceZoom: nextProps.minSourceZoom,
+      currentMaxSourceZoom: nextProps.maxSourceZoom,
+      currentFields: clonedFields,
+      previousLayerName: nextProps.layerName,
+      previousMinSourceZoom: nextProps.minSourceZoom,
+      previousMaxSourceZoom: nextProps.maxSourceZoom,
+      previousFields: clonedFields,
     };
   }
 
   _handleChange = _.debounce(() => {
-    this.props.handleChange(this.state.currentSettings);
+    this.props.handleChange({
+      layerName: this.state.currentLayerName,
+      minSourceZoom: this.state.currentMinSourceZoom,
+      maxSourceZoom: this.state.currentMaxSourceZoom,
+      fields: this.state.currentFields,
+    });
   }, 200);
 
   _handleLayerNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value === this.state.currentSettings.layerName) {
+    const layerName = e.target.value;
+    if (layerName === this.state.currentLayerName) {
       return;
     }
-    const currentSettings = {
-      layerName: e.target.value,
-      minSourceZoom: this.state.currentSettings.minSourceZoom,
-      maxSourceZoom: this.state.currentSettings.maxSourceZoom,
-      fields: this.state.currentSettings.fields,
-    };
-
-    this.setState({ currentSettings }, this._handleChange);
+    this.setState({ currentLayerName: e.targetValue }, this._handleChange);
   };
 
   _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
-    if (_.isEqual(this.state.currentSettings.fields, fields)) {
+    if (_.isEqual(this.state.currentFields, fields)) {
       return;
     }
-    const currentSettings = {
-      layerName: this.state.currentSettings.layerName,
-      minSourceZoom: this.state.currentSettings.minSourceZoom,
-      maxSourceZoom: this.state.currentSettings.maxSourceZoom,
-      fields,
-    };
-    this.setState({ currentSettings }, this._handleChange);
+    this.setState({ currentFields: fields }, this._handleChange);
   };
 
   _handleZoomRangeChange = (e: Value) => {
-    const minZoom = parseInt(e[0] as string, 10);
-    const maxZoom = parseInt(e[1] as string, 10);
+    const minSourceZoom = parseInt(e[0] as string, 10);
+    const maxSourceZoom = parseInt(e[1] as string, 10);
     if (
-      this.state.currentSettings.minSourceZoom === minZoom &&
-      this.state.currentSettings.maxSourceZoom === maxZoom
+      this.state.currentMinSourceZoom === minSourceZoom &&
+      this.state.currentMaxSourceZoom === maxSourceZoom
     ) {
       return;
     }
-
-    const currentSettings = {
-      layerName: this.state.currentSettings.layerName,
-      fields: this.state.currentSettings.fields,
-      minSourceZoom: minZoom,
-      maxSourceZoom: maxZoom,
-    };
-    this.setState({ currentSettings }, this._handleChange);
+    this.setState(
+      { currentMaxSourceZoom: minSourceZoom, currentMaxSourceZoom: maxSourceZoom },
+      this._handleChange
+    );
   };
 
   render() {
@@ -112,7 +123,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
         })}
       >
         <MVTFieldConfigEditor
-          fields={this.state.currentSettings.fields}
+          fields={this.state.currentFields.slice()}
           onChange={this._handleFieldChange}
         />
       </EuiFormRow>
@@ -129,7 +140,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
           )}
         >
           <EuiFieldText
-            value={this.state.currentSettings.layerName}
+            value={this.state.currentLayerName}
             onChange={this._handleLayerNameInputChange}
           />
         </EuiFormRow>
@@ -146,10 +157,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
             formRowDisplay="columnCompressed"
             min={MIN_ZOOM}
             max={MAX_ZOOM}
-            value={[
-              this.state.currentSettings.minSourceZoom,
-              this.state.currentSettings.maxSourceZoom,
-            ]}
+            value={[this.state.currentMinSourceZoom, this.state.currentMaxSourceZoom]}
             showInput="inputWithPopover"
             showRange
             showLabels

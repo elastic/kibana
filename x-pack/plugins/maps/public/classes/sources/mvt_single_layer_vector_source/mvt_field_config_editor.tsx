@@ -71,9 +71,10 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
     if (_.isEqual(nextProps.fields, prevState.previousFields)) {
       return null;
     }
+    const clonedFields = _.cloneDeep(nextProps.fields);
     return {
-      currentFields: nextProps.fields,
-      previousFields: nextProps.fields,
+      currentFields: clonedFields,
+      previousFields: clonedFields,
     };
   }
 
@@ -114,7 +115,10 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   _renderFieldTypeDropDown(mvtFieldConfig: MVTFieldDescriptor, index: number) {
     const onChange = (type: MVTFieldType) => {
       const newFields = this.state.currentFields.slice();
-      newFields[index].type = type;
+      newFields[index] = {
+        type,
+        name: newFields[index].name,
+      };
       this._fieldChange(newFields);
     };
 
@@ -131,7 +135,10 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
     const onChange = (e: ChangeEvent<HTMLInputElement>) => {
       const name = e.target.value;
       const newFields = this.state.currentFields.slice();
-      newFields[index].name = name;
+      newFields[index] = {
+        name,
+        type: newFields[index].type,
+      };
       this._fieldChange(newFields);
     };
 

@@ -40,7 +40,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
     if (settings.maxSourceZoom !== this.props.maxSourceZoom) {
       changes.push({ propName: 'maxSourceZoom', value: settings.maxSourceZoom });
     }
-    if (!_.isEqual(settings.fields !== this.props.fields)) {
+    if (!_.isEqual(settings.fields, this.props.fields)) {
       changes.push({ propName: 'fields', value: settings.fields });
     }
     this.props.onChange(...changes);
