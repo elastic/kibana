@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'kibana/server';
 import { MlServerLicense } from '../lib/license';
 
 import { SpacesPluginSetup } from '../../../spaces/server';
@@ -17,13 +18,19 @@ import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
 } from './providers/anomaly_detectors';
-import { ResolveMlCapabilities } from '../../common/types/capabilities';
+import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
   MlSystemProvider &
   ModulesProvider &
   ResultsServiceProvider;
+
+export interface SharedServicesChecks {
+  isFullLicense(): void;
+  isMinimumLicense(): void;
+  getHasMlCapabilities(request: KibanaRequest): (capabilities: MlCapabilitiesKey[]) => void;
+}
 
 export function createSharedServices(
   mlLicense: MlServerLicense,
@@ -32,19 +39,35 @@ export function createSharedServices(
   resolveMlCapabilities: ResolveMlCapabilities
 ): SharedServices {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
+  const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
+  const checks: SharedServicesChecks = {
+    isFullLicense,
+    isMinimumLicense,
+    getHasMlCapabilities,
+  };
 
   return {
-    ...getJobServiceProvider(isFullLicense),
-    ...getAnomalyDetectorsProvider(isFullLicense),
-    ...getMlSystemProvider(
-      isMinimumLicense,
-      isFullLicense,
-      mlLicense,
-      spaces,
-      cloud,
-      resolveMlCapabilities
-    ),
-    ...getModulesProvider(isFullLicense),
-    ...getResultsServiceProvider(isFullLicense),
+    ...getJobServiceProvider(checks),
+    ...getAnomalyDetectorsProvider(checks),
+    ...getModulesProvider(checks),
+    ...getResultsServiceProvider(checks),
+    ...getMlSystemProvider(checks, mlLicense, spaces, cloud, resolveMlCapabilities),
+  };
+}
+
+export type MlCapabilitiesProvider = (request: KibanaRequest) => any;
+
+function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
+  return (request: KibanaRequest) => {
+    return async (capabilities: MlCapabilitiesKey[]) => {
+      const mlCapabilities = await resolveMlCapabilities(request);
+      if (mlCapabilities === null) {
+        throw Error('Something went really wrong');
+      }
+
+      if (capabilities.every((c) => mlCapabilities[c] === true) === false) {
+        throw Error('Nope');
+      }
+    };
   };
 }

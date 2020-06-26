@@ -157,7 +157,7 @@ export class InfraServerPlugin {
           plugins.ml?.mlSystemProvider(context.ml?.mlClient.callAsCurrentUser, request);
         const mlAnomalyDetectors =
           context.ml &&
-          plugins.ml?.anomalyDetectorsProvider(context.ml?.mlClient.callAsCurrentUser);
+          plugins.ml?.anomalyDetectorsProvider(context.ml?.mlClient.callAsCurrentUser, request);
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
         return {

@@ -53,6 +53,7 @@ export const adminMlCapabilities = {
 export type UserMlCapabilities = typeof userMlCapabilities;
 export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
+export type MlCapabilitiesKey = keyof MlCapabilities;
 
 export const basicLicenseMlCapabilities = ['canAccessML', 'canFindFileStructure'] as Array<
   keyof MlCapabilities

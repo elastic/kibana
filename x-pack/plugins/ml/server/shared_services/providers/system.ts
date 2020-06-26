@@ -8,13 +8,13 @@ import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
 import { SearchResponse, SearchParams } from 'elasticsearch';
 import { MlServerLicense } from '../../lib/license';
 import { CloudSetup } from '../../../../cloud/server';
-import { LicenseCheck } from '../license_checks';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
 import { capabilitiesProvider } from '../../lib/capabilities';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
+import { SharedServicesChecks } from '../shared_services';
 
 export interface MlSystemProvider {
   mlSystemProvider(
@@ -28,8 +28,7 @@ export interface MlSystemProvider {
 }
 
 export function getMlSystemProvider(
-  isMinimumLicense: LicenseCheck,
-  isFullLicense: LicenseCheck,
+  { isMinimumLicense, isFullLicense, getHasMlCapabilities }: SharedServicesChecks,
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup | undefined,
@@ -37,9 +36,11 @@ export function getMlSystemProvider(
 ): MlSystemProvider {
   return {
     mlSystemProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
+      const hasMlCapabilities = getHasMlCapabilities(request);
       return {
         async mlCapabilities() {
           isMinimumLicense();
+          await hasMlCapabilities(['canAccessML']);
 
           const { isMlEnabledInSpace } =
             spaces !== undefined
@@ -48,7 +49,7 @@ export function getMlSystemProvider(
 
           const mlCapabilities = await resolveMlCapabilities(request);
           if (mlCapabilities === null) {
-            throw new Error('resolveMlCapabilities is not defined');
+            throw new Error('mlCapabilities is not defined');
           }
 
           const { getCapabilities } = capabilitiesProvider(
@@ -61,6 +62,8 @@ export function getMlSystemProvider(
         },
         async mlInfo(): Promise<MlInfoResponse> {
           isMinimumLicense();
+          await hasMlCapabilities(['canAccessML']);
+
           const info = await callAsCurrentUser('ml.info');
           const cloudId = cloud && cloud.cloudId;
           return {
@@ -70,6 +73,8 @@ export function getMlSystemProvider(
         },
         async mlAnomalySearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>> {
           isFullLicense();
+          await hasMlCapabilities(['canAccessML']);
+
           return callAsCurrentUser('search', {
             ...searchParams,
             index: ML_RESULTS_INDEX_PATTERN,

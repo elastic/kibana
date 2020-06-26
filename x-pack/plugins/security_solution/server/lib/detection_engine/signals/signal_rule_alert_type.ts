@@ -163,8 +163,9 @@ export const signalRulesAlertType = ({
           }
 
           const scopedMlCallCluster = services.getScopedCallCluster(ml.mlClient);
-          const summaryJobs = await ml
-            .jobServiceProvider(scopedMlCallCluster)
+          const summaryJobs = await (
+            await ml.jobServiceProvider(scopedMlCallCluster, ({} as unknown) as KibanaRequest)
+          ) // TODO, this is now broken
             .jobsSummary([machineLearningJobId]);
           const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
@@ -185,7 +186,7 @@ export const signalRulesAlertType = ({
             callCluster: scopedMlCallCluster,
             // This is needed to satisfy the ML Services API, but can be empty as it is
             // currently unused by the mlAnomalySearch function.
-            request: ({} as unknown) as KibanaRequest,
+            request: ({} as unknown) as KibanaRequest, // TODO, this is now broken
             jobId: machineLearningJobId,
             anomalyThreshold,
             from,
