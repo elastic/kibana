@@ -46,13 +46,12 @@ function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
           },
         },
       },
-      loggers: [
-        {
-          context: 'test-file',
+      loggers: {
+        'test-file': {
           appenders: ['test-console'],
           level: 'info',
         },
-      ],
+      },
     },
   });
 }
