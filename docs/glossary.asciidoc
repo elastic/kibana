@@ -233,7 +233,7 @@ such as syslog, Apache, and other webserver logs. Refer to
 
 [[glossary-kql]] {kib} Query Language (KQL) ::
 // tag::kql-def[]
-The default language for querying in {kib}. The KQL provides
+The default language for querying in {kib}. KQL provides
 support for scripted fields. Refer to
 {kibana-ref}/kuery-query.html[Kibana Query Language].
 // end::kql-def[]
