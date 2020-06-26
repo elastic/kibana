@@ -247,7 +247,7 @@ support for scripted fields. Refer to
 // tag::lens-def[]
 Enables you to quickly build visualizations by dragging and dropping data fields.
 Lens makes makes smart visualization suggestions for your data,
-allowing for quick switching between visualization types. Refer to
+allowing you to quickly switch between visualization types. Refer to
 {kibana-ref}/lens.html[Lens].
 // end::lens-def[]
 
