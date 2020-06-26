@@ -23,7 +23,6 @@ import { WorkspacePanel } from './workspace_panel';
 import { Document } from '../../persistence/saved_object_store';
 import { RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
-import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { generateId } from '../../id_generator';
 import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
 import { EditorFrameStartPlugins } from '../service';
@@ -275,21 +274,20 @@ export function EditorFrame(props: EditorFrameProps) {
         }
         workspacePanel={
           allLoaded && (
-            <WorkspacePanelWrapper title={state.title}>
-              <WorkspacePanel
-                activeDatasourceId={state.activeDatasourceId}
-                activeVisualizationId={state.visualization.activeId}
-                datasourceMap={props.datasourceMap}
-                datasourceStates={state.datasourceStates}
-                framePublicAPI={framePublicAPI}
-                visualizationState={state.visualization.state}
-                visualizationMap={props.visualizationMap}
-                dispatch={dispatch}
-                ExpressionRenderer={props.ExpressionRenderer}
-                core={props.core}
-                plugins={props.plugins}
-              />
-            </WorkspacePanelWrapper>
+            <WorkspacePanel
+              title={state.title}
+              activeDatasourceId={state.activeDatasourceId}
+              activeVisualizationId={state.visualization.activeId}
+              datasourceMap={props.datasourceMap}
+              datasourceStates={state.datasourceStates}
+              framePublicAPI={framePublicAPI}
+              visualizationState={state.visualization.state}
+              visualizationMap={props.visualizationMap}
+              dispatch={dispatch}
+              ExpressionRenderer={props.ExpressionRenderer}
+              core={props.core}
+              plugins={props.plugins}
+            />
           )
         }
         suggestionsPanel={

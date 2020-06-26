@@ -15,6 +15,7 @@ export {
   UseExceptionListSuccess,
 } from '../../lists/public';
 export {
+  CommentsArray,
   ExceptionListSchema,
   ExceptionListItemSchema,
   Entry,

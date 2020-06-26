@@ -10,7 +10,7 @@ import {
   ResolverRelatedEvents,
   ResolverAncestry,
   ResolverRelatedAlerts,
-  LifecycleNode,
+  ResolverLifecycleNode,
 } from '../../../../../common/endpoint/types';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
@@ -271,7 +271,7 @@ export class Fetcher {
     return tree;
   }
 
-  private async getNode(entityID: string): Promise<LifecycleNode | undefined> {
+  private async getNode(entityID: string): Promise<ResolverLifecycleNode | undefined> {
     const query = new LifecycleQuery(this.eventsIndexPattern, this.endpointID);
     const results = await query.searchAndFormat(this.client, entityID);
     if (results.length === 0) {

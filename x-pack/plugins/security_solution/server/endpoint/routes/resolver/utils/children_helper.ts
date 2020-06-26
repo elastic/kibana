@@ -10,7 +10,11 @@ import {
   isProcessStart,
   getAncestryAsArray,
 } from '../../../../../common/endpoint/models/event';
-import { ChildNode, ResolverEvent, ResolverChildren } from '../../../../../common/endpoint/types';
+import {
+  ResolverChildNode,
+  ResolverEvent,
+  ResolverChildren,
+} from '../../../../../common/endpoint/types';
 import { createChild } from './node';
 import { PaginationBuilder } from './pagination';
 
@@ -18,7 +22,7 @@ import { PaginationBuilder } from './pagination';
  * This class helps construct the children structure when building a resolver tree.
  */
 export class ChildrenNodesHelper {
-  private readonly entityToNodeCache: Map<string, ChildNode> = new Map();
+  private readonly entityToNodeCache: Map<string, ResolverChildNode> = new Map();
 
   constructor(private readonly rootID: string, private readonly limit: number) {
     this.entityToNodeCache.set(rootID, createChild(rootID));
@@ -28,7 +32,7 @@ export class ChildrenNodesHelper {
    * Constructs a ResolverChildren response based on the children that were previously add.
    */
   getNodes(): ResolverChildren {
-    const cacheCopy: Map<string, ChildNode> = new Map(this.entityToNodeCache);
+    const cacheCopy: Map<string, ResolverChildNode> = new Map(this.entityToNodeCache);
     const rootNode = cacheCopy.get(this.rootID);
     let rootNextChild = null;
 
