@@ -14,6 +14,7 @@ import {
   moveLayerToTop,
   moveLabelsToTop,
 } from './utils';
+import { syncLayerOrder } from './sort_layers';
 import { getGlyphUrl, isRetina } from '../../../meta';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
@@ -266,9 +267,10 @@ export class MBMapContainer extends React.Component {
       this.props.spatialFiltersLayer
     );
     this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap));
-    syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
-    moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
-    moveLabelsToTop(this.state.mbMap, this.props.layerList, this.props.spatialFiltersLayer);
+    syncLayerOrder(this.state.mbMap, this.props.spatialFiltersLayer, this.props.layerList);
+    //syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
+    //moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
+    //moveLabelsToTop(this.state.mbMap, this.props.layerList, this.props.spatialFiltersLayer);
   };
 
   _syncMbMapWithInspector = () => {
