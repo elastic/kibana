@@ -7,6 +7,11 @@
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
+  const log = getService('log');
+  const supertest = getService('supertest');
+  const dockerServers = getService('dockerServers');
+
+  const server = dockerServers.get('registry');
   describe('package file', () => {
     // it('fetches a .png screenshot image', async () => {
     //   const supertest = getService('supertest');
@@ -19,12 +24,19 @@ export default function ({ getService }: FtrProviderContext) {
     //     .expect(200);
     // });
 
-    it('fetches an .svg icon image', async () => {
-      const supertest = getService('supertest');
-      await supertest
-        .get('/api/ingest_manager/epm/packages/filetest/0.0.1/img/logo.svg')
-        .set('kbn-xsrf', 'xxx')
-        .expect('Content-Type', 'image/svg');
+    it('fetches an .svg icon image', async function () {
+      if (server.enabled) {
+        await supertest
+          .get('/api/ingest_manager/epm/packages/filetest/0.1.0/img/logo.svg')
+          .set('kbn-xsrf', 'xxx')
+          .expect('Content-Type', 'image/svg+xml')
+          .expect(200);
+      } else {
+        log.warning(
+          'disabling tests because DockerServers service is not enabled, set INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT to run them'
+        );
+        this.skip();
+      }
     });
 
     // it('fetches an auditbeat .conf rule file', async () => {

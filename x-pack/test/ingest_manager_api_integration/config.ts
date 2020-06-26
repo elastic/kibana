@@ -35,11 +35,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     dockerServers: defineDockerServersConfig({
       registry: {
         enabled: !!registryPort,
-        image: 'docker.elastic.co/package-registry/package-registry:PR-539',
+        image: 'docker.elastic.co/package-registry/package-registry:kibana-testing-1',
         portInContainer: 8080,
         port: registryPort,
         args: dockerArgs,
-        waitForLogLine: 'package manifests loaded into memory',
+        waitForLogLine: 'package manifests loaded',
       },
     }),
     services: {

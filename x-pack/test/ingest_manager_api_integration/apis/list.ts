@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
           return response.body;
         };
         const listResponse = await fetchPackageList();
-        expect(listResponse.response.length).to.be(15);
+        expect(listResponse.response.length).to.be(11);
       } else {
         log.warning(
           'disabling tests because DockerServers service is not enabled, set INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT to run them'

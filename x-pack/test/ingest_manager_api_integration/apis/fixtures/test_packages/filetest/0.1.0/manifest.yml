@@ -20,6 +20,6 @@ requirement:
     versions: ">7.7.0"
 
 icons:
-  - src: "/img/logo-test-64-color.svg"
+  - src: "/img/logo.svg"
     size: "16x16"
     type: "image/svg+xml"
