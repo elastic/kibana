@@ -77,9 +77,14 @@ export const LogsSection = ({ data }: Props) => {
           legendPosition="bottom"
           xDomain={{ min, max }}
         />
-        {Object.values(data.series).map((serie) => {
+        {Object.keys(data.series).map((key) => {
+          const serie = data.series[key];
+          const chartData = serie.coordinates.map((coordinate) => ({
+            ...coordinate,
+            g: serie.label,
+          }));
           return (
-            <Fragment key={serie.label}>
+            <Fragment key={key}>
               <BarSeries
                 id={serie.label}
                 xScaleType={ScaleType.Time}
@@ -87,7 +92,8 @@ export const LogsSection = ({ data }: Props) => {
                 xAccessor={'x'}
                 yAccessors={['y']}
                 stackAccessors={['x']}
-                data={serie.coordinates}
+                splitSeriesAccessors={['g']}
+                data={chartData}
               />
               <Axis
                 id="x-axis"
