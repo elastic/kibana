@@ -34,7 +34,7 @@ export interface Connection {
   destination: ConnectionNode;
 }
 
-export interface ServiceNodeMetrics {
+export interface ServiceNodeStats {
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
   avgTransactionDuration: number | null;

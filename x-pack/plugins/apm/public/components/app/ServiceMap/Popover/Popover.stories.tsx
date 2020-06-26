@@ -14,7 +14,7 @@ import { MockUrlParamsContextProvider } from '../../../../context/UrlParamsConte
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { CytoscapeContext } from '../Cytoscape';
 import { Popover } from './';
-import { ServiceMetricList } from './ServiceMetricList';
+import { ServiceStatsList } from './ServiceStatsList';
 
 storiesOf('app/ServiceMap/Popover', module)
   .addDecorator((storyFn) => {
@@ -68,12 +68,12 @@ storiesOf('app/ServiceMap/Popover', module)
     }
   );
 
-storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
+storiesOf('app/ServiceMap/Popover/ServiceStatsList', module)
   .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
   .add(
     'example',
     () => (
-      <ServiceMetricList
+      <ServiceStatsList
         avgCpuUsage={0.32809666568309237}
         avgErrorRate={0.556068173242986}
         avgMemoryUsage={0.5504868173242986}
@@ -87,7 +87,7 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
   .add(
     'loading',
     () => (
-      <ServiceMetricList
+      <ServiceStatsList
         avgCpuUsage={null}
         avgErrorRate={null}
         avgMemoryUsage={null}
@@ -101,7 +101,7 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
   .add(
     'some null values',
     () => (
-      <ServiceMetricList
+      <ServiceStatsList
         avgCpuUsage={null}
         avgErrorRate={0.615972134074397}
         avgMemoryUsage={null}
@@ -115,7 +115,7 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
   .add(
     'all null values',
     () => (
-      <ServiceMetricList
+      <ServiceStatsList
         avgCpuUsage={null}
         avgErrorRate={null}
         avgMemoryUsage={null}

@@ -5,23 +5,21 @@
  */
 
 import React from 'react';
-import { ServiceNodeMetrics } from '../../../../../common/service_map';
+import { ServiceNodeStats } from '../../../../../common/service_map';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { ServiceMetricList } from './ServiceMetricList';
+import { ServiceStatsList } from './ServiceStatsList';
 
-interface ServiceMetricFetcherProps {
+interface ServiceStatsFetcherProps {
   serviceName: string;
 }
 
-export function ServiceMetricFetcher({
-  serviceName,
-}: ServiceMetricFetcherProps) {
+export function ServiceStatsFetcher({ serviceName }: ServiceStatsFetcherProps) {
   const {
     urlParams: { start, end, environment },
   } = useUrlParams();
 
-  const { data = {} as ServiceNodeMetrics, status } = useFetcher(
+  const { data = {} as ServiceNodeStats, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
@@ -37,5 +35,5 @@ export function ServiceMetricFetcher({
   );
   const isLoading = status === 'loading';
 
-  return <ServiceMetricList {...data} isLoading={isLoading} />;
+  return <ServiceStatsList {...data} isLoading={isLoading} />;
 }
