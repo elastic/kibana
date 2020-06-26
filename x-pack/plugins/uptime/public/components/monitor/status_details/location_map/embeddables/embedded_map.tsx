@@ -20,12 +20,15 @@ import { UptimeThemeContext, UptimeStartupPluginsContext } from '../../../../../
 
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../maps/public';
 import { MapToolTipComponent } from './map_tool_tip';
-import { RenderTooltipContentParams } from '../../../../../../../maps/public/classes';
 import {
   isErrorEmbeddable,
   ViewMode,
   ErrorEmbeddable,
 } from '../../../../../../../../../src/plugins/embeddable/public';
+import {
+  RenderTooltipContentParams,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];

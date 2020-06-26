@@ -23,7 +23,10 @@ import { useMonitorId } from '../../../../../hooks';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
 import { formatAvailabilityValue } from '../../availability_reporting/availability_reporting';
 import { LastCheckLabel } from '../../translations';
-import { RenderTooltipContentParams } from '../../../../../../../maps/public/classes';
+import {
+  RenderTooltipContentParams,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 
