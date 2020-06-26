@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should render source creation editor 1`] = `
+exports[`should render source creation editor (fields should _not_ be included) 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
