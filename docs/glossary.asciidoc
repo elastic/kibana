@@ -24,7 +24,7 @@ See
 // tag::advanced-settings-def[]
 Enables you to control the appearance and behavior of {kib}
 by setting the date format, default index, and other attributes.
-Part of {kib} <<glossary-management,Stack Management>>.
+Part of {kib} Stack Management.
 See {kibana-ref}/advanced-options.html[Advanced Settings].
 // end::advanced-settings-def[]
 
@@ -257,12 +257,6 @@ syntax is available under the options menu in the query bar and from
 <<glossary-advanced-settings,Advanced Settings>>.
 // end::lucene-def[]
 
-[[glossary-license-management]] License Management ::
-// tag::license-management-def[]
-Enables you to view the status of your license. Part of {kib}
-<<glossary-management,Stack Management>>.  See {kibana-ref}/managing-licenses.html[License Management].
-// end::license-management-def[]
-
 [float]
 [[m_glos]]
 == M
@@ -360,28 +354,9 @@ Shareables enable you to display Canvas visualizations on internal wiki pages or
 A place for organizing <<glossary-dashboard,dashboards>>,
 <<glossary-visualization,visualizations>>, and other <<glossary-saved-object,saved objects>> by category.
 For example, you might have different spaces for each team, use case, or individual.
-// end::space-def[]
-
-[[glossary-feature-space]] Spaces ::
-// tag::space-feature-def[]
-A feature that allows you to organize your saved objects into meaningful categories. See
+See
 {kibana-ref}/xpack-spaces.html[Spaces].
-// end::space-feature-def[]
-
-[[glossary-stack-monitoring]] Stack Monitoring ::
-// tag::stack-monitoring-def[]
-A {kib} app that enables you to monitor the {stack}, including health and
-performance data for {es}, Logstash, and Beats. You can also monitor {kib}
-and route that data to the monitoring cluster. See
-{kibana-ref}/xpack-monitoring.html[Stack Monitoring].
-// end::stack-monitoring-def[]
-
-[[glossary-management]] Stack Management ::
-// tag::management-def[]
-A {kib} app for managing the {stack} &mdash;indices, clusters, licenses, UI settings,
-index patterns, spaces, and more.  See
-{kibana-ref}/management.html[Stack Management].
-// end::management-def[]
+// end::space-def[]
 
 
 [float]
