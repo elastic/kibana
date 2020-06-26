@@ -31,7 +31,7 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       );
       expect(actualValue).to.eql(
         expectedValue,
-        `Transform ${input} input text should be '${expectedValue}' (got '${actualValue}')`
+        `Transform edit flyout '${input}' input text should be '${expectedValue}' (got '${actualValue}')`
       );
     },
 
