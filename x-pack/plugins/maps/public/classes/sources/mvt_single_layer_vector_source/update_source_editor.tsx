@@ -22,33 +22,9 @@ export interface Props {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface State {
-  fields: null | MVTField[];
-}
+interface State {}
 
 export class UpdateSourceEditor extends Component<Props, State> {
-  state = {
-    fields: null,
-  };
-
-  private _isMounted: boolean = false;
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._loadFields();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  async _loadFields() {
-    const fields: MVTField[] = (await this.props.source.getFields()) as MVTField[];
-    if (this._isMounted) {
-      this.setState({ fields });
-    }
-  }
-
   _onTooltipPropertiesSelect = (propertyNames: string[]) => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
@@ -63,10 +39,6 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _renderSourceSettingsCard() {
-    const fields: MVTFieldDescriptor[] = (this.state.fields || []).map((field: MVTField) => {
-      return field.getMVTFieldDescriptor();
-    });
-
     return (
       <Fragment>
         <EuiPanel>
@@ -82,7 +54,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <MVTSingleLayerSourceSettings
             handleChange={this._handleChange}
             layerName={this.props.source.getLayerName() || ''}
-            fields={fields}
+            fields={this.props.source.getFieldDescriptors()}
             minSourceZoom={this.props.source.getMinZoom()}
             maxSourceZoom={this.props.source.getMaxZoom()}
             includeFields={true}
@@ -112,7 +84,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <TooltipSelector
             tooltipFields={this.props.tooltipFields} // selected fields in the tooltip
             onChange={this._onTooltipPropertiesSelect}
-            fields={this.state.fields ? this.state.fields : []} // all the fields in the source
+            fields={this.props.source.getFieldDescriptors()} // all the fields in the source
           />
         </EuiPanel>
 

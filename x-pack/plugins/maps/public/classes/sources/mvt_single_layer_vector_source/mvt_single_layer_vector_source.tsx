@@ -93,6 +93,10 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     });
   }
 
+  getFieldDescriptors(): MVTFieldDescriptor[] {
+    return this._descriptor.fields;
+  }
+
   getFieldByName(fieldName: string): MVTField | null {
     try {
       return this.createField({ fieldName });

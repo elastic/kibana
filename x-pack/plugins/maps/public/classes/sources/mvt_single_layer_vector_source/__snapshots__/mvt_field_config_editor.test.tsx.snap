@@ -9,7 +9,9 @@ exports[`should render field editor 1`] = `
     <EuiFlexItem>
       <EuiFieldText
         aria-label="Fieldname"
+        isInvalid={false}
         onChange={[Function]}
+        placeholder=""
         value="foo"
       />
     </EuiFlexItem>
@@ -29,7 +31,7 @@ exports[`should render field editor 1`] = `
                   type="string"
                 />
                 <span>
-                  String
+                  string
                 </span>
               </span>,
               "value": "String",
@@ -40,7 +42,7 @@ exports[`should render field editor 1`] = `
                   type="number"
                 />
                 <span>
-                  Number
+                  number
                 </span>
               </span>,
               "value": "Number",
@@ -67,7 +69,9 @@ exports[`should render field editor 1`] = `
     <EuiFlexItem>
       <EuiFieldText
         aria-label="Fieldname"
+        isInvalid={false}
         onChange={[Function]}
+        placeholder=""
         value="food"
       />
     </EuiFlexItem>
@@ -87,7 +91,7 @@ exports[`should render field editor 1`] = `
                   type="string"
                 />
                 <span>
-                  String
+                  string
                 </span>
               </span>,
               "value": "String",
@@ -98,7 +102,7 @@ exports[`should render field editor 1`] = `
                   type="number"
                 />
                 <span>
-                  Number
+                  number
                 </span>
               </span>,
               "value": "Number",
@@ -125,7 +129,9 @@ exports[`should render field editor 1`] = `
     <EuiFlexItem>
       <EuiFieldText
         aria-label="Fieldname"
+        isInvalid={false}
         onChange={[Function]}
+        placeholder=""
         value="fooz"
       />
     </EuiFlexItem>
@@ -145,7 +151,7 @@ exports[`should render field editor 1`] = `
                   type="string"
                 />
                 <span>
-                  String
+                  string
                 </span>
               </span>,
               "value": "String",
@@ -156,7 +162,7 @@ exports[`should render field editor 1`] = `
                   type="number"
                 />
                 <span>
-                  Number
+                  number
                 </span>
               </span>,
               "value": "Number",

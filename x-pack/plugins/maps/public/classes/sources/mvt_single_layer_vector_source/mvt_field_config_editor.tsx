@@ -77,7 +77,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
     };
   }
 
-  _notifyChange = () => {
+  _notifyChange = _.debounce(() => {
     const invalid = this.state.currentFields.some((field) => {
       return field.name === '';
     });
@@ -85,7 +85,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
     if (!invalid) {
       this.props.onChange(this.state.currentFields);
     }
-  };
+  });
 
   _fieldChange(newFields) {
     this.setState(

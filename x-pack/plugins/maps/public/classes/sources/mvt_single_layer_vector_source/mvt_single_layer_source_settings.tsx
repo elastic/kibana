@@ -94,6 +94,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
     ) {
       return;
     }
+
     const currentSettings = {
       layerName: this.state.currentSettings.layerName,
       fields: this.state.currentSettings.fields,
