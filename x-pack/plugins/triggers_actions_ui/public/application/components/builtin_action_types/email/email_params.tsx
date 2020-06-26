@@ -36,7 +36,7 @@ export const EmailParamsFields = ({
   const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
     editAction(
       paramsProperty,
-      ((actionParams as any)[paramsProperty] ?? '').concat(` {{${variable}}}`),
+      !(actionParams as any)[paramsProperty] ? `{{${variable}}}` : ` {{${variable}}}`,
       index
     );
   };

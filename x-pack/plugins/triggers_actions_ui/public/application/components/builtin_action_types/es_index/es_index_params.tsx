@@ -22,7 +22,7 @@ export const IndexParamsFields = ({
     documents && documents.length > 0 ? documents[0] : null
   );
   const onSelectMessageVariable = (variable: string) => {
-    const value = (xJson ?? '').concat(` {{${variable}}}`);
+    const value = !xJson ? `{{${variable}}}` : ` {{${variable}}}`;
     setXJson(value);
     // Keep the documents in sync with the editor content
     onDocumentsChange(convertToJson(value));

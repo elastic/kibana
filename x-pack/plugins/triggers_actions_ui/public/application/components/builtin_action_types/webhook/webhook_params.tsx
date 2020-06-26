@@ -19,7 +19,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
 }) => {
   const { body } = actionParams;
   const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(paramsProperty, (body ?? '').concat(` {{${variable}}}`), index);
+    editAction(paramsProperty, !body ? `{{${variable}}}` : ` {{${variable}}}`, index);
   };
   return (
     <Fragment>

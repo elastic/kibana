@@ -32,7 +32,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
   }, []);
 
   const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(paramsProperty, (message ?? '').concat(` {{${variable}}}`), index);
+    editAction(paramsProperty, !message ? `{{${variable}}}` : ` {{${variable}}}`, index);
   };
 
   return (

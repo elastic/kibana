@@ -27,7 +27,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
   }, []);
 
   const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(paramsProperty, (message ?? '').concat(` {{${variable}}}`), index);
+    editAction(paramsProperty, !message ? `{{${variable}}}` : ` {{${variable}}}`, index);
   };
 
   return (
