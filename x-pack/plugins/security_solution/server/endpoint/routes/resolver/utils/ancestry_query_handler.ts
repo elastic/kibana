@@ -14,7 +14,7 @@ import {
 import {
   ResolverAncestry,
   ResolverEvent,
-  LifecycleNode,
+  ResolverLifecycleNode,
 } from '../../../../../common/endpoint/types';
 import { createAncestry, createLifecycle } from './node';
 import { LifecycleQuery } from '../queries/lifecycle';
@@ -33,7 +33,7 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     private levels: number,
     indexPattern: string,
     legacyEndpointID: string | undefined,
-    originNode: LifecycleNode | undefined
+    originNode: ResolverLifecycleNode | undefined
   ) {
     this.ancestorsToFind = getAncestryAsArray(originNode?.lifecycle[0]).slice(0, levels);
     this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
@@ -46,7 +46,7 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
   }
 
   private toMapOfNodes(results: ResolverEvent[]) {
-    return results.reduce((nodes: Map<string, LifecycleNode>, event: ResolverEvent) => {
+    return results.reduce((nodes: Map<string, ResolverLifecycleNode>, event: ResolverEvent) => {
       const nodeId = entityId(event);
       let node = nodes.get(nodeId);
       if (!node) {

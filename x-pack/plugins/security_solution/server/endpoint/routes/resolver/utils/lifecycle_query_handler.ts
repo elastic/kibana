@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { ResolverEvent, LifecycleNode } from '../../../../../common/endpoint/types';
+import { ResolverEvent, ResolverLifecycleNode } from '../../../../../common/endpoint/types';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
@@ -15,8 +15,8 @@ import { createLifecycle } from './node';
 /**
  * Retrieve the lifecycle events for a node.
  */
-export class LifecycleQueryHandler implements SingleQueryHandler<LifecycleNode> {
-  private lifecycle: LifecycleNode | undefined;
+export class LifecycleQueryHandler implements SingleQueryHandler<ResolverLifecycleNode> {
+  private lifecycle: ResolverLifecycleNode | undefined;
   private readonly query: LifecycleQuery;
   constructor(
     private readonly entityID: string,
@@ -51,7 +51,7 @@ export class LifecycleQueryHandler implements SingleQueryHandler<LifecycleNode> 
   /**
    * Get the results from the msearch.
    */
-  getResults(): LifecycleNode | undefined {
+  getResults(): ResolverLifecycleNode | undefined {
     return this.lifecycle;
   }
 

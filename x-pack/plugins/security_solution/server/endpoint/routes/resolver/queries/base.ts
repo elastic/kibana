@@ -14,8 +14,10 @@ import { MSearchQuery } from './multi_searcher';
 /**
  * ResolverQuery provides the base structure for queries to retrieve events when building a resolver graph.
  *
- * @param T the structured return type of a resolver query. This represents the type that is returned when translating
- * Elasticsearch's SearchResponse<ResolverEvent> response.
+ * @param T the structured return type of a resolver query. This represents the final return type of the query after handling
+ * any aggregations.
+ * @param R the is the type after transforming ES's response. Making this definable let's us set whether it is a resolver event
+ * or something else.
  */
 export abstract class ResolverQuery<T, R = ResolverEvent> implements MSearchQuery {
   /**

@@ -20,7 +20,7 @@ describe('Tree', () => {
     // transform the generator's array of events into the format expected by the tree class
     const ancestorInfo: ResolverAncestry = {
       ancestors: generator
-        .createAlertEventAncestry(5, 0, 0)
+        .createAlertEventAncestry({ ancestors: 5, percentTerminated: 0, percentWithRelated: 0 })
         .filter((event) => {
           return event.event.kind === 'event';
         })

@@ -37,13 +37,13 @@ export class ChildrenNodesHelper {
     let rootNextChild = null;
 
     if (rootNode) {
-      rootNextChild = rootNode.nextChild;
+      rootNextChild = rootNode.nextChild ?? null;
     }
 
     cacheCopy.delete(this.rootID);
     return {
       childNodes: Array.from(cacheCopy.values()),
-      nextChild: rootNextChild || null,
+      nextChild: rootNextChild,
     };
   }
 
@@ -51,7 +51,7 @@ export class ChildrenNodesHelper {
    * Get the entity_ids of the nodes that are cached.
    */
   getEntityIDs(): string[] {
-    const cacheCopy: Map<string, ChildNode> = new Map(this.entityToNodeCache);
+    const cacheCopy: Map<string, ResolverChildNode> = new Map(this.entityToNodeCache);
     cacheCopy.delete(this.rootID);
     return Array.from(cacheCopy.keys());
   }
@@ -89,7 +89,7 @@ export class ChildrenNodesHelper {
   addStartEvents(queriedNodes: Set<string>, startEvents: ResolverEvent[]): Set<string> | undefined {
     let largestAncestryArray = 0;
     const nodesToQueryNext: Map<number, Set<string>> = new Map();
-    const nonLeafNodes: Set<ChildNode> = new Set();
+    const nonLeafNodes: Set<ResolverChildNode> = new Set();
 
     const isDistantGrandchild = (event: ResolverEvent) => {
       const ancestry = getAncestryAsArray(event);

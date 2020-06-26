@@ -84,7 +84,7 @@ export function createLifecycle(
  * @param nextChild the cursor for the response
  */
 export function createChildren(
-  nodes: ChildNode[] = [],
+  nodes: ResolverChildNode[] = [],
   nextChild: string | null = null
 ): ResolverChildren {
   return { childNodes: nodes, nextChild };

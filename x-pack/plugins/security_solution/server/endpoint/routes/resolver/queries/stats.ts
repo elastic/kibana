@@ -13,9 +13,12 @@ export interface StatsResult {
   events: Record<string, EventStats>;
 }
 
-interface CategoriesAgg {
+interface AggBucket {
   key: string;
   doc_count: number;
+}
+
+interface CategoriesAgg extends AggBucket {
   /**
    * The reason categories is optional here is because if no data was returned in the query the categories aggregation
    * will not be defined on the response (because it's a sub aggregation).
