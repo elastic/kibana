@@ -24,8 +24,8 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { IEmbeddable, EmbeddableStateTransfer } from '../..';
-import { SavedObjectEmbeddableInput, EmbeddableEditorState } from '..';
+import { IEmbeddable, EmbeddableStateTransfer, EmbeddableEditorState } from '../..';
+import { SavedObjectEmbeddableInput } from '..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 

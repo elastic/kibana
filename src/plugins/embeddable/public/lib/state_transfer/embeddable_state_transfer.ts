@@ -39,7 +39,7 @@ export class EmbeddableStateTransfer {
   ) {}
 
   /**
-   * Fetches an {@link EmbeddableOriginatingAppState | originating app} argument from the scoped
+   * Fetches an {@link EmbeddableEditorState | originating app} argument from the scoped
    * history's location state.
    *
    * @param history - the scoped history to fetch from
@@ -70,7 +70,7 @@ export class EmbeddableStateTransfer {
 
   /**
    * A wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId
-   * with {@link EmbeddableOriginatingAppState | originating app state}
+   * with {@link EmbeddableEditorState | embeddable editor state}
    */
   public async navigateToEditor(
     appId: string,

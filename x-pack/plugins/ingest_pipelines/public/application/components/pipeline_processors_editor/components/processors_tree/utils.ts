@@ -13,9 +13,9 @@ import { ProcessorInternal } from '../../types';
 // - ./components/drop_zone_button.tsx
 // - ./components/pipeline_processors_editor_item.tsx
 const itemHeightsPx = {
-  WITHOUT_NESTED_ITEMS: 67,
+  WITHOUT_NESTED_ITEMS: 57,
   WITH_NESTED_ITEMS: 137,
-  TOP_PADDING: 16,
+  TOP_PADDING: 6,
 };
 
 export const calculateItemHeight = ({

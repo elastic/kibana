@@ -34,7 +34,7 @@ export function isEmbeddableEditorState(state: unknown): state is EmbeddableEdit
 }
 
 /**
- * Represents a state package that contains all fields necessary to create an embeddable in a container.
+ * Represents a state package that contains all fields necessary to create an embeddable by reference in a container.
  * @public
  */
 export interface EmbeddablePackageByReferenceState {
@@ -42,6 +42,10 @@ export interface EmbeddablePackageByReferenceState {
   id: string;
 }
 
+/**
+ * Represents a state package that contains all fields necessary to create an embeddable by value in a container.
+ * @public
+ */
 export interface EmbeddablePackageByValueState {
   type: string;
   input: EmbeddableInput;
