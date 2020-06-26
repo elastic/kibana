@@ -169,7 +169,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
     }
 
     async clickTableSelectAll() {
-      testSubjects.click('checkboxSelectAll');
+      await testSubjects.click('checkboxSelectAll');
     }
 
     async canBeDeleted() {
